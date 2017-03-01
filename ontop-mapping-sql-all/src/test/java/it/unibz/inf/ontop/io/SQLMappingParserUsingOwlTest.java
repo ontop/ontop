@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 
 import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.injection.MappingFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.model.*;
@@ -51,7 +51,7 @@ public class SQLMappingParserUsingOwlTest {
     private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException modelFactory;
-    private final MappingFactory mappingFactory;
+    private final SpecificationFactory specificationFactory;
     private final SQLMappingParser mappingParser;
 
     private TurtleOBDASyntaxParser parser;
@@ -83,7 +83,7 @@ public class SQLMappingParserUsingOwlTest {
                 .build();
 
         Injector injector = configuration.getInjector();
-        mappingFactory = injector.getInstance(MappingFactory.class);
+        specificationFactory = injector.getInstance(SpecificationFactory.class);
 
         mappingParser = injector.getInstance(SQLMappingParser.class);
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
@@ -144,7 +144,7 @@ public class SQLMappingParserUsingOwlTest {
 
     private void saveRegularFile() throws Exception {
         OBDAModel model = modelFactory.createOBDAModel(ImmutableList.of(),
-                mappingFactory.create(mappingFactory.create(ImmutableMap.of()),
+                specificationFactory.createMetadata(specificationFactory.createPrefixManager(ImmutableMap.of()),
                         UriTemplateMatcher.create(Stream.of())));
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
         writer.save(new File("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));

@@ -1,12 +1,14 @@
 package it.unibz.inf.ontop.mapping.datalog.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.injection.MappingFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
+import it.unibz.inf.ontop.mapping.MappingNormalizer;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
@@ -24,13 +26,16 @@ import java.util.stream.Stream;
 public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingConverter {
 
     private final DatalogProgram2QueryConverter converter;
-    private final MappingFactory mappingFactory;
+    private final SpecificationFactory specificationFactory;
+    private final MappingNormalizer mappingNormalizer;
 
     @Inject
     private Datalog2QueryMappingConverterImpl(DatalogProgram2QueryConverter converter,
-                                              MappingFactory mappingFactory) {
+                                              SpecificationFactory specificationFactory,
+                                              MappingNormalizer mappingNormalizer) {
         this.converter = converter;
-        this.mappingFactory = mappingFactory;
+        this.specificationFactory = specificationFactory;
+        this.mappingNormalizer = mappingNormalizer;
     }
 
 
@@ -57,7 +62,11 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .filter(Optional::isPresent)
                 .map(Optional::get);
 
-        return mappingFactory.create(mappingMetadata, mappingStream);
+        ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap = mappingStream
+                .collect(ImmutableCollectors.toMap(
+                        q -> q.getProjectionAtom().getPredicate(),
+                        q -> q));
+        return specificationFactory.createMapping(mappingMetadata, mappingMap);
 
     }
 

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.injection.MappingFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
@@ -60,7 +60,7 @@ public class OBDAModelWrapper {
      */
     private final static OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
     private final OBDAFactoryWithException obdaFactory;
-    private final MappingFactory mappingFactory;
+    private final SpecificationFactory specificationFactory;
     private Optional<OBDADataSource> source;
 
     private OBDAModel obdaModel;
@@ -70,12 +70,12 @@ public class OBDAModelWrapper {
     private final List<OBDAMappingListener> mappingListeners;
     private final OntologyVocabulary ontologyVocabulary;
 
-    public OBDAModelWrapper(MappingFactory mappingFactory,
+    public OBDAModelWrapper(SpecificationFactory specificationFactory,
                             OBDAFactoryWithException obdaFactory, PrefixManagerWrapper prefixManager) {
-        this.mappingFactory = mappingFactory;
+        this.specificationFactory = specificationFactory;
         this.obdaFactory = obdaFactory;
         this.prefixManager = prefixManager;
-        this.obdaModel = createNewOBDAModel(mappingFactory, obdaFactory, prefixManager);
+        this.obdaModel = createNewOBDAModel(specificationFactory, obdaFactory, prefixManager);
         this.sourceListeners = new ArrayList<>();
         this.mappingListeners = new ArrayList<>();
         source = Optional.empty();
@@ -111,9 +111,9 @@ public class OBDAModelWrapper {
                 .distinct()
                 .collect(ImmutableCollectors.toMap());
 
-        PrefixManager mergedPrefixManager = mappingFactory.create(mergedPrefixes);
+        PrefixManager mergedPrefixManager = specificationFactory.createPrefixManager(mergedPrefixes);
         obdaModel = obdaModel.newModel(newObdaModel.getMappings(),
-                mappingFactory.create(mergedPrefixManager));
+                specificationFactory.createPrefixManager(mergedPrefixManager));
     }
 
     public PrefixManager getPrefixManager() {
@@ -243,7 +243,7 @@ public class OBDAModelWrapper {
     }
 
     public void reset() {
-        obdaModel = createNewOBDAModel(mappingFactory, obdaFactory, prefixManager);
+        obdaModel = createNewOBDAModel(specificationFactory, obdaFactory, prefixManager);
     }
 
 
@@ -343,10 +343,10 @@ public class OBDAModelWrapper {
         }
     }
 
-    private static OBDAModel createNewOBDAModel(MappingFactory mappingFactory, OBDAFactoryWithException obdaFactory,
+    private static OBDAModel createNewOBDAModel(SpecificationFactory specificationFactory, OBDAFactoryWithException obdaFactory,
                                                 PrefixManagerWrapper prefixManager) {
         try {
-            return obdaFactory.createOBDAModel(ImmutableList.of(), mappingFactory.create(prefixManager));
+            return obdaFactory.createOBDAModel(ImmutableList.of(), specificationFactory.createPrefixManager(prefixManager));
             /**
              * No mapping so should never happen
              */

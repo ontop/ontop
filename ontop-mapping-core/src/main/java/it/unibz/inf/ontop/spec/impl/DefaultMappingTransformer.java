@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OntologyException;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
@@ -15,13 +16,18 @@ import java.util.Optional;
 @Singleton
 public class DefaultMappingTransformer implements MappingTransformer {
 
+    private final SpecificationFactory specificationFactory;
+
     @Inject
-    private DefaultMappingTransformer() {
+    private DefaultMappingTransformer(SpecificationFactory specificationFactory) {
+        this.specificationFactory = specificationFactory;
     }
 
     @Override
     public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata,
                                        Optional<Ontology> optionalOntology) throws MappingException, OntologyException {
-        throw new RuntimeException("TODO: implement DefaultMappingTransformer.transform()");
+        // TODO: complete
+        throw new RuntimeException("TODO: implement");
+        //return mappingFactory.createSpecification(mapping, dbMetadata, );
     }
 }
