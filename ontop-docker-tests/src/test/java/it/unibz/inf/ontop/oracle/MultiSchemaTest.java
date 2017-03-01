@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.oracle;
  */
 
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
