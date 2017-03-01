@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.oracle;
  * #L%
  */
 
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.slf4j.Logger;

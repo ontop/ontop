@@ -20,7 +20,8 @@ package it.unibz.inf.ontop.db2;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 
 /***
  * Tests that oracle identifiers for tables and columns are treated

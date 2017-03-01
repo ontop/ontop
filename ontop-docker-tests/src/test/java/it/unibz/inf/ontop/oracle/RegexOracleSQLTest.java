@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.oracle;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 
 /**
  * Test to check if the sql parser supports regex correctly when written with oracle syntax. 

@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.oracle;
  * #L%
  */
 
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLIndividual;
 
 
