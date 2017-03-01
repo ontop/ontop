@@ -94,15 +94,6 @@ public class JDBCConnector implements DBConnector {
         }
     }
 
-    @Override
-    public void disconnect() {
-        try {
-            localConnection.close();
-        } catch (Exception e) {
-            log.debug(e.getMessage());
-        }
-    }
-
     private void setupConnectionPool() {
         poolProperties = new PoolProperties();
         poolProperties.setUrl(settings.getJdbcUrl());
@@ -148,6 +139,12 @@ public class JDBCConnector implements DBConnector {
 
     @Override
     public void close() {
+        try {
+            if (localConnection != null)
+                localConnection.close();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
         tomcatPool.close();
     }
 

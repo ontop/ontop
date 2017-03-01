@@ -9,8 +9,8 @@ import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
-import it.unibz.inf.ontop.pivotalrepr.utils.impl.StandardExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.impl.StandardExecutorRegistry;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -23,7 +23,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class OntopModelConfigurationImpl implements OntopModelConfiguration {

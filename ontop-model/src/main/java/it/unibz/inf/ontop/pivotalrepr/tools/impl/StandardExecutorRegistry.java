@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.pivotalrepr.utils.impl;
+package it.unibz.inf.ontop.pivotalrepr.tools.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 
 import java.util.Optional;
 

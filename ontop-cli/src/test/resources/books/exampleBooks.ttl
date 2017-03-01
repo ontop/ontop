@@ -85,7 +85,7 @@
         <http://www.w3.org/ns/r2rml#predicateObjectMap>
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
-                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#template>
                                     "http://meraka/moss/exampleBooks.owl#edition/{ed_code}/" ;
                             <http://www.w3.org/ns/r2rml#termType>
@@ -112,7 +112,7 @@
         <http://www.w3.org/ns/r2rml#predicateObjectMap>
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
-                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "wr_name" ;
                             <http://www.w3.org/ns/r2rml#datatype>
@@ -124,7 +124,7 @@
                           <http://meraka/moss/exampleBooks.owl#name>
                 ] ;
         <http://www.w3.org/ns/r2rml#subjectMap>
-                [ a       <http://www.w3.org/ns/r2rml#SubjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#SubjectMap> ;
                   <http://www.w3.org/ns/r2rml#class>
                           <http://meraka/moss/exampleBooks.owl#Author> ;
                   <http://www.w3.org/ns/r2rml#template>
@@ -191,20 +191,6 @@
         <http://www.w3.org/ns/r2rml#predicateObjectMap>
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
-                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
-                                    "pub_date" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2001/XMLSchema#dateTime> ;
-                            <http://www.w3.org/ns/r2rml#termType>
-                                    <http://www.w3.org/ns/r2rml#Literal>
-                          ] ;
-                  <http://www.w3.org/ns/r2rml#predicate>
-                          <http://meraka/moss/exampleBooks.owl#dateOfPublication>
-                ] ;
-        <http://www.w3.org/ns/r2rml#predicateObjectMap>
-                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
-                  <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "n_edt" ;
@@ -215,6 +201,20 @@
                           ] ;
                   <http://www.w3.org/ns/r2rml#predicate>
                           <http://meraka/moss/exampleBooks.owl#editionNumber>
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "pub_date" ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#dateTime> ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://meraka/moss/exampleBooks.owl#dateOfPublication>
                 ] ;
         <http://www.w3.org/ns/r2rml#subjectMap>
                 [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#SubjectMap> ;
@@ -267,7 +267,7 @@
         <http://www.w3.org/ns/r2rml#predicateObjectMap>
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
-                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#template>
                                     "http://meraka/moss/exampleBooks.owl#author/{wr_id}/" ;
                             <http://www.w3.org/ns/r2rml#termType>

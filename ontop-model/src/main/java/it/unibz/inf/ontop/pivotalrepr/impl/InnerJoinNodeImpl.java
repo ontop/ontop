@@ -25,7 +25,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     private static final String JOIN_NODE_STR = "JOIN" ;
 
     @AssistedInject
-    private InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition) {
+    protected InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition) {
         super(optionalFilterCondition);
     }
 

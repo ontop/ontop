@@ -75,7 +75,7 @@ public class DirectMappingEngine {
 	}
 
 	private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-	private final MappingFactory mappingFactory;
+	private final SpecificationFactory specificationFactory;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final OBDAFactoryWithException obdaFactory;
 	private final OntopSQLCoreSettings settings;
@@ -96,11 +96,11 @@ public class DirectMappingEngine {
 	}
 
 	@Inject
-	private DirectMappingEngine(OntopSQLCoreSettings settings, MappingFactory mappingFactory,
+	private DirectMappingEngine(OntopSQLCoreSettings settings, SpecificationFactory specificationFactory,
                                 NativeQueryLanguageComponentFactory nativeQLFactory,
                                 OBDAFactoryWithException obdaFactory) {
 		connManager = JDBCConnectionManager.getJDBCConnectionManager();
-		this.mappingFactory = mappingFactory;
+		this.specificationFactory = specificationFactory;
 		this.nativeQLFactory = nativeQLFactory;
 		this.obdaFactory = obdaFactory;
 		this.settings = settings;
@@ -189,8 +189,8 @@ public class DirectMappingEngine {
 	 * @return a new OBDA Model containing all the extracted mappings
 	 */
 	private OBDAModel extractMappings() throws DuplicateMappingException, SQLException {
-		it.unibz.inf.ontop.io.PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
-		MappingMetadata mappingMetadata = mappingFactory.create(prefixManager, UriTemplateMatcher.create(Stream.empty()));
+		it.unibz.inf.ontop.io.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
+		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, UriTemplateMatcher.create(Stream.empty()));
 		OBDAModel emptyModel = obdaFactory.createOBDAModel(ImmutableList.of(), mappingMetadata);
 		return extractMappings(emptyModel);
 	}

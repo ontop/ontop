@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 
 import java.util.Optional;
 
@@ -12,6 +12,7 @@ import java.util.Optional;
  *
  * See https://github.com/google/guice/wiki/AssistedInject.
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface IntermediateQueryFactory {
 
     IntermediateQueryBuilder createIQBuilder(DBMetadata metadata, ExecutorRegistry executorRegistry);

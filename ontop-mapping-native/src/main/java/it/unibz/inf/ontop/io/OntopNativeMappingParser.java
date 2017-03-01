@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 
 import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.injection.MappingFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
@@ -75,18 +75,18 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
-    private final MappingFactory mappingFactory;
+    private final SpecificationFactory specificationFactory;
 
     /**
      * Create an SQL Mapping Parser for generating an OBDA model.
      */
     @Inject
     private OntopNativeMappingParser(NativeQueryLanguageComponentFactory nativeQLFactory,
-                                     MappingFactory mappingFactory,
+                                     SpecificationFactory specificationFactory,
                                      OBDAFactoryWithException obdaFactory) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
-        this.mappingFactory = mappingFactory;
+        this.specificationFactory = specificationFactory;
     }
 
     /**
@@ -98,7 +98,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     public OBDAModel parse(File file) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
         checkFile(file);
         try (Reader reader = new FileReader(file)) {
-            return load(reader, mappingFactory, nativeQLFactory, obdaFactory, file.getName());
+            return load(reader, specificationFactory, nativeQLFactory, obdaFactory, file.getName());
         } catch (IOException e) {
             throw new MappingIOException(e);
         }
@@ -106,7 +106,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 
     @Override
     public OBDAModel parse(Reader reader) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
-        return load(reader, mappingFactory, nativeQLFactory, obdaFactory, ".obda file");
+        return load(reader, specificationFactory, nativeQLFactory, obdaFactory, ".obda file");
     }
 
     @Override
@@ -132,7 +132,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      *
      * TODO: refactor it. Way too complex.
      */
-	private static OBDAModel load(Reader reader, MappingFactory mappingFactory,
+	private static OBDAModel load(Reader reader, SpecificationFactory specificationFactory,
                                   NativeQueryLanguageComponentFactory nativeQLFactory,
                                   OBDAFactoryWithException obdaFactory, String fileName)
             throws MappingIOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
@@ -199,7 +199,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
             throw new InvalidMappingExceptionWithIndicator(invalidMappingIndicators);
         }
 
-        PrefixManager prefixManager = mappingFactory.create(ImmutableMap.copyOf(prefixes));
+        PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.copyOf(prefixes));
         ImmutableList<OBDAMappingAxiom> mappingAxioms = ImmutableList.copyOf(mappings);
 
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
@@ -209,7 +209,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                         .filter(t -> t instanceof Function)
                         .map(t -> (Function) t));
 
-        MappingMetadata metadata = mappingFactory.create(prefixManager, uriTemplateMatcher);
+        MappingMetadata metadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
         return obdaFactory.createOBDAModel(mappingAxioms, metadata);
 	}
     

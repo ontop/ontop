@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.ExtensionalDataNode;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQueryBuilder;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -75,9 +76,15 @@ public class MappingTest {
         /**
          * Renaming
          */
-        MappingMetadata mappingMetadata = MAPPING_FACTORY.create(MAPPING_FACTORY.create(ImmutableMap.of()),
+        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
                 UriTemplateMatcher.create(Stream.of()));
-        Mapping mapping = MAPPING_FACTORY.create(mappingMetadata, mappingAssertions.stream());
+        ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap = mappingAssertions.stream()
+                .collect(ImmutableCollectors.toMap(
+                        q -> q.getProjectionAtom().getPredicate(),
+                        q -> q));
+
+        Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata, mappingMap, EXECUTOR_REGISTRY);
+        Mapping normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
 
         /**
          * Test whether two mapping assertions share a variable
@@ -86,7 +93,7 @@ public class MappingTest {
         Set<Variable> variableUnion = new HashSet<Variable>();
         for (DistinctVariableOnlyDataAtom projectionAtom : projectionAtoms){
 
-            IntermediateQuery mappingAssertion = mapping.getDefinition(projectionAtom.getPredicate())
+            IntermediateQuery mappingAssertion = normalizedMapping.getDefinition(projectionAtom.getPredicate())
                     .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
 
             System.out.println(mappingAssertion);

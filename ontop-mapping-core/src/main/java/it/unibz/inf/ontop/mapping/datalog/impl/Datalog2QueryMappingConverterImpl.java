@@ -1,17 +1,19 @@
 package it.unibz.inf.ontop.mapping.datalog.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.injection.MappingFactory;
+import com.google.inject.Singleton;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -21,16 +23,17 @@ import java.util.stream.Stream;
  * Convert mapping assertions from Datalog to IntermediateQuery
  *
  */
+@Singleton
 public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingConverter {
 
     private final DatalogProgram2QueryConverter converter;
-    private final MappingFactory mappingFactory;
+    private final SpecificationFactory specificationFactory;
 
     @Inject
     private Datalog2QueryMappingConverterImpl(DatalogProgram2QueryConverter converter,
-                                              MappingFactory mappingFactory) {
+                                              SpecificationFactory specificationFactory) {
         this.converter = converter;
-        this.mappingFactory = mappingFactory;
+        this.specificationFactory = specificationFactory;
     }
 
 
@@ -57,7 +60,11 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .filter(Optional::isPresent)
                 .map(Optional::get);
 
-        return mappingFactory.create(mappingMetadata, mappingStream);
+        ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap = mappingStream
+                .collect(ImmutableCollectors.toMap(
+                        q -> q.getProjectionAtom().getPredicate(),
+                        q -> q));
+        return specificationFactory.createMapping(mappingMetadata, mappingMap, executorRegistry);
 
     }
 

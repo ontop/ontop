@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.inf.ontop.rdf4j.RDF4JRDFIterator;
+import it.unibz.inf.ontop.rdf4j.SemanticIndexRDFHandler;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import org.eclipse.rdf4j.model.*;
@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -88,72 +87,15 @@ public class GraphLoading {
             URL graphURL = new URL(graphIRI.toString());
             InputStream in = graphURL.openStream();
 
-            RDF4JRDFIterator rdfHandler = new RDF4JRDFIterator();
+            SemanticIndexRDFHandler rdfHandler = new SemanticIndexRDFHandler(dataRepository, localConnection);
             rdfParser.setRDFHandler(rdfHandler);
 
-            Thread insert = new Thread(new Insert(rdfParser, in, graphIRI.toString()));
-            Thread process = new Thread(new Process(rdfHandler, dataRepository, localConnection, graphIRI.toString()));
+            rdfParser.parse(in, graphIRI.toString());
+            LOG.debug("Inserted {} triples from the graph {}", rdfHandler.getCount(), graphIRI);
 
-            //start threads
-            insert.start();
-            process.start();
 
-            insert.join();
-            process.join();
-        } catch (InterruptedException | IOException e) {
+        } catch (IOException e) {
             throw new SemanticIndexException(e.getMessage());
-        }
-    }
-
-
-
-    private static class Insert implements Runnable{
-        private RDFParser rdfParser;
-        private InputStream inputStreamOrReader;
-        private String baseIRI;
-
-        Insert(RDFParser rdfParser, InputStream inputStream, String baseIRI)
-        {
-            this.rdfParser = rdfParser;
-            this.inputStreamOrReader = inputStream;
-            this.baseIRI = baseIRI;
-        }
-        @Override
-        public void run()
-        {
-            try {
-                rdfParser.parse(inputStreamOrReader, baseIRI);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-    }
-
-    private static class Process implements Runnable{
-        private final RDF4JRDFIterator iterator;
-        private final RDBMSSIRepositoryManager dataRepository;
-        private final Connection localConnection;
-        private final String graphIRI;
-
-        public Process(RDF4JRDFIterator iterator, RDBMSSIRepositoryManager dataRepository,
-                       Connection localConnection, String graphIRI)
-        {
-            this.iterator = iterator;
-            this.dataRepository = dataRepository;
-            this.localConnection = localConnection;
-            this.graphIRI = graphIRI;
-        }
-
-        @Override
-        public void run()
-        {
-            try {
-                int count = dataRepository.insertData(localConnection, iterator, 5000, 500);
-                LOG.debug("Inserted {} triples from the graph {}", count, graphIRI);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 

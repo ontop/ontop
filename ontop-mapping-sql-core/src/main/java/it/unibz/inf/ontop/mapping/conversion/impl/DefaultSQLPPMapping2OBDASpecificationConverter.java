@@ -6,13 +6,15 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
+import it.unibz.inf.ontop.mapping.MappingNormalizer;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -26,7 +28,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
-import it.unibz.inf.ontop.spec.impl.OBDASpecificationImpl;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
@@ -67,20 +68,25 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final TMappingExclusionConfig tMappingExclusionConfig;
     private final Datalog2QueryMappingConverter mappingConverter;
+    private final SpecificationFactory specificationFactory;
+    private final MappingNormalizer mappingNormalizer;
 
     @Inject
     private DefaultSQLPPMapping2OBDASpecificationConverter(OntopMappingSQLSettings settings,
                                                            MappingVocabularyFixer mappingVocabularyFixer,
                                                            NativeQueryLanguageComponentFactory nativeQLFactory,
                                                            TMappingExclusionConfig tMappingExclusionConfig,
-                                                           Datalog2QueryMappingConverter mappingConverter
-                                                 ) {
+                                                           Datalog2QueryMappingConverter mappingConverter,
+                                                           SpecificationFactory specificationFactory,
+                                                           MappingNormalizer mappingNormalizer) {
         this.settings = settings;
         this.mappingVocabularyFixer = mappingVocabularyFixer;
         this.nativeQLFactory = nativeQLFactory;
         this.dbMetadataExtractor = nativeQLFactory.create();
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.mappingConverter = mappingConverter;
+        this.specificationFactory = specificationFactory;
+        this.mappingNormalizer = mappingNormalizer;
     }
 
     @Override
@@ -159,7 +165,9 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         Mapping saturatedMapping = mappingConverter.convertMappingRules(saturatedMappingRules, dbMetadata,
                 executorRegistry, mappingMetadata);
 
-        return new OBDASpecificationImpl(saturatedMapping, dbMetadata, tBox, ontology.getVocabulary());
+        Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
+
+        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox, ontology.getVocabulary());
     }
 
     /**

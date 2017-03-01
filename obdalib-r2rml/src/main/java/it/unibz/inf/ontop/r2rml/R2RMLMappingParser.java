@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MappingIOException;
-import it.unibz.inf.ontop.injection.MappingFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.UriTemplateMatcher;
@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Reader;
 
 /**
@@ -36,15 +35,15 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
-    private final MappingFactory mappingFactory;
+    private final SpecificationFactory specificationFactory;
 
 
     @Inject
     private R2RMLMappingParser(NativeQueryLanguageComponentFactory nativeQLFactory,
-                               OBDAFactoryWithException obdaFactory, MappingFactory mappingFactory){
+                               OBDAFactoryWithException obdaFactory, SpecificationFactory specificationFactory) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
-        this.mappingFactory = mappingFactory;
+        this.specificationFactory = specificationFactory;
     }
 
 
@@ -59,21 +58,6 @@ public class R2RMLMappingParser implements SQLMappingParser {
         }
     }
 
-//        R2RMLManager r2rmlManager;
-//
-//        if (mappingFile != null) {
-//        try {
-//            r2rmlManager = new R2RMLManager(mappingFile, nativeQLFactory);
-//        } catch (RDFParseException | RDFHandlerException e) {
-//            throw new InvalidDataSourceException(e.getMessage());
-//        }
-//    }
-//
-//        else if (mappingGraph != null){
-//            r2rmlManager = new R2RMLManager(new RDF4J().asGraph(mappingGraph), nativeQLFactory);
-//        }
-//        else
-//            throw new RuntimeException("Internal inconsistency. A mappingFile or a mappingGraph should be defined.");
 
     @Override
     public OBDAModel parse(Reader reader) throws InvalidMappingException, MappingIOException, DuplicateMappingException {
@@ -100,8 +84,8 @@ public class R2RMLMappingParser implements SQLMappingParser {
                         .map(t -> (Function) t));
 
         //TODO: try to extract prefixes from the R2RML mappings
-        PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
-        MappingMetadata mappingMetadata = mappingFactory.create(prefixManager, uriTemplateMatcher);
+        PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
+        MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
 
         return obdaFactory.createOBDAModel(sourceMappings, mappingMetadata);
     }
