@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.scenarios.QuestVirtualScenarioParent;
-import it.unibz.inf.ontop.quest.scenarios.ScenarioManifestTestUtils;
 import junit.framework.Test;
 
 public class DockerDB2Testsuite extends QuestVirtualScenarioParent {
