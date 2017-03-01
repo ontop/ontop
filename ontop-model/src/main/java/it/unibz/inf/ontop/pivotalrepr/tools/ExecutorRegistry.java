@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.pivotalrepr.utils;
+package it.unibz.inf.ontop.pivotalrepr.tools;
 
 import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;

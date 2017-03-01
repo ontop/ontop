@@ -83,7 +83,7 @@ public class MappingTest {
                         q -> q.getProjectionAtom().getPredicate(),
                         q -> q));
 
-        Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata, mappingMap);
+        Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata, mappingMap, EXECUTOR_REGISTRY);
         Mapping normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
 
         /**

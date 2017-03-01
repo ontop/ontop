@@ -5,15 +5,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.mapping.MappingNormalizer;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -23,19 +23,17 @@ import java.util.stream.Stream;
  * Convert mapping assertions from Datalog to IntermediateQuery
  *
  */
+@Singleton
 public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingConverter {
 
     private final DatalogProgram2QueryConverter converter;
     private final SpecificationFactory specificationFactory;
-    private final MappingNormalizer mappingNormalizer;
 
     @Inject
     private Datalog2QueryMappingConverterImpl(DatalogProgram2QueryConverter converter,
-                                              SpecificationFactory specificationFactory,
-                                              MappingNormalizer mappingNormalizer) {
+                                              SpecificationFactory specificationFactory) {
         this.converter = converter;
         this.specificationFactory = specificationFactory;
-        this.mappingNormalizer = mappingNormalizer;
     }
 
 
@@ -66,7 +64,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .collect(ImmutableCollectors.toMap(
                         q -> q.getProjectionAtom().getPredicate(),
                         q -> q));
-        return specificationFactory.createMapping(mappingMetadata, mappingMap);
+        return specificationFactory.createMapping(mappingMetadata, mappingMap, executorRegistry);
 
     }
 

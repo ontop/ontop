@@ -46,7 +46,8 @@ public class MappingNormalizerImpl implements MappingNormalizer {
                         q -> q.getProjectionAtom().getPredicate(),
                         q -> q));
 
-        return specificationFactory.createMapping(mapping.getMetadata(), normalizedMappingMap);
+        return specificationFactory.createMapping(mapping.getMetadata(), normalizedMappingMap,
+                mapping.getExecutorRegistry());
     }
 
     /**

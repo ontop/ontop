@@ -9,12 +9,12 @@ import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.impl.OntopModelSingletons;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.sql.DBMetadataTestingTools;
 
 public class MappingTestingTools {
 
-    private static final ExecutorRegistry EXECUTOR_REGISTRY;
+    public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final DBMetadata EMPTY_METADATA = DBMetadataTestingTools.createDummyMetadata();
 

@@ -5,6 +5,9 @@ import com.google.inject.util.Providers;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.mapping.MappingNormalizer;
+import it.unibz.inf.ontop.mapping.MappingSaturator;
+import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
+import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 
@@ -26,6 +29,9 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindTMappingExclusionConfig();
         bind(OntopMappingSettings.class).toInstance(configuration.getSettings());
         bindFromPreferences(MappingNormalizer.class);
+        bindFromPreferences(MappingSaturator.class);
+        bindFromPreferences(Datalog2QueryMappingConverter.class);
+        bindFromPreferences(Mapping2DatalogConverter.class);
     }
 
     private void bindImplicitDBConstraints() {

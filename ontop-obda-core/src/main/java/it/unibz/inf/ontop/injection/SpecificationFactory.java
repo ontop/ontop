@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
 /**
@@ -21,7 +22,7 @@ public interface SpecificationFactory {
 
     MappingMetadata createMetadata(PrefixManager prefixManager, UriTemplateMatcher templateMatcher);
 
-    Mapping createMapping(MappingMetadata metadata, ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap);
+    Mapping createMapping(MappingMetadata metadata, ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap, ExecutorRegistry executorRegistry);
 
     OBDASpecification createSpecification(Mapping saturatedMapping, DBMetadata dbMetadata, TBoxReasoner tBox,
                                           ImmutableOntologyVocabulary vocabulary);
