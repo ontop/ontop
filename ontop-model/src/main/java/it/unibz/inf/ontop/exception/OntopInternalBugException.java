@@ -5,9 +5,9 @@ package it.unibz.inf.ontop.exception;
  *
  * To be derived.
  */
-public abstract class OntopIllegalStateException extends RuntimeException {
+public abstract class OntopInternalBugException extends RuntimeException {
 
-    protected OntopIllegalStateException(String message) {
+    protected OntopInternalBugException(String message) {
         super(message);
     }
 }

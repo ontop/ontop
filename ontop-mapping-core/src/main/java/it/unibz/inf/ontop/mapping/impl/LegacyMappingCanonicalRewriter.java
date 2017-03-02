@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.mapping.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingCanonicalRewriter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
+@Singleton
 public class LegacyMappingCanonicalRewriter implements MappingCanonicalRewriter {
 
     private final Mapping2DatalogConverter mapping2DatalogConverter;

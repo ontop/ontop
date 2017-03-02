@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.exception.OntopIllegalStateException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -52,7 +52,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     /**
      * TODO: explain
      */
-    public static class InvalidDatalogProgramException extends OntopIllegalStateException {
+    public static class InvalidDatalogProgramException extends OntopInternalBugException {
         public InvalidDatalogProgramException(String message) {
             super(message);
         }
