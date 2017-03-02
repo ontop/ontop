@@ -975,7 +975,7 @@ public class BindingLiftTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topUnionNode, joinNode);
 
-        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 DATA_FACTORY.getSubstitution(ImmutableMap.of(
                         X, generateURI1(D))));
         queryBuilder.addChild(joinNode, constructionNode3);
@@ -1018,8 +1018,11 @@ public class BindingLiftTest {
         expectedQueryBuilder.addChild(newConstructionNode2, dataNode8);
 
 
-        expectedQueryBuilder.addChild(topUnionNode, constructionNode3);
-        expectedQueryBuilder.addChild(constructionNode3, joinNode);
+        ConstructionNode constructionNode3b = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, B),
+                DATA_FACTORY.getSubstitution(ImmutableMap.of(
+                        X, generateURI1(D))));
+        expectedQueryBuilder.addChild(topUnionNode, constructionNode3b);
+        expectedQueryBuilder.addChild(constructionNode3b, joinNode);
         expectedQueryBuilder.addChild(joinNode, dataNode9);
         expectedQueryBuilder.addChild(joinNode, dataNode10);
 
@@ -1341,7 +1344,7 @@ public class BindingLiftTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution(ImmutableMap.of()));
+                DATA_FACTORY.getSubstitution());
 
         ConstructionNode emptyConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables());
         ConstructionNode emptyConstructionNode2 = emptyConstructionNode.clone();
@@ -1353,45 +1356,45 @@ public class BindingLiftTest {
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
 
         ConstructionNode constructionNode21 = IQ_FACTORY.createConstructionNode(unionNode21.getVariables(),
-                DATA_FACTORY.getSubstitution(ImmutableMap.of(
+                DATA_FACTORY.getSubstitution(
                         X, generateURI1(A),
-                        Y, generateURI2(B))));
+                        Y, generateURI2(B)));
 
         ConstructionNode constructionNode22 = IQ_FACTORY.createConstructionNode(unionNode22.getVariables(),
-                DATA_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, generateURI1(A))));
+                DATA_FACTORY.getSubstitution(X, generateURI1(A)));
 
         ConstructionNode constructionNode22URI2 = IQ_FACTORY.createConstructionNode(unionNode22.getVariables(),
-                DATA_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, generateURI2(A))));
+                DATA_FACTORY.getSubstitution(X, generateURI2(A)));
 
         ConstructionNode constructionNode21URI2 = IQ_FACTORY.createConstructionNode(unionNode21.getVariables(),
-                DATA_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, generateURI2(A), Y, generateURI2(B))));
+                DATA_FACTORY.getSubstitution(
+                        X, generateURI2(A),
+                        Y, generateURI2(B)));
 
         ConstructionNode constructionNode21URI1XY = constructionNode21.clone();
 
         ConstructionNode constructionNode22Z = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Z),
-                DATA_FACTORY.getSubstitution(ImmutableMap.of(
-                        Z, generateURI1(C))));
+                DATA_FACTORY.getSubstitution(Z, generateURI1(C)));
 
         ConstructionNode constructionNodeOverJoin2 = constructionNode22.clone();
-        ConstructionNode constructionNodeOverJoin1 = IQ_FACTORY.createConstructionNode(unionNode21.getVariables(),
-                DATA_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, generateURI1(A), Z, generateURI1(C))));
+        ConstructionNode constructionNodeOverJoin1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Z),
+                DATA_FACTORY.getSubstitution(
+                        X, generateURI1(A),
+                        Z, generateURI1(C)));
 
         ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
         ExtensionalDataNode table2DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
         ExtensionalDataNode table3DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
         ExtensionalDataNode table4DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
-        ExtensionalDataNode table5DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
+        ExtensionalDataNode table5DataNode1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_5, X, Y, Z));
+        ExtensionalDataNode table5DataNode2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
 
         originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         originalBuilder.addChild(rootConstructionNode, unionNode1);
         originalBuilder.addChild(unionNode1, emptyConstructionNode);
         originalBuilder.addChild(emptyConstructionNode, joinNode);
         originalBuilder.addChild(unionNode1, emptyConstructionNode2);
-        originalBuilder.addChild(emptyConstructionNode2, table5DataNode);
+        originalBuilder.addChild(emptyConstructionNode2, table5DataNode1);
 
         originalBuilder.addChild(joinNode, unionNode21);
         originalBuilder.addChild(joinNode, constructionNode22Z);
@@ -1407,7 +1410,7 @@ public class BindingLiftTest {
         originalBuilder.addChild(unionNode22, constructionNode22);
         originalBuilder.addChild(constructionNode22, table4DataNode.clone());
         originalBuilder.addChild(unionNode22, constructionNode22URI2);
-        originalBuilder.addChild(constructionNode22URI2, table5DataNode.clone());
+        originalBuilder.addChild(constructionNode22URI2, table5DataNode2);
         originalBuilder.addChild(unionNode22,constructionNodeOverJoin2 );
         originalBuilder.addChild(constructionNodeOverJoin2, joinNode1);
         originalBuilder.addChild(joinNode1, table4DataNode.clone());
@@ -1455,7 +1458,7 @@ public class BindingLiftTest {
         expectedBuilder.addChild(joinNode3, table4DataNode.clone());
         expectedBuilder.addChild(joinNode3, table4DataNode.clone());
         expectedBuilder.addChild(joinNode2, table4DataNode.clone());
-        expectedBuilder.addChild(constructionNode2, table5DataNode.clone());
+        expectedBuilder.addChild(constructionNode2, table5DataNode1);
 
         IntermediateQuery expectedQuery = expectedBuilder.build();
 
