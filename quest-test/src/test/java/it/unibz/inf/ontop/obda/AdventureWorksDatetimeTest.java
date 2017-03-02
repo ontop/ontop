@@ -42,6 +42,7 @@ public class AdventureWorksDatetimeTest {
 
 	final String owlFile = "src/test/resources/datatype/adventureWorks.owl";
 	final String obdaFile = "src/test/resources/datatype/adventureWorks.obda";
+	final String propertiesFile = "src/test/resources/datatype/adventureWorks.properties";
 
 	@Before
 	public void setUp() throws Exception {
@@ -52,6 +53,7 @@ public class AdventureWorksDatetimeTest {
 				//.enableEquivalenceOptimization(true)
 				.nativeOntopMappingFile(obdaFile)
 				.ontologyFile(owlFile)
+				.propertyFile(propertiesFile)
 				.build();
 
 		QuestOWL reasoner = factory.createReasoner(configuration);

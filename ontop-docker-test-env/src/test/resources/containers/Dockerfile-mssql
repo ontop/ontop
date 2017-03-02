@@ -21,7 +21,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
 
 RUN mkdir -p /tmp/sql_scripts/
 
-COPY sql/mssql/*.sql /tmp/sql_scripts/
+COPY sql/mssql/ /tmp/sql_scripts/
 
 COPY load-scripts-mssql.sh /var/opt/mssql/data/
 

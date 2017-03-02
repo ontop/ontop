@@ -20,7 +20,7 @@ target		:Client-{IDClient} :isBroker :Broker-{brokerID} .
 source		SELECT "broker"."id" as brokerID, "client"."id" as IDClient FROM DB2INST1."client", DB2INST1."broker" WHERE "broker"."id" = "client"."id"
 
 mappingId	Mix
-target		:Broker2-{id} :hasFile :Med-{med} . 
+target		:Broker2-{id} :hasFile :Med-{med} .
 source		SELECT "id", med from "address", SYSTOOLS.policy
 
 
