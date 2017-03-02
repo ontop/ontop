@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.translator.IntermediateQueryToData
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.tools.QueryUnionSplitter;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 @Singleton
@@ -30,20 +29,6 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
 
     private Stream<CQIE> convertMappingQuery(IntermediateQuery mappingQuery) {
         return unionSplitter.splitUnion(mappingQuery)
-                .map(this::convertSimpleQuery);
-    }
-
-    private CQIE convertSimpleQuery(IntermediateQuery simpleQuery) {
-        List<CQIE> rules = IntermediateQueryToDatalogTranslator.translate(simpleQuery).getRules();
-
-        switch (rules.size()) {
-            case 0:
-                throw new IllegalStateException("No datalog produced for " + simpleQuery);
-            case 1:
-                return rules.get(0);
-            default:
-                throw new IllegalStateException("The conversion of a simple query to Datalog is too complex: " +
-                        "it should not produce more than one rule. \n" + simpleQuery + "\n" + rules);
-        }
+                .flatMap(q -> IntermediateQueryToDatalogTranslator.translate(q).getRules().stream());
     }
 }
