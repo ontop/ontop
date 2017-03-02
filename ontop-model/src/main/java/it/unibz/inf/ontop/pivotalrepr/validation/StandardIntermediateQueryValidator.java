@@ -6,6 +6,8 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
+import java.util.Optional;
+
 /**
  * Checks the QueryNode and their children
  */
@@ -33,6 +35,18 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
             if (query.getChildren(constructionNode).size() > 1) {
                 throw new InvalidIntermediateQueryException("CONSTRUCTION node " + constructionNode
                         + " has more than one child.\n" + query);
+            }
+
+            ImmutableSet<Variable> requiredChildVariables = constructionNode.getChildVariables();
+
+            for (QueryNode child : query.getChildren(constructionNode)) {
+                ImmutableSet<Variable> childProjectedVariables = query.getVariables(child);
+
+                if (!childProjectedVariables.containsAll(requiredChildVariables)) {
+                    throw new InvalidIntermediateQueryException("This child " + child
+                            + " does not project all the variables " +
+                            "required by the CONSTRUCTION node (" + requiredChildVariables + ")\n" + query);
+                }
             }
         }
 
