@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
+import it.unibz.inf.ontop.mapping.MappingCanonicalRewriter;
 import it.unibz.inf.ontop.mapping.MappingNormalizer;
 import it.unibz.inf.ontop.mapping.MappingSaturator;
 import it.unibz.inf.ontop.model.DBMetadata;
@@ -29,14 +30,17 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private final OntopMappingSettings settings;
     private final MappingSaturator mappingSaturator;
     private final MappingNormalizer mappingNormalizer;
+    private final MappingCanonicalRewriter mappingCanonicalRewriter;
 
     @Inject
     private DefaultMappingTransformer(SpecificationFactory specificationFactory, OntopMappingSettings settings,
-                                      MappingSaturator mappingSaturator, MappingNormalizer mappingNormalizer) {
+                                      MappingSaturator mappingSaturator, MappingNormalizer mappingNormalizer,
+                                      MappingCanonicalRewriter mappingCanonicalRewriter) {
         this.specificationFactory = specificationFactory;
         this.settings = settings;
         this.mappingSaturator = mappingSaturator;
         this.mappingNormalizer = mappingNormalizer;
+        this.mappingCanonicalRewriter = mappingCanonicalRewriter;
     }
 
     @Override
@@ -49,9 +53,9 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
         TBoxReasoner saturatedTBox = TBoxReasonerImpl.create(ontology, settings.isEquivalenceOptimizationEnabled());
 
-        // TODO: support canonical IRI rewriting
+        Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(mapping, dbMetadata);
 
-        Mapping saturatedMapping = mappingSaturator.saturate(mapping, dbMetadata, saturatedTBox);
+        Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, saturatedTBox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
         return specificationFactory.createSpecification(normalizedMapping, dbMetadata, saturatedTBox,
