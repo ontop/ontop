@@ -5,9 +5,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.AtomPredicate;
+import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 
@@ -26,10 +28,25 @@ public class MappingImpl implements Mapping {
     @AssistedInject
     private MappingImpl(@Assisted MappingMetadata metadata,
                         @Assisted ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap,
-                        @Assisted ExecutorRegistry executorRegistry) {
+                        @Assisted ExecutorRegistry executorRegistry,
+                        OntopModelSettings settings) {
         this.metadata = metadata;
         this.definitions = mappingMap;
         this.executorRegistry = executorRegistry;
+
+        if (settings.isTestModeEnabled()) {
+            for (IntermediateQuery query : mappingMap.values()) {
+                if (projectNullableVariable(query))
+                    throw new IllegalArgumentException(
+                            "A mapping assertion must not return a nullable variable. \n" + query);
+            }
+        }
+    }
+
+    private static boolean projectNullableVariable(IntermediateQuery query) {
+        ConstructionNode rootNode = query.getRootConstructionNode();
+        return rootNode.getVariables().stream()
+                .anyMatch(v -> rootNode.isVariableNullable(query, v));
     }
 
     @Override
