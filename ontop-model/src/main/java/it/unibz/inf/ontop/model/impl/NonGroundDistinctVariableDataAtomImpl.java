@@ -1,15 +1,10 @@
 package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.AtomPredicate;
-import it.unibz.inf.ontop.model.NonGroundDistinctVariableDataAtom;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.*;
 
 
-
-public class NonGroundDistinctVariableDataAtomImpl extends DataAtomImpl implements NonGroundDistinctVariableDataAtom {
+public class NonGroundDistinctVariableDataAtomImpl extends AbstractDataAtomImpl implements DistinctVariableDataAtom {
 
     protected NonGroundDistinctVariableDataAtomImpl(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
         super(predicate, arguments);

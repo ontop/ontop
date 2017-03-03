@@ -268,7 +268,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			return new VariableOnlyDataAtomImpl(predicate, (ImmutableList<Variable>)(ImmutableList<?>)arguments);
 		}
 		else {
-			return new NonGroundDataAtomImpl(predicate, arguments);
+			return new DataAtomImpl(predicate, arguments);
 		}
 	}
 
