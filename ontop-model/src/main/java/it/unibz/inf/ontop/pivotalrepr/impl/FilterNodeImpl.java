@@ -3,11 +3,14 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator.Evaluation;
+import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 
 import java.util.Optional;
 
@@ -16,8 +19,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     private static final String FILTER_NODE_STR = "FILTER";
 
     @AssistedInject
-    private FilterNodeImpl(@Assisted ImmutableExpression filterCondition) {
-        super(Optional.of(filterCondition));
+    private FilterNodeImpl(@Assisted ImmutableExpression filterCondition, TermNullabilityEvaluator nullabilityEvaluator) {
+        super(Optional.of(filterCondition), nullabilityEvaluator);
     }
 
     @Override
@@ -27,7 +30,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public FilterNode clone() {
-        return new FilterNodeImpl(getOptionalFilterCondition().get());
+        return new FilterNodeImpl(getOptionalFilterCondition().get(), getNullabilityEvaluator());
     }
 
     @Override
@@ -47,7 +50,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public FilterNode changeFilterCondition(ImmutableExpression newFilterCondition) {
-        return new FilterNodeImpl(newFilterCondition);
+        return new FilterNodeImpl(newFilterCondition, getNullabilityEvaluator());
     }
 
     @Override
@@ -61,19 +64,19 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     public SubstitutionResults<FilterNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             IntermediateQuery query) {
-        Evaluation evaluation = transformBooleanExpression(substitution, getFilterCondition());
+        EvaluationResult evaluationResult = transformBooleanExpression(substitution, getFilterCondition());
 
         /**
          * The condition cannot be satisfied --> the sub-tree is empty.
          */
-        if (evaluation.isFalse()) {
+        if (evaluationResult.isEffectiveFalse()) {
             return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.DECLARE_AS_EMPTY);
         }
         else {
             /**
              * Propagates the substitution and ...
              */
-            return evaluation.getOptionalExpression()
+            return evaluationResult.getOptionalExpression()
                     /**
                      * Still a condition: returns a filter node with the new condition
                      */
@@ -83,6 +86,16 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                      */
                     .orElseGet(() -> new SubstitutionResultsImpl<>(substitution, Optional.empty()));
         }
+    }
+
+    @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        if (isFilteringNullValue(variable))
+            return false;
+
+        return query.getFirstChild(this)
+                .map(c -> c.isVariableNullable(query, variable))
+                .orElseThrow(() -> new InvalidIntermediateQueryException("A filter node must have a child"));
     }
 
     @Override

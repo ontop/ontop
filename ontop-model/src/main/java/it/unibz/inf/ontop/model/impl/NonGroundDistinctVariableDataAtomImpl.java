@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.NonGroundDistinctVariableDataAtom;
 import it.unibz.inf.ontop.model.Variable;

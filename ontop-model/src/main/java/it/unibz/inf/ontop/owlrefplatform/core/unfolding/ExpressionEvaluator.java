@@ -42,38 +42,57 @@ public class ExpressionEvaluator {
 	public ExpressionEvaluator() {
 	}
 
-	public static class Evaluation {
+	public static class EvaluationResult {
 		private final Optional<ImmutableExpression> optionalExpression;
 		private final Optional<Boolean> optionalBooleanValue;
 
 		private static final ExpressionNormalizer NORMALIZER = new ExpressionNormalizerImpl();
 
-		private Evaluation(ImmutableExpression expression) {
+		private EvaluationResult(ImmutableExpression expression) {
 			optionalExpression = Optional.of(NORMALIZER.normalize(expression));
 			optionalBooleanValue = Optional.empty();
 		}
 
-		private Evaluation(boolean value) {
+		private EvaluationResult(boolean value) {
 			optionalExpression = Optional.empty();
 			optionalBooleanValue = Optional.of(value);
+		}
+
+		/**
+		 * Evaluated as NULL
+		 */
+		private EvaluationResult() {
+			optionalExpression = Optional.empty();
+			optionalBooleanValue = Optional.empty();
 		}
 
 		public Optional<ImmutableExpression> getOptionalExpression() {
 			return optionalExpression;
 		}
 
-		public Optional<Boolean> getOptionalBooleanValue() {
-			return optionalBooleanValue;
+		public boolean isEffectiveTrue() {
+			return optionalBooleanValue
+					.filter(v -> v)
+					.isPresent();
 		}
 
-		public boolean isFalse() {
+		public boolean isEffectiveFalse() {
 			return optionalBooleanValue
 					.filter(v -> !v)
 					.isPresent();
 		}
+
+		public ImmutableTerm getTerm() {
+			if (optionalExpression.isPresent())
+				return optionalExpression.get();
+			else
+				return optionalBooleanValue
+						.map(v -> v ? OBDAVocabulary.TRUE : OBDAVocabulary.FALSE)
+						.orElse(OBDAVocabulary.NULL);
+		}
 	}
 
-	public Evaluation evaluateExpression(ImmutableExpression expression) {
+	public EvaluationResult evaluateExpression(ImmutableExpression expression) {
 		Expression mutableExpression = ImmutabilityTools.convertToMutableBooleanExpression(expression);
 
 		Term evaluatedTerm = evalOperation(mutableExpression);
@@ -90,20 +109,22 @@ public class ExpressionEvaluator {
 						+ evaluatedFunctionalTerm);
 			}
 
-			return new Evaluation(DATA_FACTORY.getImmutableExpression(
+			return new EvaluationResult(DATA_FACTORY.getImmutableExpression(
 					DATA_FACTORY.getExpression((OperationPredicate) predicate,
 							evaluatedFunctionalTerm.getTerms())));
 		}
 		else if (evaluatedTerm instanceof Constant) {
-			if (evaluatedTerm == OBDAVocabulary.FALSE || evaluatedTerm == OBDAVocabulary.NULL) {
-				return new Evaluation(false);
+			if (evaluatedTerm == OBDAVocabulary.FALSE) {
+				return new EvaluationResult(false);
 			}
+			else if (evaluatedTerm == OBDAVocabulary.NULL)
+				return new EvaluationResult();
 			else {
-				return new Evaluation(true);
+				return new EvaluationResult(true);
 			}
 		}
 		else if (evaluatedTerm instanceof Variable) {
-		    return new Evaluation(DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_TRUE,
+		    return new EvaluationResult(DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_TRUE,
                     ImmutabilityTools.convertIntoImmutableTerm(evaluatedTerm)));
         }
 		else {

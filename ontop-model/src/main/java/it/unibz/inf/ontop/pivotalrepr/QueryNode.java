@@ -78,6 +78,14 @@ public interface QueryNode extends Cloneable {
             throws QueryNodeSubstitutionException;
 
     /**
+     * Returns true if it cannot guarantee the projected variable to be non-null
+     *
+     * Throws an IllegalArgumentException if the variable is not projected by the node
+     */
+    boolean isVariableNullable(IntermediateQuery query, Variable variable);
+
+
+    /**
      * TODO: explain
      */
     boolean isSyntacticallyEquivalentTo(QueryNode node);

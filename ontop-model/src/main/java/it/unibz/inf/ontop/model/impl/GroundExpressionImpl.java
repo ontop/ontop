@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.Expression;
-import it.unibz.inf.ontop.model.GroundFunctionalTerm;
-import it.unibz.inf.ontop.model.GroundTerm;
-import it.unibz.inf.ontop.model.OperationPredicate;
+import it.unibz.inf.ontop.model.*;
 
 public class GroundExpressionImpl extends ImmutableExpressionImpl implements GroundFunctionalTerm {
 

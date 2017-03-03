@@ -4,10 +4,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -36,18 +38,20 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     private static final String LEFT_JOIN_NODE_STR = "LJ";
 
     @AssistedInject
-    private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition) {
-        super(optionalJoinCondition);
+    private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition,
+                             TermNullabilityEvaluator nullabilityEvaluator) {
+        super(optionalJoinCondition, nullabilityEvaluator);
     }
 
     @AssistedInject
-    private LeftJoinNodeImpl(@Assisted ImmutableExpression joiningCondition) {
-        super(Optional.of(joiningCondition));
+    private LeftJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
+                             TermNullabilityEvaluator nullabilityEvaluator) {
+        super(Optional.of(joiningCondition), nullabilityEvaluator);
     }
 
     @AssistedInject
-    private LeftJoinNodeImpl() {
-        super(Optional.empty());
+    private LeftJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator) {
+        super(Optional.empty(), nullabilityEvaluator);
     }
 
     @Override
@@ -57,7 +61,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public LeftJoinNode clone() {
-        return new LeftJoinNodeImpl(getOptionalFilterCondition());
+        return new LeftJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator());
     }
 
     @Override
@@ -67,7 +71,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
-        return new LeftJoinNodeImpl(newOptionalFilterCondition);
+        return new LeftJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator());
     }
 
     @Override
@@ -154,18 +158,35 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         Optional.of(substitution)));
     }
 
-    private SubstitutionResults<LeftJoinNode> applyEvaluation(IntermediateQuery query, ExpressionEvaluator.Evaluation evaluation,
+    @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        QueryNode leftChild = query.getChild(this, LEFT)
+                .orElseThrow(() -> new InvalidIntermediateQueryException("A left child is required"));
+
+        if (query.getVariables(leftChild).contains(variable))
+            return leftChild.isVariableNullable(query, variable);
+
+        QueryNode rightChild = query.getChild(this, RIGHT)
+                .orElseThrow(() -> new InvalidIntermediateQueryException("A right child is required"));
+
+        if (!query.getVariables(rightChild).contains(variable))
+            throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
+
+        return false;
+    }
+
+    private SubstitutionResults<LeftJoinNode> applyEvaluation(IntermediateQuery query, ExpressionEvaluator.EvaluationResult evaluationResult,
                                                               ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                                               Optional<ImmutableSet<Variable>> optionalVariablesFromOppositeSide,
                                                               Provenance provenance) {
         /**
          * Joining condition does not hold: replace the LJ by its left child.
          */
-        if (evaluation.isFalse()) {
+        if (evaluationResult.isEffectiveFalse()) {
             return proposeToRemoveTheRightPart(query, substitution, optionalVariablesFromOppositeSide, provenance);
         }
         else {
-            LeftJoinNode newNode = changeOptionalFilterCondition(evaluation.getOptionalExpression());
+            LeftJoinNode newNode = changeOptionalFilterCondition(evaluationResult.getOptionalExpression());
             return new SubstitutionResultsImpl<>(newNode, substitution);
         }
     }

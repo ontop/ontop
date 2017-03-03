@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.NonGroundFunctionalTerm;
+import it.unibz.inf.ontop.model.*;
 
 import static it.unibz.inf.ontop.model.impl.GroundTermTools.checkNonGroundTermConstraint;
 

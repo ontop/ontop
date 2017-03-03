@@ -61,6 +61,11 @@ public class TrueNodeImpl implements TrueNode {
     }
 
     @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        throw new IllegalArgumentException("A true node does not project any variable");
+    }
+
+    @Override
     public TrueNodeImpl clone() {
         return new TrueNodeImpl();
     }

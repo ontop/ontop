@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.DatatypeFactory;
@@ -26,6 +27,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bind(OBDADataFactory.class).toInstance(DATA_FACTORY);
 
         bindFromPreferences(IntermediateQueryValidator.class);
+        bindFromPreferences(TermNullabilityEvaluator.class);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
                 IntermediateQueryBuilder.class,

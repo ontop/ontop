@@ -53,13 +53,21 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     public SubstitutionResults<EmptyNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         ImmutableSet<Variable> newProjectedVariables = projectedVariables.stream()
-                .map(v -> substitution.apply(v))
+                .map(substitution::apply)
                 .filter(v -> v instanceof Variable)
                 .map(v -> (Variable) v)
                 .collect(ImmutableCollectors.toSet());
 
         EmptyNode newNode = new EmptyNodeImpl(newProjectedVariables);
         return new SubstitutionResultsImpl<>(newNode);
+    }
+
+    @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        if (getVariables().contains(variable))
+            return true;
+        else
+            throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
     }
 
     @Override

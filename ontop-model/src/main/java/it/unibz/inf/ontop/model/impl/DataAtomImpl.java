@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.AtomPredicate;
-import it.unibz.inf.ontop.model.DataAtom;
-import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.*;
 
 
 import java.util.HashSet;

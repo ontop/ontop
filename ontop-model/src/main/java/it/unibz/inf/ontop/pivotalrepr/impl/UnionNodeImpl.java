@@ -5,14 +5,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.*;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
@@ -83,6 +80,15 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
             UnionNode newNode = new UnionNodeImpl(newProjectedVariables);
             return new SubstitutionResultsImpl<>(newNode, substitution);
         }
+    }
+
+    @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        for(QueryNode child : query.getChildren(this)) {
+            if (child.isVariableNullable(query, variable))
+                return true;
+        }
+        return false;
     }
 
     @Override
