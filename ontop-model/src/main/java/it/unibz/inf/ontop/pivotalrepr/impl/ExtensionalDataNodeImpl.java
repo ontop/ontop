@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.exception.MissingRelationForExtensionalDataNodeExcepti
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.sql.Attribute;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
 import it.unibz.inf.ontop.sql.RelationID;
@@ -83,7 +84,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
         return IntStream.range(1, arguments.size() + 1)
                 .filter(i -> arguments.get(i - 1).equals(variable))
                 .mapToObj(relation::getAttribute)
-                .anyMatch(att -> !att.canNull());
+                .anyMatch(Attribute::canNull);
     }
 
     @Override
