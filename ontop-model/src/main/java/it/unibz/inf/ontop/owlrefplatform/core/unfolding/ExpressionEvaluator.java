@@ -76,7 +76,15 @@ public class ExpressionEvaluator {
 					.isPresent();
 		}
 
+		public boolean isNull() {
+			return ! (optionalBooleanValue.isPresent() || optionalExpression.isPresent());
+		}
+
 		public boolean isEffectiveFalse() {
+			return isFalse() || isNull();
+		}
+
+		private boolean isFalse() {
 			return optionalBooleanValue
 					.filter(v -> !v)
 					.isPresent();
