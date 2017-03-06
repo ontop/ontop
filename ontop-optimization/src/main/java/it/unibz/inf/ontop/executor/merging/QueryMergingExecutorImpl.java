@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.Queue;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
-import static it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils.generateNotConflictingRenaming;
 
 @Singleton
 public class QueryMergingExecutorImpl implements QueryMergingExecutor {
@@ -223,7 +222,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
 
 
         VariableGenerator variableGenerator = new VariableGenerator(treeComponent.getKnownVariables());
-        InjectiveVar2VarSubstitution renamingSubstitution = generateNotConflictingRenaming(variableGenerator,
+        InjectiveVar2VarSubstitution renamingSubstitution = DATA_FACTORY.generateNotConflictingRenaming(variableGenerator,
                 subQuery.getKnownVariables());
 
         IntermediateQuery renamedSubQuery;

@@ -304,7 +304,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     @Override
     public IntermediateQuery clone() {
-        return IntermediateQueryUtils.convertToBuilder(this).build();
+        return createSnapshot();
     }
 
     @Override
