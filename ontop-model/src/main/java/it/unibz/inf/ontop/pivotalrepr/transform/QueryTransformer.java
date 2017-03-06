@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.pivotalrepr.transform;
 
+import it.unibz.inf.ontop.exception.QueryTransformationException;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 
 /**
@@ -7,5 +8,5 @@ import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
  */
 public interface QueryTransformer {
 
-    IntermediateQuery transform(IntermediateQuery originalQuery);
+    IntermediateQuery transform(IntermediateQuery originalQuery) throws QueryTransformationException;
 }

@@ -17,7 +17,7 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
-import it.unibz.inf.ontop.pivotalrepr.transform.QueryTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.QueryRenamer;
 import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.pivotalrepr.transform.node.impl.IdentityQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.FunctionalTools;
@@ -229,7 +229,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         if(renamingSubstitution.isEmpty()){
             renamedSubQuery = subQuery;
         } else {
-            QueryTransformer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
+            QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
             renamedSubQuery = queryRenamer.transform(subQuery);
         }
 
