@@ -1,7 +1,9 @@
-package it.unibz.inf.ontop.pivotalrepr.impl;
+package it.unibz.inf.ontop.pivotalrepr.transform.impl;
 
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.QueryTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 
 import java.util.Optional;
 

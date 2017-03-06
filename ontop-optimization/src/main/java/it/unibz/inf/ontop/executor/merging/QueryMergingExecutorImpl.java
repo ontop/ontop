@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -16,6 +17,9 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.transform.QueryTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.impl.IdentityQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -156,10 +160,13 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
 
 
     private final IntermediateQueryFactory iqFactory;
+    private final QueryTransformerFactory transformerFactory;
 
     @Inject
-    private QueryMergingExecutorImpl(IntermediateQueryFactory iqFactory) {
+    private QueryMergingExecutorImpl(IntermediateQueryFactory iqFactory,
+                                     QueryTransformerFactory transformerFactory) {
         this.iqFactory = iqFactory;
+        this.transformerFactory = transformerFactory;
     }
 
 
@@ -223,7 +230,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         if(renamingSubstitution.isEmpty()){
             renamedSubQuery = subQuery;
         } else {
-            QueryTransformer queryRenamer = new QueryRenamer(iqFactory, renamingSubstitution);
+            QueryTransformer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
             renamedSubQuery = queryRenamer.transform(subQuery);
         }
 

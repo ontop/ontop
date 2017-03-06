@@ -10,6 +10,8 @@ import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 
 import java.util.Optional;

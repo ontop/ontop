@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;

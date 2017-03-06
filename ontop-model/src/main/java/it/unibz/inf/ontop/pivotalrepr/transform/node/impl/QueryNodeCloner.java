@@ -1,51 +1,51 @@
-package it.unibz.inf.ontop.pivotalrepr.impl;
+package it.unibz.inf.ontop.pivotalrepr.transform.node.impl;
 
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 
-/**
- * Does nothing
- */
-public class IdentityQueryNodeTransformer implements HomogeneousQueryNodeTransformer {
+public class QueryNodeCloner implements HomogeneousQueryNodeTransformer {
     @Override
     public FilterNode transform(FilterNode filterNode) {
-        return filterNode;
+        return filterNode.clone();
     }
 
     @Override
     public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
-        return extensionalDataNode;
+        return extensionalDataNode.clone();
     }
 
     @Override
     public LeftJoinNode transform(LeftJoinNode leftJoinNode) {
-        return leftJoinNode;
+        return leftJoinNode.clone();
     }
 
     @Override
     public UnionNode transform(UnionNode unionNode) {
-        return unionNode;
+        return unionNode.clone();
     }
 
     @Override
     public IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) {
-        return intensionalDataNode;
+        return intensionalDataNode.clone();
     }
 
     @Override
     public InnerJoinNode transform(InnerJoinNode innerJoinNode) {
-        return innerJoinNode;
+        return innerJoinNode.clone();
     }
 
     @Override
     public ConstructionNode transform(ConstructionNode constructionNode) {
-        return constructionNode;
+        return constructionNode.clone();
     }
 
     @Override
-    public EmptyNode transform(EmptyNode emptyNode) { return emptyNode; }
+    public EmptyNode transform(EmptyNode emptyNode) {
+        return emptyNode.clone();
+    }
 
     @Override
-    public TrueNode transform(TrueNode trueNode) { return trueNode; }
-
+    public TrueNode transform(TrueNode trueNode) {
+        return trueNode.clone();
+    }
 }
-

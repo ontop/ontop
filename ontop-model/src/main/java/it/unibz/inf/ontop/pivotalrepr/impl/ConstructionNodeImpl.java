@@ -12,6 +12,8 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;

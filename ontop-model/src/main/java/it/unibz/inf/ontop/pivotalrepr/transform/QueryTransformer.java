@@ -1,4 +1,6 @@
-package it.unibz.inf.ontop.pivotalrepr;
+package it.unibz.inf.ontop.pivotalrepr.transform;
+
+import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 
 /**
  * Transforms an IntermediateQuery

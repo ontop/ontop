@@ -1,20 +1,25 @@
-package it.unibz.inf.ontop.pivotalrepr.impl;
+package it.unibz.inf.ontop.pivotalrepr.transform.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.pivotalrepr.impl.QueryNodeRenamer;
+import it.unibz.inf.ontop.pivotalrepr.transform.QueryRenamer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-public class QueryRenamer extends NodeBasedQueryTransformer {
+public class QueryRenamerImpl extends NodeBasedQueryTransformer implements QueryRenamer {
 
     private final InjectiveVar2VarSubstitution renamingSubstitution;
 
-    public QueryRenamer(IntermediateQueryFactory iqFactory,
-                        InjectiveVar2VarSubstitution injectiveVar2VarSubstitution) {
+    @Inject
+    private QueryRenamerImpl(@Assisted InjectiveVar2VarSubstitution injectiveVar2VarSubstitution,
+                             IntermediateQueryFactory iqFactory) {
         super(new QueryNodeRenamer(iqFactory, injectiveVar2VarSubstitution));
         renamingSubstitution = injectiveVar2VarSubstitution;
     }

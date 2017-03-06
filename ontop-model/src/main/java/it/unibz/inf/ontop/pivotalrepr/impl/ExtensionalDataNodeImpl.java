@@ -4,15 +4,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MissingRelationForExtensionalDataNodeException;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.sql.Attribute;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
 import it.unibz.inf.ontop.sql.RelationID;
 
-import java.util.List;
 import java.util.stream.IntStream;
 
 /**
