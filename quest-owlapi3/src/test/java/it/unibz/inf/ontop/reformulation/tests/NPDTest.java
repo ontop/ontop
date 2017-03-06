@@ -95,6 +95,7 @@ public class NPDTest {
 				.jdbcUser(username)
 				.jdbcPassword(password)
 				.enableExistentialReasoning(true)
+				.enableTestMode()
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 		

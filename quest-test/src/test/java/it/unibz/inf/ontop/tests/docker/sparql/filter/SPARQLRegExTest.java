@@ -98,6 +98,7 @@ public class SPARQLRegExTest {
 					.nativeOntopMappingFile(obdafile)
 					.ontologyFile(owlfile)
 					.enableFullMetadataExtraction(false)
+					.enableTestMode()
 					.build();
 	        reasoner = factory.createReasoner(config);
 	        

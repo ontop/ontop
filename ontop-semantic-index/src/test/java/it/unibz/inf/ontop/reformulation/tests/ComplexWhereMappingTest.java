@@ -148,6 +148,7 @@ public class ComplexWhereMappingTest {
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableTestMode()
 				.build();
 	}
 

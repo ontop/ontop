@@ -339,6 +339,7 @@ public class R2rmlCheckerTest {
 				.r2rmlMappingFile(r2rmlfile)
 				.ontology(owlOntology)
 				.propertyFile(propertyfile)
+				.enableTestMode()
 				.build();
         reasonerR2rml = factory.createReasoner(config);
 	}
@@ -361,6 +362,7 @@ public class R2rmlCheckerTest {
 				.nativeOntopMappingFile(obdafile)
 				.propertyFile(propertyfile)
 				.ontology(owlOntology)
+				.enableTestMode()
 				.build();
 		reasonerOBDA = factory.createReasoner(config);
 

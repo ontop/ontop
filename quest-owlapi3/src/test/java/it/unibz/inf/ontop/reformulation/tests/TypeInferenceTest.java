@@ -115,6 +115,7 @@ public class TypeInferenceTest {
                 .jdbcUrl(URL)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

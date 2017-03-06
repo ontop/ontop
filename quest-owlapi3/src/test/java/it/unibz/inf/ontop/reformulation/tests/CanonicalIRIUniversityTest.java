@@ -59,6 +59,7 @@ public class CanonicalIRIUniversityTest {
                 .jdbcUrl(JDBC_URL)
                 .jdbcUser(JDBC_USER)
                 .jdbcPassword(JDBC_PASSWORD)
+                .enableTestMode()
                 .build();
 
 		/*

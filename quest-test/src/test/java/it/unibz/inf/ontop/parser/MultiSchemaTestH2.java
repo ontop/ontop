@@ -75,6 +75,7 @@ public class MultiSchemaTestH2  {
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
+				.enableTestMode()
 				.build();
 
 		/*

@@ -296,7 +296,8 @@ public class RDB2RDFTest {
 				.jdbcUrl(JDBC_URL)
 				.jdbcDriver(JDBC_DRIVER)
 				.jdbcUser(DB_USER)
-				.jdbcPassword(DB_PASSWORD);
+				.jdbcPassword(DB_PASSWORD)
+				.enableTestMode();
 	}
 
 	/**

@@ -33,6 +33,7 @@ public class MetaMappingExpanderTest {
             OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .ontologyFile(owlfile)
                     .nativeOntopMappingFile(obdafile)
+                    .enableTestMode()
                     .build();
             QuestOWL reasoner = factory.createReasoner(config);
 		/*

@@ -35,6 +35,7 @@ private void setup()  throws Exception {
 			.nativeOntopMappingFile(obdafile)
 			.ontologyFile(owlfile)
 			.dbMetadata(getMeta())
+			.enableTestMode()
 			.build();
 	Injector injector = configuration.getInjector();
 	OntopEngineFactory engineFactory = injector.getInstance(OntopEngineFactory.class);

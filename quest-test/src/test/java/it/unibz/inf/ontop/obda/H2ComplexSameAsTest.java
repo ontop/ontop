@@ -97,6 +97,7 @@ public class H2ComplexSameAsTest {
 				.ontologyFile(owlfile)
 				.sameAsMappings(sameAs)
 				.enableFullMetadataExtraction(false)
+				.enableTestMode()
 				.build();
 
 		QuestOWL reasoner = factory.createReasoner(config);

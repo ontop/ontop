@@ -126,6 +126,7 @@ public class MetaMappingVirtualABoxTest {
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableTestMode()
 				.build();
 
 

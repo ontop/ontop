@@ -296,7 +296,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 	private static OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> createConfigurationBuilder() {
 		return OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile("src/test/resources/materializer/MaterializeTest.obda")
-				.propertyFile("src/test/resources/materializer/MaterializeTest.properties");
+				.propertyFile("src/test/resources/materializer/MaterializeTest.properties")
+				.enableTestMode();
 	}
 
 	private static OntopSQLOWLAPIConfiguration createConfigurationWithOntology() {

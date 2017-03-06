@@ -116,6 +116,7 @@ public class ConditionalAsLeftJoinTest {
                 .jdbcUrl(URL)
                 .jdbcUser(USERNAME)
                 .jdbcPassword(PASSWORD)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

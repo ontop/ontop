@@ -64,6 +64,7 @@ public class MultipleSchemasTestH2 {
                     .nativeOntopMappingFile(obdafile)
                     .ontologyFile(owlfile)
                     .enableFullMetadataExtraction(false)
+                    .enableTestMode()
                     .build();
             reasoner = factory.createReasoner(config);
 
