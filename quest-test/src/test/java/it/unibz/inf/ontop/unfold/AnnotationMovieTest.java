@@ -207,6 +207,7 @@ public class AnnotationMovieTest {
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
                 .enableOntologyAnnotationQuerying(true)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

@@ -104,6 +104,7 @@ public class OBDA2DatalogTest extends TestCase {
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableTestMode()
 				.build();
 
 		QuestOWL reasoner = factory.createReasoner(configuration);

@@ -52,6 +52,7 @@ public class AdventureWorksDatetimeTest {
 				//.enableEquivalenceOptimization(true)
 				.nativeOntopMappingFile(obdaFile)
 				.ontologyFile(owlFile)
+				.enableTestMode()
 				.build();
 
 		QuestOWL reasoner = factory.createReasoner(configuration);

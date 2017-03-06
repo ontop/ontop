@@ -3,14 +3,14 @@ package it.unibz.inf.ontop.mapping.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingNormalizer;
 import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryRenamer;
+import it.unibz.inf.ontop.pivotalrepr.transform.QueryRenamer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -25,13 +25,14 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 @Singleton
 public class MappingNormalizerImpl implements MappingNormalizer {
 
-    private final IntermediateQueryFactory iqFactory;
     private final SpecificationFactory specificationFactory;
+    private final QueryTransformerFactory transformerFactory;
 
     @Inject
-    private MappingNormalizerImpl(IntermediateQueryFactory iqFactory, SpecificationFactory specificationFactory) {
-        this.iqFactory = iqFactory;
+    private MappingNormalizerImpl(SpecificationFactory specificationFactory,
+                                  QueryTransformerFactory transformerFactory) {
         this.specificationFactory = specificationFactory;
+        this.transformerFactory = transformerFactory;
     }
 
     @Override
@@ -56,15 +57,15 @@ public class MappingNormalizerImpl implements MappingNormalizer {
     private Stream<IntermediateQuery> renameQueries(Stream<IntermediateQuery> queryStream) {
         AtomicInteger i = new AtomicInteger(0);
         return queryStream
-                .map(m -> appendSuffixToVariableNames(iqFactory, m, i.incrementAndGet()));
+                .map(m -> appendSuffixToVariableNames(transformerFactory, m, i.incrementAndGet()));
     }
 
-    private static IntermediateQuery appendSuffixToVariableNames(IntermediateQueryFactory iqFactory,
+    private static IntermediateQuery appendSuffixToVariableNames(QueryTransformerFactory transformerFactory,
                                                                  IntermediateQuery query, int suffix) {
         Map<Variable, Variable> substitutionMap =
                 query.getKnownVariables().stream()
                         .collect(Collectors.toMap(v -> v, v -> DATA_FACTORY.getVariable(v.getName()+"m"+suffix)));
-        QueryRenamer queryRenamer = new QueryRenamer(iqFactory, DATA_FACTORY.getInjectiveVar2VarSubstitution(substitutionMap));
+        QueryRenamer queryRenamer = transformerFactory.createRenamer(DATA_FACTORY.getInjectiveVar2VarSubstitution(substitutionMap));
         return queryRenamer.transform(query);
     }
 }

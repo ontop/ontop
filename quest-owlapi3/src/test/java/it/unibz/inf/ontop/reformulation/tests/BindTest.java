@@ -129,6 +129,7 @@ public class BindTest {
                 .nativeOntopMappingFile(OBDA_FILE)
                 .ontologyFile(OWL_FILE)
                 .propertyFile(PROPERTY_FILE)
+                .enableTestMode()
                 .build();
 
 		QuestOWL reasoner = factory.createReasoner(configuration);
@@ -503,6 +504,7 @@ public class BindTest {
                     .nativeOntopMappingFile(OBDA_FILE)
                     .ontologyFile(OWL_FILE)
                     .propertyFile(PROPERTY_FILE)
+                    .enableTestMode()
                     .build();
 
 			QuestOWL reasoner = factory.createReasoner(configuration);

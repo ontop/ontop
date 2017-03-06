@@ -112,6 +112,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableTestMode()
 				.build();
 		
 			QuestMaterializer mat = new QuestMaterializer(configuration,false);
@@ -151,6 +152,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableTestMode()
 				.build();
 
 			// read onto

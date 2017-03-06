@@ -123,6 +123,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableTestMode()
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 

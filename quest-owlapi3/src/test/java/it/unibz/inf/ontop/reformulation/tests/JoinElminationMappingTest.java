@@ -97,6 +97,7 @@ public class JoinElminationMappingTest extends TestCase {
 					.jdbcUrl(url)
 					.jdbcUser(username)
 					.jdbcPassword(password)
+					.enableTestMode()
 					.build();
 
 		QuestOWLFactory factory = new QuestOWLFactory();

@@ -70,6 +70,7 @@ public class H2DatatypeTest {
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
+				.enableTestMode()
 				.build();
 
 		/*

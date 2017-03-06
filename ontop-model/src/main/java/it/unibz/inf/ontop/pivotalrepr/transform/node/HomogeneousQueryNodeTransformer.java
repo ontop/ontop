@@ -1,4 +1,6 @@
-package it.unibz.inf.ontop.pivotalrepr;
+package it.unibz.inf.ontop.pivotalrepr.transform.node;
+
+import it.unibz.inf.ontop.pivotalrepr.*;
 
 /**
  * TODO: explain

@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
 
@@ -58,6 +60,11 @@ public class TrueNodeImpl implements TrueNode {
     public SubstitutionResults<TrueNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         return new SubstitutionResultsImpl<>(clone());
+    }
+
+    @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        throw new IllegalArgumentException("A true node does not project any variable");
     }
 
     @Override

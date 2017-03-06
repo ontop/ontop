@@ -104,6 +104,7 @@ public class TMappingDisablingTest extends TestCase {
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.propertyFile(propertyFile)
+				.enableTestMode()
 				.build();
 		
 		QuestOWL reasoner = factory.createReasoner(configuration);
@@ -147,6 +148,7 @@ public class TMappingDisablingTest extends TestCase {
 				.ontologyFile(owlfile)
 				.propertyFile(propertyFile)
 				.tMappingExclusionConfig(TMappingExclusionConfig.parseFile(tMappingsConfFile))
+				.enableTestMode()
 				.build();
 		QuestOWL reasoner = factory.createReasoner(configuration);
 		

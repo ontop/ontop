@@ -60,6 +60,7 @@ public class OracleIdentifierTest {
 					.nativeOntopMappingFile(obdafile)
 					.enableExistentialReasoning(true)
 					.propertyFile(propertiesfile)
+					.enableTestMode()
 					.build();
 
 			repository = new OntopVirtualRepository(configuration);

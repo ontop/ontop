@@ -70,6 +70,7 @@ public class InconsistencyCheckingVirtualTest {
                 .nativeOntopMappingFile(new File(obdafile))
 				.ontology(ontology)
 				.properties(p)
+				.enableTestMode()
 				.build();
 		try {
 	        reasoner = factory.createReasoner(config);

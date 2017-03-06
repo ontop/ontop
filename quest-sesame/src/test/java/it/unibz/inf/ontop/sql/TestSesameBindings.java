@@ -82,6 +82,7 @@ public class TestSesameBindings {
                 .jdbcUrl(URL)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)
+                .enableTestMode()
                 .build();
 
         OntopVirtualRepository repo = new OntopVirtualRepository(config);

@@ -38,6 +38,7 @@ public class DatetimeStampSesameTest extends TestCase {
 				.propertyFile(propertyfile)
 				.enableExistentialReasoning(true)
 				.properties(connectionProperties)
+				.enableTestMode()
 				.build();
 		try {
 			repository = new OntopVirtualRepository( configuration);

@@ -75,6 +75,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 				.jdbcUser(JDBC_USER)
 				.jdbcPassword(JDBC_PASSWORD)
 				.enableIRISafeEncoding(false)
+				.enableTestMode()
 				.build();
 
 		// Creating a new instance of the reasoner

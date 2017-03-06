@@ -69,6 +69,7 @@ public abstract class AbstractBindTestWithFunctions {
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
                 .propertyFile(propertiesfile)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 
@@ -784,6 +785,7 @@ public abstract class AbstractBindTestWithFunctions {
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
                 .propertyFile(propertiesfile)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

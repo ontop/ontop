@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
@@ -53,13 +55,21 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     public SubstitutionResults<EmptyNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         ImmutableSet<Variable> newProjectedVariables = projectedVariables.stream()
-                .map(v -> substitution.apply(v))
+                .map(substitution::apply)
                 .filter(v -> v instanceof Variable)
                 .map(v -> (Variable) v)
                 .collect(ImmutableCollectors.toSet());
 
         EmptyNode newNode = new EmptyNodeImpl(newProjectedVariables);
         return new SubstitutionResultsImpl<>(newNode);
+    }
+
+    @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        if (getVariables().contains(variable))
+            return true;
+        else
+            throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
     }
 
     @Override

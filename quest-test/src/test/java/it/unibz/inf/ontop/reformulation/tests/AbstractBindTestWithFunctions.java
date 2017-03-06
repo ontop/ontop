@@ -66,6 +66,7 @@ public abstract class AbstractBindTestWithFunctions {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 
@@ -782,6 +783,7 @@ public abstract class AbstractBindTestWithFunctions {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

@@ -105,6 +105,7 @@ public class H2SameAsTest {
 				.nativeOntopMappingFile(obdafile)
 				.sameAsMappings(sameAs)
 				.enableFullMetadataExtraction(false)
+				.enableTestMode()
 				.build();
 
 		reasoner =  factory.createReasoner(config);

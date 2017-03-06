@@ -86,6 +86,7 @@ public class OracleLIMITTest  {
 				.nativeOntopMappingFile(obdaFileName)
 				.enableFullMetadataExtraction(false)
 				.propertyFile(propertyFile)
+				.enableTestMode()
 				.build();
 
 		reasoner = factory.createReasoner(configuration);
