@@ -37,6 +37,7 @@ private void setup()  throws Exception {
 			.ontologyFile(owlfile)
 			.propertyFile(propertyfile)
 			.dbMetadata(getMeta())
+			.enableTestMode()
 			.build();
 	Injector injector = configuration.getInjector();
 	OntopEngineFactory engineFactory = injector.getInstance(OntopEngineFactory.class);

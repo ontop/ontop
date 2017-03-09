@@ -118,6 +118,7 @@ public class MappingAnalyzerTest extends TestCase {
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableTestMode()
 				.build();
 
 		QuestOWL reasoner = factory.createReasoner(configuration);

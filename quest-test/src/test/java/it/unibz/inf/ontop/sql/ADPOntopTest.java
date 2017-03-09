@@ -30,6 +30,7 @@ public class ADPOntopTest {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(new File(obdafile))
 				.ontologyFile(owlfile)
+				.enableTestMode()
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 

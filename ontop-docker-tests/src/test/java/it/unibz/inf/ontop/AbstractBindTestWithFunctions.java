@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop;
+package it.unibz.inf.ontop.reformulation.tests;
 
 /*
  * #%L
@@ -69,6 +69,7 @@ public abstract class AbstractBindTestWithFunctions {
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
                 .propertyFile(propertiesfile)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 
@@ -459,6 +460,7 @@ public abstract class AbstractBindTestWithFunctions {
     }
 
 
+
     @Test
     public void testBindWithBefore() throws Exception {
 
@@ -597,6 +599,8 @@ public abstract class AbstractBindTestWithFunctions {
 
         return expectedValues;
     }
+
+
 
     @Test
     public void testMinutes() throws Exception {
@@ -746,19 +750,18 @@ public abstract class AbstractBindTestWithFunctions {
                 + "}";
 
         checkReturnedValues(queryBind, getTZExpectedValues());
-
     }
 
-    protected List<String> getTZExpectedValues(){
+    protected List<String> getTZExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0.0\"");
         expectedValues.add("\"0.0\"");
         expectedValues.add("\"0.0\"");
         expectedValues.add("\"0.0\"");
+
         return expectedValues;
     }
-
-    //    @Test see results of datetime with locale
+//        @Test see results of datetime with locale
     public void testDatetime() throws Exception {
 
         String value = "Jan 31 2013 9:32AM";
@@ -783,6 +786,7 @@ public abstract class AbstractBindTestWithFunctions {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
+                .enableTestMode()
                 .propertyFile(propertiesfile)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);

@@ -36,6 +36,7 @@ public class AnnotationTest {
                 .ontologyFile(owlFile)
                 .propertyFile(propertiesFile)
                 .enableOntologyAnnotationQuerying(true)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
         // Now we are ready for querying

@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.MappingExtractor;
 import it.unibz.inf.ontop.spec.MappingExtractor.MappingAndDBMetadata;
 import it.unibz.inf.ontop.spec.MappingTransformer;

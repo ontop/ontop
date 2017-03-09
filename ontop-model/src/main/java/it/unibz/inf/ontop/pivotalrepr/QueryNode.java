@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 
 /**
  * Immutable.
@@ -76,6 +78,14 @@ public interface QueryNode extends Cloneable {
     SubstitutionResults<? extends QueryNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
             throws QueryNodeSubstitutionException;
+
+    /**
+     * Returns true if it cannot guarantee the projected variable to be non-null
+     *
+     * Throws an IllegalArgumentException if the variable is not projected by the node
+     */
+    boolean isVariableNullable(IntermediateQuery query, Variable variable);
+
 
     /**
      * TODO: explain

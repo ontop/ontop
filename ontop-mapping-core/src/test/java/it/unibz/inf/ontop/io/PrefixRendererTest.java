@@ -69,7 +69,7 @@ public class PrefixRendererTest extends TestCase {
         PrefixManager pm;
         Map<String, String> prefixes = new HashMap<>();
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
-        pm = MAPPING_FACTORY.create(ImmutableMap.copyOf(prefixes));
+        pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
 		String name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("http://obda.org/predicates#q"));
 
@@ -81,7 +81,7 @@ public class PrefixRendererTest extends TestCase {
 		assertTrue(name, name.equals("&:;person-individual"));
 
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
-        pm = MAPPING_FACTORY.create(ImmutableMap.copyOf(prefixes));
+        pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
 		name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("&:;q"));
 
@@ -101,7 +101,7 @@ public class PrefixRendererTest extends TestCase {
         Map<String, String> prefixes = new HashMap<>();
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
 		prefixes.put("obdap:", "http://obda.org/predicates#");
-        pm = MAPPING_FACTORY.create(ImmutableMap.copyOf(prefixes));
+        pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
 
 		String name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals("obdap:q"));
@@ -115,7 +115,7 @@ public class PrefixRendererTest extends TestCase {
 
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
 		prefixes.put("onto:", "http://obda.org/onto.owl#");
-        pm = MAPPING_FACTORY.create(ImmutableMap.copyOf(prefixes));
+        pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
 		name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals(":q"));
 
@@ -138,7 +138,7 @@ public class PrefixRendererTest extends TestCase {
 
 		String uri = "http://obda.org/onto.owl#redirect=http://obda.org/predicates#";
 
-		PrefixManager pm = MAPPING_FACTORY.create(ImmutableMap.copyOf(prefixes));
+		PrefixManager pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
 
 		String shortForm = pm.getShortForm(uri, false);
 		System.out.println(shortForm);
@@ -148,7 +148,7 @@ public class PrefixRendererTest extends TestCase {
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://example.com/resource/");
 		prefixes.put("movie:", "http://www.movieontology.org/2009/10/01/movieontology.owl/");
 
-		pm = MAPPING_FACTORY.create(ImmutableMap.copyOf(prefixes));
+		pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
 
 		String uri2 = "http://example.com/resource/?repository=repo&uri=http://www.movieontology.org/2009/10/01/movieontology.owl/China-24951";
 		String shortForm2 = pm.getShortForm(uri2, false);

@@ -130,6 +130,7 @@ public class PropertyCharacteristicTest extends TestCase {
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
 	}

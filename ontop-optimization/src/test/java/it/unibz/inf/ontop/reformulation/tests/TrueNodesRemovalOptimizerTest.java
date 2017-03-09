@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import static it.unibz.inf.ontop.model.ExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
+import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.NULL;
 import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static org.junit.Assert.assertTrue;
@@ -200,7 +201,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(X, generateInt(A)));
+                DATA_FACTORY.getSubstitution(X, NULL));
         queryBuilder.init(projectionAtom, rootNode);
 
         UnionNode un = IQ_FACTORY.createUnionNode(ImmutableSet.of());
@@ -316,7 +317,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(X, generateInt(A)));
+                DATA_FACTORY.getSubstitution(X, NULL));
         queryBuilder.init(projectionAtom, rootNode);
 
         UnionNode un = IQ_FACTORY.createUnionNode(ImmutableSet.of());

@@ -54,6 +54,7 @@ public class SesameVirtualTest extends TestCase {
 			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.ontologyFile(owlfile)
 					.nativeOntopMappingFile(obdafile)
+					.enableTestMode()
 					.build();
 
 			repo = new OntopVirtualRepository(configuration);

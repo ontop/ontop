@@ -97,6 +97,7 @@ public class EmptyEntitiesTest {
 				.enableFullMetadataExtraction(false)
 				.ontologyFile(owlfile)
 				.nativeOntopMappingFile(new File(obdafile))
+				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
 

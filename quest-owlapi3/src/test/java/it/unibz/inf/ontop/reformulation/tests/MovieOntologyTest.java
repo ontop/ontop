@@ -47,6 +47,7 @@ public class MovieOntologyTest extends TestCase {
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.propertyFile(propertyFile)
+				.enableTestMode()
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 

@@ -11,9 +11,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>eu.optique-project</groupId>
+            <artifactId>r2rml-api-jena-binding</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
-            <version>2.11.2</version>
+            <version>3.1.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -26,6 +31,11 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-rdf-jena</artifactId>
+            <version>0.3.0-incubating</version>
+        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>

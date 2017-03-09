@@ -1,74 +1,51 @@
 package it.unibz.inf.ontop.cli;
 
+import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.rules.ExternalResource;
 
 @Ignore
 public class OntopQueryTest {
 
+    @ClassRule
+    public static ExternalResource h2Connection = new H2ExternalResourceForBookExample();
 
-    //@Ignore("too expensive to run")
     @Test
     public void testOntopQueryCMD (){
-        String[] argv = {"query", "-m", "/Users/xiao/Projects/npd-benchmark/mappings/postgres/no-spatial/npd-v2-ql_a_postgres.obda",
-                "-t", "/Users/xiao/Projects/npd-benchmark/ontology/vocabulary.owl",  "-q", "/Users/xiao/Projects/npd-benchmark/queries/01.q"};
+        String[] argv = {"query", "-m", "src/test/resources/books/exampleBooks.obda",
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-t", "src/test/resources/books/exampleBooks.owl",
+                "-q", "src/test/resources/books/q1.rq"};
         Ontop.main(argv);
     }
 
-    //@Ignore("too expensive to run")
+
     @Test
     public void testOntopQueryCMD_Out (){
-        String[] argv = {"query",
-                "-m", "/Users/xiao/Projects/npd-benchmark/mappings/postgres/no-spatial/npd-v2-ql_a_postgres.obda",
-                "-t", "/Users/xiao/Projects/npd-benchmark/ontology/vocabulary.owl",
-                "-q", "/Users/xiao/Projects/npd-benchmark/queries/01.q",
-                "-o", "/tmp/q1.csv"};
+        String[] argv = {"query", "-m", "src/test/resources/books/exampleBooks.obda",
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-t", "src/test/resources/books/exampleBooks.owl",
+                "-q", "src/test/resources/books/q1.rq",
+                "-o", "src/test/resources/output/q1-answer.csv"};
         Ontop.main(argv);
     }
 
-    //@Ignore("too expensive")
     @Test
     public void testOntopQueryR2RML (){
-        String[] argv = {"query",
-                "-m", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.ttl",
-                "-t", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.owl",
-                "-o", "/tmp/q1.csv",
-                "-l", "jdbc:mysql://10.7.20.39/lubm1",
-                "-u", "fish",
-                "-p", "fish",
-                "-d", "com.mysql.jdbc.Driver",
-                "-q", "/Users/xiao/Projects/iswc2014-benchmark/Ontop/q1.txt"
-        };
+        String[] argv = {"query", "-m", "src/test/resources/books/exampleBooks.ttl",
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-t", "src/test/resources/books/exampleBooks.owl",
+                "-q", "src/test/resources/books/q1.rq"};
         Ontop.main(argv);
     }
 
     @Test
     public void testOntopQueryR2RML_noOntology (){
         String[] argv = {"query",
-                "-m", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.ttl",
-                //"-t", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.owl",
-                "-o", "/tmp/q5_noOntology.csv",
-                "-l",	"jdbc:mysql://10.7.20.39/lubm1",
-                "-u",	"fish",
-                "-p",	"fish",
-                "-d",	"com.mysql.jdbc.Driver",
-                "-q", "/Users/xiao/Projects/iswc2014-benchmark/Ontop/q5.txt"
-        };
-        Ontop.main(argv);
-    }
-
-    @Test
-    public void testOntopQueryR2RML_Ontology (){
-        String[] argv = {"query",
-                "-m", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.ttl",
-                "-t", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.owl",
-                "-o", "/tmp/q5_Ontology.csv",
-                "-l",	"jdbc:mysql://10.7.20.39/lubm1",
-                "-u",	"fish",
-                "-p",	"fish",
-                "-d",	"com.mysql.jdbc.Driver",
-                "-q", "/Users/xiao/Projects/iswc2014-benchmark/Ontop/q5.txt"
-        };
+                "-m", "src/test/resources/books/exampleBooks.ttl",
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-q", "src/test/resources/books/q1.rq"};
         Ontop.main(argv);
     }
 
@@ -82,7 +59,7 @@ public class OntopQueryTest {
                 "--enable-annotations"
         };
         Ontop.main(argv);
-    }
+     }
 
 
 

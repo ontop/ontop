@@ -1,23 +1,22 @@
 package it.unibz.inf.ontop.cli;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class OntopOBDAToR2RMLTest {
 
-
-    //@Ignore("too expensive to run")
     @Test
     public void testOntopHelp (){
         String[] argv = {"help", "mapping", "to-r2rml"};
         Ontop.main(argv);
     }
 
-    //@Ignore("too expensive to run")
+    @Ignore("avoids overwriting exampleBooks.ttl")
     @Test
     public void testOntopOBDAToR2RML (){
         String[] argv = {"mapping", "to-r2rml",
-                "-i", "src/test/resources/mapping-northwind.obda",
-                "-t", "src/test/resources/mapping-northwind.owl"
+                "-i", "src/test/resources/books/exampleBooks.obda",
+                "-t", "src/test/resources/books/exampleBooks.owl"
         };
         Ontop.main(argv);
     }
@@ -27,30 +26,17 @@ public class OntopOBDAToR2RMLTest {
         String[] argv = {"mapping", "to-r2rml",
                 "-i", "src/test/resources/mapping-northwind.obda",
                 "-t", "src/test/resources/mapping-northwind.owl",
-                "-o", "src/test/resources/mapping-northwind.r2rml"
+                "-o", "src/test/resources/output/mapping-northwind.r2rml"
         };
         Ontop.main(argv);
     }
 
     @Test
-    public void testOntopOBDAToR2RML3 (){
+    public void testOntopOBDAToR2RML_NoOntology (){
         String[] argv = {"mapping", "to-r2rml",
-                "-i", "src/test/resources/booktutorial.obda",
-                "-t", "src/test/resources/booktutorial.owl",
-                "-o", "src/test/resources/booktutorial.r2rml"
+                "-i", "src/test/resources/books/exampleBooks.obda",
+                "-o", "src/test/resources/output/exampleBooks.r2rml"
         };
         Ontop.main(argv);
     }
-
-    @Test
-    public void testOntopOBDAToR2RML_NPD (){
-        String[] argv = {"mapping", "to-r2rml",
-                "-i", "src/test/resources/npd-v2-ql-mysql-ontop1.17.obda",
-                "-o", "src/test/resources/npd-v2-ql-mysql-ontop1.17.ttl",
-        };
-        Ontop.main(argv);
-    }
-
-
-
 }

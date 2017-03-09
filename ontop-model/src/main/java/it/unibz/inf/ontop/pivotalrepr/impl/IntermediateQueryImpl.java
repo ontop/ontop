@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -304,7 +304,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     @Override
     public IntermediateQuery clone() {
-        return IntermediateQueryUtils.convertToBuilder(this).build();
+        return createSnapshot();
     }
 
     @Override

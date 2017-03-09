@@ -100,6 +100,7 @@ public class TestQuestImplicitDBConstraints {
 				.jdbcUrl(URL)
 				.jdbcUser(USER)
 				.jdbcPassword(PASSWORD)
+				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
         
@@ -128,6 +129,7 @@ public class TestQuestImplicitDBConstraints {
 				.jdbcUrl(URL)
 				.jdbcUser(USER)
 				.jdbcPassword(PASSWORD)
+				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
         
@@ -164,6 +166,7 @@ public class TestQuestImplicitDBConstraints {
 				.jdbcUrl(URL)
 				.jdbcUser(USER)
 				.jdbcPassword(PASSWORD)
+				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
 
@@ -196,6 +199,7 @@ public class TestQuestImplicitDBConstraints {
 				.jdbcUrl(URL)
 				.jdbcUser(USER)
 				.jdbcPassword(PASSWORD)
+				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
         
@@ -228,6 +232,7 @@ public class TestQuestImplicitDBConstraints {
 				.jdbcUrl(URL)
 				.jdbcUser(USER)
 				.jdbcPassword(PASSWORD)
+				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
         
@@ -269,6 +274,7 @@ public class TestQuestImplicitDBConstraints {
 				.jdbcUrl(URL)
 				.jdbcUser(USER)
 				.jdbcPassword(PASSWORD)
+				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
         

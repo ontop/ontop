@@ -5,12 +5,6 @@ quest:		http://obda.org/quest#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
-[SourceDeclaration]
-sourceUri	file:/Users/elem/git/ontop/obdalib-r2rml/src/test/resources/mapping-northwind.ttl
-connectionUrl	jdbc:h2:tcp://localhost/DBName
-username	sa
-password	
-driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping-1308227722

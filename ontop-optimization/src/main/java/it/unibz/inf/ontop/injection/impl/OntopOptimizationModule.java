@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
+import it.unibz.inf.ontop.pivotalrepr.tools.QueryUnionSplitter;
 
 public class OntopOptimizationModule extends OntopAbstractModule {
 
@@ -46,6 +47,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromPreferences(ProjectionShrinkingExecutor.class);
         bindFromPreferences(TrueNodeRemovalExecutor.class);
         bindFromPreferences(DatalogProgram2QueryConverter.class);
+        bindFromPreferences(QueryUnionSplitter.class);
 
         // Releases the configuration (enables some GC)
         this.configuration = null;

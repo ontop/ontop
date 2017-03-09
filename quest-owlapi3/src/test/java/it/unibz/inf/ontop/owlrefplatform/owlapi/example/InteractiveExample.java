@@ -34,6 +34,7 @@ public class InteractiveExample {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
+				.enableTestMode()
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 

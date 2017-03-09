@@ -75,6 +75,7 @@ public class H2ConstantTest {
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.enableFullMetadataExtraction(false)
+				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
 

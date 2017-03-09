@@ -76,14 +76,4 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
         return !mappingFile.endsWith(".obda");
     }
 
-    protected Properties createConnectionProperties() {
-            Properties p = new Properties();
-            p.setProperty(OntopSQLCoreSettings.JDBC_NAME, jdbcURL);
-            p.setProperty(OntopSQLCoreSettings.JDBC_URL, jdbcURL);
-            p.setProperty(OntopSQLCoreSettings.JDBC_USER, jdbcUserName);
-            p.setProperty(OntopSQLCoreSettings.JDBC_PASSWORD, jdbcPassword);
-            p.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, jdbcDriverClass);
-
-            return p;
-    }
 }

@@ -27,7 +27,9 @@ public class DatetimeStampTest {
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile(owlFile).propertyFile(propertyFile);
+                .ontologyFile(owlFile)
+                .propertyFile(propertyFile)
+                .enableTestMode();
 
         if (isR2rml) {
             configBuilder.r2rmlMappingFile(filename);

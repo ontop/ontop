@@ -58,7 +58,8 @@ public class OntologyTypesTest {
 		QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.propertyFile(propertyFile)
-				.ontologyFile(owlFile);
+				.ontologyFile(owlFile)
+				.enableTestMode();
 		
 		if (isR2rml)
 			configBuilder.r2rmlMappingFile(mappingFile);
@@ -231,6 +232,7 @@ public class OntologyTypesTest {
 					.nativeOntopMappingFile(new File(obdaErroredFile))
 					.ontologyFile(owlFile)
 					.propertyFile(propertyFile)
+					.enableTestMode()
 					.build();
 	        QuestOWL reasoner = factory.createReasoner(config);
 

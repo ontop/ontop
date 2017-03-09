@@ -82,6 +82,7 @@ public class TestSQLBlankLines {
 				.jdbcUrl(URL)
 				.jdbcUser(USER)
 				.jdbcPassword(PASSWORD)
+				.enableTestMode()
 				.build();
 		reasoner = factory.createReasoner(config);
 

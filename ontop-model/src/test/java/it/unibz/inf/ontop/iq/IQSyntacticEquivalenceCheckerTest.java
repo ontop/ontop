@@ -398,7 +398,8 @@ public class IQSyntacticEquivalenceCheckerTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
         IntermediateQueryBuilder queryBuilder1 = query.newBuilder();
         queryBuilder1.init(projectionAtom1, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, DATA_NODE_2);
+        queryBuilder1.addChild(constructionNode1, IQ_FACTORY.createExtensionalDataNode(
+                DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, Z, X)));
 
         IntermediateQuery query1 = queryBuilder1.build();
 
@@ -534,7 +535,8 @@ public class IQSyntacticEquivalenceCheckerTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(TABLE3_PREDICATE, Y);
         IntermediateQueryBuilder queryBuilder1 = query.newBuilder();
         queryBuilder1.init(projectionAtom1, constructionNode1);
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Y));
         queryBuilder1.addChild(constructionNode1, dataNode1);
 
         IntermediateQuery query1 = queryBuilder1.build();

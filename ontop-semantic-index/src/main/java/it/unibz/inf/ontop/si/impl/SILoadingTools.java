@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.si.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.MappingFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
@@ -149,8 +149,8 @@ class SILoadingTools {
     private static OBDAModel createPPMapping(RDBMSSIRepositoryManager dataRepository) {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
                 .build();
-        MappingFactory mappingFactory = defaultConfiguration.getInjector().getInstance(MappingFactory.class);
-        PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
+        SpecificationFactory specificationFactory = defaultConfiguration.getInjector().getInstance(SpecificationFactory.class);
+        PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 
         ImmutableList<OBDAMappingAxiom> mappingAxioms = dataRepository.getMappings();
 
@@ -163,7 +163,7 @@ class SILoadingTools {
 
         try {
             return new OBDAModelImpl(mappingAxioms,
-                    mappingFactory.create(prefixManager, uriTemplateMatcher));
+                    specificationFactory.createMetadata(prefixManager, uriTemplateMatcher));
 
         } catch (DuplicateMappingException e) {
             throw new IllegalStateException(e.getMessage());

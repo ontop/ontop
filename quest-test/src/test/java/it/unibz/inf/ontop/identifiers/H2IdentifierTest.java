@@ -73,6 +73,7 @@ public class H2IdentifierTest {
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
+				.enableTestMode()
 				.build();
 
 		/*

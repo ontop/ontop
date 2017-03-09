@@ -25,6 +25,7 @@ import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.help.BashCompletion;
+import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
@@ -48,6 +49,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
     @Option(type = OptionType.COMMAND, name = {"-q", "--query"}, title = "queryFile",
             description = "SPARQL query file")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    @Required
     private String queryFile;
 
     public OntopQuery() {
@@ -77,9 +79,8 @@ public class OntopQuery extends OntopReasoningCommandBase {
             return;
         }
 
-
-        QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration.Builder configurationBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .propertyFile(propertiesFile)
                 .ontology(ontology)
                 .enableOntologyAnnotationQuerying(enableAnnotations);
 
@@ -89,7 +90,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
             configurationBuilder.nativeOntopMappingFile(mappingFile);
         }
 
-        factory = new QuestOWLFactory();
+        QuestOWLFactory factory = new QuestOWLFactory();
 
         try (QuestOWL reasoner = factory.createReasoner(configurationBuilder.build());
              OntopOWLConnection conn = reasoner.getConnection();

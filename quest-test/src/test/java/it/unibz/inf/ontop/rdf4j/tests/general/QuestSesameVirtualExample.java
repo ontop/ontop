@@ -70,6 +70,7 @@ public class QuestSesameVirtualExample {
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
 				.propertyFile(propertyFile)
+				.enableTestMode()
 				.build();
 
 		Repository repo = new OntopVirtualRepository(configuration);
@@ -160,6 +161,7 @@ public class QuestSesameVirtualExample {
 				.r2rmlMappingFile(ttlFile)
 				.enableExistentialReasoning(true)
 				.propertyFile(propertyFile)
+				.enableTestMode()
 				.build();
 		
 		Repository repo = new OntopVirtualRepository(configuration);

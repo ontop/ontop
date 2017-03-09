@@ -130,11 +130,7 @@ public class DirectMappingAxiomProducer {
 		for (Attribute att : table.getAttributes()) {
 			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
 			Variable objV = df.getVariable(att.getID().getName());
-			Term obj;
-			if (type == COL_TYPE.LITERAL) 
-				obj = objV;
-			else 
-				obj = df.getTypedTerm(objV, type);
+			Term obj = df.getTypedTerm(objV, type);
 			
 			atoms.add(df.getFunction(df.getDataPropertyPredicate(getLiteralPropertyIRI(att)), sub, obj));
 		}
@@ -220,7 +216,6 @@ public class DirectMappingAxiomProducer {
      * @param td
      * @return
      */
-
     private Term generateSubject(DatabaseRelationDefinition td, boolean ref) {
 		
 		String varNamePrefix = "";
@@ -257,7 +252,6 @@ public class DirectMappingAxiomProducer {
 	 * percent encoding for a String
 	 */
 	private static String percentEncode(String pe) {
-
 		pe = pe.replace("'", "%27");
 		pe = pe.replace("-", "%2D");
 		pe = pe.replace(".", "%2E");

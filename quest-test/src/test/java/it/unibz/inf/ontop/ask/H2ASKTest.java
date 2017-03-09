@@ -47,6 +47,7 @@ public class H2ASKTest  {
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
+				.enableTestMode()
 				.build();
 
 		/*

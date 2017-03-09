@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
