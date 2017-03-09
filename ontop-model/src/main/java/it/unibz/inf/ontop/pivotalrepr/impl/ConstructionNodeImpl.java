@@ -67,9 +67,31 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      * Without modifiers nor substitution.
      */
     public ConstructionNodeImpl(ImmutableSet<Variable> projectedVariables) {
-        this.projectedVariables = projectedVariables;
-        this.substitution = new ImmutableSubstitutionImpl<>(ImmutableMap.<Variable, ImmutableTerm>of());
-        this.optionalModifiers = Optional.empty();
+        this(projectedVariables, new ImmutableSubstitutionImpl<>(ImmutableMap.<Variable, ImmutableTerm>of()));
+    }
+
+    /**
+     * Without modifiers
+     */
+    public ConstructionNodeImpl(ImmutableSet<Variable> projectedVariables,
+                                ImmutableSubstitution<ImmutableTerm> substitution) {
+        this(projectedVariables, substitution, Optional.empty());
+    }
+
+    /**
+     * With a map instead of a substitution
+     */
+    public ConstructionNodeImpl(ImmutableSet<Variable> projectedVariables, ImmutableMap<Variable,
+            ImmutableTerm> map, Optional<ImmutableQueryModifiers> optionalQueryModifiers) {
+        this(projectedVariables, new ImmutableSubstitutionImpl<>(map), optionalQueryModifiers);
+    }
+
+    /**
+     * With a map and no modifier
+     */
+    public ConstructionNodeImpl(ImmutableSet<Variable> projectedVariables, ImmutableMap<Variable,
+            ImmutableTerm> map) {
+        this(projectedVariables, new ImmutableSubstitutionImpl<>(map));
     }
 
     @Override

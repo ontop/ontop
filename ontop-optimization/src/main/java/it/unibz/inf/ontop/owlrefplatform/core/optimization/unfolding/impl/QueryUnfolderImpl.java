@@ -29,7 +29,7 @@ public class QueryUnfolderImpl implements QueryUnfolder {
 
     public  QueryUnfolderImpl(Stream<IntermediateQuery> mappingStream) {
         AtomicInteger i = new AtomicInteger(0);
-        mappingIndex = mappingStream
+        mappingIndex = mappingStream.sequential()
               .map(m -> appendSuffixToVariableNames(m, i.incrementAndGet()))
               .map(m -> new AbstractMap.SimpleEntry<>(m.getProjectionAtom().getPredicate(), m))
               .collect(ImmutableCollectors.toMap());

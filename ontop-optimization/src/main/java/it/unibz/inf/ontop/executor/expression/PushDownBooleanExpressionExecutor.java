@@ -7,6 +7,6 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal
 /**
  * TODO: explain
  */
-public interface PushDownExpressionExecutor extends
+public interface PushDownBooleanExpressionExecutor extends
         SimpleNodeCentricExecutor<JoinOrFilterNode, PushDownBooleanExpressionProposal> {
 }
