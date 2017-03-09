@@ -63,7 +63,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
             return setBuilder.build();
         }
         else {
-            return ImmutableSet.of((ImmutableExpression)this);
+            return ImmutableSet.of(this);
         }
     }
 }
