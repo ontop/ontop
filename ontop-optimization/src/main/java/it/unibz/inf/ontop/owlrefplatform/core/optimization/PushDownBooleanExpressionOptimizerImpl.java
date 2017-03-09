@@ -55,7 +55,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
             }
         }
 
-        private Recipient(QueryNode root) {
+        public Recipient(QueryNode root) {
             if(root instanceof LeftJoinNode) {
                 throw new IllegalStateException("For LeftJoin recipient nodes, use the other constructor");
             }
