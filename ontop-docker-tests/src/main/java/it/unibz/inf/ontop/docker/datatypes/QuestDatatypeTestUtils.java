@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.docker.datatypes;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.scenarios.ScenarioManifestTestUtils;
+import it.unibz.inf.ontop.docker.ScenarioManifestTestUtils;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 import org.eclipse.rdf4j.OpenRDFUtil;

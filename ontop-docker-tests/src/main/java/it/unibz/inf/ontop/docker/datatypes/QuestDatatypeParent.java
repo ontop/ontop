@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.docker.datatypes;
  * #L%
  */
 
+import it.unibz.inf.ontop.docker.ResultSetInfo;
+import it.unibz.inf.ontop.docker.ResultSetInfoTupleUtil;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.quest.ResultSetInfo;
-import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
