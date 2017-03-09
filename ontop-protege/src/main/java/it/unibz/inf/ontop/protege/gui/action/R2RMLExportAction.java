@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,14 +20,17 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.r2rml.R2RMLWriter;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +44,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	private static final long serialVersionUID = -1211395039869926309L;
 
 	private OWLEditorKit editorKit = null;
-	private OBDAModel obdaModel = null;
+	private OBDAModelWrapper obdaModel = null;
 	private OWLModelManager modelManager= null;
 	
 	private Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
@@ -49,7 +52,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit)getEditorKit();		
-		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
+		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelWrapper();
 		modelManager = editorKit.getOWLModelManager();
 	}
 
@@ -58,6 +61,7 @@ public class R2RMLExportAction extends ProtegeAction {
 		// Does nothing!
 	}
 
+        // Assumes initialise() has been run and has set modelManager to active OWLModelManager
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 
@@ -70,7 +74,12 @@ public class R2RMLExportAction extends ProtegeAction {
             else {
                 URI sourceID = obdaModel.getSources().get(0).getSourceID();
 
-                final JFileChooser fc = new JFileChooser();
+		// Get the path of the file of the active OWL model
+		OWLOntology activeOntology = modelManager.getActiveOntology();
+                IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
+		File ontologyDir = new File(documentIRI.toURI().getPath());
+
+		final JFileChooser fc = new JFileChooser(ontologyDir);
                 fc.setSelectedFile(new File(sourceID + "-mappings.ttl"));
                 int approve = fc.showSaveDialog(workspace);
 
@@ -78,14 +87,18 @@ public class R2RMLExportAction extends ProtegeAction {
                     File file = fc.getSelectedFile();
 
 
-                    R2RMLWriter writer = new R2RMLWriter(obdaModel, sourceID, modelManager.getActiveOntology());
-                    writer.write(file);
-                    JOptionPane.showMessageDialog(workspace, "R2rml Export completed.");
+				R2RMLWriter writer = new R2RMLWriter(obdaModel.getCurrentImmutableOBDAModel(), sourceID,
+						modelManager.getActiveOntology(),
+						// TODO: fix this
+						QuestConfiguration.defaultBuilder().build().getInjector()
+						);
+                writer.write(file);
+                    JOptionPane.showMessageDialog(workspace, "R2RML Export completed.");
                 }
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
-            log.error("Error during r2rml export. \n");
+            log.error("Error during R2RML export. \n");
             ex.printStackTrace();
         }
 

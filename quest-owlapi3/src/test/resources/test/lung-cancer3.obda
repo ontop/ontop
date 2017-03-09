@@ -13,19 +13,19 @@ password
 driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
-mappingId	map-patient
+mappingId	map-patient-1
 target		:db1/{PATIENTID} a :Person ; :name {NAME} . 
 source		select * from "TBL_PATIENT"
 
-mappingId	patient-neopalsm
+mappingId	patient-neoplasm-2
 target		:db1/{PATIENTID} :hasNeoplasm :db1/neoplasm/{PATIENTID} . 
 source		select * from "TBL_PATIENT"
 
-mappingId	patient-neoplasm
+mappingId	patient-neoplasm-3
 target		:db1/1001 :hasNeoplasm :db1/neoplasm/{PATIENTID} . 
 source		select * from "TBL_PATIENT"
 
-mappingId	patient-neoplasm
+mappingId	patient-neoplasm-4
 target		:db1/1001 :hasNeoplasm :db1/neoplasm/2002 . 
 source		select * from "TBL_PATIENT"
 

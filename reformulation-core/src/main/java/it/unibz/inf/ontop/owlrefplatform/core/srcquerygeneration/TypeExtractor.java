@@ -2,25 +2,34 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
+import it.unibz.inf.ontop.sql.Attribute;
+import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
+import it.unibz.inf.ontop.sql.RelationDefinition;
+import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 
-import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.LITERAL;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
+
 
 /**
  * Extracts the TermTypes and the cast types from a set of Datalog rules.
  */
 public class TypeExtractor {
 
-    private static final TermType LITERAL_TYPE = OBDADataFactoryImpl.getInstance()
-            .getTermType(LITERAL);
+    private static final TermType LITERAL_TYPE = DATA_FACTORY.getTermType(LITERAL);
+
 
     public static class TypeResults {
         private final ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap;
@@ -46,11 +55,11 @@ public class TypeExtractor {
      *
      * Extracts the TermTypes and the cast types from a set of Datalog rules.
      */
-    public static TypeResults extractTypes(Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesInBottomUp) {
+    public static TypeResults extractTypes(Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesInBottomUp, DBMetadata metadata) {
         ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = extractTermTypeMap(ruleIndex.values());
 
         return new TypeResults(termTypeMap,
-                extractCastTypeMap(ruleIndex, predicatesInBottomUp, termTypeMap));
+                extractCastTypeMap(ruleIndex, predicatesInBottomUp, termTypeMap, metadata));
     }
 
     private static ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> extractTermTypeMap(Collection<CQIE> rules) {
@@ -70,14 +79,14 @@ public class TypeExtractor {
      */
     private static ImmutableMap<Predicate,ImmutableList<Predicate.COL_TYPE>> extractCastTypeMap(
             Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesInBottomUp,
-            ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap) {
+            ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap, DBMetadata metadata) {
 
         // Append-only
         Map<Predicate,ImmutableList<TermType>> mutableCastMap = Maps.newHashMap();
 
         for (Predicate predicate : predicatesInBottomUp) {
             ImmutableList<TermType> castTypes = inferCastTypes(predicate, ruleIndex.get(predicate), termTypeMap,
-                    mutableCastMap);
+                    mutableCastMap,metadata);
 
             mutableCastMap.put(predicate, castTypes);
         }
@@ -103,12 +112,28 @@ public class TypeExtractor {
     private static ImmutableList<TermType> inferCastTypes(
             Predicate predicate, Collection<CQIE> samePredicateRules,
             ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
-            Map<Predicate, ImmutableList<TermType>> alreadyKnownCastTypes) {
+            Map<Predicate, ImmutableList<TermType>> alreadyKnownCastTypes, DBMetadata metadata) {
 
         if (samePredicateRules.isEmpty()) {
+
             ImmutableList.Builder<TermType> defaultTypeBuilder = ImmutableList.builder();
+
+            RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), predicate);
+            Optional<RelationDefinition> td = Optional.ofNullable(metadata.getRelation(tableId));
+
             IntStream.range(0, predicate.getArity())
-                    .forEach(i -> defaultTypeBuilder.add(LITERAL_TYPE));
+                    .forEach(i -> {
+
+                        if(td.isPresent()) {
+                            Attribute attribute = td.get().getAttribute(i+1);
+
+                            //get type from metadata
+                            Predicate.COL_TYPE type = JdbcTypeMapper.getInstance().getPredicate(attribute.getType());
+                            defaultTypeBuilder.add(DATA_FACTORY.getTermType(type));
+                        }
+                        else{
+                            defaultTypeBuilder.add(LITERAL_TYPE);
+                        }});
             return defaultTypeBuilder.build();
         }
 
@@ -228,9 +253,8 @@ public class TypeExtractor {
                         final int index = i;
 
                         return Optional.ofNullable(alreadyKnownCastTypes.get(bodyDataAtom.getFunctionSymbol()))
-                                .map(types -> types.get(index))
-                                // TODO: may look for the COL_TYPE of the extensional atom in the DBMetadata
-                                .orElse(LITERAL_TYPE);
+                                .map(types -> types.get(index)).orElseThrow(() -> new IllegalStateException("No type could be inferred for " + term));
+
                     }
                 }
             }

@@ -20,7 +20,8 @@ package it.unibz.inf.ontop.quest.datatypes;
  * #L%
  */
 
-import info.aduna.io.IOUtil;
+import org.eclipse.rdf4j.common.io.IOUtil;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.quest.ResultSetInfo;
 import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
 
@@ -31,32 +32,33 @@ import java.net.URL;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.Query;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.ParserConfig;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
-import org.openrdf.rio.helpers.BasicParserSettings;
-import org.openrdf.rio.helpers.StatementCollector;
-import org.openrdf.sail.memory.MemoryStore;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.rio.ParserConfig;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 
 public abstract class QuestDatatypeParent extends TestCase {
@@ -114,14 +116,16 @@ public abstract class QuestDatatypeParent extends TestCase {
 	}
 	
 	protected Repository createRepository() throws Exception {
-		try {
-			SesameVirtualRepo repo = new SesameVirtualRepo(getName(), owlFileURL, obdaFileURL, parameterFileURL);
-			repo.initialize();
-			return repo;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+		QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlFileURL)
+				.nativeOntopMappingFile(obdaFileURL);
+
+		if ((parameterFileURL != null) && (!parameterFileURL.isEmpty()))
+				configBuilder.propertyFile(parameterFileURL);
+
+		OntopVirtualRepository repo = new OntopVirtualRepository(getName(), configBuilder.build());
+		repo.initialize();
+		return repo;
 	}
 	
 	@Override
@@ -235,7 +239,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 	}
 	
 	private Set<Statement> readGraphResultSetInfo() throws Exception {
-		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
+		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL).get();
 		if (rdfFormat != null) {
 			RDFParser parser = Rio.createParser(rdfFormat);
 

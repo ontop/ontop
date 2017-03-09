@@ -20,13 +20,13 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
@@ -35,10 +35,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +50,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
 
@@ -74,7 +73,6 @@ public class TreeWitnessRewriterH2Test{
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
@@ -147,8 +145,6 @@ public class TreeWitnessRewriterH2Test{
 		String username = "sa";
 		String password = "";
 
-		fac = OBDADataFactoryImpl.getInstance();
-
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
@@ -164,20 +160,6 @@ public class TreeWitnessRewriterH2Test{
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel); // (obdaModel,
-																	// new
-																	// QueryController());
-		ioManager.load(new File(obdafile)); // .loadOBDADataFromURI(new
-											// File(obdafile).toURI(),
-											// ontology.getOntologyID().getOntologyIRI().toURI(),
-											// obdaModel.getPrefixManager());
 	}
 
 	@After
@@ -232,13 +214,16 @@ public class TreeWitnessRewriterH2Test{
 		// }
 	}
 
-	private void runTests(QuestPreferences p) throws Exception {
+	private void runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(p).obdaModel(obdaModel).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
-        
+        QuestConfiguration config = QuestConfiguration.defaultBuilder().properties(p)
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.build();
+        QuestOWL reasoner = factory.createReasoner(config);
+
 		// Now we are ready for querying
 		QuestOWLStatement st = reasoner.getStatement();
 
@@ -315,18 +300,18 @@ public class TreeWitnessRewriterH2Test{
 		prepareTestQueries(tuples);
 		/*
 		 * QuestPreferences p = new QuestPreferences();
-		 * p.setCurrentValueOf(QuestPreferences.ABOX_MODE,
+		 * p.setProperty(QuestPreferences.ABOX_MODE,
 		 * QuestConstants.VIRTUAL);
-		 * p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		 * p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		 * p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		 * p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		 * p.setProperty("rewrite", "true");
 		 */
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+		Properties p  = new Properties();
+		p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "true");
 		p.setProperty("rewrite", "true");
 
 		runTests(p);

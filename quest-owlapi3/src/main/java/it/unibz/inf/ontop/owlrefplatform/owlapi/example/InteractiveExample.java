@@ -1,60 +1,28 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
-//import it.unibz.inf.config.tmappings.parser.TMappingsConfParser;
-
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 
 public class InteractiveExample {
 
-	/*
-	 * Use the sample database using H2 from
-	 * https://github.com/ontop/ontop/wiki/InstallingTutorialDatabases
-	 * 
-	 * Please use the pre-bundled H2 server from the above link
-	 * 
-	 */
-	final String owlfile = "src/main/resources/example/npd_no_spatial_db2.owl";
-	final String obdafile = "src/main/resources/example/npd_no_spatial_db2.obda";
-	
-	// Exclude from T-Mappings
-	final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
+    /*
+     * Use the sample database using H2 from
+     * https://github.com/ontop/ontop/wiki/InstallingTutorialDatabases
+     *
+     * Please use the pre-bundled H2 server from the above link
+     *
+     */
+    final String owlfile = "src/main/resources/example/npd-benchmark-1.9/npd-v2-ql.owl";
+    final String obdafile = "src/main/resources/example/npd-benchmark-1.9/npd-v2-ql-mysql-ontop1.17.obda";
+
+    // Exclude from T-Mappings
+    final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
 
 	public void runQuery() throws Exception {
-
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Load the OBDA model from an external .obda file
-		 */
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-
-		/*
-		 * Prepare the configuration for the Quest instance. The example below shows the setup for
-		 * "Virtual ABox" mode
-		 */
-		QuestPreferences preference = new QuestPreferences();
-		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-
 
 //		/*
 //		 * T-Mappings Handling!!
@@ -63,17 +31,17 @@ public class InteractiveExample {
 //		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(preference).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 
-		String outFile = "src/main/resources/davide/QueriesStdout/prova";
-
-
-		/*
-		 * Prepare the data connection for querying.
-		 */
-		QuestOWLConnection conn = reasoner.getConnection();
+	/*
+	 * Prepare the data connection for querying.
+	 */
+	QuestOWLConnection conn = reasoner.getConnection();
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		QuestOWLStatement st = conn.createStatement();
@@ -87,16 +55,14 @@ public class InteractiveExample {
 				}
 				String sparqlQuery = builder.toString();
 				System.out.println(sparqlQuery);
-				System.out.println("INSERT A LABEL");
-				String label = br.readLine();
 				QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
 				rs.close();
 				
 			/*
 			 * Print the query summary
 			 */
-				QuestOWLStatement qst = (QuestOWLStatement) st;
-				String sqlQuery = qst.getUnfolding(sparqlQuery);
+				QuestOWLStatement qst = st;
+				String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();
 								
 				System.out.println();
 				System.out.println("The input SPARQL query:");
@@ -123,10 +89,10 @@ public class InteractiveExample {
 		try {
 			InteractiveExample example = new InteractiveExample();
 
-				example.runQuery();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	    example.runQuery();
+	} catch (Exception e) {
+	    e.printStackTrace();
 	}
+    }
 }
 

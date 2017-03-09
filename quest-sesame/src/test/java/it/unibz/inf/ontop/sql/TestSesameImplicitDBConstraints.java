@@ -1,37 +1,27 @@
 package it.unibz.inf.ontop.sql;
 
-
-
-
-
-
-
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.r2rml.R2RMLManager;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.io.File;
+import java.util.Properties;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.junit.After;
 import org.junit.Test;
-import org.openrdf.model.Model;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import static org.junit.Assert.*;
+
+import it.unibz.inf.ontop.injection.OBDASettings;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 
 /**
  * Tests that user-applied constraints can be provided through 
- * sesameWrapper.SesameVirtualRepo 
+ * sesameWrapper.OntopVirtualRepository
  * with manually instantiated metadata.
  * 
  * This is quite similar to the setting in the optique platform
@@ -51,16 +41,11 @@ public class TestSesameImplicitDBConstraints {
 
 	private Connection sqlConnection;
 	private QuestDBStatement qst = null;
-	
+
 	/*
 	 * 	prepare ontop for rewriting and unfolding steps 
 	 */
 	public void init(boolean applyUserConstraints, boolean provideMetadata)  throws Exception {
-
-		DBMetadata dbMetadata;
-		QuestPreferences preference;
-		OWLOntology ontology;
-		Model model;
 
 		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
 		java.sql.Statement s = sqlConnection.createStatement();
@@ -77,17 +62,6 @@ public class TestSesameImplicitDBConstraints {
 		s.close();
 
 		/*
-		 * Load the ontology from an external .owl file.
-		 */
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Load the OBDA model from an external .r2rml file
-		 */
-		R2RMLManager rmanager = new R2RMLManager(r2rmlfile);
-		model = rmanager.getModel();
-		/*
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
@@ -97,32 +71,30 @@ public class TestSesameImplicitDBConstraints {
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
-		preference = new QuestPreferences();
-		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		preference.setCurrentValueOf(QuestPreferences.DBNAME, "countries");
-		preference.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:h2:mem:countries");
-		preference.setCurrentValueOf(QuestPreferences.DBUSER, "sa");
-		preference.setCurrentValueOf(QuestPreferences.DBPASSWORD, "");
-		preference.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "org.h2.Driver");
+		Properties p = new Properties();
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(OBDASettings.DB_NAME, "countries");
+		p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:countries");
+		p.setProperty(OBDASettings.DB_USER, "sa");
+		p.setProperty(OBDASettings.DB_PASSWORD, "");
+		p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
-		dbMetadata = getMeta();
-		SesameVirtualRepo qest1;
-		if(provideMetadata){
-			qest1 = new SesameVirtualRepo("", ontology, model, dbMetadata, preference);
-			if(applyUserConstraints){
-				// Parsing user constraints
-				ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(uc_keyfile));
-				qest1.setImplicitDBConstraints(userConstraints);
-			}
-		} else {
-			qest1 = new SesameVirtualRepo("", ontology, model, preference);
-			if(applyUserConstraints){
-				// Parsing user constraints
-				ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(uc_keyfile));
+		QuestConfiguration.Builder configurationBuilder = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlfile)
+				.r2rmlMappingFile(r2rmlfile)
+				.properties(p);
 
-				qest1.setImplicitDBConstraints(userConstraints);
-			}
+		if(applyUserConstraints){
+			// Parsing user constraints
+			ImplicitDBConstraintsReader userConstraintReader = new ImplicitDBConstraintsReader(new File(uc_keyfile));
+			configurationBuilder.dbConstraintsReader(userConstraintReader);
 		}
+
+		if(provideMetadata) {
+			configurationBuilder.dbMetadata(getMeta());
+		}
+
+		OntopVirtualRepository qest1 = new OntopVirtualRepository("", configurationBuilder.build());
 		qest1.initialize();
 		/*
 		 * Prepare the data connection for querying.
@@ -148,14 +120,14 @@ public class TestSesameImplicitDBConstraints {
 		}
 	}
 
-	private void defTable(DBMetadata dbMetadata, String name) {
+	private void defTable(RDBMetadata dbMetadata, String name) {
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 		DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
 		tableDefinition.addAttribute(idfac.createAttributeID("COL1"), java.sql.Types.INTEGER, null, false);
 		tableDefinition.addAttribute(idfac.createAttributeID("COL2"), java.sql.Types.INTEGER, null, false);
 	}
-	private DBMetadata getMeta(){
-		DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata("org.h2.Driver");
+	private RDBMetadata getMeta(){
+		RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata("org.h2.Driver");
 		defTable(dbMetadata, "TABLE1");
 		defTable(dbMetadata, "TABLE2");
 		defTable(dbMetadata, "TABLE3");

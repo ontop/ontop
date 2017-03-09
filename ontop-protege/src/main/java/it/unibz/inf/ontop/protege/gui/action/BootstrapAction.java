@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,11 +20,15 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
+import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlapi.bootstrapping.DirectMappingBootstrapper;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import org.protege.editor.core.ui.action.ProtegeAction;
@@ -52,7 +56,7 @@ public class BootstrapAction extends ProtegeAction {
 	private DirectMappingBootstrapper dm = null;
 	private String baseUri = "";
 	private OWLOntology currentOnto;
-	private OBDAModel currentModel;
+	private OBDAModelWrapper currentModel;
 	private OBDADataSource currentSource;
 
 	private Logger log = LoggerFactory.getLogger(BootstrapAction.class);
@@ -75,7 +79,7 @@ public class BootstrapAction extends ProtegeAction {
 	public void actionPerformed(ActionEvent e) {
 
 		currentOnto = owlManager.getActiveOntology();
-		currentModel = modelManager.getActiveOBDAModel();
+		currentModel = modelManager.getActiveOBDAModelWrapper();
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
@@ -150,9 +154,22 @@ public class BootstrapAction extends ProtegeAction {
 		}
 
 		public void run(String baseUri, OWLOntology currentOnto,
-				OBDAModel currentModel, OBDADataSource currentSource)
+						OBDAModelWrapper currentModel, OBDADataSource currentSource)
 				throws Exception {
-			dm = new DirectMappingBootstrapper(baseUri, currentOnto, currentModel, currentSource);
+
+            // TODO: Retrieve the effective properties (not just the default ones).
+
+			OBDACoreConfiguration defaultConfiguration = OBDACoreConfiguration.defaultBuilder().build();
+            Injector injector = defaultConfiguration.getInjector();
+
+            NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
+                    NativeQueryLanguageComponentFactory.class);
+            OBDAFactoryWithException factoryWithException = injector.getInstance(
+                    OBDAFactoryWithException.class);
+
+            dm = new DirectMappingBootstrapper(baseUri, currentOnto,
+					currentModel.getCurrentImmutableOBDAModel(), currentSource,
+                    nativeQLFactory, factoryWithException);
 		}
 
 		@Override

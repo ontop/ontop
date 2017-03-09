@@ -18,18 +18,12 @@
  * #L%
  */
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
@@ -38,32 +32,37 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import it.unibz.inf.ontop.injection.OBDASettings;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.model.MappingFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openrdf.model.Model;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.util.ModelUtil;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.QueryResults;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
-import org.openrdf.rio.helpers.RDFHandlerBase;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.util.ModelUtil;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.GraphQuery;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.QueryResults;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.RDFHandlerBase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -100,9 +99,13 @@ public class RDB2RDFTest {
 	private static ValueFactory FACTORY = ValueFactoryImpl.getInstance();
 
 	private static OWLOntology EMPTY_ONT;
+	private static Properties PROPERTIES;
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
-
-	private static QuestPreferences QUEST_PREFS = new QuestPreferences();
+	private static final String JDBC_URL = "jdbc:h2:mem:questrepository";
+	private static final String DB_USER = "sa";
+	private static final String DB_PASSWORD = "";
+	private static final String JDBC_DRIVER = "org.h2.Driver";
 
 	/**
 	 * Terms used in the manifest files of RDB2RDF test suite
@@ -222,12 +225,14 @@ public class RDB2RDFTest {
 
 		EMPTY_ONT = OWLManager.createOWLOntologyManager().createOntology();
 
-		QUEST_PREFS.setProperty(QuestPreferences.DBNAME, "h2");
-		QUEST_PREFS.setProperty(QuestPreferences.DBUSER, "sa");
-		QUEST_PREFS.setProperty(QuestPreferences.DBPASSWORD, "");
-		QUEST_PREFS.setProperty(QuestPreferences.JDBC_URL, "jdbc:h2:mem:questrepository");
-		QUEST_PREFS.setProperty(QuestPreferences.JDBC_DRIVER, "org.h2.Driver");
-		QUEST_PREFS.setProperty(QuestPreferences.BASE_IRI, BASE_IRI);
+		PROPERTIES = new Properties();
+
+		PROPERTIES.setProperty(OBDASettings.DB_NAME, "h2");
+		PROPERTIES.setProperty(OBDASettings.DB_USER, DB_USER);
+		PROPERTIES.setProperty(OBDASettings.DB_PASSWORD, DB_PASSWORD);
+		PROPERTIES.setProperty(OBDASettings.JDBC_URL, JDBC_URL);
+		PROPERTIES.setProperty(OBDASettings.JDBC_DRIVER, JDBC_DRIVER);
+		PROPERTIES.setProperty(QuestCoreSettings.BASE_IRI, BASE_IRI);
 	}
 
 	@Before
@@ -255,10 +260,35 @@ public class RDB2RDFTest {
 	protected Repository createRepository() throws Exception {
 		logger.info("RDB2RDFTest " + name + " " + mappingFile);
 
-		Model mappings = mappingFile == null ? null : Rio.parse(stream(mappingFile), BASE_IRI, Rio.getParserFormatForFileName(mappingFile));
-		SesameVirtualRepo repo = new SesameVirtualRepo(name, EMPTY_ONT, mappings, null, QUEST_PREFS);
+		QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+				.properties(PROPERTIES)
+				.ontology(EMPTY_ONT);
+		if (mappingFile != null) {
+			String absoluteFilePath = Optional.ofNullable(getClass().getResource(mappingFile))
+					.map(URL::getFile)
+					.orElseThrow(() -> new IllegalArgumentException("The mappingFile " + mappingFile
+							+ " has not been found"));
+			configBuilder.r2rmlMappingFile(absoluteFilePath);
+		}
+		else {
+			configBuilder.bootstrapMapping(getMemOBDADataSource(), BASE_IRI);
+		}
+		OntopVirtualRepository repo = new OntopVirtualRepository(name, configBuilder.build());
 		repo.initialize();
 		return repo;
+	}
+
+	private static OBDADataSource getMemOBDADataSource() {
+
+		OBDADataSource obdaSource = MAPPING_FACTORY.getDataSource(java.net.URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, JDBC_DRIVER);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, DB_PASSWORD);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, JDBC_URL);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, DB_USER);
+		obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+		obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+
+		return obdaSource;
 	}
 
 	protected static void clearDB() throws Exception {
@@ -325,7 +355,7 @@ public class RDB2RDFTest {
 
 			Set<Statement> expected = ImmutableSet.of();
 			if (outputExpected) {
-				expected = stripNamedGraphs(Rio.parse(stream(outputFile), BASE_IRI, Rio.getParserFormatForFileName(outputFile)));
+				expected = stripNamedGraphs(Rio.parse(stream(outputFile), BASE_IRI, Rio.getParserFormatForFileName(outputFile).get()));
 			}
 
 			if (!ModelUtil.equals(expected, actual)) {

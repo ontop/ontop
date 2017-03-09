@@ -3,20 +3,18 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 
 public class QuestOWLExample_ReasoningDisabled {
@@ -357,45 +355,25 @@ public class QuestOWLExample_ReasoningDisabled {
     private QuestOWLConnection createStuff() throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException {
 
 		/*
-		 * Load the ontology from an external .owl file.
-		 */
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Load the OBDA model from an external .obda file
-		 */
-        OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-        OBDAModel obdaModel = fac.getOBDAModel();
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(Settings.obdaFile);
-
-		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
-        QuestPreferences preference = new QuestPreferences();
-        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        preference.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+        Properties p = new Properties();
+        p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-//        QuestOWLFactory factory = new QuestOWLFactory();
-//        factory.setOBDAController(obdaModel);
-//        factory.setPreferenceHolder(preference);
-//
-//        TMappingExclusionConfig config = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
-//        factory.setExcludeFromTMappingsPredicates(config);
+//		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 
-
-        //QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
         TMappingExclusionConfig tMapConfig = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
 
-        
+
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).tMappingExclusionConfig(tMapConfig).build();
-        this.reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(new File(Settings.obdaFile))
+                .ontologyFile(owlfile)
+                .tMappingExclusionConfig(tMapConfig)
+                .properties(p)
+                .build();
+        this.reasoner = factory.createReasoner(config);
 		/*
 		 * Prepare the data connection for querying.
 		 */
@@ -536,7 +514,7 @@ public class QuestOWLExample_ReasoningDisabled {
 				/*
 				 * Print the query summary
 				 */
-                String sqlQuery = st.getUnfolding(sparqlQuery);
+                String sqlQuery = ((SQLExecutableQuery)st.getExecutableQuery(sparqlQuery)).getSQL();
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");

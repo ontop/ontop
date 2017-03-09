@@ -21,19 +21,20 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.protege.core.DisposableProperties;
 
 import java.awt.*;
 
 public class QuestConfigPanel extends javax.swing.JPanel {
 
     private static final long serialVersionUID = 602382682995021070L;
-    private final QuestPreferences preference;
+    private DisposableProperties preference;
 
     /**
      * The constructor.
      */
-    public QuestConfigPanel(final QuestPreferences preference) {
+    public QuestConfigPanel(final DisposableProperties preference) {
         this.preference = preference;
         initComponents();
         setSelections(preference);
@@ -41,9 +42,9 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         this.setMinimumSize(new Dimension(1024,768));
     }
 
-    private void setSelections(final QuestPreferences preference) {
+    private void setSelections(final DisposableProperties preference) {
 
-//        String value = (String) preference.getCurrentValue(QuestPreferences.REFORMULATION_TECHNIQUE);
+//        String value = (String) preference.getProperty(QuestPreferences.REFORMULATION_TECHNIQUE);
 //        if (value.equals(QuestConstants.UCQBASED)) {
 //            cmbReformulationMethods.setSelectedIndex(0);
 //        }
@@ -51,21 +52,21 @@ public class QuestConfigPanel extends javax.swing.JPanel {
 //            cmbReformulationMethods.setSelectedIndex(1);
 //        }
 
-        boolean bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.REWRITE);
+        boolean bChecked = preference.getBoolean(QuestCoreSettings.REWRITE);
         chkRewrite.setSelected(bChecked);
         
-        bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.ANNOTATIONS_IN_ONTO);
+        bChecked = preference.getBoolean(QuestCoreSettings.ANNOTATIONS_IN_ONTO);
         chkAnnotations.setSelected(bChecked);
 
-        String value = (String) preference.getCurrentValue(QuestPreferences.ABOX_MODE);
-        if (value.equals(QuestConstants.VIRTUAL)) {
+        String value = preference.getProperty(QuestCoreSettings.ABOX_MODE);
+        if (value == null || value.equals(QuestConstants.VIRTUAL)) {
             virtualModeSelected();
         }
         else if (value.equals(QuestConstants.CLASSIC)) {
             classicModeSelected();
         }
 
-//        value = (String) preference.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION);
+//        value = (String) preference.getProperty(ReformulationPlatformPreferences.DATA_LOCATION);
 //        if (value.equals(QuestConstants.PROVIDED)) {
 //            radRemoteDatabase.setSelected(true);
 //        }
@@ -73,26 +74,28 @@ public class QuestConfigPanel extends javax.swing.JPanel {
             radInMemoryDatabase.setSelected(true);
 //        }
 
-        value = (String) preference.getCurrentValue(QuestPreferences.DBTYPE);
-        switch (value) {
-            case QuestConstants.DIRECT:
-                radDirect.setSelected(true);
-                break;
-            case QuestConstants.UNIVERSAL:
-                radUniversal.setSelected(true);
-                break;
-            case QuestConstants.SEMANTIC_INDEX:
-                radSemanticIndex.setSelected(true);
-                break;
+        value = preference.getProperty(QuestCoreSettings.DBTYPE);
+        if (value != null) {
+            switch (value) {
+                case QuestConstants.DIRECT:
+                    radDirect.setSelected(true);
+                    break;
+                case QuestConstants.UNIVERSAL:
+                    radUniversal.setSelected(true);
+                    break;
+                case QuestConstants.SEMANTIC_INDEX:
+                    radSemanticIndex.setSelected(true);
+                    break;
+            }
         }
 
-        bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
+        bChecked = preference.getBoolean(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY);
         chkObtainFromOntology.setSelected(bChecked);
 
-        bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
+        bChecked = preference.getBoolean(QuestCoreSettings.OBTAIN_FROM_MAPPINGS);
         chkObtainFromMappings.setSelected(bChecked);
 
-        bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.SAME_AS);
+        bChecked = preference.getBoolean(QuestCoreSettings.SAME_AS);
         chkSameAs.setSelected(bChecked);
     }
 
@@ -455,64 +458,64 @@ public class QuestConfigPanel extends javax.swing.JPanel {
 
     private void chkObtainFromMappingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkObtainFromMappingsActionPerformed
         if (chkObtainFromMappings.isSelected()) {
-            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, Boolean.TRUE.toString());
+            preference.put(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, Boolean.TRUE.toString());
         } else {
-            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, Boolean.FALSE.toString());
+            preference.put(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, Boolean.FALSE.toString());
         }
     }//GEN-LAST:event_chkObtainFromMappingsActionPerformed
 
     private void chkObtainFromOntologyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkObtainFromOntologyActionPerformed
         if (chkObtainFromOntology.isSelected()) {
-            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, Boolean.TRUE.toString());
+            preference.put(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, Boolean.TRUE.toString());
         } else {
-            preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, Boolean.FALSE.toString());
+            preference.put(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, Boolean.FALSE.toString());
         }
     }//GEN-LAST:event_chkObtainFromOntologyActionPerformed
 
     private void radInMemoryDatabaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radInMemoryDatabaseActionPerformed
-//    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+//    preference.newProperties(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
     }//GEN-LAST:event_radInMemoryDatabaseActionPerformed
 
     private void radRemoteDatabaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radRemoteDatabaseActionPerformed
-//    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.PROVIDED);
+//    preference.newProperties(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.PROVIDED);
     }//GEN-LAST:event_radRemoteDatabaseActionPerformed
 
     private void radSemanticIndexActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radSemanticIndexActionPerformed
-        preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+        preference.put(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
     }//GEN-LAST:event_radSemanticIndexActionPerformed
 
     private void radUniversalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radUniversalActionPerformed
-        preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.UNIVERSAL);
+        preference.put(QuestCoreSettings.DBTYPE, QuestConstants.UNIVERSAL);
     }//GEN-LAST:event_radUniversalActionPerformed
 
     private void radDirectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radDirectActionPerformed
-        preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
+        preference.put(QuestCoreSettings.DBTYPE, QuestConstants.DIRECT);
     }//GEN-LAST:event_radDirectActionPerformed
 
     private void radClassicObdaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radClassicObdaActionPerformed
         classicModeSelected();
-        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-        preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-//    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+        preference.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+        preference.put(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+//    preference.newProperties(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
     }//GEN-LAST:event_radClassicObdaActionPerformed
 
     private void radVirtualObdaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radVirtualObdaActionPerformed
         virtualModeSelected();
-        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        preference.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
     }//GEN-LAST:event_radVirtualObdaActionPerformed
 
     private void chkRewriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkRewriteActionPerformed
-        preference.setCurrentValueOf(QuestPreferences.REWRITE, String.valueOf(chkRewrite.isSelected()));
+        preference.put(QuestCoreSettings.REWRITE, String.valueOf(chkRewrite.isSelected()));
 
     }//GEN-LAST:event_chkRewriteActionPerformed
 
     private void chkAnnotationsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAnnotationsActionPerformed
-        preference.setCurrentValueOf(QuestPreferences.ANNOTATIONS_IN_ONTO, String.valueOf(chkAnnotations.isSelected()));
+        preference.put(QuestCoreSettings.ANNOTATIONS_IN_ONTO, String.valueOf(chkAnnotations.isSelected()));
 
     }//GEN-LAST:event_chkAnnotationsActionPerformed
 
     private void chkSameAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSameAsActionPerformed
-        preference.setCurrentValueOf(QuestPreferences.SAME_AS, String.valueOf(chkSameAs.isSelected()));
+        preference.put(QuestCoreSettings.SAME_AS, String.valueOf(chkSameAs.isSelected()));
 
     }//GEN-LAST:event_chkSameAsActionPerformed
 

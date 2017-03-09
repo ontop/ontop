@@ -20,33 +20,31 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.injection.OBDASettings;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import it.unibz.inf.ontop.r2rml.R2RMLReader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -56,12 +54,9 @@ import static org.junit.Assert.assertTrue;
  * We use the npd database.
  */
 public class R2rmlCheckerTest {
-
-	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology owlOntology;
 	private Ontology onto;
 
@@ -87,28 +82,15 @@ public class R2rmlCheckerTest {
 
 		onto = OWLAPITranslatorUtility.translate(owlOntology);
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
-
-		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-		// String sourceUrl = "http://example.org/customOBDA";
-		URI obdaURI = new File(r2rmlfile).toURI();
-		String sourceUrl = obdaURI.toString();
-		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-				username, password, driverclass);
-
-		loadR2rml(p, dataSource);
+		Properties p = new Properties();
+        p.setProperty(OBDASettings.DB_NAME, "npd");
+        p.setProperty(OBDASettings.JDBC_URL, "jdbc:mysql://10.7.20.39/npd");
+        p.setProperty(OBDASettings.DB_USER, "fish");
+        p.setProperty(OBDASettings.DB_PASSWORD, "fish");
+        p.setProperty(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
 		loadOBDA(p);
-	
+		loadR2rml(p);
 	}
 
 	@After
@@ -132,7 +114,7 @@ public class R2rmlCheckerTest {
 	@Test 
 	public void testMappings() throws Exception {
 		for (CQIE q : reasonerOBDA.getQuestInstance().getUnfolderRules()) {
-			if (!reasonerR2rml.getQuestInstance().getUnfolderRules().contains(q)) 
+			if (!reasonerR2rml.getQuestInstance().getUnfolderRules().contains(q))
 				System.out.println("NOT IN R2RML: " + q);
 		}
 		for (CQIE q : reasonerR2rml.getQuestInstance().getUnfolderRules()) {
@@ -355,20 +337,18 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @param p
 	 *            quest preferences for QuestOWL, dataSource for the model
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	private void loadR2rml(QuestPreferences p, OBDADataSource dataSource) throws Exception {
+	private void loadR2rml(Properties p) throws OWLOntologyCreationException {
 		log.info("Loading r2rml file");
-		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		R2RMLReader reader = null;
-		reader = new R2RMLReader(r2rmlfile);
-		obdaModel = reader.readModel(dataSource);
-
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        reasonerR2rml = factory.createReasoner(owlOntology, config);
-
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.r2rmlMappingFile(r2rmlfile)
+				.ontology(owlOntology)
+				.properties(p)
+				.build();
+        reasonerR2rml = factory.createReasoner(config);
 	}
 
 	/**
@@ -378,20 +358,20 @@ public class R2rmlCheckerTest {
 	 *            quest preferences for QuestOWL, dataSource for the model
 	 */
 
-	private void loadOBDA(QuestPreferences p) throws Exception {
+	private void loadOBDA(Properties p) throws Exception {
 		// Loading the OBDA data
 		log.info("Loading obda file");
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
 
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-		reasonerOBDA = factory.createReasoner(owlOntology, config);
-		
+
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.properties(p)
+				.ontology(owlOntology)
+				.build();
+		reasonerOBDA = factory.createReasoner(config);
+
 
 	}
 

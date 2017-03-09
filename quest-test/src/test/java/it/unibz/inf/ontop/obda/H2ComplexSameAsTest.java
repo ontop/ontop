@@ -21,21 +21,13 @@ package it.unibz.inf.ontop.obda;
  */
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,9 +36,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Scanner;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -56,16 +46,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class H2ComplexSameAsTest {
 
-	private OBDADataFactory fac;
-	private QuestOWLConnection conn;
-
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/sameAs/wellbores-complex.owl";
 	final String obdafile = "src/test/resources/sameAs/wellbores-complex.obda";
-	private QuestOWL reasoner;
 	private Connection sqlConnection;
 
 	@Before
@@ -84,43 +68,11 @@ public class H2ComplexSameAsTest {
 //			    }
 			   
 			    s.close();
-		
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-	
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestOWLConfiguration config;
-
-		config = QuestOWLConfiguration.builder().obdaModel(obdaModel).sameAsMappings(true).build();
-
-
-		reasoner = (QuestOWL) factory.createReasoner(ontology, config);
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
-
-		
 	}
 
 
 	@After
 	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
 			java.sql.Statement s = sqlConnection.createStatement();
 			try {
@@ -140,13 +92,17 @@ public class H2ComplexSameAsTest {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.sameAsMappings(sameAs)
+				.enableFullMetadataExtraction(false)
+				.build();
 
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).sameAsMappings(sameAs).build();
-
-		reasoner = (QuestOWL) factory.createReasoner(ontology, config);
+		QuestOWL reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
-		conn = reasoner.getConnection();
+		QuestOWLConnection conn = reasoner.getConnection();
 
 		QuestOWLStatement st = conn.createStatement();
 		ArrayList<String> retVal = new ArrayList<>();
@@ -183,39 +139,28 @@ public class H2ComplexSameAsTest {
 
 	@Test
     public void testSameAs1() throws Exception {
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x\n" +
-                "WHERE {\n" +
-                "   ?x  a :Wellbore . \n" +
-                "}";
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> " +
+				"SELECT DISTINCT ?x\n" +
+				"WHERE {\n" +
+				"   ?x  a :Wellbore . \n" +
+				"}";
 
-		Set<String> results = ImmutableSet.copyOf(runTests(query, true));
-		Set<String> expectedResults = new HashSet<>();
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-3>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-3>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore/Katian>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore/Bill>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-4>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-3>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-3>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-2>");
+		final ImmutableSet<String> results = ImmutableSet.<String>copyOf(runTests(query, true));
 
+		ImmutableSet<String> expectedResults =
+				ImmutableSet.<String>builder()
+						.add("<http://ontop.inf.unibz.it/test/wellbore/Katian>")
+						.add("<http://ontop.inf.unibz.it/test/wellbore/Bill>")
+						.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-1>")
+						.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-2>")
+						.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-1>")
+						.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-2>")
+						.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-3>")
+						.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-1>")
+						.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-2>")
+						.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-3>")
+						.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-4>")
+						.build();
 		assertEquals(expectedResults.size(), results.size() );
 		assertEquals(expectedResults, results);
 
@@ -223,27 +168,27 @@ public class H2ComplexSameAsTest {
 
 	@Test
 	public void testNoSameAs1() throws Exception {
-		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x\n" +
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT DISTINCT ?x\n" +
 				"WHERE {\n" +
 				" {  ?x  a :Wellbore . \n" +
 				"} UNION {?x owl:sameAs [ a :Wellbore ] }} ";
 
 		ArrayList<String> results = runTests(query, false);
-		assertEquals(25, results.size() );
+		assertEquals(11, results.size() );
 
 
 	}
 
 	@Test
 	public void testSameAs2() throws Exception {
-		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x \n" +
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT DISTINCT ?x \n" +
                 "WHERE {\n" +
                 "   ?x  a :Wellbore . \n" +
                 "   ?x  :hasName ?y . \n" +
                 "}";
 
 		ArrayList<String> results = runTests(query, true);
-		assertEquals(54, results.size() );
+		assertEquals(9, results.size() );
 
 	}
 
@@ -274,18 +219,18 @@ public class H2ComplexSameAsTest {
     @Test
     public void testSameAs4() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
-                "SELECT * WHERE { ?x a :Wellbore .\n" +
+                "SELECT DISTINCT * WHERE { ?x a :Wellbore .\n" +
                 " ?x :isHappy ?z .}\n";
 
 		ArrayList<String> results = runTests(query, true);
-		assertEquals(46, results.size() );
+		assertEquals(18, results.size() );
 
     }
 
     @Test
     public void testSameAs5() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
-                "SELECT * WHERE { " +
+                "SELECT DISTINCT * WHERE { " +
                 " ?x :hasOwner ?y .}\n";
 
 		ArrayList<String> results = runTests(query, true);

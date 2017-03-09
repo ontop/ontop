@@ -22,21 +22,24 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.AssertionFactory;
 import it.unibz.inf.ontop.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.ontology.impl.AssertionFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.algebra.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.impl.LiteralImpl;
+import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.query.algebra.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class QuestGraphResultSet implements GraphResultSet {
 
@@ -54,7 +57,6 @@ public class QuestGraphResultSet implements GraphResultSet {
 	//store results in case of describe queries
 	private boolean storeResults = false;
 
-	private OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	private AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 
 	public QuestGraphResultSet(TupleResultSet results, SesameConstructTemplate template,
@@ -90,58 +92,60 @@ public class QuestGraphResultSet implements GraphResultSet {
 	 * In case of construct it is called upon next, to process
 	 * the only current result set.
 	 */
-	private List<Assertion> processResults(TupleResultSet result,
-			SesameConstructTemplate template) throws OBDAException {
-		List<Assertion> tripleAssertions = new ArrayList<>();
-		List<ProjectionElemList> peLists = template.getProjectionElemList();
-		
-		Extension ex = template.getExtension();
-		if (ex != null) 
-			{
-				extList = ex.getElements();
-				Map<String, ValueExpr> newExtMap = new HashMap<>();
-                for (ExtensionElem anExtList : extList) {
-                    newExtMap.put(anExtList.getName(), anExtList.getExpr());
-                }
-				extMap = newExtMap;
-			}
-		for (ProjectionElemList peList : peLists) {
-		int size = peList.getElements().size();
-		
-		for (int i = 0; i < size / 3; i++) {
-			
-			ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i*3), result);
-			Constant predicateConstant = getConstant(peList.getElements().get(i*3+1), result);
-			Constant objectConstant = getConstant(peList.getElements().get(i*3+2), result);
+    private List<Assertion> processResults(TupleResultSet result,
+                                           SesameConstructTemplate template) throws OBDAException {
+        List<Assertion> tripleAssertions = new ArrayList<>();
+        List<ProjectionElemList> peLists = template.getProjectionElemList();
 
-			// Determines the type of assertion
-			String predicateName = predicateConstant.getValue();
-			Assertion assertion;
-			try {
-				if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
-					assertion = ofac.createClassAssertion(objectConstant.getValue(), subjectConstant);
-				} 
-				else {
-					if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) 
-						assertion = ofac.createObjectPropertyAssertion(predicateName, 
-								subjectConstant, (ObjectConstant) objectConstant);
-					else 
-						assertion = ofac.createDataPropertyAssertion(predicateName, 
-									subjectConstant, (ValueConstant) objectConstant);
-				} 
-				if (assertion != null)
-					tripleAssertions.add(assertion);
-			}
-			catch (InconsistentOntologyException e) {
-				throw new RuntimeException("InconsistentOntologyException: " + 
-							predicateName + " " + subjectConstant + " " + objectConstant);
-			}
-		}
-		}
-		return tripleAssertions;
-	}
-	
-	@Override
+        Extension ex = template.getExtension();
+        if (ex != null) {
+            extList = ex.getElements();
+            Map<String, ValueExpr> newExtMap = new HashMap<>();
+            for (ExtensionElem anExtList : extList) {
+                newExtMap.put(anExtList.getName(), anExtList.getExpr());
+            }
+            extMap = newExtMap;
+        }
+        for (ProjectionElemList peList : peLists) {
+            int size = peList.getElements().size();
+
+            for (int i = 0; i < size / 3; i++) {
+
+                ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i * 3), result);
+                Constant predicateConstant = getConstant(peList.getElements().get(i * 3 + 1), result);
+                Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), result);
+
+                // A triple can only be constructed when none of bindings is missing
+                if (subjectConstant == null || predicateConstant == null || objectConstant==null){
+                    continue;
+                }
+
+                // Determines the type of assertion
+                String predicateName = predicateConstant.getValue();
+                Assertion assertion;
+                try {
+                    if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
+                        assertion = ofac.createClassAssertion(objectConstant.getValue(), subjectConstant);
+                    } else {
+                        if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode))
+                            assertion = ofac.createObjectPropertyAssertion(predicateName,
+                                    subjectConstant, (ObjectConstant) objectConstant);
+                        else
+                            assertion = ofac.createDataPropertyAssertion(predicateName,
+                                    subjectConstant, (ValueConstant) objectConstant);
+                    }
+                    if (assertion != null)
+                        tripleAssertions.add(assertion);
+                } catch (InconsistentOntologyException e) {
+                    throw new RuntimeException("InconsistentOntologyException: " +
+                            predicateName + " " + subjectConstant + " " + objectConstant);
+                }
+            }
+        }
+        return tripleAssertions;
+    }
+
+    @Override
 	public boolean hasNext() throws OBDAException {
 		//in case of describe, we return the collected results list information
 		if (storeResults) {
@@ -163,34 +167,35 @@ public class QuestGraphResultSet implements GraphResultSet {
 		}
 	}
 
-	private Constant getConstant(ProjectionElem node, TupleResultSet resSet)
-			throws OBDAException {
-		Constant constant = null;
-		String node_name = node.getSourceName();
-		ValueExpr ve = null;
-		
-		if (extMap!= null) {
-			ve = extMap.get(node_name);
-			if (ve!=null && ve instanceof Var)
-				throw new RuntimeException ("Invalid query. Found unbound variable: "+ve);
-		}
-		
-		if (node_name.charAt(0) == '-') {
-			org.openrdf.query.algebra.ValueConstant vc = (org.openrdf.query.algebra.ValueConstant) ve;
-			 if (vc.getValue() instanceof URIImpl) {
-				 constant = dfac.getConstantURI(vc.getValue().stringValue());
-			 } else if (vc.getValue() instanceof LiteralImpl) {
-				 constant = dfac.getConstantLiteral(vc.getValue().stringValue());
-			 } else {
-				 constant = dfac.getConstantBNode(vc.getValue().stringValue());
-			 }
-		} else {
-			constant = resSet.getConstant(node_name);
-		}
-		return constant;
-	}
-	
-	@Override
+    private Constant getConstant(ProjectionElem node, TupleResultSet resSet)
+            throws OBDAException {
+        Constant constant = null;
+        String node_name = node.getSourceName();
+        ValueExpr ve = null;
+
+        if (extMap != null) {
+            ve = extMap.get(node_name);
+            if (ve != null && ve instanceof Var)
+                throw new RuntimeException("Invalid query. Found unbound variable: " + ve);
+        }
+
+//		if (node_name.charAt(0) == '-') {
+        if (ve instanceof org.eclipse.rdf4j.query.algebra.ValueConstant) {
+            org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
+            if (vc.getValue() instanceof IRI) {
+                constant = DATA_FACTORY.getConstantURI(vc.getValue().stringValue());
+            } else if (vc.getValue() instanceof Literal) {
+                constant = DATA_FACTORY.getConstantLiteral(vc.getValue().stringValue());
+            } else {
+                constant = DATA_FACTORY.getConstantBNode(vc.getValue().stringValue());
+            }
+        } else {
+            constant = resSet.getConstant(node_name);
+        }
+        return constant;
+    }
+
+    @Override
 	public void close() throws OBDAException {
 		tupleResultSet.close();
 	}

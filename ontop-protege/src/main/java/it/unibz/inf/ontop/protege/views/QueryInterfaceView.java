@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.views;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen-Bolzano.
  * %%
@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.protege.views;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlapi.OWLResultSetWriter;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -96,10 +97,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	protected void initialiseOWLView() throws Exception {
 		obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		obdaController.addListener(this);
-		
-		prefixManager = obdaController.getActiveOBDAModel().getPrefixManager();
 
-		queryEditorPanel = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), obdaController.getQueryController());
+		prefixManager = obdaController.getActiveOBDAModelWrapper().getPrefixManager();
+
+		queryEditorPanel = new QueryInterfacePanel(obdaController.getActiveOBDAModelWrapper(), obdaController.getQueryController());
 		queryEditorPanel.setPreferredSize(new Dimension(400, 250));
 		queryEditorPanel.setMinimumSize(new Dimension(400, 250));
 
@@ -263,7 +264,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction<String>("Unfolding queries...", QueryInterfaceView.this) {
 			@Override
 			public String executeQuery(QuestOWLStatement st, String query) throws OWLException{
-				return st.getUnfolding(query);
+				// UGLY!!! SQL-specific!
+				return ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
 			}
 
 			@Override
@@ -540,6 +542,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	@Override
 	public void activeOntologyChanged() {
-		queryEditorPanel.setOBDAModel(this.obdaController.getActiveOBDAModel());
+		queryEditorPanel.setOBDAModel(this.obdaController.getActiveOBDAModelWrapper());
 	}
 }

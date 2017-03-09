@@ -1,4 +1,4 @@
-package inf.unibz.ontop.sesame.tests.general;
+package it.unibz.inf.ontop.sesame.tests.general;
 
 /*
  * #%L
@@ -20,70 +20,22 @@ package inf.unibz.ontop.sesame.tests.general;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
-import java.io.File;
 
 /***
  * Tests that TMapping does not return error in case of symmetric properties.
  * Use to check that no concurrency error appears. 
  */
-public class TMappingConcurrencyError extends TestCase {
+public class TMappingConcurrencyError extends AbstractVirtualModeTest {
 
-	private OBDADataFactory fac;
-	private QuestOWLConnection conn;
+	static final String owlfile = "src/test/resources/exampleTMapping.owl";
+	static final String obdafile = "src/test/resources/exampleTMapping.obda";
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
-
-	final String owlfile = "src/test/resources/exampleTMapping.owl";
-	final String obdafile = "src/test/resources/exampleTMapping.obda";
-	private QuestOWL reasoner;
-
-	@Override
-	public void setUp() throws Exception {
-
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		// Creating a new instance of the reasoner
-
-		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-		reasoner = factory.createReasoner(ontology, config);
-
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
-
-
+	public TMappingConcurrencyError() {
+		super(owlfile, obdafile);
 	}
+
 
 
 	public void tearDown() throws Exception{
@@ -91,38 +43,13 @@ public class TMappingConcurrencyError extends TestCase {
 		reasoner.dispose();
 	}
 
-
-
-	private String runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
-		String retval=null;
-		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
-			assertTrue(rs.nextRow());
-			OWLIndividual ind1 =	rs.getOWLIndividual("y")	 ;
-			retval = ind1.toString();
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-		return retval;
-	}
-
 	/**
 	 * Test use of quoted mixed case table name
 	 * @throws Exception
 	 */
 	public void test() throws Exception {
-		String query = "PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> SELECT ?y WHERE { ?y a :Man }";
-		String val = runTests(query);
+		String query = "PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> SELECT ?x WHERE { ?x a :Man }";
+		String val = runQueryAndReturnStringOfIndividualX(query);
 
 	}
 

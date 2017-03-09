@@ -1,4 +1,0 @@
-PREFIX : <http://example.org/>
-SELECT ?s (MONTH(?date) AS ?x) WHERE {
-	?s :date ?date
-}

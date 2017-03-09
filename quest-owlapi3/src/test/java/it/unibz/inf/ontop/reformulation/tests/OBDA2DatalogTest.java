@@ -22,24 +22,14 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -52,15 +42,13 @@ import java.sql.Statement;
  * to construct the proper datalog program.
  */
 public class OBDA2DatalogTest extends TestCase {
-	
-	private OBDADataFactory fac;
+
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/mappinganalyzer/ontology.owl";
+
 
 	@Override
 	public void setUp() throws Exception {
@@ -69,8 +57,6 @@ public class OBDA2DatalogTest extends TestCase {
 		String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -85,17 +71,10 @@ public class OBDA2DatalogTest extends TestCase {
 		}
 		st.executeUpdate(bf.toString());
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-		
-		obdaModel = fac.getOBDAModel();
 	}
 
 	@Override
 	public void tearDown() throws Exception {
-	
 			dropTables();
 			conn.close();
 		
@@ -116,194 +95,160 @@ public class OBDA2DatalogTest extends TestCase {
 		conn.commit();
 	}
 
-	private void runTests() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+	private void runTests(String obdaFileName) throws Exception {
 		
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdaFileName)
+				.ontologyFile(owlfile)
+				.build();
+
+		QuestOWL reasoner = factory.createReasoner(configuration);
+
 		// Get ready for querying
 		reasoner.getStatement();
 	}
 
 	public void testMapping_1() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_1.obda");
 		try {
-			runTests();
+			runTests("src/test/resources/test/mappinganalyzer/case_1.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_2() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_2.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_2.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_3() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_3.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_3.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_4() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_4.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_4.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_5() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_5.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_5.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL
 		}
 	}
 	
 	public void testMapping_6() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_6.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_6.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_7() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_7.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_7.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_8() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_8.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_8.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were id map to two different values
 		}
 	}
 	
 	public void testMapping_9() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_9.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_9.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were id map to two different values
 		}
 	}
 	
 	public void testMapping_10() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_10.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_10.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were alias map to two different values
 		}
 	}
 	
 	public void testMapping_11() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_11.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_11.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_12() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_12.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_12.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were name map to two different values
 		}
 	}
 	
 	public void testMapping_13() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_13.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_13.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_14() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_14.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_14.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL
 		}
 	}
 	
 	public void testMapping_15() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_15.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_15.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_16() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_16.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_16.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_17() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_17.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_17.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL
 		}
 	}
 	
 	public void testMapping_18() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_18.obda");
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_18.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}

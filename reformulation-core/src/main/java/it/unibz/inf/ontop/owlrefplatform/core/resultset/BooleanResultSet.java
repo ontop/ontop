@@ -21,12 +21,13 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  */
 
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Vector;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class BooleanResultSet implements TupleResultSet {
 
@@ -42,8 +43,7 @@ public class BooleanResultSet implements TupleResultSet {
         this.st = st;
         try {
             isTrue = set.next();
-            OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-            valueConstant = fac.getBooleanConstant(isTrue);
+            valueConstant = DATA_FACTORY.getBooleanConstant(isTrue);
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }

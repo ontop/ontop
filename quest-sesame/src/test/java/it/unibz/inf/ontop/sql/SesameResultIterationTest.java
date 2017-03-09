@@ -2,34 +2,30 @@ package it.unibz.inf.ontop.sql;
 
 import static org.junit.Assert.assertTrue;
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.r2rml.R2RMLManager;
+import it.unibz.inf.ontop.injection.OBDASettings;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.sesame.RepositoryConnection;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openrdf.model.Model;
-import org.openrdf.query.Query;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
 
 /**
  * Tests that user-applied constraints can be provided through
- * sesameWrapper.SesameVirtualRepo
+ * sesameWrapper.OntopVirtualRepository
  * with manually instantiated metadata.
  * <p>
  * This is quite similar to the setting in the optique platform
@@ -62,17 +58,11 @@ public class SesameResultIterationTest {
     static String jdbcUrl = "jdbc:h2:mem:countries_iteration_test";
 
     private Connection sqlConnection;
-    private RepositoryConnection conn;
+    private OntopRepositoryConnection conn;
 
 
     @Before
     public void init() throws Exception {
-
-        QuestPreferences preference;
-        OWLOntology ontology;
-        Model model;
-
-
         sqlConnection = DriverManager.getConnection(jdbcUrl, "sa", "");
         java.sql.Statement s = sqlConnection.createStatement();
 
@@ -92,21 +82,20 @@ public class SesameResultIterationTest {
 
         s.close();
 
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+        Properties p = new Properties();
+        p.put(OBDASettings.DB_NAME, "countries_iteration_test");
+        p.put(OBDASettings.JDBC_URL, jdbcUrl);
+        p.put(OBDASettings.DB_USER, "sa");
+        p.put(OBDASettings.DB_PASSWORD, "");
+        p.put(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
-        R2RMLManager rmanager = new R2RMLManager(r2rmlfile);
-        model = rmanager.getModel();
+        QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+                .ontologyFile(owlfile)
+                .r2rmlMappingFile(r2rmlfile)
+                .properties(p)
+                .build();
 
-        preference = new QuestPreferences();
-        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        preference.setCurrentValueOf(QuestPreferences.DBNAME, "countries_iteration_test");
-        preference.setCurrentValueOf(QuestPreferences.JDBC_URL, jdbcUrl);
-        preference.setCurrentValueOf(QuestPreferences.DBUSER, "sa");
-        preference.setCurrentValueOf(QuestPreferences.DBPASSWORD, "");
-        preference.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "org.h2.Driver");
-
-        SesameVirtualRepo repo = new SesameVirtualRepo("", ontology, model, preference);
+        OntopVirtualRepository repo = new OntopVirtualRepository("", configuration);
         repo.initialize();
         /*
 		 * Prepare the data connection for querying.

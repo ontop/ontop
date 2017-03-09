@@ -36,10 +36,15 @@ public class DirectMappingAxiomProducer {
 	private final String baseIRI;
 
 	private final OBDADataFactory df;
+	private final JdbcTypeMapper typeMapper;
 
 	public DirectMappingAxiomProducer(String baseIRI, OBDADataFactory dfac) {
 		this.df = dfac;
         this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
+		/**
+		 * TODO: use Guice instead
+		 */
+		typeMapper = JdbcTypeMapper.getInstance();
 	}
 
 
@@ -122,7 +127,6 @@ public class DirectMappingAxiomProducer {
 		atoms.add(df.getFunction(df.getClassPredicate(getTableIRI(table.getID())), sub));
 
 		//DataType Atoms
-		JdbcTypeMapper typeMapper = df.getJdbcTypeMapper();
 		for (Attribute att : table.getAttributes()) {
 			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
 			Variable objV = df.getVariable(att.getID().getName());

@@ -23,21 +23,37 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.model.impl.TermUtils;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.FunctionFlattener;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.GroundTermRemovalFromDataNodeReshaper;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
+import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.inf.ontop.parser.EncodeForURI;
+import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
-import org.openrdf.model.Literal;
-import org.openrdf.model.vocabulary.XMLSchema;
+import it.unibz.inf.ontop.utils.JdbcTypeMapper;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Types;
@@ -47,6 +63,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
+import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.SPARQL_GROUP;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -59,7 +78,7 @@ import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
  * @author mrezk, mariano, guohui
  *
  */
-public class SQLGenerator implements SQLQueryGenerator {
+public class SQLGenerator implements NativeQueryGenerator {
 
 	private static final long serialVersionUID = 7477161929752147045L;
 
@@ -78,19 +97,24 @@ public class SQLGenerator implements SQLQueryGenerator {
     private static final String LANG_SUFFIX = "Lang";
     private static final String MAIN_COLUMN_SUFFIX = "";
 
-	private static final String INDENT = "    ";
 
-	private final DBMetadata metadata;
+	private static final String INDENT = "    ";
+	private static final Function TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+
+	private final RDBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
 
 
 	private boolean generatingREPLACE = true;
-	private boolean distinctResultSet = false;
+	private final boolean distinctResultSet;
 	private final String replace1, replace2;
 
+	/**
+	 * Mutable (query-dependent)
+	 */
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
-	private boolean isSI = false;
+	private final boolean isSI;
 
 	private SemanticIndexURIMap uriRefIds;
 
@@ -98,28 +122,81 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private Map<Predicate, String> sqlAnsViewMap;
 
-	private OBDADataFactory obdaDataFactory = OBDADataFactoryImpl.getInstance();
-
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
 	private final ImmutableMap<ExpressionOperation, String> operations;
 
 	private static final org.slf4j.Logger log = LoggerFactory
 			.getLogger(SQLGenerator.class);
+	private final JdbcTypeMapper jdbcTypeMapper;
+
+	@AssistedInject
+	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
+						 QuestCoreSettings preferences, JdbcTypeMapper jdbcTypeMapper) {
+        // TODO: make these attributes immutable.
+        //TODO: avoid the null value
+        this(metadata, dataSource, null, preferences, jdbcTypeMapper);
+    }
+
+	@AssistedInject
+	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
+						 @Assisted SemanticIndexURIMap uriRefIds, QuestCoreSettings preferences,
+						 JdbcTypeMapper jdbcTypeMapper) {
+		String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+
+		if (!(metadata instanceof RDBMetadata)) {
+			throw new IllegalArgumentException("Not a DBMetadata!");
+		}
+
+		this.metadata = (RDBMetadata)metadata;
+		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI,this.metadata.getDbmsVersion(), preferences);
+		this.operations = buildOperations(sqladapter);
+		this.distinctResultSet = preferences.isDistinctPostProcessingEnabled();
+
+
+		this.generatingREPLACE = preferences.isIRISafeEncodingEnabled();
+
+		if (generatingREPLACE) {
+			StringBuilder sb1 = new StringBuilder();
+			StringBuilder sb2 = new StringBuilder();
+			for (Entry<String, String> e : EncodeForURI.TABLE.entrySet()) {
+				sb1.append("REPLACE(");
+				sb2.append(", '").append(e.getValue()).append("', '").append(e.getKey()).append("')");
+			}
+			replace1 = sb1.toString();
+			replace2 = sb2.toString();
+		}
+		else {
+			replace1 = replace2 = "";
+		}
+
+		this.isSI = !preferences.isInVirtualMode();
+		this.uriRefIds = uriRefIds;
+		this.jdbcTypeMapper = jdbcTypeMapper;
+ 	}
 
 	/**
-	 * This method is in charge of generating the SQL query from a Datalog
-	 * program
-	 *
-	 * @param metadata
-	 *            This is an instance of {@link DBMetadata}
-	 * @param sqladapter
-	 *            This contains the syntax that each DB uses.
+	 * For clone purposes only
 	 */
-	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter) {
+	private SQLGenerator(RDBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
+						 boolean isSI, String replace1, String replace2, boolean distinctResultSet,
+						 SemanticIndexURIMap uriRefIds, JdbcTypeMapper jdbcTypeMapper) {
+		if (isSI && uriRefIds == null) {
+			throw new IllegalArgumentException("A SemanticIndexURIMap must be given in the classic mode.");
+		}
 		this.metadata = metadata;
-		this.sqladapter = sqladapter;
+		this.sqladapter = sqlAdapter;
+		this.operations = buildOperations(sqlAdapter);
+		this.generatingREPLACE = generatingReplace;
+		this.replace1 = replace1;
+		this.replace2 = replace2;
+		this.isSI = isSI;
+		this.distinctResultSet = distinctResultSet;
+		this.uriRefIds = uriRefIds;
+		this.jdbcTypeMapper = jdbcTypeMapper;
+	}
 
+	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
 		ImmutableMap.Builder<ExpressionOperation, String> builder = new ImmutableMap.Builder<ExpressionOperation, String>()
 				.put(ExpressionOperation.ADD, "%s + %s")
 				.put(ExpressionOperation.SUBTRACT, "%s - %s")
@@ -159,52 +236,26 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} catch (UnsupportedOperationException e) {
 			// ignore
 		}
+		return builder.build(
 
-		operations = builder.build();
-
-		if (generatingREPLACE) {
-			StringBuilder sb1 = new StringBuilder();
-			StringBuilder sb2 = new StringBuilder();
-			for (Entry<String, String> e : EncodeForURI.TABLE.entrySet()) {
-				sb1.append("REPLACE(");
-				sb2.append(", '").append(e.getValue()).append("', '").append(e.getKey()).append("')");
-			}
-			replace1 = sb1.toString();
-			replace2 = sb2.toString();
-		}
-		else {
-			replace1 = replace2 = "";
-		}
-	}
-
-
-	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace) {
-		this(metadata, sqladapter);
-		this.generatingREPLACE = sqlGenerateReplace;
-	}
-
-	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace,
-             SemanticIndexURIMap uriRefIds) {
-		this(metadata, sqladapter, sqlGenerateReplace);
-		this.isSI = (uriRefIds != null);
-		this.uriRefIds = uriRefIds;
-	}
-
-	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace, boolean distinctResultSet, SemanticIndexURIMap uriRefIds) {
-		this(metadata, sqladapter, sqlGenerateReplace);
-		this.isSI = (uriRefIds != null);
-		this.uriRefIds = uriRefIds;
-		this.distinctResultSet = distinctResultSet;
+		);
 	}
 
 	/**
 	 * SQLGenerator must not be shared between threads
 	 * but CLONED.
 	 *
-	 * @return A cloned object without any query-dependent value
+	 * @return A cloned object without any query-dependent value
 	 */
-	public SQLQueryGenerator cloneGenerator() {
-		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE, distinctResultSet, uriRefIds);
+	public NativeQueryGenerator cloneIfNecessary() {
+		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE,
+				isSI, replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper);
+	}
+
+	@Override
+	public ExecutableQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate) {
+		// Empty string query
+		return new SQLExecutableQuery(signatureContainer, optionalConstructTemplate);
 	}
 
 	/**
@@ -213,15 +264,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * method descriptions. Observe that the SQL itself will be done by
 	 * {@link #generateQuery}
 	 *
-	 * @param queryProgram
-	 *            This is an arbitrary Datalog Program. In this program ans
-	 *            predicates will be translated to Views.
-	 * @param signature
-	 *            The Select variables in the SPARQL query
 	 */
 	@Override
-	public String generateSourceQuery(DatalogProgram queryProgram,
-									  List<String> signature) throws OBDAException {
+	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
+												  Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
+
+		DatalogProgram queryProgram = convertAndPrepare(intermediateQuery);
 
 		normalizeProgram(queryProgram);
 
@@ -275,13 +323,55 @@ public class SQLGenerator implements SQLQueryGenerator {
 			sql += subquery + "\n";
 			sql += ") " + outerViewName + "\n";
 			sql += modifier;
-			return sql;
+			return new SQLExecutableQuery(sql, signature, optionalConstructTemplate);
 		} else {
-			return generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
+			String sqlQuery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
+			return new SQLExecutableQuery(sqlQuery, signature, optionalConstructTemplate);
 		}
 	}
 
-    @Override
+	/**
+	 * TODO: explain
+	 */
+	protected static DatalogProgram convertAndPrepare(IntermediateQuery intermediateQuery) {
+		GroundTermRemovalFromDataNodeReshaper groundTermNormalizer = new GroundTermRemovalFromDataNodeReshaper();
+		intermediateQuery = groundTermNormalizer.optimize(intermediateQuery);
+		log.debug("New query after removing ground terms: \n" + intermediateQuery.toString());
+
+		PullOutVariableOptimizer pullOutVariableNormalizer = new PullOutVariableOptimizer();
+		intermediateQuery = pullOutVariableNormalizer.optimize(intermediateQuery);
+		log.debug("New query after pulling out equalities: \n" + intermediateQuery.toString());
+
+		DatalogProgram datalogProgram = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+
+		log.debug("New Datalog query: \n" + datalogProgram.toString());
+
+		/**
+		 * TODO: try to get rid of this flattener
+		 */
+		datalogProgram = FunctionFlattener.flattenDatalogProgram(datalogProgram);
+		log.debug("New flattened Datalog query: \n" + datalogProgram.toString());
+
+		/**
+		 * This code is only partially useful (for properly dealing with boolean expressions) anymore
+		 * TODO: get rid of it
+		 */
+		log.debug("Datalog syntax normalizer (low-level)...");
+		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
+
+		List<CQIE> normalizedRules = new ArrayList<>();
+		for (CQIE rule: datalogProgram.getRules()) {
+			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
+		}
+
+		OBDAQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
+		datalogProgram = DATA_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
+		log.debug("Normalized Datalog query: \n" + datalogProgram.toString());
+
+		return datalogProgram;
+	}
+
+	@Override
     public boolean hasDistinctResultSet() {
         return distinctResultSet;
     }
@@ -308,7 +398,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Main method. Generates the full SQL query, taking into account
 	 * limit/offset/order by. An important part of this program is
 	 * {@link #createViewFrom}
-	 * that will create a view for every ans prodicate in the Datalog input
+	 * that will create a view for every ans predicate in the Datalog input
 	 * program.
 	 *
 	 * @param signature
@@ -334,7 +424,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		 Map<Predicate, ParserViewDefinition> subQueryDefinitions = new HashMap<>();
 
-		TypeExtractor.TypeResults typeResults = TypeExtractor.extractTypes(ruleIndex, predicatesInBottomUp);
+		TypeExtractor.TypeResults typeResults = TypeExtractor.extractTypes(ruleIndex, predicatesInBottomUp, metadata);
 
 		ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = typeResults.getTermTypeMap();
 		ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap = typeResults.getCastTypeMap();
@@ -507,7 +597,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		List<Variable> varsInGroupBy = Lists.newArrayList();
 		for (Function atom : body) {
-			if (atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP)) {
+			if (atom.getFunctionSymbol().equals(SPARQL_GROUP)) {
 				varsInGroupBy.addAll(atom.getVariables());
 			}
 		}
@@ -604,7 +694,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @throws Exception
 	 */
 
-	private ParserViewDefinition createViewFrom(Predicate pred, DBMetadata metadata,
+	private ParserViewDefinition createViewFrom(Predicate pred, RDBMetadata metadata,
 												Multimap<Predicate, CQIE> ruleIndex,
 												Map<Predicate, ParserViewDefinition> subQueryDefinitions,
 												ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
@@ -824,7 +914,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private String getTableDefinitions(List<Function> atoms,
-									   QueryAliasIndex index, boolean isTopLevel, boolean isLeftJoin,
+									   QueryAliasIndex index, boolean isTopLevel, boolean isLeftJoin, boolean parenthesis,
 									   String indent) {
 		/*
 		 * We now collect the view definitions for each data atom each
@@ -875,10 +965,19 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} else {
 				JOIN_KEYWORD = "JOIN";
 			}
+			String JOIN;
 
-			String JOIN = "" + indent + "" + indent + "%s\n" + indent
-					+ JOIN_KEYWORD + "\n" + indent + "%s" + indent + "";
+			//add parenthesis
+			String NESTEDJOIN = "" + indent + "" + indent + "%s\n" + indent
+					+ JOIN_KEYWORD + "\n" + indent + "(%s)" + indent + "";
 
+			if(parenthesis){
+				JOIN = NESTEDJOIN;
+			}
+			else {
+				JOIN = "" + indent + "" + indent + "%s\n" + indent
+						+ JOIN_KEYWORD + "\n" + indent + "%s" + indent + "";
+			}
 
 			if (size == 0) {
 				throw new RuntimeException(
@@ -901,7 +1000,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			int currentSize = tableDefinitions.size();
 			while (currentSize > 0) {
-				currentJoin = String.format(JOIN,
+				currentJoin = String.format(NESTEDJOIN,
 						tableDefinitions.get(currentSize - 1), currentJoin);
 				tableDefinitions.remove(currentSize - 1);
 				currentSize = tableDefinitions.size();
@@ -909,6 +1008,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			tableDefinitions.add(currentJoin);
 
 			tableDefinitionsString.append(currentJoin);
+
+
 			/*
 			 * If there are ON conditions we add them now. We need to remove the
 			 * last parenthesis ')' and replace it with ' ON %s)' where %s are
@@ -918,7 +1019,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					indent);
 
 //			if (conditions.length() > 0
-//					&& tableDefinitionsString.lastIndexOf(")") != -1) {
+//					&& tableDefinitionsString.lcastIndexOf(")") != -1) {
 //				int lastidx = tableDefinitionsString.lastIndexOf(")");
 //				tableDefinitionsString.delete(lastidx,
 //						tableDefinitionsString.length());
@@ -928,8 +1029,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 //			}
 			String ON_CLAUSE = String.format(" ON\n%s\n " + indent, conditions);
 			tableDefinitionsString.append(ON_CLAUSE);
+
+
 		}
-		return tableDefinitionsString.toString();
+		return  tableDefinitionsString.toString() ;
 	}
 
 	/**
@@ -941,29 +1044,51 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private String getTableDefinition(Function atom, QueryAliasIndex index,
 									  String indent) {
 		Predicate predicate = atom.getFunctionSymbol();
+
 		if (atom.isOperation()
 				|| atom.isDataTypeFunction()) {
 			// These don't participate in the FROM clause
 			return "";
 		} else if (atom.isAlgebraFunction()) {
-			if (predicate.getName().equals("Group")) {
+
+			if (predicate == OBDAVocabulary.SPARQL_GROUP) {
 				return "";
 			}
 			List<Function> innerTerms = new ArrayList<>(atom.getTerms().size());
-			for (Term innerTerm : atom.getTerms()) {
-				innerTerms.add((Function) innerTerm);
-			}
-			if (predicate == OBDAVocabulary.SPARQL_JOIN) {
-				String indent2 = indent + INDENT;
-				String tableDefinitions = "(" + getTableDefinitions(innerTerms,
-						index, false, false, indent2) + ")";
-				return tableDefinitions;
-			} else if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
 
-				return getTableDefinitions(innerTerms, index, false, true,
-						indent + INDENT);
+			boolean parenthesis = false;
+
+
+			if (predicate == OBDAVocabulary.SPARQL_JOIN || predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
+
+				boolean isLeftJoin = false;
+
+				if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
+					isLeftJoin = true;
+				}
+
+				for (Term innerTerm : atom.getTerms()) {
+					Function innerTerm1 = (Function) innerTerm;
+					if(innerTerm1.isAlgebraFunction()){
+						//nested joins we need to add parenthesis later
+						parenthesis = true;
+					}
+					else if(isLeftJoin && innerTerm1.equals(TRUE_EQ)){
+						//in case of left join we  want to add the parenthesis
+						// only for the right tables
+						//we ignore nested joins from the left tables
+
+						parenthesis = false;
+					}
+					innerTerms.add(innerTerm1);
+				}
+				String tableDefinitions =  getTableDefinitions(innerTerms,
+						index, false, isLeftJoin, parenthesis, indent + INDENT );
+				return tableDefinitions;
 			}
+
 		}
+
 
 		/*
 		 * This is a data atom
@@ -974,7 +1099,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private String getFROM(List<Function> atoms, QueryAliasIndex index) {
 		String tableDefinitions = getTableDefinitions(atoms, index, true,
-				false, "");
+				false, false, "");
 		return "\n FROM \n" + tableDefinitions;
 	}
 
@@ -1148,8 +1273,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Function f = (Function) term;
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
-				COL_TYPE type = dtfac.getDatatype(p.toString());
-				return OBDADataFactoryImpl.getInstance().getJdbcTypeMapper().getSQLType(type);
+				COL_TYPE type = DATATYPE_FACTORY.getDatatype(p.toString());
+				return jdbcTypeMapper.getSQLType(type);
 			}
 			// Return varchar for unknown
 			return Types.VARCHAR;
@@ -1347,7 +1472,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			if (castDataType != null){
 
-				mainColumn = sqladapter.sqlCast(mainColumn, obdaDataFactory.getJdbcTypeMapper().getSQLType(castDataType));
+				mainColumn = sqladapter.sqlCast(mainColumn, jdbcTypeMapper.getSQLType(castDataType));
 			}
 
 			//int sqlType = getSQLTypeForTerm(ht,index );
@@ -1540,7 +1665,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			if (ov.getTerms().size() > 1) {
 				int size = ov.getTerms().size();
-				if (dtfac.isLiteral(pred)) {
+				if (DATATYPE_FACTORY.isLiteral(pred)) {
 					size--;
 				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {
@@ -1600,14 +1725,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 			URIConstant uc = (URIConstant) t;
 			return sqladapter.getSQLLexicalFormString(uc.getURI());
 		}
-
-		/*
-		 * Unsupported case
+		/**
+		 * Complex first argument: treats it as a string and ignore other arguments
 		 */
-		throw new IllegalArgumentException(
-				"Error, cannot generate URI constructor clause for a term: "
-						+ ov.toString());
-
+		else {
+			/*
+			 * The function is for example of the form uri(CONCAT("string",x)),we simply return the value from the database.
+			 */
+			return getSQLString(t, index, false);
+		}
 	}
 
 	// TODO: move to SQLAdapter

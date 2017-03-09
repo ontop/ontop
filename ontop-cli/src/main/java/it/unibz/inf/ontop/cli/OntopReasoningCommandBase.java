@@ -3,24 +3,14 @@ package it.unibz.inf.ontop.cli;
 
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
-import com.google.common.base.Preconditions;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.r2rml.R2RMLReader;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import org.semanticweb.owlapi.formats.N3DocumentFormat;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
 import org.semanticweb.owlapi.model.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
+import java.util.Properties;
 import java.util.Set;
 
 public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRelatedCommand {
@@ -82,46 +72,18 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
         return newOntology;
     }
 
-    protected OBDAModel loadMappingFile(String mappingFile) throws InvalidPredicateDeclarationException, IOException, InvalidMappingException {
-        OBDAModel obdaModel;
-        if(mappingFile.endsWith(".obda")){
-            obdaModel = loadOBDA(mappingFile);
-        } else {
-            obdaModel = loadR2RML(mappingFile, jdbcURL, jdbcUserName, jdbcPassword, jdbcDriverClass);
-        }
-        return obdaModel;
+    protected boolean isR2rmlFile(String mappingFile) {
+        return !mappingFile.endsWith(".obda");
     }
 
-    private OBDAModel loadOBDA(String obdaFile) throws InvalidMappingException, IOException, InvalidPredicateDeclarationException {
-        OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-        OBDAModel obdaModel = fac.getOBDAModel();
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdaFile);
-        return obdaModel;
-    }
+    protected Properties createConnectionProperties() {
+            Properties p = new Properties();
+            p.setProperty(OBDASettings.DB_NAME, jdbcURL);
+            p.setProperty(OBDASettings.JDBC_URL, jdbcURL);
+            p.setProperty(OBDASettings.DB_USER, jdbcUserName);
+            p.setProperty(OBDASettings.DB_PASSWORD, jdbcPassword);
+            p.setProperty(OBDASettings.JDBC_DRIVER, jdbcDriverClass);
 
-    private OBDAModel loadR2RML(String r2rmlFile, String jdbcUrl, String username, String password, String driverClass) {
-
-        Preconditions.checkNotNull(jdbcUrl, "jdbcURL is null");
-        Preconditions.checkNotNull(password, "password is null");
-        Preconditions.checkNotNull(username, "username is null");
-        Preconditions.checkNotNull(driverClass, "driverClass is null");
-
-        OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-
-        URI obdaURI = new File(r2rmlFile).toURI();
-
-        String sourceUrl = obdaURI.toString();
-        OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcUrl,
-                username, password, driverClass);
-
-        R2RMLReader reader = null;
-        try {
-            reader = new R2RMLReader(r2rmlFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return reader.readModel(dataSource);
+            return p;
     }
 }

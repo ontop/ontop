@@ -26,12 +26,12 @@
 		
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-quest-sesame</artifactId>
+			<artifactId>ontop-quest-rdf4j</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-runtime</artifactId>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-runtime</artifactId>
 		</dependency>
 	</dependencies>
 	             

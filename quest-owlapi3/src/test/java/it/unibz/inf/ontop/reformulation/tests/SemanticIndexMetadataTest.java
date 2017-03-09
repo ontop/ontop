@@ -1,43 +1,34 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.Quest;
+import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestComponentFactory;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Optional;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-
 public class SemanticIndexMetadataTest  extends TestCase {
-
-	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private Connection conn;
 
-	private OBDAModel obdaModel = null;
-	private OWLOntology ontology;
-
 	private static final String testCase = "twr-predicate";
-	private static final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; 
-	private static final String obdafile = "src/test/resources/test/treewitness/" + testCase + ".obda";
+	// private static final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl";
+	//private static final String obdafile = "src/test/resources/test/treewitness/" + testCase + ".obda";
 
 
 	@Override
@@ -65,14 +56,6 @@ public class SemanticIndexMetadataTest  extends TestCase {
 		//st.executeUpdate(bf.toString());
 		st.close();
 		conn.commit();
-
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel); 
-		ioManager.load(new File(obdafile));
 	}
 
 	@Override
@@ -100,19 +83,19 @@ public class SemanticIndexMetadataTest  extends TestCase {
 
 		//prepareTestQueries(tuples);
 		{
-			QuestPreferences p = new QuestPreferences();
-			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-			p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-			p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
+			Properties p = new Properties();
+			p.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+			p.put(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+			p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+			p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+			p.put(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "true");
+			p.put(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.INMEMORY);
 			
 			p.setProperty("rewrite", "true");
 
 			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 			OntologyVocabulary vb = ofac.createVocabulary();
-						
+
 			vb.createClass("A");
 			vb.createObjectProperty("P");
 			vb.createDataProperty("P");
@@ -120,11 +103,18 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			vb.createDataProperty("D");
 
 			Ontology ont = ofac.createOntology(vb);
+
+			QuestConfiguration config = QuestConfiguration.defaultBuilder()
+					.properties(p)
+					.build();
+
+			Injector injector = config.getInjector();
+			QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);
+			IQuest questInstance = componentFactory.create(ont, Optional.empty(), Optional.empty(),
+					config.getExecutorRegistry());
+			questInstance.setupRepository();
 			
-			Quest quest = new Quest(ont, p);
-			quest.setupRepository();
-			
-			RDBMSSIRepositoryManager si = quest.getSemanticIndexRepository();
+			RDBMSSIRepositoryManager si = questInstance.getOptionalSemanticIndexRepository().get();
 			
 			si.createDBSchemaAndInsertMetadata(conn);
 

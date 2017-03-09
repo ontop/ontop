@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.parser;
 
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.sql.*;
 import net.sf.jsqlparser.expression.Alias;

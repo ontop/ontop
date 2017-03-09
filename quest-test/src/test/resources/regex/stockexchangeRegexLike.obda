@@ -22,12 +22,12 @@ driverClass	oracle.jdbc.driver.OracleDriver
 [MappingDeclaration] @collection [[
 mappingId	mapping-addresses
 target		:Address-{id} a :BolzanoAddress ; :addressID {id} ; :inStreet {street} ; :hasNumber {number} ; :inCity {city} ; :inState {state} ; :inCountry {country} . 
-source		select id, street, number, city, state, country from address where  regexp_like(city, 'b.+z', 'i')
+source		select id, street, number, city, state, country from address_new where  regexp_like(city, 'b.+z', 'i')
 
 
-mappingId	mapping-brokers
-target		:Person-{id} a :StockBroker ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} . 
-source		select "ID", "NAME", "LASTNAME", "DATEOFBIRTH", "SSN" from "BROKER" where regexp_like("NAME", 'J.+a')
+mappingId	mapping-person
+target		:Person-{id} a :PhysicalPerson ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} .
+source		select id, name, lastname, dateofbirth, ssn from person_new where regexp_like(name, 'J.+a')
 
 
 ]]

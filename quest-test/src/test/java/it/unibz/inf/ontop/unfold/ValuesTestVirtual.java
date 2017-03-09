@@ -20,106 +20,26 @@ package it.unibz.inf.ontop.unfold;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-
-public class ValuesTestVirtual {
-
-	private OBDADataFactory fac;
-	private QuestOWLConnection conn;
-
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
-
-	final String owlfile = "src/test/resources/person.owl";
-	final String obdafile = "src/test/resources/person.obda";
-	private QuestOWL reasoner;
+public class ValuesTestVirtual extends AbstractVirtualModeTest {
+	
+	private static final String owlfile = "src/test/resources/person.owl";
+	private static final String obdafile = "src/test/resources/person.obda";
 	private static final String PREFIX = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> ";
 
-
-
-	public ValuesTestVirtual() throws Exception {
-
-		fac = OBDADataFactoryImpl.getInstance();
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
-
-		reasoner = factory.createReasoner(ontology, config);
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
-	}
-	
-	public void executeQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
-		int count = 0;
-		while (rs.nextRow()) {
-			count++;
-			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + rs.getOWLObject(i));
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-		rs.close();
-		assertEquals(expectedRows, count);
+	public ValuesTestVirtual() {
+		super(owlfile, obdafile);
 	}
 
 	private void runTest(String query, int expectedRows) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
-
-		try {
-			executeQueryAssertResults(query, st, expectedRows);
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-
+		countResults(PREFIX + "\n" + query, expectedRows);	
 	}
 
-	@Test
+	
 	public void testQ01() throws Exception {
-		String query1 = PREFIX +
+		String query1 =
 				"SELECT * " +
 				"WHERE {" +
 				"   ?p a :Person ; :name ?name . " +
@@ -127,9 +47,9 @@ public class ValuesTestVirtual {
 		runTest(query1, 4);
 	}
 
-	@Test
+	
 	public void testQ02() throws Exception {
-		String query2 = PREFIX +
+		String query2 =
 				"SELECT * " +
 				"WHERE {" +
 				"   ?p a :Person ; :name ?name . " +
@@ -138,9 +58,9 @@ public class ValuesTestVirtual {
 		runTest(query2, 1);
 	}
 
-	@Test
+	
 	public void testQ03() throws Exception {
-		String query3 =  PREFIX +
+		String query3 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ." +
@@ -149,9 +69,9 @@ public class ValuesTestVirtual {
 		runTest(query3, 1);
 	}
 
-	@Test
+	
 	public void testQ04() throws Exception {
-		String query4 = PREFIX +
+		String query4 =
 				"SELECT * " +
 				"WHERE {" +
 				"   ?p a :Person ; :name ?name . " +
@@ -160,9 +80,9 @@ public class ValuesTestVirtual {
 		runTest(query4, 2);
 	}
 
-	@Test
+	
 	public void testQ05() throws Exception {
-		String query5 =  PREFIX +
+		String query5 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ." +
@@ -171,9 +91,9 @@ public class ValuesTestVirtual {
 		runTest(query5, 2);
 	}
 
-	@Test
+	
 	public void testQ06() throws Exception {
-		String query6 =  PREFIX +
+		String query6 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ; :age ?age ." +
@@ -182,9 +102,9 @@ public class ValuesTestVirtual {
 		runTest(query6, 1);
 	}
 
-	@Test
+	
 	public void testQ07() throws Exception {
-		String query7 =  PREFIX +
+		String query7 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ; :age ?age ." +
@@ -193,9 +113,9 @@ public class ValuesTestVirtual {
 		runTest(query7, 1);
 	}
 
-	@Test
+	
 	public void testQ08() throws Exception {
-		String query8 =  PREFIX +
+		String query8 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ." +
@@ -204,9 +124,9 @@ public class ValuesTestVirtual {
 		runTest(query8, 0);
 	}
 
-	@Test
+	
 	public void testQ09() throws Exception {
-		String query9 =  PREFIX +
+		String query9 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ; :age ?age ." +
@@ -215,9 +135,9 @@ public class ValuesTestVirtual {
 		runTest(query9, 1);
 	}
 
-	@Test
+	
 	public void testQ10() throws Exception {
-		String query10 =  PREFIX +
+		String query10 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ; :age ?age ." +
@@ -226,9 +146,9 @@ public class ValuesTestVirtual {
 		runTest(query10, 0);
 	}
 
-	@Test
+	
 	public void testQ11() throws Exception {
-		String query11 =  PREFIX +
+		String query11 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ; :age ?age ." +
@@ -244,24 +164,22 @@ public class ValuesTestVirtual {
 	/**
 	 * Not yet supported
 	 */
-	@Ignore
-	@Test
-	public void testQ12() throws Exception {
-		String query12 =  PREFIX +
-				"SELECT * " +
-				"WHERE {" +
-				"  VALUES (?name ?age) { " +
-				"     (\"Alice\" 18) " +
-				"     (\"Bob\" 19) " +
-				"  } " +
-				"  ?p a :Person ; :name ?name ; :age ?age ." +
-				"}";
-		runTest(query12, 2);
-	}
+//	public void testQ12() throws Exception {
+//		String query12 =  PREFIX +
+//				"SELECT * " +
+//				"WHERE {" +
+//				"  VALUES (?name ?age) { " +
+//				"     (\"Alice\" 18) " +
+//				"     (\"Bob\" 19) " +
+//				"  } " +
+//				"  ?p a :Person ; :name ?name ; :age ?age ." +
+//				"}";
+//		runTest(query12, 2);
+//	}
 
-	@Test
+	
 	public void testQ12b() throws Exception {
-		String query12 =  PREFIX +
+		String query12 =
 				"SELECT * " +
 				"WHERE {" +
 				"  VALUES (?name ?age) { " +
@@ -273,9 +191,9 @@ public class ValuesTestVirtual {
 		runTest(query12, 2);
 	}
 
-	@Test
+	
 	public void testQ13() throws Exception {
-		String query13 =  PREFIX +
+		String query13 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ." +
@@ -284,9 +202,9 @@ public class ValuesTestVirtual {
 		runTest(query13, 3);
 	}
 
-	@Test
+	
 	public void testQ14() throws Exception {
-		String query14 =  PREFIX +
+		String query14 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ." +
@@ -295,9 +213,9 @@ public class ValuesTestVirtual {
 		runTest(query14, 4);
 	}
 
-	@Test
+	
 	public void testQ15() throws Exception {
-		String query15 =  PREFIX +
+		String query15 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ." +
@@ -306,9 +224,9 @@ public class ValuesTestVirtual {
 		runTest(query15, 4);
 	}
 
-	@Test
+	
 	public void testQ16() throws Exception {
-		String query16 =  PREFIX +
+		String query16 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ; :age ?age ; :mbox ?mbox ." +

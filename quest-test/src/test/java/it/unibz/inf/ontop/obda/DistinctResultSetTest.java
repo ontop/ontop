@@ -1,26 +1,20 @@
 package it.unibz.inf.ontop.obda;
 
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestDistinctTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.Before;
 import org.junit.Test;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,10 +33,7 @@ import static org.junit.Assert.assertTrue;
 
 public class DistinctResultSetTest { //
 
-    private OBDADataFactory fac;
-    Logger log = LoggerFactory.getLogger(this.getClass());
-    private OBDAModel obdaModel;
-    private OWLOntology ontology;
+    private Logger log = LoggerFactory.getLogger(this.getClass());
 
     final String owlFile = "src/test/resources/example/exampleBooks.owl";
     final String obdaFile = "src/test/resources/example/exampleBooks.obda";
@@ -54,22 +45,14 @@ public class DistinctResultSetTest { //
     }
     private int runTestsQuestOWL(Properties p, String query) throws Exception {
 
-        fac = OBDADataFactoryImpl.getInstance();
-
-        // Loading the OWL file
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
-        // Loading the OBDA data
-        obdaModel = fac.getOBDAModel();
-
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdaFile);
-
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .properties(p)
+                .nativeOntopMappingFile(obdaFile)
+                .ontologyFile(owlFile)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(config);
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();
@@ -100,10 +83,13 @@ public class DistinctResultSetTest { //
         Repository repo = null;
         int count = 0;
         try {
+            QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+                    .ontologyFile(owlFile)
+                    .nativeOntopMappingFile(obdaFile)
+                    .propertyFile(configFile)
+                    .build();
 
-        repo = new SesameVirtualRepo("my_name", owlFile, obdaFile, configFile);
-
-
+        repo = new OntopVirtualRepository("my_name", configuration);
 
         repo.initialize();
 
@@ -120,7 +106,7 @@ public class DistinctResultSetTest { //
                     count++;
                     BindingSet bindingSet = result.next();
                     for (String b : bindings)
-                        System.out.println(bindingSet.getBinding(b));
+                        log.debug("Binding : "+bindingSet.getBinding(b));
                 }
             } finally {
                 result.close();
@@ -160,8 +146,8 @@ public class DistinctResultSetTest { //
     public void testDistinctQuestOWL() throws Exception {
 
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.DISTINCT_RESULTSET, QuestConstants.TRUE);
+        Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.DISTINCT_RESULTSET, QuestConstants.TRUE);
         String query = "PREFIX : <http://meraka/moss/exampleBooks.owl#>" +
                 " select distinct * {?x a :Author}";
         int nResults = runTestsQuestOWL(p, query);

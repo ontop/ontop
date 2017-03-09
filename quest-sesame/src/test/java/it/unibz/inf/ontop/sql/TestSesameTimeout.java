@@ -1,36 +1,32 @@
 package it.unibz.inf.ontop.sql;
 
 import static org.junit.Assert.assertTrue;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.r2rml.R2RMLManager;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.sesame.RepositoryConnection;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openrdf.model.Model;
-import org.openrdf.query.Query;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import it.unibz.inf.ontop.injection.OBDASettings;
 
 /**
- * Tests that user-applied constraints can be provided through 
- * sesameWrapper.SesameVirtualRepo 
+ * Tests that user-applied constraints can be provided through
+ * sesameWrapper.OntopVirtualRepository
  * with manually instantiated metadata.
- * 
+ *
  * This is quite similar to the setting in the optique platform
  * 
  * Some stuff copied from ExampleManualMetadata 
@@ -47,15 +43,18 @@ public class TestSesameTimeout {
 	static String uc_create = "src/test/resources/userconstraints/create.sql";
 
 	private Connection sqlConnection;
-	private RepositoryConnection conn;
+	private OntopRepositoryConnection conn;
 	
 
 	@Before
 	public void init()  throws Exception {
 
-		QuestPreferences preference;
-		OWLOntology ontology;
-		Model model;
+		Properties p = new Properties();
+		p.setProperty(OBDASettings.DB_NAME, "countries");
+		p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:countries");
+		p.setProperty(OBDASettings.DB_USER, "sa");
+		p.setProperty(OBDASettings.DB_PASSWORD, "");
+		p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
 		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
 		java.sql.Statement s = sqlConnection.createStatement();
@@ -76,29 +75,18 @@ public class TestSesameTimeout {
 
 		s.close();
 
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.r2rmlMappingFile(r2rmlfile)
+				.ontologyFile(owlfile)
+				.properties(p)
+				.build();
 
-		R2RMLManager rmanager = new R2RMLManager(r2rmlfile);
-		model = rmanager.getModel();
-		
-		preference = new QuestPreferences();
-		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		preference.setCurrentValueOf(QuestPreferences.DBNAME, "countries");
-		preference.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:h2:mem:countries");
-		preference.setCurrentValueOf(QuestPreferences.DBUSER, "sa");
-		preference.setCurrentValueOf(QuestPreferences.DBPASSWORD, "");
-		preference.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "org.h2.Driver");
-
-		SesameVirtualRepo repo = new SesameVirtualRepo("", ontology, model, preference);
+		OntopVirtualRepository repo = new OntopVirtualRepository("", configuration);
 		repo.initialize();
 		/*
 		 * Prepare the data connection for querying.
 		 */
 		conn = repo.getConnection();
-
-
-
 	}
 
 
@@ -135,7 +123,7 @@ public class TestSesameTimeout {
         	result.close();
         } catch (QueryEvaluationException e) {
         	long end = System.currentTimeMillis();
-        	assertTrue(e.toString().indexOf("SesameTupleQuery timed out. More than 1 seconds passed") >= 0);
+        	assertTrue(e.toString().indexOf("OntopTupleQuery timed out. More than 1 seconds passed") >= 0);
         	assertTrue(end - start >= 1000);
         	exceptionThrown = true;
         } 

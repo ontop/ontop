@@ -22,8 +22,7 @@ package it.unibz.inf.ontop.protege.core;
 
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.utils.OBDAPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
@@ -50,7 +49,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	OWLEditorKit kit = null;
 //	OWLModelManager mmgr = null;
 	DisposableOBDAPreferences obdaPref = null;
-	DisposableQuestPreferences refplatPref = null;
+	DisposableProperties refplatPref = null;
 	
 	@Override
 	protected void setup(EditorKit editorKit) {
@@ -59,7 +58,19 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	
 	@Override
 	public void initialise() throws Exception {
-		
+
+        /***
+         * Preferences for the OBDA plugin (gui, etc)
+         */
+        obdaPref = new DisposableOBDAPreferences();
+        getEditorKit().put(DisposableOBDAPreferences.class.getName(), obdaPref);
+
+        /***
+         * Preferences for Quest
+         */
+        refplatPref = new DisposableProperties();
+        getEditorKit().put(DisposableProperties.class.getName(),refplatPref);
+        loadPreferences();
 		
 		/***
 		 * Each editor kit has its own instance of the ProtegePluginController.
@@ -71,22 +82,16 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		kit = (OWLEditorKit)getEditorKit();
 //		mmgr = (OWLModelManager)kit.getModelManager();
 //		mmgr.addListener(instance.getModelManagerListener());
+
+		getEditorKit().put(OBDAModelManager.class.getName(), instance);
+		/**
+		 * TODO: Not sound!! remove it!!!
+		 */
 		getEditorKit().put(OBDAModelImpl.class.getName(), instance);
 
 		// getEditorKit().getModelManager().put(APIController.class.getName(),
 		// instance);
 
-		/***
-		 * Preferences for the OBDA plugin (gui, etc)
-		 */
-		obdaPref = new DisposableOBDAPreferences();
-		getEditorKit().put(OBDAPreferences.class.getName(), obdaPref);
-
-		/***
-		 * Preferences for Quest
-		 */
-		refplatPref = new DisposableQuestPreferences();
-		getEditorKit().put(QuestPreferences.class.getName(),refplatPref);
 		loadPreferences();
 	}
 
@@ -117,9 +122,8 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		while(it.hasNext()){
 			String key = it.next();
 			String value = pref.getString(key, null);
-			if(value != null){
-				// here we ensure that if the abox mode is classic the the data location can only be in memory
-				if (key.equals(QuestPreferences.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) { 
+			if(value != null){			// here we ensure that if the abox mode is classic the the data location can only be in memory
+				if (key.equals(QuestCoreSettings.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) {
 //					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 					refplatPref.put(key, value);
 					isCalssic = true;
@@ -128,6 +132,8 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 				}
 			}
 		}
+		// Publish the new refplatPref
+		getEditorKit().put(DisposableProperties.class.getName(),refplatPref);
 	}
 	
 	private void storePreferences(){

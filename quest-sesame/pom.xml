@@ -5,9 +5,9 @@
 		<groupId>it.unibz.inf.ontop</groupId>
 		<version>3.0.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>ontop-quest-sesame</artifactId>
-	<name>ontop-quest-sesame</name>
-	<description>This is the Sesame API implementation based on Quest</description>
+	<artifactId>ontop-quest-rdf4j</artifactId>
+	<name>ontop-quest-rdf4j</name>
+	<description>This is the rdf4j API implementation based on Quest</description>
 
 	<dependencies>
 		<dependency>
@@ -42,11 +42,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<artifactId>ontop-obdalib-sesame</artifactId>
-			<groupId>${project.groupId}</groupId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<artifactId>ontop-reformulation-core</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
@@ -68,55 +63,57 @@
 		</dependency>
 		<!-- These will download some of the sources -->
 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-repository-api</artifactId>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-repository-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryresultio-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryparser-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryparser-sparql</artifactId>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-queryresultio-api</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-repository-manager</artifactId>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-queryparser-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-queryparser-sparql</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-repository-manager</artifactId>
 			<scope>test</scope>
 		</dependency>
 
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-queryalgebra-evaluation</artifactId>
+        </dependency>
 
-
-
 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryresultio-text</artifactId>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-queryresultio-text</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-api</artifactId>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-turtle</artifactId>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-turtle</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-rdfxml</artifactId>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-rdfxml</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-n3</artifactId>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-n3</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-ntriples</artifactId>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-ntriples</artifactId>
 		</dependency>
 
 		<dependency>
@@ -133,8 +130,9 @@
 
 		<dependency>
 			<groupId>eu.optique-project</groupId>
-			<artifactId>r2rml-api-sesame-bridge</artifactId>			
+			<artifactId>r2rml-api-rdf4j-bridge</artifactId>			
 		</dependency>
+
     </dependencies>
 
 </project>

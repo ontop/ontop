@@ -1,20 +1,13 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -33,10 +26,7 @@ public class ConditionalAsLeftJoinTest {
     private static final String OWL_FILE = "src/test/resources/test/conditional_leftjoin/conditional_leftjoin_test.owl";
     private static final String ODBA_FILE = "src/test/resources/test/conditional_leftjoin/conditional_leftjoin_test.obda";
 
-    private OBDADataFactory fac;
     private Connection conn;
-    private OBDAModel obdaModel;
-    private OWLOntology ontology;
 
     @Before
     public void setUp() throws Exception {
@@ -45,7 +35,6 @@ public class ConditionalAsLeftJoinTest {
         String username = "sa";
         String password = "sa";
 
-        fac = OBDADataFactoryImpl.getInstance();
         conn = DriverManager.getConnection(url, username, password);
         Statement st = conn.createStatement();
 
@@ -62,15 +51,6 @@ public class ConditionalAsLeftJoinTest {
 
         st.executeUpdate(bf.toString());
         conn.commit();
-
-        // Loading the OWL file
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument((new File(OWL_FILE)));
-
-        // Loading the OBDA data
-        obdaModel = fac.getOBDAModel();
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(ODBA_FILE);
     }
 
     @After
@@ -124,8 +104,11 @@ public class ConditionalAsLeftJoinTest {
     private String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(ODBA_FILE)
+                .ontologyFile(OWL_FILE)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();

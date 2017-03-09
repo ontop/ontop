@@ -21,38 +21,26 @@ package it.unibz.inf.ontop.renderer;
  */
 
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.io.SimplePrefixManager;
-import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.DatatypeFactory;
-import it.unibz.inf.ontop.model.ExpressionOperation;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.URIConstant;
-import it.unibz.inf.ontop.model.URITemplatePredicate;
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
 
 /**
  * A utility class to render a Target Query object into its representational
  * string.
  */
 public class TargetQueryRenderer {
-
-	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	
 	/**
 	 * Transforms the given <code>OBDAQuery</code> into a string. The method requires
 	 * a prefix manager to shorten full IRI name.
 	 */
 	public static String encode(List<Function> input, PrefixManager prefixManager) {
-		
+
 		TurtleWriter turtleWriter = new TurtleWriter();
 		List<Function> body = input;
 		for (Function atom : body) {
@@ -100,24 +88,10 @@ public class TargetQueryRenderer {
 	/**
 	 * Prints the short form of the predicate (by omitting the complete URI and
 	 * replacing it by a prefix name).
-	 * 
-	 * Note that by default this method will consider a set of predefined
-	 * prefixes, i.e., rdf:, rdfs:, owl:, xsd: and quest: To support this
-	 * prefixes the method will temporally add the prefixes if they dont exist
-	 * already, taken care to remove them if they didn't exist.
-	 * 
-	 * The implementation requires at the moment, the implementation requires
-	 * cloning the existing prefix manager, and hence this is highly inefficient
-	 * method. *
+	 *
 	 */
 	private static String getAbbreviatedName(String uri, PrefixManager pm, boolean insideQuotes) {
-		// Cloning the existing manager
-		PrefixManager prefManClone = new SimplePrefixManager();
-		Map<String,String> currentMap = pm.getPrefixMap();
-		for (String prefix: currentMap.keySet()) {
-			prefManClone.addPrefix(prefix, pm.getURIDefinition(prefix));
-		}
-		return prefManClone.getShortForm(uri, insideQuotes);
+		return pm.getShortForm(uri, insideQuotes);
 	}
 	
 	private static String appendTerms(Term term){
@@ -160,7 +134,7 @@ public class TargetQueryRenderer {
 			String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
 			if (function.isDataTypeFunction()) {
 				// if the function symbol is a data type predicate
-				if (dtfac.isLiteral(functionSymbol)) {
+				if (DATATYPE_FACTORY.isString(functionSymbol)) {
 					// if it is rdfs:Literal
 					int arity = function.getArity();
 					if (arity == 1) {
@@ -224,14 +198,14 @@ public class TargetQueryRenderer {
 						}
 					}
 				}
-			} 
+			}
 			else if (functionSymbol == ExpressionOperation.CONCAT) { //Concat
 				List<Term> terms = function.getTerms();
 				sb.append("\"");
 				getNestedConcats(sb, terms.get(0),terms.get(1));
 				sb.append("\"");
 				//sb.append("^^rdfs:Literal");
-			} 
+			}
 			else { // for any ordinary function symbol
 				sb.append(fname);
 				sb.append("(");

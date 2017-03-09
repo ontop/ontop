@@ -15,6 +15,11 @@
 			<artifactId>ontop-obdalib-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-optimization</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -48,23 +53,13 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryparser-api</artifactId>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-queryparser-api</artifactId>
 		</dependency> 
 
 		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-queryparser-sparql</artifactId>
-		</dependency> 
-
-<!--  		<dependency>
-  			<groupId>net.sf.jgrapht</groupId>
-  			<artifactId>jgrapht</artifactId>
-		</dependency> -->
-		
-		<dependency>
-				<groupId>org.javabits.jgrapht</groupId>
-				<artifactId>jgrapht-core</artifactId>		
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-queryparser-sparql</artifactId>
 		</dependency>
 
 		<dependency>

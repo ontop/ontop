@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -21,10 +21,13 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.mapping.sql.SQLSourceQueryValidator;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
@@ -32,7 +35,6 @@ import it.unibz.inf.ontop.protege.gui.treemodels.SynchronizedMappingListModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.utils.IDGenerator;
-import it.unibz.inf.ontop.utils.SourceQueryValidator;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.slf4j.LoggerFactory;
@@ -48,19 +50,18 @@ import java.util.List;
 
 public class MappingManagerPanel extends JPanel implements DatasourceSelectorListener {
 
-
-
-    private static final long serialVersionUID = -486013653814714526L;
+	private static final long serialVersionUID = -486013653814714526L;
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
 	private Thread validatorThread;
 
-	private SourceQueryValidator validator;
+	private SQLSourceQueryValidator validator;
 
 	private TargetQueryVocabularyValidator validatortrg;
 
-	private OBDAModel mapc;
+	private OBDAModelWrapper mapc;
 
-	private OBDAModel apic;
+	private OBDAModelWrapper apic;
 
 	private OBDADataSource selectedSource;
 
@@ -78,13 +79,15 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * @param apic
 	 *            The API controller object.
          * @param validator
-         *            TargetQueryVocabularyValidator 
+         *            TargetQueryVocabularyValidator
 	 */
-	public MappingManagerPanel(OBDAModel apic, TargetQueryVocabularyValidator validator) {
+	public MappingManagerPanel(OBDAModelWrapper apic, TargetQueryVocabularyValidator validator,
+							   NativeQueryLanguageComponentFactory nativeQLFactory) {
 
 		validatortrg = validator;
 		
 		mappingsTree = new JTree();
+        this.nativeQLFactory = nativeQLFactory;
 
 		initComponents();
 		addMenu();
@@ -170,9 +173,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		}
 	}
 
-   
-
-    private void setOBDAModel(OBDAModel omodel) {
+	public void setOBDAModel(OBDAModelWrapper omodel) {
 		
 		this.apic = omodel;
 		this.mapc = apic;
@@ -238,7 +239,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("Edit Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg,
+                nativeQLFactory);
 		panel.setMapping(mapping);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 500);
@@ -518,7 +520,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
                 OBDAMappingAxiom o = (OBDAMappingAxiom) path.get(i);
                 String id = o.getId();
                 outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
-                validator = new SourceQueryValidator(selectedSource, o.getSourceQuery());
+                validator = new SQLSourceQueryValidator(selectedSource, (OBDASQLQuery)o.getSourceQuery());
                 long timestart = System.nanoTime();
 
                 if (canceled) {
@@ -607,7 +609,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
-		OBDAModel controller = mapc;
+		OBDAModelWrapper controller = mapc;
 		URI current_srcuri = selectedSource.getSourceID();
 
 		for (int i = 0; i < currentSelection.length; i++) {
@@ -628,7 +630,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			// inserting the new mapping
 			try {
 
-				OBDAMappingAxiom oldmapping = controller.getMapping(current_srcuri, id);
+				OBDAMappingAxiom oldmapping = controller.getMapping(id);
 				OBDAMappingAxiom newmapping = null;
 				newmapping = oldmapping.clone();
 				newmapping.setId(new_id);
@@ -662,7 +664,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		// The manager panel can handle multiple deletions.
 		Object[] values = mappingList.getSelectedValues();
 
-		OBDAModel controller = mapc;
+		OBDAModelWrapper controller = mapc;
 		URI srcuri = selectedSource.getSourceID();
 
 		for (int i = 0; i < values.length; i++) {
@@ -688,7 +690,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("New Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg,
+                nativeQLFactory);
 		panel.setID(id);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 500);

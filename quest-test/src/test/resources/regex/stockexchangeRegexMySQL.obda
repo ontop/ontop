@@ -14,7 +14,7 @@ owl2xml:		http://www.w3.org/2006/12/owl2-xml#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl	jdbc:mysql://10.7.20.39/stockexchange
+connectionUrl	jdbc:mysql://10.7.20.39/stockexchange_new
 username	fish
 password	fish
 driverClass	com.mysql.jdbc.Driver
@@ -26,8 +26,8 @@ source		select id, street, number, city, state, country from address where city 
 
 
 mappingId	mapping-brokers
-target		:Person-{id} a :StockBroker ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} . 
-source		select "id", "name", "lastname", "dateofbirth", "ssn" from "broker" where "name" regexp binary 'J.+a'
+target		:Person-{id} a :PhysicalPerson ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} .
+source		select id, name, lastname, dateofbirth, ssn from person where name regexp binary 'J.+a'
 
 
 ]]

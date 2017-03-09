@@ -1,105 +1,78 @@
 package it.unibz.inf.ontop.ask;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Scanner;
 
-import static org.junit.Assert.assertTrue;
-
-
-
-public class H2ASKTest {
-
-	private OBDADataFactory fac;
-	private QuestOWLConnection conn;
-
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
+import static junit.framework.TestCase.assertTrue;
 
 
+public class H2ASKTest  {
 
-	 final String owlfile =
+	 static final String owlFile =
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	 final String obdafile =
+	 static final String obdaFile =
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-h2.obda";
 
-	 private Connection sqlConnection;
-
-
 	private QuestOWL reasoner;
+	private QuestOWLConnection conn;
+	Connection sqlConnection;
 
 	@Before
 	public void setUp() throws Exception {
-		String url = "jdbc:h2:mem:questrepository;";
-		String username = "fish";
-		String password = "fish";
 
-		fac = OBDADataFactoryImpl.getInstance();
+		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questrepository","fish", "fish");
+		java.sql.Statement s = sqlConnection.createStatement();
 
-		sqlConnection = DriverManager.getConnection(url, username, password);
-		Statement st = sqlConnection.createStatement();
+		try {
+			String text = new Scanner( new File("src/test/resources/test/stockexchange-create-h2.sql") ).useDelimiter("\\A").next();
+			s.execute(text);
+			//Server.startWebServer(sqlConnection);
 
-		FileReader reader = new FileReader("src/test/resources/stockexchange-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
+		} catch(SQLException sqle) {
+			System.out.println("Exception in creating db from script "+sqle.getMessage());
 		}
-		in.close();
 
-		st.executeUpdate(bf.toString());
-		sqlConnection.commit();
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+		s.close();
 
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlFile)
+				.nativeOntopMappingFile(obdaFile)
+				.build();
 
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
+		/*
+		 * Create the instance of Quest OWL reasoner.
+		 */
+		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        reasoner = factory.createReasoner(ontology, config);
-
-		// Now we are ready for querying
+		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();
-		
+
+
 
 	}
 
 	@After
 	public void tearDown() throws Exception {
+		try {
+			dropTables();
+			conn.close();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	private void dropTables() throws Exception {
+
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
@@ -113,16 +86,23 @@ public class H2ASKTest {
 				sqlConnection.close();
 			}
 		}
-
 	}
-	
-	private boolean runTests(String query) throws Exception {
+
+	@Test
+	public void testTrue() throws Exception {
+		String query = "ASK { ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.owl-ontologies.com/Ontology1207768242.owl#StockBroker> .}";
+		boolean val =  runQueryAndReturnBooleanX(query);
+		assertTrue(val);
+		
+	}
+
+	private boolean runQueryAndReturnBooleanX(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
 		boolean retval;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
-			OWLLiteral ind1 =	rs.getOWLLiteral("x")	 ;
+			OWLLiteral ind1 = rs.getOWLLiteral("x");
 			retval = ind1.parseBoolean();
 		} catch (Exception e) {
 			throw e;
@@ -137,13 +117,5 @@ public class H2ASKTest {
 			reasoner.dispose();
 		}
 		return retval;
-	}
-	
-	@Test
-	public void testTrue() throws Exception {
-		String query = "ASK { ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.owl-ontologies.com/Ontology1207768242.owl#StockBroker> .}";
-		boolean val =  runTests(query);
-		assertTrue(val);
-		
 	}
 }

@@ -15,28 +15,32 @@
  */
 package it.unibz.inf.ontop.sql;
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.r2rml.R2RMLManager;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.openrdf.model.Model;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.*;
-import org.openrdf.repository.RepositoryConnection;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Scanner;
 
-import static org.junit.Assert.*;
+import it.unibz.inf.ontop.injection.OBDASettings;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.junit.After;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
+import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.query.BooleanQuery;
+import org.eclipse.rdf4j.query.GraphQuery;
+import org.eclipse.rdf4j.query.GraphQueryResult;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 
 public class TestSesameBindings {
 
@@ -48,14 +52,10 @@ public class TestSesameBindings {
     static String uc_create = "src/test/resources/userconstraints/create.sql";
 
     private Connection sqlConnection;
-    private RepositoryConnection conn;
+    private OntopRepositoryConnection conn;
 
     @Before
     public void init() throws Exception {
-
-        QuestPreferences preference;
-        OWLOntology ontology;
-        Model model;
 
         sqlConnection = DriverManager.getConnection("jdbc:h2:mem:countries", "sa", "");
         java.sql.Statement s = sqlConnection.createStatement();
@@ -76,21 +76,21 @@ public class TestSesameBindings {
 
         s.close();
 
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+        Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(OBDASettings.DB_NAME, "countries");
+        p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:countries");
+        p.setProperty(OBDASettings.DB_USER, "sa");
+        p.setProperty(OBDASettings.DB_PASSWORD, "");
+        p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
-        R2RMLManager rmanager = new R2RMLManager(r2rmlfile);
-        model = rmanager.getModel();
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .ontologyFile(owlfile)
+                .r2rmlMappingFile(r2rmlfile)
+                .properties(p)
+                .build();
 
-        preference = new QuestPreferences();
-        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        preference.setCurrentValueOf(QuestPreferences.DBNAME, "countries");
-        preference.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:h2:mem:countries");
-        preference.setCurrentValueOf(QuestPreferences.DBUSER, "sa");
-        preference.setCurrentValueOf(QuestPreferences.DBPASSWORD, "");
-        preference.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "org.h2.Driver");
-
-        SesameVirtualRepo repo = new SesameVirtualRepo("", ontology, model, preference);
+        OntopVirtualRepository repo = new OntopVirtualRepository("", config);
         repo.initialize();
         /*
          * Prepare the data connection for querying.

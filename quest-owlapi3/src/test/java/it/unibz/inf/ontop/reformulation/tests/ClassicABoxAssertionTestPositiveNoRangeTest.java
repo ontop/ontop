@@ -20,17 +20,15 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import java.io.File;
+import java.util.Properties;
 
 /**
  * This test check proper handling of ABox assertions, including handling of the
@@ -46,17 +44,14 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	private QuestOWLStatement st;
 
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
-		QuestPreferences pref = new QuestPreferences();
-		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
-		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+		p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "true");
 
 		String owlfile = "src/test/resources/test/owl-types-simple-split.owl";
-
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		
 //		QuestOWLFactory fac = new QuestOWLFactory();
@@ -65,8 +60,12 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 //		reasoner = (QuestOWL) fac.createReasoner(ontology);
 //		reasoner.flush();
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(pref).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlfile)
+				.properties(p)
+				.build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 
 		conn = reasoner.getConnection();

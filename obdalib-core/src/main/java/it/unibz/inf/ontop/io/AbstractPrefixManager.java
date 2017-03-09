@@ -117,7 +117,7 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 	}
 	
 	private String removeColon(String prefix) {
-		if (prefix.equals(PrefixManager.DEFAULT_PREFIX)) {
+		if (prefix.equals(DEFAULT_PREFIX)) {
 			return prefix; // TODO Remove this code in the future.
 		}
 		return prefix.replace(":", "");

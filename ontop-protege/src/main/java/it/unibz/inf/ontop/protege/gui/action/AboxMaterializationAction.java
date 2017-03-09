@@ -81,7 +81,8 @@ public class AboxMaterializationAction extends ProtegeAction {
 		editorKit = (OWLEditorKit)getEditorKit();
 		workspace = editorKit.getWorkspace();
 		modelManager = editorKit.getOWLModelManager();
-		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
+		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelWrapper()
+				.getCurrentImmutableOBDAModel();
 		lineSeparator = System.getProperty("line.separator");
 	}
 

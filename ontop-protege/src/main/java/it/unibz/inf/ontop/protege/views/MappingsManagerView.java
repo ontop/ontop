@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.views;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -21,12 +21,12 @@ package it.unibz.inf.ontop.protege.views;
  */
 
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlapi.TargetQueryValidator;
 import it.unibz.inf.ontop.owlapi.TargetQueryValidator;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.panels.MappingManagerPanel;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
@@ -44,7 +44,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	OBDAModelManager controller = null;
 
-	OBDAModel obdaModel;
+	OBDAModelWrapper obdaModel;
 
 	MappingManagerPanel mappingPanel = null;
 
@@ -62,12 +62,12 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		controller = (OBDAModelManager) editor.get(OBDAModelImpl.class.getName());
 		controller.addListener(this);
 
-		obdaModel = controller.getActiveOBDAModel();
+		obdaModel = controller.getActiveOBDAModelWrapper();
 		
-		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getOntologyVocabulary());
+		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getCurrentImmutableOBDAModel().getOntologyVocabulary());
 		
 		// Init the Mapping Manager panel.
-		mappingPanel = new MappingManagerPanel(obdaModel, validator);
+		mappingPanel = new MappingManagerPanel(obdaModel, validator, controller.getNativeQLFactory());
 
 		editor.getOWLWorkspace().getOWLSelectionModel().addListener(new OWLSelectionModelListener() {
 			@Override
@@ -90,19 +90,19 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		if (obdaModel.getSources().size() > 0) {
 			mappingPanel.datasourceChanged(mappingPanel.getSelectedSource(), obdaModel.getSources().get(0));
 		}
-		
+
 		mappingPanel.setBorder(new TitledBorder("Mapping manager"));
 
 		setLayout(new BorderLayout());
 		//add(mappingPanel, BorderLayout.NORTH);
         add(mappingPanel, BorderLayout.CENTER);
-		
+
 	}
 
 	@Override
 	public void activeOntologyChanged() {
-		obdaModel = controller.getActiveOBDAModel();
-		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getOntologyVocabulary());
+		obdaModel = controller.getActiveOBDAModelWrapper();
+		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getCurrentImmutableOBDAModel().getOntologyVocabulary());
 
 		mappingPanel.setTargetQueryValidator(validator);
 

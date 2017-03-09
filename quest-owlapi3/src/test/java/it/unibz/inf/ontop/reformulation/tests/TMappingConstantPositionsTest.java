@@ -20,21 +20,15 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -47,12 +41,7 @@ import java.util.Properties;
  */
 
 public class TMappingConstantPositionsTest extends TestCase {
-
-	private OBDADataFactory fac;
 	private Connection conn;
-
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/tmapping-positions.owl";
 	final String obdafile = "src/test/resources/test/tmapping-positions.obda";
@@ -68,8 +57,6 @@ public class TMappingConstantPositionsTest extends TestCase {
 		String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -87,16 +74,6 @@ public class TMappingConstantPositionsTest extends TestCase {
 		st.executeUpdate(bf.toString());
 		conn.commit();
 
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-		
 	}
 
 	@Override
@@ -130,9 +107,13 @@ public class TMappingConstantPositionsTest extends TestCase {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
-        
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.properties(p)
+				.build();
+        QuestOWL reasoner = factory.createReasoner(config);
+
 		//System.out.println(reasoner.getQuestInstance().getUnfolder().getRules());
 		
 		// Now we are ready for querying
@@ -158,22 +139,26 @@ public class TMappingConstantPositionsTest extends TestCase {
 	@Test
 	public void testViEqSig() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		Properties p = new Properties();
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
 	}
-	
-	@Test
+
 	public void testClassicEqSig() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		Properties p = new Properties();
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		p.put(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
 
-		runTests(p);
+		try {
+			runTests(p);
+			fail("Was expecting an IllegalConfigurationException " +
+					"(mappings are currently forbidden in the classic mode)");
+		} catch (IllegalConfigurationException e) {
+		}
 	}
 
 

@@ -27,15 +27,15 @@ import java.util.Properties;
 
 public abstract class AbstractDbMetadataInfoTest extends TestCase {
 	
-	private DBMetadata metadata;
+	private RDBMetadata metadata;
 	
 	@Override
 	public void setUp() {
 		
 		try {
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
-			metadata = DBMetadataExtractor.createMetadata(conn);
-			DBMetadataExtractor.loadMetadata(metadata, conn, null);
+			metadata = RDBMetadataExtractionTools.createMetadata(conn);
+			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		} 
 		catch (SQLException e) { 
 			e.printStackTrace();

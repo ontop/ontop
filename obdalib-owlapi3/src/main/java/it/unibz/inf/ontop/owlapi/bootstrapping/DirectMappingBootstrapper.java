@@ -20,16 +20,22 @@ package it.unibz.inf.ontop.owlapi.bootstrapping;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
+import java.net.URI;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 public class DirectMappingBootstrapper {
 
@@ -38,25 +44,36 @@ public class DirectMappingBootstrapper {
     private OBDAModel model;
     private OBDADataSource source;
 
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
-    public DirectMappingBootstrapper(String baseuri, String url, String user, String password, String driver) throws Exception{
-		OBDADataFactory fact = OBDADataFactoryImpl.getInstance();
-		OBDADataSource source = fact.getJDBCDataSource(url, user, password, driver);
+
+    public DirectMappingBootstrapper(String baseuri, String url, String user, String password, String driver,
+									 NativeQueryLanguageComponentFactory nativeQLFactory,
+									 OBDAFactoryWithException obdaFactory) throws Exception{
+		OBDADataSource source = MAPPING_FACTORY.getJDBCDataSource(url, user, password, driver);
 		//create empty ontology and model, add source to model
 		OWLOntologyManager mng = OWLManager.createOWLOntologyManager();
 		OWLOntology onto = mng.createOntology(IRI.create(baseuri));
-		OBDAModel model = fact.getOBDAModel();
-		model.addSource(source);
-		bootstrapOntologyAndDirectMappings(baseuri, onto, model, source);
+		//TODO: avoid creating a model without mappings
+		PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
+		OBDAModel model = obdaFactory.createOBDAModel(ImmutableSet.of(source),
+				new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(), prefixManager,
+				new OntologyVocabularyImpl());
+
+		bootstrapOntologyAndDirectMappings(baseuri, onto, model, source, nativeQLFactory, obdaFactory);
 	}
 
-	public DirectMappingBootstrapper(String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source) throws Exception {
-		bootstrapOntologyAndDirectMappings(baseUri, ontology, model, source);
+	public DirectMappingBootstrapper(String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source,
+									 NativeQueryLanguageComponentFactory nativeQLFactory,
+									 OBDAFactoryWithException obdaFactory) throws Exception {
+		bootstrapOntologyAndDirectMappings(baseUri, ontology, model, source, nativeQLFactory, obdaFactory);
 	}
 
-    private void bootstrapOntologyAndDirectMappings(String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws DuplicateMappingException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
+    private void bootstrapOntologyAndDirectMappings(String baseuri, OWLOntology onto, OBDAModel model,
+													OBDADataSource source, NativeQueryLanguageComponentFactory nativeQLFactory,
+													OBDAFactoryWithException obdaFactory) throws DuplicateMappingException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
         this.source = source;
-        DirectMappingEngine engine = new DirectMappingEngine(baseuri, model.getMappings(source.getSourceID()).size());
+        DirectMappingEngine engine = new DirectMappingEngine(baseuri, model.getMappings(source.getSourceID()).size(), nativeQLFactory, obdaFactory);
         this.model =  engine.extractMappings(model, source);
         this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
     }

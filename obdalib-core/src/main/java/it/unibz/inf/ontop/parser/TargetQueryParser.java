@@ -23,11 +23,8 @@ package it.unibz.inf.ontop.parser;
 import java.util.List;
 
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.io.PrefixManager;
 
 public interface TargetQueryParser {
-	
-	public void setPrefixManager(PrefixManager manager);
-	
+
 	public List<Function> parse(String input) throws TargetQueryParserException;
 }

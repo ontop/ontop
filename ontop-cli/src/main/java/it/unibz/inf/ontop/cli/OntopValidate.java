@@ -4,14 +4,10 @@ import com.github.rvesse.airline.annotations.Command;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
-import org.semanticweb.owlapi.apibinding.OWLManager;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import org.semanticweb.owlapi.model.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -34,14 +30,32 @@ public class OntopValidate extends OntopReasoningCommandBase {
             System.exit(1);
         }
 
-        OWLOntologyManager manager = OWLManager.createConcurrentOWLOntologyManager();
-        OWLOntology ontology = null;
+        QuestConfiguration config;
+        if (isR2rmlFile(mappingFile)) {
+            config = QuestConfiguration.defaultBuilder()
+                    .ontologyFile(owlFile)
+                    .r2rmlMappingFile(mappingFile)
+                    .build();
+        }
+        else {
+            config = QuestConfiguration.defaultBuilder()
+                    .ontologyFile(owlFile)
+                    .nativeOntopMappingFile(mappingFile)
+                    .build();
+        }
 
+        OWLOntology ontology = null;
         try {
-            ontology = manager.loadOntologyFromOntologyDocument(new File(this.owlFile));
-        } catch (OWLOntologyCreationException e) {
+            ontology = config.loadProvidedInputOntology();
+        }
+        catch (OWLOntologyCreationException e) {
             System.out.format("ERROR: There is a problem loading the ontology file: %s\n", owlFile);
             e.printStackTrace();
+            System.exit(1);
+        }
+        catch (Exception ex) {
+            System.out.format("ERROR: QuestOWL reasoner cannot be initialized\n");
+            ex.printStackTrace();
             System.exit(1);
         }
 
@@ -82,27 +96,13 @@ public class OntopValidate extends OntopReasoningCommandBase {
 
         if (punning) System.exit(1);
 
-        OBDAModel obdaModel = null;
         try {
-            obdaModel = loadMappingFile(mappingFile);
-        } catch (InvalidPredicateDeclarationException | IOException | InvalidMappingException e) {
+            config.loadMapping();
+        } catch (IOException | InvalidDataSourceException | InvalidMappingException e) {
             System.out.format("ERROR: There is a problem loading the mapping file %s\n", mappingFile);
             e.printStackTrace();
             System.exit(1);
         }
-
-        QuestOWLFactory factory = new QuestOWLFactory();
-
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
-
-        try {
-            factory.createReasoner(ontology, config);
-        } catch (Exception ex) {
-            System.out.format("ERROR: QuestOWL reasoner cannot be initialized\n");
-            ex.printStackTrace();
-            System.exit(1);
-        }
-
 
     }
 }

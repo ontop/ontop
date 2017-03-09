@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.RDBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
@@ -681,7 +681,7 @@ public class ParserTest extends TestCase {
 		queryText = input;
 
 		try {
-			DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+			RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
 			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 			queryP = new ParsedSQLQuery(input, true, idfac);
 		} catch (Exception e) {

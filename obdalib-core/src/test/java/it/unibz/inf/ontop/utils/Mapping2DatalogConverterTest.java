@@ -20,15 +20,15 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.SimplePrefixManager;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
-import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.RDBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.UniqueConstraint;
@@ -36,19 +36,29 @@ import junit.framework.TestCase;
 
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class Mapping2DatalogConverterTest extends TestCase {
 
-	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-	
-	private DBMetadata md;
-	private SimplePrefixManager pm = new SimplePrefixManager();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+    private final NativeQueryLanguageComponentFactory factory;
+	private final Injector injector;
+
+	private RDBMetadata md = RDBMetadataExtractionTools.createDummyMetadata();
+	private PrefixManager pm;
+
+    public Mapping2DatalogConverterTest() {
+		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
+        injector = configuration.getInjector();
+        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
 	
 	public void setUp() {
-		md = DBMetadataExtractor.createDummyMetadata();
+		md = RDBMetadataExtractionTools.createDummyMetadata();
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
-		
+
 		// Database schema
 		DatabaseRelationDefinition table1 = md.createDatabaseRelation(idfac.createRelationID(null, "Student"));
 		table1.addAttribute(idfac.createAttributeID("id"), Types.INTEGER, null, false);
@@ -68,22 +78,25 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		DatabaseRelationDefinition table3 = md.createDatabaseRelation(idfac.createRelationID(null, "Enrollment"));
 		table3.addAttribute(idfac.createAttributeID("student_id"), Types.INTEGER, null, false);
 		table3.addAttribute(idfac.createAttributeID("course_id"), Types.VARCHAR, null, false);
-		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(idfac.createAttributeID("student_id")), 
+		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(idfac.createAttributeID("student_id")),
 				table3.getAttribute(idfac.createAttributeID("course_id"))));
 		
 		// Prefix manager
-		pm.addPrefix(":", "http://www.example.org/university#");
+        Map<String, String> prefixes = new HashMap<>();
+		prefixes.put(":", "http://www.example.org/university#");
+        pm = factory.create(prefixes);
 	}
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
-		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm);
+		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm.getPrefixMap());
 		List<Function> target = targetParser.parse(targetString);
-		
-		OBDAMappingAxiom mappingAxiom = ofac.getRDBMSMappingAxiom(ofac.getSQLQuery(source), target);
+
+		OBDAMappingAxiom mappingAxiom = factory.create(MAPPING_FACTORY.getSQLQuery(source), target);
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
-		
-		List<CQIE> dp = Mapping2DatalogConverter.constructDatalogProgram(mappingList, md);
+
+		IMapping2DatalogConverter mapping2DatalogConverter = injector.getInstance(IMapping2DatalogConverter.class);
+		List<CQIE> dp = mapping2DatalogConverter.constructDatalogProgram(mappingList, md);
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

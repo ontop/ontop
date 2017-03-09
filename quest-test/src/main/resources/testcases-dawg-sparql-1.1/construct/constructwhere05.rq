@@ -1,4 +1,0 @@
-PREFIX : <http://example.org/>
-
-CONSTRUCT 
-WHERE { ?s ?p ?o FILTER ( ?o = :o1) }

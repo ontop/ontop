@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
@@ -56,7 +56,7 @@ public class SQLQueryDeepParser {
 	 * @param query The sql query to be parsed
 	 * @return A ParsedQuery (or a SELECT * FROM table with the generated view)
 	 */
-	public static ParsedSQLQuery parse(DBMetadata dbMetaData, String query) {
+	public static ParsedSQLQuery parse(RDBMetadata dbMetaData, String query) {
     	
 		boolean errors = false;
 		ParsedSQLQuery queryParser = null;
@@ -117,7 +117,7 @@ public class SQLQueryDeepParser {
 	}
 	
 	
-	private static ParserViewDefinition createViewDefinition(DBMetadata md, String query) {
+	private static ParserViewDefinition createViewDefinition(RDBMetadata md, String query) {
 
         QuotedIDFactory idfac = md.getQuotedIDFactory();
 		

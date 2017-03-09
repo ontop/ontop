@@ -20,11 +20,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.URIConstant;
 import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.AssertionFactory;
@@ -39,10 +37,11 @@ import java.net.URI;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 
 public class NTripleAssertionIterator implements Iterator<Assertion> {
 
-	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 	private final AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 
 	private final int rdftype_hash = OBDAVocabulary.RDF_TYPE.hashCode();
@@ -69,17 +68,17 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 
 		try {
 			if (currentPredicate.getArity() == 1) {
-				URIConstant c = obdafac.getConstantURI(currSubject);
+				URIConstant c = DATA_FACTORY.getConstantURI(currSubject);
 				assertion = ofac.createClassAssertion(currentPredicate.getName(), c);
 			} 
 			else if (currentPredicate.getType(1) == Predicate.COL_TYPE.OBJECT) {
-				URIConstant c1 = obdafac.getConstantURI(currSubject);
-				URIConstant c2 = obdafac.getConstantURI(currObject);
+				URIConstant c1 = DATA_FACTORY.getConstantURI(currSubject);
+				URIConstant c2 = DATA_FACTORY.getConstantURI(currObject);
 				assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c1, c2);
 			} 
 			else if (currentPredicate.getType(1) == Predicate.COL_TYPE.LITERAL) {
-				URIConstant c1 = obdafac.getConstantURI(currSubject);
-				ValueConstant c2 = obdafac.getConstantLiteral(currObject);
+				URIConstant c1 = DATA_FACTORY.getConstantURI(currSubject);
+				ValueConstant c2 = DATA_FACTORY.getConstantLiteral(currObject);
 					assertion = ofac.createDataPropertyAssertion(currentPredicate.getName(), c1, c2);
 			} 
 			else {
@@ -204,12 +203,12 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 				//this.currTriple = triBuf.toString();
 
 				if (currPredicate.hashCode() == rdftype_hash) {
-					currentPredicate = obdafac.getClassPredicate(currObject);
+					currentPredicate = DATA_FACTORY.getClassPredicate(currObject);
 				} else {
 					if (isObjectProperty) {
-						currentPredicate = obdafac.getObjectPropertyPredicate(currPredicate);
+						currentPredicate = DATA_FACTORY.getObjectPropertyPredicate(currPredicate);
 					} else {
-						currentPredicate = obdafac.getDataPropertyPredicate(currPredicate);
+						currentPredicate = DATA_FACTORY.getDataPropertyPredicate(currPredicate);
 					}
 				}
 				staReady = true;

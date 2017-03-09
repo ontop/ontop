@@ -20,21 +20,20 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Properties;
 
 /**
  * Tests if QuestOWL can be initialized on top of an existing semantic index
@@ -42,36 +41,29 @@ import java.io.File;
  */
 public class SemanticIndexLUBMHTest extends TestCase {
 
-	private final String owlfile = "src/test/resources/test/lubm-ex-20-uni1/University0-imports.owl";
-
-	private OWLOntology ontology;
-	private OWLOntologyManager manager;
-
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String owlFilePath = "src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl";
 
 	public SemanticIndexLUBMHTest() throws Exception {
-		manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument(new File("src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl"));
 	}
 
 	public void test3InitializingQuest() throws Exception {
 		long start = System.nanoTime();
-	
-		QuestPreferences pref = new QuestPreferences();
-		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 
-//		fac.setPreferenceHolder(pref);
-//
-//		QuestOWL quest = fac.createReasoner(ontology);
+        Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(pref).build();
-        QuestOWL quest = factory.createReasoner(ontology, config);
-		
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlFilePath)
+				.properties(p)
+				.build();
+        QuestOWL quest = factory.createReasoner(config);
+
 		QuestOWLConnection qconn =  quest.getConnection();
 
-		QuestOWLStatement st = qconn.createStatement();
+		SIQuestOWLStatement st = qconn.createSIStatement();
 		long end = System.nanoTime();
 		double init_time = (end - start) / 1000000;
 		start = System.nanoTime();
@@ -174,9 +166,10 @@ public class SemanticIndexLUBMHTest extends TestCase {
 //		log.debug("File 24. Total insertion time: {}", time1);
 //		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University24.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
 		
-		//st.getSIRepository().createIndexes();
-		quest.getQuestInstance().getSemanticIndexRepository().createIndexes(qconn.getConnection());
-		
+		// V1
+		// quest.getQuestInstance().getOptionalSemanticIndexRepository().createIndexes(qconn.getConnection());
+		// END V1
+		st.createIndexes();
 		end = System.nanoTime();
 		double insert_time = (end - start) / 1000000;
 		
@@ -202,7 +195,7 @@ public class SemanticIndexLUBMHTest extends TestCase {
 			// + " }";
 
 			start = System.nanoTime();
-			QuestOWLResultSet res = (QuestOWLResultSet) st.executeTuple(query.getQuery());
+			QuestOWLResultSet res = st.executeTuple(query.getQuery());
 			end = System.nanoTime();
 
 			double time = (end - start) / 1000000;

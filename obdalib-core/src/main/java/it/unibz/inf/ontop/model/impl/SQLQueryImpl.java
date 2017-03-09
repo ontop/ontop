@@ -32,6 +32,7 @@ public class SQLQueryImpl implements OBDASQLQuery {
 		this.sqlQuery = sqlQuery;
 	}
 
+	@Override
 	public String getSQLQuery() {
 		if ((sqlQuery == null) || (sqlQuery.equals(""))) {
 			return "";

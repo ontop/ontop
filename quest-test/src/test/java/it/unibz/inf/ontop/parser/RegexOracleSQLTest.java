@@ -20,114 +20,19 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
-import java.io.File;
-
-import static org.junit.Assert.assertEquals;
-
-/** 
+/**
  * Test to check if the sql parser supports regex correctly when written with oracle syntax. 
  * Translated in a datalog function and provides the correct results
  */
-public class RegexOracleSQLTest {
+public class RegexOracleSQLTest extends AbstractVirtualModeTest {
 
-	// TODO We need to extend this test to import the contents of the mappings
-	// into OWL and repeat everything taking form OWL
+	static final String owlfile = "src/test/resources/regex/stockBolzanoAddress.owl";
+	static final String obdafile = "src/test/resources/regex/stockexchangeRegexLike.obda";
 
-	private OBDADataFactory fac;
-	private QuestOWLConnection conn;
-
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
-
-	final String owlfile = "src/test/resources/regex/stockBolzanoAddress.owl";
-	final String obdafile = "src/test/resources/regex/stockexchangeRegexLike.obda";
-	private QuestOWL reasoner;
-
-	@Before
-	public void setUp() throws Exception {
-		
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-	
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		// Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        reasoner = factory.createReasoner(ontology, config);
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
-
-		
-	}
-
- @After
-	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
-	}
-	
-
-	
-	private int runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
-		
-		int results=0;
-		try {
-			
-
-			QuestOWLResultSet rs = st.executeTuple(query);
-
-//			assertTrue(rs.nextRow());
-			while (rs.nextRow()){
-				OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
-				log.debug(ind1.toString());
-				results++;
-			}
-		
-
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-		return results;
+	public RegexOracleSQLTest() {
+		super(owlfile, obdafile);
 	}
 
 	/**
@@ -135,11 +40,9 @@ public class RegexOracleSQLTest {
 	 * select id, street, number, city, state, country from address where  regexp_like(city, 'b.+z', 'i')
 	 * @throws Exception
 	 */
-	@Test
 	public void testOracleRegexLike() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :BolzanoAddress}";
-		int numberResults = runTests(query);
-		assertEquals(2, numberResults);
+		countResults(query, 2);
 	}
 	
 	/**
@@ -147,11 +50,9 @@ public class RegexOracleSQLTest {
 	 * select "ID", "NAME", "LASTNAME", "DATEOFBIRTH", "SSN" from "BROKER" where regexp_like("NAME", 'J.+a')
 	 * @throws Exception
 	 */
-	@Test
 	public void testOracleRegexLikeUppercase() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :StockBroker}";
-		int numberResults = runTests(query);
-		assertEquals(1, numberResults);
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :PhysicalPerson}";
+		countResults(query, 1);
 	}
 	
 

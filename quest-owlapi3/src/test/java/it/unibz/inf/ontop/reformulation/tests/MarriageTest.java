@@ -21,37 +21,20 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.sql.*;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
@@ -59,11 +42,7 @@ import static org.junit.Assert.assertTrue;
 @Ignore
 public class MarriageTest {
 
-	private OBDADataFactory fac;
-	private Connection conn;
-
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
+	private Connection conn;;
 
 	private static final String ONTOLOGY_FILE = "src/test/resources/marriage/marriage.ttl";
 	private static final String OBDA_FILE = "src/test/resources/marriage/marriage.obda";
@@ -76,8 +55,6 @@ public class MarriageTest {
     	String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 
@@ -96,15 +73,6 @@ public class MarriageTest {
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(ONTOLOGY_FILE)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(OBDA_FILE);
 	}
 
 	@After
@@ -160,9 +128,12 @@ public class MarriageTest {
 
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+		QuestOWLFactory factory = new QuestOWLFactory();
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(OBDA_FILE)
+				.ontologyFile(ONTOLOGY_FILE)
+				.build();
+		QuestOWL reasoner = factory.createReasoner(config);
 
 
         // Now we are ready for querying

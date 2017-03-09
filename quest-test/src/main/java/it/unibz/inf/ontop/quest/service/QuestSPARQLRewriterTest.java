@@ -20,10 +20,12 @@ package it.unibz.inf.ontop.quest.service;
  * #L%
  */
 
-import info.aduna.io.IOUtil;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.eclipse.rdf4j.common.io.IOUtil;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,14 +42,18 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	private static final String OWL_FILE_LOCATION = ROOT_LOCATION + "stockexchange.owl";
 	private static final String OBDA_FILE_LOCATION = ROOT_LOCATION + "stockexchange-mysql.obda";
 	
-	protected SesameVirtualRepo repository;
+	protected OntopVirtualRepository repository;
 	
 	@Override
 	protected void setUp() throws Exception {
 		try {
 			final URL owlFileUrl = QuestSPARQLRewriterTest.class.getResource(OWL_FILE_LOCATION);
 			final URL obdaFileUrl = QuestSPARQLRewriterTest.class.getResource(OBDA_FILE_LOCATION);
-			repository = new SesameVirtualRepo(getName(), owlFileUrl.toString(), obdaFileUrl.toString(), "");
+			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlFileUrl)
+					.nativeOntopMappingFile(obdaFileUrl.toString())
+					.build();
+			repository = new OntopVirtualRepository(getName(), configuration);
 			repository.initialize();
 		} catch (Exception exc) {
 			repository.shutDown();
@@ -132,7 +138,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	private String getSPARQLRewriting(String sparqlInput) {
 		String sparqlOutput;
 		try {
-			sparqlOutput = getStatement().getSPARQLRewriting(sparqlInput);
+			sparqlOutput = getStatement().getRewriting(sparqlInput);
 		} catch (OBDAException e) {
 			sparqlOutput = "NULL";
 		}

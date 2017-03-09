@@ -1,6 +1,0 @@
-@prefix ex: <http://example.org/ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
-ex:a ex:b ex:c .
-ex:b rdfs:domain ex:aType .
-
