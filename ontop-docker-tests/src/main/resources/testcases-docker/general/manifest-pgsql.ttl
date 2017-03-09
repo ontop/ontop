@@ -23,4 +23,5 @@
     mf:result <select-all-pgsql.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
+    mf:parameters <datatypes-pgsql.properties> .
 

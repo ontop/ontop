@@ -22,6 +22,7 @@ public class MetaMappingExpanderTest {
          */
         final String owlfile = "src/test/resources/EPNet.owl";
         final String obdafile = "src/test/resources/EPNet.obda";
+        final String propertyfile = "src/test/resources/EPNet.properties";
 
         @Test
         public void runQuery() throws Exception {
@@ -33,6 +34,7 @@ public class MetaMappingExpanderTest {
             OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .ontologyFile(owlfile)
                     .nativeOntopMappingFile(obdafile)
+                    .propertyFile(propertyfile)
                     .build();
             QuestOWL reasoner = factory.createReasoner(config);
 		/*
