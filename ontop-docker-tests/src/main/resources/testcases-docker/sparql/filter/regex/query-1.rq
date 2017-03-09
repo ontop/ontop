@@ -1,4 +1,0 @@
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX : <http://ontop.org/tests/>
-SELECT ?x ?value	
-WHERE { ?x :literal ?value. FILTER regex(?value, "^a+b+$") }
