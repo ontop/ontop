@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableSet;
 
 /**
  * Declaration that the substitution is immutable and only refer to ImmutableTerms.
- *
  */
 public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyImmutableSubstitution {
 
@@ -21,14 +20,13 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     @Override
     T get(Variable variable);
 
-   /**
-    * Applies the substitution to an immutable term.
-    */
+    /**
+     * Applies the substitution to an immutable term.
+     */
     ImmutableTerm apply(ImmutableTerm term);
 
     /**
      * This method can be applied to simple variables
-     *
      */
     ImmutableTerm applyToVariable(Variable variable);
 
@@ -43,10 +41,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
 
     /**
      * Only guaranteed for T extends VariableOrGroundTerm.
-     *
+     * <p>
      * If T == ImmutableTerm, throws a ConversionException if
      * a substituted term is not a VariableOrGroundTerm.
-     *
      */
     DataAtom applyToDataAtom(DataAtom atom) throws ConversionException;
 
@@ -54,7 +51,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
             throws ConversionException;
 
     DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom projectionAtom)
-        throws ConversionException;
+            throws ConversionException;
 
     /**
      * Returns "f o g" where f is this substitution
@@ -79,13 +76,12 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
 
     /**
      * Returns a "similar" substitution that avoids (if possible) to substitute certain variables.
-     *
+     * <p>
      * Acts on equality between variables.
-     *
+     * <p>
      * The first variable in the list has the highest priority.
-     *
+     * <p>
      * This method requires the domain and the range to be disjoint.
-     *
      */
     ImmutableSubstitution<T> orientate(ImmutableList<Variable> priorityVariables);
 
@@ -94,4 +90,10 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     Var2VarSubstitution getVar2VarFragment();
 
     ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment();
+
+    /**
+     * Reduces the substitution's domain to its intersection with the argument domain
+     */
+    ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
+
 }

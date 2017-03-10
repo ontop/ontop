@@ -3,7 +3,8 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
-import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
+import it.unibz.inf.ontop.executor.expression.PushDownBooleanExpressionExecutor;
+import it.unibz.inf.ontop.executor.expression.PushUpBooleanExpressionExecutor;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.join.InnerJoinExecutor;
 import it.unibz.inf.ontop.executor.leftjoin.LeftJoinExecutor;
@@ -69,7 +70,8 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
 
         internalExecutorMapBuilder.put(InnerJoinOptimizationProposal.class, InnerJoinExecutor.class);
         internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
-        internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
+        internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownBooleanExpressionExecutor.class);
+        internalExecutorMapBuilder.put(PushUpBooleanExpressionProposal.class, PushUpBooleanExpressionExecutor.class);
         internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutor.class);
         internalExecutorMapBuilder.put(PullVariableOutOfDataNodeProposal.class, PullVariableOutOfDataNodeExecutor.class);
         internalExecutorMapBuilder.put(PullVariableOutOfSubTreeProposal.class, PullVariableOutOfSubTreeExecutor.class);

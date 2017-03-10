@@ -20,12 +20,12 @@ import java.util.Optional;
 /**
  * TODO: explain
  */
-public class PushDownExpressionExecutorImpl implements PushDownExpressionExecutor {
+public class PushDownBooleanExpressionExecutorImpl implements PushDownBooleanExpressionExecutor {
 
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private PushDownExpressionExecutorImpl(IntermediateQueryFactory iqFactory) {
+    private PushDownBooleanExpressionExecutorImpl(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
     }
 

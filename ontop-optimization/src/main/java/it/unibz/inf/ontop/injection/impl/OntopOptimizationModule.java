@@ -1,7 +1,8 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
-import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
+import it.unibz.inf.ontop.executor.expression.PushDownBooleanExpressionExecutor;
+import it.unibz.inf.ontop.executor.expression.PushUpBooleanExpressionExecutor;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.join.InnerJoinExecutor;
 import it.unibz.inf.ontop.executor.leftjoin.LeftJoinExecutor;
@@ -36,7 +37,8 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         // Executors
         bindFromPreferences(InnerJoinExecutor.class);
         bindFromPreferences(SubstitutionPropagationExecutor.class);
-        bindFromPreferences(PushDownExpressionExecutor.class);
+        bindFromPreferences(PushDownBooleanExpressionExecutor.class);
+        bindFromPreferences(PushUpBooleanExpressionExecutor.class);
         bindFromPreferences(GroundTermRemovalFromDataNodeExecutor.class);
         bindFromPreferences(PullVariableOutOfDataNodeExecutor.class);
         bindFromPreferences(PullVariableOutOfSubTreeExecutor.class);

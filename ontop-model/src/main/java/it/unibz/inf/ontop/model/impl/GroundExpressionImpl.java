@@ -29,4 +29,9 @@ public class GroundExpressionImpl extends ImmutableExpressionImpl implements Gro
     public boolean isGround() {
         return true;
     }
+
+    @Override
+    public boolean isVar2VarEquality() {
+        return false;
+    }
 }

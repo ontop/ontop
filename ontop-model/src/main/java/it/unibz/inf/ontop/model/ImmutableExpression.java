@@ -23,4 +23,6 @@ public interface ImmutableExpression extends Expression, ImmutableFunctionalTerm
      * It is the responsibility of the caller to make sure such a flattening makes sense.
      */
     ImmutableSet<ImmutableExpression> flatten(OperationPredicate operator);
+
+    boolean isVar2VarEquality();
 }
