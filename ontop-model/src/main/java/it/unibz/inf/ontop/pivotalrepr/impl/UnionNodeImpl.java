@@ -49,7 +49,13 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     public SubstitutionResults<UnionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode childNode, IntermediateQuery query) {
-        if (substitution.isEmpty()) {
+        /**
+         * Reduce the domain of the substitution to the variables projected out by the union node
+         */
+        ImmutableSubstitution reducedSubstitution =
+                substitution.reduceDomainToIntersectionWith(projectedVariables);
+
+        if (reducedSubstitution.isEmpty()) {
             return new SubstitutionResultsImpl<>(NO_CHANGE);
         }
         /**
@@ -58,7 +64,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
          */
         else {
             ConstructionNode newParentOfChildNode = query.getFactory().createConstructionNode(projectedVariables,
-                    (ImmutableSubstitution<ImmutableTerm>) substitution);
+                    (ImmutableSubstitution<ImmutableTerm>) reducedSubstitution);
             return new SubstitutionResultsImpl<>(newParentOfChildNode, childNode);
         }
     }

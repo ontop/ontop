@@ -123,6 +123,11 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
+    public ImmutableSubstitution<ImmutableTerm> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain) {
+        return new ImmutableSubstitutionImpl<>(ImmutableMap.of());
+    }
+
+    @Override
     public final ImmutableMap<Variable, Term> getMap() {
         return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>) getImmutableMap();
     }
