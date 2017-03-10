@@ -45,7 +45,7 @@ public class MssqlDatatypeTest extends QuestDatatypeParent {
 
             @Override
             public String getMainManifestFile() {
-                return "/testcases-datatypes/manifest-datatype-mssql.ttl";
+                return "/testcases-docker/manifest-datatype-mssql.ttl";
             }
         });
 	}

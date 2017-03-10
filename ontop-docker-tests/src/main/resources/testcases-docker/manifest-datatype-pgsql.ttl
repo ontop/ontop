@@ -6,11 +6,9 @@
 <>  rdf:type mf:Manifest ;
     rdfs:label "Quest datatype tests for PostgreSQL" ;
     mf:include (
+        <general/manifest-pgsql.ttl>
         <numeric/manifest-pgsql.ttl>
         <character/manifest-pgsql.ttl>
         <datetime/manifest-pgsql.ttl>
         <boolean/manifest-pgsql.ttl>
-        #<binary/manifest-mysql.ttl>
-        #<others/manifest-mysql.ttl>
-		<general/manifest-pgsql.ttl>
     ).

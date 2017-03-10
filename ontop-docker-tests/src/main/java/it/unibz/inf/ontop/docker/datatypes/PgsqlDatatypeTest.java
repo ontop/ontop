@@ -43,7 +43,7 @@ public class PgsqlDatatypeTest extends QuestDatatypeParent {
 			}
 			@Override
 			public String getMainManifestFile() {
-				return "/testcases-datatypes/manifest-datatype-pgsql.ttl";
+				return "/testcases-docker/manifest-datatype-pgsql.ttl";
 			}
 		});
 	}

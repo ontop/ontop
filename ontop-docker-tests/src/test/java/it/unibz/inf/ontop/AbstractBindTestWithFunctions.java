@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.reformulation.tests;
+package it.unibz.inf.ontop;
 
 /*
  * #%L

@@ -43,7 +43,7 @@ public class OracleDatatypeTest extends QuestDatatypeParent {
 			}
 			@Override
 			public String getMainManifestFile() {
-				return "/testcases-datatypes/manifest-datatype-oracle.ttl";
+				return "/testcases-docker/manifest-datatype-oracle.ttl";
 			}
 		});
 	}

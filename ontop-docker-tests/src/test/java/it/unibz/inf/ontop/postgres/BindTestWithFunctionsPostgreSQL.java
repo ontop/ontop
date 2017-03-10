@@ -21,7 +21,9 @@ package it.unibz.inf.ontop.postgres;
  */
 
 
-import it.unibz.inf.ontop.answering.reformulation.tests.AbstractBindTestWithFunctions;
+
+
+import it.unibz.inf.ontop.AbstractBindTestWithFunctions;
 import org.junit.Ignore;
 import org.junit.Test;
 
