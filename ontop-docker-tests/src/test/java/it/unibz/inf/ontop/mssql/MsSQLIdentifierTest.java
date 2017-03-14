@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.mssql;
  */
 
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 
 /***
  * Tests that mssql identifiers for tables and columns are treated

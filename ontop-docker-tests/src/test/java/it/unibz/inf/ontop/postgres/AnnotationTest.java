@@ -43,7 +43,7 @@ public class AnnotationTest {
         OntopOWLStatement st = conn.createStatement();
 
         String query = Joiner.on("\n").join(
-                CharStreams.readLines(new FileReader("src/test/resources/annotation/q1.q")));
+                CharStreams.readLines(new FileReader("src/test/resources/pgsql/annotation/q1.q")));
 
         log.debug("Executing query: ");
         log.debug("Query: \n{}", query);
