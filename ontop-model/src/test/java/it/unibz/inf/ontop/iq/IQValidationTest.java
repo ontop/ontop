@@ -13,6 +13,8 @@ import org.junit.Test;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
+import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 
 public class IQValidationTest {
@@ -149,7 +151,7 @@ public class IQValidationTest {
         queryBuilder.init(projectionAtom, constructionNode);
         queryBuilder.addChild(constructionNode, leftJoinNode);
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
-        queryBuilder.addChild(leftJoinNode, dataNode, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode, LEFT);
         IntermediateQuery query = queryBuilder.build();
     }
 
@@ -229,5 +231,54 @@ public class IQValidationTest {
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
         queryBuilder.addChild(emptyNode, dataNode);
         IntermediateQuery query = queryBuilder.build();
+    }
+
+    @Test(expected = InvalidIntermediateQueryException.class)
+    public void testUnboundVariableInFilter() {
+        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION);
+        queryBuilder.addChild(rootNode, filterNode);
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
+        queryBuilder.addChild(filterNode, dataNode);
+        queryBuilder.build();
+    }
+
+    @Test(expected = InvalidIntermediateQueryException.class)
+    public void testUnboundVariableInInnerJoin() {
+        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(EXPRESSION);
+        queryBuilder.addChild(rootNode, joinNode);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
+        queryBuilder.addChild(joinNode, dataNode1);
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, A));
+        queryBuilder.addChild(joinNode, dataNode2);
+        queryBuilder.build();
+    }
+
+    @Test(expected = InvalidIntermediateQueryException.class)
+    public void testUnboundVariableInLeftJoin() {
+        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        LeftJoinNode joinNode = IQ_FACTORY.createLeftJoinNode(EXPRESSION);
+        queryBuilder.addChild(rootNode, joinNode);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
+        queryBuilder.addChild(joinNode, dataNode1, LEFT);
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, A));
+        queryBuilder.addChild(joinNode, dataNode2, RIGHT);
+        queryBuilder.build();
     }
 }
