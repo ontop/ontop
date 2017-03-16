@@ -3,8 +3,10 @@ package it.unibz.inf.ontop.pivotalrepr.validation;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
@@ -76,6 +78,9 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
                 throw new InvalidIntermediateQueryException("JOIN node " + innerJoinNode
                         +" does not have at least 2 children.\n" + query);
             }
+
+            innerJoinNode.getOptionalFilterCondition()
+                    .ifPresent(e -> checkExpression(innerJoinNode, e));
         }
 
         @Override
@@ -84,6 +89,8 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
                 throw new InvalidIntermediateQueryException("LEFTJOIN node " + leftJoinNode
                         + " does not have 2 children.\n" + query);
             }
+            leftJoinNode.getOptionalFilterCondition()
+                    .ifPresent(e -> checkExpression(leftJoinNode, e));
         }
 
         @Override
@@ -91,6 +98,18 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
             if (query.getChildren(filterNode).size() != 1) {
                 throw new InvalidIntermediateQueryException("FILTER node " + filterNode
                         + " does not have single child.\n" + query);
+            }
+            checkExpression(filterNode, filterNode.getFilterCondition());
+        }
+
+        private void checkExpression(JoinOrFilterNode node, ImmutableExpression expression) {
+            if (!expression.getVariableStream()
+                .allMatch(v -> query.getChildren(node).stream()
+                        .flatMap(c -> query.getVariables(c).stream())
+                        .collect(ImmutableCollectors.toSet())
+                        .contains(v))) {
+                throw new InvalidIntermediateQueryException("Expression " + expression + " of "
+                        + expression + " uses an unbound variable.\n" + query);
             }
         }
 

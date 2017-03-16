@@ -2,20 +2,16 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.common.collect.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.*;
+import java.util.function.*;
 import java.util.stream.Collector;
 
 /**
- * Inspired by http://codingjunkie.net/guava-and-java8-collectors/
+ * Inspired by http://codingjunkie.net/guava-and-java8-collectors/, as well as openJDK 8
+ *
  */
 public class ImmutableCollectors {
- 
+
     private static abstract class ImmutableCollectionCollector<T, A extends ImmutableCollection.Builder, R extends ImmutableCollection<T>>
             implements Collector<T, A, R> {
 
@@ -58,6 +54,24 @@ public class ImmutableCollectors {
         @Override
         public Supplier<ImmutableList.Builder<T>> supplier() {
             return ImmutableList::builder;
+        }
+    }
+
+    private static final class Partition<T> extends AbstractMap<Boolean, T> implements Map<Boolean, T> {
+        final T forTrue;
+        final T forFalse;
+
+        Partition(T forTrue, T forFalse) {
+            this.forTrue = forTrue;
+            this.forFalse = forFalse;
+        }
+
+        @Override
+        public Set<Map.Entry<Boolean, T>> entrySet() {
+            return ImmutableSet.of(
+                    new AbstractMap.SimpleImmutableEntry<>(false, forFalse),
+                    new AbstractMap.SimpleImmutableEntry<>(true, forTrue)
+            );
         }
     }
 
@@ -148,4 +162,35 @@ public class ImmutableCollectors {
                 Collector.Characteristics.UNORDERED);
     }
 
+    public static <T> Collector<T, ?, ImmutableMap<Boolean, ImmutableList<T>>> partitioningBy(Predicate<? super T> predicate) {
+        return partitioningBy(predicate, toList());
+    }
+
+
+    public static <T, A , D> Collector<T, ?, ImmutableMap<Boolean, D>> partitioningBy (Predicate<? super T> predicate,
+                                                                              Collector<T, A , D> innerCollector){
+
+        //Supplier (stores a binary Partition, i.e. a (two entries) map from Boolean to the supplier type A of the
+        // innerCollector)
+        Supplier<Partition<A>> supplier = () -> new Partition<>(
+                innerCollector.supplier().get(),
+                innerCollector.supplier().get()
+        );
+        //Accumulator:
+        BiConsumer<A, ? super T> downstreamAccumulator = innerCollector.accumulator();
+        BiConsumer<Partition<A>, T> accumulator = (result, t) ->
+                downstreamAccumulator.accept(predicate.test(t) ? result.forTrue : result.forFalse, t);
+
+        //Merger
+        BinaryOperator<A> op = innerCollector.combiner();
+        BinaryOperator<Partition<A>> combiner = (left, right) ->
+                new Partition<>(op.apply(left.forTrue, right.forTrue),
+                        op.apply(left.forFalse, right.forFalse));
+        //Finisher
+        Function<Partition<A>, ImmutableMap<Boolean, D>> finisher = par -> ImmutableMap.of(
+                true, innerCollector.finisher().apply(par.forTrue),
+                false, innerCollector.finisher().apply(par.forFalse)
+        );
+        return Collector.of(supplier, accumulator, combiner, finisher, Collector.Characteristics.UNORDERED);
+    }
 }

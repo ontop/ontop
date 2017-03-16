@@ -5,4 +5,5 @@ package it.unibz.inf.ontop.pivotalrepr.proposal;
  *
  */
 public interface ProposalResults {
+
 }

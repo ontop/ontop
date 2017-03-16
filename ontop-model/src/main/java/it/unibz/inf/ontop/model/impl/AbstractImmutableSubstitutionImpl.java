@@ -345,6 +345,15 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return convertIntoBooleanExpression(this);
     }
 
+    @Override
+    public ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain) {
+        return new ImmutableSubstitutionImpl(
+                this.getImmutableMap().entrySet().stream()
+                        .filter(e -> restrictingDomain.contains(e.getKey()))
+                        .collect(ImmutableCollectors.toMap())
+        );
+    }
+
     protected static Optional<ImmutableExpression> convertIntoBooleanExpression(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
 
