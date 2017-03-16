@@ -1,5 +1,3 @@
-DROP TABLE test;
-
 CREATE TABLE test (
     name1 character varying(100),
 	name2 character varying(100),

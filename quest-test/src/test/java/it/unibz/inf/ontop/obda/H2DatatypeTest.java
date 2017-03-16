@@ -44,6 +44,9 @@ import static junit.framework.TestCase.assertTrue;
 public class H2DatatypeTest {
     static final String owlFile = "src/test/resources/datatype/datatypes.owl";
 	static final String obdaFile = "src/test/resources/datatype/datetime-h2.obda";
+	private static final String JDBC_URL =  "jdbc:h2:mem:wellboresNoDuplicates";
+	private static final String JDBC_USER =  "sa";
+	private static final String JDBC_PASSWORD =  "";
 
 	private QuestOWL reasoner;
 	private OntopOWLConnection conn;
@@ -53,7 +56,7 @@ public class H2DatatypeTest {
 	@Before
 	public void setUp() throws Exception {
 
-		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:datatypes","sa", "");
+		sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
 		java.sql.Statement s = sqlConnection.createStatement();
 
 		try {
@@ -70,6 +73,9 @@ public class H2DatatypeTest {
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
+				.jdbcUrl(JDBC_URL)
+				.jdbcUser(JDBC_USER)
+				.jdbcPassword(JDBC_PASSWORD)
 				.enableTestMode()
 				.build();
 

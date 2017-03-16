@@ -9,7 +9,6 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.File;
-import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -20,11 +19,10 @@ public class InconsistencyCheckingVirtualTest {
 
 	private String owlfile = "src/test/resources/example/BooksNoAxioms.owl";
 	private String obdafile = "src/test/resources/example/exampleBooks.obda";
+	private String propertiesfile = "src/test/resources/example/exampleBooks.properties";
 	private QuestOWL reasoner;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
-	
-	Properties p;
 	
 	String prefix = "http://meraka/moss/exampleBooks.owl#";
 	OWLClass c1 = Class(IRI.create(prefix + "AudioBook"));
@@ -43,8 +41,6 @@ public class InconsistencyCheckingVirtualTest {
 	
 	@Before
 	public void setUp() throws Exception {
-
-		p = new Properties();
 
 		manager = OWLManager.createOWLOntologyManager();
 		try {
@@ -69,7 +65,7 @@ public class InconsistencyCheckingVirtualTest {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(new File(obdafile))
 				.ontology(ontology)
-				.properties(p)
+				.propertyFile(propertiesfile)
 				.enableTestMode()
 				.build();
 		try {

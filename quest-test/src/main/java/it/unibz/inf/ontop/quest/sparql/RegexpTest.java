@@ -59,6 +59,7 @@ public class RegexpTest extends TestCase {
 
 	final String owlfile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
 	private String obdafile;
+	private String propertyfile;
 	
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
@@ -68,6 +69,7 @@ public class RegexpTest extends TestCase {
 	 */
 	public RegexpTest(String database, boolean isH2){
 		this.obdafile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-" + database + ".obda";
+		this.propertyfile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-" + database + ".properties";
 		this.isH2 = isH2;
 	}
 
@@ -93,7 +95,7 @@ public class RegexpTest extends TestCase {
 			java.sql.Statement s = sqlConnection.createStatement();
 
 			try {
-				String text = new Scanner( new File("src/test/resources/test/stockexchange-create-db2.sql") ).useDelimiter("\\A").next();
+				String text = new Scanner( new File("src/test/resources/test/stockexchange-create-h2.sql") ).useDelimiter("\\A").next();
 				s.execute(text);
 				//Server.startWebServer(sqlConnection);
 				
@@ -124,6 +126,7 @@ public class RegexpTest extends TestCase {
 		QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(new File(obdafile))
+				.propertyFile(propertyfile)
 				.ontologyFile(owlfile)
 				.enableFullMetadataExtraction(false)
 				.build();

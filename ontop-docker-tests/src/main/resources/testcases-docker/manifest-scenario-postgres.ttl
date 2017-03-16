@@ -7,9 +7,11 @@
     rdfs:label "Quest query evaluation scenario tests" ;
     mf:include (
 
+        <sparql/ask/manifest-pgsql.ttl>
         <virtual-mode/stockexchange/datatypes/manifest-pgsql.ttl>
         <virtual-mode/stockexchange/filters/manifest-pgsql.ttl>
         <virtual-mode/stockexchange/modifiers/manifest-pgsql.ttl>
         <virtual-mode/stockexchange/simplecq/manifest-pgsql.ttl>
+
     ).
 

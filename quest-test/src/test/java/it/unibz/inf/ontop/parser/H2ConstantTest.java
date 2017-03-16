@@ -51,11 +51,14 @@ public class H2ConstantTest {
 	final String obdafile = "src/test/resources/mappingConstants.obda";
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
+	private final String url = "jdbc:h2:mem:questjunitdb";
+	private final String username = "sa";
+	private final String password = "";
 
 	@Before
 	public void setUp() throws Exception {
 
-			 sqlConnection= DriverManager.getConnection("jdbc:h2:mem:questjunitdb","sa", "");
+			 sqlConnection= DriverManager.getConnection(url,username, password);
 			    java.sql.Statement s = sqlConnection.createStatement();
 			  
 			    try {
@@ -75,6 +78,9 @@ public class H2ConstantTest {
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.enableFullMetadataExtraction(false)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);

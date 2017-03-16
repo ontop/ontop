@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.postgres;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 
 
 /**

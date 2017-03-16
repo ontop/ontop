@@ -11,7 +11,7 @@ source		select ids, name from wellboreSpain
 
 mappingId	mappingNameFinland
 target		:finland-{idf}  a :Wellbore ; :hasName {name} ; :hasValue {depth} .
-source		select idf, depth from wellboreFinland
+source		select idf, name, depth from wellboreFinland
 
 mappingId	sameAsName
 target		:spain-{idspain} owl:sameAs :finland-{idfinland} .

@@ -50,6 +50,7 @@ public class H2ComplexSameAsTest {
 
 	final String owlfile = "src/test/resources/sameAs/wellbores-complex.owl";
 	final String obdafile = "src/test/resources/sameAs/wellbores-complex.obda";
+	final String propertyfile = "src/test/resources/sameAs/wellbores-complex.properties";
 	private Connection sqlConnection;
 
 	@Before
@@ -95,6 +96,7 @@ public class H2ComplexSameAsTest {
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
+				.propertyFile(propertyfile)
 				.sameAsMappings(sameAs)
 				.enableFullMetadataExtraction(false)
 				.enableTestMode()

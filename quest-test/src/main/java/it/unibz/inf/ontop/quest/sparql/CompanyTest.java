@@ -54,6 +54,7 @@ public class CompanyTest  {
 
 	private static final String owlFile = "resources/optional/company.owl";
 	private static final String obdaFile = "resources/optional/company.obda";
+	private static final String propertyfile = "resources/optional/company.properties";
 
 	private QuestOWL reasoner;
 	private OntopOWLConnection conn;
@@ -75,6 +76,7 @@ public class CompanyTest  {
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
+				.propertyFile(propertyfile)
 				.build();
 
 		/*

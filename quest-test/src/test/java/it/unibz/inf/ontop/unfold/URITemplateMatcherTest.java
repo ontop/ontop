@@ -49,13 +49,14 @@ public class URITemplateMatcherTest {
 
 	private static Connection sqlConnection;
 
+	private String url = "jdbc:h2:mem:questjunitdb";
+	private String username = "sa";
+	private String password = "test";
 
 	@Before
 	public void setUp() throws Exception {
 
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "test";
+
 
 		sqlConnection = DriverManager
 				.getConnection(url, username, password);
@@ -125,6 +126,9 @@ public class URITemplateMatcherTest {
 				.nativeOntopMappingFile(obdaFile)
 				.ontologyFile(owlFile)
 				.enableOntologyAnnotationQuerying(true)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
 		QuestOWL reasoner = factory.createReasoner(config);
