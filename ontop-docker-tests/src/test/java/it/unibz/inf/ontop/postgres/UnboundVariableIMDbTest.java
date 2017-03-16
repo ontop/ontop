@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.postgres;
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 
 
 /**

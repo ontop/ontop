@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.postgres;
  * #L%
  */
 
-import it.unibz.inf.ontop.sql.AbstractConstraintTest;
+import it.unibz.inf.ontop.AbstractConstraintTest;
 
 public class PgSqlConstraintTest extends AbstractConstraintTest {
 

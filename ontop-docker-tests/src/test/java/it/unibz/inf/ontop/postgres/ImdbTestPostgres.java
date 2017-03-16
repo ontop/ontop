@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.postgres;
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 
 /**
  * Test case for the IMDB database see wiki Example_MovieOntology

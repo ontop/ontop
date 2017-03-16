@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.oracle;
  * #L%
  */
 
-import it.unibz.inf.ontop.sql.AbstractConstraintTest;
+import it.unibz.inf.ontop.AbstractConstraintTest;
 
 public class OracleConstraintTest extends AbstractConstraintTest {
 

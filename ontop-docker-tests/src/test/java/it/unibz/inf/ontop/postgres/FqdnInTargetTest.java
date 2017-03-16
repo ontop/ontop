@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.postgres;
 
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 
 /**
  * Tests the usage of a FQDN in the target of a mapping that will be converted in a sub-view

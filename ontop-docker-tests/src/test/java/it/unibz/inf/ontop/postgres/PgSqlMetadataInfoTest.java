@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.postgres;
  * #L%
  */
 
-import it.unibz.inf.ontop.sql.AbstractDbMetadataInfoTest;
+import it.unibz.inf.ontop.AbstractDbMetadataInfoTest;
 
 public class PgSqlMetadataInfoTest extends AbstractDbMetadataInfoTest {
 

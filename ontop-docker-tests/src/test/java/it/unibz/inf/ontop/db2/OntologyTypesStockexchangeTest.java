@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.db2;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 
 /**
  * Test if the datatypes are assigned correctly.
