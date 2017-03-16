@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.DatalogTools;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -180,10 +181,13 @@ public class IntermediateQueryToDatalogTranslator {
 			
 		} else if (node instanceof FilterNode) {
 			ImmutableExpression filter = ((FilterNode) node).getFilterCondition();
-			Expression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter);
 			List<QueryNode> listnode =  te.getChildren(node);
 			body.addAll(getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms));
-			body.add(mutFilter);
+
+			filter.flattenAND().stream()
+					.map(ImmutabilityTools::convertToMutableBooleanExpression)
+					.forEach(body::add);
+
 			return body;
 			
 					
