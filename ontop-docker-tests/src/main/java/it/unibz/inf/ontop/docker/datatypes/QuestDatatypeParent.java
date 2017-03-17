@@ -109,6 +109,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 	protected Repository createRepository() throws Exception {
 		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileURL)
+				.enableTestMode()
 				.nativeOntopMappingFile(obdaFileURL);
 
 		if ((parameterFileURL != null) && (!parameterFileURL.isEmpty()))

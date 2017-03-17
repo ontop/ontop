@@ -35,6 +35,7 @@ public class AnnotationTest {
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
                 .propertyFile(propertiesFile)
+                .enableTestMode()
                 .enableOntologyAnnotationQuerying(true)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);

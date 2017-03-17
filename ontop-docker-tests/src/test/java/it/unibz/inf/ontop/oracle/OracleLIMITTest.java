@@ -85,6 +85,7 @@ public class OracleLIMITTest {
 				.ontologyFile(owlfile)
 				.nativeOntopMappingFile(obdaFileName)
 				.enableFullMetadataExtraction(false)
+				.enableTestMode()
 				.propertyFile(propertyFile)
 				.build();
 

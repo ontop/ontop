@@ -59,6 +59,7 @@ public class OracleIdentifierTest {
 					.ontologyFile(owlfile)
 					.nativeOntopMappingFile(obdafile)
 					.enableExistentialReasoning(true)
+					.enableTestMode()
 					.propertyFile(propertiesfile)
 					.build();
 

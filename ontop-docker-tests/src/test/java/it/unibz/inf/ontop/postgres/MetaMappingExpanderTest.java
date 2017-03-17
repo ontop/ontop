@@ -26,6 +26,7 @@ public class MetaMappingExpanderTest {
                     .ontologyFile(owlfile)
                     .nativeOntopMappingFile(obdafile)
                     .propertyFile(propertiesfile)
+                    .enableTestMode()
                     .build();
             QuestOWL reasoner = factory.createReasoner(config);
 		/*

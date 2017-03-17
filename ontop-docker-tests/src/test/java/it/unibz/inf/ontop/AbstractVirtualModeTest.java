@@ -44,6 +44,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
                 .ontologyFile(owlFileName)
                 .nativeOntopMappingFile(new File(obdaFileName))
                 .propertyFile(propertyFileName)
+                .enableTestMode()
                 .build();
         reasoner = factory.createReasoner(config);
 
