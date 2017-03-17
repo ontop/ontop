@@ -10,10 +10,12 @@ import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.transform.FilterNullableVariableQueryTransformer;
+import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.LinkedList;
@@ -80,15 +82,47 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
                                              ImmutableExpression filterCondition) {
         IntermediateQueryBuilder queryBuilder = query.newBuilder();
         queryBuilder.init(query.getProjectionAtom(), rootNode);
-        FilterNode filterNode = iqFactory.createFilterNode(filterCondition);
-        queryBuilder.addChild(rootNode, filterNode);
 
-        ImmutableList<QueryNode> formerRootChildren = query.getChildren(rootNode);
+        QueryNode formerRootChild = query.getFirstChild(rootNode)
+                .orElseThrow(() -> new InvalidIntermediateQueryException("The root node does not have a child " +
+                        "while it has some child variables."));
 
-        formerRootChildren
-                .forEach(c -> queryBuilder.addChild(filterNode, c));
+        Queue<QueryNode> parentQueue = new LinkedList<>();
 
-        Queue<QueryNode> parentQueue = new LinkedList<>(formerRootChildren);
+        if (formerRootChild instanceof FilterNode) {
+            FilterNode newFilterNode = iqFactory.createFilterNode(
+                    ImmutabilityTools.foldBooleanExpressions(
+                            ((FilterNode) formerRootChild).getFilterCondition(),
+                            filterCondition).get());
+            queryBuilder.addChild(rootNode, newFilterNode);
+            query.getChildren(formerRootChild)
+                    .forEach(c -> {
+                        queryBuilder.addChild(newFilterNode, c);
+                        parentQueue.add(c);
+                    });
+        }
+        else if (formerRootChild instanceof InnerJoinNode) {
+            InnerJoinNode formerJoinNode = (InnerJoinNode) formerRootChild;
+
+            ImmutableExpression newJoiningCondition = formerJoinNode.getOptionalFilterCondition()
+                    .map(e -> ImmutabilityTools.foldBooleanExpressions(e, filterCondition).get())
+                    .orElse(filterCondition);
+            InnerJoinNode newJoinNode = formerJoinNode.changeOptionalFilterCondition(Optional.of(newJoiningCondition));
+
+            queryBuilder.addChild(rootNode, newJoinNode);
+            query.getChildren(formerJoinNode)
+                    .forEach(c -> {
+                        queryBuilder.addChild(newJoinNode, c);
+                        parentQueue.add(c);
+                    });
+        }
+        else {
+            FilterNode filterNode = iqFactory.createFilterNode(filterCondition);
+            queryBuilder.addChild(rootNode, filterNode);
+            queryBuilder.addChild(filterNode, formerRootChild);
+            parentQueue.add(formerRootChild);
+        }
+
         while (!parentQueue.isEmpty()) {
             QueryNode parentNode = parentQueue.poll();
             query.getChildren(parentNode)
