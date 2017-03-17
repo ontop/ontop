@@ -1369,7 +1369,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("Expected query: "+ expectedQuery);
-        IntermediateQuery optimizedQuery = new FixedPointJoinLikeOptimizer().optimize(initialQuery);
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
         System.out.println("Optimized query: "+ optimizedQuery);
 
 
@@ -1423,7 +1423,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("Expected query: "+ expectedQuery);
-        IntermediateQuery optimizedQuery = new FixedPointJoinLikeOptimizer().optimize(initialQuery);
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
         System.out.println("Optimized query: "+ optimizedQuery);
 
 

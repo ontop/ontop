@@ -106,8 +106,7 @@ public class ExpressionEvaluatorTest {
         IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
         unOptimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
-        JoinLikeOptimizer joinLikeOptimizer = new FixedPointJoinLikeOptimizer();
-        IntermediateQuery optimizedQuery = joinLikeOptimizer.optimize(unOptimizedQuery);
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -235,8 +234,7 @@ public class ExpressionEvaluatorTest {
         IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
         unOptimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
-        JoinLikeOptimizer joinLikeOptimizer = new FixedPointJoinLikeOptimizer();
-        IntermediateQuery optimizedQuery = joinLikeOptimizer.optimize(unOptimizedQuery);
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 

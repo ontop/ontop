@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.LeftJoinNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
@@ -11,9 +12,11 @@ import java.util.Optional;
 /**
  *
  */
-public class BasicLeftJoinOptimizer extends NodeCentricDepthFirstOptimizer<LeftJoinOptimizationProposal> {
+public class BasicLeftJoinOptimizer extends NodeCentricDepthFirstOptimizer<LeftJoinOptimizationProposal>
+        implements LeftJoinOptimizer {
 
-    public BasicLeftJoinOptimizer() {
+    @Inject
+    private BasicLeftJoinOptimizer() {
         super(true);
     }
 
