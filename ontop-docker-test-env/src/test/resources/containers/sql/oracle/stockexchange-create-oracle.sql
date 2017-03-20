@@ -91,9 +91,10 @@
 --------------------------------------------------------
 
   CREATE TABLE "SYSTEM"."BROKERWORKSFOR_NEW" 
-   (	"BROKERID" NUMBER(*,0), 
+   (	"BROKERID" NUMBER(*,0) NOT NULL,
 	"COMPANYID" NUMBER(*,0), 
 	"CLIENTID" NUMBER(*,0)
+	CONSTRAINT bwfbook_pk PRIMARY KEY ("BROKERID")
    ) ;
 --------------------------------------------------------
 --  DDL for Table TRANSACTION_NEW

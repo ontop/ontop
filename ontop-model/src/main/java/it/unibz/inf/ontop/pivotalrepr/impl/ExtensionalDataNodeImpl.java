@@ -84,7 +84,9 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
         return IntStream.range(1, arguments.size() + 1)
                 .filter(i -> arguments.get(i - 1).equals(variable))
                 .mapToObj(relation::getAttribute)
-                .anyMatch(Attribute::canNull);
+                .allMatch(Attribute::canNull);
+
+
     }
 
     @Override
