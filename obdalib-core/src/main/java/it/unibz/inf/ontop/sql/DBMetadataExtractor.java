@@ -127,16 +127,15 @@ public class DBMetadataExtractor {
 		String productName = md.getDatabaseProductName();
 		
 		QuotedIDFactory idfac;
-		// treat Exareme as a case-sensitive DB engine (like MS SQL Server)
-		if (md.storesMixedCaseIdentifiers()) {
-			 //  MySQL
-			if (productName.contains("MySQL"))  {
-				//System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());		
-				idfac = new QuotedIDFactoryMySQL("`"); 
-			}
-			else
-				// "SQL Server" = MS SQL Server
-				idfac = new QuotedIDFactoryIdentity("\"");
+		//  MySQL
+		if (productName.contains("MySQL"))  {
+			//System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
+			idfac = new QuotedIDFactoryMySQL("`");
+		}
+		else if (md.storesMixedCaseIdentifiers()) {
+			// treat Exareme as a case-sensitive DB engine (like MS SQL Server)
+			// "SQL Server" = MS SQL Server
+			idfac = new QuotedIDFactoryIdentity("\"");
 		}
 		else {
 			if (md.storesLowerCaseIdentifiers())
