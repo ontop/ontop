@@ -130,7 +130,7 @@ public class DBMetadataExtractor {
 		//  MySQL
 		if (productName.contains("MySQL"))  {
 			//System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
-			idfac = new QuotedIDFactoryMySQL("`");
+			idfac = new QuotedIDFactoryMySQL(md.storesMixedCaseIdentifiers(), "`");
 		}
 		else if (md.storesMixedCaseIdentifiers()) {
 			// treat Exareme as a case-sensitive DB engine (like MS SQL Server)
