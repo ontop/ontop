@@ -84,7 +84,6 @@
 		<module>ontop-protege</module>
 		<module>ontop-cli</module>
 		<module>quest-test</module>
-		<module>ontop-docker-test-env</module>
 		<module>ontop-docker-tests</module>
 	</modules>
 
