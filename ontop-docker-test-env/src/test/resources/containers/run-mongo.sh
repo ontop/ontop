@@ -1,1 +1,0 @@
-docker run --name ontop_mongo_running -d ontop_mongo
