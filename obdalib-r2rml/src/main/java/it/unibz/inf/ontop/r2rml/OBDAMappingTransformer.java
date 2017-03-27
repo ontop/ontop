@@ -278,7 +278,9 @@ public class OBDAMappingTransformer {
 		Template templs = mfact.createTemplate(subjectTemplate);
 		SubjectMap sm = mfact.createSubjectMap(templs);
 		
-		TriplesMap tm = mfact.createTriplesMap(lt, sm, axiom.getId());
+		//TriplesMap tm = mfact.createTriplesMap(lt, sm, axiom.getId());
+		TriplesMap tm = mfact.createTriplesMap(lt, sm);
+		
 		
 		//process target query
 		for (Function func : tquery) {
