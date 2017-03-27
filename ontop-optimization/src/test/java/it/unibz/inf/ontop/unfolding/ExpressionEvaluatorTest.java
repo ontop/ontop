@@ -2,20 +2,25 @@ package it.unibz.inf.ontop.unfolding;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointJoinLikeOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.JoinLikeOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
+import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.Optional;
+
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.ExpressionOperation.NEQ;
-import static it.unibz.inf.ontop.model.ExpressionOperation.OR;
+import static it.unibz.inf.ontop.model.ExpressionOperation.*;
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * Test {@link it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator}
@@ -101,8 +106,7 @@ public class ExpressionEvaluatorTest {
         IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
         unOptimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
-        JoinLikeOptimizer joinLikeOptimizer = new FixedPointJoinLikeOptimizer();
-        IntermediateQuery optimizedQuery = joinLikeOptimizer.optimize(unOptimizedQuery);
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -230,8 +234,7 @@ public class ExpressionEvaluatorTest {
         IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
         unOptimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
-        JoinLikeOptimizer joinLikeOptimizer = new FixedPointJoinLikeOptimizer();
-        IntermediateQuery optimizedQuery = joinLikeOptimizer.optimize(unOptimizedQuery);
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -352,11 +355,119 @@ public class ExpressionEvaluatorTest {
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 
-    private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
+
+    @Test
+    public void testIsNotNullUri1() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, generateURI1(X));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertTrue(optionalExpression.isPresent());
+        assertEquals(optionalExpression.get(), DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, X));
+    }
+
+    @Test
+    public void testIsNotNullUri2() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, generateURI2(X, Y));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertTrue(optionalExpression.isPresent());
+        assertEquals(optionalExpression.get(),
+                ImmutabilityTools.foldBooleanExpressions(
+                        DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, X),
+                        DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, Y)).get());
+    }
+
+    @Test
+    public void testIsNotNullUri3() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NOT_NULL,
+                generateURI2(DATA_FACTORY.getConstantLiteral("toto"), X));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertTrue(optionalExpression.isPresent());
+        assertEquals(optionalExpression.get(), DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, X));
+    }
+
+    @Ignore("TODO: optimize this case")
+    @Test
+    public void testIsNotNullUri4() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NOT_NULL,
+                generateURI1(DATA_FACTORY.getConstantLiteral("toto")));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertFalse(optionalExpression.isPresent());
+        assertTrue(result.isEffectiveTrue());
+    }
+
+    @Ignore("TODO: support this tricky case")
+    @Test
+    public void testIsNotNullUriTrickyCase() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NOT_NULL,
+                generateURI1(DATA_FACTORY.getImmutableExpression(IS_NULL, X)));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+
+        /*
+         * Not necessary -> could be further optimized
+         */
+        if (optionalExpression.isPresent()) {
+            ImmutableExpression optimizedExpression = optionalExpression.get();
+            assertNotEquals("Invalid optimization for " + initialExpression,
+                    optimizedExpression, DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, X));
+            fail("The expression " + initialExpression + " should be evaluated as true");
+        }
+        else {
+            assertTrue(result.isEffectiveTrue());
+        }
+
+    }
+
+    @Test
+    public void testIsNullUri1() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NULL, generateURI1(X));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertTrue(optionalExpression.isPresent());
+        assertEquals(optionalExpression.get(), DATA_FACTORY.getImmutableExpression(IS_NULL, X));
+    }
+
+    @Test
+    public void testIsNullUri2() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NULL, generateURI2(X, Y));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertTrue(optionalExpression.isPresent());
+        assertEquals(optionalExpression.get(),
+                DATA_FACTORY.getImmutableExpression(OR,
+                        DATA_FACTORY.getImmutableExpression(IS_NULL, X),
+                        DATA_FACTORY.getImmutableExpression(IS_NULL, Y)));
+    }
+
+    @Test
+    public void testIsNullUri3() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NULL,
+                generateURI2(DATA_FACTORY.getConstantLiteral("toto"), X));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertTrue(optionalExpression.isPresent());
+        assertEquals(optionalExpression.get(), DATA_FACTORY.getImmutableExpression(IS_NULL, X));
+    }
+
+    @Ignore("TODO: optimize this case")
+    @Test
+    public void testIsNullUri4() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NULL,
+                generateURI1(DATA_FACTORY.getConstantLiteral("toto")));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertFalse(optionalExpression.isPresent());
+        assertTrue(result.isEffectiveFalse());
+    }
+
+    private ImmutableFunctionalTerm generateURI1(ImmutableTerm argument) {
         return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }
 
-    private ImmutableFunctionalTerm generateURI2(Variable var1, Variable var2) {
+    private ImmutableFunctionalTerm generateURI2(VariableOrGroundTerm var1, Variable var2) {
         return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE2, URI_TEMPLATE_STR_1, var1, var2);
     }
 

@@ -16,6 +16,9 @@ import it.unibz.inf.ontop.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.InnerJoinOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.JoinLikeOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.LeftJoinOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.pivotalrepr.tools.QueryUnionSplitter;
 
@@ -50,6 +53,9 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromPreferences(TrueNodeRemovalExecutor.class);
         bindFromPreferences(DatalogProgram2QueryConverter.class);
         bindFromPreferences(QueryUnionSplitter.class);
+        bindFromPreferences(InnerJoinOptimizer.class);
+        bindFromPreferences(JoinLikeOptimizer.class);
+        bindFromPreferences(LeftJoinOptimizer.class);
 
         // Releases the configuration (enables some GC)
         this.configuration = null;

@@ -62,16 +62,19 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 	private final OntopQueryAnsweringSettings settings;
 	private final UriTemplateMatcher uriTemplateMatcher;
 	private final DBMetadata dbMetadata;
+	private final JoinLikeOptimizer joinLikeOptimizer;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
-                                @Assisted ExecutorRegistry executorRegistry,
-                                @Nullable IRIDictionary iriDictionary,
-                                QueryCache queryCache,
-                                OntopQueryAnsweringSettings settings,
-                                DatalogProgram2QueryConverter datalogConverter,
-                                ReformulationFactory reformulationFactory,
-								QueryRewriter rewriter) {
+								@Assisted ExecutorRegistry executorRegistry,
+								@Nullable IRIDictionary iriDictionary,
+								QueryCache queryCache,
+								OntopQueryAnsweringSettings settings,
+								DatalogProgram2QueryConverter datalogConverter,
+								ReformulationFactory reformulationFactory,
+								QueryRewriter rewriter,
+								JoinLikeOptimizer joinLikeOptimizer) {
+		this.joinLikeOptimizer = joinLikeOptimizer;
 		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = LinearInclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
@@ -200,8 +203,6 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
-
-				JoinLikeOptimizer joinLikeOptimizer = new FixedPointJoinLikeOptimizer();
 				intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
 				log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
 

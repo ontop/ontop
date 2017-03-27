@@ -142,7 +142,7 @@ public class IntermediateQueryToDatalogTranslator {
 			pr.appendRule(newrule);
 
             head.optionalChildNode.ifPresent(node -> {
-                List<Function> uAtoms = getAtomFrom(query, node, heads, subQueryProjectionAtoms);
+                List<Function> uAtoms = getAtomFrom(query, node, heads, subQueryProjectionAtoms, false);
                 newrule.getBody().addAll(uAtoms);
             });
 
@@ -157,7 +157,8 @@ public class IntermediateQueryToDatalogTranslator {
 	 * Usually it will be a single atom, but it is different for the filter case.
 	 */
 	private List<Function> getAtomFrom(IntermediateQuery te, QueryNode node, Queue<RuleHead> heads,
-											  Map<ConstructionNode, DataAtom> subQueryProjectionAtoms) {
+									   Map<ConstructionNode, DataAtom> subQueryProjectionAtoms,
+									   boolean isNested) {
 		
 		List<Function> body = new ArrayList<>();
 		
@@ -180,10 +181,13 @@ public class IntermediateQueryToDatalogTranslator {
 			
 		} else if (node instanceof FilterNode) {
 			ImmutableExpression filter = ((FilterNode) node).getFilterCondition();
-			Expression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter);
 			List<QueryNode> listnode =  te.getChildren(node);
-			body.addAll(getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms));
-			body.add(mutFilter);
+			body.addAll(getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms, true));
+
+			filter.flattenAND().stream()
+					.map(ImmutabilityTools::convertToMutableBooleanExpression)
+					.forEach(body::add);
+
 			return body;
 			
 					
@@ -199,36 +203,14 @@ public class IntermediateQueryToDatalogTranslator {
 		 * Nested Atoms	
 		 */
 		} else  if (node instanceof InnerJoinNode) {
-			Optional<ImmutableExpression> filter = ((InnerJoinNode)node).getOptionalFilterCondition();
-			List<Function> atoms = new ArrayList<>();
-			List<QueryNode> listnode =  te.getChildren(node);
-			for (QueryNode childnode: listnode) {
-				List<Function> atomsList = getAtomFrom(te, childnode, heads, subQueryProjectionAtoms);
-				atoms.addAll(atomsList);
-			}
-
-			if (atoms.size() <= 1) {
-				throw new IllegalArgumentException("Inconsistent IQ: an InnerJoinNode must have at least two children");
-			}
-
-			if (filter.isPresent()){
-				ImmutableExpression filter2 = filter.get();
-				Function mutFilter = ImmutabilityTools.convertToMutableBooleanExpression(filter2);
-				Function newJ = getSPARQLJoin(atoms, Optional.of(mutFilter));
-				body.add(newJ);
-				return body;
-			}else{
-				Function newJ = getSPARQLJoin(atoms, Optional.empty());
-				body.add(newJ);
-				return body;
-			}
+			return getAtomsFromJoinNode((InnerJoinNode)node, te, heads, subQueryProjectionAtoms, isNested);
 			
 		} else if (node instanceof LeftJoinNode) {
 			Optional<ImmutableExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
 			List<QueryNode> listnode =  te.getChildren(node);
 
-			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms);
-			List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), heads, subQueryProjectionAtoms);
+			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms, true);
+			List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), heads, subQueryProjectionAtoms, true);
 				
 			if (filter.isPresent()){
 				ImmutableExpression filter2 = filter.get();
@@ -295,6 +277,44 @@ public class IntermediateQueryToDatalogTranslator {
 			 throw new UnsupportedOperationException("Type of node in the intermediate tree is unknown!!");
 		}
 
+	}
+
+	private List<Function> getAtomsFromJoinNode(InnerJoinNode node, IntermediateQuery te, Queue<RuleHead> heads,
+												Map<ConstructionNode, DataAtom> subQueryProjectionAtoms,
+												boolean isNested) {
+		List<Function> body = new ArrayList<>();
+		Optional<ImmutableExpression> filter = node.getOptionalFilterCondition();
+		List<Function> atoms = new ArrayList<>();
+		List<QueryNode> listnode =  te.getChildren(node);
+		for (QueryNode childnode: listnode) {
+			List<Function> atomsList = getAtomFrom(te, childnode, heads, subQueryProjectionAtoms, true);
+			atoms.addAll(atomsList);
+		}
+
+		if (atoms.size() <= 1) {
+			throw new IllegalArgumentException("Inconsistent IQ: an InnerJoinNode must have at least two children");
+		}
+
+		if (filter.isPresent()){
+			if (isNested) {
+				ImmutableExpression filter2 = filter.get();
+				Function mutFilter = ImmutabilityTools.convertToMutableBooleanExpression(filter2);
+				Function newJ = getSPARQLJoin(atoms, Optional.of(mutFilter));
+				body.add(newJ);
+				return body;
+			}
+			else {
+				body.addAll(atoms);
+				filter.get().flattenAND().stream()
+						.map(ImmutabilityTools::convertToMutableBooleanExpression)
+						.forEach(body::add);
+				return body;
+			}
+		}else{
+			Function newJ = getSPARQLJoin(atoms, Optional.empty());
+			body.add(newJ);
+			return body;
+		}
 	}
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
