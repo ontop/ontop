@@ -30,7 +30,7 @@ public class Db2ConstraintTest extends AbstractConstraintTest {
 
 	@Override
 	protected String getConnectionPassword() {
-		return "db2inst1-pwd";
+		return "obda-pwd";
 	}
 
 	@Override
