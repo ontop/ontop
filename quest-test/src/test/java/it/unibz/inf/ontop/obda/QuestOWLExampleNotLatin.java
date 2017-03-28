@@ -40,6 +40,7 @@ public class QuestOWLExampleNotLatin {
 	 */
 	final String owlfile = "src/test/resources/example/exampleBooksNotLatin.owl";
 	final String obdafile = "src/test/resources/example/exampleBooksNotLatin.obda";
+	final String profertiesfile = "src/test/resources/example/exampleBooksNotLatin.obda";
 
     @Test
 	public void runQuery() throws Exception {
@@ -51,6 +52,7 @@ public class QuestOWLExampleNotLatin {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
+				.propertyFile(profertiesfile)
 				.enableTestMode()
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);

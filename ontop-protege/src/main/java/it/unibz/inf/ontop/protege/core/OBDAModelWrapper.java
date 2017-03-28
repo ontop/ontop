@@ -4,9 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
@@ -92,7 +93,7 @@ public class OBDAModelWrapper {
      *
      * UGLY!
      */
-    public void parseMappings(File mappingFile) throws DuplicateMappingException, InvalidMappingException, IOException {
+    public void parseMappings(File mappingFile) throws DuplicateMappingException, InvalidMappingException, IOException, MappingIOException {
         Properties properties = source
                 .map(DataSource2PropertiesConvertor::convert)
                 .orElseThrow(() -> new IllegalStateException("Cannot parse the mapping without a data source"));
@@ -112,8 +113,18 @@ public class OBDAModelWrapper {
                 .collect(ImmutableCollectors.toMap());
 
         PrefixManager mergedPrefixManager = specificationFactory.createPrefixManager(mergedPrefixes);
+
+        ImmutableList<OBDAMappingAxiom> mappingAxioms = newObdaModel.getMappings();
+
+        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
+                mappingAxioms.stream()
+                        .flatMap(ax -> ax.getTargetQuery().stream())
+                        .flatMap(atom -> atom.getTerms().stream())
+                        .filter(t -> t instanceof Function)
+                        .map(t -> (Function) t));
+
         obdaModel = obdaModel.newModel(newObdaModel.getMappings(),
-                specificationFactory.createPrefixManager(mergedPrefixManager));
+                specificationFactory.createMetadata(mergedPrefixManager, uriTemplateMatcher));
     }
 
     public PrefixManager getPrefixManager() {
@@ -346,7 +357,8 @@ public class OBDAModelWrapper {
     private static OBDAModel createNewOBDAModel(SpecificationFactory specificationFactory, OBDAFactoryWithException obdaFactory,
                                                 PrefixManagerWrapper prefixManager) {
         try {
-            return obdaFactory.createOBDAModel(ImmutableList.of(), specificationFactory.createPrefixManager(prefixManager));
+            return obdaFactory.createOBDAModel(ImmutableList.of(), specificationFactory.createMetadata(prefixManager,
+                    UriTemplateMatcher.create(Stream.of())));
             /**
              * No mapping so should never happen
              */

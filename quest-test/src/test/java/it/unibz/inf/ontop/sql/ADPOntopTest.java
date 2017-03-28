@@ -16,9 +16,10 @@ import java.io.FileReader;
  */
 public class ADPOntopTest {
 	
-	final String owlfile = "src/test/resources/adp/npd-ql.owl";
-	final String obdafile = "src/test/resources/adp/mapping-fed.obda";
-	final String queryfile = "src/test/resources/adp/01.q";
+	final String owlFile = "src/test/resources/adp/npd-ql.owl";
+	final String obdaFile = "src/test/resources/adp/mapping-fed.obda";
+	final String queryFile = "src/test/resources/adp/01.q";
+	final String propertyFile = "src/test/resources/adp/mapping-fed.properties";
 	final String r2rmlfile = "src/test/resources/adp/mapping-fed.ttl";
 
 	public void runQuery() throws Exception {
@@ -28,8 +29,9 @@ public class ADPOntopTest {
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(new File(obdafile))
-				.ontologyFile(owlfile)
+				.nativeOntopMappingFile(new File(obdaFile))
+				.ontologyFile(owlFile)
+				.propertyFile(propertyFile)
 				.enableTestMode()
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
@@ -41,7 +43,7 @@ public class ADPOntopTest {
 		OntopOWLStatement st = conn.createStatement();
 
 		String sparqlQuery = Joiner.on("\n").join(
-				CharStreams.readLines(new FileReader(queryfile))); 
+				CharStreams.readLines(new FileReader(queryFile)));
 		
 		//System.out.println(sparqlQuery);
 		

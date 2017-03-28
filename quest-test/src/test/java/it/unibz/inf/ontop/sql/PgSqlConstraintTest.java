@@ -33,7 +33,7 @@ public class PgSqlConstraintTest extends AbstractConstraintTest {
 
 	@Override
 	protected String getConnectionString() {
-		return "jdbc:postgresql://10.7.20.39/dbconstraints";
+		return "jdbc:postgresql://obdalin.inf.unibz.it/dbconstraints";
 	}
 
 	@Override

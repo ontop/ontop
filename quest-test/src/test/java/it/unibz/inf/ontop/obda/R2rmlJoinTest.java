@@ -10,9 +10,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
-import java.util.Properties;
-
 import static org.junit.Assert.assertFalse;
 
 public class R2rmlJoinTest {
@@ -23,7 +20,7 @@ public class R2rmlJoinTest {
     final String obdaFile = "src/test/resources/oreda/oreda_bootstrapped_mapping.obda";
     final String propertyFile = "src/test/resources/oreda/oreda_bootstrapped_mapping.properties";
 
-    private void runTests(Optional<Properties> optionalProperties, String filename) throws Exception {
+    private void runTests(String filename, boolean isR2rml) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
@@ -32,10 +29,9 @@ public class R2rmlJoinTest {
                 .propertyFile(propertyFile)
                 .enableTestMode();
 
-        if (optionalProperties.isPresent()) {
+        if (isR2rml) {
             configBuilder
-                    .r2rmlMappingFile(filename)
-                    .properties(optionalProperties.get());
+                    .r2rmlMappingFile(filename);
         }
         else {
             configBuilder.nativeOntopMappingFile(filename);
@@ -86,11 +82,11 @@ public class R2rmlJoinTest {
 
     @Test
     public void testR2rml() throws Exception {
-        Properties p = new Properties();
+
 
         log.info("Loading r2rml file");
 
-        runTests(Optional.of(p), r2rmlFile);
+        runTests(r2rmlFile, true);
     }
 
 
@@ -98,7 +94,7 @@ public class R2rmlJoinTest {
     public void testOBDA() throws Exception {
 
         log.info("Loading OBDA file");
-        runTests(Optional.empty(), obdaFile);
+        runTests(obdaFile, false);
     }
 
 }

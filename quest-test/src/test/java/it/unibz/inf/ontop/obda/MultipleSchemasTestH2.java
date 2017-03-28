@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.obda;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.utils.SQLScriptRunner;
 import org.junit.*;
 import org.semanticweb.owlapi.model.OWLObject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +62,9 @@ public class MultipleSchemasTestH2 {
                     .nativeOntopMappingFile(obdafile)
                     .ontologyFile(owlfile)
                     .enableFullMetadataExtraction(false)
+                    .jdbcUrl(url)
+                    .jdbcUser(username)
+                    .jdbcPassword(password)
                     .enableTestMode()
                     .build();
             reasoner = factory.createReasoner(config);

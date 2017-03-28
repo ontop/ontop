@@ -7,7 +7,7 @@ xsd:	http://www.w3.org/2001/XMLSchema#
 
 mappingId	Date-Time Types
 target		:datetime-{id} a :Row ; :hasTime {type_time} ; :hasTimeString {type_time}^^xsd:string ; :hasDate {type_date}^^xsd:date ; :hasDateString {type_date}^^xsd:string ; :hasYear {type_year}^^xsd:gYear ; :hasTimestamp {type_timestamp} ; :hasTimestampString {type_timestamp}^^xsd:string .
-source		select id, type_timestamp, type_year, type_date, type_time from "DateTimes"
+source		select "id", "type_timestamp", "type_year", "type_date", "type_time" from "DateTimes"
 
 
 ]]

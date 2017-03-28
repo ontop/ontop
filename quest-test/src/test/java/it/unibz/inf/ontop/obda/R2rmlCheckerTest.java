@@ -43,7 +43,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -82,6 +81,8 @@ public class R2rmlCheckerTest {
 
 		onto = OWLAPITranslatorUtility.translate(owlOntology);
 
+		loadOBDA();
+		loadR2rml();
 	}
 
 	@After
@@ -327,11 +328,10 @@ public class R2rmlCheckerTest {
 	/**
 	 * create obda model from r2rml and prepare the reasoner
 	 * 
-	 * @param p
-	 *            quest preferences for QuestOWL, dataSource for the model
+	 *
 	 * @throws Exception
 	 */
-	private void loadR2rml(Properties p) throws OWLOntologyCreationException {
+	private void loadR2rml() throws OWLOntologyCreationException {
 		log.info("Loading r2rml file");
 		QuestOWLFactory factory = new QuestOWLFactory();
 
@@ -347,11 +347,10 @@ public class R2rmlCheckerTest {
 	/**
 	 * Create obda model from obda file and prepare the reasoner
 	 * 
-	 * @param p
-	 *            quest preferences for QuestOWL, dataSource for the model
+	 *
 	 */
 
-	private void loadOBDA(Properties p) throws Exception {
+	private void loadOBDA() throws Exception {
 		// Loading the OBDA data
 		log.info("Loading obda file");
 

@@ -5,14 +5,14 @@ import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.input.InputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopEngineFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.*;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
-import it.unibz.inf.ontop.sql.RDBMetadata;
-import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.RDBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 
 /**
  * This class shows how to create an instance of quest giving the metadata manually 
@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.sql.QuotedIDFactory;
 public class ExampleManualMetadata {
 	final String owlfile = "src/main/resources/example/exampleSensor.owl";
 	final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
+	final String propertyfile = "src/main/resources/example/UseCaseExampleMini.properties";
 	private OntopOWLStatement qst = null;
 	private OntopQueryEngine queryEngine;
 
@@ -34,6 +35,7 @@ private void setup()  throws Exception {
 	OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 			.nativeOntopMappingFile(obdafile)
 			.ontologyFile(owlfile)
+			.propertyFile(propertyfile)
 			.dbMetadata(getMeta())
 			.enableTestMode()
 			.build();
