@@ -72,4 +72,18 @@ public abstract class AbstractDBMetadata implements DBMetadata {
 
     protected abstract AtomPredicate convertToAtomPredicate(Predicate functionSymbol,
                                                             Map<Predicate, AtomPredicate> knownPredicateMap);
+
+    @Override
+    public Optional<DatabaseRelationDefinition> getDatabaseRelationByPredicate(AtomPredicate predicate) {
+
+        RelationID relationId = Relation2DatalogPredicate.createRelationFromPredicateName(getQuotedIDFactory(),
+                predicate);
+
+        return Optional.ofNullable(getRelation(relationId))
+                /**
+                 * Here we only consider DB relations
+                 */
+                .filter(r -> r instanceof DatabaseRelationDefinition)
+                .map(r -> (DatabaseRelationDefinition) r);
+    }
 }
