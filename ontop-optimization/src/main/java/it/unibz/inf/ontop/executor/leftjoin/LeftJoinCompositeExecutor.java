@@ -13,6 +13,8 @@ import java.util.Optional;
 
 /**
  * TODO: explain
+ *
+ * TODO: include LeftToInnerJoinExecutor + removal of unnecessary right parts
  */
 @Singleton
 public class LeftJoinCompositeExecutor extends SimpleNodeCentricCompositeExecutor<LeftJoinNode,
@@ -21,12 +23,10 @@ public class LeftJoinCompositeExecutor extends SimpleNodeCentricCompositeExecuto
     private final ImmutableList<SimpleNodeCentricExecutor<LeftJoinNode, LeftJoinOptimizationProposal>> executors;
 
     @Inject
-    private LeftJoinCompositeExecutor(LeftJoinNormalizerExecutor normalizerExecutor,
-                                      RedundantSelfLeftJoinExecutor selfLeftJoinExecutor,
+    private LeftJoinCompositeExecutor(RedundantSelfLeftJoinExecutor selfLeftJoinExecutor,
                                       ForeignKeyLeftJoinExecutor fkExecutor) {
         ImmutableList.Builder<SimpleNodeCentricExecutor<LeftJoinNode, LeftJoinOptimizationProposal>> executorBuilder = ImmutableList.builder();
 
-        executorBuilder.add(normalizerExecutor);
         //executorBuilder.add(new LeftJoinBooleanExpressionExecutor());
         executorBuilder.add(selfLeftJoinExecutor);
         executorBuilder.add(fkExecutor);
