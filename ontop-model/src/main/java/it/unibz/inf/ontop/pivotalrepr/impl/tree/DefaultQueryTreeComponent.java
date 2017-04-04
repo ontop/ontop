@@ -274,6 +274,24 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
         return tree.getVersionNumber();
     }
 
+    @Override
+    public ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode) {
+        ImmutableSet.Builder<Variable> requiredVariableBuilder = ImmutableSet.builder();
+
+        // Non-final
+        Optional<QueryNode> optionalAncestor = getParent(queryNode);
+        while (optionalAncestor.isPresent()) {
+            QueryNode ancestor = optionalAncestor.get();
+            requiredVariableBuilder.addAll(ancestor.getLocallyRequiredVariables());
+
+            if (ancestor instanceof ExplicitVariableProjectionNode)
+                break;
+            optionalAncestor = getParent(ancestor);
+        }
+
+        return requiredVariableBuilder.build();
+    }
+
     private Stream<Variable> getProjectedVariableStream(QueryNode node) {
         if (node instanceof ExplicitVariableProjectionNode) {
             return ((ExplicitVariableProjectionNode) node).getVariables().stream();

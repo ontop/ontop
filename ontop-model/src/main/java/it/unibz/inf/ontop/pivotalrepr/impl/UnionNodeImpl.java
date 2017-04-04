@@ -153,4 +153,9 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     public String toString() {
         return UNION_NODE_STR + " " + projectedVariables;
     }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return projectedVariables;
+    }
 }

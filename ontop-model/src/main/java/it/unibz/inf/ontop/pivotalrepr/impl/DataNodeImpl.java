@@ -54,4 +54,9 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
         throw new UnsupportedOperationException("A DataNode is not expected to have a child");
     }
 
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return ImmutableSet.of();
+    }
+
 }
