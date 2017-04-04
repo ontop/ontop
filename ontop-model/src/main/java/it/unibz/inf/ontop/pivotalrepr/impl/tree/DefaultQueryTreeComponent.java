@@ -277,12 +277,17 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     @Override
     public ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode) {
         ImmutableSet.Builder<Variable> requiredVariableBuilder = ImmutableSet.builder();
+        Set<Variable> variableDefinedByAncestors = new HashSet<>();
 
         // Non-final
         Optional<QueryNode> optionalAncestor = getParent(queryNode);
         while (optionalAncestor.isPresent()) {
             QueryNode ancestor = optionalAncestor.get();
-            requiredVariableBuilder.addAll(ancestor.getLocallyRequiredVariables());
+
+            ancestor.getLocallyRequiredVariables().stream()
+                    .filter(v -> !variableDefinedByAncestors.contains(v))
+                    .forEach(requiredVariableBuilder::add);
+            variableDefinedByAncestors.addAll(ancestor.getLocallyDefinedVariables());
 
             if (ancestor instanceof ExplicitVariableProjectionNode)
                 break;
