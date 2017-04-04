@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.executor.expression.PushUpBooleanExpressionExecutor;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.join.InnerJoinExecutor;
 import it.unibz.inf.ontop.executor.leftjoin.LeftJoinExecutor;
+import it.unibz.inf.ontop.executor.leftjoin.LeftJoinRightChildNormalizationAnalyzer;
 import it.unibz.inf.ontop.executor.merging.QueryMergingExecutor;
 import it.unibz.inf.ontop.executor.projection.ProjectionShrinkingExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
@@ -51,6 +52,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromPreferences(LeftJoinExecutor.class);
         bindFromPreferences(ProjectionShrinkingExecutor.class);
         bindFromPreferences(TrueNodeRemovalExecutor.class);
+        bindFromPreferences(LeftJoinRightChildNormalizationAnalyzer.class);
         bindFromPreferences(DatalogProgram2QueryConverter.class);
         bindFromPreferences(QueryUnionSplitter.class);
         bindFromPreferences(InnerJoinOptimizer.class);

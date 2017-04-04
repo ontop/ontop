@@ -12,12 +12,12 @@ import java.util.Optional;
  *
  * Does not propose to change the left data node.
  */
-public interface LeftJoinRightChildNormalizer {
+public interface LeftJoinRightChildNormalizationAnalyzer {
 
-    LeftJoinRightChildNormalization compare(DataNode leftDataNode, DataNode rightDataNode, DBMetadata dbMetadata,
-                                            VariableGenerator variableGenerator);
+    LeftJoinRightChildNormalizationAnalysis analyze(DataNode leftDataNode, DataNode rightDataNode, DBMetadata dbMetadata,
+                                                    VariableGenerator variableGenerator);
 
-    interface LeftJoinRightChildNormalization {
+    interface LeftJoinRightChildNormalizationAnalysis {
         /**
          * Returns true if its matches a unique constraint or a foreign key
          */
@@ -27,6 +27,6 @@ public interface LeftJoinRightChildNormalizer {
          */
         Optional<DataNode> getProposedRightDataNode();
 
-        Optional<ImmutableExpression> getNormalizationExpression();
+        Optional<ImmutableExpression> getAdditionalExpression();
     }
 }

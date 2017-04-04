@@ -1,10 +1,11 @@
 package it.unibz.inf.ontop.executor.leftjoin.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.executor.leftjoin.LeftJoinRightChildNormalizer;
+import it.unibz.inf.ontop.executor.leftjoin.LeftJoinRightChildNormalizationAnalyzer;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.pivotalrepr.DataNode;
@@ -22,15 +23,15 @@ import static it.unibz.inf.ontop.model.ExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 @Singleton
-public class LeftJoinRightChildNormalizerImpl implements LeftJoinRightChildNormalizer {
+public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRightChildNormalizationAnalyzer {
 
     @Inject
-    private LeftJoinRightChildNormalizerImpl() {
+    private LeftJoinRightChildNormalizationAnalyzerImpl() {
     }
 
     @Override
-    public LeftJoinRightChildNormalization compare(DataNode leftDataNode, DataNode rightDataNode, DBMetadata dbMetadata,
-                                                       VariableGenerator variableGenerator) {
+    public LeftJoinRightChildNormalizationAnalysis analyze(DataNode leftDataNode, DataNode rightDataNode, DBMetadata dbMetadata,
+                                                           VariableGenerator variableGenerator) {
         DataAtom leftProjectionAtom = leftDataNode.getProjectionAtom();
         DataAtom rightProjectionAtom = rightDataNode.getProjectionAtom();
 
@@ -44,27 +45,27 @@ public class LeftJoinRightChildNormalizerImpl implements LeftJoinRightChildNorma
 
         if (!(optionalLeftRelation.isPresent() && optionalRightRelation.isPresent())) {
             // TODO: print a warning
-            return new LeftJoinRightChildNormalizationImpl(false);
+            return new LeftJoinRightChildNormalizationAnalysisImpl(false);
         }
 
         DatabaseRelationDefinition leftRelation = optionalLeftRelation.get();
         DatabaseRelationDefinition rightRelation = optionalRightRelation.get();
 
         ImmutableList<UniqueConstraint> matchedUCs = leftRelation.equals(rightRelation)
-                ? ImmutableList.of()
-                : extractMatchedUCs(leftRelation, leftArguments, rightArguments);
+                ? extractMatchedUCs(leftRelation, leftArguments, rightArguments)
+                : ImmutableList.of();
 
         ImmutableList<ForeignKeyConstraint> matchedFKs = extractMatchedFKs(leftRelation, rightRelation, leftArguments,
                 rightArguments);
 
         if (matchedUCs.isEmpty() && matchedFKs.isEmpty()) {
-            return new LeftJoinRightChildNormalizationImpl(false);
+            return new LeftJoinRightChildNormalizationAnalysisImpl(false);
         }
 
-        ImmutableList<Integer> conflictingRightArgumentIndexes = extractNonMatchedRightAttributeIndexes(
-                matchedUCs, matchedFKs, rightArguments.size())
-                .filter(i -> isRightArgumentConflicting(i, leftArguments, rightArguments))
-                .boxed()
+        ImmutableSet<Integer> nonMatchedRightAttributeIndexes = extractNonMatchedRightAttributeIndexes(matchedUCs,
+                matchedFKs, rightArguments.size());
+        ImmutableList<Integer> conflictingRightArgumentIndexes = nonMatchedRightAttributeIndexes.stream()
+                .filter(i -> isRightArgumentConflicting(i, leftArguments, rightArguments, nonMatchedRightAttributeIndexes))
                 .collect(ImmutableCollectors.toList());
 
         if (!conflictingRightArgumentIndexes.isEmpty()) {
@@ -73,10 +74,10 @@ public class LeftJoinRightChildNormalizerImpl implements LeftJoinRightChildNorma
             ImmutableExpression newExpression = computeExpression(rightArguments,
                     newRightDataNode.getProjectionAtom().getArguments());
 
-            return new LeftJoinRightChildNormalizationImpl(newRightDataNode, newExpression);
+            return new LeftJoinRightChildNormalizationAnalysisImpl(newRightDataNode, newExpression);
         }
         else {
-            return new LeftJoinRightChildNormalizationImpl(true);
+            return new LeftJoinRightChildNormalizationAnalysisImpl(true);
         }
     }
 
@@ -114,7 +115,7 @@ public class LeftJoinRightChildNormalizerImpl implements LeftJoinRightChildNorma
                         .equals(rightArguments.get(c.getReference().getIndex() - 1)));
     }
 
-    private IntStream extractNonMatchedRightAttributeIndexes(ImmutableList<UniqueConstraint> matchedUCs,
+    private ImmutableSet<Integer> extractNonMatchedRightAttributeIndexes(ImmutableList<UniqueConstraint> matchedUCs,
                                                                           ImmutableList<ForeignKeyConstraint> matchedFKs,
                                                                           int arity) {
         return IntStream.range(0, arity)
@@ -125,11 +126,14 @@ public class LeftJoinRightChildNormalizerImpl implements LeftJoinRightChildNorma
                 .filter(i -> (matchedFKs.stream()
                         .noneMatch(fk ->
                                 fk.getComponents().stream()
-                                        .anyMatch(c -> c.getReference().getIndex() == (i + 1)))));
+                                        .anyMatch(c -> c.getReference().getIndex() == (i + 1)))))
+                .boxed()
+                .collect(ImmutableCollectors.toSet());
     }
 
     private boolean isRightArgumentConflicting(int rightArgumentIndex, ImmutableList<? extends VariableOrGroundTerm> leftArguments,
-                                               ImmutableList<? extends VariableOrGroundTerm> rightArguments) {
+                                               ImmutableList<? extends VariableOrGroundTerm> rightArguments,
+                                               ImmutableSet<Integer> nonMatchedRightAttributeIndexes) {
         VariableOrGroundTerm rightArgument = rightArguments.get(rightArgumentIndex);
         /*
          * Ground term -> pulled out as an equality
@@ -144,8 +148,10 @@ public class LeftJoinRightChildNormalizerImpl implements LeftJoinRightChildNorma
         if (leftArguments.contains(rightVariable))
             return true;
         return IntStream.range(0, rightArguments.size())
-                .filter(i -> i != rightArgumentIndex)
-                .noneMatch(i -> rightArguments.get(i).equals(rightVariable));
+                // In case of an equality between two nonMatchedRightAttributeIndexes: count it once
+                // (thanks to this order relation)
+                .filter(i -> (i < rightArgumentIndex) || (!nonMatchedRightAttributeIndexes.contains(i)))
+                .anyMatch(i -> rightArguments.get(i).equals(rightVariable));
     }
 
     private DataAtom computeNewRightAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> rightArguments,
@@ -173,7 +179,7 @@ public class LeftJoinRightChildNormalizerImpl implements LeftJoinRightChildNorma
 
 
 
-    public static class LeftJoinRightChildNormalizationImpl implements LeftJoinRightChildNormalization {
+    public static class LeftJoinRightChildNormalizationAnalysisImpl implements LeftJoinRightChildNormalizationAnalysis {
 
         @Nullable
         private final DataNode newRightDataNode;
@@ -181,13 +187,13 @@ public class LeftJoinRightChildNormalizerImpl implements LeftJoinRightChildNorma
         private final ImmutableExpression expression;
         private final boolean isMatchingAConstraint;
 
-        private LeftJoinRightChildNormalizationImpl(DataNode newRightDataNode, ImmutableExpression expression) {
+        private LeftJoinRightChildNormalizationAnalysisImpl(DataNode newRightDataNode, ImmutableExpression expression) {
             this.newRightDataNode = newRightDataNode;
             this.expression = expression;
             this.isMatchingAConstraint = true;
         }
 
-        private LeftJoinRightChildNormalizationImpl(boolean isMatchingAConstraint) {
+        private LeftJoinRightChildNormalizationAnalysisImpl(boolean isMatchingAConstraint) {
             this.newRightDataNode = null;
             this.expression = null;
             this.isMatchingAConstraint = isMatchingAConstraint;
@@ -204,7 +210,7 @@ public class LeftJoinRightChildNormalizerImpl implements LeftJoinRightChildNorma
         }
 
         @Override
-        public Optional<ImmutableExpression> getNormalizationExpression() {
+        public Optional<ImmutableExpression> getAdditionalExpression() {
             return Optional.ofNullable(expression);
         }
     }

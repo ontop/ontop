@@ -156,6 +156,8 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery query1 = expectedQueryBuilder.build();
 
+        System.out.println("\n Expected query: \n" +  query1);
+
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
