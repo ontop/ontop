@@ -91,4 +91,9 @@ public class TrueNodeImpl implements TrueNode {
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of();
     }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return ImmutableSet.of();
+    }
 }

@@ -59,4 +59,9 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
         return ImmutableSet.of();
     }
 
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return getLocalVariables();
+    }
+
 }
