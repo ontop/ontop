@@ -403,6 +403,11 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return getChildVariables();
+    }
+
+    @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
         visitor.visit(this);
     }
