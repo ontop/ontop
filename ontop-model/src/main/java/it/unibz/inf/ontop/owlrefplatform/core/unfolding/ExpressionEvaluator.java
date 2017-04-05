@@ -143,6 +143,15 @@ public class ExpressionEvaluator {
 		}
 	}
 
+	public ImmutableTerm evaluateFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
+
+		Function mutableFunctionalTerm = ImmutabilityTools.convertToMutableFunction(functionalTerm);
+
+		Term evaluatedTerm = evalOperation(functionalTerm);
+
+		return ImmutabilityTools.convertIntoImmutableTerm(evaluatedTerm);
+	}
+
 
 	private Term eval(Term expr) {
 		if (expr instanceof Variable) 

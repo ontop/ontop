@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
@@ -262,7 +263,10 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             return OBDAVocabulary.NULL;
         }
 
-        return DATA_FACTORY.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newArguments);
+        ImmutableFunctionalTerm partiallyNormalizedTerm = DATA_FACTORY.getImmutableFunctionalTerm(
+                functionalTerm.getFunctionSymbol(), newArguments);
+        // Mostly for evaluating IF_ELSE_NULL
+        return new ExpressionEvaluator().evaluateFunctionalTerm(partiallyNormalizedTerm);
     }
 
     /**
