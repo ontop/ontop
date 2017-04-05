@@ -144,11 +144,8 @@ public class ExpressionEvaluator {
 	}
 
 	public ImmutableTerm evaluateFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
-
 		Function mutableFunctionalTerm = ImmutabilityTools.convertToMutableFunction(functionalTerm);
-
-		Term evaluatedTerm = evalOperation(functionalTerm);
-
+		Term evaluatedTerm = eval(mutableFunctionalTerm);
 		return ImmutabilityTools.convertIntoImmutableTerm(evaluatedTerm);
 	}
 
