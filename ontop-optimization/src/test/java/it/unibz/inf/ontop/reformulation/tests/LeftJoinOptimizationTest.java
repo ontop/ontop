@@ -587,11 +587,14 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, constructionNode);
-        expectedQueryBuilder.addChild(constructionNode, leftJoinNode);
-        expectedQueryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
-        expectedQueryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        expectedQueryBuilder.addChild(constructionNode, joinNode);
+        expectedQueryBuilder.addChild(joinNode, dataNode1);
+        expectedQueryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query1 = expectedQueryBuilder.build();
+
+        System.out.println("\n Expected query: \n" +  query1);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
