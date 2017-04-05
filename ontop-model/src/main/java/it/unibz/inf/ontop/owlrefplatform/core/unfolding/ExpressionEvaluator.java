@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static it.unibz.inf.ontop.model.ExpressionOperation.IF_ELSE_NULL;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
@@ -291,7 +292,10 @@ public class ExpressionEvaluator {
 		} 
 		else if (pred == ExpressionOperation.QUEST_CAST) {
 			return term;
-		}	
+		}
+		else if (pred == IF_ELSE_NULL) {
+			return evalIfElseNull(term);
+		}
 		else {
 			throw new RuntimeException(
 					"Evaluation of expression not supported: "
@@ -1017,5 +1021,22 @@ public class ExpressionEvaluator {
 			return e1;
 		
 		return DATA_FACTORY.getFunctionOR(e1, e2);
+	}
+
+	private Term evalIfElseNull(Function ifElseNullExpression) {
+		List<Term> arguments = ifElseNullExpression.getTerms();
+
+		Term condition = arguments.get(0);
+		Term termIfTrue = arguments.get(1);
+
+		Term newConditionalTerm = eval(condition);
+		Term newTermIfTrue = eval(termIfTrue);
+
+		if (newConditionalTerm == OBDAVocabulary.TRUE)
+			return newTermIfTrue;
+		else if (newConditionalTerm == OBDAVocabulary.FALSE)
+			return OBDAVocabulary.NULL;
+		else
+			return DATA_FACTORY.getExpression(IF_ELSE_NULL, newConditionalTerm, newTermIfTrue);
 	}
 }

@@ -81,7 +81,7 @@ public interface IntermediateQuery {
     /**
      * May disable the (possible) validation tests
      */
-    <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal,
+    <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
                                                                                         boolean disableValidation)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
