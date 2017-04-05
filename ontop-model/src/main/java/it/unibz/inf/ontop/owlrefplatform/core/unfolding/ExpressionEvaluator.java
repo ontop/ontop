@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.inf.ontop.owlrefplatform.core.expression.ExpressionNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.expression.ExpressionNormalizerImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -143,12 +144,49 @@ public class ExpressionEvaluator {
 		}
 	}
 
-	public ImmutableTerm evaluateFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
-		Function mutableFunctionalTerm = ImmutabilityTools.convertToMutableFunction(functionalTerm);
-		Term evaluatedTerm = eval(mutableFunctionalTerm);
-		return ImmutabilityTools.convertIntoImmutableTerm(evaluatedTerm);
+	/**
+	 * Simplifies a functional term by evaluating the possible boolean and if-else-null expressions
+	 */
+	public ImmutableTerm simplifyFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
+		Predicate functionSymbol = functionalTerm.getFunctionSymbol();
+		if (functionSymbol instanceof ExpressionOperation) {
+			switch ((ExpressionOperation) functionSymbol) {
+				case AND:
+				case OR:
+				case NOT:
+				case EQ:
+				case NEQ:
+				case LT:
+				case LTE:
+				case GT:
+				case GTE:
+				case IS_NULL:
+				case IS_NOT_NULL:
+				case IS_TRUE:
+				case STR_STARTS:
+				case STR_ENDS:
+				case CONTAINS:
+				case IF_ELSE_NULL:
+					Function mutableFunctionalTerm = ImmutabilityTools.convertToMutableFunction(functionalTerm);
+					Term evaluatedTerm = eval(mutableFunctionalTerm);
+					return ImmutabilityTools.convertIntoImmutableTerm(evaluatedTerm);
+				default:
+					break;
+			}
+		}
+		// By default
+		return DATA_FACTORY.getImmutableFunctionalTerm(functionSymbol,
+				functionalTerm.getArguments().stream()
+						.map(this::simplify)
+						.collect(ImmutableCollectors.toList()));
 	}
 
+	private ImmutableTerm simplify(ImmutableTerm term) {
+		if (term instanceof ImmutableFunctionalTerm)
+			return simplifyFunctionalTerm((ImmutableFunctionalTerm) term);
+		else
+			return term;
+	}
 
 	private Term eval(Term expr) {
 		if (expr instanceof Variable) 
@@ -1036,7 +1074,11 @@ public class ExpressionEvaluator {
 		Term termIfTrue = arguments.get(1);
 
 		Term newConditionalTerm = eval(condition);
-		Term newTermIfTrue = eval(termIfTrue);
+
+		ImmutableTerm newImmutableTermIfTrue = simplify(ImmutabilityTools.convertIntoImmutableTerm(termIfTrue));
+		Term newTermIfTrue = (newImmutableTermIfTrue instanceof ImmutableFunctionalTerm)
+				? ImmutabilityTools.convertToMutableFunction((ImmutableFunctionalTerm) newImmutableTermIfTrue)
+				: newImmutableTermIfTrue;
 
 		if (newConditionalTerm == OBDAVocabulary.TRUE)
 			return newTermIfTrue;

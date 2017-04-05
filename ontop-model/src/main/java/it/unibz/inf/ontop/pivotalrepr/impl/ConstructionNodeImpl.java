@@ -266,7 +266,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         ImmutableFunctionalTerm partiallyNormalizedTerm = DATA_FACTORY.getImmutableFunctionalTerm(
                 functionalTerm.getFunctionSymbol(), newArguments);
         // Mostly for evaluating IF_ELSE_NULL
-        return new ExpressionEvaluator().evaluateFunctionalTerm(partiallyNormalizedTerm);
+        return new ExpressionEvaluator().simplifyFunctionalTerm(partiallyNormalizedTerm);
     }
 
     /**
