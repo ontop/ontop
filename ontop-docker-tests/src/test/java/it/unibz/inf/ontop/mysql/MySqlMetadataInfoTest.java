@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.mysql;
  * #L%
  */
 
-import it.unibz.inf.ontop.sql.AbstractDbMetadataInfoTest;
+import it.unibz.inf.ontop.AbstractDbMetadataInfoTest;
 
 public class MySqlMetadataInfoTest extends AbstractDbMetadataInfoTest {
 

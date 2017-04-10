@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.mysql;
 
-import it.unibz.inf.ontop.rdf4j.tests.general.AbstractVirtualSesameTest;
+import it.unibz.inf.ontop.AbstractVirtualSesameTest;
 import org.junit.Test;
 
 

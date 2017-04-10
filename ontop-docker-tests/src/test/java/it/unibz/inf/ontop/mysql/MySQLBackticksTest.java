@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.mysql;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 
 /***
  * Tests that mysql identifiers for tables and columns are treated

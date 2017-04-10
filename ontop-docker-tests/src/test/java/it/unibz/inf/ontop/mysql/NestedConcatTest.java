@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.mysql;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.AbstractVirtualModeTest;
 
 
 public class NestedConcatTest extends AbstractVirtualModeTest {

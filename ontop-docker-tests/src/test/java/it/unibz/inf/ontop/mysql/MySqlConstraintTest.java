@@ -20,7 +20,8 @@ package it.unibz.inf.ontop.mysql;
  * #L%
  */
 
-import it.unibz.inf.ontop.sql.AbstractConstraintTest;
+
+import it.unibz.inf.ontop.AbstractConstraintTest;
 
 public class MySqlConstraintTest extends AbstractConstraintTest {
 
