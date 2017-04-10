@@ -643,10 +643,10 @@ public abstract class AbstractBindTestWithFunctions {
 
     protected List<String> getHoursExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"18\"^^xsd:integer");
-        expectedValues.add("\"12\"^^xsd:integer");
-        expectedValues.add("\"9\"^^xsd:integer");
+        expectedValues.add("\"16\"^^xsd:integer");
+        expectedValues.add("\"11\"^^xsd:integer");
         expectedValues.add("\"7\"^^xsd:integer");
+        expectedValues.add("\"6\"^^xsd:integer");
         return expectedValues;
     }
 
