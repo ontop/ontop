@@ -196,15 +196,17 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
                     throw new IllegalStateException("Inconsistent tree: a LJ without positions for its children found");
                 }
             }
-            else if (ancestor instanceof ConstructionNode) {
+            // TODO: consider that would allow lifting
+            //            ancestorChild = ancestor;
+            //            optionalAncestor = query.getParent(ancestor);
+            /*
+             * By default: stops
+             *
+             * Ok for ConstructionNode and UnionNode
+             */
+            else {
                 return Optional.empty();
             }
-
-            /**
-             * By default: continues
-             */
-            ancestorChild = ancestor;
-            optionalAncestor = query.getParent(ancestor);
         }
         return Optional.empty();
     }
