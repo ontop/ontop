@@ -189,7 +189,6 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
                             break;
                         case RIGHT:
                             return Optional.of((JoinOrFilterNode)ancestor);
-
                     }
                 }
                 else {
@@ -197,8 +196,6 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
                 }
             }
             // TODO: consider that would allow lifting
-            //            ancestorChild = ancestor;
-            //            optionalAncestor = query.getParent(ancestor);
             /*
              * By default: stops
              *
@@ -207,6 +204,9 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
             else {
                 return Optional.empty();
             }
+
+            ancestorChild = ancestor;
+            optionalAncestor = query.getParent(ancestor);
         }
         return Optional.empty();
     }
