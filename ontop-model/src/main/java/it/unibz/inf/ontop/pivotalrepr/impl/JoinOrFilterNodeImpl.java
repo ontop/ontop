@@ -64,4 +64,14 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
     protected TermNullabilityEvaluator getNullabilityEvaluator() {
         return nullabilityEvaluator;
     }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return getLocalVariables();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return ImmutableSet.of();
+    }
 }

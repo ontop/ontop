@@ -140,4 +140,6 @@ public interface IntermediateQuery {
     ExecutorRegistry getExecutorRegistry();
 
     IntermediateQueryFactory getFactory();
+
+    ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode);
 }

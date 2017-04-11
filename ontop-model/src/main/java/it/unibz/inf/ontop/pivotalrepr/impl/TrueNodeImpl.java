@@ -86,4 +86,14 @@ public class TrueNodeImpl implements TrueNode {
     public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
         return new NodeTransformationProposalImpl(NodeTransformationProposedState.NO_LOCAL_CHANGE, ImmutableSet.of());
     }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return ImmutableSet.of();
+    }
 }

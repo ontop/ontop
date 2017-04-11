@@ -322,6 +322,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return iqFactory;
     }
 
+    @Override
+    public ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode) {
+        return treeComponent.getVariablesRequiredByAncestors(queryNode);
+    }
+
     private void validate() throws InvalidIntermediateQueryException {
         validator.validate(this);
     }
