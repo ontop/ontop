@@ -53,12 +53,16 @@ public class MultiSchemaTestH2  {
 
 	private QuestOWL reasoner;
 	private OntopOWLConnection conn;
+	private String url = "jdbc:h2:mem:questrepository";
+	private String username =  "fish";
+	private String password = "fish";
+
 	Connection sqlConnection;
 
 	@Before
 	public void setUp() throws Exception {
 
-		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questrepository","fish", "fish");
+		sqlConnection = DriverManager.getConnection(url,username, password);
 		java.sql.Statement s = sqlConnection.createStatement();
 
 		try {
@@ -75,6 +79,10 @@ public class MultiSchemaTestH2  {
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
+				.enableTestMode()
 				.build();
 
 		/*

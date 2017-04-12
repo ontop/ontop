@@ -1,15 +1,21 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 
 public class IntensionalDataNodeImpl extends DataNodeImpl implements IntensionalDataNode {
 
     private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
 
-    public IntensionalDataNodeImpl(DataAtom atom) {
+    @AssistedInject
+    private IntensionalDataNodeImpl(@Assisted DataAtom atom) {
         super(atom);
     }
 
@@ -40,6 +46,18 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
     public SubstitutionResults<IntensionalDataNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         return applySubstitution((IntensionalDataNode)this, substitution);
+    }
+
+    /**
+     * We assume all the variables are non-null. Ok for triple patterns.
+     * TODO: what about quads and default graphs?
+     */
+    @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        if (getVariables().contains(variable))
+            return false;
+        else
+            throw new IllegalArgumentException("The variable" + variable + " is not projected by " + this);
     }
 
     @Override

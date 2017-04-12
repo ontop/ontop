@@ -1,12 +1,12 @@
 package it.unibz.inf.ontop.executor.join;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition;
-import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -25,6 +25,13 @@ import static it.unibz.inf.ontop.executor.join.JoinExtractionUtils.*;
 @Singleton
 public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
 
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private JoinBooleanExpressionExecutor(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
+
     /**
      * Standard method (InternalProposalExecutor)
      */
@@ -41,8 +48,7 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
 
         Optional<ImmutableExpression> optionalAggregatedFilterCondition;
         try {
-            optionalAggregatedFilterCondition = extractFoldAndOptimizeBooleanExpressions(filterOrJoinNodes,
-                    query.getMetadata());
+            optionalAggregatedFilterCondition = extractFoldAndOptimizeBooleanExpressions(filterOrJoinNodes);
         }
         /**
          * The filter condition cannot be satisfied --> the join node and its sub-tree is thus removed from the tree.
@@ -50,7 +56,7 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
          */
         catch (UnsatisfiableExpressionException e) {
 
-            EmptyNode replacingEmptyNode = new EmptyNodeImpl(query.getVariables(originalTopJoinNode));
+            EmptyNode replacingEmptyNode = iqFactory.createEmptyNode(query.getVariables(originalTopJoinNode));
             treeComponent.replaceSubTree(originalTopJoinNode, replacingEmptyNode);
 
             RemoveEmptyNodeProposal cleaningProposal = new RemoveEmptyNodeProposalImpl(replacingEmptyNode, false);
@@ -70,7 +76,7 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
             /**
              * Optimized join node
              */
-            InnerJoinNode newJoinNode = new InnerJoinNodeImpl(optionalAggregatedFilterCondition);
+            InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(optionalAggregatedFilterCondition);
 
             Optional<ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, originalTopJoinNode);
             treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode,

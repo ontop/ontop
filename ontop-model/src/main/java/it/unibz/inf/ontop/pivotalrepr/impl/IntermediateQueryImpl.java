@@ -3,11 +3,12 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
-import it.unibz.inf.ontop.injection.OntopModelFactory;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -46,7 +47,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     private final QueryTreeComponent treeComponent;
 
-    private final MetadataForQueryOptimization metadata;
+    private final DBMetadata dbMetadata;
 
     private final DistinctVariableOnlyDataAtom projectionAtom;
 
@@ -56,23 +57,23 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     private final OntopModelSettings settings;
 
-    private final OntopModelFactory modelFactory;
+    private final IntermediateQueryFactory iqFactory;
 
 
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
-    public IntermediateQueryImpl(MetadataForQueryOptimization metadata, DistinctVariableOnlyDataAtom projectionAtom,
+    public IntermediateQueryImpl(DBMetadata dbMetadata, DistinctVariableOnlyDataAtom projectionAtom,
                                  QueryTreeComponent treeComponent, ExecutorRegistry executorRegistry,
                                  IntermediateQueryValidator validator, OntopModelSettings settings,
-                                 OntopModelFactory modelFactory) {
-        this.metadata = metadata;
+                                 IntermediateQueryFactory iqFactory) {
+        this.dbMetadata = dbMetadata;
         this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
         this.executorRegistry = executorRegistry;
         this.validator = validator;
         this.settings = settings;
-        this.modelFactory = modelFactory;
+        this.iqFactory = iqFactory;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -90,8 +91,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public IntermediateQuery createSnapshot() {
-        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent.createSnapshot(),
-                executorRegistry, validator, settings, modelFactory);
+        return new IntermediateQueryImpl(dbMetadata, projectionAtom, treeComponent.createSnapshot(),
+                executorRegistry, validator, settings, iqFactory);
     }
 
     @Override
@@ -120,12 +121,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public IntermediateQueryBuilder newBuilder() {
-        return modelFactory.create(metadata, executorRegistry);
+        return iqFactory.createIQBuilder(dbMetadata, executorRegistry);
     }
 
     @Override
-    public MetadataForQueryOptimization getMetadata() {
-        return metadata;
+    public DBMetadata getDBMetadata() {
+        return dbMetadata;
     }
 
     @Override
@@ -303,7 +304,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     @Override
     public IntermediateQuery clone() {
-        return IntermediateQueryUtils.convertToBuilder(this).build();
+        return createSnapshot();
     }
 
     @Override
@@ -314,6 +315,16 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public ExecutorRegistry getExecutorRegistry() {
         return executorRegistry;
+    }
+
+    @Override
+    public IntermediateQueryFactory getFactory() {
+        return iqFactory;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode) {
+        return treeComponent.getVariablesRequiredByAncestors(queryNode);
     }
 
     private void validate() throws InvalidIntermediateQueryException {

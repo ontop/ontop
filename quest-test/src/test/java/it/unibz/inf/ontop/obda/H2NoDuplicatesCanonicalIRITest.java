@@ -52,6 +52,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 
 	final String owlfile = "src/test/resources/sameAs/wellbores-same-as-can.owl";
 	final String obdafile = "src/test/resources/sameAs/wellbores-same-as-can.obda";
+
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
 
@@ -75,6 +76,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 				.jdbcUser(JDBC_USER)
 				.jdbcPassword(JDBC_PASSWORD)
 				.enableIRISafeEncoding(false)
+				.enableTestMode()
 				.build();
 
 		// Creating a new instance of the reasoner

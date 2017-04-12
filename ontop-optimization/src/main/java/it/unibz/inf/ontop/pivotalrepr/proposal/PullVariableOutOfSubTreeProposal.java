@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.pivotalrepr.proposal;
 
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.JoinLikeNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 

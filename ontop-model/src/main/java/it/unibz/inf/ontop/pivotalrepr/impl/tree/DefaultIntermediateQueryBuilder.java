@@ -3,15 +3,16 @@ package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.injection.OntopModelFactory;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 
 import java.util.Optional;
@@ -21,9 +22,9 @@ import java.util.Optional;
  */
 public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
-    private final MetadataForQueryOptimization metadata;
+    private final DBMetadata dbMetadata;
     private final ExecutorRegistry executorRegistry;
-    private final OntopModelFactory modelFactory;
+    private final IntermediateQueryFactory iqFactory;
     private final IntermediateQueryValidator validator;
     private final OntopModelSettings settings;
     private DistinctVariableOnlyDataAtom projectionAtom;
@@ -31,14 +32,14 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     private boolean canEdit;
 
     @AssistedInject
-    protected DefaultIntermediateQueryBuilder(@Assisted MetadataForQueryOptimization metadata,
+    protected DefaultIntermediateQueryBuilder(@Assisted DBMetadata dbMetadata,
                                             @Assisted ExecutorRegistry executorRegistry,
-                                            OntopModelFactory modelFactory,
+                                            IntermediateQueryFactory iqFactory,
                                             IntermediateQueryValidator validator,
                                             OntopModelSettings settings) {
-        this.metadata = metadata;
+        this.dbMetadata = dbMetadata;
         this.executorRegistry = executorRegistry;
-        this.modelFactory = modelFactory;
+        this.iqFactory = iqFactory;
         this.validator = validator;
         this.settings = settings;
         tree = null;
@@ -100,7 +101,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
-        IntermediateQuery query = buildQuery(metadata, projectionAtom, new DefaultQueryTreeComponent(tree));
+        IntermediateQuery query = buildQuery(dbMetadata, projectionAtom, new DefaultQueryTreeComponent(tree));
         canEdit = false;
         return query;
     }
@@ -108,12 +109,12 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     /**
      * Can be overwritten to use another constructor
      */
-    protected IntermediateQuery buildQuery(MetadataForQueryOptimization metadata,
+    protected IntermediateQuery buildQuery(DBMetadata metadata,
                                            DistinctVariableOnlyDataAtom projectionAtom,
                                            QueryTreeComponent treeComponent) {
 
         return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent, executorRegistry, validator,
-                settings, modelFactory);
+                settings, iqFactory);
     }
 
     private void checkInitialization() throws IntermediateQueryBuilderException {
@@ -141,12 +142,13 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
         return tree.getChildren(node);
     }
 
-    protected ExecutorRegistry getExecutorRegistry() {
-        return executorRegistry;
+    @Override
+    public IntermediateQueryFactory getFactory() {
+        return iqFactory;
     }
 
-    protected OntopModelFactory getModelFactory() {
-        return modelFactory;
+    protected ExecutorRegistry getExecutorRegistry() {
+        return executorRegistry;
     }
 
     protected IntermediateQueryValidator getValidator() {

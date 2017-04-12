@@ -20,76 +20,82 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.pivotalrepr.mapping.TargetAtom;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class UriTemplateMatcher {
 
-	private final Map<Pattern, Function> uriTemplateMatcher = new HashMap<>();
-	
-	/**
-	 * creates a URI template matcher 
-	 * 
-	 * @param unfoldingProgram
-	 * @return
-	 */
-	
-	public static UriTemplateMatcher create(List<CQIE> unfoldingProgram) {
+	private UriTemplateMatcher() {
+	}
 
+	private final Map<Pattern, Function> uriTemplateMatcher = new HashMap<>();
+
+	public static UriTemplateMatcher createFromTargetAtoms(Stream<TargetAtom> targetAtoms) {
+		return create(targetAtoms
+				.map(TargetAtom::getSubstitution)
+				// URI constructors can be found in the co-domain of the substitution
+				.flatMap(s -> s.getImmutableMap().values().stream())
+				.filter(t -> t instanceof Function)
+				.map(t -> (Function) t));
+	}
+
+	/**
+	 * TODO: refactor using streaming.
+	 */
+	public static UriTemplateMatcher create(Stream<? extends Function> targetAtomStream) {
 		Set<String> templateStrings = new HashSet<>();
 		
 		UriTemplateMatcher uriTemplateMatcher  = new UriTemplateMatcher();
 
-		for (CQIE mapping : unfoldingProgram) { 
-			
-			Function head = mapping.getHead();
+		ImmutableList<? extends Function> targetAtoms = targetAtomStream.collect(ImmutableCollectors.toList());
 
-			 // Collecting URI templates and making pattern matchers for them.
-			for (Term term : head.getTerms()) {
-				if (!(term instanceof Function)) {
-					continue;
-				}
-				Function fun = (Function) term;
-				if (!(fun.getFunctionSymbol() instanceof URITemplatePredicate)) {
-					continue;
-				}
+		for (Function fun : targetAtoms) {
+
+		 // Collecting URI templates and making pattern matchers for them.
+			if (!(fun.getFunctionSymbol() instanceof URITemplatePredicate)) {
+				continue;
+			}
+			/*
+			 * This is a URI function, so it can generate pattern matchers
+			 * for the URIs. We have two cases, one where the arity is 1,
+			 * and there is a constant/variable. The second case is
+			 * where the first element is a string template of the URI, and
+			 * the rest of the terms are variables/constants
+			 */
+			if (fun.getTerms().size() == 1) {
 				/*
-				 * This is a URI function, so it can generate pattern matchers
-				 * for the URIs. We have two cases, one where the arity is 1,
-				 * and there is a constant/variable. The second case is
-				 * where the first element is a string template of the URI, and
-				 * the rest of the terms are variables/constants
+				 * URI without template, we get it directly from the column
+				 * of the table, and the function is only f(x)
 				 */
-				if (fun.getTerms().size() == 1) {
-					/*
-					 * URI without template, we get it directly from the column
-					 * of the table, and the function is only f(x)
-					 */
-					if (templateStrings.contains("(.+)")) {
-						continue;
-					}
-
-					Function templateFunction = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getVariable("x"));
-					Pattern matcher = Pattern.compile("(.+)");
-					uriTemplateMatcher.uriTemplateMatcher.put(matcher, templateFunction);
-					templateStrings.add("(.+)");
-				} else {
-					ValueConstant template = (ValueConstant) fun.getTerms().get(0);
-					String templateString = template.getValue();
-					templateString = templateString.replace("{}", "(.+)");
-
-					if (templateStrings.contains(templateString)) {
-						continue;
-					}
-
-					Pattern matcher = Pattern.compile(templateString);
-					uriTemplateMatcher.uriTemplateMatcher.put(matcher, fun);
-					templateStrings.add(templateString);
-
+				if (templateStrings.contains("(.+)")) {
+					continue;
 				}
+
+				Function templateFunction = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getVariable("x"));
+				Pattern matcher = Pattern.compile("(.+)");
+				uriTemplateMatcher.uriTemplateMatcher.put(matcher, templateFunction);
+				templateStrings.add("(.+)");
+			} else {
+				ValueConstant template = (ValueConstant) fun.getTerms().get(0);
+				String templateString = template.getValue();
+				templateString = templateString.replace("{}", "(.+)");
+
+				if (templateStrings.contains(templateString)) {
+					continue;
+				}
+
+				Pattern matcher = Pattern.compile(templateString);
+				uriTemplateMatcher.uriTemplateMatcher.put(matcher, fun);
+				templateStrings.add(templateString);
+
 			}
 		}
 		return uriTemplateMatcher;

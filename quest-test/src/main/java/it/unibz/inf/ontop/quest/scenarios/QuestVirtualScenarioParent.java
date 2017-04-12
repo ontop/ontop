@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.quest.scenarios;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import org.eclipse.rdf4j.repository.Repository;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.eclipse.rdf4j.repository.Repository;
 
 public abstract class QuestVirtualScenarioParent extends QuestScenarioParent {
 
@@ -36,6 +36,7 @@ public abstract class QuestVirtualScenarioParent extends QuestScenarioParent {
 	protected Repository createRepository() throws Exception {
 		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileURL)
+				.enableTestMode()
 				.nativeOntopMappingFile(obdaFileURL);
 
 		if (parameterFileURL != null && (!parameterFileURL.isEmpty())) {

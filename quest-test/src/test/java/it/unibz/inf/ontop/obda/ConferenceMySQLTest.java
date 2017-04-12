@@ -48,6 +48,7 @@ public class ConferenceMySQLTest {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(new File(obdaFile))
+				.enableTestMode()
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 	}

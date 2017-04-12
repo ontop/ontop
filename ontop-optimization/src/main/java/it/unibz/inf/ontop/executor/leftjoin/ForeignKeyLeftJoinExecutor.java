@@ -1,10 +1,11 @@
 package it.unibz.inf.ontop.executor.leftjoin;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricExecutor;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.LeftJoinOptimizationProposal;
@@ -22,6 +23,13 @@ import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentP
  */
 @Singleton
 public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
+
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private ForeignKeyLeftJoinExecutor(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
 
     /**
      * This method assumes that all redundant IS_NOT_NULL predicates
@@ -55,7 +63,7 @@ public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<Lef
                 DataNode leftDataNode = (DataNode) leftChild;
                 DataNode rightDataNode = (DataNode) rightChild;
 
-                boolean replaceLeftJoinByInnerJoin = propose(leftDataNode, rightDataNode, query.getMetadata());
+                boolean replaceLeftJoinByInnerJoin = propose(leftDataNode, rightDataNode, query.getDBMetadata());
                 if (replaceLeftJoinByInnerJoin) {
 
                     /**
@@ -76,8 +84,7 @@ public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<Lef
      *
      *  Returns a proposal for optimization.
      */
-    private boolean propose(DataNode leftDataNode, DataNode rightDataNode,
-                            MetadataForQueryOptimization metadata) {
+    private boolean propose(DataNode leftDataNode, DataNode rightDataNode, DBMetadata dbMetadata) {
 
         AtomPredicate leftPredicate = leftDataNode.getProjectionAtom().getPredicate();
         AtomPredicate rightPredicate = rightDataNode.getProjectionAtom().getPredicate();
@@ -86,8 +93,8 @@ public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<Lef
          * we check whether there are foreign key constraints
          */
 
-        DatabaseRelationDefinition leftPredicateDatabaseRelation = getDatabaseRelation(metadata.getDBMetadata(), leftPredicate);
-        DatabaseRelationDefinition rightPredicateDatabaseRelation = getDatabaseRelation(metadata.getDBMetadata(), rightPredicate);
+        DatabaseRelationDefinition leftPredicateDatabaseRelation = getDatabaseRelation(dbMetadata, leftPredicate);
+        DatabaseRelationDefinition rightPredicateDatabaseRelation = getDatabaseRelation(dbMetadata, rightPredicate);
 
 
         if(leftPredicateDatabaseRelation != null && rightPredicateDatabaseRelation != null) {
@@ -149,7 +156,7 @@ public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<Lef
          * as we only replace left join by inner join if the filter condition
          * is not present.
          */
-        InnerJoinNode newTopNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode newTopNode = iqFactory.createInnerJoinNode();
         treeComponent.replaceNode(leftJoinNode, newTopNode);
 
         return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(newTopNode));

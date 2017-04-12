@@ -1,8 +1,5 @@
 package it.unibz.inf.ontop.cli;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,11 +91,12 @@ public class SimpleMaterializerTest {
 
     @Test
     public void runMaterializationWithReasoning() throws Exception {
-        String outFile = "src/test/resources/test/out.owl";
+        String outFile = "src/test/resources/output/simplemapping_materialzed_with_reasnoing.owl";
         String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping.obda";
+        String propertiesFile = "src/test/resources/test/simplemapping.properties";
         Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile,
-                "-o", outFile);
+                "-o", outFile, "-p", propertiesFile);
         assertEquals(5, numOfClassAssertions(outFile));
         assertEquals(0, numOfObjectPropertyAssertions(outFile));
         assertEquals(2, numOfAnnotationAssertions(outFile));
@@ -106,28 +104,29 @@ public class SimpleMaterializerTest {
 
     @Test
     public void runMaterializationWithoutReasoning() throws Exception {
-        String outFile = "src/test/resources/test/out.owl";
+        String outFile = "src/test/resources/output/simplemapping_materialzed_no_reasnoing.owl";
         String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping.obda";
+        String propertiesFile = "src/test/resources/test/simplemapping.properties";
         Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile,
-                "-o", outFile, "--disable-reasoning");
+                "-o", outFile, "--disable-reasoning", "-p", propertiesFile);
         assertEquals(3, numOfClassAssertions(outFile));
         assertEquals(0, numOfObjectPropertyAssertions(outFile));
     }
 
-    public int numOfClassAssertions(String owlFile) throws OWLOntologyCreationException {
+    private int numOfClassAssertions(String owlFile) throws OWLOntologyCreationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
         return ontology.getAxioms(AxiomType.CLASS_ASSERTION).size();
     }
 
-    public int numOfObjectPropertyAssertions(String owlFile) throws OWLOntologyCreationException {
+    private int numOfObjectPropertyAssertions(String owlFile) throws OWLOntologyCreationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
         return ontology.getAxioms(AxiomType.OBJECT_PROPERTY_ASSERTION).size();
     }
 
-    public int numOfAnnotationAssertions(String owlFile) throws OWLOntologyCreationException {
+    private int numOfAnnotationAssertions(String owlFile) throws OWLOntologyCreationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
         return ontology.getAxioms(AxiomType.ANNOTATION_ASSERTION).size();

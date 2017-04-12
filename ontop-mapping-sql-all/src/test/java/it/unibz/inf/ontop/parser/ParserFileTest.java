@@ -33,10 +33,9 @@ import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import junit.framework.TestCase;
-import net.sf.jsqlparser.JSQLParserException;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.mapping.SQLMappingParser;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import org.slf4j.Logger;
@@ -48,7 +47,7 @@ public class ParserFileTest extends TestCase {
 	final static Logger log = LoggerFactory
 			.getLogger(ParserFileTest.class);
 
-	private final MappingParser mappingParser;
+	private final SQLMappingParser mappingParser;
 
 	public ParserFileTest() {
 		OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
@@ -57,7 +56,7 @@ public class ParserFileTest extends TestCase {
 				.jdbcPassword("fake_password")
 				.build();
 		Injector injector = configuration.getInjector();
-		mappingParser = injector.getInstance(MappingParser.class);
+		mappingParser = injector.getInstance(SQLMappingParser.class);
     }
 
 	// @Test

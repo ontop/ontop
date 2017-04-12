@@ -120,6 +120,7 @@ public class RedundantJoinFKProfTest {
                 .jdbcUrl(URL)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

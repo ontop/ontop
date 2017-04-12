@@ -2,12 +2,14 @@ package it.unibz.inf.ontop.executor.pullout;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.executor.substitution.DescendingPropagationTools;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -28,6 +30,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
  * TODO: complete (partially implemented)
  *
  */
+@Singleton
 public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfDataNodeExecutor {
 
     private static class VariableRenaming {
@@ -51,6 +54,13 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
             this.optionalSubstitution = optionalSubstitution;
             this.newEqualities = newEqualities;
         }
+    }
+
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private PullVariableOutOfDataNodeExecutorImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -137,7 +147,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
                 }
 
             }
-            else if (ancestorNode instanceof ConstructionNode) {
+            else if (ancestorNode instanceof ConstructionNode || ancestorNode instanceof UnionNode) {
                 return insertFilterNode(treeComponent, lastChildNode, newEqualities);
             }
             else {
@@ -172,9 +182,9 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
     /**
      * TODO: explain
      */
-    private static QueryNode insertFilterNode(QueryTreeComponent treeComponent, QueryNode child,
+    private QueryNode insertFilterNode(QueryTreeComponent treeComponent, QueryNode child,
                                          ImmutableExpression newEqualities) throws IllegalTreeUpdateException {
-        FilterNode newFilterNode = new FilterNodeImpl(newEqualities);
+        FilterNode newFilterNode = iqFactory.createFilterNode(newEqualities);
         treeComponent.insertParent(child, newFilterNode);
         return  newFilterNode;
     }

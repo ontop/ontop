@@ -5,12 +5,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.Var2VarSubstitutionImpl;
+import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +31,7 @@ import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DEC
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.computeNewProjectedVariables;
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.extractRelevantDescendingSubstitution;
 
+@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
 
@@ -34,8 +39,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      * TODO: find a better name
      */
     private static class NewSubstitutionPair {
-        public final ImmutableSubstitution<ImmutableTerm> bindings;
-        public final ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution;
+        final ImmutableSubstitution<ImmutableTerm> bindings;
+        final ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution;
 
         private NewSubstitutionPair(ImmutableSubstitution<ImmutableTerm> bindings,
                                     ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution) {
@@ -48,27 +53,46 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
+    @SuppressWarnings("FieldCanBeLocal")
     private static int CONVERGENCE_BOUND = 5;
 
     private final Optional<ImmutableQueryModifiers> optionalModifiers;
+    private final TermNullabilityEvaluator nullabilityEvaluator;
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableSubstitution<ImmutableTerm> substitution;
 
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
 
-    public ConstructionNodeImpl(ImmutableSet<Variable> projectedVariables, ImmutableSubstitution<ImmutableTerm> substitution,
-                                Optional<ImmutableQueryModifiers> optionalQueryModifiers) {
+    @AssistedInject
+    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
+                                 @Assisted ImmutableSubstitution<ImmutableTerm> substitution,
+                                 @Assisted Optional<ImmutableQueryModifiers> optionalQueryModifiers,
+                                 TermNullabilityEvaluator nullabilityEvaluator) {
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.optionalModifiers = optionalQueryModifiers;
+        this.nullabilityEvaluator = nullabilityEvaluator;
     }
 
     /**
      * Without modifiers nor substitution.
      */
-    public ConstructionNodeImpl(ImmutableSet<Variable> projectedVariables) {
+    @AssistedInject
+    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
+                                 TermNullabilityEvaluator nullabilityEvaluator) {
         this.projectedVariables = projectedVariables;
-        this.substitution = new ImmutableSubstitutionImpl<>(ImmutableMap.<Variable, ImmutableTerm>of());
+        this.nullabilityEvaluator = nullabilityEvaluator;
+        this.substitution = DATA_FACTORY.getSubstitution();
+        this.optionalModifiers = Optional.empty();
+    }
+
+    @AssistedInject
+    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
+                                 @Assisted ImmutableSubstitution<ImmutableTerm> substitution,
+                                 TermNullabilityEvaluator nullabilityEvaluator) {
+        this.projectedVariables = projectedVariables;
+        this.substitution = substitution;
+        this.nullabilityEvaluator = nullabilityEvaluator;
         this.optionalModifiers = Optional.empty();
     }
 
@@ -92,7 +116,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     @Override
     public ConstructionNode clone() {
-        return new ConstructionNodeImpl(projectedVariables, substitution, optionalModifiers);
+        return new ConstructionNodeImpl(projectedVariables, substitution, optionalModifiers, nullabilityEvaluator);
     }
 
     @Override
@@ -106,7 +130,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         ImmutableSet<Variable> variableDefinedByBindings = substitution.getDomain();
 
         Stream<Variable> variablesRequiredByBindings = substitution.getImmutableMap().values().stream()
-                .flatMap(t -> t.getVariableStream());
+                .flatMap(ImmutableTerm::getVariableStream);
 
         //return only the variables that are also used in the bindings for the child of the construction node
         return Stream.concat(projectedVariables.stream(), variablesRequiredByBindings)
@@ -196,11 +220,11 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .filter(e -> projectedVariables.contains(e.getKey()))
                 .forEach(newSubstitutionMapBuilder::put);
 
-        ImmutableSubstitutionImpl<ImmutableTerm> newSubstitution = new ImmutableSubstitutionImpl<>(
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = DATA_FACTORY.getSubstitution(
                 newSubstitutionMapBuilder.build());
 
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
-                newSubstitution, getOptionalModifiers());
+                newSubstitution, getOptionalModifiers(), nullabilityEvaluator);
 
         /**
          * Stops to propagate the substitution
@@ -310,9 +334,45 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          */
         else {
             ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
-                    newSubstitutions.bindings, newOptionalModifiers);
+                    newSubstitutions.bindings, newOptionalModifiers, nullabilityEvaluator);
 
             return new SubstitutionResultsImpl<>(newConstructionNode, substitutionToPropagate);
+        }
+    }
+
+    @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        if (getChildVariables().contains(variable))
+            return isChildVariableNullable(query, variable);
+
+        return Optional.ofNullable(substitution.get(variable))
+                .map(t -> isTermNullable(query, t))
+                .orElseThrow(() -> new IllegalArgumentException("The variable " + variable + " is not projected by " + this));
+    }
+
+    private boolean isChildVariableNullable(IntermediateQuery query, Variable variable) {
+        return query.getFirstChild(this)
+                .map(c -> c.isVariableNullable(query, variable))
+                .orElseThrow(() -> new InvalidIntermediateQueryException(
+                        "A construction node with child variables must have a child"));
+    }
+
+    private boolean isTermNullable(IntermediateQuery query, ImmutableTerm substitutionValue) {
+        if (substitutionValue instanceof ImmutableFunctionalTerm) {
+            ImmutableSet<Variable> nullableVariables = substitutionValue.getVariableStream()
+                    .filter(v -> isChildVariableNullable(query, v))
+                    .collect(ImmutableCollectors.toSet());
+            return nullabilityEvaluator.isNullable(substitutionValue, nullableVariables);
+
+        }
+        else if (substitutionValue instanceof Constant) {
+            return substitutionValue.equals(OBDAVocabulary.NULL);
+        }
+        else if (substitutionValue instanceof Variable) {
+            return isChildVariableNullable(query, (Variable)substitutionValue);
+        }
+        else {
+            throw new IllegalStateException("Unexpected immutable term");
         }
     }
 
@@ -340,6 +400,16 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
            return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_TRUE, ImmutableSet.of());
         }
        return new NodeTransformationProposalImpl(NodeTransformationProposedState.NO_LOCAL_CHANGE, ImmutableSet.of());
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return getChildVariables();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return substitution.getDomain();
     }
 
     @Override
@@ -387,13 +457,14 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         return new NewSubstitutionPair(newTheta, delta);
     }
 
+    @SuppressWarnings("unchecked")
     private static ImmutableSubstitution<NonVariableTerm> extractTauO(ImmutableSubstitution<? extends ImmutableTerm> tau) {
         ImmutableMap<Variable, NonVariableTerm> newMap = tau.getImmutableMap().entrySet().stream()
                 .filter(e -> e.getValue() instanceof NonVariableTerm)
                 .map(e -> (Map.Entry<Variable, NonVariableTerm>) e)
                 .collect(ImmutableCollectors.toMap());
 
-        return new ImmutableSubstitutionImpl<>(newMap);
+        return DATA_FACTORY.getSubstitution(newMap);
     }
 
     /**
@@ -402,7 +473,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private static Var2VarSubstitution extractTauEq(Var2VarSubstitution tauR) {
         int domainVariableCount = tauR.getDomain().size();
         if (domainVariableCount <= 1) {
-            return new Var2VarSubstitutionImpl(ImmutableMap.of());
+            return DATA_FACTORY.getVar2VarSubstitution(ImmutableMap.of());
         }
 
         ImmutableMultimap<Variable, Variable> inverseMultimap = tauR.getImmutableMap().entrySet().stream()
@@ -425,7 +496,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 })
                 .collect(ImmutableCollectors.toMap());
 
-        return new Var2VarSubstitutionImpl(newMap);
+        return DATA_FACTORY.getVar2VarSubstitution(newMap);
     }
 
     private static ImmutableSubstitution<ImmutableTerm> extractEtaB(ImmutableSubstitution<ImmutableTerm> eta,
@@ -440,7 +511,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .filter(e -> !tauCDomain.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap());
 
-        return new ImmutableSubstitutionImpl<>(newMap);
+        return DATA_FACTORY.getSubstitution(newMap);
     }
 
     private static ImmutableSubstitution<? extends ImmutableTerm> computeDelta(
@@ -452,6 +523,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         ImmutableSet<Map.Entry<Variable, Variable>> tauEqEntries = tauEq.getImmutableMap().entrySet();
         ImmutableSet<Variable> formerThetaDomain = formerTheta.getDomain();
 
+        @SuppressWarnings("SuspiciousMethodCalls")
         ImmutableMap<Variable, ImmutableTerm> newMap = Stream.concat(
                 eta.getImmutableMap().entrySet().stream(),
                 tauR.getImmutableMap().entrySet().stream())
@@ -461,7 +533,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .distinct()
                 .collect(ImmutableCollectors.toMap());
 
-        return new ImmutableSubstitutionImpl<>(newMap);
+        return DATA_FACTORY.getSubstitution(newMap);
     }
 
     /**

@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.spec.MappingExtractor;
+import it.unibz.inf.ontop.spec.MappingTransformer;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 
 /**
@@ -15,6 +17,8 @@ public class OntopMappingPostModule extends OntopAbstractModule {
 
     @Override
     public void configure() {
+        bindFromPreferences(MappingExtractor.class);
+        bindFromPreferences(MappingTransformer.class);
         bindFromPreferences(OBDASpecificationExtractor.class);
     }
 }

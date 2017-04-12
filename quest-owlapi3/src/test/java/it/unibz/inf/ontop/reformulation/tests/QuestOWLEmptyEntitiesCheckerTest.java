@@ -111,6 +111,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
 		// Now we are ready for querying

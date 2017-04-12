@@ -2,6 +2,9 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
@@ -9,6 +12,8 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -22,8 +27,21 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     private static final String JOIN_NODE_STR = "JOIN" ;
 
-    public InnerJoinNodeImpl(Optional<ImmutableExpression> optionalFilterCondition) {
-        super(optionalFilterCondition);
+    @AssistedInject
+    protected InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition,
+                                TermNullabilityEvaluator nullabilityEvaluator) {
+        super(optionalFilterCondition, nullabilityEvaluator);
+    }
+
+    @AssistedInject
+    private InnerJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
+                              TermNullabilityEvaluator nullabilityEvaluator) {
+        super(Optional.of(joiningCondition), nullabilityEvaluator);
+    }
+
+    @AssistedInject
+    private InnerJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator) {
+        super(Optional.empty(), nullabilityEvaluator);
     }
 
     @Override
@@ -33,7 +51,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public InnerJoinNode clone() {
-        return new InnerJoinNodeImpl(getOptionalFilterCondition());
+        return new InnerJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator());
     }
 
     @Override
@@ -43,7 +61,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
-        return new InnerJoinNodeImpl(newOptionalFilterCondition);
+        return new InnerJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator());
     }
 
     @Override
@@ -74,7 +92,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
         }
 
-        return computeAndEvaluateNewCondition(substitution, query, Optional.empty())
+        return computeAndEvaluateNewCondition(substitution, Optional.empty())
                 .map(ev -> applyEvaluation(ev, substitution))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(NO_CHANGE, Optional.of(substitution)));
     }
@@ -84,18 +102,46 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
 
         return getOptionalFilterCondition()
-                .map(cond -> transformBooleanExpression(query, substitution, cond))
+                .map(cond -> transformBooleanExpression(substitution, cond))
                 .map(ev -> applyEvaluation(ev, substitution))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(NO_CHANGE, Optional.of(substitution)));
     }
 
-    private SubstitutionResults<InnerJoinNode> applyEvaluation(ExpressionEvaluator.Evaluation evaluation,
+    @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+
+        if (isFilteringNullValue(variable))
+            return false;
+
+        // Non-already
+        boolean alsoProjectedByAnotherChild = false;
+
+        for(QueryNode child : query.getChildren(this)) {
+            if (query.getVariables(child).contains(variable)) {
+                // Joining conditions cannot be null
+                if (alsoProjectedByAnotherChild)
+                    return false;
+
+                if (child.isVariableNullable(query, variable))
+                    alsoProjectedByAnotherChild = true;
+                else
+                    return false;
+            }
+        }
+
+        if (!alsoProjectedByAnotherChild)
+            throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
+
+        return true;
+    }
+
+    private SubstitutionResults<InnerJoinNode> applyEvaluation(ExpressionEvaluator.EvaluationResult evaluationResult,
                                                                ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-        if (evaluation.isFalse()) {
+        if (evaluationResult.isEffectiveFalse()) {
             return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
         }
         else {
-            InnerJoinNode newNode = changeOptionalFilterCondition(evaluation.getOptionalExpression());
+            InnerJoinNode newNode = changeOptionalFilterCondition(evaluationResult.getOptionalExpression());
             return new SubstitutionResultsImpl<>(newNode, substitution);
         }
     }
@@ -127,7 +173,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 if (condition.isPresent()) {
                     return new NodeTransformationProposalImpl(
                             REPLACE_BY_NEW_NODE,
-                            new FilterNodeImpl(condition.get()),
+                            query.getFactory().createFilterNode(condition.get()),
                             ImmutableSet.of()
                     );
                 }

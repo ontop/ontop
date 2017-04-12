@@ -1,8 +1,13 @@
 package it.unibz.inf.ontop.cli;
 
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.ExternalResource;
 
 public class OntopBootstrapTest {
+
+    @ClassRule
+    public static ExternalResource h2Connection = new H2ExternalResourceForBookExample();
 
     @Test
     public void testOntopHelp(){
@@ -14,12 +19,9 @@ public class OntopBootstrapTest {
     public void testOntopBootstrap (){
         String[] argv = {"bootstrap",
                 "-b", "http://www.example.org/",
-                "-m", "src/test/resources/bootstrapped-univ-benchQL.obda",
-                "-t", "src/test/resources/bootstrapped-univ-benchQL.owl",
-                "-l", "jdbc:mysql://10.7.20.39/lubm1",
-                "-u", "fish",
-                "-p", "fish",
-                "-d", "com.mysql.jdbc.Driver"
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-m", "src/test/resources/output/exampleBooks-bootstrapped.obda",
+                "-t", "src/test/resources/output/exampleBooks-bootstrapped.owl"
         };
         Ontop.main(argv);
     }

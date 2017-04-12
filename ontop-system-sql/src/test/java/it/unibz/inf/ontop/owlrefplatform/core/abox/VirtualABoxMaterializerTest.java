@@ -141,7 +141,7 @@ public class VirtualABoxMaterializerTest {
 				.build();
 		Injector injector = configuration.getInjector();
 		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-		MappingFactory mappingFactory = injector.getInstance(MappingFactory.class);
+		SpecificationFactory specificationFactory = injector.getInstance(SpecificationFactory.class);
 		OBDAFactoryWithException obdaFactory = injector.getInstance(OBDAFactoryWithException.class);
 
     			/*
@@ -169,8 +169,14 @@ public class VirtualABoxMaterializerTest {
 
 		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 
-		PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
-		MappingMetadata mappingMetadata = mappingFactory.create(prefixManager);
+		UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
+				body.stream()
+						.flatMap(atom -> atom.getTerms().stream())
+						.filter(t -> t instanceof Function)
+						.map(t -> (Function) t));
+
+		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
+		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
 		return obdaFactory.createOBDAModel(ImmutableList.of(map1), mappingMetadata);
 	}
 

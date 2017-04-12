@@ -85,8 +85,8 @@
 		<module>ontop-cli</module>
         <module>ontop-temporal</module>
 		<module>quest-test</module>
-		<module>ontop-docker-test-env</module>
-    </modules>
+		<module>ontop-docker-tests</module>
+	</modules>
 
 	<profiles>
 		<profile>
@@ -147,7 +147,7 @@
         <antlr.version>3.5.2</antlr.version>
         <airline.version>2.1.0</airline.version>
         <tomcat-jdbc.version>9.0.0.M1</tomcat-jdbc.version>
-        <r2rml-api.version>0.4.0</r2rml-api.version>
+        <r2rml-api.version>0.6.0</r2rml-api.version>
         <jetty.version>9.4.0.v20161208</jetty.version>
     </properties>
 
@@ -564,15 +564,21 @@
 			<!-- Optique R2RML API -->
 			<dependency>
 				<groupId>eu.optique-project</groupId>
-				<artifactId>r2rml-api</artifactId>
+				<artifactId>r2rml-api-core</artifactId>
 				<version>${r2rml-api.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>eu.optique-project</groupId>
-				<artifactId>r2rml-api-rdf4j-bridge</artifactId>
+				<artifactId>r2rml-api-rdf4j-binding</artifactId>
 				<version>${r2rml-api.version}</version>
 			</dependency>
+
+            <dependency>
+                <groupId>eu.optique-project</groupId>
+                <artifactId>r2rml-api-jena-binding</artifactId>
+                <version>${r2rml-api.version}</version>
+            </dependency>
 
 			<dependency>
 				<groupId>org.functionaljava</groupId>
@@ -623,33 +629,5 @@
             </dependency>
         </dependencies>
 	</dependencyManagement>
-
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-report-plugin</artifactId>
-				<configuration>
-					<outputDirectory>/build/report</outputDirectory>
-					<showSuccess>true</showSuccess>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<configuration>
-					<outputDirectory>/var/lib/tomcat7/webapps/ontop-test-result</outputDirectory>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jxr-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</reporting>
 
 </project>

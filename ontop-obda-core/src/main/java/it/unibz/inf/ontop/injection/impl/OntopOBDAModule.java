@@ -1,8 +1,15 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import com.google.common.collect.ImmutableList;
+import com.google.inject.Module;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopOBDAConfiguration;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.mapping.Mapping;
+import it.unibz.inf.ontop.mapping.MappingMetadata;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 
 class OntopOBDAModule extends OntopAbstractModule {
 
@@ -15,7 +22,15 @@ class OntopOBDAModule extends OntopAbstractModule {
 
     @Override
     protected void configure() {
-
         bind(OntopOBDASettings.class).toInstance(settings);
+
+        Module mappingFactoryModule = buildFactory(ImmutableList.of(
+                PrefixManager.class,
+                MappingMetadata.class,
+                Mapping.class,
+                OBDASpecification.class
+                ),
+                SpecificationFactory.class);
+        install(mappingFactoryModule);
     }
 }

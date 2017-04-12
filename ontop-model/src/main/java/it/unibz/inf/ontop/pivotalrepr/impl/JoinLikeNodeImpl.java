@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.JoinLikeNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -13,15 +13,16 @@ import java.util.stream.Stream;
 
 public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements JoinLikeNode {
 
-    protected JoinLikeNodeImpl(Optional<ImmutableExpression> optionalJoinCondition) {
-        super(optionalJoinCondition);
+    protected JoinLikeNodeImpl(Optional<ImmutableExpression> optionalJoinCondition,
+                               TermNullabilityEvaluator nullabilityEvaluator) {
+        super(optionalJoinCondition, nullabilityEvaluator);
     }
 
     /**
      * TODO: explain
      */
-    protected Optional<ExpressionEvaluator.Evaluation> computeAndEvaluateNewCondition(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query,
+    protected Optional<ExpressionEvaluator.EvaluationResult> computeAndEvaluateNewCondition(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             Optional<ImmutableExpression> optionalNewEqualities) {
 
         Optional<ImmutableExpression> updatedExistingCondition = getOptionalFilterCondition()
@@ -36,8 +37,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                     .flatMap(e -> e.flattenAND().stream()));
 
         return newCondition
-                .map(cond -> new ExpressionEvaluator(query.getMetadata().getUriTemplateMatcher())
-                        .evaluateExpression(cond));
+                .map(cond -> new ExpressionEvaluator().evaluateExpression(cond));
     }
 
     protected static ImmutableSet<Variable> union(ImmutableSet<Variable> set1, ImmutableSet<Variable> set2) {

@@ -2,10 +2,9 @@ package it.unibz.inf.ontop.pivotalrepr.datalog;
 
 
 import com.google.common.collect.ImmutableList;
-import fj.P2;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogProgram2QueryConverterImpl;
+import it.unibz.inf.ontop.pivotalrepr.mapping.TargetAtom;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -29,14 +28,14 @@ public class Datalog2IQConversionTest {
 
     @Test
     public void testHeadConversion() throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
-        AtomPredicate predicate = new AtomPredicateImpl("ans", 5);
+        AtomPredicate predicate = DATA_FACTORY.getAtomPredicate("ans", 5);
 
         Function datalogHead = DATA_FACTORY.getFunction(predicate,X,X,TWO, Y, URI_TEMPLATE);
 
-        P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> results = convertFromDatalogDataAtom(datalogHead);
+        TargetAtom targetAtom = convertFromDatalogDataAtom(datalogHead);
 
-        DistinctVariableOnlyDataAtom projectionAtom = results._1();
-        ImmutableSubstitution<ImmutableTerm> bindings = results._2();
+        DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
+        ImmutableSubstitution<ImmutableTerm> bindings = targetAtom.getSubstitution();
 
         assertEquals(projectionAtom.getPredicate(), predicate);
 

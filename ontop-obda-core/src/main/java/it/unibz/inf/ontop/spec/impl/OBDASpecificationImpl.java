@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.spec.impl;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -14,9 +16,10 @@ public class OBDASpecificationImpl implements OBDASpecification {
     private final TBoxReasoner saturatedTBox;
     private final ImmutableOntologyVocabulary vocabulary;
 
-    public OBDASpecificationImpl(Mapping saturatedMapping, DBMetadata dbMetadata,
-                                 TBoxReasoner saturatedTBox,
-                                 ImmutableOntologyVocabulary vocabulary) {
+    @Inject
+    private OBDASpecificationImpl(@Assisted Mapping saturatedMapping, @Assisted DBMetadata dbMetadata,
+                                  @Assisted TBoxReasoner saturatedTBox,
+                                  @Assisted ImmutableOntologyVocabulary vocabulary) {
         this.mapping = saturatedMapping;
         this.dbMetadata = dbMetadata;
         this.saturatedTBox = saturatedTBox;

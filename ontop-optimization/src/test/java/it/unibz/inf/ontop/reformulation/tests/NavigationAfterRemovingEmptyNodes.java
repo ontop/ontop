@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
@@ -14,23 +13,21 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposa
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 import org.junit.Test;
 
-import java.util.Optional;
-
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class NavigationAfterRemovingEmptyNodes {
 
-    private static final AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 2);
-    private static final AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table2", 2);
-    private static final AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table3", 2);
-    private static final AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("table4", 2);
-    private static final AtomPredicate TABLE5_PREDICATE = new AtomPredicateImpl("table5", 2);
-    private static final AtomPredicate TABLE6_PREDICATE = new AtomPredicateImpl("table6", 2);
+    private static final AtomPredicate TABLE1_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 2);
+    private static final AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("table2", 2);
+    private static final AtomPredicate TABLE3_PREDICATE = DATA_FACTORY.getAtomPredicate("table3", 2);
+    private static final AtomPredicate TABLE4_PREDICATE = DATA_FACTORY.getAtomPredicate("table4", 2);
+    private static final AtomPredicate TABLE5_PREDICATE = DATA_FACTORY.getAtomPredicate("table5", 2);
+    private static final AtomPredicate TABLE6_PREDICATE = DATA_FACTORY.getAtomPredicate("table6", 2);
 
-    private static final AtomPredicate ANS1_ARITY_1_PREDICATE = new AtomPredicateImpl("ans1", 1);
-    private static final AtomPredicate ANS1_ARITY_2_PREDICATE = new AtomPredicateImpl("ans1", 2);
+    private static final AtomPredicate ANS1_ARITY_1_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
+    private static final AtomPredicate ANS1_ARITY_2_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 2);
 
     private static final Variable X = DATA_FACTORY.getVariable("x");
     private static final Variable Y = DATA_FACTORY.getVariable("y");
@@ -68,20 +65,20 @@ public class NavigationAfterRemovingEmptyNodes {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        UnionNode unionNode = new UnionNodeImpl(projectionAtom.getVariables());
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
         initialQueryBuilder.addChild(initialRootNode, unionNode);
         initialQueryBuilder.addChild(unionNode, DATA_NODE_1);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(unionNode, joinNode);
 
-        FilterNode filterNode = new FilterNodeImpl(DATA_FACTORY.getImmutableExpression(ExpressionOperation.GT, A,
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(DATA_FACTORY.getImmutableExpression(ExpressionOperation.GT, A,
                 DATA_FACTORY.getConstantLiteral("2")));
         initialQueryBuilder.addChild(joinNode, filterNode);
-        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A));
+        EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A));
         initialQueryBuilder.addChild(filterNode, emptyNode);
         initialQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, C));
 
@@ -108,16 +105,16 @@ public class NavigationAfterRemovingEmptyNodes {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        UnionNode unionNode = new UnionNodeImpl(projectionAtom.getVariables());
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
         initialQueryBuilder.addChild(initialRootNode, unionNode);
 
-        InnerJoinNode unsatisfiedJoinNode = new InnerJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(
+        InnerJoinNode unsatisfiedJoinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ,
                 DATA_FACTORY.getConstantLiteral("2", Predicate.COL_TYPE.INTEGER),
-                DATA_FACTORY.getConstantLiteral("3", Predicate.COL_TYPE.INTEGER))));
+                DATA_FACTORY.getConstantLiteral("3", Predicate.COL_TYPE.INTEGER)));
         initialQueryBuilder.addChild(unionNode, unsatisfiedJoinNode);
         initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_1);
         initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_2);
@@ -147,7 +144,7 @@ public class NavigationAfterRemovingEmptyNodes {
     }
 
     private static ExtensionalDataNode buildExtensionalDataNode(AtomPredicate predicate, VariableOrGroundTerm ... arguments) {
-        return new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(predicate, arguments));
+        return IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(predicate, arguments));
     }
 
 }

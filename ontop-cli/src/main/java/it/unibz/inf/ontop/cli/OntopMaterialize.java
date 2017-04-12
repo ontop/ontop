@@ -25,6 +25,7 @@ import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -66,17 +67,11 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     " materializing large OBDA setting. Default: false.")
     public boolean separate = false;
 
-
-
     @Option(type = OptionType.COMMAND, name = {"--no-streaming"}, title = "do not execute streaming of results",
             description = "All the SQL results of one big query will be stored in memory. Not recommended. Default: false.")
     private boolean noStream = false;
 
     private boolean doStreamResults = true;
-
-	public static void main(String... args) {
-
-	}
 
     public OntopMaterialize(){}
 
@@ -119,6 +114,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             // Loads it only once
             OBDAModel obdaModel = configuration.loadProvidedPPMapping();
             OntopSQLOWLAPIConfiguration materializationConfig = createAndInitConfigurationBuilder()
+                    .propertyFile(propertiesFile)
                     // To avoid parsing it again and again
                     .obdaModel(obdaModel)
                     .build();
@@ -345,9 +341,12 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
      * Mapping file + connection info
      */
     private Builder<? extends Builder> createAndInitConfigurationBuilder() {
-        Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .enableOntologyAnnotationQuerying(true)
-                .properties(createConnectionProperties());
+
+        final Builder<? extends Builder> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder();
+
+//        if (!Strings.isNullOrEmpty(owlFile)){
+//            configBuilder.ontologyFile(owlFile);
+//        }
 
         if (isR2rmlFile(mappingFile)) {
             configBuilder.r2rmlMappingFile(mappingFile);
@@ -356,6 +355,8 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             configBuilder.nativeOntopMappingFile(mappingFile);
         }
 
-        return configBuilder;
+        return configBuilder
+                .propertyFile(propertiesFile)
+                .enableOntologyAnnotationQuerying(true);
     }
 }

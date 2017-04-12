@@ -2,12 +2,14 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -17,7 +19,7 @@ import java.util.stream.Stream;
  */
 public interface IntermediateQuery {
 
-    MetadataForQueryOptimization getMetadata();
+    DBMetadata getDBMetadata();
 
     ConstructionNode getRootConstructionNode();
 
@@ -136,4 +138,8 @@ public interface IntermediateQuery {
      *
      */
     ExecutorRegistry getExecutorRegistry();
+
+    IntermediateQueryFactory getFactory();
+
+    ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode);
 }

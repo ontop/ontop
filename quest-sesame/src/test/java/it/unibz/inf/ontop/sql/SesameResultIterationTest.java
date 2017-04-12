@@ -89,6 +89,7 @@ public class SesameResultIterationTest {
                 .jdbcUrl(URL)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)
+                .enableTestMode()
                 .build();
 
         OntopVirtualRepository repo = new OntopVirtualRepository(configuration);

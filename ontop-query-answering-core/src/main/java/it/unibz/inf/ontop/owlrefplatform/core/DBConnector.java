@@ -13,12 +13,6 @@ public interface DBConnector {
 
     boolean connect() throws OntopConnectionException;
 
-    /**
-     * TODO: remove it
-     */
-    @Deprecated
-    void disconnect() throws OntopConnectionException;
-
     void close() throws OntopConnectionException;
 
     /**

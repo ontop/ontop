@@ -3,13 +3,15 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.*;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
@@ -19,7 +21,8 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     private static final String UNION_NODE_STR = "UNION";
     private final ImmutableSet<Variable> projectedVariables;
 
-    public UnionNodeImpl(ImmutableSet<Variable> projectedVariables) {
+    @AssistedInject
+    private UnionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables) {
         this.projectedVariables = projectedVariables;
     }
 
@@ -46,7 +49,13 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     public SubstitutionResults<UnionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode childNode, IntermediateQuery query) {
-        if (substitution.isEmpty()) {
+        /**
+         * Reduce the domain of the substitution to the variables projected out by the union node
+         */
+        ImmutableSubstitution reducedSubstitution =
+                substitution.reduceDomainToIntersectionWith(projectedVariables);
+
+        if (reducedSubstitution.isEmpty()) {
             return new SubstitutionResultsImpl<>(NO_CHANGE);
         }
         /**
@@ -54,8 +63,8 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
          * Such a construction node will contain the substitution.
          */
         else {
-            ConstructionNode newParentOfChildNode = new ConstructionNodeImpl(projectedVariables,
-                    (ImmutableSubstitution<ImmutableTerm>) substitution, Optional.empty());
+            ConstructionNode newParentOfChildNode = query.getFactory().createConstructionNode(projectedVariables,
+                    (ImmutableSubstitution<ImmutableTerm>) reducedSubstitution);
             return new SubstitutionResultsImpl<>(newParentOfChildNode, childNode);
         }
     }
@@ -79,6 +88,15 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
             UnionNode newNode = new UnionNodeImpl(newProjectedVariables);
             return new SubstitutionResultsImpl<>(newNode, substitution);
         }
+    }
+
+    @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        for(QueryNode child : query.getChildren(this)) {
+            if (child.isVariableNullable(query, variable))
+                return true;
+        }
+        return false;
     }
 
     @Override
@@ -134,5 +152,15 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     @Override
     public String toString() {
         return UNION_NODE_STR + " " + projectedVariables;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return projectedVariables;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return ImmutableSet.of();
     }
 }

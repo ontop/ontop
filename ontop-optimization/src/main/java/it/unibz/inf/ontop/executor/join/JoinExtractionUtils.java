@@ -28,7 +28,7 @@ public class JoinExtractionUtils {
      * TODO: explain
      */
     public static Optional<ImmutableExpression> extractFoldAndOptimizeBooleanExpressions(
-            ImmutableList<JoinOrFilterNode> filterAndJoinNodes, MetadataForQueryOptimization metadata)
+            ImmutableList<JoinOrFilterNode> filterAndJoinNodes)
             throws UnsatisfiableExpressionException {
 
         ImmutableList<ImmutableExpression> booleanExpressions = extractBooleanExpressions(
@@ -36,14 +36,14 @@ public class JoinExtractionUtils {
 
         Optional<ImmutableExpression> foldedExpression = foldBooleanExpressions(booleanExpressions);
         if (foldedExpression.isPresent()) {
-            ExpressionEvaluator evaluator = new ExpressionEvaluator(metadata.getUriTemplateMatcher());
+            ExpressionEvaluator evaluator = new ExpressionEvaluator();
 
-            ExpressionEvaluator.Evaluation evaluation = evaluator.evaluateExpression(foldedExpression.get());
-            if (evaluation.isFalse()) {
+            ExpressionEvaluator.EvaluationResult evaluationResult = evaluator.evaluateExpression(foldedExpression.get());
+            if (evaluationResult.isEffectiveFalse()) {
                 throw new UnsatisfiableExpressionException();
             }
             else {
-                return evaluation.getOptionalExpression();
+                return evaluationResult.getOptionalExpression();
             }
         }
         else {

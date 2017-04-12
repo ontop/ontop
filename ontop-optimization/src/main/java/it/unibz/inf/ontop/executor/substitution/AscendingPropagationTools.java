@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
@@ -311,7 +310,7 @@ public class AscendingPropagationTools {
             Optional<NodeTracker> optionalAncestryTracker) throws EmptyQueryException {
 
         ImmutableSet<Variable> nullVariables = query.getVariables(currentAncestor);
-        EmptyNode replacingEmptyNode = new EmptyNodeImpl(nullVariables);
+        EmptyNode replacingEmptyNode = query.getFactory().createEmptyNode(nullVariables);
 
         treeComponent.replaceSubTree(currentAncestor, replacingEmptyNode);
 

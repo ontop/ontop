@@ -27,18 +27,10 @@ import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.rdf4j.RDF4JRDFIterator;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.RDFParseException;
-import org.eclipse.rdf4j.rio.turtle.TurtleParser;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -113,56 +105,6 @@ public class SemanticIndexManager {
 		log.info("Loaded {} items into the DB.", result);
 
 		return result;
-	}
-
-	public int insertDataNTriple(final String ntripleFile, final String baseURI, final int commitInterval, final int batchSize)
-			throws SQLException, RDFParseException, RDFHandlerException, FileNotFoundException, IOException {
-
-		final TurtleParser parser = new TurtleParser();
-		// NTriplesParser parser = new NTriplesParser();
-
-		final RDF4JRDFIterator aBoxIter = new RDF4JRDFIterator();
-		
-		parser.setRDFHandler(aBoxIter);
-
-
-		Thread t = new Thread(() -> {
-
-            try {
-                parser.parse(new BufferedReader(new FileReader(ntripleFile)), baseURI);
-            } catch (RDFParseException | RDFHandlerException | IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        });
-
-		final int[] val = new int[1];
-
-		Thread t2 = new Thread(() -> {
-            try {
-                val[0] = dataRepository.insertData(conn, aBoxIter, commitInterval, batchSize);
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            log.info("Loaded {} items into the DB.", val[0]);
-
-        });
-
-		t.start();
-		t2.start();
-		try {
-			t.join();
-
-			t2.join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// EquivalentTriplePredicateIterator newData = new
-		// EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
-
-		return val[0];
 	}
 
 }

@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.*;
@@ -38,10 +39,10 @@ import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
@@ -74,7 +75,7 @@ public class DirectMappingEngine {
 	}
 
 	private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-	private final MappingFactory mappingFactory;
+	private final SpecificationFactory specificationFactory;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final OBDAFactoryWithException obdaFactory;
 	private final OntopSQLCoreSettings settings;
@@ -88,18 +89,18 @@ public class DirectMappingEngine {
 	 *
 	 */
 	public static BootstrappingResults bootstrap(OntopSQLOWLAPIConfiguration configuration, String baseIRI)
-			throws IOException, InvalidMappingException, OWLOntologyCreationException, SQLException, OWLOntologyStorageException, DuplicateMappingException {
+			throws MappingIOException, InvalidMappingException, OWLOntologyCreationException, SQLException, OWLOntologyStorageException, DuplicateMappingException {
 		DirectMappingEngine engine = configuration.getInjector().getInstance(DirectMappingEngine.class);
 		return engine.bootstrapMappingAndOntology(baseIRI, configuration.loadPPMapping(),
 				configuration.loadInputOntology());
 	}
 
 	@Inject
-	private DirectMappingEngine(OntopSQLCoreSettings settings, MappingFactory mappingFactory,
+	private DirectMappingEngine(OntopSQLCoreSettings settings, SpecificationFactory specificationFactory,
                                 NativeQueryLanguageComponentFactory nativeQLFactory,
                                 OBDAFactoryWithException obdaFactory) {
 		connManager = JDBCConnectionManager.getJDBCConnectionManager();
-		this.mappingFactory = mappingFactory;
+		this.specificationFactory = specificationFactory;
 		this.nativeQLFactory = nativeQLFactory;
 		this.obdaFactory = obdaFactory;
 		this.settings = settings;
@@ -188,8 +189,8 @@ public class DirectMappingEngine {
 	 * @return a new OBDA Model containing all the extracted mappings
 	 */
 	private OBDAModel extractMappings() throws DuplicateMappingException, SQLException {
-		it.unibz.inf.ontop.io.PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
-		MappingMetadata mappingMetadata = mappingFactory.create(prefixManager);
+		it.unibz.inf.ontop.io.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
+		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, UriTemplateMatcher.create(Stream.empty()));
 		OBDAModel emptyModel = obdaFactory.createOBDAModel(ImmutableList.of(), mappingMetadata);
 		return extractMappings(emptyModel);
 	}

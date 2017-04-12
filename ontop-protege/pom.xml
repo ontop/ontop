@@ -184,11 +184,11 @@
 
         <dependency>
             <groupId>eu.optique-project</groupId>
-            <artifactId>r2rml-api</artifactId>
+            <artifactId>r2rml-api-core</artifactId>
         </dependency>
         <dependency>
             <groupId>eu.optique-project</groupId>
-            <artifactId>r2rml-api-rdf4j-bridge</artifactId>
+            <artifactId>r2rml-api-rdf4j-binding</artifactId>
         </dependency>
 
         <!-- Protege and OWLAPI bundle dependencies -->

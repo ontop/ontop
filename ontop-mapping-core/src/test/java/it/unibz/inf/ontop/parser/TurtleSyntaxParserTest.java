@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.parser;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 
-import it.unibz.inf.ontop.injection.MappingFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.Function;
@@ -45,13 +45,13 @@ import java.util.List;
 public class TurtleSyntaxParserTest {
 
 	private final static Logger log = LoggerFactory.getLogger(TurtleSyntaxParserTest.class);
-    private final MappingFactory mappingFactory;
+    private final SpecificationFactory specificationFactory;
 
     public TurtleSyntaxParserTest() {
 		OntopMappingConfiguration configuration = OntopMappingConfiguration
 				.defaultBuilder().build();
 		Injector injector = configuration.getInjector();
-        mappingFactory = injector.getInstance(MappingFactory.class);
+        specificationFactory = injector.getInstance(SpecificationFactory.class);
     }
 	
 	public void test_1_1() {
@@ -328,7 +328,7 @@ public class TurtleSyntaxParserTest {
 	}
 	
 	private PrefixManager getPrefixManager() {
-        return mappingFactory.create(ImmutableMap.of(
+        return specificationFactory.createPrefixManager(ImmutableMap.of(
 				PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#",
 				"ex:", "http://www.example.org/"
 		));

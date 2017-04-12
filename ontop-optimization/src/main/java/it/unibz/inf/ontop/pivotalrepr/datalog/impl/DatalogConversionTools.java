@@ -3,16 +3,11 @@ package it.unibz.inf.ontop.pivotalrepr.datalog.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import fj.P;
-import fj.P2;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.DataNode;
-import it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogProgram2QueryConverterImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.IntensionalDataNodeImpl;
-
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
+import it.unibz.inf.ontop.pivotalrepr.mapping.TargetAtom;
+import it.unibz.inf.ontop.pivotalrepr.mapping.impl.TargetAtomImpl;
 
 import java.util.Collection;
 
@@ -26,13 +21,14 @@ public class DatalogConversionTools {
     /**
      * TODO: explain
      */
-    public static DataNode createDataNode(DataAtom dataAtom, Collection<Predicate> tablePredicates) {
+    public static DataNode createDataNode(IntermediateQueryFactory iqFactory, DataAtom dataAtom,
+                                          Collection<Predicate> tablePredicates) {
 
         if (tablePredicates.contains(dataAtom.getPredicate())) {
-            return new ExtensionalDataNodeImpl(dataAtom);
+            return iqFactory.createExtensionalDataNode(dataAtom);
         }
 
-        return new IntensionalDataNodeImpl(dataAtom);
+        return iqFactory.createIntensionalDataNode(dataAtom);
     }
 
 
@@ -41,14 +37,14 @@ public class DatalogConversionTools {
      *
      * TODO: deal with multiple occurences of the same variable in the head of the DatalogProgram
      */
-    public static P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> convertFromDatalogDataAtom(
+    public static TargetAtom convertFromDatalogDataAtom(
             Function datalogDataAtom)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
         Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
         AtomPredicate atomPredicate = (datalogAtomPredicate instanceof AtomPredicate)
                 ? (AtomPredicate) datalogAtomPredicate
-                : new AtomPredicateImpl(datalogAtomPredicate);
+                : DATA_FACTORY.getAtomPredicate(datalogAtomPredicate);
 
         ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
         ImmutableMap.Builder<Variable, ImmutableTerm> allBindingBuilder = ImmutableMap.builder();
@@ -95,9 +91,9 @@ public class DatalogConversionTools {
         }
 
         DistinctVariableOnlyDataAtom dataAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(atomPredicate, argListBuilder.build());
-        ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(allBindingBuilder.build());
+        ImmutableSubstitution<ImmutableTerm> substitution = DATA_FACTORY.getSubstitution(allBindingBuilder.build());
 
 
-        return P.p(dataAtom, substitution);
+        return new TargetAtomImpl(dataAtom, substitution);
     }
 }

@@ -34,6 +34,7 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -41,6 +42,9 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.rio.RDFHandler;
+import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -48,7 +52,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
@@ -99,7 +103,7 @@ public class RDB2RDFTest {
 
 	private static Connection SQL_CONN;
 
-	private static ValueFactory FACTORY = ValueFactoryImpl.getInstance();
+	private static ValueFactory FACTORY = SimpleValueFactory.getInstance();
 
 	private static OWLOntology EMPTY_ONT;
 	private static Properties PROPERTIES;
@@ -115,15 +119,15 @@ public class RDB2RDFTest {
 	private static class TestVocabulary  {
 		public static final String NS = "http://purl.org/NET/rdb2rdf-test#";
 
-		public static final URI SQL_SCRIPT_FILE = FACTORY.createURI(NS, "sqlScriptFile");
+		public static final IRI SQL_SCRIPT_FILE = FACTORY.createIRI(NS, "sqlScriptFile");
 
-		public static final URI DIRECT_MAPPING = FACTORY.createURI(NS, "DirectMapping");
+		public static final IRI DIRECT_MAPPING = FACTORY.createIRI(NS, "DirectMapping");
 
-		public static final URI R2RML = FACTORY.createURI(NS, "R2RML");
+		public static final IRI R2RML = FACTORY.createIRI(NS, "R2RML");
 
-		public static final URI MAPPING_DOCUMENT = FACTORY.createURI(NS, "mappingDocument");
+		public static final IRI MAPPING_DOCUMENT = FACTORY.createIRI(NS, "mappingDocument");
 
-		public static final URI OUTPUT = FACTORY.createURI(NS, "output");
+		public static final IRI OUTPUT = FACTORY.createIRI(NS, "output");
 	}
 
 	/**
@@ -140,7 +144,7 @@ public class RDB2RDFTest {
 
 			// simpler handler for manifest files that takes advantage of the fact that triples in
 			// manifest files are ordered in a certain way (otherwise we'll get an explicit error)
-			RDFHandlerBase manifestHandler = new RDFHandlerBase() {
+            RDFHandler manifestHandler = new AbstractRDFHandler() {
 				protected String name;
 				protected String sqlFile;
 				protected String mappingFile;
@@ -148,7 +152,7 @@ public class RDB2RDFTest {
 
 				@Override
 				public void handleStatement(final Statement st) throws RDFHandlerException {
-					URI pred = st.getPredicate();
+					IRI pred = st.getPredicate();
 					// the first thing we'll see in the file is the SQL script file
 					if (pred.equals(TestVocabulary.SQL_SCRIPT_FILE)) {
 						// make sure there is a single SQL script in each manifest
@@ -162,7 +166,7 @@ public class RDB2RDFTest {
 							// create parameter for the previous test case
 							createTestCase();
 							// reset state
-							name = ((URI) st.getSubject()).getLocalName();
+							name = ((IRI) st.getSubject()).getLocalName();
 							mappingFile = outputFile = null;
 						}
 					}
@@ -292,14 +296,15 @@ public class RDB2RDFTest {
 				.jdbcUrl(JDBC_URL)
 				.jdbcDriver(JDBC_DRIVER)
 				.jdbcUser(DB_USER)
-				.jdbcPassword(DB_PASSWORD);
+				.jdbcPassword(DB_PASSWORD)
+				.enableTestMode();
 	}
 
 	/**
 	 * Bootstraps the mapping and returns a new configuration
 	 */
 	OntopSQLOWLAPIConfiguration bootstrapDMConfiguration()
-			throws SQLException, IOException, InvalidMappingException, OWLOntologyStorageException,
+			throws SQLException, MappingIOException, InvalidMappingException, OWLOntologyStorageException,
 			OWLOntologyCreationException, DuplicateMappingException {
 
 		OntopSQLOWLAPIConfiguration initialConfiguration = createInMemoryBuilder().build();

@@ -1,13 +1,17 @@
 package it.unibz.inf.ontop.si.impl;
 
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.MappingFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
@@ -31,6 +35,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 
 class SILoadingTools {
 
@@ -144,12 +149,21 @@ class SILoadingTools {
     private static OBDAModel createPPMapping(RDBMSSIRepositoryManager dataRepository) {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
                 .build();
-        MappingFactory mappingFactory = defaultConfiguration.getInjector().getInstance(MappingFactory.class);
-        PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
+        SpecificationFactory specificationFactory = defaultConfiguration.getInjector().getInstance(SpecificationFactory.class);
+        PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
+
+        ImmutableList<OBDAMappingAxiom> mappingAxioms = dataRepository.getMappings();
+
+        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
+                mappingAxioms.stream()
+                        .flatMap(ax -> ax.getTargetQuery().stream())
+                        .flatMap(atom -> atom.getTerms().stream())
+                        .filter(t -> t instanceof Function)
+                        .map(t -> (Function) t));
 
         try {
-            return new OBDAModelImpl(dataRepository.getMappings(),
-                    mappingFactory.create(prefixManager));
+            return new OBDAModelImpl(mappingAxioms,
+                    specificationFactory.createMetadata(prefixManager, uriTemplateMatcher));
 
         } catch (DuplicateMappingException e) {
             throw new IllegalStateException(e.getMessage());
@@ -157,6 +171,6 @@ class SILoadingTools {
     }
 
     private static String buildNewJdbcUrl() {
-        return "jdbc:h2:mem:questrepository:" + System.currentTimeMillis() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+        return "jdbc:h2:mem:questrepository:" + UUID.randomUUID() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
     }
 }

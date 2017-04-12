@@ -21,12 +21,10 @@ package it.unibz.inf.ontop.obda;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.utils.SQLScriptRunner;
 import org.junit.*;
 import org.semanticweb.owlapi.model.OWLObject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,6 +127,9 @@ public class ReverseURITestH2 {
 	        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.nativeOntopMappingFile(obdafile)
 					.ontologyFile(owlfile)
+					.jdbcUrl(url)
+					.jdbcUser(username)
+					.jdbcPassword(password)
 					.enableFullMetadataExtraction(false)
 					.build();
 	        reasoner = factory.createReasoner(config);

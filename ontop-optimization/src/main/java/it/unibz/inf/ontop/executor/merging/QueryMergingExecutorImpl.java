@@ -3,10 +3,12 @@ package it.unibz.inf.ontop.executor.merging;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -15,6 +17,9 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.transform.QueryRenamer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.impl.IdentityQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -22,7 +27,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
-import static it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils.generateNotConflictingRenaming;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 @Singleton
 public class QueryMergingExecutorImpl implements QueryMergingExecutor {
@@ -101,7 +106,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                                 results.getSubstitutionToPropagate());
 
                     case DECLARE_AS_TRUE:
-                        return new AnalysisResults(originalNode, new TrueNodeImpl(),
+                        return new AnalysisResults(originalNode, query.getFactory().createTrueNode(),
                                 Optional.empty());
                     /**
                      * Recursive
@@ -117,7 +122,8 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                         throw new IllegalStateException("Construction node insertion not expected during query merging");
 
                     case DECLARE_AS_EMPTY:
-                        return analyze(query, new EmptyNodeImpl(query.getVariables(originalNode)), substitutionToApply);
+                        return analyze(query, query.getFactory().createEmptyNode(query.getVariables(originalNode)),
+                                substitutionToApply);
 
                     default:
                         throw new IllegalStateException("Unknown local action:" + results.getLocalAction());
@@ -148,6 +154,18 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         public Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition() {
             return optionalPosition;
         }
+    }
+
+
+
+    private final IntermediateQueryFactory iqFactory;
+    private final QueryTransformerFactory transformerFactory;
+
+    @Inject
+    private QueryMergingExecutorImpl(IntermediateQueryFactory iqFactory,
+                                     QueryTransformerFactory transformerFactory) {
+        this.iqFactory = iqFactory;
+        this.transformerFactory = transformerFactory;
     }
 
 
@@ -183,7 +201,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
 
     private void removeUnsatisfiedNode(QueryTreeComponent treeComponent, IntensionalDataNode intensionalNode) {
 
-        EmptyNode emptyNode = new EmptyNodeImpl(intensionalNode.getVariables());
+        EmptyNode emptyNode = iqFactory.createEmptyNode(intensionalNode.getVariables());
         treeComponent.replaceSubTree(intensionalNode, emptyNode);
     }
 
@@ -191,7 +209,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
      * TODO: explain
      *
      */
-    protected static void mergeSubQuery(QueryTreeComponent treeComponent, IntermediateQuery subQuery,
+    protected void mergeSubQuery(QueryTreeComponent treeComponent, IntermediateQuery subQuery,
                                         IntensionalDataNode intensionalDataNode) {
         /**
          * Gets the parent of the intensional node and remove the latter
@@ -204,14 +222,14 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
 
 
         VariableGenerator variableGenerator = new VariableGenerator(treeComponent.getKnownVariables());
-        InjectiveVar2VarSubstitution renamingSubstitution = generateNotConflictingRenaming(variableGenerator,
+        InjectiveVar2VarSubstitution renamingSubstitution = DATA_FACTORY.generateNotConflictingRenaming(variableGenerator,
                 subQuery.getKnownVariables());
 
         IntermediateQuery renamedSubQuery;
         if(renamingSubstitution.isEmpty()){
             renamedSubQuery = subQuery;
         } else {
-            QueryTransformer queryRenamer = new QueryRenamer(renamingSubstitution);
+            QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
             renamedSubQuery = queryRenamer.transform(subQuery);
         }
 
@@ -267,12 +285,12 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
     }
 
 
-    private static HomogeneousQueryNodeTransformer createRenamer(InjectiveVar2VarSubstitution renamingSubstitution) {
+    private HomogeneousQueryNodeTransformer createRenamer(InjectiveVar2VarSubstitution renamingSubstitution) {
         if (renamingSubstitution.isEmpty()) {
             return new IdentityQueryNodeTransformer();
         }
         else {
-            return new QueryNodeRenamer(renamingSubstitution);
+            return new QueryNodeRenamer(iqFactory, renamingSubstitution);
         }
     }
 
@@ -291,7 +309,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                 (ImmutableList<VariableOrGroundTerm>) targetAtom.getArguments()).stream()
                 .collect(ImmutableCollectors.toMap());
 
-        return new ImmutableSubstitutionImpl<>(newMap);
+        return DATA_FACTORY.getSubstitution(newMap);
     }
 
     /**

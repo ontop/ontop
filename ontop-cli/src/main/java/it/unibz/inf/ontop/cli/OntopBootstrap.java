@@ -19,7 +19,7 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-b", "--base-iri"}, title = "base IRI",
             description = "base uri of the generated mapping")
-    protected String baseIRI;
+    private String baseIRI;
 
     @Override
     public void run() {
@@ -33,12 +33,7 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
             Objects.requireNonNull(owlFile, "ontology file must not be null");
 
             OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    .jdbcUrl(jdbcURL)
-                    .jdbcUser(jdbcUserName)
-                    .jdbcPassword(jdbcPassword)
-                    .jdbcDriver(jdbcDriverClass)
-                    .ontologyFile(owlFile)
-                    .nativeOntopMappingFile(mappingFile)
+                    .propertyFile(propertiesFile)
                     .build();
 
             BootstrappingResults results = DirectMappingEngine.bootstrap(configuration, baseIRI);

@@ -58,6 +58,7 @@ public class OracleLongNameTest {
 				.nativeOntopMappingFile(new File(obdafile1))
 				.ontologyFile(owlfile)
 				.propertyFile(propertyfile)
+				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
 

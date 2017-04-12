@@ -101,7 +101,7 @@ public class OBDAModelManager implements Disposable {
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
-	private final MappingFactory mappingFactory;
+	private final SpecificationFactory specificationFactory;
 
 	public OBDAModelManager(EditorKit editorKit) {
 
@@ -116,7 +116,7 @@ public class OBDAModelManager implements Disposable {
 				.jdbcPassword("")
 				.build().getInjector();
 
-		this.mappingFactory = defaultInjector.getInstance(MappingFactory.class);
+		this.specificationFactory = defaultInjector.getInstance(SpecificationFactory.class);
 		this.nativeQLFactory = defaultInjector.getInstance(NativeQueryLanguageComponentFactory.class);
 		this.obdaFactory = defaultInjector.getInstance(OBDAFactoryWithException.class);
 
@@ -440,7 +440,7 @@ public class OBDAModelManager implements Disposable {
         PrefixDocumentFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
         PrefixManagerWrapper prefixWrapper = new PrefixManagerWrapper(prefixManager);
 
-		activeOBDAModel = new OBDAModelWrapper(mappingFactory, obdaFactory, prefixWrapper);
+		activeOBDAModel = new OBDAModelWrapper(specificationFactory, obdaFactory, prefixWrapper);
 		activeOBDAModel.addSourceListener(dlistener);
 		activeOBDAModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);

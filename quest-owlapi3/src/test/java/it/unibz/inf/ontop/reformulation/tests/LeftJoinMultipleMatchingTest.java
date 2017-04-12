@@ -109,6 +109,7 @@ public class LeftJoinMultipleMatchingTest {
                 .jdbcUrl(URL)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)
+                .enableTestMode()
                 .build();
         reasoner = factory.createReasoner(config);
 
@@ -178,6 +179,7 @@ public class LeftJoinMultipleMatchingTest {
                 .jdbcUrl(URL)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)
+                .enableTestMode()
                 .build();
         reasoner = factory.createReasoner(config);
 

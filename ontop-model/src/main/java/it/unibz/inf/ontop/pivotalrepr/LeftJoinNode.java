@@ -5,6 +5,7 @@ import java.util.Optional;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 
 public interface LeftJoinNode extends JoinLikeNode, BinaryNonCommutativeOperatorNode {
 

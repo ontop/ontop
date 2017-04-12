@@ -23,12 +23,11 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
@@ -48,6 +47,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 public class IntermediateQueryToDatalogTranslator {
 
 
+	private final IntermediateQueryFactory iqFactory;
 
 	private static class RuleHead {
 		public final ImmutableSubstitution<ImmutableTerm> substitution;
@@ -68,7 +68,8 @@ public class IntermediateQueryToDatalogTranslator {
 	// Incremented
 	private int subQueryCounter;
 
-	private IntermediateQueryToDatalogTranslator() {
+	private IntermediateQueryToDatalogTranslator(IntermediateQueryFactory iqFactory) {
+		this.iqFactory = iqFactory;
 		subQueryCounter = 0;
 	}
 
@@ -77,7 +78,7 @@ public class IntermediateQueryToDatalogTranslator {
 	 * 
 	 */
 	public static DatalogProgram translate(IntermediateQuery query) {
-		IntermediateQueryToDatalogTranslator translator = new IntermediateQueryToDatalogTranslator();
+		IntermediateQueryToDatalogTranslator translator = new IntermediateQueryToDatalogTranslator(query.getFactory());
 		return translator.translateQuery(query);
 	}
 
@@ -141,7 +142,7 @@ public class IntermediateQueryToDatalogTranslator {
 			pr.appendRule(newrule);
 
             head.optionalChildNode.ifPresent(node -> {
-                List<Function> uAtoms = getAtomFrom(query, node, heads, subQueryProjectionAtoms);
+                List<Function> uAtoms = getAtomFrom(query, node, heads, subQueryProjectionAtoms, false);
                 newrule.getBody().addAll(uAtoms);
             });
 
@@ -156,7 +157,8 @@ public class IntermediateQueryToDatalogTranslator {
 	 * Usually it will be a single atom, but it is different for the filter case.
 	 */
 	private List<Function> getAtomFrom(IntermediateQuery te, QueryNode node, Queue<RuleHead> heads,
-											  Map<ConstructionNode, DataAtom> subQueryProjectionAtoms) {
+									   Map<ConstructionNode, DataAtom> subQueryProjectionAtoms,
+									   boolean isNested) {
 		
 		List<Function> body = new ArrayList<>();
 		
@@ -179,10 +181,13 @@ public class IntermediateQueryToDatalogTranslator {
 			
 		} else if (node instanceof FilterNode) {
 			ImmutableExpression filter = ((FilterNode) node).getFilterCondition();
-			Expression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter);
 			List<QueryNode> listnode =  te.getChildren(node);
-			body.addAll(getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms));
-			body.add(mutFilter);
+			body.addAll(getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms, true));
+
+			filter.flattenAND().stream()
+					.map(ImmutabilityTools::convertToMutableBooleanExpression)
+					.forEach(body::add);
+
 			return body;
 			
 					
@@ -198,36 +203,14 @@ public class IntermediateQueryToDatalogTranslator {
 		 * Nested Atoms	
 		 */
 		} else  if (node instanceof InnerJoinNode) {
-			Optional<ImmutableExpression> filter = ((InnerJoinNode)node).getOptionalFilterCondition();
-			List<Function> atoms = new ArrayList<>();
-			List<QueryNode> listnode =  te.getChildren(node);
-			for (QueryNode childnode: listnode) {
-				List<Function> atomsList = getAtomFrom(te, childnode, heads, subQueryProjectionAtoms);
-				atoms.addAll(atomsList);
-			}
-
-			if (atoms.size() <= 1) {
-				throw new IllegalArgumentException("Inconsistent IQ: an InnerJoinNode must have at least two children");
-			}
-
-			if (filter.isPresent()){
-				ImmutableExpression filter2 = filter.get();
-				Function mutFilter = ImmutabilityTools.convertToMutableBooleanExpression(filter2);
-				Function newJ = getSPARQLJoin(atoms, Optional.of(mutFilter));
-				body.add(newJ);
-				return body;
-			}else{
-				Function newJ = getSPARQLJoin(atoms, Optional.empty());
-				body.add(newJ);
-				return body;
-			}
+			return getAtomsFromJoinNode((InnerJoinNode)node, te, heads, subQueryProjectionAtoms, isNested);
 			
 		} else if (node instanceof LeftJoinNode) {
 			Optional<ImmutableExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
 			List<QueryNode> listnode =  te.getChildren(node);
 
-			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms);
-			List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), heads, subQueryProjectionAtoms);
+			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms, true);
+			List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), heads, subQueryProjectionAtoms, true);
 				
 			if (filter.isPresent()){
 				ImmutableExpression filter2 = filter.get();
@@ -264,7 +247,7 @@ public class IntermediateQueryToDatalogTranslator {
                     subQueryProjectionAtoms.put(cn, freshHeadAtom);
                     heads.add(new RuleHead(cn.getSubstitution(), freshHeadAtom, grandChild));
                 } else {
-                    ConstructionNode cn = new ConstructionNodeImpl(((UnionNode) node).getVariables());
+                    ConstructionNode cn = iqFactory.createConstructionNode(((UnionNode) node).getVariables());
                     subQueryProjectionAtoms.put(cn, freshHeadAtom);
                     heads.add(new RuleHead(cn.getSubstitution(), freshHeadAtom, Optional.ofNullable(child)));
                 }
@@ -287,7 +270,7 @@ public class IntermediateQueryToDatalogTranslator {
 			//DataAtom projectionAtom = generateProjectionAtom(ImmutableSet.of());
 			//heads.add(new RuleHead(new ImmutableSubstitutionImpl<>(ImmutableMap.of()), projectionAtom,Optional.empty()));
 			//return body;
-			body.add(DATA_FACTORY.getDistinctVariableOnlyDataAtom(new AtomPredicateImpl("dummy", 0), ImmutableList.of()));
+			body.add(DATA_FACTORY.getDistinctVariableOnlyDataAtom(DATA_FACTORY.getAtomPredicate("dummy", 0), ImmutableList.of()));
 			return body;
 
 		} else {
@@ -296,8 +279,46 @@ public class IntermediateQueryToDatalogTranslator {
 
 	}
 
+	private List<Function> getAtomsFromJoinNode(InnerJoinNode node, IntermediateQuery te, Queue<RuleHead> heads,
+												Map<ConstructionNode, DataAtom> subQueryProjectionAtoms,
+												boolean isNested) {
+		List<Function> body = new ArrayList<>();
+		Optional<ImmutableExpression> filter = node.getOptionalFilterCondition();
+		List<Function> atoms = new ArrayList<>();
+		List<QueryNode> listnode =  te.getChildren(node);
+		for (QueryNode childnode: listnode) {
+			List<Function> atomsList = getAtomFrom(te, childnode, heads, subQueryProjectionAtoms, true);
+			atoms.addAll(atomsList);
+		}
+
+		if (atoms.size() <= 1) {
+			throw new IllegalArgumentException("Inconsistent IQ: an InnerJoinNode must have at least two children");
+		}
+
+		if (filter.isPresent()){
+			if (isNested) {
+				ImmutableExpression filter2 = filter.get();
+				Function mutFilter = ImmutabilityTools.convertToMutableBooleanExpression(filter2);
+				Function newJ = getSPARQLJoin(atoms, Optional.of(mutFilter));
+				body.add(newJ);
+				return body;
+			}
+			else {
+				body.addAll(atoms);
+				filter.get().flattenAND().stream()
+						.map(ImmutabilityTools::convertToMutableBooleanExpression)
+						.forEach(body::add);
+				return body;
+			}
+		}else{
+			Function newJ = getSPARQLJoin(atoms, Optional.empty());
+			body.add(newJ);
+			return body;
+		}
+	}
+
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
-		AtomPredicate newPredicate = new AtomPredicateImpl("ansSQ" + ++subQueryCounter, projectedVariables.size());
+		AtomPredicate newPredicate = DATA_FACTORY.getAtomPredicate("ansSQ" + ++subQueryCounter, projectedVariables.size());
 		return DATA_FACTORY.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}
 

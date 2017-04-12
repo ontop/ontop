@@ -85,6 +85,7 @@ public class SesameTableWithSpaceTest extends TestCase {
 					.r2rmlMappingFile(mappingfile)
 					.enableExistentialReasoning(true)
 					.properties(connectionProperties)
+					.enableTestMode()
 					.build();
 
 			repo = new OntopVirtualRepository(configuration);
