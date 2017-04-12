@@ -64,17 +64,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea, bsns_arr_area_transfer_hst.baaTransferDirection, bsns_arr_area_transfer_hst.cmpNpdidCompany, bsns_arr_area_transfer_hst.baaTransferDateValidFrom, bsns_arr_area.baaNpdidBsnsArrArea FROM bsns_arr_area_transfer_hst INNER JOIN bsns_arr_area ON bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea"
+                           rr:sqlQuery  "SELECT bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea, bsns_arr_area_transfer_hst.baaTransferDirection, bsns_arr_area_transfer_hst.cmpNpdidCompany, bsns_arr_area_transfer_hst.baaTransferDateValidFrom FROM bsns_arr_area_transfer_hst INNER JOIN bsns_arr_area ON bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{bsns_arr_area.baaNpdidBsnsArrArea}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{baaNpdidBsnsArrArea}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#transferredBAA>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea}/transfer/{bsns_arr_area_transfer_hst.baaTransferDirection}/{bsns_arr_area_transfer_hst.cmpNpdidCompany}/history/{bsns_arr_area_transfer_hst.baaTransferDateValidFrom}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{baaNpdidBsnsArrArea}/transfer/{baaTransferDirection}/{cmpNpdidCompany}/history/{baaTransferDateValidFrom}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -343,34 +343,34 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT tuf_petreg_message.tufNpdidTuf, tuf_petreg_message.ptlMessageDocumentNo, tuf_petreg_licence.tufNpdidTuf FROM tuf_petreg_message INNER JOIN tuf_petreg_licence ON tuf_petreg_message.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf"
+                           rr:sqlQuery  "SELECT tuf_petreg_message.tufNpdidTuf, tuf_petreg_message.ptlMessageDocumentNo FROM tuf_petreg_message INNER JOIN tuf_petreg_licence ON tuf_petreg_message.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tuf_petreg_licence.tufNpdidTuf}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tufNpdidTuf}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2-ptl#messageForTUF>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tuf_petreg_message.tufNpdidTuf}/message/{tuf_petreg_message.ptlMessageDocumentNo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tufNpdidTuf}/message/{ptlMessageDocumentNo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT wellbore_core_photo.wellbore_core_photo_id, wellbore_core_photo.wlbNpdidWellbore, wellbore_core_photo.wlbCoreNumber, wellbore_core_photo.wlbCorePhotoTitle, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_core_photo INNER JOIN wellbore_npdid_overview ON wellbore_core_photo.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT wellbore_core_photo.wellbore_core_photo_id, wellbore_core_photo.wlbNpdidWellbore, wellbore_core_photo.wlbCoreNumber, wellbore_core_photo.wlbCorePhotoTitle FROM wellbore_core_photo INNER JOIN wellbore_npdid_overview ON wellbore_core_photo.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#corePhotoForWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_core_photo.wlbNpdidWellbore}/core/{wellbore_core_photo.wlbCoreNumber}/photo/{wellbore_core_photo.wellbore_core_photo_id}/{wellbore_core_photo.wlbCorePhotoTitle}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber}/photo/{wellbore_core_photo_id}/{wlbCorePhotoTitle}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -485,17 +485,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT wellbore_core.wellbore_core_id, wellbore_core.wlbNpdidWellbore, wellbore_core.wlbCoreNumber, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_core INNER JOIN wellbore_npdid_overview ON wellbore_core.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT wellbore_core.wellbore_core_id, wellbore_core.wlbNpdidWellbore, wellbore_core.wlbCoreNumber FROM wellbore_core INNER JOIN wellbore_npdid_overview ON wellbore_core.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#coreForWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_core.wlbNpdidWellbore}/core/{wellbore_core.wlbCoreNumber}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -536,17 +536,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT fldArea.dscNpdidDiscovery, fldArea.dscHcType, discovery.dscNpdidDiscovery FROM fldArea INNER JOIN discovery ON fldArea.dscNpdidResInclInDiscovery = discovery.dscNpdidDiscovery"
+                           rr:sqlQuery  "SELECT fldArea.dscNpdidDiscovery FdscNpdidDiscovery, fldArea.dscHcType, discovery.dscNpdidDiscovery DdscNpdidDiscovery FROM fldArea INNER JOIN discovery ON fldArea.dscNpdidResInclInDiscovery = discovery.dscNpdidDiscovery"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{discovery.dscNpdidDiscovery}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{DdscNpdidDiscovery}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#resourcesIncludedInDiscovery>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{fldArea.dscNpdidDiscovery}/area/hctype/{fldArea.dscHcType}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{FdscNpdidDiscovery}/area/hctype/{dscHcType}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -1005,17 +1005,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT licence_oper_hst.prlNpdidLicence, licence_oper_hst.cmpNpdidCompany, licence_oper_hst.prlOperDateValidFrom, licence_oper_hst.prlOperDateValidTo, company.cmpNpdidCompany FROM licence_oper_hst INNER JOIN company ON licence_oper_hst.cmpNpdidCompany = company.cmpNpdidCompany"
+                           rr:sqlQuery  "SELECT licence_oper_hst.prlNpdidLicence, licence_oper_hst.cmpNpdidCompany, licence_oper_hst.prlOperDateValidFrom, licence_oper_hst.prlOperDateValidTo FROM licence_oper_hst INNER JOIN company ON licence_oper_hst.cmpNpdidCompany = company.cmpNpdidCompany"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company.cmpNpdidCompany}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#licenceOperatorCompany>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence_oper_hst.prlNpdidLicence}/operator/{licence_oper_hst.cmpNpdidCompany}/history/{licence_oper_hst.prlOperDateValidFrom}/{licence_oper_hst.prlOperDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}/operator/{cmpNpdidCompany}/history/{prlOperDateValidFrom}/{prlOperDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -1695,17 +1695,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT field_reserves.fldNpdidField, field.fldNpdidField FROM field_reserves INNER JOIN field ON field_reserves.fldNpdidField = field.fldNpdidField"
+                           rr:sqlQuery  "SELECT field_reserves.fldNpdidField FROM field_reserves INNER JOIN field ON field_reserves.fldNpdidField = field.fldNpdidField"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field.fldNpdidField}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#reservesForField>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field_reserves.fldNpdidField}/reserve" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}/reserve" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -2398,17 +2398,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT field_operator_hst.fldNpdidField, field_operator_hst.cmpNpdidCompany, field_operator_hst.fldOperatorFrom, field_operator_hst.fldOperatorTo, company.cmpNpdidCompany FROM field_operator_hst INNER JOIN company ON field_operator_hst.cmpNpdidCompany = company.cmpNpdidCompany"
+                           rr:sqlQuery  "SELECT field_operator_hst.fldNpdidField, field_operator_hst.cmpNpdidCompany, field_operator_hst.fldOperatorFrom, field_operator_hst.fldOperatorTo FROM field_operator_hst INNER JOIN company ON field_operator_hst.cmpNpdidCompany = company.cmpNpdidCompany"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company.cmpNpdidCompany}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#fieldOperator>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field_operator_hst.fldNpdidField}/operator/{field_operator_hst.cmpNpdidCompany}/history/{field_operator_hst.fldOperatorFrom}/{field_operator_hst.fldOperatorTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}/operator/{cmpNpdidCompany}/history/{fldOperatorFrom}/{fldOperatorTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -2608,17 +2608,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT licence_oper_hst.prlNpdidLicence, licence_oper_hst.cmpNpdidCompany, licence_oper_hst.prlOperDateValidFrom, licence_oper_hst.prlOperDateValidTo, licence.prlNpdidLicence FROM licence_oper_hst INNER JOIN licence ON licence_oper_hst.prlNpdidLicence = licence.prlNpdidLicence"
+                           rr:sqlQuery  "SELECT licence_oper_hst.prlNpdidLicence, licence_oper_hst.cmpNpdidCompany, licence_oper_hst.prlOperDateValidFrom, licence_oper_hst.prlOperDateValidTo FROM licence_oper_hst INNER JOIN licence ON licence_oper_hst.prlNpdidLicence = licence.prlNpdidLicence"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence.prlNpdidLicence}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#operatorForLicence>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence_oper_hst.prlNpdidLicence}/operator/{licence_oper_hst.cmpNpdidCompany}/history/{licence_oper_hst.prlOperDateValidFrom}/{licence_oper_hst.prlOperDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}/operator/{cmpNpdidCompany}/history/{prlOperDateValidFrom}/{prlOperDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -2741,17 +2741,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT tuf_operator_hst.tufNpdidTuf, tuf_operator_hst.cmpNpdidCompany, tuf_operator_hst.tufOperDateValidFrom, tuf_operator_hst.tufOperDateValidTo, company.cmpNpdidCompany FROM tuf_operator_hst INNER JOIN company ON tuf_operator_hst.cmpNpdidCompany = company.cmpNpdidCompany"
+                           rr:sqlQuery  "SELECT tuf_operator_hst.tufNpdidTuf, tuf_operator_hst.cmpNpdidCompany, tuf_operator_hst.tufOperDateValidFrom, tuf_operator_hst.tufOperDateValidTo FROM tuf_operator_hst INNER JOIN company ON tuf_operator_hst.cmpNpdidCompany = company.cmpNpdidCompany"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company.cmpNpdidCompany}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2-ptl#TUFOperatorCompany>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/facility/{tuf_operator_hst.tufNpdidTuf}/operator/{tuf_operator_hst.cmpNpdidCompany}/history/{tuf_operator_hst.tufOperDateValidFrom}/{tuf_operator_hst.tufOperDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/facility/{tufNpdidTuf}/operator/{cmpNpdidCompany}/history/{tufOperDateValidFrom}/{tufOperDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -3307,17 +3307,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT licence_transfer_hst.prlNpdidLicence, licence_transfer_hst.prlTransferDirection, licence_transfer_hst.cmpNpdidCompany, licence_transfer_hst.prlTransferDateValidFrom, licence.prlNpdidLicence FROM licence_transfer_hst INNER JOIN licence ON licence_transfer_hst.prlNpdidLicence = licence.prlNpdidLicence"
+                           rr:sqlQuery  "SELECT licence_transfer_hst.prlNpdidLicence, licence_transfer_hst.prlTransferDirection, licence_transfer_hst.cmpNpdidCompany, licence_transfer_hst.prlTransferDateValidFrom FROM licence_transfer_hst INNER JOIN licence ON licence_transfer_hst.prlNpdidLicence = licence.prlNpdidLicence"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence.prlNpdidLicence}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#transferredLicence>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence_transfer_hst.prlNpdidLicence}/transfer/{licence_transfer_hst.prlTransferDirection}/{licence_transfer_hst.cmpNpdidCompany}/history/{licence_transfer_hst.prlTransferDateValidFrom}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}/transfer/{prlTransferDirection}/{cmpNpdidCompany}/history/{prlTransferDateValidFrom}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -3650,17 +3650,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT fldArea.dscNpdidDiscovery, fldArea.dscHcType, discovery.dscNpdidDiscovery FROM fldArea INNER JOIN discovery ON fldArea.dscNpdidDiscovery = discovery.dscNpdidDiscovery"
+                           rr:sqlQuery  "SELECT fldArea.dscNpdidDiscovery, fldArea.dscHcType FROM fldArea INNER JOIN discovery ON fldArea.dscNpdidDiscovery = discovery.dscNpdidDiscovery"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{discovery.dscNpdidDiscovery}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{dscNpdidDiscovery}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#isGeometryOfFeature>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{fldArea.dscNpdidDiscovery}/area/hctype/{fldArea.dscHcType}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{dscNpdidDiscovery}/area/hctype/{dscHcType}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -4685,17 +4685,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT fclPoint.fclNpdidFacility, facility_fixed.fclNpdidFacility FROM fclPoint INNER JOIN facility_fixed ON fclPoint.fclNpdidFacility = facility_fixed.fclNpdidFacility"
+                           rr:sqlQuery  "SELECT fclPoint.fclNpdidFacility FROM fclPoint INNER JOIN facility_fixed ON fclPoint.fclNpdidFacility = facility_fixed.fclNpdidFacility"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/facility/{facility_fixed.fclNpdidFacility}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/facility/{fclNpdidFacility}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#isGeometryOfFeature>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/facility/{fclPoint.fclNpdidFacility}/point" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/facility/{fclNpdidFacility}/point" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -6013,17 +6013,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT wellbore_document.wellbore_document_id, wellbore_document.wlbNpdidWellbore, wellbore_document.wlbDocumentName, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_document INNER JOIN wellbore_npdid_overview ON wellbore_document.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT wellbore_document.wellbore_document_id, wellbore_document.wlbNpdidWellbore, wellbore_document.wlbDocumentName FROM wellbore_document INNER JOIN wellbore_npdid_overview ON wellbore_document.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#documentForWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_document.wlbNpdidWellbore}/document/{wellbore_document.wellbore_document_id}/{wellbore_document.wlbDocumentName}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_document.wlbNpdidWellbore}/document/{wellbore_document_id}/{wlbDocumentName}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -6197,17 +6197,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT wellbore_casing_and_lot.wellbore_casing_and_lot_id, wellbore_casing_and_lot.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_casing_and_lot INNER JOIN wellbore_npdid_overview ON wellbore_casing_and_lot.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT wellbore_casing_and_lot.wellbore_casing_and_lot_id, wellbore_casing_and_lot.wlbNpdidWellbore FROM wellbore_casing_and_lot INNER JOIN wellbore_npdid_overview ON wellbore_casing_and_lot.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#LOTForWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_casing_and_lot.wlbNpdidWellbore}/test/casingleakoff/{wellbore_casing_and_lot.wellbore_casing_and_lot_id}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/test/casingleakoff/{wellbore_casing_and_lot_id}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -6643,34 +6643,34 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT wellbore_coordinates.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_coordinates INNER JOIN wellbore_npdid_overview ON wellbore_coordinates.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT wellbore_coordinates.wlbNpdidWellbore FROM wellbore_coordinates INNER JOIN wellbore_npdid_overview ON wellbore_coordinates.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#coordinateForWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_coordinates.wlbNpdidWellbore}/point" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/point" ;
                            rr:termType  rr:IRI
                          ]
 ] .
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT licence_area_poly_hst.prlNpdidLicence, licence_area_poly_hst.prlAreaPolyBlockName, licence_area_poly_hst.prlAreaPolyPolyNo, licence_area_poly_hst.prlAreaPolyDateValidFrom, licence_area_poly_hst.prlAreaPolyDateValidTo, licence.prlNpdidLicence FROM licence_area_poly_hst INNER JOIN licence ON licence_area_poly_hst.prlNpdidLicence = licence.prlNpdidLicence"
+                           rr:sqlQuery  "SELECT licence_area_poly_hst.prlNpdidLicence, licence_area_poly_hst.prlAreaPolyBlockName, licence_area_poly_hst.prlAreaPolyPolyNo, licence_area_poly_hst.prlAreaPolyDateValidFrom, licence_area_poly_hst.prlAreaPolyDateValidTo FROM licence_area_poly_hst INNER JOIN licence ON licence_area_poly_hst.prlNpdidLicence = licence.prlNpdidLicence"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence.prlNpdidLicence}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#isGeometryOfFeature>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence_area_poly_hst.prlNpdidLicence}/block/{licence_area_poly_hst.prlAreaPolyBlockName}/polyno/{licence_area_poly_hst.prlAreaPolyPolyNo}/history/{licence_area_poly_hst.prlAreaPolyDateValidFrom}/{licence_area_poly_hst.prlAreaPolyDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}/block/{prlAreaPolyBlockName}/polyno/{prlAreaPolyPolyNo}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -6985,17 +6985,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT tuf_petreg_licence_licencee.tufNpdidTuf, tuf_petreg_licence_licencee.cmpNpdidCompany, tuf_petreg_licence.tufNpdidTuf FROM tuf_petreg_licence_licencee INNER JOIN tuf_petreg_licence ON tuf_petreg_licence_licencee.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf"
+                           rr:sqlQuery  "SELECT tuf_petreg_licence_licencee.tufNpdidTuf, tuf_petreg_licence_licencee.cmpNpdidCompany FROM tuf_petreg_licence_licencee INNER JOIN tuf_petreg_licence ON tuf_petreg_licence_licencee.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tuf_petreg_licence.tufNpdidTuf}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tufNpdidTuf}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2-ptl#TUFLicenceeForTUF>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tuf_petreg_licence_licencee.tufNpdidTuf}/licencee/{tuf_petreg_licence_licencee.cmpNpdidCompany}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tufNpdidTuf}/licencee/{cmpNpdidCompany}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -7597,17 +7597,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT prlArea.prlArea_id, prlArea.prlNpdidLicence, prlArea.prlAreaPolyDateValidFrom, prlArea.prlAreaPolyDateValidTo, licence.prlNpdidLicence FROM prlArea INNER JOIN licence ON prlArea.prlNpdidLicence = licence.prlNpdidLicence"
+                           rr:sqlQuery  "SELECT prlArea.prlArea_id, prlArea.prlNpdidLicence, prlArea.prlAreaPolyDateValidFrom, prlArea.prlAreaPolyDateValidTo FROM prlArea INNER JOIN licence ON prlArea.prlNpdidLicence = licence.prlNpdidLicence"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence.prlNpdidLicence}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#isGeometryOfFeature>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlArea.prlNpdidLicence}/area/{prlArea.prlArea_id}/history/{prlArea.prlAreaPolyDateValidFrom}/{prlArea.prlAreaPolyDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}/area/{prlArea_id}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -7783,17 +7783,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT field_activity_status_hst.fldNpdidField, field_activity_status_hst.fldStatus, field_activity_status_hst.fldStatusFromDate, field_activity_status_hst.fldStatusToDate, field.fldNpdidField FROM field_activity_status_hst INNER JOIN field ON field_activity_status_hst.fldNpdidField = field.fldNpdidField"
+                           rr:sqlQuery  "SELECT field_activity_status_hst.fldNpdidField, field_activity_status_hst.fldStatus, field_activity_status_hst.fldStatusFromDate, field_activity_status_hst.fldStatusToDate FROM field_activity_status_hst INNER JOIN field ON field_activity_status_hst.fldNpdidField = field.fldNpdidField"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field.fldNpdidField}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#statusForField>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field_activity_status_hst.fldNpdidField}/activity/{field_activity_status_hst.fldStatus}/history/{field_activity_status_hst.fldStatusFromDate}/{field_activity_status_hst.fldStatusToDate}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}/activity/{fldStatus}/history/{fldStatusFromDate}/{fldStatusToDate}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -8157,17 +8157,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT wellbore_mud.wellbore_mud_id, wellbore_mud.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_mud INNER JOIN wellbore_npdid_overview ON wellbore_mud.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT wellbore_mud.wellbore_mud_id, wellbore_mud.wlbNpdidWellbore FROM wellbore_mud INNER JOIN wellbore_npdid_overview ON wellbore_mud.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#mudTestForWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_mud.wlbNpdidWellbore}/test/mud/{wellbore_mud.wellbore_mud_id}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/test/mud/{wellbore_mud_id}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -8209,17 +8209,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea, bsns_arr_area_licensee_hst.cmpNpdidCompany, bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom, bsns_arr_area_licensee_hst.baaLicenseeDateValidTo, bsns_arr_area.baaNpdidBsnsArrArea FROM bsns_arr_area_licensee_hst INNER JOIN bsns_arr_area ON bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea"
+                           rr:sqlQuery  "SELECT bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea, bsns_arr_area_licensee_hst.cmpNpdidCompany, bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom, bsns_arr_area_licensee_hst.baaLicenseeDateValidTo FROM bsns_arr_area_licensee_hst INNER JOIN bsns_arr_area ON bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{bsns_arr_area.baaNpdidBsnsArrArea}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{baaNpdidBsnsArrArea}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#licenseeForBAA>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea}/licensee/{bsns_arr_area_licensee_hst.cmpNpdidCompany}/history/{bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom}/{bsns_arr_area_licensee_hst.baaLicenseeDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{baaNpdidBsnsArrArea}/licensee/{cmpNpdidCompany}/history/{baaLicenseeDateValidFrom}/{baaLicenseeDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -8243,17 +8243,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT dscArea.dscNpdidDiscovery, dscArea.dscHcType, discovery.dscNpdidDiscovery FROM dscArea INNER JOIN discovery ON dscArea.dscNpdidDiscovery = discovery.dscNpdidDiscovery"
+                           rr:sqlQuery  "SELECT dscArea.dscNpdidDiscovery, dscArea.dscHcType FROM dscArea INNER JOIN discovery ON dscArea.dscNpdidDiscovery = discovery.dscNpdidDiscovery"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{discovery.dscNpdidDiscovery}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{dscNpdidDiscovery}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#isGeometryOfFeature>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{dscArea.dscNpdidDiscovery}/area/hctype/{dscArea.dscHcType}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{dscNpdidDiscovery}/area/hctype/{dscHcType}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -9641,17 +9641,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT wlbPoint.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wlbPoint INNER JOIN wellbore_npdid_overview ON wlbPoint.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT wellbore_npdid_overview.wlbNpdidWellbore FROM wlbPoint INNER JOIN wellbore_npdid_overview ON wlbPoint.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#isGeometryOfFeature>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbPoint.wlbNpdidWellbore}/point" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/point" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -9834,17 +9834,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT strat_litho_wellbore.wlbNpdidWellbore, strat_litho_wellbore.lsuNpdidLithoStrat, strat_litho_wellbore.lsuTopDepth, strat_litho_wellbore.lsuBottomDepth, wellbore_npdid_overview.wlbNpdidWellbore FROM strat_litho_wellbore INNER JOIN wellbore_npdid_overview ON strat_litho_wellbore.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT strat_litho_wellbore.wlbNpdidWellbore, strat_litho_wellbore.lsuNpdidLithoStrat, strat_litho_wellbore.lsuTopDepth, strat_litho_wellbore.lsuBottomDepth FROM strat_litho_wellbore INNER JOIN wellbore_npdid_overview ON strat_litho_wellbore.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#stratumForWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{strat_litho_wellbore.wlbNpdidWellbore}/stratum/{strat_litho_wellbore.lsuNpdidLithoStrat}/depth/{strat_litho_wellbore.lsuTopDepth}/{strat_litho_wellbore.lsuBottomDepth}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/stratum/{lsuNpdidLithoStrat}/depth/{lsuTopDepth}/{lsuBottomDepth}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -10129,17 +10129,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT wellbore_oil_sample.wellbore_oil_sample_id, wellbore_oil_sample.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_oil_sample INNER JOIN wellbore_npdid_overview ON wellbore_oil_sample.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT wellbore_oil_sample.wellbore_oil_sample_id, wellbore_oil_sample.wlbNpdidWellbore FROM wellbore_oil_sample INNER JOIN wellbore_npdid_overview ON wellbore_oil_sample.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#oilSampleTestForWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_oil_sample.wlbNpdidWellbore}/test/oilsample/{wellbore_oil_sample.wellbore_oil_sample_id}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/test/oilsample/{wellbore_oil_sample_id}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -10211,17 +10211,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT company_reserves.cmpNpdidCompany, company_reserves.fldNpdidField, field.fldNpdidField FROM company_reserves INNER JOIN field ON company_reserves.fldNpdidField = field.fldNpdidField"
+                           rr:sqlQuery  "SELECT company_reserves.cmpNpdidCompany, company_reserves.fldNpdidField FROM company_reserves INNER JOIN field ON company_reserves.fldNpdidField = field.fldNpdidField"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field.fldNpdidField}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#reservesForField>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company_reserves.cmpNpdidCompany}/reserve/{company_reserves.fldNpdidField}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}/reserve/{fldNpdidField}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -10388,17 +10388,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT wellbore_formation_top.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat, wellbore_formation_top.lsuTopDepth, wellbore_formation_top.lsuBottomDepth, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_formation_top INNER JOIN wellbore_npdid_overview ON wellbore_formation_top.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT wellbore_formation_top.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat, wellbore_formation_top.lsuTopDepth, wellbore_formation_top.lsuBottomDepth FROM wellbore_formation_top INNER JOIN wellbore_npdid_overview ON wellbore_formation_top.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#stratumForWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_formation_top.wlbNpdidWellbore}/stratum/{wellbore_formation_top.lsuNpdidLithoStrat}/depth/{wellbore_formation_top.lsuTopDepth}/{wellbore_formation_top.lsuBottomDepth}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/stratum/{lsuNpdidLithoStrat}/depth/{lsuTopDepth}/{lsuBottomDepth}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -10615,17 +10615,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT field_licensee_hst.fldNpdidField, field_licensee_hst.cmpNpdidCompany, field_licensee_hst.fldLicenseeFrom, field_licensee_hst.fldLicenseeTo, company.cmpNpdidCompany FROM field_licensee_hst INNER JOIN company ON field_licensee_hst.cmpNpdidCompany = company.cmpNpdidCompany"
+                           rr:sqlQuery  "SELECT field_licensee_hst.fldNpdidField, field_licensee_hst.cmpNpdidCompany, field_licensee_hst.fldLicenseeFrom, field_licensee_hst.fldLicenseeTo FROM field_licensee_hst INNER JOIN company ON field_licensee_hst.cmpNpdidCompany = company.cmpNpdidCompany"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company.cmpNpdidCompany}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#fieldLicensee>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field_licensee_hst.fldNpdidField}/licensee/{field_licensee_hst.cmpNpdidCompany}/history/{field_licensee_hst.fldLicenseeFrom}/{field_licensee_hst.fldLicenseeTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}/licensee/{cmpNpdidCompany}/history/{fldLicenseeFrom}/{fldLicenseeTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -10892,17 +10892,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_exploration_all INNER JOIN wellbore_npdid_overview ON wellbore_exploration_all.wlbNpdidWellboreReclass = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT wellbore_exploration_all.wlbNpdidWellbore AwlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore OwlbNpdidWellbore FROM wellbore_exploration_all INNER JOIN wellbore_npdid_overview ON wellbore_exploration_all.wlbNpdidWellboreReclass = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{OwlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#reclassedFromWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_exploration_all.wlbNpdidWellbore}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{AwlbNpdidWellbore}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -10962,17 +10962,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT dscArea.dscNpdidDiscovery, dscArea.dscHcType, discovery.dscNpdidDiscovery FROM dscArea INNER JOIN discovery ON dscArea.dscNpdidResInclInDiscovery = discovery.dscNpdidDiscovery"
+                           rr:sqlQuery  "SELECT dscArea.dscNpdidDiscovery, dscArea.dscHcType FROM dscArea INNER JOIN discovery ON dscArea.dscNpdidResInclInDiscovery = discovery.dscNpdidDiscovery"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{discovery.dscNpdidDiscovery}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{dscNpdidDiscovery}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#resourcesIncludedInDiscovery>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{dscArea.dscNpdidDiscovery}/area/hctype/{dscArea.dscHcType}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{dscNpdidDiscovery}/area/hctype/{dscHcType}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -11231,17 +11231,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT licence_licensee_hst.prlNpdidLicence, licence_licensee_hst.cmpNpdidCompany, licence_licensee_hst.prlLicenseeDateValidFrom, licence_licensee_hst.prlLicenseeDateValidTo, company.cmpNpdidCompany FROM licence_licensee_hst INNER JOIN company ON licence_licensee_hst.cmpNpdidCompany = company.cmpNpdidCompany"
+                           rr:sqlQuery  "SELECT licence_licensee_hst.prlNpdidLicence, licence_licensee_hst.cmpNpdidCompany, licence_licensee_hst.prlLicenseeDateValidFrom, licence_licensee_hst.prlLicenseeDateValidTo FROM licence_licensee_hst INNER JOIN company ON licence_licensee_hst.cmpNpdidCompany = company.cmpNpdidCompany"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company.cmpNpdidCompany}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#licenceLicensee>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence_licensee_hst.prlNpdidLicence}/licensee/{licence_licensee_hst.cmpNpdidCompany}/history/{licence_licensee_hst.prlLicenseeDateValidFrom}/{licence_licensee_hst.prlLicenseeDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}/licensee/{cmpNpdidCompany}/history/{prlLicenseeDateValidFrom}/{prlLicenseeDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -11495,17 +11495,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT licence_petreg_message.prlNpdidLicence, licence_petreg_message.ptlMessageDocumentNo, licence.prlNpdidLicence FROM licence_petreg_message INNER JOIN licence ON licence_petreg_message.prlNpdidLicence = licence.prlNpdidLicence"
+                           rr:sqlQuery  "SELECT licence_petreg_message.prlNpdidLicence, licence_petreg_message.ptlMessageDocumentNo FROM licence_petreg_message INNER JOIN licence ON licence_petreg_message.prlNpdidLicence = licence.prlNpdidLicence"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence.prlNpdidLicence}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#messageForLicence>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/licence/{licence_petreg_message.prlNpdidLicence}/message/{licence_petreg_message.ptlMessageDocumentNo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/licence/{prlNpdidLicence}/message/{ptlMessageDocumentNo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -11582,17 +11582,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea, bsns_arr_area_licensee_hst.cmpNpdidCompany, bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom, bsns_arr_area_licensee_hst.baaLicenseeDateValidTo, company.cmpNpdidCompany FROM bsns_arr_area_licensee_hst INNER JOIN company ON bsns_arr_area_licensee_hst.cmpNpdidCompany = company.cmpNpdidCompany"
+                           rr:sqlQuery  "SELECT bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea, bsns_arr_area_licensee_hst.cmpNpdidCompany, bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom, bsns_arr_area_licensee_hst.baaLicenseeDateValidTo FROM bsns_arr_area_licensee_hst INNER JOIN company ON bsns_arr_area_licensee_hst.cmpNpdidCompany = company.cmpNpdidCompany"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company.cmpNpdidCompany}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#baaLicensee>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea}/licensee/{bsns_arr_area_licensee_hst.cmpNpdidCompany}/history/{bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom}/{bsns_arr_area_licensee_hst.baaLicenseeDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{baaNpdidBsnsArrArea}/licensee/{cmpNpdidCompany}/history/{baaLicenseeDateValidFrom}/{baaLicenseeDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -11732,17 +11732,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT licence_transfer_hst.prlNpdidLicence, licence_transfer_hst.prlTransferDirection, licence_transfer_hst.cmpNpdidCompany, licence_transfer_hst.prlTransferDateValidFrom, company.cmpNpdidCompany FROM licence_transfer_hst INNER JOIN company ON licence_transfer_hst.cmpNpdidCompany = company.cmpNpdidCompany"
+                           rr:sqlQuery  "SELECT licence_transfer_hst.prlNpdidLicence, licence_transfer_hst.prlTransferDirection, licence_transfer_hst.cmpNpdidCompany, licence_transfer_hst.prlTransferDateValidFrom FROM licence_transfer_hst INNER JOIN company ON licence_transfer_hst.cmpNpdidCompany = company.cmpNpdidCompany"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company.cmpNpdidCompany}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#licenceTransferCompany>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence_transfer_hst.prlNpdidLicence}/transfer/{licence_transfer_hst.prlTransferDirection}/{licence_transfer_hst.cmpNpdidCompany}/history/{licence_transfer_hst.prlTransferDateValidFrom}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}/transfer/{prlTransferDirection}/{cmpNpdidCompany}/history/{prlTransferDateValidFrom}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -13283,34 +13283,34 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT bsns_arr_area_area_poly_hst.baaNpdidBsnsArrArea, bsns_arr_area_area_poly_hst.baaAreaPolyBlockName, bsns_arr_area_area_poly_hst.baaAreaPolyNo, bsns_arr_area_area_poly_hst.baaAreaPolyDateValidFrom, bsns_arr_area_area_poly_hst.baaAreaPolyDateValidTo, bsns_arr_area.baaNpdidBsnsArrArea FROM bsns_arr_area_area_poly_hst INNER JOIN bsns_arr_area ON bsns_arr_area_area_poly_hst.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea"
+                           rr:sqlQuery  "SELECT bsns_arr_area_area_poly_hst.baaNpdidBsnsArrArea, bsns_arr_area_area_poly_hst.baaAreaPolyBlockName, bsns_arr_area_area_poly_hst.baaAreaPolyNo, bsns_arr_area_area_poly_hst.baaAreaPolyDateValidFrom, bsns_arr_area_area_poly_hst.baaAreaPolyDateValidTo FROM bsns_arr_area_area_poly_hst INNER JOIN bsns_arr_area ON bsns_arr_area_area_poly_hst.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{bsns_arr_area.baaNpdidBsnsArrArea}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{baaNpdidBsnsArrArea}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#isGeometryOfFeature>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{bsns_arr_area_area_poly_hst.baaNpdidBsnsArrArea}/block/{bsns_arr_area_area_poly_hst.baaAreaPolyBlockName}/polyno/{bsns_arr_area_area_poly_hst.baaAreaPolyNo}/history/{bsns_arr_area_area_poly_hst.baaAreaPolyDateValidFrom}/{bsns_arr_area_area_poly_hst.baaAreaPolyDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{baaNpdidBsnsArrArea}/block/{baaAreaPolyBlockName}/polyno/{baaAreaPolyNo}/history/{baaAreaPolyDateValidFrom}/{baaAreaPolyDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT company_reserves.cmpNpdidCompany, company_reserves.fldNpdidField, company.cmpNpdidCompany FROM company_reserves INNER JOIN company ON company_reserves.cmpNpdidCompany = company.cmpNpdidCompany"
+                           rr:sqlQuery  "SELECT company_reserves.cmpNpdidCompany, company_reserves.fldNpdidField FROM company_reserves INNER JOIN company ON company_reserves.cmpNpdidCompany = company.cmpNpdidCompany"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company.cmpNpdidCompany}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#reservesForCompany>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company_reserves.cmpNpdidCompany}/reserve/{company_reserves.fldNpdidField}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}/reserve/{fldNpdidField}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -13367,17 +13367,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT strat_litho_wellbore_core.wlbNpdidWellbore, strat_litho_wellbore_core.lsuNpdidLithoStrat, wellbore_npdid_overview.wlbNpdidWellbore FROM strat_litho_wellbore_core INNER JOIN wellbore_npdid_overview ON strat_litho_wellbore_core.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT strat_litho_wellbore_core.wlbNpdidWellbore, strat_litho_wellbore_core.lsuNpdidLithoStrat FROM strat_litho_wellbore_core INNER JOIN wellbore_npdid_overview ON strat_litho_wellbore_core.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#coreForWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{strat_litho_wellbore_core.wlbNpdidWellbore}/stratum/{strat_litho_wellbore_core.lsuNpdidLithoStrat}/cores" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/stratum/{lsuNpdidLithoStrat}/cores" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -13401,17 +13401,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT field_owner_hst.fldNpdidField, field_owner_hst.fldNpdidOwner, field_owner_hst.fldOwnershipFromDate, field_owner_hst.fldOwnershipToDate, field.fldNpdidField FROM field_owner_hst INNER JOIN field ON field_owner_hst.fldNpdidField = field.fldNpdidField"
+                           rr:sqlQuery  "SELECT field_owner_hst.fldNpdidField, field_owner_hst.fldNpdidOwner, field_owner_hst.fldOwnershipFromDate, field_owner_hst.fldOwnershipToDate FROM field_owner_hst INNER JOIN field ON field_owner_hst.fldNpdidField = field.fldNpdidField"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field.fldNpdidField}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#ownerForField>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field_owner_hst.fldNpdidField}/owner/{field_owner_hst.fldNpdidOwner}/history/{field_owner_hst.fldOwnershipFromDate}/{field_owner_hst.fldOwnershipToDate}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}/owner/{fldNpdidOwner}/history/{fldOwnershipFromDate}/{fldOwnershipToDate}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -13582,17 +13582,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT wellbore_development_all.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_development_all INNER JOIN wellbore_npdid_overview ON wellbore_development_all.wlbNpdidWellboreReclass = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT wellbore_development_all.wlbNpdidWellbore AwlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore OwlbNpdidWellbore FROM wellbore_development_all INNER JOIN wellbore_npdid_overview ON wellbore_development_all.wlbNpdidWellboreReclass = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{OwlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#reclassedFromWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_development_all.wlbNpdidWellbore}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{AwlbNpdidWellbore}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -13671,17 +13671,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT licence_petreg_licence_licencee.prlNpdidLicence, licence_petreg_licence_licencee.cmpNpdidCompany, company.cmpNpdidCompany FROM licence_petreg_licence_licencee INNER JOIN company ON licence_petreg_licence_licencee.cmpNpdidCompany = company.cmpNpdidCompany"
+                           rr:sqlQuery  "SELECT licence_petreg_licence_licencee.prlNpdidLicence, licence_petreg_licence_licencee.cmpNpdidCompany FROM licence_petreg_licence_licencee INNER JOIN company ON licence_petreg_licence_licencee.cmpNpdidCompany = company.cmpNpdidCompany"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company.cmpNpdidCompany}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2-ptl#licenceLicenceeCompany>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/licence/{licence_petreg_licence_licencee.prlNpdidLicence}/licencee/{licence_petreg_licence_licencee.cmpNpdidCompany}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/licence/{prlNpdidLicence}/licencee/{cmpNpdidCompany}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -14410,17 +14410,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT tuf_operator_hst.tufNpdidTuf, tuf_operator_hst.cmpNpdidCompany, tuf_operator_hst.tufOperDateValidFrom, tuf_operator_hst.tufOperDateValidTo, tuf_petreg_licence.tufNpdidTuf FROM tuf_operator_hst INNER JOIN tuf_petreg_licence ON tuf_operator_hst.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf"
+                           rr:sqlQuery  "SELECT tuf_operator_hst.tufNpdidTuf, tuf_operator_hst.cmpNpdidCompany, tuf_operator_hst.tufOperDateValidFrom, tuf_operator_hst.tufOperDateValidTo FROM tuf_operator_hst INNER JOIN tuf_petreg_licence ON tuf_operator_hst.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tuf_petreg_licence.tufNpdidTuf}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tufNpdidTuf}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2-ptl#TUFOperatorForLicence>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/facility/{tuf_operator_hst.tufNpdidTuf}/operator/{tuf_operator_hst.cmpNpdidCompany}/history/{tuf_operator_hst.tufOperDateValidFrom}/{tuf_operator_hst.tufOperDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/facility/{tufNpdidTuf}/operator/{cmpNpdidCompany}/history/{tufOperDateValidFrom}/{tufOperDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -14462,17 +14462,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea, bsns_arr_area_transfer_hst.baaTransferDirection, bsns_arr_area_transfer_hst.cmpNpdidCompany, bsns_arr_area_transfer_hst.baaTransferDateValidFrom, company.cmpNpdidCompany FROM bsns_arr_area_transfer_hst INNER JOIN company ON bsns_arr_area_transfer_hst.cmpNpdidCompany = company.cmpNpdidCompany"
+                           rr:sqlQuery  "SELECT bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea, bsns_arr_area_transfer_hst.baaTransferDirection, bsns_arr_area_transfer_hst.cmpNpdidCompany, bsns_arr_area_transfer_hst.baaTransferDateValidFrom FROM bsns_arr_area_transfer_hst INNER JOIN company ON bsns_arr_area_transfer_hst.cmpNpdidCompany = company.cmpNpdidCompany"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company.cmpNpdidCompany}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#baaTransferCompany>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea}/transfer/{bsns_arr_area_transfer_hst.baaTransferDirection}/{bsns_arr_area_transfer_hst.cmpNpdidCompany}/history/{bsns_arr_area_transfer_hst.baaTransferDateValidFrom}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{baaNpdidBsnsArrArea}/transfer/{baaTransferDirection}/{cmpNpdidCompany}/history/{baaTransferDateValidFrom}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -14878,17 +14878,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT tuf_petreg_licence_licencee.tufNpdidTuf, tuf_petreg_licence_licencee.cmpNpdidCompany, company.cmpNpdidCompany FROM tuf_petreg_licence_licencee INNER JOIN company ON tuf_petreg_licence_licencee.cmpNpdidCompany = company.cmpNpdidCompany"
+                           rr:sqlQuery  "SELECT tuf_petreg_licence_licencee.tufNpdidTuf, tuf_petreg_licence_licencee.cmpNpdidCompany FROM tuf_petreg_licence_licencee INNER JOIN company ON tuf_petreg_licence_licencee.cmpNpdidCompany = company.cmpNpdidCompany"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company.cmpNpdidCompany}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2-ptl#TUFLicenceeCompany>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tuf_petreg_licence_licencee.tufNpdidTuf}/licencee/{tuf_petreg_licence_licencee.cmpNpdidCompany}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tufNpdidTuf}/licencee/{cmpNpdidCompany}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -14913,17 +14913,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT A.prlNpdidLicence, A.prlTaskID, B.prlNpdidLicence, B.prlTaskRefID FROM licence_task AS A, licence_task AS B WHERE A.prlTaskID=B.prlTaskRefID"
+                           rr:sqlQuery  "SELECT A.prlNpdidLicence AprlNpdidLicence, A.prlTaskID AprlTaskID, B.prlNpdidLicence BprlNpdidLicence, B.prlTaskRefID BprlTaskRefID FROM licence_task AS A, licence_task AS B WHERE A.prlTaskID=B.prlTaskRefID"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{B.prlNpdidLicence}/task/{B.prlTaskRefID}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{BprlNpdidLicence}/task/{BprlTaskRefID}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#dependsOnTask>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{A.prlNpdidLicence}/task/{A.prlTaskID}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{AprlNpdidLicence}/task/{AprlTaskID}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -14982,17 +14982,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT licence_petreg_licence_licencee.prlNpdidLicence, licence_petreg_licence_licencee.cmpNpdidCompany, licence.prlNpdidLicence FROM licence_petreg_licence_licencee INNER JOIN licence ON licence_petreg_licence_licencee.prlNpdidLicence = licence.prlNpdidLicence"
+                           rr:sqlQuery  "SELECT licence_petreg_licence_licencee.prlNpdidLicence, licence_petreg_licence_licencee.cmpNpdidCompany FROM licence_petreg_licence_licencee INNER JOIN licence ON licence_petreg_licence_licencee.prlNpdidLicence = licence.prlNpdidLicence"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence.prlNpdidLicence}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2-ptl#licenceeForLicence>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/licence/{licence_petreg_licence_licencee.prlNpdidLicence}/licencee/{licence_petreg_licence_licencee.cmpNpdidCompany}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/licence/{prlNpdidLicence}/licencee/{cmpNpdidCompany}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -15095,17 +15095,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT tuf_owner_hst.tufNpdidTuf, tuf_owner_hst.cmpNpdidCompany, tuf_owner_hst.tufOwnerDateValidFrom, tuf_owner_hst.tufOwnerDateValidTo, company.cmpNpdidCompany FROM tuf_owner_hst INNER JOIN company ON tuf_owner_hst.cmpNpdidCompany = company.cmpNpdidCompany"
+                           rr:sqlQuery  "SELECT tuf_owner_hst.tufNpdidTuf, tuf_owner_hst.cmpNpdidCompany, tuf_owner_hst.tufOwnerDateValidFrom, tuf_owner_hst.tufOwnerDateValidTo FROM tuf_owner_hst INNER JOIN company ON tuf_owner_hst.cmpNpdidCompany = company.cmpNpdidCompany"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{company.cmpNpdidCompany}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/company/{cmpNpdidCompany}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2-ptl#TUFOwnerCompany>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/facility/{tuf_owner_hst.tufNpdidTuf}/owner/{tuf_owner_hst.cmpNpdidCompany}/history/{tuf_owner_hst.tufOwnerDateValidFrom}/{tuf_owner_hst.tufOwnerDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/facility/{tufNpdidTuf}/owner/{cmpNpdidCompany}/history/{tufOwnerDateValidFrom}/{tufOwnerDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -15252,17 +15252,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT baaArea.baaNpdidBsnsArrArea, baaArea.baaNpdidBsnsArrAreaPoly, bsns_arr_area.baaNpdidBsnsArrArea FROM baaArea INNER JOIN bsns_arr_area ON baaArea.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea"
+                           rr:sqlQuery  "SELECT baaArea.baaNpdidBsnsArrArea, baaArea.baaNpdidBsnsArrAreaPoly FROM baaArea INNER JOIN bsns_arr_area ON baaArea.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{bsns_arr_area.baaNpdidBsnsArrArea}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{baaNpdidBsnsArrArea}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#isGeometryOfFeature>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{baaArea.baaNpdidBsnsArrArea}/polygon/{baaArea.baaNpdidBsnsArrAreaPoly}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/baa/{baaNpdidBsnsArrArea}/polygon/{baaNpdidBsnsArrAreaPoly}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -15357,17 +15357,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT field_licensee_hst.fldNpdidField, field_licensee_hst.cmpNpdidCompany, field_licensee_hst.fldLicenseeFrom, field_licensee_hst.fldLicenseeTo, field.fldNpdidField FROM field_licensee_hst INNER JOIN field ON field_licensee_hst.fldNpdidField = field.fldNpdidField"
+                           rr:sqlQuery  "SELECT field_licensee_hst.fldNpdidField, field_licensee_hst.cmpNpdidCompany, field_licensee_hst.fldLicenseeFrom, field_licensee_hst.fldLicenseeTo FROM field_licensee_hst INNER JOIN field ON field_licensee_hst.fldNpdidField = field.fldNpdidField"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field.fldNpdidField}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#licenseeForField>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field_licensee_hst.fldNpdidField}/licensee/{field_licensee_hst.cmpNpdidCompany}/history/{field_licensee_hst.fldLicenseeFrom}/{field_licensee_hst.fldLicenseeTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}/licensee/{cmpNpdidCompany}/history/{fldLicenseeFrom}/{fldLicenseeTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -15868,17 +15868,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT field_operator_hst.fldNpdidField, field_operator_hst.cmpNpdidCompany, field_operator_hst.fldOperatorFrom, field_operator_hst.fldOperatorTo, field.fldNpdidField FROM field_operator_hst INNER JOIN field ON field_operator_hst.fldNpdidField = field.fldNpdidField"
+                           rr:sqlQuery  "SELECT field_operator_hst.fldNpdidField, field_operator_hst.cmpNpdidCompany, field_operator_hst.fldOperatorFrom, field_operator_hst.fldOperatorTo FROM field_operator_hst INNER JOIN field ON field_operator_hst.fldNpdidField = field.fldNpdidField"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field.fldNpdidField}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#operatorForField>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{field_operator_hst.fldNpdidField}/operator/{field_operator_hst.cmpNpdidCompany}/history/{field_operator_hst.fldOperatorFrom}/{field_operator_hst.fldOperatorTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/field/{fldNpdidField}/operator/{cmpNpdidCompany}/history/{fldOperatorFrom}/{fldOperatorTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -16131,17 +16131,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT wellbore_dst.wlbNpdidWellbore, wellbore_dst.wlbDstTestNumber, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_dst INNER JOIN wellbore_npdid_overview ON wellbore_dst.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
+                           rr:sqlQuery  "SELECT wellbore_dst.wlbNpdidWellbore, wellbore_dst.wlbDstTestNumber FROM wellbore_dst INNER JOIN wellbore_npdid_overview ON wellbore_dst.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_npdid_overview.wlbNpdidWellbore}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#DSTForWellbore>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wellbore_dst.wlbNpdidWellbore}/test/drillstem/{wellbore_dst.wlbDstTestNumber}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/test/drillstem/{wlbDstTestNumber}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -16776,17 +16776,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT tuf_owner_hst.tufNpdidTuf, tuf_owner_hst.cmpNpdidCompany, tuf_owner_hst.tufOwnerDateValidFrom, tuf_owner_hst.tufOwnerDateValidTo, tuf_petreg_licence.tufNpdidTuf FROM tuf_owner_hst INNER JOIN tuf_petreg_licence ON tuf_owner_hst.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf"
+                           rr:sqlQuery  "SELECT tuf_owner_hst.tufNpdidTuf, tuf_owner_hst.cmpNpdidCompany, tuf_owner_hst.tufOwnerDateValidFrom, tuf_owner_hst.tufOwnerDateValidTo FROM tuf_owner_hst INNER JOIN tuf_petreg_licence ON tuf_owner_hst.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tuf_petreg_licence.tufNpdidTuf}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/petreg/facility/{tufNpdidTuf}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2-ptl#TUFOwnerForLicence>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/facility/{tuf_owner_hst.tufNpdidTuf}/owner/{tuf_owner_hst.cmpNpdidCompany}/history/{tuf_owner_hst.tufOwnerDateValidFrom}/{tuf_owner_hst.tufOwnerDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/facility/{tufNpdidTuf}/owner/{cmpNpdidCompany}/history/{tufOwnerDateValidFrom}/{tufOwnerDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -17084,17 +17084,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT prlAreaSplitByBlock.prlNpdidLicence, prlAreaSplitByBlock.blcName, prlAreaSplitByBlock.prlAreaPolyPolyNo, prlAreaSplitByBlock.prlAreaPolyDateValidFrom, prlAreaSplitByBlock.prlAreaPolyDateValidTo, licence.prlNpdidLicence FROM prlAreaSplitByBlock INNER JOIN licence ON prlAreaSplitByBlock.prlNpdidLicence = licence.prlNpdidLicence"
+                           rr:sqlQuery  "SELECT prlAreaSplitByBlock.prlNpdidLicence, prlAreaSplitByBlock.blcName, prlAreaSplitByBlock.prlAreaPolyPolyNo, prlAreaSplitByBlock.prlAreaPolyDateValidFrom, prlAreaSplitByBlock.prlAreaPolyDateValidTo FROM prlAreaSplitByBlock INNER JOIN licence ON prlAreaSplitByBlock.prlNpdidLicence = licence.prlNpdidLicence"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence.prlNpdidLicence}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#isGeometryOfFeature>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlAreaSplitByBlock.prlNpdidLicence}/block/{prlAreaSplitByBlock.blcName}/polyno/{prlAreaSplitByBlock.prlAreaPolyPolyNo}/history/{prlAreaSplitByBlock.prlAreaPolyDateValidFrom}/{prlAreaSplitByBlock.prlAreaPolyDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}/block/{blcName}/polyno/{prlAreaPolyPolyNo}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -18143,17 +18143,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT licence_phase_hst.prlNpdidLicence, licence_phase_hst.prlPhase, licence_phase_hst.prlDatePhaseValidFrom, licence_phase_hst.prlDatePhaseValidTo, licence.prlNpdidLicence FROM licence_phase_hst INNER JOIN licence ON licence_phase_hst.prlNpdidLicence = licence.prlNpdidLicence"
+                           rr:sqlQuery  "SELECT licence_phase_hst.prlNpdidLicence, licence_phase_hst.prlPhase, licence_phase_hst.prlDatePhaseValidFrom, licence_phase_hst.prlDatePhaseValidTo FROM licence_phase_hst INNER JOIN licence ON licence_phase_hst.prlNpdidLicence = licence.prlNpdidLicence"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence.prlNpdidLicence}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#statusForLicence>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence_phase_hst.prlNpdidLicence}/phase/{licence_phase_hst.prlPhase}/history/{licence_phase_hst.prlDatePhaseValidFrom}/{licence_phase_hst.prlDatePhaseValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}/phase/{prlPhase}/history/{prlDatePhaseValidFrom}/{prlDatePhaseValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -18188,17 +18188,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT discovery_reserves.dscNpdidDiscovery, discovery_reserves.dscReservesRC, discovery.dscNpdidDiscovery FROM discovery_reserves INNER JOIN discovery ON discovery_reserves.dscNpdidDiscovery = discovery.dscNpdidDiscovery"
+                           rr:sqlQuery  "SELECT discovery_reserves.dscNpdidDiscovery, discovery_reserves.dscReservesRC FROM discovery_reserves INNER JOIN discovery ON discovery_reserves.dscNpdidDiscovery = discovery.dscNpdidDiscovery"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{discovery.dscNpdidDiscovery}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{dscNpdidDiscovery}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#reservesForDiscovery>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{discovery_reserves.dscNpdidDiscovery}/{discovery_reserves.dscReservesRC}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/discovery/{dscNpdidDiscovery}/{dscReservesRC}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -18294,17 +18294,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT licence_licensee_hst.prlNpdidLicence, licence_licensee_hst.cmpNpdidCompany, licence_licensee_hst.prlLicenseeDateValidFrom, licence_licensee_hst.prlLicenseeDateValidTo, licence.prlNpdidLicence FROM licence_licensee_hst INNER JOIN licence ON licence_licensee_hst.prlNpdidLicence = licence.prlNpdidLicence"
+                           rr:sqlQuery  "SELECT licence_licensee_hst.prlNpdidLicence, licence_licensee_hst.cmpNpdidCompany, licence_licensee_hst.prlLicenseeDateValidFrom, licence_licensee_hst.prlLicenseeDateValidTo FROM licence_licensee_hst INNER JOIN licence ON licence_licensee_hst.prlNpdidLicence = licence.prlNpdidLicence"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence.prlNpdidLicence}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#licenseeForLicence>
                          ] ;
   rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence_licensee_hst.prlNpdidLicence}/licensee/{licence_licensee_hst.cmpNpdidCompany}/history/{licence_licensee_hst.prlLicenseeDateValidFrom}/{licence_licensee_hst.prlLicenseeDateValidTo}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}/licensee/{cmpNpdidCompany}/history/{prlLicenseeDateValidFrom}/{prlLicenseeDateValidTo}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
@@ -18358,17 +18358,17 @@
 
 [ a                      rr:TriplesMap ;
   rr:logicalTable        [ a            rr:R2RMLView ;
-                           rr:sqlQuery  "SELECT licence_task.prlNpdidLicence, licence_task.prlTaskID, licence.prlNpdidLicence FROM licence_task INNER JOIN licence ON licence_task.prlNpdidLicence = licence.prlNpdidLicence"
+                           rr:sqlQuery  "SELECT licence_task.prlNpdidLicence, licence_task.prlTaskID FROM licence_task INNER JOIN licence ON licence_task.prlNpdidLicence = licence.prlNpdidLicence"
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
-                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence.prlNpdidLicence}" ;
+                                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}" ;
                                            rr:termType  rr:IRI
                                          ] ;
                            rr:predicate  <http://sws.ifi.uio.no/vocab/npd-v2#taskForLicence>
                          ] ;
   rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
-                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{licence_task.prlNpdidLicence}/task/{licence_task.prlTaskID}" ;
+                           rr:template  "http://sws.ifi.uio.no/data/npd-v2/licence/{prlNpdidLicence}/task/{prlTaskID}" ;
                            rr:termType  rr:IRI
                          ]
 ] .
