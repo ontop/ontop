@@ -150,7 +150,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -682,7 +682,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -2142,7 +2142,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -2704,7 +2704,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -3386,7 +3386,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -5540,7 +5540,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -5767,7 +5767,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -6463,7 +6463,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -7450,7 +7450,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -7562,7 +7562,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -8360,7 +8360,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -8721,7 +8721,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -8831,7 +8831,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -9028,7 +9028,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -9512,7 +9512,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -10141,7 +10141,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -11156,7 +11156,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -11426,7 +11426,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -12171,7 +12171,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -12537,7 +12537,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -13287,7 +13287,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -14182,7 +14182,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -14265,7 +14265,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -15318,7 +15318,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -16876,7 +16876,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -18812,7 +18812,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -18970,7 +18970,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -19637,7 +19637,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -20130,7 +20130,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -21120,7 +21120,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -21147,7 +21147,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -21315,7 +21315,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -21637,7 +21637,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -22413,7 +22413,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -22457,7 +22457,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -23379,7 +23379,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -23481,7 +23481,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -24624,7 +24624,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -25027,7 +25027,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -25239,7 +25239,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -25380,7 +25380,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -26529,7 +26529,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -27646,7 +27646,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -27729,7 +27729,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -28246,7 +28246,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -28849,7 +28849,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -29295,7 +29295,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -29783,7 +29783,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "true" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -29827,7 +29827,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
@@ -30789,7 +30789,7 @@
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
                   <http://www.w3.org/ns/r2rml#objectMap>
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
-                            <http://www.w3.org/ns/r2rml#column>
+                            <http://www.w3.org/ns/r2rml#constant>
                                     "false" ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>

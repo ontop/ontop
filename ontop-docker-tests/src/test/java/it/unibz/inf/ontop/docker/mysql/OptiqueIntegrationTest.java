@@ -21,7 +21,7 @@ public class OptiqueIntegrationTest extends AbstractVirtualSesameTest {
 		String sparqlQuery = "SELECT ?x WHERE {?x a <http://sws.ifi.uio.no/vocab/npd-v2#Field>}" ; 
 		//read expected result
 		//int expectedResult = 14366 ;
-		int expectedResult = 101;
+		int expectedResult = 98;
 		
 		int obtainedResult = count(sparqlQuery);
 		System.out.println(obtainedResult);
