@@ -61,7 +61,7 @@ public class R2rmlCheckerTest {
 	final String owlfile = "src/test/resources/mysql/example/npd-v2-ql_a.owl";
 	final String obdafile = "src/test/resources/mysql/example/npd-v2-ql_a.obda";
 	final String propertyfile = "src/test/resources/mysql/example/npd-v2-ql_a.properties";
-	final String r2rmlfile = "src/test/resources/mysql/example/npd-v2-ql_test_a.ttl";
+	final String r2rmlfile = "src/test/resources/mysql/example/npd-v2-ql_a.ttl";
 
 	private List<Predicate> emptyConceptsObda = new ArrayList<>();
 	private List<Predicate> emptyRolesObda = new ArrayList<>();
