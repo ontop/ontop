@@ -3553,8 +3553,8 @@ target		npd:licence/{prlAreaSplitByBlock.prlNpdidLicence}/block/{prlAreaSplitByB
 source		SELECT prlAreaSplitByBlock.prlNpdidLicence, prlAreaSplitByBlock.blcName, prlAreaSplitByBlock.prlAreaPolyPolyNo, prlAreaSplitByBlock.prlAreaPolyDateValidFrom, prlAreaSplitByBlock.prlAreaPolyDateValidTo, company.cmpNpdidCompany FROM prlAreaSplitByBlock INNER JOIN company ON prlAreaSplitByBlock.prlLastOperatorNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00886:ForeignKey
-target		npd:licence/{licence_transfer_hst.prlNpdidLicence}/transfer/{licence_transfer_hst.prlTransferDirection}/{licence_transfer_hst.cmpNpdidCompany}/history/{licence_transfer_hst.prlTransferDateValidFrom} npdv:transferredLicence npd:licence/{licence.prlNpdidLicence} . 
-source		SELECT licence_transfer_hst.prlNpdidLicence, licence_transfer_hst.prlTransferDirection, licence_transfer_hst.cmpNpdidCompany, licence_transfer_hst.prlTransferDateValidFrom, licence.prlNpdidLicence FROM licence_transfer_hst INNER JOIN licence ON licence_transfer_hst.prlNpdidLicence = licence.prlNpdidLicence
+target		npd:licence/{prlNpdidLicence}/transfer/{prlTransferDirection}/{cmpNpdidCompany}/history/{prlTransferDateValidFrom} npdv:transferredLicence npd:licence/{prlNpdidLicence} .
+source		SELECT licence_transfer_hst.prlNpdidLicence, licence_transfer_hst.prlTransferDirection, licence_transfer_hst.cmpNpdidCompany, licence_transfer_hst.prlTransferDateValidFrom FROM licence_transfer_hst INNER JOIN licence ON licence_transfer_hst.prlNpdidLicence = licence.prlNpdidLicence
 
 mappingId	Mapping:00887:ForeignKey
 target		npd:wellbore/{wellbore_development_all.wlbNpdidWellbore} npdv:drillingOperatorCompany npd:company/{company.cmpNpdidCompany} . 
@@ -3573,28 +3573,28 @@ target		npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore} npdv:exploratio
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, field.fldNpdidField FROM wellbore_exploration_all INNER JOIN field ON wellbore_exploration_all.fldNpdidField = field.fldNpdidField
 
 mappingId	Mapping:00891:ForeignKey
-target		npd:wellbore/{wellbore_dst.wlbNpdidWellbore}/test/drillstem/{wellbore_dst.wlbDstTestNumber} npdv:DSTForWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT wellbore_dst.wlbNpdidWellbore, wellbore_dst.wlbDstTestNumber, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_dst INNER JOIN wellbore_npdid_overview ON wellbore_dst.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{wlbNpdidWellbore}/test/drillstem/{wlbDstTestNumber} npdv:DSTForWellbore npd:wellbore/{wlbNpdidWellbore} .
+source		SELECT wellbore_dst.wlbNpdidWellbore, wellbore_dst.wlbDstTestNumber FROM wellbore_dst INNER JOIN wellbore_npdid_overview ON wellbore_dst.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00892:ForeignKey
 target		npd:wellbore/{wellbore_development_all.wlbNpdidWellbore} npdv:wellboreForDiscovery npd:discovery/{discovery.dscNpdidDiscovery} . 
 source		SELECT wellbore_development_all.wlbNpdidWellbore, discovery.dscNpdidDiscovery FROM wellbore_development_all INNER JOIN discovery ON wellbore_development_all.dscNpdidDiscovery = discovery.dscNpdidDiscovery
 
 mappingId	Mapping:00893:ForeignKey
-target		npd:discovery/{dscArea.dscNpdidDiscovery}/area/hctype/{dscArea.dscHcType} npdv:resourcesIncludedInDiscovery npd:discovery/{discovery.dscNpdidDiscovery} . 
-source		SELECT dscArea.dscNpdidDiscovery, dscArea.dscHcType, discovery.dscNpdidDiscovery FROM dscArea INNER JOIN discovery ON dscArea.dscNpdidResInclInDiscovery = discovery.dscNpdidDiscovery
+target		npd:discovery/{AdscNpdidDiscovery}/area/hctype/{dscHcType} npdv:resourcesIncludedInDiscovery npd:discovery/{DdscNpdidDiscovery} .
+source		SELECT dscArea.dscNpdidDiscovery AdscNpdidDiscovery, dscArea.dscHcType, discovery.dscNpdidDiscovery DdscNpdidDiscovery FROM dscArea INNER JOIN discovery ON dscArea.dscNpdidResInclInDiscovery = discovery.dscNpdidDiscovery
 
 mappingId	Mapping:00894:ForeignKey
-target		npd:baa/{bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea}/transfer/{bsns_arr_area_transfer_hst.baaTransferDirection}/{bsns_arr_area_transfer_hst.cmpNpdidCompany}/history/{bsns_arr_area_transfer_hst.baaTransferDateValidFrom} npdv:baaTransferCompany npd:company/{company.cmpNpdidCompany} . 
-source		SELECT bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea, bsns_arr_area_transfer_hst.baaTransferDirection, bsns_arr_area_transfer_hst.cmpNpdidCompany, bsns_arr_area_transfer_hst.baaTransferDateValidFrom, company.cmpNpdidCompany FROM bsns_arr_area_transfer_hst INNER JOIN company ON bsns_arr_area_transfer_hst.cmpNpdidCompany = company.cmpNpdidCompany
+target		npd:baa/{baaNpdidBsnsArrArea}/transfer/{baaTransferDirection}/{cmpNpdidCompany}/history/{baaTransferDateValidFrom} npdv:baaTransferCompany npd:company/{cmpNpdidCompany} .
+source		SELECT bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea, bsns_arr_area_transfer_hst.baaTransferDirection, bsns_arr_area_transfer_hst.cmpNpdidCompany, bsns_arr_area_transfer_hst.baaTransferDateValidFrom FROM bsns_arr_area_transfer_hst INNER JOIN company ON bsns_arr_area_transfer_hst.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00895:ForeignKey
-target		npd:discovery/{fldArea.dscNpdidDiscovery}/area/hctype/{fldArea.dscHcType} npdv:isGeometryOfFeature npd:discovery/{discovery.dscNpdidDiscovery} . 
-source		SELECT fldArea.dscNpdidDiscovery, fldArea.dscHcType, discovery.dscNpdidDiscovery FROM fldArea INNER JOIN discovery ON fldArea.dscNpdidDiscovery = discovery.dscNpdidDiscovery
+target		npd:discovery/{dscNpdidDiscovery}/area/hctype/{dscHcType} npdv:isGeometryOfFeature npd:discovery/{dscNpdidDiscovery} .
+source		SELECT fldArea.dscNpdidDiscovery, fldArea.dscHcType FROM fldArea INNER JOIN discovery ON fldArea.dscNpdidDiscovery = discovery.dscNpdidDiscovery
 
 mappingId	Mapping:00896:ForeignKey
-target		npd:company/{company_reserves.cmpNpdidCompany}/reserve/{company_reserves.fldNpdidField} npdv:reservesForCompany npd:company/{company.cmpNpdidCompany} . 
-source		SELECT company_reserves.cmpNpdidCompany, company_reserves.fldNpdidField, company.cmpNpdidCompany FROM company_reserves INNER JOIN company ON company_reserves.cmpNpdidCompany = company.cmpNpdidCompany
+target		npd:company/{cmpNpdidCompany}/reserve/{fldNpdidField} npdv:reservesForCompany npd:company/{cmpNpdidCompany} .
+source		SELECT company_reserves.cmpNpdidCompany, company_reserves.fldNpdidField FROM company_reserves INNER JOIN company ON company_reserves.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00897:ForeignKey
 target		npd:field/{field.fldNpdidField} npdv:currentFieldOwner npd:licence/{licence.prlNpdidLicence} . 
@@ -3605,16 +3605,16 @@ target		npd:wellbore/{wellbore_development_all.wlbNpdidWellbore} npdv:developmen
 source		SELECT wellbore_development_all.wlbNpdidWellbore, licence.prlNpdidLicence FROM wellbore_development_all INNER JOIN licence ON wellbore_development_all.wlbProductionLicence = licence.prlName
 
 mappingId	Mapping:00899:ForeignKey
-target		npd:wellbore/{wellbore_casing_and_lot.wlbNpdidWellbore}/test/casingleakoff/{wellbore_casing_and_lot.wellbore_casing_and_lot_id} npdv:LOTForWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT wellbore_casing_and_lot.wellbore_casing_and_lot_id, wellbore_casing_and_lot.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_casing_and_lot INNER JOIN wellbore_npdid_overview ON wellbore_casing_and_lot.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{wlbNpdidWellbore}/test/casingleakoff/{wellbore_casing_and_lot_id} npdv:LOTForWellbore npd:wellbore/{wlbNpdidWellbore} .
+source		SELECT wellbore_casing_and_lot.wellbore_casing_and_lot_id, wellbore_casing_and_lot.wlbNpdidWellbore FROM wellbore_casing_and_lot INNER JOIN wellbore_npdid_overview ON wellbore_casing_and_lot.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00900:ForeignKey
 target		npd:field/{field_investment_yearly.prfNpdidInformationCarrier}/investment/{field_investment_yearly.prfYear} npdv:investmentForField npd:field/{field.fldNpdidField} . 
 source		SELECT field_investment_yearly.prfNpdidInformationCarrier, field_investment_yearly.prfYear, field.fldNpdidField FROM field_investment_yearly INNER JOIN field ON field_investment_yearly.prfNpdidInformationCarrier = field.fldNpdidField
 
 mappingId	Mapping:00901:ForeignKey
-target		npd:field/{field_operator_hst.fldNpdidField}/operator/{field_operator_hst.cmpNpdidCompany}/history/{field_operator_hst.fldOperatorFrom}/{field_operator_hst.fldOperatorTo} npdv:fieldOperator npd:company/{company.cmpNpdidCompany} . 
-source		SELECT field_operator_hst.fldNpdidField, field_operator_hst.cmpNpdidCompany, field_operator_hst.fldOperatorFrom, field_operator_hst.fldOperatorTo, company.cmpNpdidCompany FROM field_operator_hst INNER JOIN company ON field_operator_hst.cmpNpdidCompany = company.cmpNpdidCompany
+target		npd:field/{fldNpdidField}/operator/{cmpNpdidCompany}/history/{fldOperatorFrom}/{fldOperatorTo} npdv:fieldOperator npd:company/{cmpNpdidCompany} .
+source		SELECT field_operator_hst.fldNpdidField, field_operator_hst.cmpNpdidCompany, field_operator_hst.fldOperatorFrom, field_operator_hst.fldOperatorTo FROM field_operator_hst INNER JOIN company ON field_operator_hst.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00902:ForeignKey
 target		npd:licence/{prlArea.prlNpdidLicence}/area/{prlArea.prlArea_id}/history/{prlArea.prlAreaPolyDateValidFrom}/{prlArea.prlAreaPolyDateValidTo} npdv:lastOperatorCompany npd:company/{company.cmpNpdidCompany} . 
@@ -3625,8 +3625,8 @@ target		npd:wellbore/{wellbore_development_all.wlbNpdidWellbore} npdv:developmen
 source		SELECT wellbore_development_all.wlbNpdidWellbore, field.fldNpdidField FROM wellbore_development_all INNER JOIN field ON wellbore_development_all.fldNpdidField = field.fldNpdidField
 
 mappingId	Mapping:00904:ForeignKey
-target		npd:licence/{licence_phase_hst.prlNpdidLicence}/phase/{licence_phase_hst.prlPhase}/history/{licence_phase_hst.prlDatePhaseValidFrom}/{licence_phase_hst.prlDatePhaseValidTo} npdv:statusForLicence npd:licence/{licence.prlNpdidLicence} . 
-source		SELECT licence_phase_hst.prlNpdidLicence, licence_phase_hst.prlPhase, licence_phase_hst.prlDatePhaseValidFrom, licence_phase_hst.prlDatePhaseValidTo, licence.prlNpdidLicence FROM licence_phase_hst INNER JOIN licence ON licence_phase_hst.prlNpdidLicence = licence.prlNpdidLicence
+target		npd:licence/{prlNpdidLicence}/phase/{prlPhase}/history/{prlDatePhaseValidFrom}/{prlDatePhaseValidTo} npdv:statusForLicence npd:licence/{prlNpdidLicence} .
+source		SELECT licence_phase_hst.prlNpdidLicence, licence_phase_hst.prlPhase, licence_phase_hst.prlDatePhaseValidFrom, licence_phase_hst.prlDatePhaseValidTo FROM licence_phase_hst INNER JOIN licence ON licence_phase_hst.prlNpdidLicence = licence.prlNpdidLicence
 
 mappingId	Mapping:00905:ForeignKey
 target		npd:survey/{seis_acquisition_progress.seaProgressText2}/status/{seis_acquisition_progress.seis_acquisition_progress_id} npdv:statusForSurvey npd:survey/{seis_acquisition.seaName} . 
@@ -3637,15 +3637,15 @@ target		npd:survey/{seaMultiline.seaSurveyName}/multiline npdv:isGeometryOfFeatu
 source		SELECT seaMultiline.seaSurveyName, seis_acquisition.seaName FROM seaMultiline INNER JOIN seis_acquisition ON seaMultiline.seaSurveyName = seis_acquisition.seaName
 
 mappingId	Mapping:00907:ForeignKey
-target		npd:facility/{tuf_owner_hst.tufNpdidTuf}/owner/{tuf_owner_hst.cmpNpdidCompany}/history/{tuf_owner_hst.tufOwnerDateValidFrom}/{tuf_owner_hst.tufOwnerDateValidTo} ptl:TUFOwnerCompany npd:company/{company.cmpNpdidCompany} . 
-source		SELECT tuf_owner_hst.tufNpdidTuf, tuf_owner_hst.cmpNpdidCompany, tuf_owner_hst.tufOwnerDateValidFrom, tuf_owner_hst.tufOwnerDateValidTo, company.cmpNpdidCompany FROM tuf_owner_hst INNER JOIN company ON tuf_owner_hst.cmpNpdidCompany = company.cmpNpdidCompany
+target		npd:facility/{tufNpdidTuf}/owner/{cmpNpdidCompany}/history/{tufOwnerDateValidFrom}/{tufOwnerDateValidTo} ptl:TUFOwnerCompany npd:company/{cmpNpdidCompany} .
+source		SELECT tuf_owner_hst.tufNpdidTuf, tuf_owner_hst.cmpNpdidCompany, tuf_owner_hst.tufOwnerDateValidFrom, tuf_owner_hst.tufOwnerDateValidTo FROM tuf_owner_hst INNER JOIN company ON tuf_owner_hst.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00908:ForeignKey
-target		npd:field/{field_owner_hst.fldNpdidField}/owner/{field_owner_hst.fldNpdidOwner}/history/{field_owner_hst.fldOwnershipFromDate}/{field_owner_hst.fldOwnershipToDate} npdv:ownerForField npd:field/{field.fldNpdidField} . 
-source		SELECT field_owner_hst.fldNpdidField, field_owner_hst.fldNpdidOwner, field_owner_hst.fldOwnershipFromDate, field_owner_hst.fldOwnershipToDate, field.fldNpdidField FROM field_owner_hst INNER JOIN field ON field_owner_hst.fldNpdidField = field.fldNpdidField
+target		npd:field/{fldNpdidField}/owner/{fldNpdidOwner}/history/{fldOwnershipFromDate}/{fldOwnershipToDate} npdv:ownerForField npd:field/{fldNpdidField} .
+source		SELECT field_owner_hst.fldNpdidField, field_owner_hst.fldNpdidOwner, field_owner_hst.fldOwnershipFromDate, field_owner_hst.fldOwnershipToDate FROM field_owner_hst INNER JOIN field ON field_owner_hst.fldNpdidField = field.fldNpdidField
 
 mappingId	Mapping:00909:ForeignKey
-target		npd:field/{field.fldNpdidField} npdv:currentFieldOperator npd:company/{company.cmpNpdidCompany} . 
+target		npd:field/{field.fldNpdidField} npdv:currentFieldOperator npd:company/{company.cmpNpdidCompany} .
 source		SELECT field.fldNpdidField, company.cmpNpdidCompany FROM field INNER JOIN company ON field.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00910:ForeignKey
@@ -3657,24 +3657,24 @@ target		npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore} npdv:wellOperat
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, company.cmpNpdidCompany FROM wellbore_exploration_all INNER JOIN company ON wellbore_exploration_all.wlbDiskosWellOperator = company.cmpShortName
 
 mappingId	Mapping:00912:ForeignKey
-target		npd:wellbore/{wellbore_mud.wlbNpdidWellbore}/test/mud/{wellbore_mud.wellbore_mud_id} npdv:mudTestForWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT wellbore_mud.wellbore_mud_id, wellbore_mud.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_mud INNER JOIN wellbore_npdid_overview ON wellbore_mud.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{wlbNpdidWellbore}/test/mud/{wellbore_mud_id} npdv:mudTestForWellbore npd:wellbore/{wlbNpdidWellbore} .
+source		SELECT wellbore_mud.wellbore_mud_id, wellbore_mud.wlbNpdidWellbore FROM wellbore_mud INNER JOIN wellbore_npdid_overview ON wellbore_mud.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00913:ForeignKey
-target		npd:discovery/{fldArea.dscNpdidDiscovery}/area/hctype/{fldArea.dscHcType} npdv:resourcesIncludedInDiscovery npd:discovery/{discovery.dscNpdidDiscovery} . 
-source		SELECT fldArea.dscNpdidDiscovery, fldArea.dscHcType, discovery.dscNpdidDiscovery FROM fldArea INNER JOIN discovery ON fldArea.dscNpdidResInclInDiscovery = discovery.dscNpdidDiscovery
+target		npd:discovery/{FdscNpdidDiscovery}/area/hctype/{dscHcType} npdv:resourcesIncludedInDiscovery npd:discovery/{DdscNpdidDiscovery} .
+source		SELECT fldArea.dscNpdidDiscovery FdscNpdidDiscovery, fldArea.dscHcType, discovery.dscNpdidDiscovery DdscNpdidDiscovery FROM fldArea INNER JOIN discovery ON fldArea.dscNpdidResInclInDiscovery = discovery.dscNpdidDiscovery
 
 mappingId	Mapping:00914:ForeignKey
-target		npd:field/{field_operator_hst.fldNpdidField}/operator/{field_operator_hst.cmpNpdidCompany}/history/{field_operator_hst.fldOperatorFrom}/{field_operator_hst.fldOperatorTo} npdv:operatorForField npd:field/{field.fldNpdidField} . 
-source		SELECT field_operator_hst.fldNpdidField, field_operator_hst.cmpNpdidCompany, field_operator_hst.fldOperatorFrom, field_operator_hst.fldOperatorTo, field.fldNpdidField FROM field_operator_hst INNER JOIN field ON field_operator_hst.fldNpdidField = field.fldNpdidField
+target		npd:field/{fldNpdidField}/operator/{cmpNpdidCompany}/history/{fldOperatorFrom}/{fldOperatorTo} npdv:operatorForField npd:field/{fldNpdidField} .
+source		SELECT field_operator_hst.fldNpdidField, field_operator_hst.cmpNpdidCompany, field_operator_hst.fldOperatorFrom, field_operator_hst.fldOperatorTo FROM field_operator_hst INNER JOIN field ON field_operator_hst.fldNpdidField = field.fldNpdidField
 
 mappingId	Mapping:00915:ForeignKey
-target		npd:facility/{tuf_operator_hst.tufNpdidTuf}/operator/{tuf_operator_hst.cmpNpdidCompany}/history/{tuf_operator_hst.tufOperDateValidFrom}/{tuf_operator_hst.tufOperDateValidTo} ptl:TUFOperatorForLicence npd:petreg/facility/{tuf_petreg_licence.tufNpdidTuf} . 
-source		SELECT tuf_operator_hst.tufNpdidTuf, tuf_operator_hst.cmpNpdidCompany, tuf_operator_hst.tufOperDateValidFrom, tuf_operator_hst.tufOperDateValidTo, tuf_petreg_licence.tufNpdidTuf FROM tuf_operator_hst INNER JOIN tuf_petreg_licence ON tuf_operator_hst.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf
+target		npd:facility/{tufNpdidTuf}/operator/{cmpNpdidCompany}/history/{tufOperDateValidFrom}/{tufOperDateValidTo} ptl:TUFOperatorForLicence npd:petreg/facility/{tufNpdidTuf} .
+source		SELECT tuf_operator_hst.tufNpdidTuf, tuf_operator_hst.cmpNpdidCompany, tuf_operator_hst.tufOperDateValidFrom, tuf_operator_hst.tufOperDateValidTo FROM tuf_operator_hst INNER JOIN tuf_petreg_licence ON tuf_operator_hst.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf
 
 mappingId	Mapping:00916:ForeignKey
-target		npd:wellbore/{wellbore_core.wlbNpdidWellbore}/core/{wellbore_core.wlbCoreNumber} npdv:coreForWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT wellbore_core.wellbore_core_id, wellbore_core.wlbNpdidWellbore, wellbore_core.wlbCoreNumber, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_core INNER JOIN wellbore_npdid_overview ON wellbore_core.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber} npdv:coreForWellbore npd:wellbore/{wlbNpdidWellbore} .
+source		SELECT wellbore_core.wellbore_core_id, wellbore_core.wlbNpdidWellbore, wellbore_core.wlbCoreNumber FROM wellbore_core INNER JOIN wellbore_npdid_overview ON wellbore_core.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00917:ForeignKey
 target		npd:wellbore/{wellbore_development_all.wlbNpdidWellbore} npdv:wellOperator npd:company/{company.cmpNpdidCompany} . 
@@ -3689,88 +3689,88 @@ target		npd:field/{field.fldNpdidField} npdv:discoveryWellbore npd:wellbore/{wel
 source		SELECT field.fldNpdidField, wellbore_npdid_overview.wlbNpdidWellbore FROM field INNER JOIN wellbore_npdid_overview ON field.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00920:ForeignKey
-target		npd:field/{field_activity_status_hst.fldNpdidField}/activity/{field_activity_status_hst.fldStatus}/history/{field_activity_status_hst.fldStatusFromDate}/{field_activity_status_hst.fldStatusToDate} npdv:statusForField npd:field/{field.fldNpdidField} . 
-source		SELECT field_activity_status_hst.fldNpdidField, field_activity_status_hst.fldStatus, field_activity_status_hst.fldStatusFromDate, field_activity_status_hst.fldStatusToDate, field.fldNpdidField FROM field_activity_status_hst INNER JOIN field ON field_activity_status_hst.fldNpdidField = field.fldNpdidField
+target		npd:field/{fldNpdidField}/activity/{fldStatus}/history/{fldStatusFromDate}/{fldStatusToDate} npdv:statusForField npd:field/{fldNpdidField} .
+source		SELECT field_activity_status_hst.fldNpdidField, field_activity_status_hst.fldStatus, field_activity_status_hst.fldStatusFromDate, field_activity_status_hst.fldStatusToDate FROM field_activity_status_hst INNER JOIN field ON field_activity_status_hst.fldNpdidField = field.fldNpdidField
 
 mappingId	Mapping:00921:ForeignKey
-target		npd:petreg/licence/{licence_petreg_licence_licencee.prlNpdidLicence}/licencee/{licence_petreg_licence_licencee.cmpNpdidCompany} ptl:licenceLicenceeCompany npd:company/{company.cmpNpdidCompany} . 
-source		SELECT licence_petreg_licence_licencee.prlNpdidLicence, licence_petreg_licence_licencee.cmpNpdidCompany, company.cmpNpdidCompany FROM licence_petreg_licence_licencee INNER JOIN company ON licence_petreg_licence_licencee.cmpNpdidCompany = company.cmpNpdidCompany
+target		npd:petreg/licence/{prlNpdidLicence}/licencee/{cmpNpdidCompany} ptl:licenceLicenceeCompany npd:company/{cmpNpdidCompany} .
+source		SELECT licence_petreg_licence_licencee.prlNpdidLicence, licence_petreg_licence_licencee.cmpNpdidCompany FROM licence_petreg_licence_licencee INNER JOIN company ON licence_petreg_licence_licencee.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00922:ForeignKey
 target		npd:discovery/{fldArea.dscNpdidDiscovery}/area/hctype/{fldArea.dscHcType} npdv:isGeometryOfFeature npd:field/{field.fldNpdidField} . 
 source		SELECT fldArea.dscNpdidDiscovery, fldArea.dscHcType, field.fldNpdidField FROM fldArea INNER JOIN field ON fldArea.fldNpdidField = field.fldNpdidField
 
 mappingId	Mapping:00923:ForeignKey
-target		npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore} npdv:reclassedFromWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT wellbore_exploration_all.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_exploration_all INNER JOIN wellbore_npdid_overview ON wellbore_exploration_all.wlbNpdidWellboreReclass = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{AwlbNpdidWellbore} npdv:reclassedFromWellbore npd:wellbore/{OwlbNpdidWellbore} .
+source		SELECT wellbore_exploration_all.wlbNpdidWellbore AwlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore OwlbNpdidWellbore FROM wellbore_exploration_all INNER JOIN wellbore_npdid_overview ON wellbore_exploration_all.wlbNpdidWellboreReclass = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00924:ForeignKey
 target		npd:discovery/{discovery.dscNpdidDiscovery} npdv:includedInField npd:field/{field.fldNpdidField} . 
 source		SELECT discovery.dscNpdidDiscovery, field.fldNpdidField FROM discovery INNER JOIN field ON discovery.fldNpdidField = field.fldNpdidField
 
 mappingId	Mapping:00925:ForeignKey
-target		npd:baa/{bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea}/licensee/{bsns_arr_area_licensee_hst.cmpNpdidCompany}/history/{bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom}/{bsns_arr_area_licensee_hst.baaLicenseeDateValidTo} npdv:licenseeForBAA npd:baa/{bsns_arr_area.baaNpdidBsnsArrArea} . 
-source		SELECT bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea, bsns_arr_area_licensee_hst.cmpNpdidCompany, bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom, bsns_arr_area_licensee_hst.baaLicenseeDateValidTo, bsns_arr_area.baaNpdidBsnsArrArea FROM bsns_arr_area_licensee_hst INNER JOIN bsns_arr_area ON bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea
+target		npd:baa/{baaNpdidBsnsArrArea}/licensee/{cmpNpdidCompany}/history/{baaLicenseeDateValidFrom}/{baaLicenseeDateValidTo} npdv:licenseeForBAA npd:baa/{baaNpdidBsnsArrArea} .
+source		SELECT bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea, bsns_arr_area_licensee_hst.cmpNpdidCompany, bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom, bsns_arr_area_licensee_hst.baaLicenseeDateValidTo FROM bsns_arr_area_licensee_hst INNER JOIN bsns_arr_area ON bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea
 
 mappingId	Mapping:00926:ForeignKey
 target		npd:wellbore/{wellbore_shallow_all.wlbNpdidWellbore} npdv:shallowWellboreForLicence npd:licence/{licence.prlNpdidLicence} . 
 source		SELECT wellbore_shallow_all.wlbNpdidWellbore, licence.prlNpdidLicence FROM wellbore_shallow_all INNER JOIN licence ON wellbore_shallow_all.wlbProductionLicence = licence.prlName
 
 mappingId	Mapping:00927:ForeignKey
-target		npd:petreg/facility/{tuf_petreg_message.tufNpdidTuf}/message/{tuf_petreg_message.ptlMessageDocumentNo} ptl:messageForTUF npd:petreg/facility/{tuf_petreg_licence.tufNpdidTuf} . 
-source		SELECT tuf_petreg_message.tufNpdidTuf, tuf_petreg_message.ptlMessageDocumentNo, tuf_petreg_licence.tufNpdidTuf FROM tuf_petreg_message INNER JOIN tuf_petreg_licence ON tuf_petreg_message.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf
+target		npd:petreg/facility/{tufNpdidTuf}/message/{ptlMessageDocumentNo} ptl:messageForTUF npd:petreg/facility/{tufNpdidTuf} .
+source		SELECT tuf_petreg_message.tufNpdidTuf, tuf_petreg_message.ptlMessageDocumentNo FROM tuf_petreg_message INNER JOIN tuf_petreg_licence ON tuf_petreg_message.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf
 
 mappingId	Mapping:00928:ForeignKey
-target		npd:petreg/facility/{tuf_petreg_licence_licencee.tufNpdidTuf}/licencee/{tuf_petreg_licence_licencee.cmpNpdidCompany} ptl:TUFLicenceeForTUF npd:petreg/facility/{tuf_petreg_licence.tufNpdidTuf} . 
-source		SELECT tuf_petreg_licence_licencee.tufNpdidTuf, tuf_petreg_licence_licencee.cmpNpdidCompany, tuf_petreg_licence.tufNpdidTuf FROM tuf_petreg_licence_licencee INNER JOIN tuf_petreg_licence ON tuf_petreg_licence_licencee.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf
+target		npd:petreg/facility/{tufNpdidTuf}/licencee/{cmpNpdidCompany} ptl:TUFLicenceeForTUF npd:petreg/facility/{tufNpdidTuf} .
+source		SELECT tuf_petreg_licence_licencee.tufNpdidTuf, tuf_petreg_licence_licencee.cmpNpdidCompany FROM tuf_petreg_licence_licencee INNER JOIN tuf_petreg_licence ON tuf_petreg_licence_licencee.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf
 
 mappingId	Mapping:00929:ForeignKey
-target		npd:facility/{tuf_owner_hst.tufNpdidTuf}/owner/{tuf_owner_hst.cmpNpdidCompany}/history/{tuf_owner_hst.tufOwnerDateValidFrom}/{tuf_owner_hst.tufOwnerDateValidTo} ptl:TUFOwnerForLicence npd:petreg/facility/{tuf_petreg_licence.tufNpdidTuf} . 
-source		SELECT tuf_owner_hst.tufNpdidTuf, tuf_owner_hst.cmpNpdidCompany, tuf_owner_hst.tufOwnerDateValidFrom, tuf_owner_hst.tufOwnerDateValidTo, tuf_petreg_licence.tufNpdidTuf FROM tuf_owner_hst INNER JOIN tuf_petreg_licence ON tuf_owner_hst.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf
+target		npd:facility/{tufNpdidTuf}/owner/{cmpNpdidCompany}/history/{tufOwnerDateValidFrom}/{tufOwnerDateValidTo} ptl:TUFOwnerForLicence npd:petreg/facility/{tufNpdidTuf} .
+source		SELECT tuf_owner_hst.tufNpdidTuf, tuf_owner_hst.cmpNpdidCompany, tuf_owner_hst.tufOwnerDateValidFrom, tuf_owner_hst.tufOwnerDateValidTo FROM tuf_owner_hst INNER JOIN tuf_petreg_licence ON tuf_owner_hst.tufNpdidTuf = tuf_petreg_licence.tufNpdidTuf
 
 mappingId	Mapping:00930:ForeignKey
-target		npd:wellbore/{wellbore_oil_sample.wlbNpdidWellbore}/test/oilsample/{wellbore_oil_sample.wellbore_oil_sample_id} npdv:oilSampleTestForWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT wellbore_oil_sample.wellbore_oil_sample_id, wellbore_oil_sample.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_oil_sample INNER JOIN wellbore_npdid_overview ON wellbore_oil_sample.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{wlbNpdidWellbore}/test/oilsample/{wellbore_oil_sample_id} npdv:oilSampleTestForWellbore npd:wellbore/{wlbNpdidWellbore} .
+source		SELECT wellbore_oil_sample.wellbore_oil_sample_id, wellbore_oil_sample.wlbNpdidWellbore FROM wellbore_oil_sample INNER JOIN wellbore_npdid_overview ON wellbore_oil_sample.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00931:ForeignKey
-target		npd:licence/{licence_oper_hst.prlNpdidLicence}/operator/{licence_oper_hst.cmpNpdidCompany}/history/{licence_oper_hst.prlOperDateValidFrom}/{licence_oper_hst.prlOperDateValidTo} npdv:licenceOperatorCompany npd:company/{company.cmpNpdidCompany} . 
-source		SELECT licence_oper_hst.prlNpdidLicence, licence_oper_hst.cmpNpdidCompany, licence_oper_hst.prlOperDateValidFrom, licence_oper_hst.prlOperDateValidTo, company.cmpNpdidCompany FROM licence_oper_hst INNER JOIN company ON licence_oper_hst.cmpNpdidCompany = company.cmpNpdidCompany
+target		npd:licence/{prlNpdidLicence}/operator/{cmpNpdidCompany}/history/{prlOperDateValidFrom}/{prlOperDateValidTo} npdv:licenceOperatorCompany npd:company/{cmpNpdidCompany} .
+source		SELECT licence_oper_hst.prlNpdidLicence, licence_oper_hst.cmpNpdidCompany, licence_oper_hst.prlOperDateValidFrom, licence_oper_hst.prlOperDateValidTo FROM licence_oper_hst INNER JOIN company ON licence_oper_hst.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00932:ForeignKey
-target		npd:petreg/facility/{tuf_petreg_licence_licencee.tufNpdidTuf}/licencee/{tuf_petreg_licence_licencee.cmpNpdidCompany} ptl:TUFLicenceeCompany npd:company/{company.cmpNpdidCompany} . 
-source		SELECT tuf_petreg_licence_licencee.tufNpdidTuf, tuf_petreg_licence_licencee.cmpNpdidCompany, company.cmpNpdidCompany FROM tuf_petreg_licence_licencee INNER JOIN company ON tuf_petreg_licence_licencee.cmpNpdidCompany = company.cmpNpdidCompany
+target		npd:petreg/facility/{tufNpdidTuf}/licencee/{cmpNpdidCompany} ptl:TUFLicenceeCompany npd:company/{cmpNpdidCompany} .
+source		SELECT tuf_petreg_licence_licencee.tufNpdidTuf, tuf_petreg_licence_licencee.cmpNpdidCompany FROM tuf_petreg_licence_licencee INNER JOIN company ON tuf_petreg_licence_licencee.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00933:ForeignKey
-target		npd:field/{field_licensee_hst.fldNpdidField}/licensee/{field_licensee_hst.cmpNpdidCompany}/history/{field_licensee_hst.fldLicenseeFrom}/{field_licensee_hst.fldLicenseeTo} npdv:fieldLicensee npd:company/{company.cmpNpdidCompany} . 
-source		SELECT field_licensee_hst.fldNpdidField, field_licensee_hst.cmpNpdidCompany, field_licensee_hst.fldLicenseeFrom, field_licensee_hst.fldLicenseeTo, company.cmpNpdidCompany FROM field_licensee_hst INNER JOIN company ON field_licensee_hst.cmpNpdidCompany = company.cmpNpdidCompany
+target		npd:field/{fldNpdidField}/licensee/{cmpNpdidCompany}/history/{fldLicenseeFrom}/{fldLicenseeTo} npdv:fieldLicensee npd:company/{cmpNpdidCompany} .
+source		SELECT field_licensee_hst.fldNpdidField, field_licensee_hst.cmpNpdidCompany, field_licensee_hst.fldLicenseeFrom, field_licensee_hst.fldLicenseeTo FROM field_licensee_hst INNER JOIN company ON field_licensee_hst.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00934:ForeignKey
-target		npd:baa/{baaArea.baaNpdidBsnsArrArea}/polygon/{baaArea.baaNpdidBsnsArrAreaPoly} npdv:isGeometryOfFeature npd:baa/{bsns_arr_area.baaNpdidBsnsArrArea} . 
-source		SELECT baaArea.baaNpdidBsnsArrArea, baaArea.baaNpdidBsnsArrAreaPoly, bsns_arr_area.baaNpdidBsnsArrArea FROM baaArea INNER JOIN bsns_arr_area ON baaArea.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea
+target		npd:baa/{baaNpdidBsnsArrArea}/polygon/{baaNpdidBsnsArrAreaPoly} npdv:isGeometryOfFeature npd:baa/{baaNpdidBsnsArrArea} .
+source		SELECT baaArea.baaNpdidBsnsArrArea, baaArea.baaNpdidBsnsArrAreaPoly FROM baaArea INNER JOIN bsns_arr_area ON baaArea.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea
 
 mappingId	Mapping:00935:ForeignKey
 target		npd:survey/{seis_acquisition_coordinates_inc_turnarea.seaSurveyName}/point/{seis_acquisition_coordinates_inc_turnarea.seaPolygonPointNumber} npdv:coordinateForSurvey npd:survey/{seis_acquisition.seaName} . 
 source		SELECT seis_acquisition_coordinates_inc_turnarea.seaSurveyName, seis_acquisition_coordinates_inc_turnarea.seaPolygonPointNumber, seis_acquisition.seaName FROM seis_acquisition_coordinates_inc_turnarea INNER JOIN seis_acquisition ON seis_acquisition_coordinates_inc_turnarea.seaNpdidSurvey = seis_acquisition.seaNpdidSurvey
 
 mappingId	Mapping:00936:ForeignKey
-target		npd:licence/{licence_task.prlNpdidLicence}/task/{licence_task.prlTaskID} npdv:taskForLicence npd:licence/{licence.prlNpdidLicence} . 
-source		SELECT licence_task.prlNpdidLicence, licence_task.prlTaskID, licence.prlNpdidLicence FROM licence_task INNER JOIN licence ON licence_task.prlNpdidLicence = licence.prlNpdidLicence
+target		npd:licence/{prlNpdidLicence}/task/{prlTaskID} npdv:taskForLicence npd:licence/{prlNpdidLicence} .
+source		SELECT licence_task.prlNpdidLicence, licence_task.prlTaskID FROM licence_task INNER JOIN licence ON licence_task.prlNpdidLicence = licence.prlNpdidLicence
 
 mappingId	Mapping:00937:ForeignKey
-target		npd:licence/{licence_area_poly_hst.prlNpdidLicence}/block/{licence_area_poly_hst.prlAreaPolyBlockName}/polyno/{licence_area_poly_hst.prlAreaPolyPolyNo}/history/{licence_area_poly_hst.prlAreaPolyDateValidFrom}/{licence_area_poly_hst.prlAreaPolyDateValidTo} npdv:isGeometryOfFeature npd:licence/{licence.prlNpdidLicence} . 
-source		SELECT licence_area_poly_hst.prlNpdidLicence, licence_area_poly_hst.prlAreaPolyBlockName, licence_area_poly_hst.prlAreaPolyPolyNo, licence_area_poly_hst.prlAreaPolyDateValidFrom, licence_area_poly_hst.prlAreaPolyDateValidTo, licence.prlNpdidLicence FROM licence_area_poly_hst INNER JOIN licence ON licence_area_poly_hst.prlNpdidLicence = licence.prlNpdidLicence
+target		npd:licence/{prlNpdidLicence}/block/{prlAreaPolyBlockName}/polyno/{prlAreaPolyPolyNo}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo} npdv:isGeometryOfFeature npd:licence/{prlNpdidLicence} .
+source		SELECT licence_area_poly_hst.prlNpdidLicence, licence_area_poly_hst.prlAreaPolyBlockName, licence_area_poly_hst.prlAreaPolyPolyNo, licence_area_poly_hst.prlAreaPolyDateValidFrom, licence_area_poly_hst.prlAreaPolyDateValidTo FROM licence_area_poly_hst INNER JOIN licence ON licence_area_poly_hst.prlNpdidLicence = licence.prlNpdidLicence
 
 mappingId	Mapping:00938:ForeignKey
 target		npd:petreg/licence/{licence_petreg_licence_oper.prlNpdidLicence} ptl:licenceOperatorCompany npd:company/{company.cmpNpdidCompany} . 
 source		SELECT licence_petreg_licence_oper.prlNpdidLicence, company.cmpNpdidCompany FROM licence_petreg_licence_oper INNER JOIN company ON licence_petreg_licence_oper.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00939:ForeignKey
-target		npd:wellbore/{wellbore_core_photo.wlbNpdidWellbore}/core/{wellbore_core_photo.wlbCoreNumber}/photo/{wellbore_core_photo.wellbore_core_photo_id}/{wellbore_core_photo.wlbCorePhotoTitle} npdv:corePhotoForWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT wellbore_core_photo.wellbore_core_photo_id, wellbore_core_photo.wlbNpdidWellbore, wellbore_core_photo.wlbCoreNumber, wellbore_core_photo.wlbCorePhotoTitle, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_core_photo INNER JOIN wellbore_npdid_overview ON wellbore_core_photo.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber}/photo/{wellbore_core_photo_id}/{wlbCorePhotoTitle} npdv:corePhotoForWellbore npd:wellbore/{wlbNpdidWellbore} .
+source		SELECT wellbore_core_photo.wellbore_core_photo_id, wellbore_core_photo.wlbNpdidWellbore, wellbore_core_photo.wlbCoreNumber, wellbore_core_photo.wlbCorePhotoTitle FROM wellbore_core_photo INNER JOIN wellbore_npdid_overview ON wellbore_core_photo.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00940:ForeignKey
-target		npd:licence/{licence_licensee_hst.prlNpdidLicence}/licensee/{licence_licensee_hst.cmpNpdidCompany}/history/{licence_licensee_hst.prlLicenseeDateValidFrom}/{licence_licensee_hst.prlLicenseeDateValidTo} npdv:licenseeForLicence npd:licence/{licence.prlNpdidLicence} . 
-source		SELECT licence_licensee_hst.prlNpdidLicence, licence_licensee_hst.cmpNpdidCompany, licence_licensee_hst.prlLicenseeDateValidFrom, licence_licensee_hst.prlLicenseeDateValidTo, licence.prlNpdidLicence FROM licence_licensee_hst INNER JOIN licence ON licence_licensee_hst.prlNpdidLicence = licence.prlNpdidLicence
+target		npd:licence/{prlNpdidLicence}/licensee/{cmpNpdidCompany}/history/{prlLicenseeDateValidFrom}/{prlLicenseeDateValidTo} npdv:licenseeForLicence npd:licence/{prlNpdidLicence} .
+source		SELECT licence_licensee_hst.prlNpdidLicence, licence_licensee_hst.cmpNpdidCompany, licence_licensee_hst.prlLicenseeDateValidFrom, licence_licensee_hst.prlLicenseeDateValidTo FROM licence_licensee_hst INNER JOIN licence ON licence_licensee_hst.prlNpdidLicence = licence.prlNpdidLicence
 
 mappingId	Mapping:00941:ForeignKey
 target		npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore} npdv:explorationWellboreForLicence npd:licence/{licence.prlNpdidLicence} . 
@@ -3781,32 +3781,32 @@ target		npd:survey/{seis_acquisition.seaName} npdv:reportingCompany npd:company/
 source		SELECT seis_acquisition.seaName, company.cmpNpdidCompany FROM seis_acquisition INNER JOIN company ON seis_acquisition.seaCompanyReported = company.cmpLongName
 
 mappingId	Mapping:00943:ForeignKey
-target		npd:wellbore/{wellbore_document.wlbNpdidWellbore}/document/{wellbore_document.wellbore_document_id}/{wellbore_document.wlbDocumentName} npdv:documentForWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT wellbore_document.wellbore_document_id, wellbore_document.wlbNpdidWellbore, wellbore_document.wlbDocumentName, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_document INNER JOIN wellbore_npdid_overview ON wellbore_document.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{wlbNpdidWellbore}/document/{wellbore_document_id}/{wlbDocumentName} npdv:documentForWellbore npd:wellbore/{wlbNpdidWellbore} .
+source		SELECT wellbore_document.wellbore_document_id, wellbore_document.wlbNpdidWellbore, wellbore_document.wlbDocumentName FROM wellbore_document INNER JOIN wellbore_npdid_overview ON wellbore_document.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00944:ForeignKey
-target		npd:licence/{licence_transfer_hst.prlNpdidLicence}/transfer/{licence_transfer_hst.prlTransferDirection}/{licence_transfer_hst.cmpNpdidCompany}/history/{licence_transfer_hst.prlTransferDateValidFrom} npdv:licenceTransferCompany npd:company/{company.cmpNpdidCompany} . 
-source		SELECT licence_transfer_hst.prlNpdidLicence, licence_transfer_hst.prlTransferDirection, licence_transfer_hst.cmpNpdidCompany, licence_transfer_hst.prlTransferDateValidFrom, company.cmpNpdidCompany FROM licence_transfer_hst INNER JOIN company ON licence_transfer_hst.cmpNpdidCompany = company.cmpNpdidCompany
+target		npd:licence/{prlNpdidLicence}/transfer/{prlTransferDirection}/{cmpNpdidCompany}/history/{prlTransferDateValidFrom} npdv:licenceTransferCompany npd:company/{cmpNpdidCompany} .
+source		SELECT licence_transfer_hst.prlNpdidLicence, licence_transfer_hst.prlTransferDirection, licence_transfer_hst.cmpNpdidCompany, licence_transfer_hst.prlTransferDateValidFrom FROM licence_transfer_hst INNER JOIN company ON licence_transfer_hst.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00945:ForeignKey
-target		npd:baa/{bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea}/transfer/{bsns_arr_area_transfer_hst.baaTransferDirection}/{bsns_arr_area_transfer_hst.cmpNpdidCompany}/history/{bsns_arr_area_transfer_hst.baaTransferDateValidFrom} npdv:transferredBAA npd:baa/{bsns_arr_area.baaNpdidBsnsArrArea} . 
-source		SELECT bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea, bsns_arr_area_transfer_hst.baaTransferDirection, bsns_arr_area_transfer_hst.cmpNpdidCompany, bsns_arr_area_transfer_hst.baaTransferDateValidFrom, bsns_arr_area.baaNpdidBsnsArrArea FROM bsns_arr_area_transfer_hst INNER JOIN bsns_arr_area ON bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea
+target		npd:baa/{baaNpdidBsnsArrArea}/transfer/{baaTransferDirection}/{cmpNpdidCompany}/history/{baaTransferDateValidFrom} npdv:transferredBAA npd:baa/{baaNpdidBsnsArrArea} .
+source		SELECT bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea, bsns_arr_area_transfer_hst.baaTransferDirection, bsns_arr_area_transfer_hst.cmpNpdidCompany, bsns_arr_area_transfer_hst.baaTransferDateValidFrom FROM bsns_arr_area_transfer_hst INNER JOIN bsns_arr_area ON bsns_arr_area_transfer_hst.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea
 
 mappingId	Mapping:00946:ForeignKey
-target		npd:licence/{prlAreaSplitByBlock.prlNpdidLicence}/block/{prlAreaSplitByBlock.blcName}/polyno/{prlAreaSplitByBlock.prlAreaPolyPolyNo}/history/{prlAreaSplitByBlock.prlAreaPolyDateValidFrom}/{prlAreaSplitByBlock.prlAreaPolyDateValidTo} npdv:isGeometryOfFeature npd:licence/{licence.prlNpdidLicence} . 
-source		SELECT prlAreaSplitByBlock.prlNpdidLicence, prlAreaSplitByBlock.blcName, prlAreaSplitByBlock.prlAreaPolyPolyNo, prlAreaSplitByBlock.prlAreaPolyDateValidFrom, prlAreaSplitByBlock.prlAreaPolyDateValidTo, licence.prlNpdidLicence FROM prlAreaSplitByBlock INNER JOIN licence ON prlAreaSplitByBlock.prlNpdidLicence = licence.prlNpdidLicence
+target		npd:licence/{prlNpdidLicence}/block/{blcName}/polyno/{prlAreaPolyPolyNo}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo} npdv:isGeometryOfFeature npd:licence/{prlNpdidLicence} .
+source		SELECT prlAreaSplitByBlock.prlNpdidLicence, prlAreaSplitByBlock.blcName, prlAreaSplitByBlock.prlAreaPolyPolyNo, prlAreaSplitByBlock.prlAreaPolyDateValidFrom, prlAreaSplitByBlock.prlAreaPolyDateValidTo FROM prlAreaSplitByBlock INNER JOIN licence ON prlAreaSplitByBlock.prlNpdidLicence = licence.prlNpdidLicence
 
 mappingId	Mapping:00947:ForeignKey
-target		npd:wellbore/{wlbPoint.wlbNpdidWellbore}/point npdv:isGeometryOfFeature npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT wlbPoint.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wlbPoint INNER JOIN wellbore_npdid_overview ON wlbPoint.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{wlbNpdidWellbore}/point npdv:isGeometryOfFeature npd:wellbore/{wlbNpdidWellbore} .
+source		SELECT wlbPoint.wlbNpdidWellbore FROM wlbPoint INNER JOIN wellbore_npdid_overview ON wlbPoint.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00948:ForeignKey
-target		npd:wellbore/{wellbore_formation_top.wlbNpdidWellbore}/stratum/{wellbore_formation_top.lsuNpdidLithoStrat}/depth/{wellbore_formation_top.lsuTopDepth}/{wellbore_formation_top.lsuBottomDepth} npdv:stratumForWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT wellbore_formation_top.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat, wellbore_formation_top.lsuTopDepth, wellbore_formation_top.lsuBottomDepth, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_formation_top INNER JOIN wellbore_npdid_overview ON wellbore_formation_top.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{wlbNpdidWellbore}/stratum/{lsuNpdidLithoStrat}/depth/{lsuTopDepth}/{lsuBottomDepth} npdv:stratumForWellbore npd:wellbore/{wlbNpdidWellbore} .
+source		SELECT wellbore_formation_top.wlbNpdidWellbore, wellbore_formation_top.lsuNpdidLithoStrat, wellbore_formation_top.lsuTopDepth, wellbore_formation_top.lsuBottomDepth FROM wellbore_formation_top INNER JOIN wellbore_npdid_overview ON wellbore_formation_top.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00949:ForeignKey
-target		npd:petreg/licence/{licence_petreg_licence_licencee.prlNpdidLicence}/licencee/{licence_petreg_licence_licencee.cmpNpdidCompany} ptl:licenceeForLicence npd:licence/{licence.prlNpdidLicence} . 
-source		SELECT licence_petreg_licence_licencee.prlNpdidLicence, licence_petreg_licence_licencee.cmpNpdidCompany, licence.prlNpdidLicence FROM licence_petreg_licence_licencee INNER JOIN licence ON licence_petreg_licence_licencee.prlNpdidLicence = licence.prlNpdidLicence
+target		npd:petreg/licence/{prlNpdidLicence}/licencee/{cmpNpdidCompany} ptl:licenceeForLicence npd:licence/{prlNpdidLicence} .
+source		SELECT licence_petreg_licence_licencee.prlNpdidLicence, licence_petreg_licence_licencee.cmpNpdidCompany FROM licence_petreg_licence_licencee INNER JOIN licence ON licence_petreg_licence_licencee.prlNpdidLicence = licence.prlNpdidLicence
 
 mappingId	Mapping:00950:ForeignKey
 target		npd:discovery/{discovery.dscNpdidDiscovery} npdv:discoveryWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
@@ -3817,60 +3817,60 @@ target		npd:baa/{bsns_arr_area_operator.baaNpdidBsnsArrArea} npdv:baaOperatorCom
 source		SELECT bsns_arr_area_operator.baaNpdidBsnsArrArea, company.cmpNpdidCompany FROM bsns_arr_area_operator INNER JOIN company ON bsns_arr_area_operator.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00952:ForeignKey
-target		npd:facility/{tuf_operator_hst.tufNpdidTuf}/operator/{tuf_operator_hst.cmpNpdidCompany}/history/{tuf_operator_hst.tufOperDateValidFrom}/{tuf_operator_hst.tufOperDateValidTo} ptl:TUFOperatorCompany npd:company/{company.cmpNpdidCompany} . 
-source		SELECT tuf_operator_hst.tufNpdidTuf, tuf_operator_hst.cmpNpdidCompany, tuf_operator_hst.tufOperDateValidFrom, tuf_operator_hst.tufOperDateValidTo, company.cmpNpdidCompany FROM tuf_operator_hst INNER JOIN company ON tuf_operator_hst.cmpNpdidCompany = company.cmpNpdidCompany
+target		npd:facility/{tufNpdidTuf}/operator/{cmpNpdidCompany}/history/{tufOperDateValidFrom}/{tufOperDateValidTo} ptl:TUFOperatorCompany npd:company/{cmpNpdidCompany} .
+source		SELECT tuf_operator_hst.tufNpdidTuf, tuf_operator_hst.cmpNpdidCompany, tuf_operator_hst.tufOperDateValidFrom, tuf_operator_hst.tufOperDateValidTo FROM tuf_operator_hst INNER JOIN company ON tuf_operator_hst.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00953:ForeignKey
 target		npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore} npdv:wellboreForDiscovery npd:discovery/{discovery.dscNpdidDiscovery} . 
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, discovery.dscNpdidDiscovery FROM wellbore_exploration_all INNER JOIN discovery ON wellbore_exploration_all.dscNpdidDiscovery = discovery.dscNpdidDiscovery
 
 mappingId	Mapping:00954:ForeignKey
-target		npd:discovery/{discovery_reserves.dscNpdidDiscovery}/{discovery_reserves.dscReservesRC} npdv:reservesForDiscovery npd:discovery/{discovery.dscNpdidDiscovery} . 
-source		SELECT discovery_reserves.dscNpdidDiscovery, discovery_reserves.dscReservesRC, discovery.dscNpdidDiscovery FROM discovery_reserves INNER JOIN discovery ON discovery_reserves.dscNpdidDiscovery = discovery.dscNpdidDiscovery
+target		npd:discovery/{dscNpdidDiscovery}/{dscReservesRC} npdv:reservesForDiscovery npd:discovery/{dscNpdidDiscovery} .
+source		SELECT discovery_reserves.dscNpdidDiscovery, discovery_reserves.dscReservesRC FROM discovery_reserves INNER JOIN discovery ON discovery_reserves.dscNpdidDiscovery = discovery.dscNpdidDiscovery
 
 mappingId	Mapping:00955:ForeignKey
-target		npd:petreg/licence/{licence_petreg_message.prlNpdidLicence}/message/{licence_petreg_message.ptlMessageDocumentNo} npdv:messageForLicence npd:licence/{licence.prlNpdidLicence} . 
-source		SELECT licence_petreg_message.prlNpdidLicence, licence_petreg_message.ptlMessageDocumentNo, licence.prlNpdidLicence FROM licence_petreg_message INNER JOIN licence ON licence_petreg_message.prlNpdidLicence = licence.prlNpdidLicence
+target		npd:petreg/licence/{prlNpdidLicence}/message/{ptlMessageDocumentNo} npdv:messageForLicence npd:licence/{prlNpdidLicence} .
+source		SELECT licence_petreg_message.prlNpdidLicence, licence_petreg_message.ptlMessageDocumentNo FROM licence_petreg_message INNER JOIN licence ON licence_petreg_message.prlNpdidLicence = licence.prlNpdidLicence
 
 mappingId	Mapping:00956:ForeignKey
-target		npd:licence/{licence_oper_hst.prlNpdidLicence}/operator/{licence_oper_hst.cmpNpdidCompany}/history/{licence_oper_hst.prlOperDateValidFrom}/{licence_oper_hst.prlOperDateValidTo} npdv:operatorForLicence npd:licence/{licence.prlNpdidLicence} . 
-source		SELECT licence_oper_hst.prlNpdidLicence, licence_oper_hst.cmpNpdidCompany, licence_oper_hst.prlOperDateValidFrom, licence_oper_hst.prlOperDateValidTo, licence.prlNpdidLicence FROM licence_oper_hst INNER JOIN licence ON licence_oper_hst.prlNpdidLicence = licence.prlNpdidLicence
+target		npd:licence/{prlNpdidLicence}/operator/{cmpNpdidCompany}/history/{prlOperDateValidFrom}/{prlOperDateValidTo} npdv:operatorForLicence npd:licence/{prlNpdidLicence} .
+source		SELECT licence_oper_hst.prlNpdidLicence, licence_oper_hst.cmpNpdidCompany, licence_oper_hst.prlOperDateValidFrom, licence_oper_hst.prlOperDateValidTo FROM licence_oper_hst INNER JOIN licence ON licence_oper_hst.prlNpdidLicence = licence.prlNpdidLicence
 
 mappingId	Mapping:00957:ForeignKey
-target		npd:licence/{licence_licensee_hst.prlNpdidLicence}/licensee/{licence_licensee_hst.cmpNpdidCompany}/history/{licence_licensee_hst.prlLicenseeDateValidFrom}/{licence_licensee_hst.prlLicenseeDateValidTo} npdv:licenceLicensee npd:company/{company.cmpNpdidCompany} . 
-source		SELECT licence_licensee_hst.prlNpdidLicence, licence_licensee_hst.cmpNpdidCompany, licence_licensee_hst.prlLicenseeDateValidFrom, licence_licensee_hst.prlLicenseeDateValidTo, company.cmpNpdidCompany FROM licence_licensee_hst INNER JOIN company ON licence_licensee_hst.cmpNpdidCompany = company.cmpNpdidCompany
+target		npd:licence/{prlNpdidLicence}/licensee/{cmpNpdidCompany}/history/{prlLicenseeDateValidFrom}/{prlLicenseeDateValidTo} npdv:licenceLicensee npd:company/{cmpNpdidCompany} .
+source		SELECT licence_licensee_hst.prlNpdidLicence, licence_licensee_hst.cmpNpdidCompany, licence_licensee_hst.prlLicenseeDateValidFrom, licence_licensee_hst.prlLicenseeDateValidTo FROM licence_licensee_hst INNER JOIN company ON licence_licensee_hst.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00958:ForeignKey
-target		npd:baa/{bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea}/licensee/{bsns_arr_area_licensee_hst.cmpNpdidCompany}/history/{bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom}/{bsns_arr_area_licensee_hst.baaLicenseeDateValidTo} npdv:baaLicensee npd:company/{company.cmpNpdidCompany} . 
-source		SELECT bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea, bsns_arr_area_licensee_hst.cmpNpdidCompany, bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom, bsns_arr_area_licensee_hst.baaLicenseeDateValidTo, company.cmpNpdidCompany FROM bsns_arr_area_licensee_hst INNER JOIN company ON bsns_arr_area_licensee_hst.cmpNpdidCompany = company.cmpNpdidCompany
+target		npd:baa/{baaNpdidBsnsArrArea}/licensee/{cmpNpdidCompany}/history/{baaLicenseeDateValidFrom}/{baaLicenseeDateValidTo} npdv:baaLicensee npd:company/{cmpNpdidCompany} .
+source		SELECT bsns_arr_area_licensee_hst.baaNpdidBsnsArrArea, bsns_arr_area_licensee_hst.cmpNpdidCompany, bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom, bsns_arr_area_licensee_hst.baaLicenseeDateValidTo FROM bsns_arr_area_licensee_hst INNER JOIN company ON bsns_arr_area_licensee_hst.cmpNpdidCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00959:ForeignKey
-target		npd:wellbore/{wellbore_coordinates.wlbNpdidWellbore}/point npdv:coordinateForWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT wellbore_coordinates.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_coordinates INNER JOIN wellbore_npdid_overview ON wellbore_coordinates.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{wlbNpdidWellbore}/point npdv:coordinateForWellbore npd:wellbore/{wlbNpdidWellbore} .
+source		SELECT wellbore_coordinates.wlbNpdidWellbore FROM wellbore_coordinates INNER JOIN wellbore_npdid_overview ON wellbore_coordinates.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00960:ForeignKey
-target		npd:wellbore/{wellbore_development_all.wlbNpdidWellbore} npdv:reclassedFromWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT wellbore_development_all.wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore FROM wellbore_development_all INNER JOIN wellbore_npdid_overview ON wellbore_development_all.wlbNpdidWellboreReclass = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{AwlbNpdidWellbore} npdv:reclassedFromWellbore npd:wellbore/{OwlbNpdidWellbore} .
+source		SELECT wellbore_development_all.wlbNpdidWellbore AwlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore OwlbNpdidWellbore FROM wellbore_development_all INNER JOIN wellbore_npdid_overview ON wellbore_development_all.wlbNpdidWellboreReclass = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00961:ForeignKey
-target		npd:discovery/{dscArea.dscNpdidDiscovery}/area/hctype/{dscArea.dscHcType} npdv:isGeometryOfFeature npd:discovery/{discovery.dscNpdidDiscovery} . 
-source		SELECT dscArea.dscNpdidDiscovery, dscArea.dscHcType, discovery.dscNpdidDiscovery FROM dscArea INNER JOIN discovery ON dscArea.dscNpdidDiscovery = discovery.dscNpdidDiscovery
+target		npd:discovery/{dscNpdidDiscovery}/area/hctype/{dscHcType} npdv:isGeometryOfFeature npd:discovery/{dscNpdidDiscovery} .
+source		SELECT dscArea.dscNpdidDiscovery, dscArea.dscHcType FROM dscArea INNER JOIN discovery ON dscArea.dscNpdidDiscovery = discovery.dscNpdidDiscovery
 
 mappingId	Mapping:00962:ForeignKey
-target		npd:wellbore/{strat_litho_wellbore_core.wlbNpdidWellbore}/stratum/{strat_litho_wellbore_core.lsuNpdidLithoStrat}/cores npdv:coreForWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT strat_litho_wellbore_core.wlbNpdidWellbore, strat_litho_wellbore_core.lsuNpdidLithoStrat, wellbore_npdid_overview.wlbNpdidWellbore FROM strat_litho_wellbore_core INNER JOIN wellbore_npdid_overview ON strat_litho_wellbore_core.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{wlbNpdidWellbore}/stratum/{lsuNpdidLithoStrat}/cores npdv:coreForWellbore npd:wellbore/{wlbNpdidWellbore} .
+source		SELECT strat_litho_wellbore_core.wlbNpdidWellbore, strat_litho_wellbore_core.lsuNpdidLithoStrat FROM strat_litho_wellbore_core INNER JOIN wellbore_npdid_overview ON strat_litho_wellbore_core.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00963:ForeignKey
-target		npd:field/{field_licensee_hst.fldNpdidField}/licensee/{field_licensee_hst.cmpNpdidCompany}/history/{field_licensee_hst.fldLicenseeFrom}/{field_licensee_hst.fldLicenseeTo} npdv:licenseeForField npd:field/{field.fldNpdidField} . 
-source		SELECT field_licensee_hst.fldNpdidField, field_licensee_hst.cmpNpdidCompany, field_licensee_hst.fldLicenseeFrom, field_licensee_hst.fldLicenseeTo, field.fldNpdidField FROM field_licensee_hst INNER JOIN field ON field_licensee_hst.fldNpdidField = field.fldNpdidField
+target		npd:field/{fldNpdidField}/licensee/{cmpNpdidCompany}/history/{fldLicenseeFrom}/{fldLicenseeTo} npdv:licenseeForField npd:field/{fldNpdidField} .
+source		SELECT field_licensee_hst.fldNpdidField, field_licensee_hst.cmpNpdidCompany, field_licensee_hst.fldLicenseeFrom, field_licensee_hst.fldLicenseeTo FROM field_licensee_hst INNER JOIN field ON field_licensee_hst.fldNpdidField = field.fldNpdidField
 
 mappingId	Mapping:00964:ForeignKey
-target		npd:baa/{bsns_arr_area_area_poly_hst.baaNpdidBsnsArrArea}/block/{bsns_arr_area_area_poly_hst.baaAreaPolyBlockName}/polyno/{bsns_arr_area_area_poly_hst.baaAreaPolyNo}/history/{bsns_arr_area_area_poly_hst.baaAreaPolyDateValidFrom}/{bsns_arr_area_area_poly_hst.baaAreaPolyDateValidTo} npdv:isGeometryOfFeature npd:baa/{bsns_arr_area.baaNpdidBsnsArrArea} . 
-source		SELECT bsns_arr_area_area_poly_hst.baaNpdidBsnsArrArea, bsns_arr_area_area_poly_hst.baaAreaPolyBlockName, bsns_arr_area_area_poly_hst.baaAreaPolyNo, bsns_arr_area_area_poly_hst.baaAreaPolyDateValidFrom, bsns_arr_area_area_poly_hst.baaAreaPolyDateValidTo, bsns_arr_area.baaNpdidBsnsArrArea FROM bsns_arr_area_area_poly_hst INNER JOIN bsns_arr_area ON bsns_arr_area_area_poly_hst.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea
+target		npd:baa/{baaNpdidBsnsArrArea}/block/{baaAreaPolyBlockName}/polyno/{baaAreaPolyNo}/history/{baaAreaPolyDateValidFrom}/{baaAreaPolyDateValidTo} npdv:isGeometryOfFeature npd:baa/{baaNpdidBsnsArrArea} .
+source		SELECT bsns_arr_area_area_poly_hst.baaNpdidBsnsArrArea, bsns_arr_area_area_poly_hst.baaAreaPolyBlockName, bsns_arr_area_area_poly_hst.baaAreaPolyNo, bsns_arr_area_area_poly_hst.baaAreaPolyDateValidFrom, bsns_arr_area_area_poly_hst.baaAreaPolyDateValidTo FROM bsns_arr_area_area_poly_hst INNER JOIN bsns_arr_area ON bsns_arr_area_area_poly_hst.baaNpdidBsnsArrArea = bsns_arr_area.baaNpdidBsnsArrArea
 
 mappingId	Mapping:00965:ForeignKey
-target		npd:licence/{prlArea.prlNpdidLicence}/area/{prlArea.prlArea_id}/history/{prlArea.prlAreaPolyDateValidFrom}/{prlArea.prlAreaPolyDateValidTo} npdv:isGeometryOfFeature npd:licence/{licence.prlNpdidLicence} . 
-source		SELECT prlArea.prlArea_id, prlArea.prlNpdidLicence, prlArea.prlAreaPolyDateValidFrom, prlArea.prlAreaPolyDateValidTo, licence.prlNpdidLicence FROM prlArea INNER JOIN licence ON prlArea.prlNpdidLicence = licence.prlNpdidLicence
+target		npd:licence/{prlNpdidLicence}/area/{prlArea_id}/history/{prlAreaPolyDateValidFrom}/{prlAreaPolyDateValidTo} npdv:isGeometryOfFeature npd:licence/{prlNpdidLicence} .
+source		SELECT prlArea.prlArea_id, prlArea.prlNpdidLicence, prlArea.prlAreaPolyDateValidFrom, prlArea.prlAreaPolyDateValidTo FROM prlArea INNER JOIN licence ON prlArea.prlNpdidLicence = licence.prlNpdidLicence
 
 mappingId	Mapping:00966:ForeignKey
 target		npd:facility/{fclPoint.fclNpdidFacility}/point npdv:belongsToFacility npd:petreg/facility/{tuf_petreg_licence.tufNpdidTuf} . 
@@ -3885,24 +3885,24 @@ target		npd:wellbore/{wellbore_exploration_all.wlbNpdidWellbore} npdv:drillingOp
 source		SELECT wellbore_exploration_all.wlbNpdidWellbore, company.cmpNpdidCompany FROM wellbore_exploration_all INNER JOIN company ON wellbore_exploration_all.wlbDrillingOperator = company.cmpLongName
 
 mappingId	Mapping:00969:ForeignKey
-target		npd:field/{field_reserves.fldNpdidField}/reserve npdv:reservesForField npd:field/{field.fldNpdidField} . 
-source		SELECT field_reserves.fldNpdidField, field.fldNpdidField FROM field_reserves INNER JOIN field ON field_reserves.fldNpdidField = field.fldNpdidField
+target		npd:field/{fldNpdidField}/reserve npdv:reservesForField npd:field/{fldNpdidField} .
+source		SELECT field_reserves.fldNpdidField FROM field_reserves INNER JOIN field ON field_reserves.fldNpdidField = field.fldNpdidField
 
 mappingId	Mapping:00970:ForeignKey
-target		npd:company/{company_reserves.cmpNpdidCompany}/reserve/{company_reserves.fldNpdidField} npdv:reservesForField npd:field/{field.fldNpdidField} . 
-source		SELECT company_reserves.cmpNpdidCompany, company_reserves.fldNpdidField, field.fldNpdidField FROM company_reserves INNER JOIN field ON company_reserves.fldNpdidField = field.fldNpdidField
+target		npd:company/{cmpNpdidCompany}/reserve/{fldNpdidField} npdv:reservesForField npd:field/{fldNpdidField} .
+source		SELECT company_reserves.cmpNpdidCompany, company_reserves.fldNpdidField FROM company_reserves INNER JOIN field ON company_reserves.fldNpdidField = field.fldNpdidField
 
 mappingId	Mapping:00971:ForeignKey
 target		npd:facility/{facility_moveable.fclNpdidFacility} npdv:currentResponsibleCompany npd:company/{company.cmpNpdidCompany} . 
 source		SELECT facility_moveable.fclNpdidFacility, company.cmpNpdidCompany FROM facility_moveable INNER JOIN company ON facility_moveable.fclNpdidCurrentRespCompany = company.cmpNpdidCompany
 
 mappingId	Mapping:00972:ForeignKey
-target		npd:facility/{fclPoint.fclNpdidFacility}/point npdv:isGeometryOfFeature npd:facility/{facility_fixed.fclNpdidFacility} . 
-source		SELECT fclPoint.fclNpdidFacility, facility_fixed.fclNpdidFacility FROM fclPoint INNER JOIN facility_fixed ON fclPoint.fclNpdidFacility = facility_fixed.fclNpdidFacility
+target		npd:facility/{fclNpdidFacility}/point npdv:isGeometryOfFeature npd:facility/{fclNpdidFacility} .
+source		SELECT fclPoint.fclNpdidFacility FROM fclPoint INNER JOIN facility_fixed ON fclPoint.fclNpdidFacility = facility_fixed.fclNpdidFacility
 
 mappingId	Mapping:00973:ForeignKey
-target		npd:wellbore/{strat_litho_wellbore.wlbNpdidWellbore}/stratum/{strat_litho_wellbore.lsuNpdidLithoStrat}/depth/{strat_litho_wellbore.lsuTopDepth}/{strat_litho_wellbore.lsuBottomDepth} npdv:stratumForWellbore npd:wellbore/{wellbore_npdid_overview.wlbNpdidWellbore} . 
-source		SELECT strat_litho_wellbore.wlbNpdidWellbore, strat_litho_wellbore.lsuNpdidLithoStrat, strat_litho_wellbore.lsuTopDepth, strat_litho_wellbore.lsuBottomDepth, wellbore_npdid_overview.wlbNpdidWellbore FROM strat_litho_wellbore INNER JOIN wellbore_npdid_overview ON strat_litho_wellbore.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+target		npd:wellbore/{wlbNpdidWellbore}/stratum/{lsuNpdidLithoStrat}/depth/{lsuTopDepth}/{lsuBottomDepth} npdv:stratumForWellbore npd:wellbore/{wlbNpdidWellbore} .
+source		SELECT strat_litho_wellbore.wlbNpdidWellbore, strat_litho_wellbore.lsuNpdidLithoStrat, strat_litho_wellbore.lsuTopDepth, strat_litho_wellbore.lsuBottomDepth FROM strat_litho_wellbore INNER JOIN wellbore_npdid_overview ON strat_litho_wellbore.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00974:Table:Subs:npdv:MoveableFacility
 target		npd:facility/{fclNpdidFacility} a npdv:JackUp3LegsFacility . 
@@ -4769,8 +4769,8 @@ target		npd:wellbore/{wlbNpdidWellbore}/cores npdv:member npd:wellbore/{wlbNpdid
 source		SELECT wlbNpdidWellbore,wlbCoreNumber FROM wellbore_core
 
 mappingId	Mapping:NPD:Manual13
-target		npd:licence/{A.prlNpdidLicence}/task/{A.prlTaskRefID} npdv:dependsOnTask npd:licence/{B.prlNpdidLicence}/task/{B.prlTaskRefID} . 
-source		SELECT A.prlNpdidLicence, B.prlTaskID FROM licence_task AS A, licence_task AS B WHERE A.prlTaskRefID=B.prlTaskID
+target		npd:licence/{AprlNpdidLicence}/task/{AprlTaskRefID} npdv:dependsOnTask npd:licence/{BprlNpdidLicence}/task/{BprlTaskRefID} .
+source		SELECT A.prlNpdidLicence AprlNpdidLicence, A.prlTaskRefID AprlTaskRefID, B.prlNpdidLicence BprlNpdidLicence, B.prlTaskRefID BprlTaskRefID FROM licence_task AS A, licence_task AS B WHERE A.prlTaskRefID=B.prlTaskID
 
 mappingId	Mapping:NPD:ManualDavide2
 target		npd:wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber} npdv:coresTotalLength {wlbTotalCoreLength}^^xsd:decimal . 
