@@ -122,6 +122,7 @@ public class BindTestWithFunctions {
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
                 .propertyFile(propertyFile)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 
@@ -787,6 +788,7 @@ public class BindTestWithFunctions {
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
                 .propertyFile(propertyFile)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

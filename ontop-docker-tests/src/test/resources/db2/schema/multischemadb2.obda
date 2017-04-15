@@ -1,0 +1,34 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+
+[MappingDeclaration] @collection [[
+mappingId	Address
+target		:Address-{id} a :Address . 
+source		select "id" FROM DB2INST1."address"
+
+mappingId	Name
+target		:Person-{id} a :Broker .
+source		select "broker"."id" FROM db2inst1."broker"
+
+mappingId	Worker
+target		:Worker-{worker} a :Worker . 
+source		select "broker"."id" as worker  FROM DB2INST1."broker"
+
+mappingId	Client
+target		:Client-{IDClient} :isBroker :Broker-{brokerID} .
+source		SELECT "broker"."id" as brokerID, "client"."id" as IDClient FROM DB2INST1."client", DB2INST1."broker" WHERE "broker"."id" = "client"."id"
+
+mappingId	Mix
+target		:Broker2-{street} :hasFile :Med-{name} .
+source		SELECT "street", "person"."name" from "address", DB2INST1."person"
+
+
+
+
+
+
+
+
+]]
+

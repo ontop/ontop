@@ -2,11 +2,9 @@ package it.unibz.inf.ontop.model.impl;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.Expression;
-import it.unibz.inf.ontop.model.OperationPredicate;
-import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.NonGroundFunctionalTerm;
+import it.unibz.inf.ontop.model.*;
 
+import static it.unibz.inf.ontop.model.ExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.impl.GroundTermTools.checkNonGroundTermConstraint;
 
 public class NonGroundExpressionImpl extends ImmutableExpressionImpl implements NonGroundFunctionalTerm {
@@ -29,5 +27,12 @@ public class NonGroundExpressionImpl extends ImmutableExpressionImpl implements 
     @Override
     public boolean isGround() {
         return false;
+    }
+
+    @Override
+    public boolean isVar2VarEquality() {
+        return getFunctionSymbol().equals(EQ) &&
+                getTerms().size() == 2 &&
+                getTerms().stream().allMatch(t -> t instanceof Variable);
     }
 }

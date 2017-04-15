@@ -12,7 +12,7 @@ target		:Broker-{id} a :Broker .
 source		select broker.id from "stockexchange".broker
 
 mappingId	Worker
-target		:Worker-{id} a :Worker .
+target		:Worker-{worker} a :Worker .
 source		select broker.id as worker from "stockexchange".broker
 
 mappingId	Client
@@ -20,8 +20,8 @@ target		:Client-{IDClient} :isBroker :Broker-{brokerID} .
 source		select broker.id as brokerID, client.id as IDClient, broker.id from "stockexchange".broker, "stockexchange".client where broker.id = client.id
 
 mappingId	Mix
-target		:Broker2-{id} :hasFile :Med-{med} . 
-source		SELECT "id", med from "stockexchange".address, policy
+target		:Broker2-{id} :hasFile :Med-{med} .
+source		SELECT id, med from "stockexchange".address, policy
 
 
 ]]

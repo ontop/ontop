@@ -4,16 +4,16 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.exception.OntopIllegalStateException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.pivotalrepr.impl.ImmutableQueryModifiersImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.transform.QueryMerger;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -30,10 +30,13 @@ import static it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogRule2QueryConve
 public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryConverter {
 
     private final IntermediateQueryFactory iqFactory;
+    private final QueryMerger queryMerger;
 
     @Inject
-    private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory) {
+    private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory,
+                                              QueryMerger queryMerger) {
         this.iqFactory = iqFactory;
+        this.queryMerger = queryMerger;
     }
 
 
@@ -52,7 +55,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     /**
      * TODO: explain
      */
-    public static class InvalidDatalogProgramException extends OntopIllegalStateException {
+    public static class InvalidDatalogProgramException extends OntopInternalBugException {
         public InvalidDatalogProgramException(String message) {
             super(message);
         }
@@ -150,7 +153,9 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                             convertDatalogRule(dbMetadata, datalogAtomDefinition, tablePredicates,
                                     Optional.<ImmutableQueryModifiers>empty(), iqFactory, executorRegistry));
                 }
-                return IntermediateQueryUtils.mergeDefinitions(iqFactory, convertedDefinitions, optionalModifiers);
+                return optionalModifiers.isPresent()
+                        ? queryMerger.mergeDefinitions(convertedDefinitions, optionalModifiers.get())
+                        : queryMerger.mergeDefinitions(convertedDefinitions);
         }
     }
 

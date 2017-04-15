@@ -29,7 +29,7 @@ public class PgSqlMetadataInfoTest extends AbstractDbMetadataInfoTest {
 
 	@Override
 	protected String getConnectionString() {
-		return "jdbc:postgresql://10.7.20.39/datatypes";
+		return "jdbc:postgresql://obdalin.inf.unibz.it/datatypes";
 	}
 
 	@Override

@@ -6,7 +6,6 @@ import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +25,7 @@ public class AnnotationTest {
 
     final String owlFile = "src/test/resources/annotation/doid.owl";
     final String obdaFile = "src/test/resources/annotation/doid.obda";
+    final String propertiesFile =  "src/test/resources/annotation/doid.properties";
 
     private int runTestQuery1() throws Exception {
 
@@ -34,7 +34,9 @@ public class AnnotationTest {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
+                .propertyFile(propertiesFile)
                 .enableOntologyAnnotationQuerying(true)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
         // Now we are ready for querying

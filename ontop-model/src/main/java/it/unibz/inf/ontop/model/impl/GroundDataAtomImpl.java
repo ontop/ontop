@@ -3,10 +3,10 @@ package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.AtomPredicate;
+import it.unibz.inf.ontop.model.DistinctVariableDataAtom;
 import it.unibz.inf.ontop.model.GroundTerm;
-import it.unibz.inf.ontop.model.GroundDataAtom;
 
-public class GroundDataAtomImpl extends DataAtomImpl implements GroundDataAtom {
+public class GroundDataAtomImpl extends AbstractDataAtomImpl implements DistinctVariableDataAtom {
 
     protected GroundDataAtomImpl(AtomPredicate predicate, ImmutableList<? extends GroundTerm> groundTerms) {
         super(predicate, groundTerms);

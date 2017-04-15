@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
 
@@ -61,6 +63,11 @@ public class TrueNodeImpl implements TrueNode {
     }
 
     @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        throw new IllegalArgumentException("A true node does not project any variable");
+    }
+
+    @Override
     public TrueNodeImpl clone() {
         return new TrueNodeImpl();
     }
@@ -78,5 +85,15 @@ public class TrueNodeImpl implements TrueNode {
     @Override
     public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
         return new NodeTransformationProposalImpl(NodeTransformationProposedState.NO_LOCAL_CHANGE, ImmutableSet.of());
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return ImmutableSet.of();
     }
 }

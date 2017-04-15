@@ -29,6 +29,7 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 
 public interface OBDADataFactory extends Serializable {
@@ -330,4 +331,7 @@ public interface OBDADataFactory extends Serializable {
 
 	Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
 	InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Map<Variable, Variable> substitutionMap);
+
+	InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator,
+																ImmutableSet<Variable> variables);
 }

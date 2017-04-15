@@ -38,12 +38,12 @@ public class JoinExtractionUtils {
         if (foldedExpression.isPresent()) {
             ExpressionEvaluator evaluator = new ExpressionEvaluator();
 
-            ExpressionEvaluator.Evaluation evaluation = evaluator.evaluateExpression(foldedExpression.get());
-            if (evaluation.isFalse()) {
+            ExpressionEvaluator.EvaluationResult evaluationResult = evaluator.evaluateExpression(foldedExpression.get());
+            if (evaluationResult.isEffectiveFalse()) {
                 throw new UnsatisfiableExpressionException();
             }
             else {
-                return evaluation.getOptionalExpression();
+                return evaluationResult.getOptionalExpression();
             }
         }
         else {

@@ -304,7 +304,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     @Override
     public IntermediateQuery clone() {
-        return IntermediateQueryUtils.convertToBuilder(this).build();
+        return createSnapshot();
     }
 
     @Override
@@ -320,6 +320,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public IntermediateQueryFactory getFactory() {
         return iqFactory;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode) {
+        return treeComponent.getVariablesRequiredByAncestors(queryNode);
     }
 
     private void validate() throws InvalidIntermediateQueryException {

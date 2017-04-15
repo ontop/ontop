@@ -21,10 +21,12 @@ package it.unibz.inf.ontop.model.impl;
  */
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.LanguageTag;
 import it.unibz.inf.ontop.model.TermType;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.ValueFactory;
 
 
@@ -268,7 +270,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			return new VariableOnlyDataAtomImpl(predicate, (ImmutableList<Variable>)(ImmutableList<?>)arguments);
 		}
 		else {
-			return new NonGroundDataAtomImpl(predicate, arguments);
+			return new DataAtomImpl(predicate, arguments);
 		}
 	}
 
@@ -711,5 +713,16 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			throw new RuntimeException("Unsupported term: " + term);
 		}
 		return newTerm;
+	}
+
+	@Override
+	public InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator,
+																			  ImmutableSet<Variable> variables) {
+		ImmutableMap<Variable, Variable> newMap = variables.stream()
+				.map(v -> new AbstractMap.SimpleEntry<>(v, variableGenerator.generateNewVariableIfConflicting(v)))
+				.filter(pair -> ! pair.getKey().equals(pair.getValue()))
+				.collect(ImmutableCollectors.toMap());
+
+		return getInjectiveVar2VarSubstitution(newMap);
 	}
 }

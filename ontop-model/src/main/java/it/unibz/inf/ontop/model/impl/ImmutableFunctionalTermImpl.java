@@ -124,4 +124,5 @@ public abstract class ImmutableFunctionalTermImpl extends AbstractFunctionalTerm
     public int hashCode() {
         return toString().hashCode();
     }
+
 }

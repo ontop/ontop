@@ -15,8 +15,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Properties;
-
 public class DatetimeStampSesameTest extends TestCase {
 
 	String owlfile = "src/test/resources/northwind/northwind-dmo.owl";
@@ -29,15 +27,12 @@ public class DatetimeStampSesameTest extends TestCase {
 
 	public DatetimeStampSesameTest(){
 
-		Properties connectionProperties = new Properties();
-		// set jdbc params in config
-
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)
 				.r2rmlMappingFile(mappingfile)
 				.propertyFile(propertyfile)
 				.enableExistentialReasoning(true)
-				.properties(connectionProperties)
+				.enableTestMode()
 				.build();
 		try {
 			repository = new OntopVirtualRepository( configuration);

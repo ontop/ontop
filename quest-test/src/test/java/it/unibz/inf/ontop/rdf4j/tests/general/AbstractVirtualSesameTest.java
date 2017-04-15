@@ -32,6 +32,7 @@ public abstract class AbstractVirtualSesameTest extends TestCase {
                     .r2rmlMappingFile(r2rmlfile)
                     .enableExistentialReasoning(true)
                     .propertyFile(propertyFile)
+                    .enableTestMode()
                     .build();
 
             repo = new OntopVirtualRepository(configuration);

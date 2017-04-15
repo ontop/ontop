@@ -86,6 +86,7 @@ public class OracleLIMITTest  {
 				.nativeOntopMappingFile(obdaFileName)
 				.enableFullMetadataExtraction(false)
 				.propertyFile(propertyFile)
+				.enableTestMode()
 				.build();
 
 		reasoner = factory.createReasoner(configuration);
@@ -104,7 +105,7 @@ public class OracleLIMITTest  {
 	/**
 	 * Test that LIMIT is correctly translated to WHERE ROWNUM <= 10 in oracle
 	 * 
-	 * when the driverClass is oracle.jdbc.OracleDriver in the obdafile
+	 * when the driverClass is oracle.jdbc.OracleDriver in the obdaFile
 	 * @throws Exception
 	 */
 	@Test
@@ -116,7 +117,7 @@ public class OracleLIMITTest  {
 	/**
 	 * Test that LIMIT is correctly translated to WHERE ROWNUM <= 10 in oracle
 	 * 
-	 * when the driverClass is oracle.jdbc.driver.OracleDriver in the obdafile
+	 * when the driverClass is oracle.jdbc.driver.OracleDriver in the obdaFile
 	 * @throws Exception
 	 */
 	@Test

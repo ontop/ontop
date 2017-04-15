@@ -20,6 +20,8 @@ public class AnnotationMovieTest {
 
     final String owlFile = "src/test/resources/annotation/movieontology.owl";
     final String obdaFile = "src/test/resources/annotation/newSyntaxMovieontology.obda";
+    final String propertyFile = "src/test/resources/annotation/newSyntaxMovieontology.properties";
+
 
     @Test
     public void testAnnotationInOntology() throws Exception {
@@ -206,7 +208,9 @@ public class AnnotationMovieTest {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
+                .propertyFile(propertyFile)
                 .enableOntologyAnnotationQuerying(true)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

@@ -56,11 +56,14 @@ public class H2SameAsTest {
 	final String obdafile = "src/test/resources/sameAs/wellbores.obda";
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
+	private static final String JDBC_URL =  "jdbc:h2:mem:wellboresNoDuplicates";
+	private static final String JDBC_USER =  "sa";
+	private static final String JDBC_PASSWORD =  "";
 
 	@Before
 	public void setUp() throws Exception {
 
-			 sqlConnection= DriverManager.getConnection("jdbc:h2:mem:wellbores","sa", "");
+		sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
 			    java.sql.Statement s = sqlConnection.createStatement();
 			  
 //			    try {
@@ -105,6 +108,10 @@ public class H2SameAsTest {
 				.nativeOntopMappingFile(obdafile)
 				.sameAsMappings(sameAs)
 				.enableFullMetadataExtraction(false)
+				.jdbcUrl(JDBC_URL)
+				.jdbcUser(JDBC_USER)
+				.jdbcPassword(JDBC_PASSWORD)
+				.enableTestMode()
 				.build();
 
 		reasoner =  factory.createReasoner(config);

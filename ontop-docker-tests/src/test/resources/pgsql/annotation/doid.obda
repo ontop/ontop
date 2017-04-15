@@ -1,0 +1,19 @@
+[PrefixDeclaration]
+:		http://purl.obolibrary.org/obo/doid.owl#
+obo:		http://purl.obolibrary.org/obo/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+doid:		http://purl.obolibrary.org/obo/doid#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+oboInOwl:	http://www.geneontology.org/formats/oboInOwl#
+
+
+[MappingDeclaration] @collection [[
+mappingId      MAPID-b305ed1c06714504a2978e85f1423981
+target         obo:DOID_0060309 rdfs:comment {bk_title}^^xsd:string .
+source         SELECT bk_title from tb_books
+
+]]
+

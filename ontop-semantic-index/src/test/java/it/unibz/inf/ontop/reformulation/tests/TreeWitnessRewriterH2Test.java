@@ -221,6 +221,7 @@ public class TreeWitnessRewriterH2Test{
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableTestMode()
 				.build();
 
 		QuestOWL reasoner;

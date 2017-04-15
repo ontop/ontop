@@ -49,6 +49,7 @@ public class DistinctResultSetTest { //
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
                 .propertyFile(propertyFile)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
         // Now we are ready for querying
@@ -85,6 +86,7 @@ public class DistinctResultSetTest { //
                     .ontologyFile(owlFile)
                     .nativeOntopMappingFile(obdaFile)
                     .propertyFile(configFile)
+                    .enableTestMode()
                     .build();
 
         repo = new OntopVirtualRepository(configuration);

@@ -139,4 +139,6 @@ public interface QueryTreeComponent {
      * Used in fixed-point optimization.
      */
     int getVersionNumber();
+
+    ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode);
 }

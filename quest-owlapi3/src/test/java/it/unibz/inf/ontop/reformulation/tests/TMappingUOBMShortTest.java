@@ -39,6 +39,7 @@ public class TMappingUOBMShortTest {
 				.jdbcUser(username)
 				.jdbcPassword(password)
 				.enableExistentialReasoning(true)
+				.enableTestMode()
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 	}

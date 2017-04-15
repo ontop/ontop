@@ -50,6 +50,7 @@ public class ABoxMaterializerExample {
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(OBDA_FILE)
 				.propertyFile(PROPERTY_FILE)
+				.enableTestMode()
 				.build();
 
 		/*

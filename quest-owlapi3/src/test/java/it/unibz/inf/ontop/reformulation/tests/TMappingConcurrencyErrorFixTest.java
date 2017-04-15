@@ -92,6 +92,7 @@ public class TMappingConcurrencyErrorFixTest{
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
 

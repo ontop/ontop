@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableOnlyDataAtom;
 
-public class VariableOnlyDataAtomImpl extends NonGroundDataAtomImpl implements VariableOnlyDataAtom {
+public class VariableOnlyDataAtomImpl extends AbstractDataAtomImpl implements VariableOnlyDataAtom {
     protected VariableOnlyDataAtomImpl(AtomPredicate predicate, ImmutableList<Variable> variables) {
         super(predicate, variables);
     }
@@ -17,5 +17,10 @@ public class VariableOnlyDataAtomImpl extends NonGroundDataAtomImpl implements V
     @Override
     public ImmutableList<Variable> getArguments() {
         return (ImmutableList<Variable>)super.getArguments();
+    }
+
+    @Override
+    public boolean isGround() {
+        return getVariables().isEmpty();
     }
 }

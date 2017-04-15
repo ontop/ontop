@@ -53,6 +53,7 @@ public class ABoxSesameMaterializerExample {
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(inputFile)
 				.propertyFile(PROPERTY_FILE)
+				.enableTestMode()
 				.build();
 
 		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);

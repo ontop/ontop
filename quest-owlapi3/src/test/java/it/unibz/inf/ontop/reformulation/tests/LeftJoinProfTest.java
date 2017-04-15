@@ -403,6 +403,7 @@ public class LeftJoinProfTest {
                 .nativeOntopMappingFile(ODBA_FILE)
                 .ontologyFile(OWL_FILE)
                 .propertyFile(PROPERTY_FILE)
+                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

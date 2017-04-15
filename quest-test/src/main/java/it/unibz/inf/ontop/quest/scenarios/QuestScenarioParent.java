@@ -20,30 +20,18 @@ package it.unibz.inf.ontop.quest.scenarios;
  * #L%
  */
 
-import org.eclipse.rdf4j.common.io.IOUtil;
 import it.unibz.inf.ontop.quest.ResultSetInfo;
 import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
+import org.eclipse.rdf4j.common.io.IOUtil;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.URI;
-import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.MalformedQueryException;
-import org.eclipse.rdf4j.query.Query;
-import org.eclipse.rdf4j.query.QueryEvaluationException;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.dawg.DAWGTestResultSetUtil;
+import org.eclipse.rdf4j.query.resultio.BooleanQueryResultParserRegistry;
+import org.eclipse.rdf4j.query.resultio.QueryResultFormat;
+import org.eclipse.rdf4j.query.resultio.QueryResultIO;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
@@ -57,6 +45,14 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public abstract class QuestScenarioParent extends TestCase {
 	
@@ -125,20 +121,36 @@ public abstract class QuestScenarioParent extends TestCase {
 
 	@Override
 	protected void runTest() throws Exception {
-		ResultSetInfo expectedResult = readResultSetInfo();
+
 		RepositoryConnection con = dataRep.getConnection();
+		Optional<ResultSetInfo> expectedTupleResult = Optional.empty();
 		try {
 			String queryString = readQueryString();
 			Query query = con.prepareQuery(QueryLanguage.SPARQL, queryString, queryFileURL);
+
 			if (query instanceof TupleQuery) {
-				TupleQueryResult queryResult = ((TupleQuery)query).evaluate();
-				compareResultSize(queryResult, expectedResult);
+				expectedTupleResult = Optional.of(readResultSetInfo());
+				TupleQueryResult queryResult = ((TupleQuery) query).evaluate();
+
+				compareResultSize(queryResult, expectedTupleResult.get());
+
+
+			} else if (query instanceof BooleanQuery) {
+				boolean queryResult = ((BooleanQuery) query).evaluate();
+				boolean expectedResult = readExpectedBooleanQueryResult();
+				assertEquals(expectedResult, queryResult);
 			} else {
+
 				throw new RuntimeException("Unexpected query type: " + query.getClass());
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
-			compareThrownException(e, expectedResult); // compare the thrown exception class
+			if(expectedTupleResult.isPresent())
+			{
+				compareThrownException(e, expectedTupleResult.get()); // compare the thrown exception class
+			}
+
 		}
 		finally {
 			con.close();
@@ -163,6 +175,60 @@ public abstract class QuestScenarioParent extends TestCase {
 
 			logger.error(message.toString());
 			fail(message.toString());
+		}
+	}
+
+	private boolean readExpectedBooleanQueryResult()
+			throws Exception
+	{
+		Optional<QueryResultFormat> bqrFormat = BooleanQueryResultParserRegistry.getInstance().getFileFormatForFileName(resultFileURL);
+
+		if (bqrFormat.isPresent()) {
+			InputStream in = new URL(resultFileURL).openStream();
+			try {
+				return QueryResultIO.parseBoolean(in, bqrFormat.get());
+			}
+			finally {
+				in.close();
+			}
+		}
+		else {
+			Set<Statement> resultGraph = readExpectedGraphQueryResult();
+			return DAWGTestResultSetUtil.toBooleanQueryResult(resultGraph);
+		}
+	}
+
+	private Set<Statement> readExpectedGraphQueryResult()
+			throws Exception
+	{
+		Optional<RDFFormat> rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
+
+		if (rdfFormat.isPresent()) {
+			RDFParser parser = Rio.createParser(rdfFormat.get(), dataRep.getValueFactory());
+			ParserConfig config = parser.getParserConfig();
+			// To emulate DatatypeHandling.IGNORE
+			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
+			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
+			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
+			config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
+//			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
+//			parser.setPreserveBNodeIDs(true);
+
+			Set<Statement> result = new LinkedHashSet<Statement>();
+			parser.setRDFHandler(new StatementCollector(result));
+
+			InputStream in = new URL(resultFileURL).openStream();
+			try {
+				parser.parse(in, resultFileURL);
+			}
+			finally {
+				in.close();
+			}
+
+			return result;
+		}
+		else {
+			throw new RuntimeException("Unable to determine file type of results file");
 		}
 	}
 

@@ -7,10 +7,14 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +57,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private static int CONVERGENCE_BOUND = 5;
 
     private final Optional<ImmutableQueryModifiers> optionalModifiers;
+    private final TermNullabilityEvaluator nullabilityEvaluator;
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableSubstitution<ImmutableTerm> substitution;
 
@@ -60,28 +65,34 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                                @Assisted ImmutableSubstitution<ImmutableTerm> substitution,
-                                @Assisted Optional<ImmutableQueryModifiers> optionalQueryModifiers) {
+                                 @Assisted ImmutableSubstitution<ImmutableTerm> substitution,
+                                 @Assisted Optional<ImmutableQueryModifiers> optionalQueryModifiers,
+                                 TermNullabilityEvaluator nullabilityEvaluator) {
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.optionalModifiers = optionalQueryModifiers;
+        this.nullabilityEvaluator = nullabilityEvaluator;
     }
 
     /**
      * Without modifiers nor substitution.
      */
     @AssistedInject
-    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables) {
+    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
+                                 TermNullabilityEvaluator nullabilityEvaluator) {
         this.projectedVariables = projectedVariables;
+        this.nullabilityEvaluator = nullabilityEvaluator;
         this.substitution = DATA_FACTORY.getSubstitution();
         this.optionalModifiers = Optional.empty();
     }
 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                                 @Assisted ImmutableSubstitution<ImmutableTerm> substitution) {
+                                 @Assisted ImmutableSubstitution<ImmutableTerm> substitution,
+                                 TermNullabilityEvaluator nullabilityEvaluator) {
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
+        this.nullabilityEvaluator = nullabilityEvaluator;
         this.optionalModifiers = Optional.empty();
     }
 
@@ -105,7 +116,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     @Override
     public ConstructionNode clone() {
-        return new ConstructionNodeImpl(projectedVariables, substitution, optionalModifiers);
+        return new ConstructionNodeImpl(projectedVariables, substitution, optionalModifiers, nullabilityEvaluator);
     }
 
     @Override
@@ -213,7 +224,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 newSubstitutionMapBuilder.build());
 
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
-                newSubstitution, getOptionalModifiers());
+                newSubstitution, getOptionalModifiers(), nullabilityEvaluator);
 
         /**
          * Stops to propagate the substitution
@@ -323,9 +334,45 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          */
         else {
             ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
-                    newSubstitutions.bindings, newOptionalModifiers);
+                    newSubstitutions.bindings, newOptionalModifiers, nullabilityEvaluator);
 
             return new SubstitutionResultsImpl<>(newConstructionNode, substitutionToPropagate);
+        }
+    }
+
+    @Override
+    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        if (getChildVariables().contains(variable))
+            return isChildVariableNullable(query, variable);
+
+        return Optional.ofNullable(substitution.get(variable))
+                .map(t -> isTermNullable(query, t))
+                .orElseThrow(() -> new IllegalArgumentException("The variable " + variable + " is not projected by " + this));
+    }
+
+    private boolean isChildVariableNullable(IntermediateQuery query, Variable variable) {
+        return query.getFirstChild(this)
+                .map(c -> c.isVariableNullable(query, variable))
+                .orElseThrow(() -> new InvalidIntermediateQueryException(
+                        "A construction node with child variables must have a child"));
+    }
+
+    private boolean isTermNullable(IntermediateQuery query, ImmutableTerm substitutionValue) {
+        if (substitutionValue instanceof ImmutableFunctionalTerm) {
+            ImmutableSet<Variable> nullableVariables = substitutionValue.getVariableStream()
+                    .filter(v -> isChildVariableNullable(query, v))
+                    .collect(ImmutableCollectors.toSet());
+            return nullabilityEvaluator.isNullable(substitutionValue, nullableVariables);
+
+        }
+        else if (substitutionValue instanceof Constant) {
+            return substitutionValue.equals(OBDAVocabulary.NULL);
+        }
+        else if (substitutionValue instanceof Variable) {
+            return isChildVariableNullable(query, (Variable)substitutionValue);
+        }
+        else {
+            throw new IllegalStateException("Unexpected immutable term");
         }
     }
 
@@ -353,6 +400,16 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
            return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_TRUE, ImmutableSet.of());
         }
        return new NodeTransformationProposalImpl(NodeTransformationProposedState.NO_LOCAL_CHANGE, ImmutableSet.of());
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return getChildVariables();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return substitution.getDomain();
     }
 
     @Override

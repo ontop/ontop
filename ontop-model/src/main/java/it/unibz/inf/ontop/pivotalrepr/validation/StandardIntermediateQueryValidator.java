@@ -3,8 +3,12 @@ package it.unibz.inf.ontop.pivotalrepr.validation;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.Optional;
 
 /**
  * Checks the QueryNode and their children
@@ -34,6 +38,18 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
                 throw new InvalidIntermediateQueryException("CONSTRUCTION node " + constructionNode
                         + " has more than one child.\n" + query);
             }
+
+            ImmutableSet<Variable> requiredChildVariables = constructionNode.getChildVariables();
+
+            for (QueryNode child : query.getChildren(constructionNode)) {
+                ImmutableSet<Variable> childProjectedVariables = query.getVariables(child);
+
+                if (!childProjectedVariables.containsAll(requiredChildVariables)) {
+                    throw new InvalidIntermediateQueryException("This child " + child
+                            + " does not project all the variables " +
+                            "required by the CONSTRUCTION node (" + requiredChildVariables + ")\n" + query);
+                }
+            }
         }
 
         @Override
@@ -62,6 +78,9 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
                 throw new InvalidIntermediateQueryException("JOIN node " + innerJoinNode
                         +" does not have at least 2 children.\n" + query);
             }
+
+            innerJoinNode.getOptionalFilterCondition()
+                    .ifPresent(e -> checkExpression(innerJoinNode, e));
         }
 
         @Override
@@ -70,6 +89,8 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
                 throw new InvalidIntermediateQueryException("LEFTJOIN node " + leftJoinNode
                         + " does not have 2 children.\n" + query);
             }
+            leftJoinNode.getOptionalFilterCondition()
+                    .ifPresent(e -> checkExpression(leftJoinNode, e));
         }
 
         @Override
@@ -77,6 +98,20 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
             if (query.getChildren(filterNode).size() != 1) {
                 throw new InvalidIntermediateQueryException("FILTER node " + filterNode
                         + " does not have single child.\n" + query);
+            }
+            checkExpression(filterNode, filterNode.getFilterCondition());
+        }
+
+        private void checkExpression(JoinOrFilterNode node, ImmutableExpression expression) {
+            ImmutableSet<Variable> unboundVariables = expression.getVariableStream()
+                    .filter(v -> !(query.getChildren(node).stream()
+                            .flatMap(c -> query.getVariables(c).stream())
+                            .collect(ImmutableCollectors.toSet())
+                            .contains(v)))
+                    .collect(ImmutableCollectors.toSet());
+            if (!unboundVariables.isEmpty()) {
+                throw new InvalidIntermediateQueryException("Expression " + expression + " of "
+                        + expression + " uses unbound variables (" + unboundVariables +  ").\n" + query);
             }
         }
 

@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.unfolding;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.impl.DatalogTools;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
@@ -42,38 +44,65 @@ public class ExpressionEvaluator {
 	public ExpressionEvaluator() {
 	}
 
-	public static class Evaluation {
+	public static class EvaluationResult {
 		private final Optional<ImmutableExpression> optionalExpression;
 		private final Optional<Boolean> optionalBooleanValue;
 
 		private static final ExpressionNormalizer NORMALIZER = new ExpressionNormalizerImpl();
 
-		private Evaluation(ImmutableExpression expression) {
+		private EvaluationResult(ImmutableExpression expression) {
 			optionalExpression = Optional.of(NORMALIZER.normalize(expression));
 			optionalBooleanValue = Optional.empty();
 		}
 
-		private Evaluation(boolean value) {
+		private EvaluationResult(boolean value) {
 			optionalExpression = Optional.empty();
 			optionalBooleanValue = Optional.of(value);
+		}
+
+		/**
+		 * Evaluated as NULL
+		 */
+		private EvaluationResult() {
+			optionalExpression = Optional.empty();
+			optionalBooleanValue = Optional.empty();
 		}
 
 		public Optional<ImmutableExpression> getOptionalExpression() {
 			return optionalExpression;
 		}
 
-		public Optional<Boolean> getOptionalBooleanValue() {
-			return optionalBooleanValue;
+		public boolean isEffectiveTrue() {
+			return optionalBooleanValue
+					.filter(v -> v)
+					.isPresent();
 		}
 
-		public boolean isFalse() {
+		public boolean isNull() {
+			return ! (optionalBooleanValue.isPresent() || optionalExpression.isPresent());
+		}
+
+		public boolean isEffectiveFalse() {
+			return isFalse() || isNull();
+		}
+
+		private boolean isFalse() {
 			return optionalBooleanValue
 					.filter(v -> !v)
 					.isPresent();
 		}
+
+		public ImmutableTerm getTerm() {
+			if (optionalExpression.isPresent())
+				return optionalExpression.get();
+			else
+				return optionalBooleanValue
+						.map(v -> v ? OBDAVocabulary.TRUE : OBDAVocabulary.FALSE)
+						.orElse(OBDAVocabulary.NULL);
+		}
 	}
 
-	public Evaluation evaluateExpression(ImmutableExpression expression) {
+	public EvaluationResult evaluateExpression(ImmutableExpression expression) {
 		Expression mutableExpression = ImmutabilityTools.convertToMutableBooleanExpression(expression);
 
 		Term evaluatedTerm = evalOperation(mutableExpression);
@@ -90,20 +119,22 @@ public class ExpressionEvaluator {
 						+ evaluatedFunctionalTerm);
 			}
 
-			return new Evaluation(DATA_FACTORY.getImmutableExpression(
+			return new EvaluationResult(DATA_FACTORY.getImmutableExpression(
 					DATA_FACTORY.getExpression((OperationPredicate) predicate,
 							evaluatedFunctionalTerm.getTerms())));
 		}
 		else if (evaluatedTerm instanceof Constant) {
-			if (evaluatedTerm == OBDAVocabulary.FALSE || evaluatedTerm == OBDAVocabulary.NULL) {
-				return new Evaluation(false);
+			if (evaluatedTerm == OBDAVocabulary.FALSE) {
+				return new EvaluationResult(false);
 			}
+			else if (evaluatedTerm == OBDAVocabulary.NULL)
+				return new EvaluationResult();
 			else {
-				return new Evaluation(true);
+				return new EvaluationResult(true);
 			}
 		}
 		else if (evaluatedTerm instanceof Variable) {
-		    return new Evaluation(DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_TRUE,
+		    return new EvaluationResult(DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_TRUE,
                     ImmutabilityTools.convertIntoImmutableTerm(evaluatedTerm)));
         }
 		else {
@@ -595,6 +626,16 @@ public class ExpressionEvaluator {
 			return DATA_FACTORY.getBooleanConstant(!isnull);
 		}
 
+		/*
+		 * Special optimization for URI templates
+		 */
+		if (result instanceof Function) {
+			Function functionalTerm = (Function) result;
+			if (functionalTerm.getFunctionSymbol() instanceof URITemplatePredicate) {
+				return simplifyIsNullorNotNullUriTemplate(functionalTerm, isnull);
+			}
+		}
+
 		// TODO improve evaluation of is (not) null
 		/*
 		 * This can be improved by evaluating some of the function, e.g,. URI
@@ -604,6 +645,39 @@ public class ExpressionEvaluator {
 			return DATA_FACTORY.getFunctionIsNull(result);
 		} else {
 			return DATA_FACTORY.getFunctionIsNotNull(result);
+		}
+	}
+
+	/**
+	 * TODO: make it stronger (in case someone uses complex sub-terms such as IS_NULL(x) inside the URI template...)
+	 */
+	private Function simplifyIsNullorNotNullUriTemplate(Function uriTemplate, boolean isNull) {
+		Set<Variable> variables = uriTemplate.getVariables();
+		if (isNull) {
+			switch (variables.size()) {
+				case 0:
+					return DATA_FACTORY.getFunctionIsNull(uriTemplate);
+				case 1:
+					return DATA_FACTORY.getFunctionIsNull(variables.iterator().next());
+				default:
+					return variables.stream()
+							.reduce(null,
+									(e, v) -> e == null
+											? DATA_FACTORY.getFunctionIsNull(v)
+											: DATA_FACTORY.getFunctionOR(e, DATA_FACTORY.getFunctionIsNull(v)),
+									(e1, e2) -> e1 == null
+											? e2
+											: (e2 == null) ? e1 : DATA_FACTORY.getFunctionOR(e1, e2));
+			}
+		}
+		else {
+			if (variables.isEmpty())
+				return DATA_FACTORY.getFunctionIsNotNull(uriTemplate);
+			else
+				return DatalogTools.foldBooleanConditions(
+						variables.stream()
+								.map(DATA_FACTORY::getFunctionIsNotNull)
+								.collect(Collectors.toList()));
 		}
 	}
 

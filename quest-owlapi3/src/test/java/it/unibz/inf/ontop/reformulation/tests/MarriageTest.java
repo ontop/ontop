@@ -135,6 +135,7 @@ public class MarriageTest {
 				.jdbcUrl(JDBC_URL)
 				.jdbcUser(JDBC_USER)
 				.jdbcPassword(JDBC_PASSWORD)
+				.enableTestMode()
 				.build();
 		QuestOWL reasoner = factory.createReasoner(config);
 

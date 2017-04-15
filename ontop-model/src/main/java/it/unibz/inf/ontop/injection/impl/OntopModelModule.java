@@ -2,11 +2,16 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.model.DatatypeFactory;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.transform.FilterNullableVariableQueryTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.QueryMerger;
+import it.unibz.inf.ontop.pivotalrepr.transform.QueryRenamer;
 import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.*;
@@ -26,6 +31,9 @@ public class OntopModelModule extends OntopAbstractModule {
         bind(OBDADataFactory.class).toInstance(DATA_FACTORY);
 
         bindFromPreferences(IntermediateQueryValidator.class);
+        bindFromPreferences(TermNullabilityEvaluator.class);
+        bindFromPreferences(QueryMerger.class);
+        bindFromPreferences(FilterNullableVariableQueryTransformer.class);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
                 IntermediateQueryBuilder.class,
@@ -41,5 +49,10 @@ public class OntopModelModule extends OntopAbstractModule {
                 ),
                 IntermediateQueryFactory.class);
         install(iqFactoryModule);
+
+        Module queryTransformerModule = buildFactory(ImmutableList.of(
+                QueryRenamer.class),
+                QueryTransformerFactory.class);
+        install(queryTransformerModule);
     }
 }

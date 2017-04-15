@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HeterogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
 
 /**
  * Immutable.
@@ -78,6 +80,14 @@ public interface QueryNode extends Cloneable {
             throws QueryNodeSubstitutionException;
 
     /**
+     * Returns true if it cannot guarantee the projected variable to be non-null
+     *
+     * Throws an IllegalArgumentException if the variable is not projected by the node
+     */
+    boolean isVariableNullable(IntermediateQuery query, Variable variable);
+
+
+    /**
      * TODO: explain
      */
     boolean isSyntacticallyEquivalentTo(QueryNode node);
@@ -85,4 +95,18 @@ public interface QueryNode extends Cloneable {
     NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild);
 
     NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode);
+
+    /**
+     * Set of variables that this node, INDEPENDENTLY OF THE REQUIREMENTS OF ITS ANCESTORS,
+     * requires to be defined in the sub-tree.
+     *
+     * Said differently, additional variable requirements may come from its ancestors.
+     *
+     */
+    ImmutableSet<Variable> getLocallyRequiredVariables();
+
+    /**
+     * Locally defined variables must not appear in the sub-tree
+     */
+    ImmutableSet<Variable> getLocallyDefinedVariables();
 }

@@ -393,7 +393,7 @@ public class LeftJoinOptimizationTest {
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         queryBuilder.addChild(constructionNode, leftJoinNode);
         ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N1, ONE));
-        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, N1, M, M));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, N1, M, N));
 
         queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
