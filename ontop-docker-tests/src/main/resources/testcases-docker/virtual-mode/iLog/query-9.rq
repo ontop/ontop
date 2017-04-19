@@ -1,0 +1,31 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#>  
+
+# ITU sui treni (ILOG) in un dato momento
+# evento pi� recente
+
+SELECT DISTINCT  ?train ?itu
+WHERE {
+ ?event :happensToITU ?itu.
+	?event a :Loading .
+       	?event :hasEventTime ?by .
+	?event :happensOnTrain ?train.
+      	FILTER(?by<"2011-11-11T12:00:00.000Z"^^xsd:dateTime)
+	
+OPTIONAL{
+	?event2 :happensToITU ?itu;
+		a :Unloading;
+		:hasEventTime ?time_of_recent.
+
+	FILTER(?time_of_recent<"2011-11-11T13:00:00.000Z"^^xsd:dateTime)
+	}
+
+ FILTER(!bound(?event2))
+ }
+
+
+ORDER BY ?train
+

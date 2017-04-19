@@ -1,0 +1,30 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#>  
+PREFIX sparqldl:<http://pellet.owldl.com/ns/sdle#>
+
+# itu scaricati e caricati in ogni terminal in un intervallo di tempo (ILOG)
+
+SELECT ?event ?terminal
+WHERE {
+	{?event   :happensToITU ?itu;
+		 :takesPlaceAt ?terminal;
+		 a :Loading;
+		 :hasEventTime ?date.
+	FILTER (?date > "2011-11-11T12:00:00.000Z"^^xsd:dateTime
+		&& ?date < "2011-11-11T13:00:00.000Z"^^xsd:dateTime).
+		
+	}
+UNION
+	{?event   :happensToITU ?itu;
+		 :takesPlaceAt ?terminal;
+		 a :Unloading;
+		 :hasEventTime ?date.
+	FILTER (?date > "2011-11-11T12:00:00.000Z"^^xsd:dateTime
+		&& ?date < "2011-11-11T13:00:00.000Z"^^xsd:dateTime).
+	}
+}
+ORDER BY ?terminal
+
