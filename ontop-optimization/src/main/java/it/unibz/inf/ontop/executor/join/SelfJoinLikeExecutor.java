@@ -202,7 +202,7 @@ public class SelfJoinLikeExecutor {
         ImmutableCollection<Collection<DataNode>> dataNodeGroups = groupingMap.asMap().values();
 
         try {
-            /**
+            /*
              * Collection of unifying substitutions
              */
             ImmutableSet<ImmutableSubstitution<VariableOrGroundTerm>> unifyingSubstitutions =
@@ -217,7 +217,7 @@ public class SelfJoinLikeExecutor {
                             })
                             .filter(s -> !s.isEmpty())
                             .collect(ImmutableCollectors.toSet());
-            /**
+            /*
              * All the nodes that have been at least once dominated (--> could thus be removed).
              *
              * Not parallellizable
@@ -239,7 +239,7 @@ public class SelfJoinLikeExecutor {
 
             return new PredicateLevelProposal(keptNodes, unifyingSubstitutions, removableNodes);
 
-            /**
+            /*
              * Trick: rethrow the exception
               */
         } catch (AtomUnificationRuntimeException e) {
@@ -268,14 +268,14 @@ public class SelfJoinLikeExecutor {
                     DataAtom previousDataAtom = keptDataNode.getProjectionAtom();
                     DataAtom newDataAtom = mergedSubstitution.applyToDataAtom(previousDataAtom);
 
-                    /**
+                    /*
                      * If new atom
                      */
                     if (!previousDataAtom.equals(newDataAtom)) {
                         newDataNodeBuilder.add(createNewDataNode(keptDataNode, newDataAtom));
                         removedDataNodeBuilder.add(keptDataNode);
                     }
-                    /**
+                    /*
                      * Otherwise, no need to updated the "previous" data node
                      * (we keep it).
                      */
@@ -310,7 +310,7 @@ public class SelfJoinLikeExecutor {
         // Non-final
         ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution = DATA_FACTORY.getSubstitution();
 
-        /**
+        /*
          * Should normally not be called in this case.
          */
         if (redundantNodes.size() < 2) {
@@ -390,7 +390,7 @@ public class SelfJoinLikeExecutor {
                 if (optionalAccumulatedSubstitution.isPresent()) {
                     return optionalAccumulatedSubstitution.get();
                 }
-                /**
+                /*
                  * Cannot unify the two substitutions
                  */
                 else {
@@ -399,7 +399,7 @@ public class SelfJoinLikeExecutor {
                 }
             }
         }
-        /**
+        /*
          * Cannot unify the two atoms
          */
         else {
@@ -414,12 +414,12 @@ public class SelfJoinLikeExecutor {
      * to the positions
      * TODO: explain
      */
-    protected static ImmutableList<VariableOrGroundTerm> extractPrimaryKeyArguments(DataAtom atom,
-                                                                                  ImmutableList<Integer> primaryKeyPositions) {
+    protected static ImmutableList<VariableOrGroundTerm> extractArguments(DataAtom atom,
+                                                                          ImmutableList<Integer> positions) {
         ImmutableList.Builder<VariableOrGroundTerm> listBuilder = ImmutableList.builder();
         int atomLength = atom.getArguments().size();
 
-        for (Integer keyIndex : primaryKeyPositions) {
+        for (Integer keyIndex : positions) {
             if (keyIndex > atomLength) {
                 // TODO: find another exception
                 throw new RuntimeException("The key index does not respect the arity of the atom " + atom);
@@ -431,7 +431,7 @@ public class SelfJoinLikeExecutor {
         return listBuilder.build();
     }
 
-    protected static <N extends JoinOrFilterNode> NodeCentricOptimizationResults<N> getJoinNodeCentricOptimizationResults(
+    protected static <N extends JoinOrFilterNode> NodeCentricOptimizationResults<N> updateJoinNodeAndPropagateSubstitution(
             IntermediateQuery query,
             QueryTreeComponent treeComponent,
             N joinNode,
@@ -440,7 +440,7 @@ public class SelfJoinLikeExecutor {
             case 0:
                 throw new IllegalStateException("Self-join elimination MUST not eliminate ALL the nodes");
 
-                /**
+                /*
                  * Special case: only one child remains so the join node is not needed anymore.
                  *
                  * Creates a FILTER node if there is a joining condition
@@ -461,7 +461,7 @@ public class SelfJoinLikeExecutor {
 
                 NodeCentricOptimizationResults<QueryNode> propagationResults = propagateSubstitution(query,
                         proposal.getOptionalSubstitution(), newTopNode);
-                /**
+                /*
                  * Converts it into NodeCentricOptimizationResults over the focus node
                  */
                 return propagationResults.getNewNodeOrReplacingChild()
@@ -471,7 +471,7 @@ public class SelfJoinLikeExecutor {
                         .orElseGet(() -> new NodeCentricOptimizationResultsImpl<N>(query,
                                 propagationResults.getOptionalNextSibling(),
                                 propagationResults.getOptionalClosestAncestor()));
-            /**
+            /*
              * Multiple children, keep the top join node
              */
             default:
@@ -498,7 +498,7 @@ public class SelfJoinLikeExecutor {
             // Forces the use of an internal executor (the treeComponent must remain the same).
             return query.applyProposal(propagationProposal, true);
         }
-        /**
+        /*
          * No substitution to propagate
          */
         else {
@@ -512,7 +512,7 @@ public class SelfJoinLikeExecutor {
      */
     protected ImmutableList<Variable> prioritizeVariables(IntermediateQuery query, JoinLikeNode joinLikeNode) {
 
-        /**
+        /*
          * Sequential (order matters)
          */
         return extractAncestors(query, joinLikeNode).stream()
@@ -546,7 +546,7 @@ public class SelfJoinLikeExecutor {
         if (node instanceof ExplicitVariableProjectionNode)
             return ((ExplicitVariableProjectionNode)node).getVariables().stream();
 
-        /**
+        /*
          * LJ: look for variables on the left
          *     only when the focus node is on the right
          */
