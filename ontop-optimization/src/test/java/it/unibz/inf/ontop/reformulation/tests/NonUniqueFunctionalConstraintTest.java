@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.sql.*;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Types;
@@ -21,6 +22,7 @@ import static junit.framework.TestCase.assertTrue;
 /**
  * Elimination of redundant self-joins using a non unique functional constraint
  */
+@Ignore
 public class NonUniqueFunctionalConstraintTest {
 
     private final static AtomPredicate TABLE1_PREDICATE;
