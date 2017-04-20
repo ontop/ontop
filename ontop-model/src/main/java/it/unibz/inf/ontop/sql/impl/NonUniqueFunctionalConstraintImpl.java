@@ -41,13 +41,15 @@ public class NonUniqueFunctionalConstraintImpl implements NonUniqueFunctionalCon
 
 
         @Override
-        public void addDeterminant(Attribute determinant) {
+        public Builder addDeterminant(Attribute determinant) {
             determinants.add(determinant);
+            return this;
         }
 
         @Override
-        public void addDependent(Attribute dependent) {
+        public Builder addDependent(Attribute dependent) {
             dependents.add(dependent);
+            return this;
         }
 
         @Override
