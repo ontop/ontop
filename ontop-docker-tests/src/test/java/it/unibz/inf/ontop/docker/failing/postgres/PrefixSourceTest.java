@@ -1,7 +1,7 @@
-package it.unibz.inf.ontop.failing;
+package it.unibz.inf.ontop.docker.failing.postgres;
 
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 
 /**
  * Class to test that a URI with double prefix has not a prefix  wrongly removed
@@ -10,9 +10,9 @@ import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
  */
 public class PrefixSourceTest extends AbstractVirtualModeTest{
 
-    static final String owlfile = "src/test/resources/movieontology.owl";
-    static final String obdafile = "src/test/resources/newPrefixMovieOntology.obda";
-    static final String propertiesfile = "src/test/resources/newPrefixMovieOntology.properties";
+    static final String owlfile = "src/test/resources/pgsql/imdb/movieontology.owl";
+    static final String obdafile = "src/test/resources/pgsql/imdb/newPrefixMovieOntology.obda";
+    static final String propertiesfile = "src/test/resources/pgsql/imdb/movieontology.properties";
 
     public PrefixSourceTest() {
         super(owlfile, obdafile, propertiesfile);

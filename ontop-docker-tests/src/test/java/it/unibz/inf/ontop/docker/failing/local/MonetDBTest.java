@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.failing.local;
+package it.unibz.inf.ontop.docker.failing.local;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.sql;
+package it.unibz.inf.ontop.docker.failing.local;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;

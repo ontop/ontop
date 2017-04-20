@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.sql;
+package it.unibz.inf.ontop.docker.failing.local;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

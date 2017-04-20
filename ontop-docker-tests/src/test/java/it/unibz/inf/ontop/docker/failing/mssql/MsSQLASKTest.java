@@ -1,17 +1,17 @@
-package it.unibz.inf.ontop.failing;
+package it.unibz.inf.ontop.docker.failing.mssql;
 
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 
 public class MsSQLASKTest extends AbstractVirtualModeTest {
 
 
 	 private static final String owlfile =
-	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	 "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
 	 private static final String obdafile =
-	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mssql.obda";
+	 "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mssql.obda";
 	private static final String propertyfile =
-			"src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mssql.properties";
+			"src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mssql.properties";
 
 	public MsSQLASKTest() {
 		super(owlfile, obdafile, propertyfile);

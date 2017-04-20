@@ -20,7 +20,9 @@ package it.unibz.inf.ontop.docker.postgres;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+
+
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 
 import java.util.ArrayList;
 import java.util.List;
