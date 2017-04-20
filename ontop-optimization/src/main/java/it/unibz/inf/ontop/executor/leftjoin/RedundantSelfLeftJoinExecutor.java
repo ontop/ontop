@@ -326,8 +326,8 @@ public class RedundantSelfLeftJoinExecutor
         ImmutableMultimap.Builder<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMapBuilder = ImmutableMultimap.builder();
 
         for (ImmutableList<Integer> primaryKeyPositions : collectionOfPrimaryKeyPositions) {
-            groupingMapBuilder.put(extractPrimaryKeyArguments(leftDataNode.getProjectionAtom(), primaryKeyPositions), leftDataNode);
-            groupingMapBuilder.put(extractPrimaryKeyArguments(rightDataNode.getProjectionAtom(), primaryKeyPositions), rightDataNode);
+            groupingMapBuilder.put(extractArguments(leftDataNode.getProjectionAtom(), primaryKeyPositions), leftDataNode);
+            groupingMapBuilder.put(extractArguments(rightDataNode.getProjectionAtom(), primaryKeyPositions), rightDataNode);
         }
         return groupingMapBuilder.build();
     }
@@ -384,7 +384,7 @@ public class RedundantSelfLeftJoinExecutor
                 throw new IllegalStateException("Self-left join elimination MUST not add more than 2 new nodes");
         }
 
-        return getJoinNodeCentricOptimizationResults(query, treeComponent, leftJoinNode, proposal);
+        return updateJoinNodeAndPropagateSubstitution(query, treeComponent, leftJoinNode, proposal);
     }
 
 
