@@ -8,8 +8,9 @@ import org.semanticweb.owlapi.model.OWLObject;
 
 public class MonetDBTest {
 
-        final String owlfile = "src/test/resources/example/booktutorial.owl";
-        final String obdafile = "src/test/resources/example/booktutorial.obda";
+        final String owlFile = "src/test/resources/local/monet/booktutorial.owl";
+        final String obdaFile = "src/test/resources/local/monet/booktutorial.obda";
+        final String propertyFile = "src/test/resources/local/monet/booktutorial.properties";
 
 //    final String owlfile = "src/test/resources/example/exampleBooks.owl";
 //    final String obdafile = "src/test/resources/example/exampleBooks.obda";
@@ -22,8 +23,9 @@ public class MonetDBTest {
             */
             QuestOWLFactory factory = new QuestOWLFactory();
             OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    .nativeOntopMappingFile(obdafile)
-                    .ontologyFile(owlfile)
+                    .nativeOntopMappingFile(obdaFile)
+                    .ontologyFile(owlFile)
+                    .propertyFile(propertyFile)
                     .enableTestMode()
                     .build();
             QuestOWL reasoner = factory.createReasoner(config);

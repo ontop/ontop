@@ -16,11 +16,11 @@ import java.io.FileReader;
  */
 public class ADPOntopTest {
 	
-	final String owlFile = "src/test/resources/adp/npd-ql.owl";
-	final String obdaFile = "src/test/resources/adp/mapping-fed.obda";
-	final String queryFile = "src/test/resources/adp/01.q";
-	final String propertyFile = "src/test/resources/adp/mapping-fed.properties";
-	final String r2rmlfile = "src/test/resources/adp/mapping-fed.ttl";
+	final String owlFile = "src/test/resources/local/adp/npd-ql.owl";
+	final String obdaFile = "src/test/resources/local/adp/mapping-fed.obda";
+	final String queryFile = "src/test/resources/local/adp/01.q";
+	final String propertyFile = "src/test/resources/local/adp/mapping-fed.properties";
+	final String r2rmlfile = "src/test/resources/local/adp/mapping-fed.ttl";
 
 	public void runQuery() throws Exception {
 

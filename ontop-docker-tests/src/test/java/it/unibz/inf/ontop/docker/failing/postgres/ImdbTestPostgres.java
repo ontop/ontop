@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.docker.postgres;
+package it.unibz.inf.ontop.docker.failing.postgres;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 
