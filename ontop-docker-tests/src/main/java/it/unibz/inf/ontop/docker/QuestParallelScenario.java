@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.ResultSetInfo;
-import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
 import org.eclipse.rdf4j.common.io.IOUtil;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.*;
