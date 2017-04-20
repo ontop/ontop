@@ -13,8 +13,8 @@ public interface NonUniqueFunctionalConstraint {
     ImmutableSet<Attribute> getDependents();
 
     interface Builder {
-        void addDeterminant(Attribute determinant);
-        void addDependent(Attribute dependent);
+        Builder addDeterminant(Attribute determinant);
+        Builder addDependent(Attribute dependent);
 
         NonUniqueFunctionalConstraint build();
     }
