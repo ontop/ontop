@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.docker.failing.local;
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 
 public class SAPHANATest extends AbstractVirtualModeTest {
 

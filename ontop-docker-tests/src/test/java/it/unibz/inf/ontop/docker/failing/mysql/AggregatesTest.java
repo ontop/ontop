@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.docker.failing.mysql;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 
 public class AggregatesTest extends AbstractVirtualModeTest {
 
