@@ -35058,13 +35058,13 @@ _:node190675gahx6642 rr:objectMap _:node190675gahx6641 .
 
 _:node190675gahx6639 rr:predicateObjectMap _:node190675gahx6642 .
 
-_:node190675gahx6637 rr:sqlQuery "SELECT A.prlNpdidLicence, B.prlTaskID FROM licence_task AS A, licence_task AS B WHERE A.prlTaskRefID=B.prlTaskID" .
+_:node190675gahx6637 rr:sqlQuery "SELECT A.prlNpdidLicence AprlNpdidLicence, A.prlTaskRefID AprlTaskRefID, B.prlNpdidLicence BprlNpdidLicence, B.prlTaskRefID BprlTaskRefID FROM licence_task AS A, licence_task AS B WHERE A.prlTaskRefID=B.prlTaskID" .
 
 _:node190675gahx6638 rr:termType rr:IRI .
 
-_:node190675gahx6641 rr:template "http://sws.ifi.uio.no/data/npd-v2/licence/{B.prlNpdidLicence}/task/{B.prlTaskRefID}" .
+_:node190675gahx6641 rr:template "http://sws.ifi.uio.no/data/npd-v2/licence/{BprlNpdidLicence}/task/{BprlTaskRefID}" .
 
-_:node190675gahx6638 rr:template "http://sws.ifi.uio.no/data/npd-v2/licence/{A.prlNpdidLicence}/task/{A.prlTaskRefID}" .
+_:node190675gahx6638 rr:template "http://sws.ifi.uio.no/data/npd-v2/licence/{AprlNpdidLicence}/task/{AprlTaskRefID}" .
 
 _:node190675gahx6642 a rr:PredicateObjectMap ;
 	rr:predicate <http://sws.ifi.uio.no/vocab/npd-v2#dependsOnTask> .

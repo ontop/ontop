@@ -1,0 +1,535 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY quest "http://obda.org/quest#" >
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY iLogOntology "http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#"
+     xml:base="http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:iLogOntology="http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#"
+     xmlns:quest="http://obda.org/quest#">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#containsITU -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;containsITU">
+        <rdfs:comment>Una RequestForWork è legata a un certo numero di ITU. containsITU è inversa funzionale.</rdfs:comment>
+        <rdfs:range rdf:resource="&iLogOntology;ITU"/>
+        <rdfs:domain rdf:resource="&iLogOntology;RequestForWork"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#happensOnTrain -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;happensOnTrain">
+        <rdfs:domain rdf:resource="&iLogOntology;ITUEvent"/>
+        <rdfs:range rdf:resource="&iLogOntology;Train"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#happensToITU -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;happensToITU">
+        <rdfs:range rdf:resource="&iLogOntology;ITU"/>
+        <rdfs:domain rdf:resource="&iLogOntology;ITUEvent"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#happensToTrain -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;happensToTrain">
+        <rdfs:range rdf:resource="&iLogOntology;Train"/>
+        <rdfs:domain rdf:resource="&iLogOntology;TrainEvent"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasDestination -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;hasDestination">
+        <rdfs:comment>Una Route ha diverse fermate schedulate. Viceversa, una certa fermata è fermata di più Route.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iLogOntology;Route"/>
+        <rdfs:range rdf:resource="&iLogOntology;ScheduledStop"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasITUArrival -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;hasITUArrival">
+        <rdfs:range rdf:resource="&iLogOntology;Terminal"/>
+        <rdfs:domain rdf:resource="&iLogOntology;TransportOrder"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasITUDeparture -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;hasITUDeparture">
+        <rdfs:range rdf:resource="&iLogOntology;Terminal"/>
+        <rdfs:domain rdf:resource="&iLogOntology;TransportOrder"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasOrigin -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;hasOrigin">
+        <rdfs:domain rdf:resource="&iLogOntology;Route"/>
+        <rdfs:range rdf:resource="&iLogOntology;ScheduledStop"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasScheduledStopTerminal -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;hasScheduledStopTerminal">
+        <rdfs:comment>Uno a uno.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iLogOntology;ScheduledStop"/>
+        <rdfs:range rdf:resource="&iLogOntology;Terminal"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#isAssignedToRoute -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;isAssignedToRoute">
+        <rdfs:range rdf:resource="&iLogOntology;Route"/>
+        <rdfs:domain rdf:resource="&iLogOntology;Train"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#operatesNearby -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;operatesNearby">
+        <rdfs:domain rdf:resource="&iLogOntology;Customer"/>
+        <rdfs:range rdf:resource="&iLogOntology;Terminal"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#passesThrough -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;passesThrough">
+        <rdfs:comment>Percorso.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iLogOntology;Route"/>
+        <rdfs:range rdf:resource="&iLogOntology;ScheduledStop"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#relatesToITU -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;relatesToITU">
+        <rdfs:comment>uno a uno, ma si uscirebbe da owl2ql.</rdfs:comment>
+        <rdfs:range rdf:resource="&iLogOntology;ITU"/>
+        <rdfs:domain rdf:resource="&iLogOntology;TransportOrder"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#requests -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;requests">
+        <rdfs:comment>Inversa funzionale, ma si uscirebbe da owl2ql.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iLogOntology;Customer"/>
+        <rdfs:range rdf:resource="&iLogOntology;RequestForWork"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#satisfies -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;satisfies">
+        <rdfs:comment>Funzionale, ma si uscirebbe da owl2ql.</rdfs:comment>
+        <rdfs:range rdf:resource="&iLogOntology;RequestForWork"/>
+        <rdfs:domain rdf:resource="&iLogOntology;TransportOrder"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#takesPlaceAt -->
+
+    <owl:ObjectProperty rdf:about="&iLogOntology;takesPlaceAt">
+        <rdfs:domain rdf:resource="&iLogOntology;Event"/>
+        <rdfs:range rdf:resource="&iLogOntology;Terminal"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasBeenLate -->
+
+    <owl:DatatypeProperty rdf:about="&iLogOntology;hasBeenLate">
+        <rdfs:comment>1 se l&apos;ITU è in ritardo, 0 se in orario.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iLogOntology;ITU"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasCapacity -->
+
+    <owl:DatatypeProperty rdf:about="&iLogOntology;hasCapacity">
+        <rdfs:domain rdf:resource="&iLogOntology;Train"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasCustomerName -->
+
+    <owl:DatatypeProperty rdf:about="&iLogOntology;hasCustomerName">
+        <rdfs:comment>Il nome human-readable del cliente.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iLogOntology;Customer"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasEventTime -->
+
+    <owl:DatatypeProperty rdf:about="&iLogOntology;hasEventTime">
+        <rdfs:domain rdf:resource="&iLogOntology;Event"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasITUID -->
+
+    <owl:DatatypeProperty rdf:about="&iLogOntology;hasITUID"/>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasRequestDate -->
+
+    <owl:DatatypeProperty rdf:about="&iLogOntology;hasRequestDate">
+        <rdfs:domain rdf:resource="&iLogOntology;RequestForWork"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasRouteName -->
+
+    <owl:DatatypeProperty rdf:about="&iLogOntology;hasRouteName">
+        <rdfs:comment>La route è associata a un nome treno.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iLogOntology;Route"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasScheduledTime -->
+
+    <owl:DatatypeProperty rdf:about="&iLogOntology;hasScheduledTime">
+        <rdfs:domain rdf:resource="&iLogOntology;ScheduledStop"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasTerminalName -->
+
+    <owl:DatatypeProperty rdf:about="&iLogOntology;hasTerminalName">
+        <rdfs:comment>Il nome della città in cui il terminal è situato.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iLogOntology;Terminal"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasTrainNumber -->
+
+    <owl:DatatypeProperty rdf:about="&iLogOntology;hasTrainNumber">
+        <rdfs:comment>Il TrainNumber è il numero del treno logico, ad esempio l&apos;intercity 575 Genova-Livorno.</rdfs:comment>
+        <rdfs:domain rdf:resource="&iLogOntology;Train"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#hasTrainSerialNumber -->
+
+    <owl:DatatypeProperty rdf:about="&iLogOntology;hasTrainSerialNumber">
+        <rdfs:comment>Questo codice tiene traccia del giorno a cui il treno è riferito. Per esempio, il treno 11 del secondo giorno avrà serialNumber 2011, dove &quot;20&quot; è il prefisso relativo al secondo giorno, e così via.</rdfs:comment>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#Customer -->
+
+    <owl:Class rdf:about="&iLogOntology;Customer">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:comment>I clienti.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#Event -->
+
+    <owl:Class rdf:about="&iLogOntology;Event">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:comment>Un evento è un evento registrato.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#ITU -->
+
+    <owl:Class rdf:about="&iLogOntology;ITU">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:comment>Gli ITU (International Transport Unit), o UTI, sono i container.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#ITUEvent -->
+
+    <owl:Class rdf:about="&iLogOntology;ITUEvent">
+        <rdfs:subClassOf rdf:resource="&iLogOntology;Event"/>
+        <owl:disjointWith rdf:resource="&iLogOntology;TrainEvent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#Loading -->
+
+    <owl:Class rdf:about="&iLogOntology;Loading">
+        <rdfs:subClassOf rdf:resource="&iLogOntology;ITUEvent"/>
+        <owl:disjointWith rdf:resource="&iLogOntology;Unloading"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#Passing -->
+
+    <owl:Class rdf:about="&iLogOntology;Passing">
+        <rdfs:subClassOf rdf:resource="&iLogOntology;ITUEvent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#RequestForWork -->
+
+    <owl:Class rdf:about="&iLogOntology;RequestForWork">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:comment>Le RequestForWork sono generate dai Customer, e riportano i container da movimentare. Sono rivolte alle TransportEnterprise, che le ricevono.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#Route -->
+
+    <owl:Class rdf:about="&iLogOntology;Route">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:comment>Le route vengono inserite una sola volta per ogni treno.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#ScheduledStop -->
+
+    <owl:Class rdf:about="&iLogOntology;ScheduledStop">
+        <rdfs:comment>Gli ScheduledStop sono relativi alla route di un treno, e tengono traccia del tempo di percorrenza di ogni tratta indipendentemente dal giorno o dall&apos;ora di partenza. Una ScheduledStop va pensata come a una coppia di valori (terminal, dateTime). Nota: il dateTime della ScheduledStop non è un tempo assoluto, ma solo un tempo di percorrenza, che non cambia.
+Esempio:
+la Route Genova-Torino (genova,alessandria,torino) avrà:
+- come ScheduledStop di origine Genova con tempo 0;
+- come ScheduledStop di passaggio Alessandria con tempo 3600;
+- come ScheduledStop di arrivo Torino con tempo 7800.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#Terminal -->
+
+    <owl:Class rdf:about="&iLogOntology;Terminal">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:comment>I terminal sono gli unici luohi del nostro scenario.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#Train -->
+
+    <owl:Class rdf:about="&iLogOntology;Train">
+        <rdfs:comment>Per Train si intende un treno logico.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#TrainArrival -->
+
+    <owl:Class rdf:about="&iLogOntology;TrainArrival">
+        <rdfs:subClassOf rdf:resource="&iLogOntology;TrainEvent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#TrainDeparture -->
+
+    <owl:Class rdf:about="&iLogOntology;TrainDeparture">
+        <rdfs:subClassOf rdf:resource="&iLogOntology;TrainEvent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#TrainEvent -->
+
+    <owl:Class rdf:about="&iLogOntology;TrainEvent">
+        <rdfs:subClassOf rdf:resource="&iLogOntology;Event"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#TrainPassage -->
+
+    <owl:Class rdf:about="&iLogOntology;TrainPassage">
+        <rdfs:subClassOf rdf:resource="&iLogOntology;TrainEvent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#TransportOrder -->
+
+    <owl:Class rdf:about="&iLogOntology;TransportOrder">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:comment>I TransportOrder sono ordini di trasporto legati ai container, e sono in rapporto uno a uno con essi.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#Unloading -->
+
+    <owl:Class rdf:about="&iLogOntology;Unloading">
+        <rdfs:subClassOf rdf:resource="&iLogOntology;ITUEvent"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing">
+        <rdfs:comment>Nota: gli ID (nel senso di chiave primaria) degli oggetti sono i loro URI nell&apos;ontologia. Abbiamo poi dato dei label ad alcuni oggetti, come customerName.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&iLogOntology;Loading"/>
+            <rdf:Description rdf:about="&iLogOntology;Passing"/>
+            <rdf:Description rdf:about="&iLogOntology;Unloading"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&iLogOntology;Customer"/>
+            <rdf:Description rdf:about="&iLogOntology;Event"/>
+            <rdf:Description rdf:about="&iLogOntology;ITU"/>
+            <rdf:Description rdf:about="&iLogOntology;RequestForWork"/>
+            <rdf:Description rdf:about="&iLogOntology;Route"/>
+            <rdf:Description rdf:about="&iLogOntology;ScheduledStop"/>
+            <rdf:Description rdf:about="&iLogOntology;Terminal"/>
+            <rdf:Description rdf:about="&iLogOntology;Train"/>
+            <rdf:Description rdf:about="&iLogOntology;TransportOrder"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&iLogOntology;TrainArrival"/>
+            <rdf:Description rdf:about="&iLogOntology;TrainDeparture"/>
+            <rdf:Description rdf:about="&iLogOntology;TrainPassage"/>
+        </owl:members>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.3.1957) http://owlapi.sourceforge.net -->
+

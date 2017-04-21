@@ -35185,11 +35185,11 @@ _:node19fnk6fifx6641 a rr:ObjectMap .
 
 _:node19fnk6fifx6642 rr:objectMap _:node19fnk6fifx6641 .
 
-_:node19fnk6fifx6638 rr:template "http://sws.ifi.uio.no/data/npd-v2/licence/{A.prlNpdidLicence}/task/{A.prlTaskRefID}" ;
+_:node19fnk6fifx6638 rr:template "http://sws.ifi.uio.no/data/npd-v2/licence/{AprlNpdidLicence}/task/{AprlTaskRefID}" ;
 	a rr:TermMap ;
 	rr:termType rr:IRI .
 
-_:node19fnk6fifx6637 rr:sqlQuery "SELECT A.prlNpdidLicence, B.prlTaskID FROM licence_task AS A, licence_task AS B WHERE A.prlTaskRefID=B.prlTaskID" .
+_:node19fnk6fifx6637 rr:sqlQuery "SELECT A.prlNpdidLicence AprlNpdidLicence, A.prlTaskRefID AprlTaskRefID, B.prlNpdidLicence BprlNpdidLicence, B.prlTaskRefID BprlTaskRefID FROM licence_task AS A, licence_task AS B WHERE A.prlTaskRefID=B.prlTaskID" .
 
 _:node19fnk6fifx6641 rr:termType rr:IRI .
 
@@ -35201,7 +35201,7 @@ _:node19fnk6fifx6641 a rr:TermMap .
 
 _:node19fnk6fifx6638 a rr:SubjectMap .
 
-_:node19fnk6fifx6641 rr:template "http://sws.ifi.uio.no/data/npd-v2/licence/{B.prlNpdidLicence}/task/{B.prlTaskRefID}" .
+_:node19fnk6fifx6641 rr:template "http://sws.ifi.uio.no/data/npd-v2/licence/{BprlNpdidLicence}/task/{BprlTaskRefID}" .
 
 _:node19fnk6fifx6639 rr:subjectMap _:node19fnk6fifx6638 .
 

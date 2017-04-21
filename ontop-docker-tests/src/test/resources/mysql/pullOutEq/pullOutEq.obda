@@ -1,0 +1,10 @@
+[PrefixDeclaration]
+:		http://example.com/vocab#
+xsd:    http://www.w3.org/2001/XMLSchema#
+
+
+[MappingDeclaration] @collection [[
+mappingId	Person
+target		<http://example.com/persons/{idperson}> a :Person ; :hasId {idperson}^^xsd:int ; :firstName {firstname} ; :lastName {lastname} ; :age {age}^^xsd:int ; :gender {gender} .
+source		select idperson, firstname, lastname, age, gender from person
+]]

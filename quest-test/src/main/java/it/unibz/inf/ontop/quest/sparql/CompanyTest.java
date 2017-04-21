@@ -79,7 +79,7 @@ public class CompanyTest  {
 				.propertyFile(propertyfile)
 				.build();
 
-		/*
+		/*m
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory factory = new QuestOWLFactory();
