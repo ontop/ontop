@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.executor.join;
 
 import com.google.common.collect.*;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -120,15 +118,17 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
 
         for (AtomPredicate predicate : initialDataNodeMap.keySet()) {
             ImmutableCollection<DataNode> initialNodes = initialDataNodeMap.get(predicate);
-            PredicateLevelProposal predicateProposal = proposePerPredicate(initialNodes, predicate, dbMetadata);
-            proposalListBuilder.add(predicateProposal);
+            Optional<PredicateLevelProposal> predicateProposal = proposePerPredicate(initialNodes, predicate, dbMetadata,
+                    priorityVariables);
+            predicateProposal.ifPresent(proposalListBuilder::add);
         }
 
         return createConcreteProposal(proposalListBuilder.build(), priorityVariables);
     }
 
-    protected abstract PredicateLevelProposal proposePerPredicate(ImmutableCollection<DataNode> initialNodes,
-                                                                  AtomPredicate predicate, DBMetadata dbMetadata) throws AtomUnificationException;
+    protected abstract Optional<PredicateLevelProposal> proposePerPredicate(ImmutableCollection<DataNode> initialNodes,
+                                                                  AtomPredicate predicate, DBMetadata dbMetadata,
+                                                                  ImmutableList<Variable> priorityVariables) throws AtomUnificationException;
 
     /**
      * Assumes that the data atoms are leafs.
