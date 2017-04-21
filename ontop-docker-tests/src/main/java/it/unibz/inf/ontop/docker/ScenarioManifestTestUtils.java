@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
+
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 import org.eclipse.rdf4j.OpenRDFUtil;
@@ -122,7 +123,7 @@ public class ScenarioManifestTestUtils {
 		return suite;
 	}
 
-	static void addTurtle(RepositoryConnection con, URL url, String baseURI, Resource... contexts)
+	public static void addTurtle(RepositoryConnection con, URL url, String baseURI, Resource... contexts)
 			throws IOException, RepositoryException, RDFParseException {
 		if (baseURI == null) {
 			baseURI = url.toExternalForm();

@@ -1,0 +1,1705 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/"
+     xml:base="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_C_Code -->
+
+    <owl:ObjectProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_C_Code">
+        <rdfs:domain rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames"/>
+        <rdfs:range rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countref"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_SpecCode -->
+
+    <owl:ObjectProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_SpecCode">
+        <rdfs:domain rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames"/>
+        <rdfs:range rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_C_Code -->
+
+    <owl:ObjectProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_C_Code">
+        <rdfs:range rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countref"/>
+        <rdfs:domain rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_SpecCode -->
+
+    <owl:ObjectProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_SpecCode">
+        <rdfs:domain rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country"/>
+        <rdfs:range rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphdat_Speccode -->
+
+    <owl:ObjectProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphdat_Speccode">
+        <rdfs:domain rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphdat"/>
+        <rdfs:range rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain_SpecCode -->
+
+    <owl:ObjectProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain_SpecCode">
+        <rdfs:domain rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain"/>
+        <rdfs:range rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_FamCode -->
+
+    <owl:ObjectProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_FamCode">
+        <rdfs:range rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families"/>
+        <rdfs:domain rdf:resource="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_City -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_City"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Comments -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Comments"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Country -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Country"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_E-mail -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_E-mail"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_FAX -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_FAX"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Institute -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Institute"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Keywords -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Keywords"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Personnel -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Personnel">
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Prename -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Prename"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_StaffPhoto -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_StaffPhoto"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Street -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Street"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Surname -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Surname"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_WebPage -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_WebPage"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Year -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Year"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_ComName -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_ComName"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_Language -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_Language"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_NameType -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_NameType"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countref_Factbook -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countref_Factbook"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countref_PAESE -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countref_PAESE"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Aquaculture -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Aquaculture"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Brackish -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Brackish"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Freshwater -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Freshwater"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Game -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Game">
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Importance -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Importance"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_LiveExport -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_LiveExport"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Saltwater -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Saltwater"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Status -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Status"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Activity -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Activity"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Aquarium -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Aquarium"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Brackish -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Brackish"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Class -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Class"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Division -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Division"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_FamiliesRefNo -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_FamiliesRefNo">
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Family -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Family">
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Freshwater -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Freshwater"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Genera -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Genera"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Marine -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Marine"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Order -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Order"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Remark -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Remark"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_ReprGuild -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_ReprGuild"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Species -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Species"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_SpeciesCount -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_SpeciesCount"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphdat_AddChars -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphdat_AddChars"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain_AuthName -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain_AuthName"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain_Entered -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain_Entered"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain_LifeStage -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain_LifeStage"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain_PicName -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain_PicName"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain_autoctr -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain_autoctr"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/refrens_Author -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/refrens_Author"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/refrens_RefNo -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/refrens_RefNo"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/refrens_Year -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/refrens_Year"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_AnaCat -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_AnaCat"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_Aquarium -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_Aquarium"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_Author -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_Author"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_Comments -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_Comments"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_Dangerous -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_Dangerous"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_DemersPelag -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_DemersPelag"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_FBname -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_FBname"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_GameFish -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_GameFish"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_GameRef -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_GameRef"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_Genus -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_Genus"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_PicPreferredName -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_PicPreferredName"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_SpecCode -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_SpecCode"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_Species -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_Species"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_SpeciesRefNo -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_SpeciesRefNo"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_UsedforAquaculture -->
+
+    <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species_UsedforAquaculture"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/abnorm -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/abnorm"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/abnormref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/abnormref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/abundance -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/abundance"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/abundancedelta -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/abundancedelta"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/acknowledge -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/acknowledge"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/address -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/address"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/alieninvasive -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/alieninvasive"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/allgenus -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/allgenus"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/aquamaint -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/aquamaint"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/aquarium -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/aquarium"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/aquariumref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/aquariumref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/biblio -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/biblio"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/biblio2 -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/biblio2"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/brains -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/brains"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/broodstock -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/broodstock"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cas_biblio -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cas_biblio"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cas_bibliogen -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cas_bibliogen"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cas_bibliosp -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cas_bibliosp"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cellabel10d30w -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cellabel10d30w"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cellabel1d30w -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cellabel1d30w"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cellabel2d30w -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cellabel2d30w"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/checklist -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/checklist"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cigua -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cigua"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ciguafb -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ciguafb"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/citesfb -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/citesfb"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cl50 -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cl50"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/classes -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/classes"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_us -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_us"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collectionsref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collectionsref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countfao -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countfao"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countfaoref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countfaoref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countrysub -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countrysub"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countrysubref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countrysubref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cultspec -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cultspec"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cultsys -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cultsys"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cultures -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/cultures"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/data2010 -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/data2010"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/data2050 -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/data2050"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/diet -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/diet"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/diet_items -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/diet_items"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/diseases -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/diseases"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/dispic -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/dispic"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/disref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/disref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecology -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecology"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosysfam -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosysfam"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosyslhref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosyslhref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosystem -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosystem"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosystemcntref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosystemcntref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosystemcountry -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosystemcountry"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosystemfaoref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosystemfaoref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosystemref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ecosystemref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/eggdev -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/eggdev"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/eggnurserysystem -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/eggnurserysystem"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/eggs -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/eggs"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/elecdat -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/elecdat"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/elecstudies -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/elecstudies"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/elecsub -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/elecsub"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/enzymes -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/enzymes"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/estimate -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/estimate"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/estimatedepth -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/estimatedepth"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/faoaquacult -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/faoaquacult"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/faoareas -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/faoareas"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/faoarfam -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/faoarfam"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/faoarord -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/faoarord"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/faoarref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/faoarref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/faocatch -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/faocatch"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fbrelinks -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fbrelinks"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fbusers -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fbusers"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_datasource -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_datasource"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_fish -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_fish"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_fishingdetails -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_fishingdetails"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_location -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_location"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_losses -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_losses"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_lossesfinance -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_lossesfinance"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_lossesother -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_lossesother"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_processdetails -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_processdetails"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_storagedetails -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_storagedetails"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_transportdetails -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fl_transportdetails"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/food -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/food"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/foodecosystemtype -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/foodecosystemtype"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fooditems -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fooditems"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/foodtroph -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/foodtroph"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/frynurserysystem -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/frynurserysystem"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fubh -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/fubh"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/gazetteer -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/gazetteer"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/genedat -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/genedat"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/genera -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/genera"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/genetics -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/genetics"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/gicim_photos_01 -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/gicim_photos_01"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/gicim_photosx -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/gicim_photosx"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/gillarea -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/gillarea"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/glossary -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/glossary"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/graphcateg -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/graphcateg"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/icescatch -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/icescatch"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/institution -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/institution"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/instlanguage -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/instlanguage"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/instmembership -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/instmembership"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/instspecies -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/instspecies"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/intrcase -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/intrcase"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/isscaap -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/isscaap"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/journals -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/journals"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/keyquestions -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/keyquestions"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/keys_table -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/keys_table"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/label_index -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/label_index"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/language -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/language"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/languagecountry -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/languagecountry"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/languagegroup -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/languagegroup"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/languagescript -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/languagescript"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/languagescriptcountry -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/languagescriptcountry"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/larvae -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/larvae"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/larvaepresence -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/larvaepresence"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/larvalnurserysystem -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/larvalnurserysystem"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/larvalswimspeed -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/larvalswimspeed"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/larvdyn -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/larvdyn"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/latgraphs -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/latgraphs"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/massconversion -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/massconversion"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/materialsexamined -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/materialsexamined"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/matrix -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/matrix"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/maturity -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/maturity"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/miniessay -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/miniessay"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphdat -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphdat"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphmet -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphmet"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphmettlratios -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphmettlratios"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphorders -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/morphorders"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/museum -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/museum"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/myersbiblio -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/myersbiblio"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/myersdata -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/myersdata"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/myersrecruitmentdatabase -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/myersrecruitmentdatabase"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/occurrence -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/occurrence"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/occurrence_x -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/occurrence_x"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/oceanprovfaoref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/oceanprovfaoref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/oceanprovinces -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/oceanprovinces"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/oceanprovincesref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/oceanprovincesref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/orderage -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/orderage"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/orders -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/orders"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/otoliths -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/otoliths"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/oxygen -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/oxygen"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/picturesmain"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/pop_rm -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/pop_rm"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/popchar -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/popchar"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/popgrowth -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/popgrowth"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/poplf -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/poplf"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/poplfdata -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/poplfdata"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/popll -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/popll"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/poplw -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/poplw"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/popqb -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/popqb"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/popular -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/popular"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/predatorecosystemtype -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/predatorecosystemtype"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/predatorhierarchy -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/predatorhierarchy"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/predatortroph -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/predatortroph"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/predats -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/predats"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/proxims -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/proxims"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ration -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/ration"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/refrens -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/refrens"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/reproduc -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/reproduc"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/revisions -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/revisions"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/rp_province -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/rp_province"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/rp_region -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/rp_region"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/seafoodad -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/seafoodad"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/seafoodadref -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/seafoodadref"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/searchpagestats -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/searchpagestats"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/sounds -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/sounds"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/spawning -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/spawning"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/species"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/speed -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/speed"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/sponsors -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/sponsors"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/stocks -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/stocks"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/strains -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/strains"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/swimming -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/swimming"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/synonyms -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/synonyms"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/tabnotes -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/tabnotes"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/urls -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/urls"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/vision -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/vision"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/waterquality -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/waterquality"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/webfish -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/webfish"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/webuse -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/webuse"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/whatsnew -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/whatsnew"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_cn3 -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_cn3"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_continent -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_continent"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_country_importance -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_country_importance"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_factsheetmaint -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_factsheetmaint"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_factsheetmaint_aquaculture -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_factsheetmaint_aquaculture"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_foridentification -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_foridentification"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_picturetype -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_picturetype"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_picturetype_lifestage -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_picturetype_lifestage"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_rdecomnamescountry -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_rdecomnamescountry"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_rdecomnameslanguage -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_rdecomnameslanguage"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_rdecountrycoordinators -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_rdecountrycoordinators"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_tour -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_tour"/>
+    
+
+
+    <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_userstypelist -->
+
+    <owl:Class rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/zweb_userstypelist"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.2.3.1824) http://owlapi.sourceforge.net -->
+

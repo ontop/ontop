@@ -1,0 +1,40 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/>
+
+SELECT ?common ?code ?refno ?author ?demerspelag ?anacat
+               ?family ?order ?class ?entered ?pic ?picid ?description 
+               ?refauthor ?refyear ?collaborator  ?comments
+WHERE {
+   ?x :species_Genus "Aboma" .
+   ?x :species_SpecCode ?code.
+   ?x :species_Species "etheostoma" .
+   ?x :species_Comments ?comments .
+   OPTIONAL {?x :species_Author ?author}.
+   OPTIONAL {?x :species_FBname ?common}.
+   OPTIONAL {?x :species_SpeciesRefNo ?refno}.
+   OPTIONAL {?ref :refrens_RefNo ?refno}.
+   OPTIONAL {?ref :refrens_Author ?refauthor}.
+   OPTIONAL {?ref :refrens_Year ?refyear}.
+   OPTIONAL {?x :species_Comments ?biology.}
+   OPTIONAL {
+      ?x :species_FamCode ?famcode.
+      ?famcode :families_Family ?family.
+      ?famcode :families_Order ?order.
+      ?famcode :families_Class ?class.
+   }
+   OPTIONAL {
+      ?morph :morphdat_Speccode ?x.
+      ?morph :morphdat_AddChars ?description.
+   }
+   OPTIONAL {?x :species_DemersPelag ?demerspelag.}
+   OPTIONAL {?x :species_AnaCat ?anacat.}
+   OPTIONAL {
+      ?x :species_PicPreferredName ?pic.
+      ?pic_node :picturesmain_SpecCode ?x.
+      ?pic_node :picturesmain_PicName ?pic.
+      ?pic_node :picturesmain_autoctr ?picid.
+      ?pic_node :picturesmain_Entered ?entered.
+      ?pic_node :picturesmain_AuthName ?collaborator.
+   }
+}
+

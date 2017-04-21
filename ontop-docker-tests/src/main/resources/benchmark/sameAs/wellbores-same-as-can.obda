@@ -1,0 +1,39 @@
+[PrefixDeclaration]
+:		http://ontop.inf.unibz.it/test/wellbore#
+owl:    http://www.w3.org/2002/07/owl#
+xsd:    http://www.w3.org/2001/XMLSchema#
+obda:    https://w3id.org/obda/vocabulary#
+epds: http://epds/wellbore/
+npd: http://npd/wellbore/
+ow: http://ow/wellbore/
+well: http://ontop.inf.unibz.it/test/well/
+
+
+[MappingDeclaration] @collection [[
+
+mappingId	mapping_can
+target		<http://ontop/wellbore/{can_prov}/{can_id}> obda:isCanonicalIRIOf epds:{id1} , npd:{id2} , ow:{id3} .
+source		select can_id, can_prov, id1, id2, id3 from T_can_link
+
+mappingId	mappingT1
+target		<http://epds/wellbore/{id}> a :Wellbore ; :inWell well:{well} ; :name "{name}"  .
+source		select id, well, name from T1
+
+mappingId	mappingT2
+target		<http://npd/wellbore/{id}>  a :Wellbore ;  :inWell :{well} ; :name "{name}" .
+source		select id, well, name from T2
+
+mappingId	mappingT3
+target		<http://ow/wellbore/{id}>   a :Wellbore ;  :inWell :{well} ; :name "{name}" .
+source		select id, well, name from T3
+
+mappingId	mappingW1
+target		well:{name} a :Well ;  :hasWellbore epds:{wellbore}  .
+source		select name, wellbore from W1
+
+mappingId	mapping_can_well
+target		<http://ontop/well/{can_prov}/{can_id}> obda:isCanonicalIRIOf well:{id1} , :{id2}  .
+source		select can_id, can_prov, id1, id2 from T_can_well_link
+
+
+]]

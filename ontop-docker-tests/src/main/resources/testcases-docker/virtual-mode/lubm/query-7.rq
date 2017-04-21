@@ -1,0 +1,12 @@
+# Query7
+# This query is similar to Query 6 in terms of class Student but it increases in the
+# number of classes and properties and its selectivity is high.
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ub: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+SELECT ?X ?Y
+WHERE 
+{?X rdf:type ub:Student .
+ ?Y rdf:type ub:Course .
+  ?X ub:takesCourse ?Y .
+ <http://www.Department0.University0.edu/AssociateProfessor0> ub:teacherOf ?Y
+}

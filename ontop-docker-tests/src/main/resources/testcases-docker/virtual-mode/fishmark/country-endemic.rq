@@ -1,0 +1,18 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX fd: <http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/>
+
+SELECT ?order ?family ?genus ?species ?name 
+WHERE {
+   ?nameID fd:comnames_ComName ?name .
+   ?nameID fd:comnames_C_Code ?ccode . 
+   ?nameID fd:comnames_SpecCode ?x.
+   ?x fd:species_Genus ?genus .
+   ?x fd:species_Species ?species .
+   ?x fd:species_FamCode ?f .
+   ?f fd:families_Family  ?family .
+   ?f fd:families_Order ?order .
+   ?c fd:country_SpecCode ?x.
+   ?c fd:country_Status "endemic" .
+   ?c fd:country_C_Code ?cf .
+   ?cf fd:countref_PAESE "Italy" .     
+}

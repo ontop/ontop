@@ -1,0 +1,20 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#>
+PREFIX sparqldl:<http://pellet.owldl.com/ns/sdle#>
+
+# terminal e rispettive movimentazioni
+# e' piu' veloce commentando ITU e Terminal (tanto non possono non esserlo)
+
+SELECT DISTINCT ?terminal  ?itu
+WHERE {
+?event a :ITUEvent;
+ :takesPlaceAt ?terminal;
+ :happensToITU ?itu;
+ :hasEventTime ?time;
+ {?event a :Loading} UNION {?event a :Unloading} UNION {?event a :Passing}.
+FILTER(?time < "2011-11-12T00:00:00.000Z"^^xsd:dateTime  )}
+ORDER BY ?terminal 
+

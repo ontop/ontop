@@ -1,0 +1,14 @@
+# Query12
+# The benchmark data do not produce any instances of class Chair. Instead, each
+# Department individual is linked to the chair professor of that department by 
+# property headOf. Hence this query requires realization, i.e., inference that
+# that professor is an instance of class Chair because he or she is the head of a
+# department. Input of this query is small as well.
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ub: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>
+SELECT DISTINCT ?X ?Y
+WHERE
+{?X rdf:type ub:Chair .
+  ?Y rdf:type ub:Department .
+  ?X ub:worksFor ?Y .
+  ?Y ub:subOrganizationOf <http://www.University0.edu>}
