@@ -141,15 +141,11 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
                                                                                      InnerJoinNode topJoinNode,
                                                                                      ConcreteProposal proposal)
             throws EmptyQueryException {
-        /**
+        /*
          * First, add and remove non-top nodes
          */
         proposal.getDataNodesToRemove()
                 .forEach(treeComponent::removeSubTree);
-
-        proposal.getNewDataNodes()
-                .forEach(newNode -> treeComponent.addChild(topJoinNode, newNode,
-                        Optional.empty(), false));
 
         return updateJoinNodeAndPropagateSubstitution(query, treeComponent, topJoinNode, proposal);
     }

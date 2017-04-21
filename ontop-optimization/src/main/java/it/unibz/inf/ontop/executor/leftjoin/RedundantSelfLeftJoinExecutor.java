@@ -358,31 +358,11 @@ public class RedundantSelfLeftJoinExecutor
                                                                            QueryTreeComponent treeComponent,
                                                                            LeftJoinNode leftJoinNode,
                                                                            ConcreteProposal proposal) throws EmptyQueryException {
-        /**
+        /*
          * First, add and remove non-top nodes
          */
         proposal.getDataNodesToRemove()
                 .forEach(treeComponent::removeSubTree);
-
-        switch( proposal.getNewDataNodes().size() ) {
-            case 0:
-                break;
-
-            case 1:
-                proposal.getNewDataNodes()
-                        .forEach(newNode -> treeComponent.addChild(leftJoinNode, newNode,
-                                Optional.of(LEFT), false));
-                break;
-
-            case 2:
-                UnmodifiableIterator<DataNode> dataNodeIter = proposal.getNewDataNodes().iterator();
-                treeComponent.addChild(leftJoinNode, dataNodeIter.next(), Optional.of(LEFT), false);
-                treeComponent.addChild(leftJoinNode, dataNodeIter.next(), Optional.of(RIGHT), false);
-                break;
-
-            default:
-                throw new IllegalStateException("Self-left join elimination MUST not add more than 2 new nodes");
-        }
 
         return updateJoinNodeAndPropagateSubstitution(query, treeComponent, leftJoinNode, proposal);
     }
