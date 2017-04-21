@@ -103,13 +103,15 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         }
 
         private void checkExpression(JoinOrFilterNode node, ImmutableExpression expression) {
-            if (!expression.getVariableStream()
-                .allMatch(v -> query.getChildren(node).stream()
-                        .flatMap(c -> query.getVariables(c).stream())
-                        .collect(ImmutableCollectors.toSet())
-                        .contains(v))) {
+            ImmutableSet<Variable> unboundVariables = expression.getVariableStream()
+                    .filter(v -> !(query.getChildren(node).stream()
+                            .flatMap(c -> query.getVariables(c).stream())
+                            .collect(ImmutableCollectors.toSet())
+                            .contains(v)))
+                    .collect(ImmutableCollectors.toSet());
+            if (!unboundVariables.isEmpty()) {
                 throw new InvalidIntermediateQueryException("Expression " + expression + " of "
-                        + expression + " uses an unbound variable.\n" + query);
+                        + expression + " uses unbound variables (" + unboundVariables +  ").\n" + query);
             }
         }
 

@@ -104,4 +104,14 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
     }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return ImmutableSet.of();
+    }
 }
