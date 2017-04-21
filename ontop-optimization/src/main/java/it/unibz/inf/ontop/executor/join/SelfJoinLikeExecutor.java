@@ -45,37 +45,13 @@ public class SelfJoinLikeExecutor {
      */
     protected static class PredicateLevelProposal {
 
-        private final ImmutableCollection<DataNode> keptDataNodes;
         private final ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> substitutions;
         private final ImmutableCollection<DataNode> removedDataNodes;
 
-        public PredicateLevelProposal(ImmutableCollection<DataNode> keptDataNodes,
-                                         ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> substitutions,
-                                         ImmutableCollection<DataNode> removedDataNodes) {
-            this.keptDataNodes = keptDataNodes;
+        public PredicateLevelProposal(ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> substitutions,
+                                      ImmutableCollection<DataNode> removedDataNodes) {
             this.substitutions = substitutions;
             this.removedDataNodes = removedDataNodes;
-
-            if (keptDataNodes.stream()
-                    .anyMatch(removedDataNodes::contains)) {
-                throw new IllegalStateException("A node cannot be kept and removed at the same time");
-            }
-        }
-
-        /**
-         * No redundancy
-         */
-        public PredicateLevelProposal(ImmutableCollection<DataNode> initialDataNodes) {
-            this.keptDataNodes = initialDataNodes;
-            this.substitutions = ImmutableList.of();
-            this.removedDataNodes = ImmutableList.of();
-        }
-
-        /**
-         * Not unified
-         */
-        public ImmutableCollection<DataNode> getKeptDataNodes() {
-            return keptDataNodes;
         }
 
         public ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> getSubstitutions() {
@@ -96,20 +72,13 @@ public class SelfJoinLikeExecutor {
      */
     protected static class ConcreteProposal {
 
-        private final ImmutableCollection<DataNode> newDataNodes;
         private final Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution;
         private final ImmutableCollection<DataNode> removedDataNodes;
 
-        public ConcreteProposal(ImmutableCollection<DataNode> newDataNodes,
-                                   Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
-                                   ImmutableCollection<DataNode> removedDataNodes) {
-            this.newDataNodes = newDataNodes;
+        public ConcreteProposal(Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
+                                ImmutableCollection<DataNode> removedDataNodes) {
             this.optionalSubstitution = optionalSubstitution;
             this.removedDataNodes = removedDataNodes;
-        }
-
-        public ImmutableCollection<DataNode> getNewDataNodes() {
-            return newDataNodes;
         }
 
         public ImmutableCollection<DataNode> getDataNodesToRemove() {
@@ -232,12 +201,7 @@ public class SelfJoinLikeExecutor {
                             })
                     .getRemovalNodes());
 
-            ImmutableSet<DataNode> keptNodes = dataNodeGroups.stream()
-                    .flatMap(Collection::stream)
-                    .filter(n -> !removableNodes.contains(n))
-                    .collect(ImmutableCollectors.toSet());
-
-            return new PredicateLevelProposal(keptNodes, unifyingSubstitutions, removableNodes);
+            return new PredicateLevelProposal(unifyingSubstitutions, removableNodes);
 
             /*
              * Trick: rethrow the exception
@@ -257,51 +221,15 @@ public class SelfJoinLikeExecutor {
             return Optional.empty();
         }
 
-        ImmutableSet.Builder<DataNode> removedDataNodeBuilder = ImmutableSet.builder();
-        ImmutableSet.Builder<DataNode> newDataNodeBuilder = ImmutableSet.builder();
+        ImmutableSet<DataNode> removedDataNodes =predicateProposals.stream()
+                .flatMap(p -> p.getRemovedDataNodes().stream())
+                .collect(ImmutableCollectors.toSet());
 
-        for (PredicateLevelProposal predicateProposal : predicateProposals) {
-            if (optionalMergedSubstitution.isPresent()) {
-                ImmutableSubstitution<VariableOrGroundTerm> mergedSubstitution = optionalMergedSubstitution.get();
-
-                for (DataNode keptDataNode : predicateProposal.getKeptDataNodes()) {
-                    DataAtom previousDataAtom = keptDataNode.getProjectionAtom();
-                    DataAtom newDataAtom = mergedSubstitution.applyToDataAtom(previousDataAtom);
-
-                    /*
-                     * If new atom
-                     */
-                    if (!previousDataAtom.equals(newDataAtom)) {
-                        newDataNodeBuilder.add(createNewDataNode(keptDataNode, newDataAtom));
-                        removedDataNodeBuilder.add(keptDataNode);
-                    }
-                    /*
-                     * Otherwise, no need to updated the "previous" data node
-                     * (we keep it).
-                     */
-                }
-            }
-            removedDataNodeBuilder.addAll(predicateProposal.getRemovedDataNodes());
-        }
-
-        ImmutableSet<DataNode> newDataNodes = newDataNodeBuilder.build();
-        ImmutableSet<DataNode> removedDataNodes = removedDataNodeBuilder.build();
-
-        if (newDataNodes.isEmpty()
-                && removedDataNodes.isEmpty()
+        if (removedDataNodes.isEmpty()
                 && (! optionalMergedSubstitution.isPresent()))
             return Optional.empty();
 
-        return Optional.of(new ConcreteProposal(newDataNodes, optionalMergedSubstitution, removedDataNodes));
-    }
-
-    private static DataNode createNewDataNode(DataNode previousDataNode, DataAtom newDataAtom) {
-        if (previousDataNode instanceof ExtensionalDataNode) {
-            return previousDataNode.newAtom(newDataAtom);
-        }
-        else {
-            throw new IllegalArgumentException("Unexpected type of data node: " + previousDataNode);
-        }
+        return Optional.of(new ConcreteProposal(optionalMergedSubstitution, removedDataNodes));
     }
 
 
