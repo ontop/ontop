@@ -95,4 +95,18 @@ public interface QueryNode extends Cloneable {
     NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild);
 
     NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode);
+
+    /**
+     * Set of variables that this node, INDEPENDENTLY OF THE REQUIREMENTS OF ITS ANCESTORS,
+     * requires to be defined in the sub-tree.
+     *
+     * Said differently, additional variable requirements may come from its ancestors.
+     *
+     */
+    ImmutableSet<Variable> getLocallyRequiredVariables();
+
+    /**
+     * Locally defined variables must not appear in the sub-tree
+     */
+    ImmutableSet<Variable> getLocallyDefinedVariables();
 }
