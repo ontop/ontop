@@ -9,8 +9,11 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.pivotalrepr.DataNode;
+
+import java.util.Optional;
 
 /**
  * Uses unique constraints to detect and remove redundant self inner joins
@@ -29,18 +32,19 @@ public class UCRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor {
      *
      */
     @Override
-    protected PredicateLevelProposal proposePerPredicate(ImmutableCollection<DataNode> initialNodes,
-                                                         AtomPredicate predicate, DBMetadata dbMetadata)
+    protected Optional<PredicateLevelProposal> proposePerPredicate(ImmutableCollection<DataNode> initialNodes,
+                                                                   AtomPredicate predicate, DBMetadata dbMetadata,
+                                                                   ImmutableList<Variable> priorityVariables)
             throws AtomUnificationException {
         ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> uniqueConstraints = dbMetadata.getUniqueConstraints();
 
         if (uniqueConstraints.containsKey(predicate)) {
             ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap = groupByUniqueConstraintArguments(
                     initialNodes, uniqueConstraints.get(predicate));
-            return proposeForGroupingMap(groupingMap);
+            return Optional.of(proposeForGroupingMap(groupingMap));
         }
         else {
-            return new PredicateLevelProposal(initialNodes);
+            return Optional.empty();
         }
     }
 
