@@ -24,23 +24,9 @@ import it.unibz.inf.ontop.docker.AbstractDbMetadataInfoTest;
 
 public class MssqlMetadataInfoTest extends AbstractDbMetadataInfoTest {
 
-	@Override
-	protected String getConnectionPassword() {
-		return "Mssql1.0";
-	}
+	private static final String propertyFile = "/mssql/datatypes-mssql.properties";
 
-	@Override
-	protected String getConnectionString() {
-		return "jdbc:sqlserver://tom.inf.unibz.it;databaseName=datatypes";
-	}
-
-	@Override
-	protected String getConnectionUsername() {
-		return "SA";
-	}
-
-	@Override
-	protected String getDriverName() {
-		return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+	public MssqlMetadataInfoTest() {
+		super(propertyFile);
 	}
 }

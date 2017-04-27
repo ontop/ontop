@@ -32,9 +32,9 @@ import java.util.List;
  */
 public class OrderByTest extends AbstractVirtualModeTest {
 
-    static final String owlFile = "src/test/resources/pgsql/order/stockBolzanoAddress.owl";
-    static final String obdaFile = "src/test/resources/pgsql/order/stockBolzanoAddress.obda";
-    static final String propertiesFile = "src/test/resources/pgsql/order/stockBolzanoAddress.properties";
+    static final String owlFile = "/pgsql/order/stockBolzanoAddress.owl";
+    static final String obdaFile = "/pgsql/order/stockBolzanoAddress.obda";
+    static final String propertiesFile = "/pgsql/order/stockBolzanoAddress.properties";
 
     public OrderByTest() {
         super(owlFile, obdaFile, propertiesFile);

@@ -29,9 +29,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class PostgresLowercaseIdentifierTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "src/test/resources/pgsql/identifiers/identifiers.owl";
-	static final String obdafile = "src/test/resources/pgsql/identifiers/identifiers-lowercase-postgres.obda";
-	static final String propertyfile = "src/test/resources/pgsql/identifiers/identifiers-lowercase-postgres.properties";
+	static final String owlfile = "/pgsql/identifiers/identifiers.owl";
+	static final String obdafile = "/pgsql/identifiers/identifiers-lowercase-postgres.obda";
+	static final String propertyfile = "/pgsql/identifiers/identifiers-lowercase-postgres.properties";
 
 	public PostgresLowercaseIdentifierTest() {
 		super(owlfile, obdafile, propertyfile);

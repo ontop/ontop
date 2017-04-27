@@ -24,27 +24,10 @@ import it.unibz.inf.ontop.docker.AbstractConstraintTest;
 
 public class OracleConstraintTest extends AbstractConstraintTest {
 
+	private static final String propertyFile = "/oracle/oracle.properties";
+
 	public OracleConstraintTest(String method) {
-		super(method);
+		super(method, propertyFile);
 	}
 
-	@Override
-	protected String getConnectionPassword() {
-		return "oracle";
-	}
-
-	@Override
-	protected String getConnectionString() {
-		return "jdbc:oracle:thin:@//tom.inf.unibz.it:49161/xe";
-	}
-
-	@Override
-	protected String getConnectionUsername() {
-		return "system";
-	}
-
-	@Override
-	protected String getDriverName() {
-		return "oracle.jdbc.OracleDriver";
-	}
 }

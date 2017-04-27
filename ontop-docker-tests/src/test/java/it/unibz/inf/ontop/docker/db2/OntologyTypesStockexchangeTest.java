@@ -31,9 +31,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 
 public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     
-	static final String owlFile = "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	static final String obdaFile = "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-db2.obda";
-    static final String propertyFile = "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-db2.properties";
+	static final String owlFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	static final String obdaFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-db2.obda";
+    static final String propertyFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-db2.properties";
 
     public OntologyTypesStockexchangeTest() {
         super(owlFile, obdaFile, propertyFile);

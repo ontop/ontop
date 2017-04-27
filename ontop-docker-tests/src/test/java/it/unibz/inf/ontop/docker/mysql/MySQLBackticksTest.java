@@ -28,9 +28,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class MySQLBackticksTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "src/test/resources/mysql/identifiers/identifiers.owl";
-	static final String obdafile = "src/test/resources/mysql/identifiers/identifiers-backtick-mysql.obda";
-	static final String propertiesfile = "src/test/resources/mysql/identifiers/identifiers-backtick-mysql.properties";
+	static final String owlfile = "/mysql/identifiers/identifiers.owl";
+	static final String obdafile = "/mysql/identifiers/identifiers-backtick-mysql.obda";
+	static final String propertiesfile = "/mysql/identifiers/identifiers-backtick-mysql.properties";
 
 	public MySQLBackticksTest() {
 		super(owlfile, obdafile, propertiesfile);

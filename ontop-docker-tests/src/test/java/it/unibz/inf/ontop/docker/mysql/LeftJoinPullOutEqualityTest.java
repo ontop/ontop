@@ -8,9 +8,9 @@ import org.semanticweb.owlapi.model.OWLException;
  */
 public class LeftJoinPullOutEqualityTest extends AbstractVirtualModeTest {
 
-    static final String owlFileName = "src/test/resources/mysql/pullOutEq/pullOutEq.ttl";
-    static final String obdaFileName = "src/test/resources/mysql/pullOutEq/pullOutEq.obda";
-    static final String propertyFileName = "src/test/resources/mysql/pullOutEq/pullOutEq.properties";
+    static final String owlFileName = "/mysql/pullOutEq/pullOutEq.ttl";
+    static final String obdaFileName = "/mysql/pullOutEq/pullOutEq.obda";
+    static final String propertyFileName = "/mysql/pullOutEq/pullOutEq.properties";
 
     public LeftJoinPullOutEqualityTest() {
         super(owlFileName, obdaFileName, propertyFileName);

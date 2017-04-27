@@ -9,9 +9,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class OraclePrefixSourceTest extends AbstractVirtualModeTest {
 
-    static final String owlFile = "src/test/resources/oracle/regex/stockBolzanoAddress.owl";
-    static final String obdaFile = "src/test/resources/oracle/regex/stockexchangePrefix.obda";
-    static final String propertiesFile = "src/test/resources/oracle/oracle.properties";
+    static final String owlFile = "/oracle/regex/stockBolzanoAddress.owl";
+    static final String obdaFile = "/oracle/regex/stockexchangePrefix.obda";
+    static final String propertiesFile = "/oracle/oracle.properties";
 
     public OraclePrefixSourceTest() {
         super(owlFile, obdaFile, propertiesFile);

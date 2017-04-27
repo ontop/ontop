@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.docker.postgres;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
@@ -19,29 +20,21 @@ import static org.junit.Assert.assertFalse;
  *
  *
  */
-public class AnnotationTest {
+public class AnnotationTest extends AbstractVirtualModeTest {
 
     Logger log = LoggerFactory.getLogger(this.getClass());
 
-    final String owlFile = "src/test/resources/pgsql/annotation/doid.owl";
-    final String obdaFile = "src/test/resources/pgsql/annotation/doid.obda";
-    final String propertiesFile = "src/test/resources/pgsql/annotation/doid.properties";
+    final static String owlFile = "/pgsql/annotation/doid.owl";
+    final static String obdaFile = "/pgsql/annotation/doid.obda";
+    final static String propertyFile = "/pgsql/annotation/doid.properties";
 
-    private int runTestQuery1() throws Exception {
+    public AnnotationTest() {
+        super(owlFile, obdaFile, propertyFile);
+    }
 
-        // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdaFile)
-                .ontologyFile(owlFile)
-                .propertyFile(propertiesFile)
-                .enableTestMode()
-                .enableOntologyAnnotationQuerying(true)
-                .build();
-        QuestOWL reasoner = factory.createReasoner(config);
-        // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+
+    @Test
+    public void testAnnotationInOntology() throws Exception {
 
         String query = Joiner.on("\n").join(
                 CharStreams.readLines(new FileReader("src/test/resources/pgsql/annotation/q1.q")));
@@ -49,43 +42,7 @@ public class AnnotationTest {
         log.debug("Executing query: ");
         log.debug("Query: \n{}", query);
 
-        long start = System.nanoTime();
-        QuestOWLResultSet res = st.executeTuple(query);
-        long end = System.nanoTime();
-
-        double time = (end - start) / 1000;
-
-        int count = 0;
-        while (res.nextRow()) {
-            count += 1;
-            if (count == 1) {
-                for (int i = 1; i <= res.getColumnCount(); i++) {
-                    log.debug("Example result " + res.getSignature().get(i - 1) + " = " + res.getOWLObject(i));
-
-                }
-
-            }
-        }
-        log.debug("Total results: {}", count);
-
-        assertFalse(count == 0);
-
-        log.debug("Elapsed time: {} ms", time);
-
-        st.close();
-        conn.close();
-        reasoner.dispose();
-
-        return count;
-    }
-
-
-
-    @Test
-    public void testAnnotationInOntology() throws Exception {
-
-        int results = runTestQuery1();
-        assertEquals(76, results);
+        countResults(query ,76);
     }
 
 

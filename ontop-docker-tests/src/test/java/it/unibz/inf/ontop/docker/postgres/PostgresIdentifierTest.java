@@ -29,9 +29,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class PostgresIdentifierTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "src/test/resources/pgsql/identifiers/identifiers.owl";
-	static final String obdafile = "src/test/resources/pgsql/identifiers/identifiers-postgres.obda";
-	static final String propertiesfile = "src/test/resources/pgsql/identifiers/identifiers-postgres.properties";
+	static final String owlfile = "/pgsql/identifiers/identifiers.owl";
+	static final String obdafile = "/pgsql/identifiers/identifiers-postgres.obda";
+	static final String propertiesfile = "/pgsql/identifiers/identifiers-postgres.properties";
 
 	public PostgresIdentifierTest() {
 		super(owlfile, obdafile, propertiesfile);

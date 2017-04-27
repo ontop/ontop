@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
+import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
@@ -28,6 +29,7 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URL;
 import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -55,9 +57,9 @@ public abstract class AbstractBindTestWithFunctions {
 
 
     protected AbstractBindTestWithFunctions(String owlfile, String obdafile, String propertiesfile) {
-        this.owlfile = owlfile;
-        this.obdafile = obdafile;
-        this.propertiesfile = propertiesfile;
+        this.owlfile =  this.getClass().getResource(owlfile).toString();
+        this.obdafile =  this.getClass().getResource(obdafile).toString();
+        this.propertiesfile =  this.getClass().getResource(propertiesfile).toString();
     }
 
     private void runTests(String query) throws Exception {

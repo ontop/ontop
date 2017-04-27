@@ -29,9 +29,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 public class RegexPostgresSQLTest extends AbstractVirtualModeTest {
 
 
-	static final String owlfile = "src/test/resources/pgsql/regex/stockBolzanoAddress.owl";
-	static final String obdafile = "src/test/resources/pgsql/regex/stockexchangeRegex.obda";
-	static final String propertiesfile = "src/test/resources/pgsql/regex/stockexchangeRegex.properties";
+	static final String owlfile = "/pgsql/regex/stockBolzanoAddress.owl";
+	static final String obdafile = "/pgsql/regex/stockexchangeRegex.obda";
+	static final String propertiesfile = "/pgsql/regex/stockexchangeRegex.properties";
 
 	public RegexPostgresSQLTest() {
 		super(owlfile, obdafile,propertiesfile );

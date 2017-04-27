@@ -9,6 +9,8 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -17,9 +19,9 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
 
 public class InconsistencyCheckingVirtualTest {
 
-	private String owlfile = "src/test/resources/mysql/example/BooksNoAxioms.owl";
-	private String obdafile = "src/test/resources/mysql/example/exampleBooks.obda";
-	private String propertiesfile = "src/test/resources/mysql/example/exampleBooks.properties";
+	private String owlFile = "/mysql/example/BooksNoAxioms.owl";
+	private String obdaFile = "/mysql/example/exampleBooks.obda";
+	private String propertyFile = "/mysql/example/exampleBooks.properties";
 	private QuestOWL reasoner;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
@@ -44,7 +46,8 @@ public class InconsistencyCheckingVirtualTest {
 
 		manager = OWLManager.createOWLOntologyManager();
 		try {
-			ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+			InputStream ontologyFile =  this.getClass().getResourceAsStream(owlFile);
+			ontology = manager.loadOntologyFromOntologyDocument(ontologyFile);
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -60,12 +63,16 @@ public class InconsistencyCheckingVirtualTest {
 	
 	private void startReasoner(){
 
+
+		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
+
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(new File(obdafile))
+                .nativeOntopMappingFile(obdaFileName)
 				.ontology(ontology)
-				.propertyFile(propertiesfile)
+				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
 		try {

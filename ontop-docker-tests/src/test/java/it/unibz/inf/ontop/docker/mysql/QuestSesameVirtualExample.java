@@ -54,12 +54,19 @@ public class QuestSesameVirtualExample {
 	 * Use the sample database using H2 from
 	 * https://babbage.inf.unibz.it/trac/obdapublic/wiki/InstallingTutorialDatabases
 	 */
-	final String owlFile = "src/test/resources/mysql/example/exampleBooks.owl";
-	final String obdaFile = "src/test/resources/mysql/example/exampleBooks.obda";
-	final String ttlFile = "src/test/resources/mysql/example/Books-mappings.ttl";
-	final String propertyFile = "src/test/resources/mysql/example/exampleBooks.properties";
+	final String owlFile = "/mysql/example/exampleBooks.owl";
+	final String obdaFile = "/mysql/example/exampleBooks.obda";
+	final String ttlFile = "/mysql/example/Books-mappings.ttl";
+	final String propertyFile = "/mysql/example/exampleBooks.properties";
+
+	final String owlFileName =  this.getClass().getResource(owlFile).toString();
+	final String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+	final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
 	public void runQuery() throws Exception {
+
+
+
 
 		/*
 		 * Create a Quest Sesame repository with additional setup that uses no
@@ -67,9 +74,9 @@ public class QuestSesameVirtualExample {
 		 * TreeWitness algorithm.
 		 */
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile(owlFile)
-				.nativeOntopMappingFile(obdaFile)
-				.propertyFile(propertyFile)
+				.ontologyFile(owlFileName)
+				.nativeOntopMappingFile(obdaFileName)
+				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
 
@@ -142,13 +149,14 @@ public class QuestSesameVirtualExample {
 		
 		//create owlontology from file
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(new File(owlFile).getParentFile(), false);
+		URL owlFileName =  this.getClass().getResource(owlFile);
+		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(new File(owlFileName.getPath()).getParentFile(), false);
 		man.addIRIMapper(iriMapper);
-		OWLOntology owlontology = man.loadOntologyFromOntologyDocument(new File(owlFile));
+		OWLOntology owlontology = man.loadOntologyFromOntologyDocument(new File(owlFileName.getPath()));
 		
 		//create RDF Graph from ttl file
 		RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
-		InputStream in = new FileInputStream(ttlFile);
+		InputStream in =  this.getClass().getResourceAsStream(ttlFile);
 		URL documentUrl = new URL("file://" + ttlFile);
 		//Graph myGraph = new org.eclipse.rdf4j.model.impl.GraphImpl();
 		Model myModel = new LinkedHashModel();
@@ -156,11 +164,12 @@ public class QuestSesameVirtualExample {
 		parser.setRDFHandler(collector);
 		parser.parse(in, documentUrl.toString());
 
+		String ttlFileName =  this.getClass().getResource(ttlFile).toString();
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile(owlFile)
-				.r2rmlMappingFile(ttlFile)
+				.ontologyFile(owlFileName)
+				.r2rmlMappingFile(ttlFileName)
 				.enableExistentialReasoning(true)
-				.propertyFile(propertyFile)
+				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
 		

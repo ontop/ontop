@@ -4,9 +4,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 
 public class SAPHANATest extends AbstractVirtualModeTest {
 
-    private static final String owlfile = "src/test/resources/local/sap/SAPbooktutorial.owl";
-    private static final String obdafile = "src/test/resources/local/sap/SAPbooktutorial.obda";
-    private static final String propertyfile = "src/test/resources/local/sap/SAPbooktutorial.properties";
+    private static final String owlfile = "/local/sap/SAPbooktutorial.owl";
+    private static final String obdafile = "/local/sap/SAPbooktutorial.obda";
+    private static final String propertyfile = "/local/sap/SAPbooktutorial.properties";
 
     public SAPHANATest() {
         super(owlfile, obdafile, propertyfile);

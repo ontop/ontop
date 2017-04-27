@@ -10,9 +10,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class PrefixSourceTest extends AbstractVirtualModeTest{
 
-    static final String owlfile = "src/test/resources/pgsql/imdb/movieontology.owl";
-    static final String obdafile = "src/test/resources/pgsql/imdb/newPrefixMovieOntology.obda";
-    static final String propertiesfile = "src/test/resources/pgsql/imdb/movieontology.properties";
+    static final String owlfile = "/pgsql/imdb/movieontology.owl";
+    static final String obdafile = "/pgsql/imdb/newPrefixMovieOntology.obda";
+    static final String propertiesfile = "/pgsql/imdb/movieontology.properties";
 
     public PrefixSourceTest() {
         super(owlfile, obdafile, propertiesfile);

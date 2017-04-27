@@ -38,21 +38,25 @@ public class QuestOWLExampleNotLatin {
 	 * Test with not latin Character
 	 * 
 	 */
-	final String owlfile = "src/test/resources/mysql/example/exampleBooksNotLatin.owl";
-	final String obdafile = "src/test/resources/mysql/example/exampleBooksNotLatin.obda";
-	final String profertiesfile = "src/test/resources/mysql/example/exampleBooksNotLatin.properties";
+	final String owlFile = "/mysql/example/exampleBooksNotLatin.owl";
+	final String obdaFile = "/mysql/example/exampleBooksNotLatin.obda";
+	final String propertyFile = "/mysql/example/exampleBooksNotLatin.properties";
 
     @Test
 	public void runQuery() throws Exception {
+
+		String owlFileName =  this.getClass().getResource(owlFile).toString();
+		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(obdafile)
-				.ontologyFile(owlfile)
-				.propertyFile(profertiesfile)
+				.nativeOntopMappingFile(obdaFileName)
+				.ontologyFile(owlFileName)
+				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);

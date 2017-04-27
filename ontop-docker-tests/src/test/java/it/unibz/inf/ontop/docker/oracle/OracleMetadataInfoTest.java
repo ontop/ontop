@@ -24,23 +24,10 @@ import it.unibz.inf.ontop.docker.AbstractDbMetadataInfoTest;
 
 public class OracleMetadataInfoTest extends AbstractDbMetadataInfoTest {
 
-	@Override
-	protected String getConnectionPassword() {
-		return "oracle";
-	}
+	private static final String propertyFile = "/oracle/oracle.properties";
 
-	@Override
-	protected String getConnectionString() {
-		return "jdbc:oracle:thin:@//tom.inf.unibz.it:49161/xe";
-	}
-
-	@Override
-	protected String getConnectionUsername() {
-		return "system";
-	}
-
-	@Override
-	protected String getDriverName() {
-		return "oracle.jdbc.driver.OracleDriver";
+	public OracleMetadataInfoTest() {
+		super(propertyFile);
 	}
 }
+

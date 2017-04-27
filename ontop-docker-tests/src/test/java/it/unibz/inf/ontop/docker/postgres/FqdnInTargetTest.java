@@ -10,9 +10,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 public class FqdnInTargetTest extends AbstractVirtualModeTest
 {
 
-    static final String owlfile = "src/test/resources/pgsql/imdb/ontologyIMDB.owl";
-    static final String obdafile = "src/test/resources/pgsql/imdb/ontologyIMDB-fqdn.obda";
-	static final String propertiesfile = "src/test/resources/pgsql/imdb/ontologyIMDB-fqdn.properties";
+    static final String owlfile = "/pgsql/imdb/ontologyIMDB.owl";
+    static final String obdafile = "/pgsql/imdb/ontologyIMDB-fqdn.obda";
+	static final String propertiesfile = "/pgsql/imdb/ontologyIMDB-fqdn.properties";
 
 	public FqdnInTargetTest() {
 		super(owlfile, obdafile, propertiesfile);

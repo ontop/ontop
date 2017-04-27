@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.docker.postgres;
 
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
@@ -9,33 +10,20 @@ import org.semanticweb.owlapi.model.OWLObject;
 /**
  * Created by elem on 21/09/15.
  */
-public class MetaMappingExpanderTest {
+public class MetaMappingExpanderTest extends AbstractVirtualModeTest {
 
-        final String owlfile = "src/test/resources/pgsql/EPNet.owl";
-        final String obdafile = "src/test/resources/pgsql/EPNet.obda";
-        final String propertiesfile = "src/test/resources/pgsql/EPNet.properties";
+        final static String owlFile = "/pgsql/EPNet.owl";
+        final static String obdaFile = "/pgsql/EPNet.obda";
+        final static String propertyFile = "/pgsql/EPNet.properties";
 
-        @Test
-        public void runQuery() throws Exception {
+    public MetaMappingExpanderTest() {
+        super(owlFile, obdaFile, propertyFile);
+    }
 
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-            QuestOWLFactory factory = new QuestOWLFactory();
-            OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    .ontologyFile(owlfile)
-                    .nativeOntopMappingFile(obdafile)
-                    .propertyFile(propertiesfile)
-                    .enableTestMode()
-                    .build();
-            QuestOWL reasoner = factory.createReasoner(config);
-		/*
-		 * Prepare the data connection for querying.
-		 */
-            OntopOWLConnection conn = reasoner.getConnection();
-            OntopOWLStatement st = conn.createStatement();
+    @Test
+    public void testQuery() throws Exception {
 
-		/*
+        /*
 		 * Get the book information that is stored in the database
 		 */
 //        String sparqlQuery = "PREFIX : <http://www.semanticweb.org/ontologies/2015/1/EPNet-ONTOP_Ontology#>\n" +
@@ -51,61 +39,16 @@ public class MetaMappingExpanderTest {
 //                "?pl :hasLongitude ?long\n" +
 //                "}\n" +
 //                "limit 50\n";
-            String sparqlQuery = "PREFIX : <http://www.semanticweb.org/ontologies/2015/1/EPNet-ONTOP_Ontology#>\n" +
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                    "PREFIX dcterms: <http://purl.org/dc/terms/>\n" +
-                    "select ?x\n" +
-                    "where {\n" +
-                    "?x rdf:type :AmphoraSection2026 .\n" +
-                    "}\n" +
-                    "limit 5\n";
+        String sparqlQuery = "PREFIX : <http://www.semanticweb.org/ontologies/2015/1/EPNet-ONTOP_Ontology#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX dcterms: <http://purl.org/dc/terms/>\n" +
+                "select ?x\n" +
+                "where {\n" +
+                "?x rdf:type :AmphoraSection2026 .\n" +
+                "}\n" +
+                "limit 5\n";
 
-            try {
-                long t1 = System.currentTimeMillis();
-                QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-                int columnSize = rs.getColumnCount();
-                while (rs.nextRow()) {
-                    for (int idx = 1; idx <= columnSize; idx++) {
-                        OWLObject binding = rs.getOWLObject(idx);
-                        System.out.print(binding.toString() + ", ");
-                    }
-                    System.out.print("\n");
-                }
-                rs.close();
-                long t2 = System.currentTimeMillis();
+        runQuery(sparqlQuery);
 
-			/*
-			 * Print the query summary
-			 */
-                QuestOWLStatement qst = (QuestOWLStatement) st;
-                String sqlQuery = qst.getRewritingRendering(sparqlQuery);
-
-                System.out.println();
-                System.out.println("The input SPARQL query:");
-                System.out.println("=======================");
-                System.out.println(sparqlQuery);
-                System.out.println();
-
-                System.out.println("The output SQL query:");
-                System.out.println("=====================");
-                System.out.println(sqlQuery);
-
-                System.out.println("Query Execution Time:");
-                System.out.println("=====================");
-                System.out.println((t2-t1) + "ms");
-
-            } finally {
-
-			/*
-			 * Close connection and resources
-			 */
-                if (st != null && !st.isClosed()) {
-                    st.close();
-                }
-                if (conn != null && !conn.isClosed()) {
-                    conn.close();
-                }
-                reasoner.dispose();
-            }
         }
 }

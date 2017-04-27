@@ -7,11 +7,11 @@ public class MsSQLASKTest extends AbstractVirtualModeTest {
 
 
 	 private static final String owlfile =
-	 "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	 "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
 	 private static final String obdafile =
-	 "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mssql.obda";
+	 "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mssql.obda";
 	private static final String propertyfile =
-			"src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mssql.properties";
+			"/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mssql.properties";
 
 	public MsSQLASKTest() {
 		super(owlfile, obdafile, propertyfile);
