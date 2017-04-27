@@ -25,11 +25,14 @@ import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 public abstract class AbstractConstraintTest extends TestCase {
 	
@@ -39,22 +42,37 @@ public abstract class AbstractConstraintTest extends TestCase {
 	private static final String TB_WRITER = "Writer";
 	private static final String TB_EDITION = "Edition";
 	private static final String TB_BOOKWRITER = "BookWriter";
+
+	private String propertyFile;
+	private Properties properties;
+
 	
 	private static Logger log = LoggerFactory.getLogger(AbstractConstraintTest.class);
 	
-	public AbstractConstraintTest(String method) {
+	public AbstractConstraintTest(String method, String propertyFile) {
 		super(method);
+		this.propertyFile = propertyFile;
+
 	}
 	
 	@Override
-	public void setUp() {
+	public void setUp() throws Exception {
 		try {
+			InputStream pStream =this.getClass().getResourceAsStream(propertyFile);
+			properties = new Properties();
+			properties.load(pStream);
+
 			log.info(getConnectionString() + "\n");
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
 			metadata = RDBMetadataExtractionTools.createMetadata(conn);
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
-		} 
-		catch (SQLException e) { 
+		}
+		catch (IOException e) {
+			log.error("IOException during setUp of propertyFile");
+			e.printStackTrace();
+		}
+		catch (SQLException e) {
+			log.error("SQL Exception during setUp of metadata");
 			e.printStackTrace();
 		}
 	}
@@ -111,9 +129,24 @@ public abstract class AbstractConstraintTest extends TestCase {
 	private void writeLog(String tableName, Object keys) {
 		log.info(String.format("%s(%s)", tableName, keys.toString()));
 	}
-	
-	protected abstract String getDriverName();
-	protected abstract String getConnectionString();
-	protected abstract String getConnectionUsername();
-	protected abstract String getConnectionPassword();
+
+
+	public String getConnectionPassword() {
+		return properties.getProperty("jdbc.password");
+	}
+
+
+	public String getConnectionString() {
+		return properties.getProperty("jdbc.url");
+	}
+
+
+	public String getConnectionUsername() {
+		return properties.getProperty("jdbc.user");
+	}
+
+
+	public String getDriverName() {
+		return properties.getProperty("jdbc.driver");
+	}
 }

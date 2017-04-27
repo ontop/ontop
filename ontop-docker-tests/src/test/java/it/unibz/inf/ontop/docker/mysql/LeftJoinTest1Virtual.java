@@ -31,9 +31,9 @@ import org.junit.Test;
 public class LeftJoinTest1Virtual extends AbstractVirtualModeTest {
 	//private static Logger log = LoggerFactory.getLogger(LeftJoinTest1Virtual.class);
 
-	private static final String owlfile = "src/test/resources/mysql/person/person.owl";
-	private static final String obdafile = "src/test/resources/mysql/person/person1.obda";
-	private static final String propertyfile = "src/test/resources/mysql/person/person1.properties";
+	private static final String owlfile = "/mysql/person/person.owl";
+	private static final String obdafile = "/mysql/person/person1.obda";
+	private static final String propertyfile = "/mysql/person/person1.properties";
 
     public LeftJoinTest1Virtual() {
         super(owlfile, obdafile, propertyfile);

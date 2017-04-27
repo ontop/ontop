@@ -11,9 +11,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class ConcatMappingTest extends AbstractVirtualModeTest {
 
-    static final String owlFile = "src/test/resources/mysql/northwind/mapping-northwind.owl";
-    static final String obdaFile = "src/test/resources/mysql/northwind/mapping-northwind.obda";
-    static final String propertiesFile = "src/test/resources/mysql/northwind/mapping-northwind.properties";
+    static final String owlFile = "/mysql/northwind/mapping-northwind.owl";
+    static final String obdaFile = "/mysql/northwind/mapping-northwind.obda";
+    static final String propertiesFile = "/mysql/northwind/mapping-northwind.properties";
 
     public ConcatMappingTest() {
         super(owlFile, obdaFile, propertiesFile);

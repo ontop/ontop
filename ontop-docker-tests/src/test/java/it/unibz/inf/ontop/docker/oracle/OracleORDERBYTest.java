@@ -37,9 +37,9 @@ import java.util.List;
 public class OracleORDERBYTest extends AbstractVirtualModeTest {
 
     private static final Logger log = LoggerFactory.getLogger(OracleORDERBYTest.class);
-    static final String owlFile = "src/test/resources/oracle/orderby/orderBy.owl";
-    static final String obdaFile = "src/test/resources/oracle/orderby/orderBy.obda";
-    static final String propertyFile = "src/test/resources/oracle/oracle.properties";
+    static final String owlFile = "/oracle/orderby/orderBy.owl";
+    static final String obdaFile = "/oracle/orderby/orderBy.obda";
+    static final String propertyFile = "/oracle/oracle.properties";
 
     public OracleORDERBYTest() {
         super(owlFile, obdaFile, propertyFile);

@@ -32,28 +32,34 @@ import java.util.Properties;
 
 public class SesameTableWithSpaceTest extends TestCase {
 
-	String owlfile = "src/test/resources/mysql/northwind/1.4a.owl";
-	String mappingfile = "src/test/resources/mysql/northwind/mapping-northwind-1421066727259.ttl";
+	String owlFile = "/mysql/northwind/1.4a.owl";
+	String ttlFile = "/mysql/northwind/mapping-northwind-1421066727259.ttl";
+	String propertyFile = "/mysql/northwind/northwind.properties";
 
 	OWLOntology owlontology;
 	Model mappings;
 	RepositoryConnection con;
 	Properties connectionProperties;
 
+	final String owlFileName =  this.getClass().getResource(owlFile).toString();
+	final String ttlFileName =  this.getClass().getResource(ttlFile).toString();
+	final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
+
+
 	public SesameTableWithSpaceTest() {
 		// create owlontology from file
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(
-				new File(owlfile).getParentFile(), false);
+		URL owlFileName =  this.getClass().getResource(owlFile);
+		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(new File(owlFileName.getPath()).getParentFile(), false);
 		man.addIRIMapper(iriMapper);
 		try {
 			owlontology = man
-					.loadOntologyFromOntologyDocument(new File(owlfile));
+					.loadOntologyFromOntologyDocument(new File(owlFileName.getPath()));
 
 			// create RDF Graph from ttl file
 			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
-			InputStream in = new FileInputStream(mappingfile);
-			URL documentUrl = new URL("file://" + mappingfile);
+			InputStream in =  this.getClass().getResourceAsStream(ttlFile);
+			URL documentUrl = new URL("file://" + ttlFile);
 			mappings = new LinkedHashModel();
 			StatementCollector collector = new StatementCollector(mappings);
 			parser.setRDFHandler(collector);
@@ -66,14 +72,6 @@ public class SesameTableWithSpaceTest extends TestCase {
 			assertFalse(false);
 		}
 
-		connectionProperties = new Properties();
-		// set jdbc params in config
-		connectionProperties.put(OntopSQLCoreSettings.JDBC_NAME, "northwindSpaced");
-		connectionProperties.put(OntopSQLCoreSettings.JDBC_URL,
-				"jdbc:mysql://tom.inf.unibz.it:3694/northwindSpaced?sessionVariables=sql_mode='ANSI'");
-		connectionProperties.put(OntopSQLCoreSettings.JDBC_USER, "root");
-		connectionProperties.put(OntopSQLCoreSettings.JDBC_PASSWORD, "mysql");
-		connectionProperties.put(OntopSQLCoreSettings.JDBC_DRIVER,"com.mysql.jdbc.Driver");
 	}
 
 	public void setUp() {
@@ -81,10 +79,10 @@ public class SesameTableWithSpaceTest extends TestCase {
 		Repository repo;
 		try {
 			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-					.ontologyFile(owlfile)
-					.r2rmlMappingFile(mappingfile)
+					.ontologyFile(owlFileName)
+					.r2rmlMappingFile(ttlFileName)
 					.enableExistentialReasoning(true)
-					.properties(connectionProperties)
+					.propertyFile(propertyFileName)
 					.enableTestMode()
 					.build();
 

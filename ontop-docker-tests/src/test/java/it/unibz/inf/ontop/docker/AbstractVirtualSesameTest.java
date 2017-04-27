@@ -12,26 +12,26 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 
 public abstract class AbstractVirtualSesameTest extends TestCase {
 
-    private final String owlfile;
-    private final String r2rmlfile;
-    private final String propertyFile;
+    private final String owlFileName;
+    private final String r2rmlFileName;
+    private final String propertyFileName;
 
     RepositoryConnection con;
 
-    public AbstractVirtualSesameTest(String owlfile, String r2rmlfile, String propertyFile) {
-        this.owlfile = owlfile;
-        this.r2rmlfile = r2rmlfile;
-        this.propertyFile = propertyFile;
+    public AbstractVirtualSesameTest(String owlFile, String r2rmlFile, String propertyFile) {
+        this.owlFileName =  this.getClass().getResource(owlFile).toString();
+        this.r2rmlFileName =  this.getClass().getResource(r2rmlFile).toString();
+        this.propertyFileName =  this.getClass().getResource(propertyFile).toString();
     }
 
     public void setUp() {
         Repository repo;
         try {
             OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    .ontologyFile(owlfile)
-                    .r2rmlMappingFile(r2rmlfile)
+                    .ontologyFile(owlFileName)
+                    .r2rmlMappingFile(r2rmlFileName)
                     .enableExistentialReasoning(true)
-                    .propertyFile(propertyFile)
+                    .propertyFile(propertyFileName)
                     .enableTestMode()
                     .build();
 

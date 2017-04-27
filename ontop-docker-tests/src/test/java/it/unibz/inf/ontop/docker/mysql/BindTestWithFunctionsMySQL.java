@@ -36,9 +36,9 @@ import java.util.List;
 
 public class BindTestWithFunctionsMySQL extends AbstractBindTestWithFunctions {
 
-	private static final String owlfile = "src/test/resources/mysql/bindTest/sparqlBind.owl";
-    private static final String obdafile = "src/test/resources/mysql/bindTest/sparqlBindMySQL.obda";
-    private static final String propertyfile = "src/test/resources/mysql/bindTest/sparqlBindMySQL.properties";
+	private static final String owlfile = "/mysql/bindTest/sparqlBind.owl";
+    private static final String obdafile = "/mysql/bindTest/sparqlBindMySQL.obda";
+    private static final String propertyfile = "/mysql/bindTest/sparqlBindMySQL.properties";
 
     public BindTestWithFunctionsMySQL() {
         super(owlfile, obdafile, propertyfile);

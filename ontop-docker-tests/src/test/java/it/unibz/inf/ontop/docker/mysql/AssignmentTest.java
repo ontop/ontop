@@ -10,9 +10,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class AssignmentTest extends AbstractVirtualModeTest {
 
-    private static final String owlFile = "src/test/resources/mysql/bindTest/ontologyOdbs.owl";
-    private static final String obdaFile = "src/test/resources/mysql/bindTest/mappingsOdbs.obda";
-    private static final String propertyFile = "src/test/resources/mysql/bindTest/mappingsOdbs.properties";
+    private static final String owlFile = "/mysql/bindTest/ontologyOdbs.owl";
+    private static final String obdaFile = "/mysql/bindTest/mappingsOdbs.obda";
+    private static final String propertyFile = "/mysql/bindTest/mappingsOdbs.properties";
 
     public AssignmentTest() {
         super(owlFile, obdaFile, propertyFile);

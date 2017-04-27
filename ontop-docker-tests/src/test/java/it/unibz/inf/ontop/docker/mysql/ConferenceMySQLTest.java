@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker.mysql;
  * #L%
  */
 
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
@@ -34,20 +35,23 @@ import java.io.File;
  *
  */
 
-public class ConferenceMySQLTest {
+public class ConferenceMySQLTest  {
 
-    final String owlFile = "src/test/resources/mysql/conference/ontology5.owl";
-    final String obdaFile = "src/test/resources/mysql/conference/ontology5.obda";
-	final String propertyFile = "src/test/resources/mysql/conference/ontology5.properties";
+    final String owlFile = "/mysql/conference/ontology5.owl";
+    final String obdaFile = "/mysql/conference/ontology5.obda";
+	final String propertyFile = "/mysql/conference/ontology5.properties";
 
 	private void runTests(String query) throws Exception {
+		String owlFileName =  this.getClass().getResource(owlFile).toString();
+		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile(owlFile)
-				.nativeOntopMappingFile(new File(obdaFile))
-				.propertyFile(propertyFile)
+				.ontologyFile(owlFileName)
+				.nativeOntopMappingFile(obdaFileName)
+				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);

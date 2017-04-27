@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory;
 
 public class OracleDateTimeTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "src/test/resources/oracle/datetime/dateTimeExampleBooks.owl";
-	static final String obdafile = "src/test/resources/oracle/datetime/dateTimeExampleBooks.obda";
-	static final String propertyfile = "src/test/resources/oracle/oracle.properties";
+	static final String owlfile = "/oracle/datetime/dateTimeExampleBooks.owl";
+	static final String obdafile = "/oracle/datetime/dateTimeExampleBooks.obda";
+	static final String propertyfile = "/oracle/oracle.properties";
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public OracleDateTimeTest() {

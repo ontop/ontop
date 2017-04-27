@@ -115,6 +115,19 @@
 			</build>
 		</profile>
 		<profile>
+			<id>set-docker-jdbc-url</id>
+			<activation>
+				<!--<property>-->
+					<!--<name>setDockerUrl</name>-->
+					<!--<value>true</value>-->
+				<!--</property>-->
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<docker.url>localhost</docker.url>
+			</properties>
+		</profile>
+		<profile>
 			<id>doclint-java8-disable</id>
 			<activation>
 				<jdk>[1.8,</jdk>
@@ -211,7 +224,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>2.7</version>
+					<version>3.0.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

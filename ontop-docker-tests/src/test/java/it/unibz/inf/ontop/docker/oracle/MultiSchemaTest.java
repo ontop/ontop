@@ -33,9 +33,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class MultiSchemaTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "src/test/resources/oracle/oracle-schema.owl";
-	static final String obdafile = "src/test/resources/oracle/oracle-schema.obda";
-	static final String propertiesfile = "src/test/resources/oracle/oracle.properties";
+	static final String owlfile = "/oracle/oracle-schema.owl";
+	static final String obdafile = "/oracle/oracle-schema.obda";
+	static final String propertiesfile = "/oracle/oracle.properties";
 
 	public MultiSchemaTest() {
 		super(owlfile, obdafile, propertiesfile);

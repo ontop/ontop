@@ -38,9 +38,9 @@ import java.util.List;
 
 public class BindTestWithFunctionsPostgreSQL extends AbstractBindTestWithFunctions {
 
-    private static final String owlfile = "src/test/resources/pgsql/bind/sparqlBind.owl";
-    private static final String obdafile = "src/test/resources/pgsql/bind/sparqlBindPostgreSQL.obda";
-    private static final String propertiesfile = "src/test/resources/pgsql/bind/sparqlBindPostgreSQL.properties";
+    private static final String owlfile = "/pgsql/bind/sparqlBind.owl";
+    private static final String obdafile = "/pgsql/bind/sparqlBindPostgreSQL.obda";
+    private static final String propertiesfile = "/pgsql/bind/sparqlBindPostgreSQL.properties";
 
     public BindTestWithFunctionsPostgreSQL() {
         super(owlfile, obdafile, propertiesfile);

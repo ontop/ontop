@@ -38,9 +38,9 @@ import java.util.List;
  */
 
 public class BindTestWithFunctionsSqlServer extends AbstractBindTestWithFunctions {
-    private static final String owlfile = "src/test/resources/mssql/sparqlBind.owl";
-    private static final String obdafile = "src/test/resources/mssql/sparqlBindSqlServer.obda";
-    private static final String propertiesfile = "src/test/resources/mssql/sparqlBindSqlServer.properties";
+    private static final String owlfile = "/mssql/sparqlBind.owl";
+    private static final String obdafile = "/mssql/sparqlBindSqlServer.obda";
+    private static final String propertiesfile = "/mssql/sparqlBindSqlServer.properties";
 
     public BindTestWithFunctionsSqlServer() {
         super(owlfile, obdafile, propertiesfile );

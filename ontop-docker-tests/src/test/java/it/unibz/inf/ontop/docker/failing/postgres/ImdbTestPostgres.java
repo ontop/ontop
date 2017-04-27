@@ -10,9 +10,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 
 public class ImdbTestPostgres extends AbstractVirtualModeTest {
 
-    private static final String owlFile = "src/test/resources/pgsql/imdb/movieontology.owl";
-    private static final String obdaFile = "src/test/resources/pgsql/imdb/movieontology.obda";
-    private static final String propertyFile = "src/test/resources/pgsql/imdb/movieontology.properties";
+    private static final String owlFile = "/pgsql/imdb/movieontology.owl";
+    private static final String obdaFile = "/pgsql/imdb/movieontology.obda";
+    private static final String propertyFile = "/pgsql/imdb/movieontology.properties";
 
     public ImdbTestPostgres() {
         super(owlFile, obdaFile, propertyFile);

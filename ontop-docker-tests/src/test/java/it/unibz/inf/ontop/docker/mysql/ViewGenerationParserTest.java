@@ -6,9 +6,9 @@ import org.junit.Test;
 
 public class ViewGenerationParserTest extends AbstractVirtualModeTest {
 
-    static final String owlFile = "src/test/resources/mysql/northwind/northwind.owl";
-    static final String obdaFile = "src/test/resources/mysql/northwind/northwindComplex.obda";
-    static final String propertiesFile = "src/test/resources/mysql/northwind/northwindComplex.properties";
+    static final String owlFile = "/mysql/northwind/northwind.owl";
+    static final String obdaFile = "/mysql/northwind/northwindComplex.obda";
+    static final String propertiesFile = "/mysql/northwind/northwindComplex.properties";
 
     public ViewGenerationParserTest() {
         super(owlFile, obdaFile, propertiesFile);
