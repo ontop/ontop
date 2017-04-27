@@ -9,16 +9,17 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.pivotalrepr.DataNode;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.injection.OntopModelSettings.CardinalityPreservationMode.LOOSE;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Uses non-unique functional constraints to detect and remove redundant self inner joins.
@@ -62,10 +63,11 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
                         c -> c,
                         c -> groupDataNodesPerConstraint(c, initialNodes)));
 
-        ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> dependentUnifiers =
-                constraintNodeMap.entrySet().stream()
-                        .flatMap(e -> extractDependentUnifiers(e.getKey(), e.getValue()))
-                        .collect(ImmutableCollectors.toList());
+        ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> dependentUnifierBuilder = ImmutableList.builder();
+        for (Map.Entry<NonUniqueFunctionalConstraint, ImmutableCollection<Collection<DataNode>>> constraintEntry : constraintNodeMap.entrySet()) {
+            dependentUnifierBuilder.addAll(extractDependentUnifiers(constraintEntry.getKey(), constraintEntry.getValue()));
+        }
+        ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> dependentUnifiers = dependentUnifierBuilder.build();
 
         /*
          * Does not look for redundant joins if not in the LOOSE preservation mode
@@ -73,7 +75,10 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
         if (settings.getCardinalityPreservationMode() != LOOSE)
             return Optional.of(new PredicateLevelProposal(dependentUnifiers, ImmutableList.of()));
 
-        throw new RuntimeException("TODO: continue");
+        /*
+         * TODO: continue (remove this)
+         */
+        return Optional.of(new PredicateLevelProposal(dependentUnifiers, ImmutableList.of()));
     }
 
     private ImmutableCollection<Collection<DataNode>> groupDataNodesPerConstraint(
@@ -99,21 +104,24 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
                 .collect(ImmutableCollectors.toList());
     }
 
-    private Stream<ImmutableSubstitution<VariableOrGroundTerm>> extractDependentUnifiers(
-            NonUniqueFunctionalConstraint constraint, ImmutableCollection<Collection<DataNode>> dataNodeClusters) {
+    private ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> extractDependentUnifiers(
+            NonUniqueFunctionalConstraint constraint, ImmutableCollection<Collection<DataNode>> dataNodeClusters)
+            throws AtomUnificationException {
         ImmutableList<Integer> dependentIndexes = constraint.getDependents().stream()
                 .map(d -> d.getIndex() - 1)
                 .collect(ImmutableCollectors.toList());
 
-        return dataNodeClusters.stream()
-                .flatMap(c -> extractDependentUnifiersFromCluster(dependentIndexes, c));
-
+        ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> substitutionCollectionBuilder = ImmutableList.builder();
+        for (Collection<DataNode> cluster : dataNodeClusters) {
+            substitutionCollectionBuilder.addAll(extractDependentUnifiersFromCluster(dependentIndexes, cluster));
+        }
+        return substitutionCollectionBuilder.build();
     }
 
-    private Stream<ImmutableSubstitution<VariableOrGroundTerm>> extractDependentUnifiersFromCluster(
-            ImmutableList<Integer> dependentIndexes, Collection<DataNode> cluster) {
+    private Collection<ImmutableSubstitution<VariableOrGroundTerm>> extractDependentUnifiersFromCluster(
+            ImmutableList<Integer> dependentIndexes, Collection<DataNode> cluster) throws AtomUnificationException {
         if (cluster.size() < 2)
-            return Stream.empty();
+            return ImmutableList.of();
 
         Iterator<DataNode> clusterIterator = cluster.iterator();
         DataNode firstDataNode = clusterIterator.next();
@@ -123,11 +131,55 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
          *
          * NB: while loop due to the exception
          */
+        Collection<ImmutableSubstitution<VariableOrGroundTerm>> substitutionCollection = new ArrayList<>();
         while (clusterIterator.hasNext()) {
-            //unifyRedundantNodes()
-            throw new RuntimeException("TODO: continue");
+            DataNode currentDataNode = clusterIterator.next();
+            unifyDependentTerms(firstDataNode.getProjectionAtom(), currentDataNode.getProjectionAtom(), dependentIndexes)
+                    .ifPresent(substitutionCollection::add);
         }
-        throw new RuntimeException("TODO: continue");
+
+        return substitutionCollection;
+    }
+
+    /**
+     *
+     * Gives a preference to the variables of the left atom
+     *
+     * Throws an AtomUnificationException if unification is impossible
+     */
+    private Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifyDependentTerms(
+            DataAtom leftAtom, DataAtom rightAtom, ImmutableList<Integer> dependentIndexes)
+            throws AtomUnificationException {
+
+        // Non-final
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> currentUnifier = Optional.empty();
+
+        for (Integer dependentIndex : dependentIndexes) {
+            VariableOrGroundTerm leftArgument = leftAtom.getTerm(dependentIndex);
+            VariableOrGroundTerm rightArgument = rightAtom.getTerm(dependentIndex);
+
+            /*
+             * Throws an exception if the unification is not possible
+             */
+            ImmutableSubstitution<VariableOrGroundTerm> termUnifier = ImmutableUnificationTools.computeDirectedMGU(
+                    rightArgument, leftArgument)
+                    .map(ImmutableSubstitution::getImmutableMap)
+                    .map(map -> map.entrySet().stream()
+                            .collect(ImmutableCollectors.toMap(
+                                    Map.Entry::getKey,
+                                    e -> ImmutabilityTools.convertIntoVariableOrGroundTerm(e.getValue()))))
+                    .map(DATA_FACTORY::getSubstitution)
+                    .orElseThrow(AtomUnificationException::new);
+
+            ImmutableSubstitution<VariableOrGroundTerm> newUnifier = currentUnifier.isPresent()
+                    ? ImmutableUnificationTools.computeAtomMGUS(currentUnifier.get(), termUnifier)
+                            .orElseThrow(AtomUnificationException::new)
+                    : termUnifier;
+
+            currentUnifier = Optional.of(newUnifier);
+
+        }
+        return currentUnifier.filter(s -> !s.isEmpty());
     }
 
 
