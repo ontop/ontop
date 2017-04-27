@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.executor.join;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -12,11 +9,11 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.pivotalrepr.DataNode;
+import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.injection.OntopModelSettings.CardinalityPreservationMode.LOOSE;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
@@ -44,7 +41,8 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
     @Override
     protected Optional<PredicateLevelProposal> proposePerPredicate(ImmutableCollection<DataNode> initialNodes,
                                                                    AtomPredicate predicate, DBMetadata dbMetadata,
-                                                                   ImmutableList<Variable> priorityVariables)
+                                                                   ImmutableList<Variable> priorityVariables,
+                                                                   IntermediateQuery query)
             throws AtomUnificationException {
 
         if (initialNodes.size() < 2)
@@ -72,19 +70,11 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
         }
         ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> dependentUnifiers = dependentUnifierBuilder.build();
 
-        /*
-         * Does not look for redundant joins if not in the LOOSE preservation mode
-         */
-        if (settings.getCardinalityPreservationMode() != LOOSE) {
-            return dependentUnifiers.isEmpty()
-                    ? Optional.empty()
-                    : Optional.of(new PredicateLevelProposal(dependentUnifiers, ImmutableList.of()));
-        }
+        ImmutableList<DataNode> nodesToRemove = selectNodesToRemove(query, initialNodes, constraintNodeMap);
 
-        /*
-         * TODO: continue (remove this)
-         */
-        return Optional.of(new PredicateLevelProposal(dependentUnifiers, ImmutableList.of()));
+        return (dependentUnifiers.isEmpty() && nodesToRemove.isEmpty())
+                ? Optional.empty()
+                : Optional.of(new PredicateLevelProposal(dependentUnifiers, nodesToRemove));
     }
 
     private ImmutableCollection<Collection<DataNode>> groupDataNodesPerConstraint(
@@ -186,6 +176,42 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
 
         }
         return currentUnifier.filter(s -> !s.isEmpty());
+    }
+
+    /**
+     * Does not look for redundant joins if not in the LOOSE preservation mode
+     *
+     * TODO: consider the case of predicates with multiple non-unique functional dependencies
+     */
+    private ImmutableList<DataNode> selectNodesToRemove(
+            IntermediateQuery query, ImmutableCollection<DataNode> samePredicateNodes,
+            ImmutableMap<NonUniqueFunctionalConstraint, ImmutableCollection<Collection<DataNode>>> constraintNodeMap) {
+
+        if ((settings.getCardinalityPreservationMode() != LOOSE) || (constraintNodeMap.size() != 1)) {
+            return ImmutableList.of();
+        }
+
+        Map.Entry<NonUniqueFunctionalConstraint, ImmutableCollection<Collection<DataNode>>> constraintEntry =
+                constraintNodeMap.entrySet().iterator().next();
+        NonUniqueFunctionalConstraint constraint = constraintEntry.getKey();
+        ImmutableCollection<Collection<DataNode>> clusters = constraintEntry.getValue();
+
+
+        ImmutableSet<DataNode> requiredNodes = findRequiredNodes(query, samePredicateNodes, constraint, clusters);
+
+        // TODO: implement it seriously
+        return ImmutableList.of();
+    }
+
+    private ImmutableSet<DataNode> findRequiredNodes(IntermediateQuery query, ImmutableCollection<DataNode> samePredicateNodes,
+                                                     NonUniqueFunctionalConstraint constraint,
+                                                     ImmutableCollection<Collection<DataNode>> clusters) {
+        DataNode firstDataNode = samePredicateNodes.iterator().next();
+        // Since all the nodes are assumed to be the children of the same join node, this concern all these data nodes
+        ImmutableSet<Variable> requiredVariablesByAncestors = query.getVariablesRequiredByAncestors(firstDataNode);
+
+        // TODO: implement seriously
+        return ImmutableSet.copyOf(samePredicateNodes);
     }
 
 

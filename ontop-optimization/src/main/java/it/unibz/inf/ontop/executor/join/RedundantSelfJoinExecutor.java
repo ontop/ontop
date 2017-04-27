@@ -53,7 +53,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
 
             try {
                 Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, priorityVariables,
-                        query.getDBMetadata());
+                        query, query.getDBMetadata());
 
                 if (!optionalConcreteProposal.isPresent()) {
                     break;
@@ -111,7 +111,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
      */
     private Optional<ConcreteProposal> propose(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
                                                ImmutableList<Variable> priorityVariables,
-                                               DBMetadata dbMetadata)
+                                               IntermediateQuery query, DBMetadata dbMetadata)
             throws AtomUnificationException {
 
         ImmutableList.Builder<PredicateLevelProposal> proposalListBuilder = ImmutableList.builder();
@@ -119,7 +119,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
         for (AtomPredicate predicate : initialDataNodeMap.keySet()) {
             ImmutableCollection<DataNode> initialNodes = initialDataNodeMap.get(predicate);
             Optional<PredicateLevelProposal> predicateProposal = proposePerPredicate(initialNodes, predicate, dbMetadata,
-                    priorityVariables);
+                    priorityVariables, query);
             predicateProposal.ifPresent(proposalListBuilder::add);
         }
 
@@ -127,8 +127,9 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
     }
 
     protected abstract Optional<PredicateLevelProposal> proposePerPredicate(ImmutableCollection<DataNode> initialNodes,
-                                                                  AtomPredicate predicate, DBMetadata dbMetadata,
-                                                                  ImmutableList<Variable> priorityVariables) throws AtomUnificationException;
+                                                                            AtomPredicate predicate, DBMetadata dbMetadata,
+                                                                            ImmutableList<Variable> priorityVariables,
+                                                                            IntermediateQuery query) throws AtomUnificationException;
 
     /**
      * Assumes that the data atoms are leafs.
