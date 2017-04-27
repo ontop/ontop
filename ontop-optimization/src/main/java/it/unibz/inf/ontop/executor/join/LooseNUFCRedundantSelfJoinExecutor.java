@@ -22,9 +22,12 @@ import static it.unibz.inf.ontop.injection.OntopModelSettings.CardinalityPreserv
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
- * Uses non-unique functional constraints to detect and remove redundant self inner joins.
+ * Uses non-unique functional constraints to:
+ *   (1) unify some terms (a functional dependency is generating equalities)
+ *   (2) detect and remove redundant self inner joins.
  *
- * Does nothing if the CardinalityPreservationMode is not LOOSE (it does not guarantee its preservation).
+ *
+ * Does not remove any self-join if the CardinalityPreservationMode is not LOOSE (it does not guarantee its preservation).
  *
  */
 @Singleton
@@ -72,8 +75,11 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
         /*
          * Does not look for redundant joins if not in the LOOSE preservation mode
          */
-        if (settings.getCardinalityPreservationMode() != LOOSE)
-            return Optional.of(new PredicateLevelProposal(dependentUnifiers, ImmutableList.of()));
+        if (settings.getCardinalityPreservationMode() != LOOSE) {
+            return dependentUnifiers.isEmpty()
+                    ? Optional.empty()
+                    : Optional.of(new PredicateLevelProposal(dependentUnifiers, ImmutableList.of()));
+        }
 
         /*
          * TODO: continue (remove this)

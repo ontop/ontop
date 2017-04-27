@@ -216,7 +216,7 @@ public class SelfJoinLikeExecutor {
             ImmutableList<Variable> priorityVariables) {
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMergedSubstitution;
         try {
-            optionalMergedSubstitution = mergeSubstitutions(predicateProposals, priorityVariables);
+            optionalMergedSubstitution = mergeSubstitutions(extractSubstitutions(predicateProposals), priorityVariables);
         } catch (AtomUnificationException e) {
             return Optional.empty();
         }
@@ -260,9 +260,8 @@ public class SelfJoinLikeExecutor {
     }
 
     protected static Optional<ImmutableSubstitution<VariableOrGroundTerm>> mergeSubstitutions(
-            ImmutableList<PredicateLevelProposal> predicateProposals, ImmutableList<Variable> priorityVariables)
+            ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions, ImmutableList<Variable> priorityVariables)
             throws AtomUnificationException {
-        ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions = extractSubstitutions(predicateProposals);
 
         // Non-final
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalAccumulatedSubstitution = Optional.empty();
