@@ -205,8 +205,10 @@ public class ImmutableUnificationTools {
                 return Optional.empty();
             }
 
-            ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(
-                    ImmutableMap.of(sourceVariable, targetTerm));
+            ImmutableSubstitution<ImmutableTerm> substitution = sourceVariable.equals(targetTerm)
+                    ? EMPTY_SUBSTITUTION
+                    : new ImmutableSubstitutionImpl<>(ImmutableMap.of(sourceVariable, targetTerm));
+
             return Optional.of(substitution);
         }
 
