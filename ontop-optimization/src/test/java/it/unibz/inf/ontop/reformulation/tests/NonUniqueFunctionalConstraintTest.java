@@ -84,7 +84,6 @@ public class NonUniqueFunctionalConstraintTest {
         METADATA = dbMetadata;
     }
 
-    @Ignore
     @Test
     public void testRedundantSelfJoin1() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
@@ -120,7 +119,6 @@ public class NonUniqueFunctionalConstraintTest {
         optimizeAndCompare(query, expectedQuery, joinNode);
     }
 
-    @Ignore
     @Test
     public void testRedundantSelfJoin2() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,
@@ -157,7 +155,6 @@ public class NonUniqueFunctionalConstraintTest {
         optimizeAndCompare(query, expectedQuery, joinNode);
     }
 
-    @Ignore
     @Test
     public void testRedundantSelfJoin3() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,
@@ -187,7 +184,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.init(projectionAtom, newRootNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, F, G));
+                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, B, G));
 
         expectedQueryBuilder.addChild(newRootNode, dataNode3);
 
@@ -196,7 +193,6 @@ public class NonUniqueFunctionalConstraintTest {
         optimizeAndCompare(query, expectedQuery, joinNode);
     }
 
-    @Ignore
     @Test
     public void testRedundantSelfJoin4() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
@@ -232,7 +228,6 @@ public class NonUniqueFunctionalConstraintTest {
         optimizeAndCompare(query, expectedQuery, joinNode);
     }
 
-    @Ignore
     @Test
     public void testRedundantSelfJoin5() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);

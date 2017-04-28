@@ -52,7 +52,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
             ImmutableList<Variable> priorityVariables = prioritizeVariables(query, topJoinNode);
 
             try {
-                Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, priorityVariables,
+                Optional<ConcreteProposal> optionalConcreteProposal = propose(topJoinNode, initialMap, priorityVariables,
                         query, query.getDBMetadata());
 
                 if (!optionalConcreteProposal.isPresent()) {
@@ -109,7 +109,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
     /**
      * Throws an AtomUnificationException when the results are guaranteed to be empty
      */
-    private Optional<ConcreteProposal> propose(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
+    private Optional<ConcreteProposal> propose(InnerJoinNode joinNode, ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
                                                ImmutableList<Variable> priorityVariables,
                                                IntermediateQuery query, DBMetadata dbMetadata)
             throws AtomUnificationException {
@@ -118,7 +118,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
 
         for (AtomPredicate predicate : initialDataNodeMap.keySet()) {
             ImmutableCollection<DataNode> initialNodes = initialDataNodeMap.get(predicate);
-            Optional<PredicateLevelProposal> predicateProposal = proposePerPredicate(initialNodes, predicate, dbMetadata,
+            Optional<PredicateLevelProposal> predicateProposal = proposePerPredicate(joinNode, initialNodes, predicate, dbMetadata,
                     priorityVariables, query);
             predicateProposal.ifPresent(proposalListBuilder::add);
         }
@@ -126,7 +126,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
         return createConcreteProposal(proposalListBuilder.build(), priorityVariables);
     }
 
-    protected abstract Optional<PredicateLevelProposal> proposePerPredicate(ImmutableCollection<DataNode> initialNodes,
+    protected abstract Optional<PredicateLevelProposal> proposePerPredicate(InnerJoinNode joinNode, ImmutableCollection<DataNode> initialNodes,
                                                                             AtomPredicate predicate, DBMetadata dbMetadata,
                                                                             ImmutableList<Variable> priorityVariables,
                                                                             IntermediateQuery query) throws AtomUnificationException;

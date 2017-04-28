@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.pivotalrepr.DataNode;
+import it.unibz.inf.ontop.pivotalrepr.InnerJoinNode;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 
 import java.util.Optional;
@@ -33,7 +34,7 @@ public class UCRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor {
      *
      */
     @Override
-    protected Optional<PredicateLevelProposal> proposePerPredicate(ImmutableCollection<DataNode> initialNodes,
+    protected Optional<PredicateLevelProposal> proposePerPredicate(InnerJoinNode joinNode, ImmutableCollection<DataNode> initialNodes,
                                                                    AtomPredicate predicate, DBMetadata dbMetadata,
                                                                    ImmutableList<Variable> priorityVariables,
                                                                    IntermediateQuery query)
