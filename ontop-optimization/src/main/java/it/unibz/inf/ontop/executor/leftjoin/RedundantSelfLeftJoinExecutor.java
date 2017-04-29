@@ -326,8 +326,8 @@ public class RedundantSelfLeftJoinExecutor
         ImmutableMultimap.Builder<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMapBuilder = ImmutableMultimap.builder();
 
         for (ImmutableList<Integer> primaryKeyPositions : collectionOfPrimaryKeyPositions) {
-            groupingMapBuilder.put(extractPrimaryKeyArguments(leftDataNode.getProjectionAtom(), primaryKeyPositions), leftDataNode);
-            groupingMapBuilder.put(extractPrimaryKeyArguments(rightDataNode.getProjectionAtom(), primaryKeyPositions), rightDataNode);
+            groupingMapBuilder.put(extractArguments(leftDataNode.getProjectionAtom(), primaryKeyPositions), leftDataNode);
+            groupingMapBuilder.put(extractArguments(rightDataNode.getProjectionAtom(), primaryKeyPositions), rightDataNode);
         }
         return groupingMapBuilder.build();
     }
@@ -358,33 +358,13 @@ public class RedundantSelfLeftJoinExecutor
                                                                            QueryTreeComponent treeComponent,
                                                                            LeftJoinNode leftJoinNode,
                                                                            ConcreteProposal proposal) throws EmptyQueryException {
-        /**
+        /*
          * First, add and remove non-top nodes
          */
         proposal.getDataNodesToRemove()
                 .forEach(treeComponent::removeSubTree);
 
-        switch( proposal.getNewDataNodes().size() ) {
-            case 0:
-                break;
-
-            case 1:
-                proposal.getNewDataNodes()
-                        .forEach(newNode -> treeComponent.addChild(leftJoinNode, newNode,
-                                Optional.of(LEFT), false));
-                break;
-
-            case 2:
-                UnmodifiableIterator<DataNode> dataNodeIter = proposal.getNewDataNodes().iterator();
-                treeComponent.addChild(leftJoinNode, dataNodeIter.next(), Optional.of(LEFT), false);
-                treeComponent.addChild(leftJoinNode, dataNodeIter.next(), Optional.of(RIGHT), false);
-                break;
-
-            default:
-                throw new IllegalStateException("Self-left join elimination MUST not add more than 2 new nodes");
-        }
-
-        return getJoinNodeCentricOptimizationResults(query, treeComponent, leftJoinNode, proposal);
+        return updateJoinNodeAndPropagateSubstitution(query, treeComponent, leftJoinNode, proposal);
     }
 
 

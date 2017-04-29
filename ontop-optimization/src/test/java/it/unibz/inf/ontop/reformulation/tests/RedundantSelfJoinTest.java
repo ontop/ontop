@@ -394,11 +394,13 @@ public class RedundantSelfJoinTest {
         queryBuilder1.addChild(constructionNode1, joinNode1);
         ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
 
-        queryBuilder1.addChild(joinNode1, dataNode4);
         queryBuilder1.addChild(joinNode1, dataNode5);
         queryBuilder1.addChild(joinNode1, IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, N, O)));
+        queryBuilder1.addChild(joinNode1, dataNode4);
 
         IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\n Expected query: \n" +  query1);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }

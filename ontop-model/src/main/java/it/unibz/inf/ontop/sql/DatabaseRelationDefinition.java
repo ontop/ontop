@@ -39,6 +39,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 
 	private final List<UniqueConstraint> ucs = new LinkedList<>();
 	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
+	private final List<NonUniqueFunctionalConstraint> nonUniqueFunctionalConstraints = new ArrayList<>();
 	private UniqueConstraint pk;	
 	
 	
@@ -136,6 +137,14 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	
 	public ImmutableList<UniqueConstraint> getUniqueConstraints() {
 		return ImmutableList.copyOf(ucs);
+	}
+
+	public void addNonUniqueFunctionalConstraint(NonUniqueFunctionalConstraint constraint) {
+		nonUniqueFunctionalConstraints.add(constraint);
+	}
+
+	public ImmutableList<NonUniqueFunctionalConstraint> getNonUniqueFunctionalConstraints() {
+		return ImmutableList.copyOf(nonUniqueFunctionalConstraints);
 	}
 	
 	/**
