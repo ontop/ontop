@@ -6,10 +6,13 @@ import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
+import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintExtractor;
+import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBContraintSet;
 import net.sf.jsqlparser.JSQLParserException;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -33,20 +36,21 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
      *
      * Can be useful for eliminating self-joins
      */
-    private final Optional<ImplicitDBConstraintsReader> userConstraints;
+    private final PreProcessedImplicitRelationalDBConstraintExtractor implicitDBConstraintExtractor;
 
     @Inject
-    private DefaultRDBMetadataExtractor(OntopMappingSQLSettings settings, @Nullable ImplicitDBConstraintsReader userConstraints) {
+    private DefaultRDBMetadataExtractor(OntopMappingSQLSettings settings,
+                                        PreProcessedImplicitRelationalDBConstraintExtractor implicitDBConstraintExtractor) {
         this.obtainFullMetadata = settings.isFullMetadataExtractionEnabled();
-        this.userConstraints = Optional.ofNullable(userConstraints);
+        this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
     }
 
     @Override
-    public RDBMetadata extract(OBDAModel obdaModel, Connection connection)
+    public RDBMetadata extract(OBDAModel obdaModel, Connection connection, Optional<File> constraintFile)
             throws DBMetadataExtractionException {
         try {
             RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection);
-            return extract(obdaModel, connection, metadata);
+            return extract(obdaModel, connection, metadata, constraintFile);
         } catch (SQLException e) {
             throw new DBMetadataExtractionException(e.getMessage());
         }
@@ -54,11 +58,16 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
     @Override
     public RDBMetadata extract(OBDAModel model, @Nullable Connection connection,
-                               DBMetadata partiallyDefinedMetadata) throws DBMetadataExtractionException {
+                               DBMetadata partiallyDefinedMetadata, Optional<File> constraintFile)
+            throws DBMetadataExtractionException {
 
         if (!(partiallyDefinedMetadata instanceof RDBMetadata)) {
             throw new IllegalArgumentException("Was expecting a DBMetadata");
         }
+
+        Optional<PreProcessedImplicitRelationalDBContraintSet> implicitConstraints = constraintFile.isPresent()
+                ? Optional.of(implicitDBConstraintExtractor.extract(constraintFile.get()))
+                : Optional.empty();
 
         try {
             RDBMetadata metadata = (RDBMetadata) partiallyDefinedMetadata;
@@ -75,7 +84,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
                     // Parse mappings. Just to get the table names in use
 
                     Set<RelationID> realTables = getRealTables(metadata.getQuotedIDFactory(), model.getMappings());
-                    userConstraints.ifPresent(c -> {
+                    implicitConstraints.ifPresent(c -> {
                         // Add the tables referred to by user-supplied foreign keys
                         Set<RelationID> referredTables = c.getReferredTables(metadata.getQuotedIDFactory());
                         realTables.addAll(referredTables);
@@ -91,7 +100,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
                 }
             }
 
-            userConstraints.ifPresent(c ->  {
+            implicitConstraints.ifPresent(c ->  {
                 c.insertUniqueConstraints(metadata);
                 c.insertForeignKeyConstraints(metadata);
             });

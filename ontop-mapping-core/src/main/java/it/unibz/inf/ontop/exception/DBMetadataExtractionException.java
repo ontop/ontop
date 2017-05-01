@@ -8,4 +8,8 @@ public class DBMetadataExtractionException extends OBDASpecificationException {
     public DBMetadataExtractionException(String message) {
         super(message);
     }
+
+    protected DBMetadataExtractionException(Exception e) {
+        super(e);
+    }
 }

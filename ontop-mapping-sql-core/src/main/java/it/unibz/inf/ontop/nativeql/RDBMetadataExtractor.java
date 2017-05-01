@@ -6,7 +6,9 @@ import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 
 import javax.annotation.Nullable;
+import java.io.File;
 import java.sql.Connection;
+import java.util.Optional;
 
 /**
  * Extracts the metadata of the database by:
@@ -19,8 +21,10 @@ import java.sql.Connection;
  */
 public interface RDBMetadataExtractor {
 
-    RDBMetadata extract(OBDAModel model, @Nullable Connection dbConnection) throws DBMetadataExtractionException;
+    RDBMetadata extract(OBDAModel model, @Nullable Connection dbConnection, Optional<File> constraintFile)
+            throws DBMetadataExtractionException;
 
     RDBMetadata extract(OBDAModel model, @Nullable Connection dbConnection,
-                       DBMetadata partiallyDefinedMetadata) throws DBMetadataExtractionException;
+                       DBMetadata partiallyDefinedMetadata, Optional<File> constraintFile)
+            throws DBMetadataExtractionException;
 }
