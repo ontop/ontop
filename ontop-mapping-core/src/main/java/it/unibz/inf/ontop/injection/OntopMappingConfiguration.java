@@ -4,14 +4,11 @@ package it.unibz.inf.ontop.injection;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
 public interface OntopMappingConfiguration extends OntopOBDASpecificationConfiguration, OntopOptimizationConfiguration {
-
-    Optional<ImplicitDBConstraintsReader> getImplicitDBConstraintsReader();
 
     Optional<TMappingExclusionConfig> getTmappingExclusions();
 
@@ -26,8 +23,6 @@ public interface OntopMappingConfiguration extends OntopOBDASpecificationConfigu
 
 
     interface OntopMappingBuilderFragment<B extends Builder<B>> {
-
-        B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints);
 
         B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config);
 

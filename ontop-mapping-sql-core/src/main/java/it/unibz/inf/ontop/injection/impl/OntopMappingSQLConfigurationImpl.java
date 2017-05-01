@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
@@ -63,11 +62,6 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
     }
 
     @Override
-    public Optional<ImplicitDBConstraintsReader> getImplicitDBConstraintsReader() {
-        return mappingConfiguration.getImplicitDBConstraintsReader();
-    }
-
-    @Override
     public Optional<TMappingExclusionConfig> getTmappingExclusions() {
         return mappingConfiguration.getTmappingExclusions();
     }
@@ -82,20 +76,22 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
      */
     @Override
     public Optional<OBDASpecification> loadSpecification() throws OBDASpecificationException {
-        return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
+        return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
     Optional<OBDASpecification> loadSpecification(OntologySupplier ontologySupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
-                                                  Supplier<Optional<Model>> mappingGraphSupplier)
+                                                  Supplier<Optional<Model>> mappingGraphSupplier,
+                                                  Supplier<Optional<File>> constraintFileSupplier)
             throws OBDASpecificationException {
         return mappingConfiguration.loadSpecification(
                 ontologySupplier,
                 () -> options.predefinedMappingModel.map(m -> (PreProcessedMapping) m),
                 mappingFileSupplier,
                 mappingReaderSupplier,
-                mappingGraphSupplier
+                mappingGraphSupplier,
+                constraintFileSupplier
         );
     }
 

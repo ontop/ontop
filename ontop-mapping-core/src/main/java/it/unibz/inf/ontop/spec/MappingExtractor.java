@@ -26,19 +26,23 @@ public interface MappingExtractor {
     }
 
     MappingAndDBMetadata extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                 @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                 ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException;
 
     MappingAndDBMetadata extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                 @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                 ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException;
 
     MappingAndDBMetadata extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                 @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                 ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException;
 
     MappingAndDBMetadata extract(@Nonnull PreProcessedMapping mapping, @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                 @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                 ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException;
 
 
