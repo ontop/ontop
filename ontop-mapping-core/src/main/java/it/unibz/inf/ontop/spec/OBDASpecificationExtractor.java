@@ -16,19 +16,23 @@ import java.util.Optional;
 public interface OBDASpecificationExtractor {
 
     OBDASpecification extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
-                              @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                              @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                              ExecutorRegistry executorRegistry)
             throws OBDASpecificationException;
 
     OBDASpecification extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
-                              @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                              @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                              ExecutorRegistry executorRegistry)
             throws OBDASpecificationException;
 
     OBDASpecification extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
-                              @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                              @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                              ExecutorRegistry executorRegistry)
             throws OBDASpecificationException;
 
     OBDASpecification extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata,
-                              @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                              @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                              ExecutorRegistry executorRegistry)
             throws OBDASpecificationException;
 
 }
