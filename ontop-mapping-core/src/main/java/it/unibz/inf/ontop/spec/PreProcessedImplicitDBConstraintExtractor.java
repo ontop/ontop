@@ -10,5 +10,5 @@ import java.io.File;
  */
 public interface PreProcessedImplicitDBConstraintExtractor {
 
-    PreProcessedImplicitDBContraintSet extract(@Nonnull File constraintFile) throws ImplicitDBContraintException;
+    PreProcessedImplicitDBConstraintSet extract(@Nonnull File constraintFile) throws ImplicitDBContraintException;
 }

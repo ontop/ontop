@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.ImplicitDBContraintException;
 import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintExtractor;
-import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBContraintSet;
+import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ public class BasicPreProcessedImplicitRelationalDBConstraintExtractor implements
     }
 
     @Override
-    public PreProcessedImplicitRelationalDBContraintSet extract(@Nonnull File constraintFile)
+    public PreProcessedImplicitRelationalDBConstraintSet extract(@Nonnull File constraintFile)
             throws ImplicitDBContraintException {
         ImmutableList.Builder<String[]> ucBuilder = ImmutableList.builder();
         ImmutableList.Builder<String[]> fkBuilder = ImmutableList.builder();
@@ -56,6 +56,6 @@ public class BasicPreProcessedImplicitRelationalDBConstraintExtractor implements
             throw new ImplicitDBContraintException(e);
         }
 
-        return new BasicPreProcessedImplicitRelationalDBContraintSet(ucBuilder.build(), fkBuilder.build());
+        return new BasicPreProcessedImplicitRelationalDBConstraintSet(ucBuilder.build(), fkBuilder.build());
     }
 }

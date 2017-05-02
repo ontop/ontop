@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintExtractor;
-import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBContraintSet;
+import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintSet;
 import net.sf.jsqlparser.JSQLParserException;
 
 import javax.annotation.Nullable;
@@ -65,7 +65,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
             throw new IllegalArgumentException("Was expecting a DBMetadata");
         }
 
-        Optional<PreProcessedImplicitRelationalDBContraintSet> implicitConstraints = constraintFile.isPresent()
+        Optional<PreProcessedImplicitRelationalDBConstraintSet> implicitConstraints = constraintFile.isPresent()
                 ? Optional.of(implicitDBConstraintExtractor.extract(constraintFile.get()))
                 : Optional.empty();
 
