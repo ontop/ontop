@@ -32,7 +32,6 @@ import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.owlapi.OBDAModelValidator;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.querymanager.*;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;

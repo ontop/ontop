@@ -21,28 +21,32 @@ public class FakeMappingExtractor implements MappingExtractor {
 
     @Override
     public MappingAndDBMetadata extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                        @Nonnull Optional<Ontology> ontology, Optional<File> constraintFile,
+                                        ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public MappingAndDBMetadata extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                        @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                        ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public MappingAndDBMetadata extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                        @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                        ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping mapping, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                        @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                        ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
         throw new UnsupportedOperationException(MESSAGE);
     }
