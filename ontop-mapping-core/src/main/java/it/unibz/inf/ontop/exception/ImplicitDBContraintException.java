@@ -11,4 +11,8 @@ public class ImplicitDBContraintException extends DBMetadataExtractionException 
     public ImplicitDBContraintException(Exception e) {
         super(e);
     }
+
+    public ImplicitDBContraintException(String prefix, Exception e) {
+        super(prefix, e);
+    }
 }

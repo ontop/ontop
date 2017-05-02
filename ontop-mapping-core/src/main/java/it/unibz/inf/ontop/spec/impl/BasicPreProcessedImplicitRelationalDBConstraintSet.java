@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.spec.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.DBMetadata;
-import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBContraintSet;
+import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintSet;
 import it.unibz.inf.ontop.sql.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +23,9 @@ import java.util.Set;
  *  Moved from ImplicitDBContraintsReader
  *
  */
-public class BasicPreProcessedImplicitRelationalDBContraintSet implements PreProcessedImplicitRelationalDBContraintSet {
+public class BasicPreProcessedImplicitRelationalDBConstraintSet implements PreProcessedImplicitRelationalDBConstraintSet {
 
-    private static Logger log = LoggerFactory.getLogger(BasicPreProcessedImplicitRelationalDBContraintSet.class);
+    private static Logger log = LoggerFactory.getLogger(BasicPreProcessedImplicitRelationalDBConstraintSet.class);
 
     // List of two-element arrays: table id and a comma-separated list of columns
     private final ImmutableList<String[]> ucs;
@@ -35,8 +35,8 @@ public class BasicPreProcessedImplicitRelationalDBContraintSet implements PrePro
     private final ImmutableList<String[]> fks;
 
 
-    BasicPreProcessedImplicitRelationalDBContraintSet(ImmutableList<String[]> uniqueConstraints,
-                                                      ImmutableList<String[]> foreignKeys) {
+    BasicPreProcessedImplicitRelationalDBConstraintSet(ImmutableList<String[]> uniqueConstraints,
+                                                       ImmutableList<String[]> foreignKeys) {
         this.ucs = uniqueConstraints;
         this.fks = foreignKeys;
     }

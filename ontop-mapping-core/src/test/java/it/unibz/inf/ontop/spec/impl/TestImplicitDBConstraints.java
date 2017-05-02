@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import it.unibz.inf.ontop.exception.ImplicitDBContraintException;
 import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintExtractor;
-import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBContraintSet;
+import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintSet;
 import it.unibz.inf.ontop.sql.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +38,7 @@ public class TestImplicitDBConstraints {
 	
 	@Test
 	public void testEmptyUserConstraints() throws ImplicitDBContraintException {
-		PreProcessedImplicitRelationalDBContraintSet uc = CONSTRAINT_EXTRACTOR.extract(
+		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
 				new File("src/test/resources/userconstraints/empty_constraints.lst"));
 
 		Set<RelationID> refs = uc.getReferredTables(idfac);
@@ -47,7 +47,7 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testUserPKeys() throws ImplicitDBContraintException {
-		PreProcessedImplicitRelationalDBContraintSet uc = CONSTRAINT_EXTRACTOR.extract(
+		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
 				new File("src/test/resources/userconstraints/pkeys.lst"));
 		Set<RelationID> refs = uc.getReferredTables(idfac);
 		assertTrue(refs.size() == 0);
@@ -55,7 +55,7 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testAddPrimaryKeys() throws ImplicitDBContraintException {
-		PreProcessedImplicitRelationalDBContraintSet uc = CONSTRAINT_EXTRACTOR.extract(
+		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
 				new File("src/test/resources/userconstraints/pkeys.lst"));
 		uc.insertUniqueConstraints(this.md);
 		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
@@ -66,7 +66,7 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testGetReferredTables() throws ImplicitDBContraintException {
-		PreProcessedImplicitRelationalDBContraintSet uc = CONSTRAINT_EXTRACTOR.extract(
+		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
 				new File("src/test/resources/userconstraints/fkeys.lst"));
 		Set<RelationID> refs = uc.getReferredTables(idfac);
 		assertTrue(refs.size() == 1);
@@ -75,7 +75,7 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testAddForeignKeys() throws ImplicitDBContraintException {
-		PreProcessedImplicitRelationalDBContraintSet uc = CONSTRAINT_EXTRACTOR.extract(
+		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
 				new File("src/test/resources/userconstraints/fkeys.lst"));
 		uc.insertForeignKeyConstraints(this.md);
 		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
@@ -88,7 +88,7 @@ public class TestImplicitDBConstraints {
 
 	@Test
 	public void testAddKeys() throws ImplicitDBContraintException {
-		PreProcessedImplicitRelationalDBContraintSet uc = CONSTRAINT_EXTRACTOR.extract(
+		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
 				new File("src/test/resources/userconstraints/keys.lst"));
 		uc.insertUniqueConstraints(this.md);
 		uc.insertForeignKeyConstraints(this.md);

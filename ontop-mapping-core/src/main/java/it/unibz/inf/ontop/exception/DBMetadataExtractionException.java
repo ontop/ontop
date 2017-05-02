@@ -12,4 +12,8 @@ public class DBMetadataExtractionException extends OBDASpecificationException {
     protected DBMetadataExtractionException(Exception e) {
         super(e);
     }
+
+    protected DBMetadataExtractionException(String prefix, Exception e) {
+        super(prefix, e);
+    }
 }

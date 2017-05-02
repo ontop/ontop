@@ -8,6 +8,6 @@ import java.io.File;
 public interface PreProcessedImplicitRelationalDBConstraintExtractor extends PreProcessedImplicitDBConstraintExtractor {
 
     @Override
-    PreProcessedImplicitRelationalDBContraintSet extract(@Nonnull File constraintFile)
+    PreProcessedImplicitRelationalDBConstraintSet extract(@Nonnull File constraintFile)
             throws ImplicitDBContraintException;
 }
