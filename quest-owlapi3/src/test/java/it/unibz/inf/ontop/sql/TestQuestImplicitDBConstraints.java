@@ -154,15 +154,12 @@ public class TestQuestImplicitDBConstraints {
 	public void testWithSelfJoinElim() throws Exception {
 		this.prepareDB(uc_create);
 
-		// Parsing user constraints
-		ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(uc_keyfile));
-
 
 		QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
-				.dbConstraintsReader(userConstraints)
+				.basicImplicitConstraintFile(uc_keyfile)
 				.jdbcUrl(URL)
 				.jdbcUser(USER)
 				.jdbcPassword(PASSWORD)
@@ -186,16 +183,12 @@ public class TestQuestImplicitDBConstraints {
 	@Test
 	public void testForeignKeysWithSelfJoinElim() throws Exception {
 		this.prepareDB(uc_create);
-		// Parsing user constraints
-		ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(uc_keyfile));
-//		factory.setImplicitDBConstraints(userConstraints);
-//		this.reasoner = factory.createReasoner(new SimpleConfiguration());
 
 		QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
-				.dbConstraintsReader(userConstraints)
+				.basicImplicitConstraintFile(uc_keyfile)
 				.jdbcUrl(URL)
 				.jdbcUser(USER)
 				.jdbcPassword(PASSWORD)
@@ -261,16 +254,12 @@ public class TestQuestImplicitDBConstraints {
 	@Test
 	public void testForeignKeysTablesWithUC() throws Exception {
 		this.prepareDB(fk_create);
-		// Parsing user constraints
-		ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(fk_keyfile));
-//		factory.setImplicitDBConstraints(userConstraints);
-//		this.reasoner = factory.createReasoner(new SimpleConfiguration());
 
 		QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(fk_owlfile)
 				.nativeOntopMappingFile(fk_obdafile)
-				.dbConstraintsReader(userConstraints)
+				.basicImplicitConstraintFile(fk_keyfile)
 				.jdbcUrl(URL)
 				.jdbcUser(USER)
 				.jdbcPassword(PASSWORD)

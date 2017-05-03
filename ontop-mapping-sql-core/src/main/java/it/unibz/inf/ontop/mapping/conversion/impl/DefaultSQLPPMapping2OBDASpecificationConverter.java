@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.utils.MetaMappingExpander;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -91,7 +92,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
     @Override
     public OBDASpecification convert(final OBDAModel initialPPMapping, Optional<DBMetadata> optionalDBMetadata,
-                                     Optional<Ontology> optionalOntology, ExecutorRegistry executorRegistry)
+                                     Optional<Ontology> optionalOntology, Optional<File> constraintFile,
+                                     ExecutorRegistry executorRegistry)
             throws DBMetadataExtractionException, MappingException {
 
 
@@ -110,7 +112,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         // TODO: in the future, should only extract the DBMetadata
         DBMetadataAndMappingAxioms dbMetadataAndAxioms = extractDBMetadataAndNormalizeMappingAxioms(
-                simplifiedPPMapping, optionalDBMetadata);
+                simplifiedPPMapping, optionalDBMetadata, constraintFile);
 
         RDBMetadata dbMetadata = dbMetadataAndAxioms.dbMetadata;
 
@@ -192,7 +194,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      * Makes use of the DB connection
      */
     private DBMetadataAndMappingAxioms extractDBMetadataAndNormalizeMappingAxioms(final OBDAModel fixedPPMapping,
-                                                                                  Optional<DBMetadata> optionalDBMetadata)
+                                                                                  Optional<DBMetadata> optionalDBMetadata,
+                                                                                  Optional<File> constraintFile)
             throws DBMetadataExtractionException, MetaMappingExpansionException {
 
         try (Connection localConnection = createConnection()) {
@@ -200,7 +203,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             /*
              * Extracts the DBMetadata
              */
-            RDBMetadata dbMetadata = extractDBMetadata(fixedPPMapping, optionalDBMetadata, localConnection);
+            RDBMetadata dbMetadata = extractDBMetadata(fixedPPMapping, optionalDBMetadata, localConnection, constraintFile);
             ImmutableList<OBDAMappingAxiom> mappingAxioms = fixedPPMapping.getMappings();
 
             // TODO: move all this logic somewhere else (in several places)
@@ -664,11 +667,12 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      *
      */
     private RDBMetadata extractDBMetadata(final OBDAModel fixedPPMapping,
-                                          Optional<DBMetadata> optionalDBMetadata, Connection localConnection)
+                                          Optional<DBMetadata> optionalDBMetadata, Connection localConnection,
+                                          Optional<File> constraintFile)
             throws DBMetadataExtractionException {
         return optionalDBMetadata.isPresent()
-                ? dbMetadataExtractor.extract(fixedPPMapping, localConnection, optionalDBMetadata.get())
-                : dbMetadataExtractor.extract(fixedPPMapping, localConnection);
+                ? dbMetadataExtractor.extract(fixedPPMapping, localConnection, optionalDBMetadata.get(), constraintFile)
+                : dbMetadataExtractor.extract(fixedPPMapping, localConnection, constraintFile);
     }
 
     private Connection createConnection() throws SQLException {
