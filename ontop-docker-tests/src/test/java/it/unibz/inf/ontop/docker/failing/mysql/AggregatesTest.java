@@ -21,7 +21,9 @@ package it.unibz.inf.ontop.docker.failing.mysql;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Ignore;
 
+@Ignore("Not supported yet")
 public class AggregatesTest extends AbstractVirtualModeTest {
 
 	private static final String owlfile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";

@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.docker.failing.local;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Ignore;
 
+@Ignore("Local test")
 public class SAPHANATest extends AbstractVirtualModeTest {
 
     private static final String owlfile = "/local/sap/SAPbooktutorial.owl";

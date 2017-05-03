@@ -2,10 +2,11 @@ package it.unibz.inf.ontop.docker.failing.local;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
 
-
+@Ignore("Local test")
 public class MonetDBTest {
 
         final String owlFile = "/local/monet/booktutorial.owl";

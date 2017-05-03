@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.docker.failing.mssql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Ignore;
 
+@Ignore("Mssql does not have limit and offset")
 public class MsSQLASKTest extends AbstractVirtualModeTest {
 
 
