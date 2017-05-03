@@ -28,9 +28,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class RegexOracleSQLTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "src/test/resources/oracle/regex/stockBolzanoAddress.owl";
-	static final String obdafile = "src/test/resources/oracle/regex/stockexchangeRegexLike.obda";
-	static final String propertiesfile = "src/test/resources/oracle/oracle.properties";
+	static final String owlfile = "/oracle/regex/stockBolzanoAddress.owl";
+	static final String obdafile = "/oracle/regex/stockexchangeRegexLike.obda";
+	static final String propertiesfile = "/oracle/oracle.properties";
 
 	public RegexOracleSQLTest() {
 		super(owlfile, obdafile, propertiesfile);

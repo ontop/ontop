@@ -24,23 +24,10 @@ import it.unibz.inf.ontop.docker.AbstractDbMetadataInfoTest;
 
 public class MySqlMetadataInfoTest extends AbstractDbMetadataInfoTest {
 
-	@Override
-	protected String getConnectionPassword() {
-		return "mysql";
+	private static final String propertyFile = "/mysql/dbconstraints-mysql.properties";
+
+	public MySqlMetadataInfoTest() {
+		super(propertyFile);
 	}
 
-	@Override
-	protected String getConnectionString() {
-		return "jdbc:mysql://tom.inf.unibz.it:3694/dbconstraints";
-	}
-
-	@Override
-	protected String getConnectionUsername() {
-		return "root";
-	}
-
-	@Override
-	protected String getDriverName() {
-		return "com.mysql.jdbc.Driver";
-	}
 }

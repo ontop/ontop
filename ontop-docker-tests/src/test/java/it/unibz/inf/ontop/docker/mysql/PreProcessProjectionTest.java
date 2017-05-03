@@ -5,9 +5,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 
 public class PreProcessProjectionTest extends AbstractVirtualModeTest {
 
-    static final String owlfile = "src/test/resources/mysql/northwind/northwind.owl";
-    static final String obdafile = "src/test/resources/mysql/northwind/mappingStars.obda";
-    static final String propertiesfile = "src/test/resources/mysql/northwind/mapping-northwind.properties";
+    static final String owlfile = "/mysql/northwind/northwind.owl";
+    static final String obdafile = "/mysql/northwind/mappingStars.obda";
+    static final String propertiesfile = "/mysql/northwind/mapping-northwind.properties";
 
     public PreProcessProjectionTest() {
         super(owlfile, obdafile, propertiesfile);

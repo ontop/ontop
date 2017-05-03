@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
-import junit.framework.TestCase;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
@@ -11,15 +10,21 @@ import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatetimeStampSesameTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
-	String owlfile = "src/test/resources/mysql/northwind/northwind-dmo.owl";
-	String mappingfile = "src/test/resources/mysql/northwind/mapping-northwind-dmo.ttl";
-	String propertyfile = "src/test/resources/mysql/northwind/mapping-northwind-dmo.properties";
+
+public class DatetimeStampSesameTest  {
+
+	String owlFile = "/mysql/northwind/northwind-dmo.owl";
+	String obdaFile = "/mysql/northwind/mapping-northwind-dmo.ttl";
+	String propertyFile = "/mysql/northwind/mapping-northwind-dmo.properties";
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	RepositoryConnection con;
@@ -27,10 +32,14 @@ public class DatetimeStampSesameTest extends TestCase {
 
 	public DatetimeStampSesameTest(){
 
+		String owlFileName =  this.getClass().getResource(owlFile).toString();
+		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
+
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile(owlfile)
-				.r2rmlMappingFile(mappingfile)
-				.propertyFile(propertyfile)
+				.ontologyFile(owlFileName)
+				.r2rmlMappingFile(obdaFileName)
+				.propertyFile(propertyFileName)
 				.enableExistentialReasoning(true)
 				.enableTestMode()
 				.build();
@@ -42,7 +51,7 @@ public class DatetimeStampSesameTest extends TestCase {
 			assertFalse(false);
 		}
 	}
-
+	@Before
 	public void setUp() {
 		try {
 			con = repository.getConnection();
@@ -54,6 +63,7 @@ public class DatetimeStampSesameTest extends TestCase {
 
 	}
 
+	@After
 	public void tearDown() {
 		try {
 			if (con != null && con.isOpen()) {

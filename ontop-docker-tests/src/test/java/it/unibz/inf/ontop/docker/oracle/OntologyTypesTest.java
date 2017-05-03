@@ -45,27 +45,32 @@ public class OntologyTypesTest {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
-	final String owlFile = "src/test/resources/oracle/ontologyType/dataPropertiesOntologyType.owl";
-	final String obdaFile = "src/test/resources/oracle/ontologyType/dataPropertiesOntologyType.obda";
-	final String propertyFile = "src/test/resources/oracle/oracle.properties";
-    final String r2rmlFile = "src/test/resources/oracle/ontologyType/dataPropertiesPrettyType.ttl";
-	final String obdaErroredFile = "src/test/resources/oracle/ontologyType/erroredOntologyType.obda";
+	final String owlFile = "/oracle/ontologyType/dataPropertiesOntologyType.owl";
+	final String obdaFile = "/oracle/ontologyType/dataPropertiesOntologyType.obda";
+	final String propertyFile = "/oracle/oracle.properties";
+    final String r2rmlFile = "/oracle/ontologyType/dataPropertiesPrettyType.ttl";
+	final String obdaErroredFile = "/oracle/ontologyType/erroredOntologyType.obda";
 
-	private void runTests(boolean isR2rml, String query, int numberResults,
-						  String mappingFile) throws Exception {
+	final String owlFileName =  this.getClass().getResource(owlFile).toString();
+	final String r2rmlFileName =  this.getClass().getResource(r2rmlFile).toString();
+	final String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+	final String obdaErroredFileName =  this.getClass().getResource(obdaErroredFile).toString();
+	final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
+
+	private void runTests(boolean isR2rml, String query, int numberResults) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.propertyFile(propertyFile)
+				.propertyFile(propertyFileName)
 				.enableTestMode()
-				.ontologyFile(owlFile);
+				.ontologyFile(owlFileName);
 
 
 		if (isR2rml)
-			configBuilder.r2rmlMappingFile(mappingFile);
+			configBuilder.r2rmlMappingFile(r2rmlFileName);
 		else
-			configBuilder.nativeOntopMappingFile(mappingFile);
+			configBuilder.nativeOntopMappingFile(obdaFileName);
 
 		QuestOWL reasoner = factory.createReasoner(configBuilder.build());
 
@@ -116,28 +121,28 @@ public class OntologyTypesTest {
 		String query1 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
-		runTests(false, query1, 0, obdaFile);
+		runTests(false, query1, 0);
 //
 //        //no value in the mapping
 		//xsd:long in the ontology
 		String query1b = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
 
-		runTests(false, query1b, 3, obdaFile);
+		runTests(false, query1b, 3);
 
 		//no value in the mapping
 		//xsd:string in the ontology
 		String query2 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
 
-		runTests(false, query2, 3, obdaFile);
+		runTests(false, query2, 3);
 
 		//no value in the ontology
 		//rdfs:Literal in the mapping
 		String query3 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
 
-		runTests(false, query3, 3, obdaFile);
+		runTests(false, query3, 3);
 
 		//no value in the ontology
 		//no value in the mapping
@@ -145,7 +150,7 @@ public class OntologyTypesTest {
 		String query4 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
 
-		runTests(false, query4, 3, obdaFile);
+		runTests(false, query4, 3);
 
 		// no value in the ontology
 		//value in the mapping is xsd:long
@@ -153,7 +158,7 @@ public class OntologyTypesTest {
 		String query5 = "PREFIX franz: <http://www.franz.com/>" +
 				"select * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
 
-		runTests(false, query5, 3, obdaFile);
+		runTests(false, query5, 3);
 
 		// no value in the ontology
 		//value in the mapping is xsd:positiveInteger
@@ -161,7 +166,7 @@ public class OntologyTypesTest {
 		String query6 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
 
-		runTests(false, query6, 3, obdaFile);
+		runTests(false, query6, 3);
 
 
 	}
@@ -174,28 +179,28 @@ public class OntologyTypesTest {
 		String query1 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
-		runTests(true, query1, 0, r2rmlFile);
+		runTests(true, query1, 0);
 //
 //        //no value in the mapping
 		//xsd:long in the ontology
 		String query1b = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
 
-		runTests(true, query1b, 3, r2rmlFile);
+		runTests(true, query1b, 3);
 
 		//no value in the mapping
 		//xsd:string in the ontology
 		String query2 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
 
-		runTests(true, query2, 3, r2rmlFile);
+		runTests(true, query2, 3);
 
 		//no value in the ontology
 		//rdfs:Literal in the mapping
 		String query3 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
 
-		runTests(true, query3, 3, r2rmlFile);
+		runTests(true, query3, 3);
 
 		//no value in the ontology
 		//no value in the mapping
@@ -203,7 +208,7 @@ public class OntologyTypesTest {
 		String query4 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
 
-		runTests(true,  query4, 3, r2rmlFile);
+		runTests(true,  query4, 3);
 
 		// no value in the ontology
 		//value in the mapping is xsd:long
@@ -211,7 +216,7 @@ public class OntologyTypesTest {
 		String query5 = "PREFIX franz: <http://www.franz.com/>" +
 				"select * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
 
-		runTests(true,  query5, 3, r2rmlFile);
+		runTests(true,  query5, 3);
 
 		// no value in the ontology
 		//value in the mapping is xsd:positiveInteger
@@ -219,7 +224,7 @@ public class OntologyTypesTest {
 		String query6 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
 
-		runTests(true, query6, 3, r2rmlFile);
+		runTests(true, query6, 3);
 	}
 
 	@Test
@@ -230,10 +235,10 @@ public class OntologyTypesTest {
 			// Creating a new instance of the reasoner
 			QuestOWLFactory factory = new QuestOWLFactory();
 			OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-					.nativeOntopMappingFile(new File(obdaErroredFile))
-					.ontologyFile(owlFile)
+					.nativeOntopMappingFile(obdaErroredFileName)
+					.ontologyFile(owlFileName)
 					.enableTestMode()
-					.propertyFile(propertyFile)
+					.propertyFile(propertyFileName)
 					.build();
 			QuestOWL reasoner = factory.createReasoner(config);
 

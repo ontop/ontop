@@ -21,12 +21,14 @@ package it.unibz.inf.ontop.docker.failing.mysql;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Ignore;
 
+@Ignore("Not supported yet")
 public class AggregatesTest extends AbstractVirtualModeTest {
 
-	private static final String owlfile = "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	private static final String obdafile = "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
-	private static final String propertiesfile = "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.properties";
+	private static final String owlfile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	private static final String obdafile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
+	private static final String propertiesfile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.properties";
 
 	public AggregatesTest() {
 		super(owlfile, obdafile, propertiesfile);

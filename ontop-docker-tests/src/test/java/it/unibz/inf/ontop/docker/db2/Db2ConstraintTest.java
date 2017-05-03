@@ -22,29 +22,18 @@ package it.unibz.inf.ontop.docker.db2;
 
 import it.unibz.inf.ontop.docker.AbstractConstraintTest;
 
+import java.io.IOException;
+
+
 public class Db2ConstraintTest extends AbstractConstraintTest {
 
-	public Db2ConstraintTest(String method) {
-		super(method);
+	private static final String propertyFile = "/db2/bind/db2-smallbooks.properties";
+
+
+	public Db2ConstraintTest(String method) throws IOException {
+		super(method, propertyFile);
+
+
 	}
 
-	@Override
-	protected String getConnectionPassword() {
-		return "obda-pwd";
-	}
-
-	@Override
-	protected String getConnectionString() {
-		return "jdbc:db2://tom.inf.unibz.it:50000/sbooks";
-	}
-
-	@Override
-	protected String getConnectionUsername() {
-		return "db2inst1";
-	}
-
-	@Override
-	protected String getDriverName() {
-		return "com.ibm.db2.jcc.DB2Driver";
-	}
 }

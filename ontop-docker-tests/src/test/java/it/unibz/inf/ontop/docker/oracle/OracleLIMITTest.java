@@ -54,19 +54,22 @@ public class OracleLIMITTest {
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology ontology;
 	
-	final String owlfile = "src/test/resources/oracle/oraclesql/o.owl";
-	final String obdafile1 = "src/test/resources/oracle/oraclesql/o1.obda";
-	final String obdafile2 = "src/test/resources/oracle/oraclesql/o2.obda";
-	final String propertyFile = "src/test/resources/oracle/oracle.properties";
+	final String owlFile = "/oracle/oraclesql/o.owl";
+	final String obdaFile1 = "/oracle/oraclesql/o1.obda";
+	final String obdaFile2 = "/oracle/oraclesql/o2.obda";
+	final String propertyFile = "/oracle/oracle.properties";
+
+	final String owlFileName =  this.getClass().getResource(owlFile).toString();
+	final String obdaFile1Name =  this.getClass().getResource(obdaFile1).toString();
+	final String obdaFile2Name =  this.getClass().getResource(obdaFile2).toString();
+	final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
+
+
 	private QuestOWL reasoner;
 
 	@Before
 	public void setUp() throws Exception {
-		
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+
 	}
 
 	@After
@@ -82,11 +85,11 @@ public class OracleLIMITTest {
 		QuestOWLFactory factory = new QuestOWLFactory();
 
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile(owlfile)
+				.ontologyFile(owlFileName)
 				.nativeOntopMappingFile(obdaFileName)
 				.enableFullMetadataExtraction(false)
 				.enableTestMode()
-				.propertyFile(propertyFile)
+				.propertyFile(propertyFileName)
 				.build();
 
 		reasoner = factory.createReasoner(configuration);
@@ -110,7 +113,7 @@ public class OracleLIMITTest {
 	 */
 	@Test
 	public void testWithShortDriverString() throws Exception {
-		runQuery(obdafile1);
+		runQuery(obdaFile1Name);
 	}
 
 	
@@ -122,7 +125,7 @@ public class OracleLIMITTest {
 	 */
 	@Test
 	public void testWithLongDriverString() throws Exception {
-		runQuery(obdafile2);
+		runQuery(obdaFile2Name);
 	}
 
 	

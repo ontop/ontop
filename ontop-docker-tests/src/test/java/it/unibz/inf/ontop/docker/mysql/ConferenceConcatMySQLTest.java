@@ -35,9 +35,9 @@ import org.semanticweb.owlapi.model.OWLObject;
 
 public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 
-    static final String owlFile = "src/test/resources/mysql/conference/ontology3.owl";
-    static final String obdaFile = "src/test/resources/mysql/conference/secondmapping-test.obda";
-	static final String propertyFile = "src/test/resources/mysql/conference/secondmapping-test.properties";
+    static final String owlFile = "/mysql/conference/ontology3.owl";
+    static final String obdaFile = "/mysql/conference/secondmapping-test.obda";
+	static final String propertyFile = "/mysql/conference/secondmapping-test.properties";
 
 	public ConferenceConcatMySQLTest() {
 		super(owlFile, obdaFile, propertyFile);

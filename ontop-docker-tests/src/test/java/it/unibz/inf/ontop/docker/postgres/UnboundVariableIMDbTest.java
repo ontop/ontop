@@ -12,9 +12,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class UnboundVariableIMDbTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "src/test/resources/pgsql/imdb/ontologyIMDB.owl";
-	static final String obdafile = "src/test/resources/pgsql/imdb/ontologyIMDBSimplify.obda";
-	static final String propertyfile = "src/test/resources/pgsql/imdb/movieontology.properties";
+	static final String owlfile = "/pgsql/imdb/ontologyIMDB.owl";
+	static final String obdafile = "/pgsql/imdb/ontologyIMDBSimplify.obda";
+	static final String propertyfile = "/pgsql/imdb/movieontology.properties";
 
 	public UnboundVariableIMDbTest() {
 		super(owlfile, obdafile, propertyfile);

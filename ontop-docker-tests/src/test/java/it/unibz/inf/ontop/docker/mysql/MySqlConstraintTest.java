@@ -25,27 +25,10 @@ import it.unibz.inf.ontop.docker.AbstractConstraintTest;
 
 public class MySqlConstraintTest extends AbstractConstraintTest {
 
+	private static final String propertyFile = "/mysql/dbconstraints-mysql.properties";
+
 	public MySqlConstraintTest(String method) {
-		super(method);
+		super(method, propertyFile);
 	}
 
-	@Override
-	protected String getConnectionPassword() {
-		return "mysql";
-	}
-
-	@Override
-	protected String getConnectionString() {
-		return "jdbc:mysql://tom.inf.unibz.it:3694/dbconstraints";
-	}
-
-	@Override
-	protected String getConnectionUsername() {
-		return "root";
-	}
-
-	@Override
-	protected String getDriverName() {
-		return "com.mysql.jdbc.Driver";
-	}
 }

@@ -29,9 +29,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class RegexMySQLTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "src/test/resources/mysql/regex/stockBolzanoAddress.owl";
-	static final String obdafile = "src/test/resources/mysql/regex/stockexchangeRegexMySQL.obda";
-	static final String propertiesfile = "src/test/resources/mysql/regex/stockexchangeRegexMySQL.properties";
+	static final String owlfile = "/mysql/regex/stockBolzanoAddress.owl";
+	static final String obdafile = "/mysql/regex/stockexchangeRegexMySQL.obda";
+	static final String propertiesfile = "/mysql/regex/stockexchangeRegexMySQL.properties";
 
 	public RegexMySQLTest() {
 		super(owlfile, obdafile, propertiesfile);

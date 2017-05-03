@@ -29,9 +29,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class MsSQLIdentifierTest extends AbstractVirtualModeTest {
 
-	private static final String owlfile = "src/test/resources/mssql/identifiers.owl";
-	private static final String obdafile = "src/test/resources/mssql/identifiers-mssql.obda";
-	private static final String propertyfile = "src/test/resources/mssql/identifiers-mssql.properties";
+	private static final String owlfile = "/mssql/identifiers.owl";
+	private static final String obdafile = "/mssql/identifiers-mssql.obda";
+	private static final String propertyfile = "/mssql/identifiers-mssql.properties";
 
 	public MsSQLIdentifierTest() {
 		super(owlfile, obdafile, propertyfile);

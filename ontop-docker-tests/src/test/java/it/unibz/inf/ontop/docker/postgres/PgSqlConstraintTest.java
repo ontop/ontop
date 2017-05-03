@@ -24,27 +24,10 @@ import it.unibz.inf.ontop.docker.AbstractConstraintTest;
 
 public class PgSqlConstraintTest extends AbstractConstraintTest {
 
+	private static final String propertyFile = "/pgsql/dbconstraints-pgsql.properties";
+
 	public PgSqlConstraintTest(String method) {
-		super(method);
+		super(method, propertyFile);
 	}
 
-	@Override
-	protected String getConnectionPassword() {
-		return "postgres2";
-	}
-
-	@Override
-	protected String getConnectionString() {
-		return "jdbc:postgresql://tom.inf.unibz.it:7777/dbconstraints";
-	}
-
-	@Override
-	protected String getConnectionUsername() {
-		return "postgres";
-	}
-
-	@Override
-	protected String getDriverName() {
-		return "org.postgresql.Driver";
-	}
 }

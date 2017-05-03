@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.docker.postgres;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +16,16 @@ import static org.junit.Assert.assertFalse;
  *
  *
  */
-public class AnnotationMovieTest {
+public class AnnotationMovieTest extends AbstractVirtualModeTest{
     Logger log = LoggerFactory.getLogger(this.getClass());
 
-    final String owlFile = "src/test/resources/pgsql/annotation/movieontology.owl";
-    final String obdaFile = "src/test/resources/pgsql/annotation/newSyntaxMovieontology.obda";
-    final String propertyFile = "src/test/resources/pgsql/annotation/newSyntaxMovieontology.properties";
+    final static String owlFile = "/pgsql/annotation/movieontology.owl";
+    final static String obdaFile = "/pgsql/annotation/newSyntaxMovieontology.obda";
+    final static String propertyFile = "/pgsql/annotation/newSyntaxMovieontology.properties";
+
+    public AnnotationMovieTest() {
+        super(owlFile, obdaFile, propertyFile);
+    }
 
 
     @Test
@@ -35,8 +40,8 @@ public class AnnotationMovieTest {
 
 
 
-        int results = runTestQuery(queryBind);
-        assertEquals(4, results);
+        countResults(queryBind, 4);
+
     }
 
 
@@ -56,8 +61,8 @@ public class AnnotationMovieTest {
 
 
 
-        int results = runTestQuery(queryBind);
-        assertEquals(444090, results);
+        countResults(queryBind, 444090);
+
     }
 
     @Test
@@ -76,8 +81,8 @@ public class AnnotationMovieTest {
 
 
 
-        int results = runTestQuery(queryBind);
-        assertEquals(443300, results);
+        countResults(queryBind, 443300);
+
     }
 
     @Test
@@ -96,8 +101,8 @@ public class AnnotationMovieTest {
 
 
 
-        int results = runTestQuery(queryBind);
-        assertEquals(112576, results);
+        countResults(queryBind, 112576);
+
     }
 
 
@@ -117,8 +122,8 @@ public class AnnotationMovieTest {
 
 
 
-        int results = runTestQuery(queryBind);
-        assertEquals(876722, results);
+        countResults(queryBind, 876722);
+
     }
 
     @Test //no check is executed to verify that the value is a valid uri
@@ -137,8 +142,8 @@ public class AnnotationMovieTest {
 
 
 
-        int results = runTestQuery(queryBind);
-        assertEquals(7530011, results);
+        countResults(queryBind, 7530011);
+
     }
 
     @Test //no class in the ontology
@@ -155,9 +160,7 @@ public class AnnotationMovieTest {
                 "}";
 
 
-
-        int results = runTestQuery(queryBind);
-        assertEquals(7530011, results);
+        countResults(queryBind, 7530011);
     }
 
     @Test //no dataproperty in the ontology
@@ -173,10 +176,7 @@ public class AnnotationMovieTest {
 
                 "}";
 
-
-
-        int results = runTestQuery(queryBind);
-        assertEquals(705859, results);
+        countResults(queryBind, 705859);
 
     }
 
@@ -195,64 +195,11 @@ public class AnnotationMovieTest {
 
 
 
-        int results = runTestQuery(queryBind);
-        assertEquals(444090, results);
-
-    }
-
-
-    private int runTestQuery(String query) throws Exception {
-
-        // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdaFile)
-                .ontologyFile(owlFile)
-                .propertyFile(propertyFile)
-                .enableOntologyAnnotationQuerying(true)
-                .enableTestMode()
-                .build();
-        QuestOWL reasoner = factory.createReasoner(config);
-
-        // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
-
-
-        log.debug("Executing query: ");
-        log.debug("Query: \n{}", query);
-
-        long start = System.nanoTime();
-        QuestOWLResultSet res = st.executeTuple(query);
-        long end = System.nanoTime();
-
-        double time = (end - start) / 1000;
-        String result = "";
-        int count = 0;
-        while (res.nextRow()) {
-            count += 1;
-            if (count == 1) {
-                for (int i = 1; i <= res.getColumnCount(); i++) {
-                    log.debug("Example result " + res.getSignature().get(i - 1) + " = " + res.getOWLObject(i));
-
-                }
-            }
-        }
-        log.debug("Total results: {}", count);
-
-        assertFalse(count == 0);
-
-        log.debug("Elapsed time: {} ms", time);
-
-        st.close();
-        conn.close();
-        reasoner.dispose();
-
-        return count;
-
+        countResults(queryBind, 444090);
 
 
     }
+
 
 
 }

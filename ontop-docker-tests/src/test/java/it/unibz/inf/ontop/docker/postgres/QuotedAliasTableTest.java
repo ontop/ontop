@@ -29,9 +29,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  *L
  */
 public class QuotedAliasTableTest extends AbstractVirtualModeTest {
-	static final String owlfile = "src/test/resources/pgsql/extended-npd-v2-ql_a_postgres.owl";
-    static final String obdafile = "src/test/resources/pgsql/npd-v2.obda";
-	static final String propertiesfile = "src/test/resources/pgsql/npd-v2.properties";
+	static final String owlfile = "/pgsql/extended-npd-v2-ql_a_postgres.owl";
+    static final String obdafile = "/pgsql/npd-v2.obda";
+	static final String propertiesfile = "/pgsql/npd-v2.properties";
 
 	public QuotedAliasTableTest() {
 		super(owlfile, obdafile, propertiesfile);

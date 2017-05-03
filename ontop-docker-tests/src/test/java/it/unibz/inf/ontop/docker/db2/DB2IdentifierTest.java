@@ -30,9 +30,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class DB2IdentifierTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "src/test/resources/db2/identifiers/identifiers.owl";
-	static final String obdafile = "src/test/resources/db2/identifiers/identifiers-db2.obda";
-	static final String propertyfile = "src/test/resources/db2/db2-stock.properties";
+	static final String owlfile = "/db2/identifiers/identifiers.owl";
+	static final String obdafile = "/db2/identifiers/identifiers-db2.obda";
+	static final String propertyfile = "/db2/db2-stock.properties";
 
 	public DB2IdentifierTest() {
 		super(owlfile, obdafile, propertyfile);

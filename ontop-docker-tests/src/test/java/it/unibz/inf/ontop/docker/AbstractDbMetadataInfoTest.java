@@ -23,23 +23,44 @@ package it.unibz.inf.ontop.docker;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import junit.framework.TestCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
 import java.util.Properties;
 
 public abstract class AbstractDbMetadataInfoTest extends TestCase {
 	
 	private RDBMetadata metadata;
-	
+	private String propertyFile;
+	private Properties properties;
+
+	private static Logger log = LoggerFactory.getLogger(AbstractDbMetadataInfoTest.class);
+
+	public AbstractDbMetadataInfoTest(String propertyFile) {
+		this.propertyFile = propertyFile;
+
+	}
+
 	@Override
-	public void setUp() {
+	public void setUp() throws Exception {
 		
 		try {
+			InputStream pStream =this.getClass().getResourceAsStream(propertyFile);
+			properties = new Properties();
+			properties.load(pStream);
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
 			metadata = RDBMetadataExtractionTools.createMetadata(conn);
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
-		} 
-		catch (SQLException e) { 
+		}
+		catch (IOException e) {
+			log.error("IOException during setUp of propertyFile");
+			e.printStackTrace();
+		}
+		catch (SQLException e) {
+			log.error("SQL Exception during setUp of metadata");
 			e.printStackTrace();
 		}
 	}
@@ -78,9 +99,23 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 			System.out.println(msg);
 		}
 	}
-	
-	protected abstract String getDriverName();
-	protected abstract String getConnectionString();
-	protected abstract String getConnectionUsername();
-	protected abstract String getConnectionPassword();
+
+	public String getConnectionPassword() {
+		return properties.getProperty("jdbc.password");
+	}
+
+
+	public String getConnectionString() {
+		return properties.getProperty("jdbc.url");
+	}
+
+
+	public String getConnectionUsername() {
+		return properties.getProperty("jdbc.user");
+	}
+
+
+	public String getDriverName() {
+		return properties.getProperty("jdbc.driver");
+	}
 }

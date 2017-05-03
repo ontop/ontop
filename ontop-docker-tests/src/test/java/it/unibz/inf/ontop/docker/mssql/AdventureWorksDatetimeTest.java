@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.docker.mssql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -34,35 +35,20 @@ import static org.junit.Assert.assertTrue;
 /***
  * Tests that SQL Server returns the datetimes correctly
  */
-public class AdventureWorksDatetimeTest {
+public class AdventureWorksDatetimeTest extends AbstractVirtualModeTest {
 
 	private OntopOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
-	final String owlFile = "src/test/resources/mssql/adventureWorks.owl";
-	final String obdaFile = "src/test/resources/mssql/adventureWorks.obda";
-	final String propertiesFile = "src/test/resources/mssql/adventureWorks.properties";
+	static final String owlFile = "/mssql/adventureWorks.owl";
+	static final String obdaFile = "/mssql/adventureWorks.obda";
+	static final String propertiesFile = "/mssql/adventureWorks.properties";
 
-	@Before
-	public void setUp() throws Exception {
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-
-		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				//.enableEquivalenceOptimization(true)
-				.nativeOntopMappingFile(obdaFile)
-				.ontologyFile(owlFile)
-				.propertyFile(propertiesFile)
-				.enableTestMode()
-				.build();
-
-		QuestOWL reasoner = factory.createReasoner(configuration);
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
+	public AdventureWorksDatetimeTest() {
+		super(owlFile, obdaFile, propertiesFile);
 	}
-	
+
 	private String runTests(String query) throws Exception {
 		OntopOWLStatement st = conn.createStatement();
 		String retval="";
@@ -98,8 +84,8 @@ public class AdventureWorksDatetimeTest {
 	public void testDatetime() throws Exception {
 
 		String query =  "PREFIX : <http://knova.ru/adventureWorks.owl#>\n" +
-				"SELECT DISTINCT ?x ?y { ?x :SpecialOffer_ModifiedDate ?y }";
-		String val = runTests(query);
+				"SELECT DISTINCT ?x ?y { ?y :SpecialOffer_ModifiedDate ?x }";
+		String val = runQueryAndReturnStringOfLiteralX(query);
 		assertEquals("\"2005-05-02T00:00:00.0\"^^xsd:dateTime", val);
 	}
 

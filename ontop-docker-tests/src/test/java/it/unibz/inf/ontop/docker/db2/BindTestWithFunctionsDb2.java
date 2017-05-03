@@ -35,9 +35,9 @@ import java.util.List;
  */
 
 public class BindTestWithFunctionsDb2 extends AbstractBindTestWithFunctions {
-	private static final String owlfile = "src/test/resources/db2/bind/sparqlBind.owl";
-	private static final String obdafile = "src/test/resources/db2/bind/sparqlBindDb2.obda";
-    private static final String propertiesfile = "src/test/resources/db2/bind/db2-smallbooks.properties";
+	private static final String owlfile = "/db2/bind/sparqlBind.owl";
+	private static final String obdafile = "/db2/bind/sparqlBindDb2.obda";
+    private static final String propertiesfile = "/db2/bind/db2-smallbooks.properties";
 
     public BindTestWithFunctionsDb2() {
         super(owlfile, obdafile, propertiesfile);

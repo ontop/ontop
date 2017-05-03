@@ -32,23 +32,30 @@ public class DistinctResultSetTest { //
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    final String owlFile = "src/test/resources/mysql/example/exampleBooks.owl";
-    final String obdaFile = "src/test/resources/mysql/example/exampleBooks.obda";
-    final String propertyFile = "src/test/resources/mysql/example/exampleBooks.properties";
+    final String owlFile = "/mysql/example/exampleBooks.owl";
+    final String obdaFile = "/mysql/example/exampleBooks.obda";
+    final String propertyFile = "/mysql/example/exampleBooks.properties";
+    static String owlFileName;
+    static String obdaFileName;
+    static String propertyFileName;
 
     @Before
     public void setUp() throws Exception {
-
+        owlFileName =  this.getClass().getResource(owlFile).toString();
+        obdaFileName =  this.getClass().getResource(obdaFile).toString();
+        propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
     }
     private int runTestsQuestOWL( String query) throws Exception {
 
+
+
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdaFile)
-                .ontologyFile(owlFile)
-                .propertyFile(propertyFile)
+                .nativeOntopMappingFile(obdaFileName)
+                .ontologyFile(owlFileName)
+                .propertyFile(propertyFileName)
 //                .enableTestMode()
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
@@ -83,8 +90,8 @@ public class DistinctResultSetTest { //
         int count = 0;
         try {
             OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    .ontologyFile(owlFile)
-                    .nativeOntopMappingFile(obdaFile)
+                    .ontologyFile(owlFileName)
+                    .nativeOntopMappingFile(obdaFileName)
                     .propertyFile(configFile)
                     .enableTestMode()
                     .build();
@@ -156,8 +163,8 @@ public class DistinctResultSetTest { //
 
         String query = "PREFIX : <http://meraka/moss/exampleBooks.owl#>" +
                 " select distinct * {?x a :Book}";
-        File f = new File("src/test/resources/mysql/example/exampleDistinct.properties");
-        String pref = "file:" + f.getAbsolutePath();
+        String pref = this.getClass().getResource("/mysql/example/exampleDistinct.properties").toString();
+
         int nResults = runTestsSesame(query,pref) ;
         assertEquals(24, nResults);
     }

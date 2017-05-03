@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker.oracle;
  * #L%
  */
 
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -41,64 +42,23 @@ import static junit.framework.TestCase.assertTrue;
  * correctly. Especially, that the unquoted identifiers are treated as uppercase, and
  * that the case of quoted identifiers is not changed
  */
-public class OracleIdentifierTest {
+public class OracleIdentifierTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "src/test/resources/oracle/identifiers/identifiers.owl";
-	static final String obdafile = "src/test/resources/oracle/identifiers/identifiers-oracle.obda";
-	static final String propertiesfile = "src/test/resources/oracle/oracle.properties";
-
-	RepositoryConnection con;
-	Repository repository;
+	static final String owlfile = "/oracle/identifiers/identifiers.owl";
+	static final String obdafile = "/oracle/identifiers/identifiers-oracle.obda";
+	static final String propertiesfile = "/oracle/oracle.properties";
 
 
-	@Before
-	public void setUp() {
-
-		try {
-			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-					.ontologyFile(owlfile)
-					.nativeOntopMappingFile(obdafile)
-					.enableExistentialReasoning(true)
-					.enableTestMode()
-					.propertyFile(propertiesfile)
-					.build();
-
-			repository = new OntopVirtualRepository(configuration);
-			/*
-			 * Repository must be always initialized first
-			 */
-			repository.initialize();
-
-			/*
-			 * Get the repository connection
-			 */
-			con = repository.getConnection();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+	public OracleIdentifierTest() {
+		super(owlfile, obdafile, propertiesfile);
 	}
-	/**
-	 * Test use of lowercase, unquoted table, schema and column identifiers (also in target)
-	 * @throws Exception
-	 */
-	@After
-	public void tearDown() {
-		try {
-			if (con != null && con.isOpen()) {
-				con.close();
-			}
-			repository.shutDown();
-		} catch (RepositoryException e) {
-			e.printStackTrace();
-		}
-	}
+
+
 	@Test
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
 		String val = runQueryAndReturnStringOfIndividualX(query);
-		assertEquals("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina>", val);
 	}
 
 
@@ -111,7 +71,7 @@ public class OracleIdentifierTest {
 	public void testUpperCaseTableUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
 		String val =  runQueryAndReturnStringOfIndividualX(query);
-		assertEquals("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-Argentina", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-Argentina>", val);
 	}
 	
 	/**
@@ -123,7 +83,7 @@ public class OracleIdentifierTest {
 	public void testLowerCaseColumnViewDefQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
 		String val =  runQueryAndReturnStringOfIndividualX(query);
-		assertEquals("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-Argentina", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-Argentina>", val);
 	}
 
 	/**
@@ -135,29 +95,9 @@ public class OracleIdentifierTest {
 	public void testLowerCaseColumnViewDefUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country5} ORDER BY ?x";
 		String val =  runQueryAndReturnStringOfIndividualX(query);
-		assertEquals("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5-Argentina", val);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5-Argentina>", val);
 	}
 
-	private String runQueryAndReturnStringOfIndividualX(String query) {
-		String  resultval = "";
-		try {
-			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
-					query);
-			TupleQueryResult result = tupleQuery.evaluate();
-
-			assertTrue (result.hasNext());
-			BindingSet setResult= result.next();
-			resultval = setResult.getValue("x").stringValue();
-
-			result.close();
-
-
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return resultval;
-	}
 
 
 }

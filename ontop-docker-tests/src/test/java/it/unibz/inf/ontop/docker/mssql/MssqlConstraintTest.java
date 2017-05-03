@@ -22,29 +22,16 @@ package it.unibz.inf.ontop.docker.mssql;
 
 import it.unibz.inf.ontop.docker.AbstractConstraintTest;
 
+import java.util.Properties;
+
 public class MssqlConstraintTest extends AbstractConstraintTest {
 
+	private static final String propertyFile = "/mssql/dbconstraints-mssql.properties";
+
+
+
 	public MssqlConstraintTest(String method) {
-		super(method);
+		super(method, propertyFile);
 	}
 
-	@Override
-	protected String getConnectionPassword() {
-		return "Mssql1.0";
-	}
-
-	@Override
-	protected String getConnectionString() {
-		return "jdbc:sqlserver://tom.inf.unibz.it;databaseName=dbconstraints";
-	}
-
-	@Override
-	protected String getConnectionUsername() {
-		return "SA";
-	}
-
-	@Override
-	protected String getDriverName() {
-		return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-	}
 }
