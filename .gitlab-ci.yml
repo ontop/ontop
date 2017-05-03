@@ -1,5 +1,5 @@
 all-test:
   script:
       - set MAVEN_OPTS="-Xms6000m -Xmx8000m"
-      - mvn install --fail-at-end
+      - mvn install -Ddocker.url=tom.inf.unibz.it --fail-at-end
       - cd quest-test && mvn install -DskipTests=false --fail-never || true
