@@ -19,9 +19,9 @@ import static junit.framework.TestCase.assertTrue;
 public class H2ASKTest  {
 
 	 static final String owlFile =
-	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	 "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
 	 static final String obdaFile =
-	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-h2.obda";
+	 "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-h2.obda";
 
 	private QuestOWL reasoner;
 	private OntopOWLConnection conn;
@@ -30,11 +30,14 @@ public class H2ASKTest  {
 	@Before
 	public void setUp() throws Exception {
 
-		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questrepository","fish", "fish");
+		String url = "jdbc:h2:mem:questrepository";
+		String user = "fish";
+		String password = "fish";
+		sqlConnection = DriverManager.getConnection(url, user, password);
 		java.sql.Statement s = sqlConnection.createStatement();
 
 		try {
-			String text = new Scanner( new File("src/test/resources/test/stockexchange-create-h2.sql") ).useDelimiter("\\A").next();
+			String text = new Scanner( new File("src/main/resources/dump/stockexchange-create-h2.sql") ).useDelimiter("\\A").next();
 			s.execute(text);
 			//Server.startWebServer(sqlConnection);
 
@@ -47,6 +50,9 @@ public class H2ASKTest  {
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
+				.jdbcUrl(url)
+				.jdbcUser(user)
+				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
 
