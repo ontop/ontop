@@ -76,8 +76,7 @@ public class OBDAModelManager implements Disposable {
 
 	private final JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
 
-    private boolean applyUserConstraints = false;
-	private ImplicitDBConstraintsReader userConstraints;
+    private boolean applyImplicitDBConstraints = false;
 	
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
 
@@ -101,6 +100,7 @@ public class OBDAModelManager implements Disposable {
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
 	private final SpecificationFactory specificationFactory;
+	private File implicitDBConstraintFile;
 
 	public OBDAModelManager(EditorKit editorKit) {
 
@@ -636,8 +636,8 @@ public class OBDAModelManager implements Disposable {
                 DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
                 questfactory.setPreferences(reasonerPreference.clone());
                 questfactory.setOBDAModelWrapper(getActiveOBDAModelWrapper());
-                if(applyUserConstraints)
-                    questfactory.setImplicitDBConstraints(userConstraints);
+                if(applyImplicitDBConstraints)
+                    questfactory.setImplicitDBConstraintFile(implicitDBConstraintFile);
             }
 			fireActiveOBDAModelChange();
 
@@ -676,11 +676,11 @@ public class OBDAModelManager implements Disposable {
 
 				String obdaDocumentIri = owlName + OBDA_EXT;
 				String queryDocumentIri = owlName + QUERY_EXT;
-				String dbprefsDocumentIri = owlName + DBPREFS_EXT;
+				String implicitDBConstraintFilePath = owlName + DBPREFS_EXT;
 
 				File obdaFile = new File(URI.create(obdaDocumentIri));
 				File queryFile = new File(URI.create(queryDocumentIri));
-				File dbprefsFile = new File(URI.create(dbprefsDocumentIri));
+				implicitDBConstraintFile = new File(URI.create(implicitDBConstraintFilePath));
 
 
                 if (obdaFile.exists()) {
@@ -699,14 +699,13 @@ public class OBDAModelManager implements Disposable {
                         queryController.reset();
                         throw new Exception("Exception occurred while loading Query document: " + queryFile + "\n\n" + ex.getMessage());
                     }
-                    applyUserConstraints = false;
-                    if (dbprefsFile.exists()){
+                    applyImplicitDBConstraints = false;
+                    if (implicitDBConstraintFile.exists()){
                         try {
                             // Load user-supplied constraints
-                            userConstraints = new ImplicitDBConstraintsReader(dbprefsFile);
-                            applyUserConstraints = true;
+                            applyImplicitDBConstraints = true;
                         } catch (Exception ex) {
-                            throw new Exception("Exception occurred while loading database preference file : " + dbprefsFile + "\n\n" + ex.getMessage());
+                            throw new Exception("Exception occurred while loading database preference file : " + implicitDBConstraintFile + "\n\n" + ex.getMessage());
                         }
                     }
                 } else {
