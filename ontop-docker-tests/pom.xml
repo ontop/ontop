@@ -48,6 +48,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
