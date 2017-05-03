@@ -34,6 +34,10 @@ public interface OntopMappingSQLAllConfiguration extends OntopMappingSQLConfigur
         B r2rmlMappingReader(@Nonnull Reader mappingReader);
 
         B r2rmlMappingGraph(@Nonnull Model rdfGraph);
+
+        B basicImplicitConstraintFile(@Nonnull File constraintFile);
+
+        B basicImplicitConstraintFile(@Nonnull String constraintFilename);
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingSQLConfiguration.Builder<B>,

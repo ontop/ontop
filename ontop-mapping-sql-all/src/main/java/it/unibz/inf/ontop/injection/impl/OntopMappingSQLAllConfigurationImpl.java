@@ -48,7 +48,8 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         return loadSpecification(ontologySupplier,
                 () -> options.mappingFile,
                 () -> options.mappingReader,
-                () -> options.mappingGraph);
+                () -> options.mappingGraph,
+                () -> options.constraintFile);
     }
 
     @Override
@@ -80,13 +81,16 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         private final Optional<File> mappingFile;
         private final Optional<Reader> mappingReader;
         private final Optional<Model> mappingGraph;
+        private final Optional<File> constraintFile;
         final OntopMappingSQLOptions mappingSQLOptions;
 
         OntopMappingSQLAllOptions(Optional<File> mappingFile, Optional<Reader> mappingReader,
-                                  Optional<Model> mappingGraph, OntopMappingSQLOptions mappingSQLOptions) {
+                                  Optional<Model> mappingGraph, Optional<File> constraintFile,
+                                  OntopMappingSQLOptions mappingSQLOptions) {
             this.mappingFile = mappingFile;
             this.mappingReader = mappingReader;
             this.mappingGraph = mappingGraph;
+            this.constraintFile = constraintFile;
             this.mappingSQLOptions = mappingSQLOptions;
         }
     }
@@ -96,19 +100,23 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
             implements OntopMappingSQLAllBuilderFragment<B> {
         private final B builder;
         private final Runnable declareMappingDefinedCB;
+        private final Runnable declareImplicitConstraintSetDefinedCB;
 
         private Optional<File> mappingFile = Optional.empty();
         private Optional<Reader> mappingReader = Optional.empty();
         private Optional<Model> mappingGraph = Optional.empty();
+        private Optional<File> constraintFile = Optional.empty();
 
         private boolean useR2rml = false;
 
         /**
          * Default constructor
          */
-        protected StandardMappingSQLAllBuilderFragment(B builder, Runnable declareMappingDefinedCB) {
+        protected StandardMappingSQLAllBuilderFragment(B builder, Runnable declareMappingDefinedCB,
+                                                       Runnable declareImplicitConstraintSetDefinedCB) {
             this.builder = builder;
             this.declareMappingDefinedCB = declareMappingDefinedCB;
+            this.declareImplicitConstraintSetDefinedCB = declareImplicitConstraintSetDefinedCB;
         }
 
 
@@ -180,6 +188,35 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
             return builder;
         }
 
+        @Override
+        public B basicImplicitConstraintFile(@Nonnull File constraintFile) {
+            declareImplicitConstraintSetDefinedCB.run();
+            this.constraintFile = Optional.of(constraintFile);
+            return builder;
+        }
+
+        @Override
+        public B basicImplicitConstraintFile(@Nonnull String constraintFilename) {
+            declareImplicitConstraintSetDefinedCB.run();
+            try {
+                URI fileURI = new URI(constraintFilename);
+                String scheme = fileURI.getScheme();
+                if (scheme == null) {
+                    this.constraintFile = Optional.of(new File(fileURI.getPath()));
+                }
+                else if (scheme.equals("file")) {
+                    this.constraintFile = Optional.of(new File(fileURI));
+                }
+                else {
+                    throw new InvalidOntopConfigurationException("Currently only local files are supported" +
+                            "as implicit constraint files");
+                }
+                return builder;
+            } catch (URISyntaxException e) {
+                throw new InvalidOntopConfigurationException("Invalid implicit constraint file path: " + e.getMessage());
+            }
+        }
+
         protected Properties generateProperties() {
             Properties p = new Properties();
 
@@ -213,7 +250,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         }
 
         final OntopMappingSQLAllOptions generateMappingSQLAllOptions(OntopMappingSQLOptions mappingOptions) {
-            return new OntopMappingSQLAllOptions(mappingFile, mappingReader, mappingGraph, mappingOptions);
+            return new OntopMappingSQLAllOptions(mappingFile, mappingReader, mappingGraph, constraintFile, mappingOptions);
         }
 
     }
@@ -223,11 +260,12 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
             implements OntopMappingSQLAllConfiguration.Builder<B> {
 
         private final StandardMappingSQLAllBuilderFragment<B> localFragmentBuilder;
+        private boolean isImplicitConstraintSetDefined = false;
 
         OntopMappingSQLAllBuilderMixin() {
             B builder = (B) this;
             this.localFragmentBuilder = new StandardMappingSQLAllBuilderFragment<>(builder,
-                    this::declareMappingDefined);
+                    this::declareMappingDefined, this::declareImplicitConstraintSetDefined);
         }
 
         @Override
@@ -265,6 +303,16 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
             return localFragmentBuilder.r2rmlMappingGraph(rdfGraph);
         }
 
+        @Override
+        public B basicImplicitConstraintFile(@Nonnull File constraintFile) {
+            return localFragmentBuilder.basicImplicitConstraintFile(constraintFile);
+        }
+
+        @Override
+        public B basicImplicitConstraintFile(@Nonnull String constraintFilename) {
+            return localFragmentBuilder.basicImplicitConstraintFile(constraintFilename);
+        }
+
         final OntopMappingSQLAllOptions generateMappingSQLAllOptions() {
             OntopMappingSQLOptions sqlMappingOptions = generateMappingSQLOptions();
             return localFragmentBuilder.generateMappingSQLAllOptions(sqlMappingOptions);
@@ -279,6 +327,12 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
 
         boolean isR2rml() {
             return localFragmentBuilder.isR2rml();
+        }
+
+        void declareImplicitConstraintSetDefined() {
+            if (isImplicitConstraintSetDefined)
+                throw new InvalidOntopConfigurationException("The implicit constraint file is already defined");
+            isImplicitConstraintSetDefined = true;
         }
 
     }
