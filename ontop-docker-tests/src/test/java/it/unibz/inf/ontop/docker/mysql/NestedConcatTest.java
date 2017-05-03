@@ -26,9 +26,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 public class NestedConcatTest extends AbstractVirtualModeTest {
 
 
-    static final String owlfile = "src/test/resources/mysql/nestedconcat/test.owl";
-    static final String obdafile = "src/test/resources/mysql/nestedconcat/test.obda";
-    static final String propertyfile = "src/test/resources/mysql/nestedconcat/test.properties";
+    static final String owlfile = "/mysql/nestedconcat/test.owl";
+    static final String obdafile = "/mysql/nestedconcat/test.obda";
+    static final String propertyfile = "/mysql/nestedconcat/test.properties";
 
     public NestedConcatTest() {
         super(owlfile, obdafile, propertyfile);

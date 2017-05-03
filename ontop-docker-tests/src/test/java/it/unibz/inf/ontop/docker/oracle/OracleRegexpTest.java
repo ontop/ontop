@@ -33,9 +33,9 @@ import org.semanticweb.owlapi.model.OWLIndividual;
  */
 public class OracleRegexpTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "src/test/resources/oracle/regex/oracle-regexp.owl";
-	static final String obdafile = "src/test/resources/oracle/regex/oracle-regexp.obda";
-	static final String propertyfile = "src/test/resources/oracle/oracle.properties";
+	static final String owlfile = "/oracle/regex/oracle-regexp.owl";
+	static final String obdafile = "/oracle/regex/oracle-regexp.obda";
+	static final String propertyfile = "/oracle/oracle.properties";
 
 	public OracleRegexpTest() {
 		super(owlfile, obdafile, propertyfile);

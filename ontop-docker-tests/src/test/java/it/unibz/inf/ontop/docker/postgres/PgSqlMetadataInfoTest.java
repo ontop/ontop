@@ -24,23 +24,9 @@ import it.unibz.inf.ontop.docker.AbstractDbMetadataInfoTest;
 
 public class PgSqlMetadataInfoTest extends AbstractDbMetadataInfoTest {
 
-	@Override
-	protected String getConnectionPassword() {
-		return "postgres2";
-	}
+	private static final String propertyFile = "/pgsql/datatypes-pgsql.properties";
 
-	@Override
-	protected String getConnectionString() {
-		return "jdbc:postgresql://tom.inf.unibz.it:7777/datatypes";
-	}
-
-	@Override
-	protected String getConnectionUsername() {
-		return "postgres";
-	}
-
-	@Override
-	protected String getDriverName() {
-		return "org.postgresql.Driver";
+	public PgSqlMetadataInfoTest() {
+		super(propertyFile);
 	}
 }

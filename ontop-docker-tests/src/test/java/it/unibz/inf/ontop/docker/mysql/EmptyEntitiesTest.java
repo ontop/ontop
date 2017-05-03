@@ -56,11 +56,11 @@ public class EmptyEntitiesTest {
 //	final String obdaFile = "src/test/resources/emptiesDatabase.obda";
 	
 	 final String owlFile =
-	 "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	 "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
 	 final String obdaFile =
-	 "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
+	 "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
 	final String propertyFile =
-			"src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.properties";
+			"/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.properties";
 	
 	private List<String> emptyConcepts = new ArrayList<String>();
 	private List<String> emptyRoles = new ArrayList<String>();
@@ -73,36 +73,18 @@ public class EmptyEntitiesTest {
 	@Before
 	public void setUp() throws Exception {
 
-//		String driver = "org.h2.Driver";
-//		String url = "jdbc:h2:mem:questjunitdb;";
-//		String username = "sa";
-//		String password = "";
-//
-//		fac = OBDADataFactoryImpl.getInstance();
-//
-//		connection = DriverManager.getConnection(url, username, password);
-//		Statement st = connection.createStatement();
-//
-//		FileReader reader = new FileReader("src/test/resources/emptiesDatabase-h2.sql");
-//		BufferedReader in = new BufferedReader(reader);
-//		StringBuilder bf = new StringBuilder();
-//		String line = in.readLine();
-//		while (line != null) {
-//			bf.append(line);
-//			line = in.readLine();
-//		}
-//
-//		st.executeUpdate(bf.toString());
-//		connection.commit();
+		String owlFileName =  this.getClass().getResource(owlFile).toString();
+		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
 		// Creating a new instance of the reasoner
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.enableFullMetadataExtraction(false)
-				.ontologyFile(owlFile)
-				.nativeOntopMappingFile(new File(obdaFile))
-				.propertyFile(new File(propertyFile))
+				.ontologyFile(owlFileName)
+				.nativeOntopMappingFile(obdaFileName)
+				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);

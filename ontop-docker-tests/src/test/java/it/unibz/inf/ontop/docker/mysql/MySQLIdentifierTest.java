@@ -29,9 +29,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class MySQLIdentifierTest extends AbstractVirtualModeTest {
 
-	private static final String owlfile = "src/test/resources/mysql/identifiers/identifiers.owl";
-	private static final String obdafile = "src/test/resources/mysql/identifiers/identifiers-mysql.obda";
-	private static final String propertiesfile = "src/test/resources/mysql/identifiers/identifiers-mysql.properties";
+	private static final String owlfile = "/mysql/identifiers/identifiers.owl";
+	private static final String obdafile = "/mysql/identifiers/identifiers-mysql.obda";
+	private static final String propertiesfile = "/mysql/identifiers/identifiers-mysql.properties";
 
 	public MySQLIdentifierTest() {
 		super(owlfile, obdafile, propertiesfile);

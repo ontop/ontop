@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker.regex;
  * #L%
  */
 
+import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -57,7 +59,8 @@ public class RegexpTest extends TestCase {
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology ontology;
 
-	final String owlfile = "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	private static final String ROOT_LOCATION = "/testcases-docker/virtual-mode/stockexchange/simplecq/";
+	private static final String owlfile = ROOT_LOCATION + "stockexchange.owl";
 	private String obdafile;
 	private String propertyfile;
 	
@@ -68,8 +71,8 @@ public class RegexpTest extends TestCase {
 	 * Constructor is necessary for parameterized test
 	 */
 	public RegexpTest(String database, boolean isH2){
-		this.obdafile = "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-" + database + ".obda";
-		this.propertyfile = "src/main/resources/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-" + database + ".properties";
+		this.obdafile = ROOT_LOCATION +"stockexchange-" + database + ".obda";
+		this.propertyfile = ROOT_LOCATION +"stockexchange-" + database + ".properties";
 		this.isH2 = isH2;
 	}
 
@@ -122,12 +125,15 @@ public class RegexpTest extends TestCase {
 		if(this.isH2)
 			this.createH2Database();
 
+		final URL owlFileUrl = QuestSPARQLRewriterTest.class.getResource(owlfile);
+		final URL obdaFileUrl = QuestSPARQLRewriterTest.class.getResource(obdafile);
+		final URL propertyFileUrl = QuestSPARQLRewriterTest.class.getResource(propertyfile);
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(new File(obdafile))
-				.propertyFile(propertyfile)
-				.ontologyFile(owlfile)
+				.nativeOntopMappingFile(obdaFileUrl.toString())
+				.propertyFile(propertyFileUrl.toString())
+				.ontologyFile(owlFileUrl)
 				.enableFullMetadataExtraction(false)
 				.build();
         reasoner = factory.createReasoner(config);

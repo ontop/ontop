@@ -35,9 +35,9 @@ public class MultiSchemaTestDB2 extends AbstractVirtualModeTest {
 	// into OWL and repeat everything taking form OWL
 
 
-	static final String owlfile = "src/test/resources/db2/schema/multischemadb2.owl";
-	static final String obdafile = "src/test/resources/db2/schema/multischemadb2.obda";
-	static final String propertiesfile = "src/test/resources/db2/db2-stock.properties";
+	static final String owlfile = "/db2/schema/multischemadb2.owl";
+	static final String obdafile = "/db2/schema/multischemadb2.obda";
+	static final String propertiesfile = "/db2/db2-stock.properties";
 
 	public MultiSchemaTestDB2() {
 		super(owlfile, obdafile, propertiesfile);

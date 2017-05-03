@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.docker.mysql;
+package it.unibz.inf.ontop.docker.failing.mysql;
 
 /*
  * #%L
@@ -39,7 +39,7 @@ public class ABoxSesameMaterializerExample {
 	 * https://babbage.inf.unibz.it/trac/obdapublic/wiki/InstallingTutorialDatabases
 	 */
 	private static final String inputFile = "src/test/resources/mysql/example/exampleBooks.obda";
-	private static final String PROPERTY_FILE = "src/test/resources/mysql/example/exampleBooks.properties";
+	private static final String PROPERTY_FILE = "/mysql/example/exampleBooks.properties";
 	private static final String outputFile = "src/test/resources/mysql/example/exampleBooks.n3";
 
 	/**
@@ -49,9 +49,11 @@ public class ABoxSesameMaterializerExample {
 	
 	public void generateTriples() throws Exception {
 
+		String propertyFileName =  this.getClass().getResource(PROPERTY_FILE).toString();
+
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(inputFile)
-				.propertyFile(PROPERTY_FILE)
+				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
 

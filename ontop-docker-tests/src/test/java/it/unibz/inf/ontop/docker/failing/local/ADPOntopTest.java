@@ -16,22 +16,25 @@ import java.io.FileReader;
  */
 public class ADPOntopTest {
 	
-	final String owlFile = "src/test/resources/local/adp/npd-ql.owl";
-	final String obdaFile = "src/test/resources/local/adp/mapping-fed.obda";
-	final String queryFile = "src/test/resources/local/adp/01.q";
-	final String propertyFile = "src/test/resources/local/adp/mapping-fed.properties";
-	final String r2rmlfile = "src/test/resources/local/adp/mapping-fed.ttl";
+	final String owlFile = "/local/adp/npd-ql.owl";
+	final String obdaFile = "/local/adp/mapping-fed.obda";
+	final String queryFile = "/local/adp/01.q";
+	final String propertyFile = "/local/adp/mapping-fed.properties";
+	final String r2rmlfile = "/local/adp/mapping-fed.ttl";
 
 	public void runQuery() throws Exception {
 
+		String owlFileName =  this.getClass().getResource(owlFile).toString();
+		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(new File(obdaFile))
-				.ontologyFile(owlFile)
-				.propertyFile(propertyFile)
+				.nativeOntopMappingFile(obdaFileName)
+				.ontologyFile(owlFileName)
+				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);

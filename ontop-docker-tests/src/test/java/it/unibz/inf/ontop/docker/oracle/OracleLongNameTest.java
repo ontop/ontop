@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker.oracle;
  * #L%
  */
 
+import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
@@ -34,42 +35,18 @@ import java.io.File;
 /***
  * Oracle long name.
  */
-public class OracleLongNameTest {
+public class OracleLongNameTest extends AbstractVirtualModeTest {
 
-	private OntopOWLConnection conn;
 	
-	final String owlfile = "src/test/resources/oracle/oraclesql/o.owl";
-	final String obdafile1 = "src/test/resources/oracle/oraclesql/o1.obda";
-	final String propertyfile = "src/test/resources/oracle/oracle.properties";
-	private QuestOWL reasoner;
+	final static String owlFile = "/oracle/oraclesql/o.owl";
+	final static String obdaFile1 = "/oracle/oraclesql/o1.obda";
+	final static String propertyFile = "/oracle/oracle.properties";
 
-	@After
-	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
+	public OracleLongNameTest() {
+		super(owlFile, obdaFile1, propertyFile);
 	}
-	
 
-	private void runQuery(String varName) throws OWLException{
 
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(new File(obdafile1))
-				.ontologyFile(owlfile)
-				.propertyFile(propertyfile)
-				.enableTestMode()
-				.build();
-        reasoner = factory.createReasoner(config);
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
-		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
-				"SELECT " + varName + " WHERE { " + varName  + " a :Country}";
-		
-		OntopOWLStatement st = conn.createStatement();
-		st.executeTuple(query);
-	}
 	
 	
 	/**
@@ -77,7 +54,9 @@ public class OracleLongNameTest {
 	 */
 	@Test
 	public void testShortVarName() throws Exception {
-		runQuery("?x");
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
+				"SELECT ?x WHERE { ?x a :Country}";
+		checkThereIsAtLeastOneResult(query);
 	}
 
 	/**
@@ -85,7 +64,9 @@ public class OracleLongNameTest {
 	 */
 	@Test
 	public void testLongVarName() throws Exception {
-		runQuery("?veryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongVarName");
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
+				"SELECT ?veryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongVarName WHERE { ?veryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongVarName a :Country}";
+		checkThereIsAtLeastOneResult(query);
 	}
 }
 

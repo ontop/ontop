@@ -30,9 +30,9 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     protected OntopOWLConnection conn;
 
     public AbstractVirtualModeTest(String owlFile, String obdaFile, String propertyFile) {
-        this.owlFileName = owlFile;
-        this.obdaFileName = obdaFile;
-        this.propertyFileName = propertyFile;
+        this.owlFileName =  this.getClass().getResource(owlFile).toString();
+        this.obdaFileName =  this.getClass().getResource(obdaFile).toString();
+        this.propertyFileName =  this.getClass().getResource(propertyFile).toString();
     }
 
     @Override
@@ -42,7 +42,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .enableFullMetadataExtraction(false)
                 .ontologyFile(owlFileName)
-                .nativeOntopMappingFile(new File(obdaFileName))
+                .nativeOntopMappingFile(obdaFileName)
                 .propertyFile(propertyFileName)
                 .enableTestMode()
                 .build();

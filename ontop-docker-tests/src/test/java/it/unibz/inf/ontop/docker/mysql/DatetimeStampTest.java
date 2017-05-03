@@ -17,25 +17,30 @@ public class DatetimeStampTest {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    final String owlFile = "src/test/resources/mysql/northwind/northwind-dmo.owl";
-    final String r2rmlFile = "src/test/resources/mysql/northwind/mapping-northwind-dmo.ttl";
-    final String obdaFile = "src/test/resources/mysql/northwind/mapping-northwind-dmo.obda";
-    final String propertyFile = "src/test/resources/mysql/northwind/mapping-northwind-dmo.properties";
+    final String owlFile = "/mysql/northwind/northwind-dmo.owl";
+    final String r2rmlFile = "/mysql/northwind/mapping-northwind-dmo.ttl";
+    final String obdaFile = "/mysql/northwind/mapping-northwind-dmo.obda";
+    final String propertyFile = "/mysql/northwind/mapping-northwind-dmo.properties";
 
     private void runTests(String filename, boolean isR2rml, String propertyFile) throws Exception {
+
+        String owlFileName =  this.getClass().getResource(owlFile).toString();
+        String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+        String r2rmlFileName =  this.getClass().getResource(r2rmlFile).toString();
+        String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile(owlFile)
-                .propertyFile(propertyFile)
+                .ontologyFile(owlFileName)
+                .propertyFile(propertyFileName)
                 .enableTestMode();
 
         if (isR2rml) {
-            configBuilder.r2rmlMappingFile(filename);
+            configBuilder.r2rmlMappingFile(r2rmlFileName);
         }
         else {
-            configBuilder.nativeOntopMappingFile(filename);
+            configBuilder.nativeOntopMappingFile(obdaFileName);
         }
 
         QuestOWL reasoner = factory.createReasoner(configBuilder.build());

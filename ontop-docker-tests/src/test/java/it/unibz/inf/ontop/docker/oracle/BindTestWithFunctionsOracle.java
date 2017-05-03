@@ -38,9 +38,9 @@ import java.util.List;
 
 public class BindTestWithFunctionsOracle extends AbstractBindTestWithFunctions {
 
-    private static final String owlfile = "src/test/resources/oracle/bindTest/sparqlBind.owl";
-    private static final String obdafile = "src/test/resources/oracle/bindTest/sparqlBindOracle.obda";
-    private static final String propertiesfile = "src/test/resources/oracle/oracle.properties";
+    private static final String owlfile = "/oracle/bindTest/sparqlBind.owl";
+    private static final String obdafile = "/oracle/bindTest/sparqlBindOracle.obda";
+    private static final String propertiesfile = "/oracle/oracle.properties";
 
     public BindTestWithFunctionsOracle() {
         super(owlfile, obdafile, propertiesfile);

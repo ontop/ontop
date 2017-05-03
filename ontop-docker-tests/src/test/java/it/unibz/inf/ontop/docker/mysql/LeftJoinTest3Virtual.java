@@ -30,9 +30,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
  */
 public class LeftJoinTest3Virtual extends AbstractVirtualModeTest {
 
-	private static final String owlfile = "src/test/resources/mysql/person/person.owl";
-	private static final String obdafile = "src/test/resources/mysql/person/person3.obda";
-	private static final String propertyfile = "src/test/resources/mysql/person/person3.properties";
+	private static final String owlfile = "/mysql/person/person.owl";
+	private static final String obdafile = "/mysql/person/person3.obda";
+	private static final String propertyfile = "/mysql/person/person3.properties";
 
 	public LeftJoinTest3Virtual() {
 		super(owlfile, obdafile, propertyfile);

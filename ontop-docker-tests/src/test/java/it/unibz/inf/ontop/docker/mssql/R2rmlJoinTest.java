@@ -15,26 +15,31 @@ import static org.junit.Assert.assertFalse;
 public class R2rmlJoinTest {
     Logger log = LoggerFactory.getLogger(this.getClass());
 
-    final String owlFile = "src/test/resources/mssql/oreda/oreda_bootstrapped_ontology.owl";
-    final String r2rmlFile = "src/test/resources/mssql/oreda/oreda_bootstrapped_mapping.ttl";
-    final String obdaFile = "src/test/resources/mssql/oreda/oreda_bootstrapped_mapping.obda";
-    final String propertyFile = "src/test/resources/mssql/oreda/oreda_bootstrapped_mapping.properties";
+    final String owlFile = "/mssql/oreda/oreda_bootstrapped_ontology.owl";
+    final String r2rmlFile = "/mssql/oreda/oreda_bootstrapped_mapping.ttl";
+    final String obdaFile = "/mssql/oreda/oreda_bootstrapped_mapping.obda";
+    final String propertyFile = "/mssql/oreda/oreda_bootstrapped_mapping.properties";
 
     private void runTests(String filename, boolean isR2rml) throws Exception {
+
+        String owlFileName =  this.getClass().getResource(owlFile).toString();
+        String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+        String r2rmlFileName =  this.getClass().getResource(r2rmlFile).toString();
+        String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile(owlFile)
-                .propertyFile(propertyFile)
+                .ontologyFile(owlFileName)
+                .propertyFile(propertyFileName)
                 .enableTestMode();
 
         if (isR2rml) {
             configBuilder
-                    .r2rmlMappingFile(filename);
+                    .r2rmlMappingFile(r2rmlFileName);
         }
         else {
-            configBuilder.nativeOntopMappingFile(filename);
+            configBuilder.nativeOntopMappingFile(obdaFileName);
         }
 
         QuestOWL reasoner = factory.createReasoner(configBuilder.build());

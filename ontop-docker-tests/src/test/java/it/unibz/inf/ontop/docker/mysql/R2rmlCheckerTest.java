@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -58,10 +59,15 @@ public class R2rmlCheckerTest {
 	private OWLOntology owlOntology;
 	private Ontology onto;
 
-	final String owlfile = "src/test/resources/mysql/example/npd-v2-ql_a.owl";
-	final String obdafile = "src/test/resources/mysql/example/npd-v2-ql_a.obda";
-	final String propertyfile = "src/test/resources/mysql/example/npd-v2-ql_a.properties";
-	final String r2rmlfile = "src/test/resources/mysql/example/npd-v2-ql_a.ttl";
+	final String owlFile = "/mysql/example/npd-v2-ql_a.owl";
+	final String obdaFile = "/mysql/example/npd-v2-ql_a.obda";
+	final String propertyFile = "/mysql/example/npd-v2-ql_a.properties";
+	final String r2rmlFile = "/mysql/example/npd-v2-ql_a.ttl";
+
+	final InputStream owlFileName =  this.getClass().getResourceAsStream(owlFile);
+	final String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+	final String r2rmlFileName =  this.getClass().getResource(r2rmlFile).toString();
+	final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
 	private List<Predicate> emptyConceptsObda = new ArrayList<>();
 	private List<Predicate> emptyRolesObda = new ArrayList<>();
@@ -74,10 +80,12 @@ public class R2rmlCheckerTest {
 	@Before
 	public void setUp() throws Exception {
 		// Loading the OWL file
-		
+
+
+
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		owlOntology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
+				.loadOntologyFromOntologyDocument(owlFileName);
 
 		onto = OWLAPITranslatorUtility.translate(owlOntology);
 
@@ -336,9 +344,9 @@ public class R2rmlCheckerTest {
 		QuestOWLFactory factory = new QuestOWLFactory();
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.r2rmlMappingFile(r2rmlfile)
+				.r2rmlMappingFile(r2rmlFileName)
 				.ontology(owlOntology)
-				.propertyFile(propertyfile)
+				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
         reasonerR2rml = factory.createReasoner(config);
@@ -358,8 +366,8 @@ public class R2rmlCheckerTest {
 		QuestOWLFactory factory = new QuestOWLFactory();
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(obdafile)
-				.propertyFile(propertyfile)
+				.nativeOntopMappingFile(obdaFileName)
+				.propertyFile(propertyFileName)
 				.ontology(owlOntology)
 				.enableTestMode()
 				.build();

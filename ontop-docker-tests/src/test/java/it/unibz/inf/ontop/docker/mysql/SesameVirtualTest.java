@@ -47,15 +47,18 @@ public class SesameVirtualTest extends TestCase {
 		Repository repo = null;
 		
 		try {
-			
-			
-			String owlfile = "src/test/resources/mysql/example/exampleBooks.owl";
-			String obdafile = "src/test/resources/mysql/example/exampleBooks.obda";
-			String propertyFile = "src/test/resources/mysql/example/exampleBooks.properties";
+
+
+			String owlFile = "/mysql/example/exampleBooks.owl";
+			String obdaFile = "/mysql/example/exampleBooks.obda";
+			String propertyFile = "/mysql/example/exampleBooks.properties";
+			String owlFileName =  this.getClass().getResource(owlFile).toString();
+			String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+			String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-					.ontologyFile(owlfile)
-					.nativeOntopMappingFile(obdafile)
-					.propertyFile(propertyFile)
+					.ontologyFile(owlFileName)
+					.nativeOntopMappingFile(obdaFileName)
+					.propertyFile(propertyFileName)
 					.enableTestMode()
 					.build();
 

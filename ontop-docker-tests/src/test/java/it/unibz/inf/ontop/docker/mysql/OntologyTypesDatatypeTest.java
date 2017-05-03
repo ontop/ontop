@@ -30,9 +30,9 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 
 public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
 
-    static final String owlfile = "src/main/resources/testcases-docker/datetime/datatypes.owl";
-    static final String obdafile = "src/main/resources/testcases-docker/datetime/datatypes-mysql.obda";
-    static final String propertiesfile = "src/main/resources/testcases-docker/datetime/datatypes-mysql.properties";
+    static final String owlfile = "/testcases-docker/datetime/datatypes.owl";
+    static final String obdafile = "/testcases-docker/datetime/datatypes-mysql.obda";
+    static final String propertiesfile = "/testcases-docker/datetime/datatypes-mysql.properties";
 
     public OntologyTypesDatatypeTest() {
         super(owlfile, obdafile, propertiesfile);
