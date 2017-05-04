@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.docker.mssql;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import org.junit.Test;
 
 /***
  * Tests that jtds jdbc driver for SQL Server returns the datatypes correctly
@@ -41,7 +40,7 @@ public class JTDSDatatypesTest extends AbstractVirtualModeTest {
 	 * Test use of datetime with jtds driver
 	 * @throws Exception
 	 */
-	@Test
+
 	public void testDatetime() throws Exception {
 
 		String query =  "PREFIX : <http://knova.ru/adventureWorks.owl#>\n" +
