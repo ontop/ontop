@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.ClassAssertion;
 import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
@@ -42,7 +41,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.Iterator;
 
 public class QuestOWLMaterializerTest extends TestCase {
 
@@ -185,4 +184,6 @@ public class QuestOWLMaterializerTest extends TestCase {
 			Assert.assertEquals(3, objAss); //3 since no subprop for obj prop
 
 	}
+
+
 }
