@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -949,6 +950,14 @@ public class SQLParserTest {
 	@Test
 	public void test_double_subquery() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT * FROM (SELECT * FROM oreda.pm_maint_items) AS child, (SELECT * FROM oreda.pm_program) AS parent  WHERE child.i_id=parent.i_id AND child.inst_id=parent.inst_id AND child.su_code=parent.su_code AND child.pm_interval=parent.pm_interval AND child.mc_code=parent.mc_code AND child.mac_code=parent.mac_code AND child.owner_id=parent.owner_id");
+		assertEquals(2, re.getDataAtoms().size());
+		assertEquals(7, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().size());
+	}
+
+	@Ignore
+	public void test_recursive() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = sqp.parse("WITH RECURSIVE fibonacci(indice, site_id) AS ( VALUES (1, 1) UNION ALL SELECT site_id, indice+site_id FROM fibonacci WHERE site_id < 1000000 ) SELECT site_id FROM fibonacci");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(7, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
