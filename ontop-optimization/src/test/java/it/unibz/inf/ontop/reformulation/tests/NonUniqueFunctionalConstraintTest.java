@@ -246,10 +246,7 @@ public class NonUniqueFunctionalConstraintTest {
                 DATA_FACTORY.getSubstitution(Z, Y), Optional.of(DISTINCT_MODIFIER));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, B, G));
-
-        expectedQueryBuilder.addChild(newRootNode, dataNode3);
+        expectedQueryBuilder.addChild(newRootNode, dataNode2);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -452,9 +449,7 @@ public class NonUniqueFunctionalConstraintTest {
                 DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
-        ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, I, J, Z));
-        expectedQueryBuilder.addChild(joinNode, dataNode6);
+        expectedQueryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -504,9 +499,7 @@ public class NonUniqueFunctionalConstraintTest {
                 DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, B, Z, G));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
 
-        ExtensionalDataNode dataNode7 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, I, J, G));
-        expectedQueryBuilder.addChild(joinNode, dataNode7);
+        expectedQueryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
