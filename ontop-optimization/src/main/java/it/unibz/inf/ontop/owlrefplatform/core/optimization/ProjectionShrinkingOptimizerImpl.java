@@ -16,11 +16,8 @@ import java.util.stream.Collectors;
 public class ProjectionShrinkingOptimizerImpl implements ProjectionShrinkingOptimizer {
 
 
-    public ProjectionShrinkingOptimizerImpl() {
-    }
-
     @Override
-    public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+    public IntermediateQuery optimize(IntermediateQuery query) {
 
         /**
          * Contains all (non discarded) variables projected out by some node previously traversed,
@@ -29,13 +26,19 @@ public class ProjectionShrinkingOptimizerImpl implements ProjectionShrinkingOpti
          * Immutable only for safety (updated in practice).
          * Question: shall we keep it as immutable ?
          */
-        ImmutableSet<Variable> allRetainedVariables = query.getProjectionAtom().getVariables();
-
-        return optimizeSubtree(query.getRootConstructionNode(), query, allRetainedVariables);
-
+        ConstructionNode rootNode = query.getRootConstructionNode();
+        Optional<QueryNode> rootChild = query.getFirstChild(rootNode);
+        if (rootChild.isPresent()) {
+            return optimizeSubtree(
+                    rootChild.get(),
+                    query,
+                    rootNode.getLocallyRequiredVariables()
+            );
+        }
+        return query;
     }
 
-    private IntermediateQuery optimizeSubtree(QueryNode focusNode, IntermediateQuery query, ImmutableSet<Variable> allRetainedVariables) throws EmptyQueryException {
+    private IntermediateQuery optimizeSubtree(QueryNode focusNode, IntermediateQuery query, ImmutableSet<Variable> allRetainedVariables) {
         Optional<QueryNode> optionalNextNode;
         Optional<ProjectionShrinkingProposal> optionalProposal = Optional.empty();
 
@@ -45,7 +48,12 @@ public class ProjectionShrinkingOptimizerImpl implements ProjectionShrinkingOpti
             optionalProposal = makeProposal((ExplicitVariableProjectionNode) focusNode, query, allRetainedVariables);
         }
         if (optionalProposal.isPresent()) {
-            NodeCentricOptimizationResults<ExplicitVariableProjectionNode> optimizationResults = query.applyProposal(optionalProposal.get());
+            NodeCentricOptimizationResults<ExplicitVariableProjectionNode> optimizationResults;
+            try {
+                optimizationResults = query.applyProposal(optionalProposal.get());
+            } catch (EmptyQueryException e) {
+                throw new IllegalStateException("The projection shrinker should not empty the query");
+            }
             QueryNodeNavigationTools.NextNodeAndQuery nextNodeAndQuery = QueryNodeNavigationTools.getNextNodeAndQuery(query, optimizationResults);
             query = nextNodeAndQuery.getNextQuery();
             optionalNextNode = nextNodeAndQuery.getOptionalNextNode();
@@ -59,17 +67,23 @@ public class ProjectionShrinkingOptimizerImpl implements ProjectionShrinkingOpti
 
     private Optional<ProjectionShrinkingProposal> makeProposal(ExplicitVariableProjectionNode node, IntermediateQuery query, ImmutableSet<Variable> allRetainedVariables) {
 
-        if (!(node instanceof UnionNode || node instanceof ConstructionNode)) {
-            throw new IllegalStateException("a projection shrinking proposal can only be made for a Union or Construction node");
-        }
 
-        Map<Boolean, List<Variable>> splitVariables = node.getLocalVariables().stream()
-                .collect(Collectors.partitioningBy(v -> allRetainedVariables.contains(v)));
-        if (splitVariables.get(false).iterator().hasNext()) {
-            return Optional.of(new ProjectionShrinkingProposalImpl(query, node,
-                    splitVariables.get(true).stream().collect(ImmutableCollectors.toSet())));
+        if (node instanceof UnionNode || node instanceof ConstructionNode) {
+            Map<Boolean, List<Variable>> splitVariables = node.getVariables().stream()
+                    .collect(Collectors.partitioningBy(v -> allRetainedVariables.contains(v)));
+
+            if (splitVariables.get(false).iterator().hasNext()) {
+                return Optional.of(
+                        new ProjectionShrinkingProposalImpl(
+                                query,
+                                node,
+                                splitVariables.get(true).stream().collect(ImmutableCollectors.toSet())
+                        ));
+            }
+            return Optional.empty();
         }
-        return Optional.empty();
+        throw new IllegalStateException("A projection shrinking proposal can only be made for a Union or Construction node");
+
     }
 
 
@@ -87,7 +101,7 @@ public class ProjectionShrinkingOptimizerImpl implements ProjectionShrinkingOpti
 
         /**
          * Add all variables encountered in implicit joining conditions,
-         * i.e. projected out by at least two children subtrees of a JoinLikeNnode
+         * i.e. projected out by at least two children subtrees of a JoinLikeNode
          */
 
         Set<Variable> repeatedVariables = new HashSet<>();
