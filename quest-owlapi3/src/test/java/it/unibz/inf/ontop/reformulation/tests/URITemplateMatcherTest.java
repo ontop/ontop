@@ -50,8 +50,8 @@ public class URITemplateMatcherTest {
 	private static Connection sqlConnection;
 
 	private String url = "jdbc:h2:mem:questjunitdb";
-	private String username = "sa";
-	private String password = "test";
+	private String username = "fish";
+	private String password = "fish";
 
 	@Before
 	public void setUp() throws Exception {
