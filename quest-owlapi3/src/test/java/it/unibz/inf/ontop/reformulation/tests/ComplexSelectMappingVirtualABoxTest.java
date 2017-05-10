@@ -62,8 +62,8 @@ public class ComplexSelectMappingVirtualABoxTest  {
 	final String obdafile = "src/test/resources/test/complexmapping.obda";
 
 	private static final String url = "jdbc:h2:mem:questjunitdb";
-	private static final String username = "sa";
-	private static final String password = "";
+	private static final String username = "fish";
+	private static final String password = "fish";
 
 	@Before
 	public void setUp() throws Exception {
