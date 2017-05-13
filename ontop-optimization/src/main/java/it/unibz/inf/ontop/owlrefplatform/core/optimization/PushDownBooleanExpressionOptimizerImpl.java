@@ -270,7 +270,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
                 if (candidateSubtreeRoot instanceof LeftJoinNode) {
                     QueryNode rightChild = query.getChild(candidateSubtreeRoot, RIGHT)
                             .orElseThrow(() -> new IllegalTreeException("a LeftJoinNode is expected to have a right child"));
-                    if (query.getVariables(rightChild).containsAll(expressionVariables) && !containsIsNullAtom(expression)) {
+                    if (query.getVariables(rightChild).containsAll(expressionVariables)) {
                         mustKeepAtProviderLevel = true;
                     }
                 }
@@ -298,32 +298,6 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
         return Stream.concat(recipients, childRecipients).distinct();
     }
 
-    /**
-     * Recursive.
-     * Assumption: the expression is in NNF, and without double negation.
-     */
-    private boolean containsIsNullAtom(ImmutableTerm expression) {
-        if (expression instanceof ImmutableExpression) {
-            ImmutableExpression castExpression = (ImmutableExpression) expression;
-            OperationPredicate operator = castExpression.getFunctionSymbol();
-            if (operator.equals(AND) || operator.equals(OR)) {
-                return castExpression.getArguments().stream()
-                        .anyMatch(e -> containsIsNullAtom(e));
-            }
-            if (operator.equals(NOT)) {
-                ImmutableTerm arg = castExpression.getArguments().get(0);
-                if (arg instanceof ImmutableExpression &&
-                        ((ImmutableExpression) arg).getFunctionSymbol().equals(IS_NOT_NULL)) {
-                    return true;
-                }
-            }
-            if (operator.equals(IS_NULL)) {
-                return true;
-            }
-            return false;
-        }
-        throw new IllegalArgumentException("This term is expected to be a boolean expression");
-    }
 
 
     /**
@@ -425,18 +399,10 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
                 .isPresent()) {
 
             /**
-             * If the expression contains an ISNULL atom or a !ISNOTNULL atom,
-             * rule out the right operand as a candidate subtree for propagation.
-             */
-            ImmutableList<QueryNode> candidateSubtrees = containsIsNullAtom(expression) ?
-                    ImmutableList.of(query.getChildren(currentNode).get(0)) :
-                    query.getChildren(currentNode);
-
-            /**
              *  Look for recipients in candidate subtrees (note that if there is none,
              *  the provider node will be returned as the only recipient)
              */
-            recipients = selectRecipients(query, providerNode, candidateSubtrees, expression);
+            recipients = selectRecipients(query, providerNode, query.getChildren(currentNode), expression);
         } else {
             /**
              * Ask for a filter node to be created above the leftJoinNode
