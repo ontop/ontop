@@ -38,15 +38,21 @@ public class ProjectionShrinkingOptimizerImpl implements ProjectionShrinkingOpti
         return query;
     }
 
-    private IntermediateQuery optimizeSubtree(QueryNode focusNode, IntermediateQuery query, ImmutableSet<Variable> allRetainedVariables) {
-        Optional<QueryNode> optionalNextNode;
+    private IntermediateQuery optimizeSubtree(QueryNode focusNode, IntermediateQuery query, ImmutableSet<Variable> retainedVariables) {
+
         Optional<ProjectionShrinkingProposal> optionalProposal = Optional.empty();
 
-        if (focusNode instanceof JoinOrFilterNode) {
-            allRetainedVariables = updateEncounteredVariables((JoinOrFilterNode) focusNode, query, allRetainedVariables);
-        } else if (focusNode instanceof UnionNode || focusNode instanceof ConstructionNode) {
-            optionalProposal = makeProposal((ExplicitVariableProjectionNode) focusNode, query, allRetainedVariables);
+        if (focusNode instanceof UnionNode || focusNode instanceof ConstructionNode) {
+            optionalProposal = makeProposal((ExplicitVariableProjectionNode) focusNode, query, retainedVariables);
         }
+
+        if (focusNode instanceof JoinOrFilterNode) {
+            retainedVariables = updateRetainedVariables((JoinOrFilterNode) focusNode, query, retainedVariables);
+        } else if (focusNode instanceof ConstructionNode) {
+            retainedVariables = updateRetainedVariables((ConstructionNode) focusNode, query, retainedVariables);
+        }
+
+
         if (optionalProposal.isPresent()) {
             NodeCentricOptimizationResults<ExplicitVariableProjectionNode> optimizationResults;
             try {
@@ -54,15 +60,13 @@ public class ProjectionShrinkingOptimizerImpl implements ProjectionShrinkingOpti
             } catch (EmptyQueryException e) {
                 throw new IllegalStateException("The projection shrinker should not empty the query");
             }
-            QueryNodeNavigationTools.NextNodeAndQuery nextNodeAndQuery = QueryNodeNavigationTools.getNextNodeAndQuery(query, optimizationResults);
-            query = nextNodeAndQuery.getNextQuery();
-            optionalNextNode = nextNodeAndQuery.getOptionalNextNode();
-        } else {
-            optionalNextNode = QueryNodeNavigationTools.getDepthFirstNextNode(query, focusNode);
+            focusNode = optimizationResults.getOptionalNewNode().orElseThrow(
+                    () -> new IllegalStateException("A replacing node should be generated"));
         }
-        return (optionalNextNode.isPresent()) ?
-                optimizeSubtree(optionalNextNode.get(), query, allRetainedVariables) :
-                query;
+        for(QueryNode childNode: query.getChildren(focusNode)) {
+            query = optimizeSubtree(childNode, query, retainedVariables);
+        }
+        return query;
     }
 
     private Optional<ProjectionShrinkingProposal> makeProposal(ExplicitVariableProjectionNode node, IntermediateQuery query, ImmutableSet<Variable> allRetainedVariables) {
@@ -87,8 +91,8 @@ public class ProjectionShrinkingOptimizerImpl implements ProjectionShrinkingOpti
     }
 
 
-    private ImmutableSet<Variable> updateEncounteredVariables(JoinOrFilterNode joinOrFilterNode, IntermediateQuery query,
-                                                              ImmutableSet<Variable> allRetainedVariables) {
+    private ImmutableSet<Variable> updateRetainedVariables(JoinOrFilterNode joinOrFilterNode, IntermediateQuery query,
+                                                           ImmutableSet<Variable> allRetainedVariables) {
 
         /**
          * Add all variables encountered in filtering or explicit joining conditions
@@ -103,7 +107,6 @@ public class ProjectionShrinkingOptimizerImpl implements ProjectionShrinkingOpti
          * Add all variables encountered in implicit joining conditions,
          * i.e. projected out by at least two children subtrees of a JoinLikeNode
          */
-
         Set<Variable> repeatedVariables = new HashSet<>();
         if (joinOrFilterNode instanceof JoinLikeNode) {
             Set<Variable> encounteredVariables = new HashSet<>();
@@ -118,5 +121,33 @@ public class ProjectionShrinkingOptimizerImpl implements ProjectionShrinkingOpti
         }
         joinOrFilterVariables.addAll(repeatedVariables);
         return ImmutableSet.copyOf(Sets.union(allRetainedVariables, joinOrFilterVariables));
+    }
+
+    private ImmutableSet<Variable> updateRetainedVariables(ConstructionNode constructionNode, IntermediateQuery query,
+                                                           ImmutableSet<Variable> allRetainedVariables) {
+
+
+        /**
+         * Retain only:
+         * - variables required by the substitution
+         * - variables projected independently of the substitution
+         */
+        //P: all projected variables
+        ImmutableSet<Variable> projectedVariables = constructionNode.getVariables();
+        //O: variables corresponding to the substitution's output
+        ImmutableSet<Variable> substitutionOutput = constructionNode.getSubstitution().getDomain();
+        //P' = P - O
+        ImmutableSet<Variable> simpleProjectionVariables = projectedVariables.stream()
+                .filter(v -> !substitutionOutput.contains(v))
+                .collect(ImmutableCollectors.toSet());
+        //R: variables required by the substitution
+        ImmutableSet<Variable> variablesRequiredBySubstitution = constructionNode.getSubstitution().getImmutableMap().values().stream()
+                .flatMap(t -> t.getVariableStream()).collect(ImmutableCollectors.toSet());
+
+        //return P' + R
+        return ImmutableSet.<Variable>builder()
+                .addAll(simpleProjectionVariables)
+                .addAll(variablesRequiredBySubstitution)
+                .build();
     }
 }
