@@ -200,8 +200,13 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 				IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 				intermediateQuery = substitutionOptimizer.optimize(intermediateQuery);
 
-
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
+
+				ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizerImpl();
+				intermediateQuery = projectionShrinkingOptimizer.optimize(intermediateQuery);
+
+				log.debug("After projection shrinking: \n" + intermediateQuery.toString());
+
 
 				intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
 				log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
