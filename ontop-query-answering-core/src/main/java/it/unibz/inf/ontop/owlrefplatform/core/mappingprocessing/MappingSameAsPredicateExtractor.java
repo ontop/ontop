@@ -23,6 +23,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.UnionFriendlyBindingExtractor;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 
 import java.util.*;
@@ -36,10 +38,13 @@ public class MappingSameAsPredicateExtractor {
 
     private Set<Predicate> objectPropertiesMapped;
 
+    private final UnionFriendlyBindingExtractor extractor = new UnionFriendlyBindingExtractor();
+
     /**
      * Constructs a mapping containing the URI of owl:sameAs
      */
     public MappingSameAsPredicateExtractor(Mapping mapping) throws IllegalArgumentException {
+
 
         this.mapping = mapping;
 
@@ -60,16 +65,24 @@ public class MappingSameAsPredicateExtractor {
 
         for (AtomPredicate predicate : mapping.getPredicates()) {
 
-            if (predicate.isSameAsProperty() ) { // we check for owl same as
+            if (predicate.getName().equals(OBDAVocabulary.SAME_AS) ) { // we check for owl same as
 
                 IntermediateQuery definition = mapping.getDefinition(predicate)
                         .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
                                 "(-> inconsistent)"));
 
+                Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution =  extractor.extractInSubTree(
+                        definition, definition.getRootConstructionNode()).getOptionalSubstitution();
+
                 DistinctVariableOnlyDataAtom projectionAtom = definition.getProjectionAtom();
 
                 Term term1 = projectionAtom.getTerm(0);
                 Term term2 = projectionAtom.getTerm(1);
+
+
+                if (optionalSubstitution.isPresent()){
+
+                }
 
                 if (term1 instanceof Function && term2 instanceof Function) {
 
