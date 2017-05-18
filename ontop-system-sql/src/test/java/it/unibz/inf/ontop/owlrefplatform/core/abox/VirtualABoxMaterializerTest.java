@@ -160,9 +160,9 @@ public class VirtualABoxMaterializerTest {
 
 		List<Function> body = new LinkedList<Function>();
 		body.add(DATA_FACTORY.getFunction(person, personTemplate));
-		body.add(DATA_FACTORY.getFunction(fn, personTemplate, DATA_FACTORY.getVariable("fn")));
-		body.add(DATA_FACTORY.getFunction(ln, personTemplate, DATA_FACTORY.getVariable("ln")));
-		body.add(DATA_FACTORY.getFunction(age, personTemplate, DATA_FACTORY.getVariable("age")));
+		body.add(DATA_FACTORY.getFunction(fn, personTemplate, DATA_FACTORY.getTypedTerm(DATA_FACTORY.getVariable("fn"), Predicate.COL_TYPE.LITERAL)));
+		body.add(DATA_FACTORY.getFunction(ln, personTemplate, DATA_FACTORY.getTypedTerm( DATA_FACTORY.getVariable("ln"), Predicate.COL_TYPE.LITERAL)));
+		body.add(DATA_FACTORY.getFunction(age, personTemplate, DATA_FACTORY.getTypedTerm( DATA_FACTORY.getVariable("age"), Predicate.COL_TYPE.LITERAL)));
 		body.add(DATA_FACTORY.getFunction(hasschool, personTemplate, schoolTemplate));
 		body.add(DATA_FACTORY.getFunction(school, schoolTemplate));
 
