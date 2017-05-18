@@ -7,23 +7,23 @@ target		:id/{id} a :B .
 source		SELECT id FROM T1
 
 mappingId	MAPID-T2
-target		:id/{id} :p {p1} . 
+target		:id/{id} :p "{p1}" .
 source		SELECT id,  p1 FROM T2
 
 mappingId	MAPID-T3
-target		:id/{id} :p {p1} . 
+target		:id/{id} :p "{p1}" .
 source		SELECT id, p1 FROM T3
 
 mappingId	MAPID-T4
-target		:id/{id} :p {p1} . 
+target		:id/{id} :p "{p1}" .
 source		SELECT id, p1 FROM T4
 
 mappingId	MAPID-T5
-target		:id/{id} :p {p1} . 
+target		:id/{id} :p "{p1}" .
 source		SELECT id, p1 FROM T5
 
 mappingId	MAPID-T6
-target		:id/{id} :p {p1} . 
+target		:id/{id} :p "{p1}" .
 source		SELECT * FROM T6
 
 mappingId	MAPID-T7
