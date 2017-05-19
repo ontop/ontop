@@ -20,21 +20,16 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.LanguageTag;
-import it.unibz.inf.ontop.model.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.ValueFactory;
 
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-
-
-import com.google.common.collect.ImmutableList;
 
 import static it.unibz.inf.ontop.model.impl.DataAtomTools.areVariablesDistinct;
 import static it.unibz.inf.ontop.model.impl.DataAtomTools.isVariableOnly;
@@ -377,7 +372,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getUriTemplateForDatatype(String type) {
-		return getFunction(new URITemplatePredicateImpl(1), getConstantLiteral(type, COL_TYPE.OBJECT));
+		return getFunction(new URITemplatePredicateImpl(1), getConstantLiteral(type));
 	}
 	
 	@Override
