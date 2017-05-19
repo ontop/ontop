@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MissingRelationForExtensionalDataNodeException;
@@ -94,6 +95,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
         return (node instanceof ExtensionalDataNode)
                 && ((ExtensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
     }
+
 
     @Override
     public String toString() {

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.DataAtom;
@@ -64,6 +65,11 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof IntensionalDataNode)
                 && ((IntensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
+    }
+
+    @Override
+    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
+        return getLocallyRequiredVariables();
     }
 
     @Override

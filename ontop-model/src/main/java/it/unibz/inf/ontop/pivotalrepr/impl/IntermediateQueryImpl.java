@@ -13,8 +13,11 @@ import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -324,7 +327,29 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode) {
-        return treeComponent.getVariablesRequiredByAncestors(queryNode);
+        ImmutableSet.Builder<Variable> requiredVariableBuilder = ImmutableSet.builder();
+
+        // Non-final
+        Optional<QueryNode> optionalAncestor = getParent(queryNode);
+        while (optionalAncestor.isPresent()) {
+            QueryNode ancestor = optionalAncestor.get();
+
+            ancestor.getRequiredVariables(this)
+                    .forEach(requiredVariableBuilder::add);
+
+            if (ancestor instanceof ExplicitVariableProjectionNode)
+                break;
+            optionalAncestor = getParent(ancestor);
+        }
+
+        ImmutableSet<Variable> requiredVariables = requiredVariableBuilder.build();
+        /*
+         * Restrict to variables which can actually be provided.
+         * Assumption: variables defined by a node should not appear in its subtree
+         */
+        return getVariables(queryNode).stream()
+                .filter(requiredVariables::contains)
+                .collect(ImmutableCollectors.toSet());
     }
 
     private void validate() throws InvalidIntermediateQueryException {
