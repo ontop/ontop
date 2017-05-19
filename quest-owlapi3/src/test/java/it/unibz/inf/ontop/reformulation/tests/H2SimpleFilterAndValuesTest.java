@@ -41,9 +41,9 @@ import static junit.framework.TestCase.assertTrue;
 /***
  * Tests that h2 datatypes
  */
-public class H2DatatypeTest {
-    static final String owlFile = "src/test/resources/datatype/datatypes.owl";
-	static final String obdaFile = "src/test/resources/datatype/datetime-h2.obda";
+public class H2SimpleFilterAndValuesTest {
+	final String owlFile = "src/test/resources/filter/datatypes.owl";
+	final String obdaFile = "src/test/resources/filter/filter-h2.obda";
 	private static final String JDBC_URL =  "jdbc:h2:mem:datatype";
 	private static final String JDBC_USER =  "sa";
 	private static final String JDBC_PASSWORD =  "";
@@ -60,7 +60,7 @@ public class H2DatatypeTest {
 		java.sql.Statement s = sqlConnection.createStatement();
 
 		try {
-			String text = new Scanner( new File("src/test/resources/datatype/h2-datatypes.sql") ).useDelimiter("\\A").next();
+			String text = new Scanner( new File("src/test/resources/filter/h2-datatypes.sql") ).useDelimiter("\\A").next();
 			s.execute(text);
 			//Server.startWebServer(sqlConnection);
 
