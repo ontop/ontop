@@ -93,6 +93,11 @@ public class TrueNodeImpl implements TrueNode {
     }
 
     @Override
+    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
+        return getLocallyRequiredVariables();
+    }
+
+    @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
     }
