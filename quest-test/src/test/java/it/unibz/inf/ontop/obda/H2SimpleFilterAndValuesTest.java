@@ -59,8 +59,8 @@ public class H2SimpleFilterAndValuesTest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/datatype/datatypes.owl";
-	final String obdafile = "src/test/resources/datatype/datetime-h2.obda";
+	final String owlfile = "src/test/resources/filter/datatypes.owl";
+	final String obdafile = "src/test/resources/filter/filter-h2.obda";
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
 
@@ -71,7 +71,7 @@ public class H2SimpleFilterAndValuesTest {
 			    java.sql.Statement s = sqlConnection.createStatement();
 			  
 			    try {
-			    	String text = new Scanner( new File("src/test/resources/datatype/h2-datatypes.sql") ).useDelimiter("\\A").next();
+			    	String text = new Scanner( new File("src/test/resources/filter/h2-datatypes.sql") ).useDelimiter("\\A").next();
 			    	s.execute(text);
 			    	//Server.startWebServer(sqlConnection);
 			    	 
@@ -170,13 +170,6 @@ public class H2SimpleFilterAndValuesTest {
 		assertEquals("\"2013-03-18\"", val);
 	}
 
-
-	/**
-	 * Test use of Filter with class
-	 * @throws Exception
-	 */
-
-
 	@Test
 	public void testValuesClass() throws Exception {
 		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x ?y\n" +
@@ -203,11 +196,22 @@ public class H2SimpleFilterAndValuesTest {
 	public void testValuesProperty() throws Exception {
 		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x ?y\n" +
 				"WHERE {\n" +
-				"   ?z a ?x; :hasDate ?y\n" +
+				"   ?z a :Row; ?x ?y\n" +
 				"   VALUES ?x { :hasDate } .\n" +
 				"}";
 		String val = runTests(query);
 		assertEquals("\"2013-03-18\"", val);
+	}
+
+
+	@Test
+	public void testValuesProperty2() throws Exception {
+		String query = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT * WHERE"
+				+ "{ ?x a  :Row .  ?x ?v ?y . VALUES ?v { :hasSmallInt } }";
+
+
+		String val = runTests(query);
+		assertEquals("\"1\"^^xsd:integer", val);
 	}
 }
 
