@@ -408,6 +408,11 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
+    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
+        return getLocallyRequiredVariables();
+    }
+
+    @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return substitution.getDomain();
     }

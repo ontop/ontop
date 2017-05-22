@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
@@ -114,6 +115,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @Override
     public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
         throw new UnsupportedOperationException("The TrueNode child of a FilterNode is not expected to be removed");
+    }
+
+    @Override
+    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
+        return getLocallyRequiredVariables();
     }
 
     @Override

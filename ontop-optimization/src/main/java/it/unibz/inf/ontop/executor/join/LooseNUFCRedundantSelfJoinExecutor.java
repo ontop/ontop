@@ -69,17 +69,41 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
                         c -> c,
                         c -> groupDataNodesPerConstraint(c, initialNodes)));
 
-        ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> dependentUnifierBuilder = ImmutableList.builder();
-        for (Map.Entry<NonUniqueFunctionalConstraint, ImmutableCollection<Collection<DataNode>>> constraintEntry : constraintNodeMap.entrySet()) {
-            dependentUnifierBuilder.addAll(extractDependentUnifiers(constraintEntry.getKey(), constraintEntry.getValue()));
-        }
-        ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> dependentUnifiers = dependentUnifierBuilder.build();
+        ImmutableSet<Variable> requiredAndCooccuringVariables = extractRequiredAndCooccuringVariables(query, joinNode);
 
-        ImmutableSet<DataNode> nodesToRemove = selectNodesToRemove(query, joinNode, constraintNodeMap, predicate);
+        ImmutableSet<DataNode> nodesToRemove = selectNodesToRemove(requiredAndCooccuringVariables,
+                constraintNodeMap, predicate);
+
+        ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> dependentUnifiers = extractDependentUnifiers(
+                databaseRelation, constraintNodeMap, nodesToRemove);
 
         return (dependentUnifiers.isEmpty() && nodesToRemove.isEmpty())
                 ? Optional.empty()
                 : Optional.of(new PredicateLevelProposal(dependentUnifiers, nodesToRemove));
+    }
+
+    /**
+     * TODO: explain
+     *
+     * @throws AtomUnificationException
+     */
+    private ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> extractDependentUnifiers(
+            DatabaseRelationDefinition databaseRelation, ImmutableMap<NonUniqueFunctionalConstraint,
+            ImmutableCollection<Collection<DataNode>>> constraintNodeMap,
+            ImmutableSet<DataNode> nodesToRemove) throws AtomUnificationException {
+
+        ImmutableSet<Integer> nullableIndexes = databaseRelation.getAttributes().stream()
+                .filter(Attribute::canNull)
+                .map(a -> a.getIndex() - 1)
+                .collect(ImmutableCollectors.toSet());
+
+        ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> dependentUnifierBuilder = ImmutableList.builder();
+        for (Map.Entry<NonUniqueFunctionalConstraint, ImmutableCollection<Collection<DataNode>>> constraintEntry : constraintNodeMap.entrySet()) {
+            dependentUnifierBuilder.addAll(extractDependentUnifiers(constraintEntry.getKey(), constraintEntry.getValue(),
+                    nodesToRemove, nullableIndexes));
+        }
+
+        return dependentUnifierBuilder.build();
     }
 
     private ImmutableCollection<Collection<DataNode>> groupDataNodesPerConstraint(
@@ -106,7 +130,8 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
     }
 
     private ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> extractDependentUnifiers(
-            NonUniqueFunctionalConstraint constraint, ImmutableCollection<Collection<DataNode>> dataNodeClusters)
+            NonUniqueFunctionalConstraint constraint, ImmutableCollection<Collection<DataNode>> dataNodeClusters,
+            ImmutableSet<DataNode> nodesToRemove, ImmutableSet<Integer> nullableIndexes)
             throws AtomUnificationException {
         ImmutableList<Integer> dependentIndexes = constraint.getDependents().stream()
                 .map(d -> d.getIndex() - 1)
@@ -114,28 +139,40 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
 
         ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> substitutionCollectionBuilder = ImmutableList.builder();
         for (Collection<DataNode> cluster : dataNodeClusters) {
-            substitutionCollectionBuilder.addAll(extractDependentUnifiersFromCluster(dependentIndexes, cluster));
+            substitutionCollectionBuilder.addAll(extractDependentUnifiersFromCluster(dependentIndexes, cluster,
+                    nodesToRemove, nullableIndexes));
         }
         return substitutionCollectionBuilder.build();
     }
 
     private Collection<ImmutableSubstitution<VariableOrGroundTerm>> extractDependentUnifiersFromCluster(
-            ImmutableList<Integer> dependentIndexes, Collection<DataNode> cluster) throws AtomUnificationException {
+            ImmutableList<Integer> dependentIndexes, Collection<DataNode> cluster,
+            ImmutableSet<DataNode> nodesToRemove, ImmutableSet<Integer> nullableIndexes)
+            throws AtomUnificationException {
         if (cluster.size() < 2)
             return ImmutableList.of();
 
-        Iterator<DataNode> clusterIterator = cluster.iterator();
-        DataNode firstDataNode = clusterIterator.next();
+        DataNode referenceDataNode = cluster.stream()
+                // Try to get the first kept data node
+                .filter(n -> !nodesToRemove.contains(n))
+                .findFirst()
+                // Otherwise if all the nodes will be removed, take the first one
+                .orElseGet(() -> cluster.iterator().next());
 
         /*
-         * Ignores the first element
+         * Ignores the reference data node
          *
          * NB: while loop due to the exception
          */
         Collection<ImmutableSubstitution<VariableOrGroundTerm>> substitutionCollection = new ArrayList<>();
-        while (clusterIterator.hasNext()) {
-            DataNode currentDataNode = clusterIterator.next();
-            unifyDependentTerms(firstDataNode.getProjectionAtom(), currentDataNode.getProjectionAtom(), dependentIndexes)
+        for (DataNode currentDataNode : cluster) {
+            if (currentDataNode == referenceDataNode)
+                continue;
+
+            boolean willBeRemoved = nodesToRemove.contains(currentDataNode);
+
+            unifyDependentTerms(referenceDataNode.getProjectionAtom(), currentDataNode.getProjectionAtom(),
+                    dependentIndexes, willBeRemoved, nullableIndexes)
                     .ifPresent(substitutionCollection::add);
         }
 
@@ -149,7 +186,8 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
      * Throws an AtomUnificationException if unification is impossible
      */
     private Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifyDependentTerms(
-            DataAtom leftAtom, DataAtom rightAtom, ImmutableList<Integer> dependentIndexes)
+            DataAtom leftAtom, DataAtom rightAtom, ImmutableList<Integer> dependentIndexes,
+            boolean willRightAtomBeRemoved, ImmutableSet<Integer> nullableIndexes)
             throws AtomUnificationException {
 
         // Non-final
@@ -172,13 +210,23 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
                     .map(DATA_FACTORY::getSubstitution)
                     .orElseThrow(AtomUnificationException::new);
 
-            ImmutableSubstitution<VariableOrGroundTerm> newUnifier = currentUnifier.isPresent()
+            ImmutableSubstitution<VariableOrGroundTerm> candidateUnifier = currentUnifier.isPresent()
                     ? ImmutableUnificationTools.computeAtomMGUS(currentUnifier.get(), termUnifier)
                             .orElseThrow(AtomUnificationException::new)
                     : termUnifier;
 
-            currentUnifier = Optional.of(newUnifier);
-
+            /*
+             * Only includes this substitution if it is SAFE to do it.
+             *
+             * Safety is guaranteed if:
+             *   - The right node will be removed (NB: the substitution is also required in that case)
+             *   - The column is not nullable
+             *   TODO: consider the case where nullable variables will be FILTERED OUT (improvement)
+             *
+             */
+            currentUnifier = (willRightAtomBeRemoved || (!nullableIndexes.contains(dependentIndex)))
+                    ? Optional.of(candidateUnifier)
+                    : currentUnifier ;
         }
         return currentUnifier.filter(s -> !s.isEmpty());
     }
@@ -189,14 +237,12 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
      * TODO: consider the case of predicates with multiple non-unique functional dependencies
      */
     private ImmutableSet<DataNode> selectNodesToRemove(
-            IntermediateQuery query, InnerJoinNode joinNode,
-            ImmutableMap<NonUniqueFunctionalConstraint, ImmutableCollection<Collection<DataNode>>> constraintNodeMap, AtomPredicate predicate) {
+
+            ImmutableSet<Variable> requiredAndCooccuringVariables, ImmutableMap<NonUniqueFunctionalConstraint, ImmutableCollection<Collection<DataNode>>> constraintNodeMap, AtomPredicate predicate) {
 
         if (settings.getCardinalityPreservationMode() != LOOSE) {
             return ImmutableSet.of();
         }
-
-        ImmutableSet<Variable> requiredAndCooccuringVariables = extractRequiredAndCooccuringVariables(query, joinNode);
 
         /*
          * Expects that different unique constraints can only remove independent data nodes (-> no conflict)
@@ -212,27 +258,25 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
     private ImmutableSet<Variable> extractRequiredAndCooccuringVariables(IntermediateQuery query, InnerJoinNode joinNode) {
         Stream<Variable> requiredVariablesByAncestorStream = Stream.concat(
                 query.getVariablesRequiredByAncestors(joinNode).stream(),
-                joinNode.getLocallyRequiredVariables().stream());
+                joinNode.getRequiredVariables(query).stream());
 
         /*
-         * NB: takes into multiple occurrences of a variable within the same data node. For other nodes, count
-         * only the first occurrence.
+         * NB: looks fro into multiple occurrences of a variable within the same data node
          */
-        ImmutableMultiset<Variable> childrenVariableBag = query.getChildren(joinNode).stream()
-                .flatMap(c -> (c instanceof DataNode)
+        Stream<Variable> innerCooccuringVariableStream = query.getChildren(joinNode).stream()
+                .filter(c -> c instanceof DataNode)
+                .map(c -> (DataNode) c)
+                .flatMap(c ->
                         // Multiset
-                        ? ((DataNode) c).getProjectionAtom().getArguments().stream()
+                        c.getProjectionAtom().getArguments().stream()
                         .filter(t -> t instanceof Variable)
                         .map(v -> (Variable) v)
-                        // Set
-                        : query.getVariables(c).stream())
-                .collect(ImmutableCollectors.toMultiset());
+                        .collect(ImmutableCollectors.toMultiset())
+                        .entrySet().stream()
+                                .filter(e -> e.getCount() > 1)
+                                .map(Multiset.Entry::getElement));
 
-        Stream<Variable> cooccuringVariableStream = childrenVariableBag.entrySet().stream()
-                .filter(e -> e.getCount() > 1)
-                .map(Multiset.Entry::getElement);
-
-        return Stream.concat(requiredVariablesByAncestorStream, cooccuringVariableStream)
+        return Stream.concat(requiredVariablesByAncestorStream, innerCooccuringVariableStream)
                 .collect(ImmutableCollectors.toSet());
     }
 

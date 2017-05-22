@@ -64,4 +64,8 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
         return getLocalVariables();
     }
 
+    @Override
+    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
+        return getLocallyRequiredVariables();
+    }
 }
