@@ -18,6 +18,8 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.DATA_FACTORY;
 import static it.unibz.inf.ontop.OptimizationTestingTools.IQ_FACTORY;
 import static it.unibz.inf.ontop.OptimizationTestingTools.createQueryBuilder;
 import static it.unibz.inf.ontop.model.ExpressionOperation.NEQ;
+import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static junit.framework.TestCase.assertTrue;
 
 /**
@@ -246,10 +248,7 @@ public class NonUniqueFunctionalConstraintTest {
                 DATA_FACTORY.getSubstitution(Z, Y), Optional.of(DISTINCT_MODIFIER));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, B, G));
-
-        expectedQueryBuilder.addChild(newRootNode, dataNode3);
+        expectedQueryBuilder.addChild(newRootNode, dataNode2);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -452,9 +451,7 @@ public class NonUniqueFunctionalConstraintTest {
                 DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
-        ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, I, J, Z));
-        expectedQueryBuilder.addChild(joinNode, dataNode6);
+        expectedQueryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -499,14 +496,10 @@ public class NonUniqueFunctionalConstraintTest {
         ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
                 DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
-
         ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
                 DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, B, Z, G));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
-
-        ExtensionalDataNode dataNode7 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, I, J, G));
-        expectedQueryBuilder.addChild(joinNode, dataNode7);
+        expectedQueryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -977,6 +970,50 @@ public class NonUniqueFunctionalConstraintTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
         optimizeAndCompare(query, expectedQuery, joinNode);
+    }
+
+    @Test
+    public void testLJNonRedundantSelfJoin1() throws EmptyQueryException {
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
+
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        queryBuilder.init(projectionAtom, rootNode);
+
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
+        queryBuilder.addChild(rootNode, leftJoinNode);
+
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        queryBuilder.addChild(leftJoinNode, joinNode, LEFT);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+        queryBuilder.addChild(joinNode, dataNode1);
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, A, D, E, F));
+        queryBuilder.addChild(joinNode, dataNode2);
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
+                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, F, H, I, J, K));
+        queryBuilder.addChild(leftJoinNode, dataNode3, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+
+        IntermediateQueryBuilder exceptedBuilder = createQueryBuilder(METADATA);
+        exceptedBuilder.init(projectionAtom, rootNode);
+        exceptedBuilder.addChild(rootNode, leftJoinNode);
+        exceptedBuilder.addChild(leftJoinNode, joinNode, LEFT);
+        exceptedBuilder.addChild(joinNode, dataNode1);
+
+        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
+                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, A, B, Z, F));
+        exceptedBuilder.addChild(joinNode, dataNode4);
+
+        exceptedBuilder.addChild(leftJoinNode, dataNode3, RIGHT);
+
+        optimizeAndCompare(query, exceptedBuilder.build(), joinNode);
     }
 
     private static NodeCentricOptimizationResults<InnerJoinNode> optimizeAndCompare(IntermediateQuery query,
