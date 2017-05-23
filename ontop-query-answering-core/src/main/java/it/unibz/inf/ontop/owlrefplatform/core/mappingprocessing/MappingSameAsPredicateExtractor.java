@@ -27,7 +27,10 @@ import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.UnionFriendlyBindingExtractor;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class MappingSameAsPredicateExtractor {
 
@@ -71,18 +74,12 @@ public class MappingSameAsPredicateExtractor {
                         .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
                                 "(-> inconsistent)"));
 
-                Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution =  extractor.extractInSubTree(
-                        definition, definition.getRootConstructionNode()).getOptionalSubstitution();
 
                 DistinctVariableOnlyDataAtom projectionAtom = definition.getProjectionAtom();
 
                 Term term1 = projectionAtom.getTerm(0);
                 Term term2 = projectionAtom.getTerm(1);
 
-
-                if (optionalSubstitution.isPresent()){
-
-                }
 
                 if (term1 instanceof Function && term2 instanceof Function) {
 
