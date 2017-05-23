@@ -55,7 +55,6 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 import org.eclipse.rdf4j.model.util.ModelUtil;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.GraphQuery;
@@ -67,9 +66,6 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.helpers.RDFHandlerBase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
@@ -105,7 +101,6 @@ public class RDB2RDFTest {
 
 	private static ValueFactory FACTORY = SimpleValueFactory.getInstance();
 
-	private static OWLOntology EMPTY_ONT;
 	private static Properties PROPERTIES;
 
 	private static final String JDBC_URL = "jdbc:h2:mem:questrepository";
@@ -229,8 +224,6 @@ public class RDB2RDFTest {
 		SQL_CONN = DriverManager.getConnection("jdbc:h2:mem:questrepository","sa", "");
 		//Server.startWebServer(SQL_CONN);
 
-		EMPTY_ONT = OWLManager.createOWLOntologyManager().createOntology();
-
 		PROPERTIES = new Properties();
 
 		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_NAME, "h2");
@@ -286,8 +279,7 @@ public class RDB2RDFTest {
 
 	Builder<? extends Builder> createStandardConfigurationBuilder() {
 		  return OntopSQLOWLAPIConfiguration.defaultBuilder()
-				 .properties(PROPERTIES)
-				 .ontology(EMPTY_ONT);
+				 .properties(PROPERTIES);
 	}
 
 	Builder<? extends Builder> createInMemoryBuilder() {

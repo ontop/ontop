@@ -180,13 +180,12 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      *       --> merge it with the "repair" step
      */
     private OBDAModel fixMappingAxioms(OBDAModel initialPPMapping, Optional<Ontology> optionalOntology) {
-        if (optionalOntology.isPresent()) {
-            Ontology ontology = optionalOntology.get();
-            return mappingVocabularyFixer.fixOBDAModel(initialPPMapping, ontology.getVocabulary());
-        }
-        else
-            //BC: Why are we not checking? Inconsistent processing
-            return initialPPMapping;
+        return optionalOntology
+                .map(Ontology::getVocabulary)
+                //.filter(v -> !v.isEmpty())
+                .map(v -> mappingVocabularyFixer.fixOBDAModel(initialPPMapping, v))
+                //BC: Why are we not checking? Inconsistent processing
+                .orElse(initialPPMapping);
     }
 
 
