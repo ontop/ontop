@@ -189,8 +189,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             return mappingVocabularyFixer.fixOBDAModel(initialPPMapping, ontology.getVocabulary());
         }
         else {
-            //fix all mappings
-            return mappingVocabularyFixer.fixOBDAModel(initialPPMapping, ONTOLOGY_FACTORY.createVocabulary());
+            //BC: Why are we not checking? Inconsistent processing
+            return initialPPMapping;
         }
 
     }
