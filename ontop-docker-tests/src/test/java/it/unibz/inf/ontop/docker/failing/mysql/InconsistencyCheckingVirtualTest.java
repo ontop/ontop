@@ -8,9 +8,7 @@ import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
-import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -55,10 +53,10 @@ public class InconsistencyCheckingVirtualTest {
 	}
 	
 	@Test
-	public void testInitialConsistency() {
+	public void testInitialConsistency() throws OWLException {
 		//initially the ontology is consistent
 		startReasoner();
-		assertTrue(reasoner.isConsistent());
+		assertTrue(reasoner.isQuestConsistent());
 	}
 	
 	private void startReasoner(){
@@ -85,7 +83,7 @@ public class InconsistencyCheckingVirtualTest {
 	}
 	
 	@Test
-	public void testDisjointClassInconsistency() throws OWLOntologyCreationException {
+	public void testDisjointClassInconsistency() throws OWLException {
 
 		//Male(a), Female(a), disjoint(Male, Female)
 		
@@ -93,7 +91,7 @@ public class InconsistencyCheckingVirtualTest {
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 		
 		manager.removeAxiom(ontology, DisjointClasses(c1, c2));
@@ -101,7 +99,7 @@ public class InconsistencyCheckingVirtualTest {
 	} 
 	
 	@Test
-	public void testDisjointObjectPropInconsistency() throws OWLOntologyCreationException {
+	public void testDisjointObjectPropInconsistency() throws OWLException {
 
 		//hasMother(a, b), hasFather(a,b), disjoint(hasMother, hasFather)
 		manager.addAxiom(ontology,ObjectPropertyAssertion(r1, a, b)); //
@@ -110,7 +108,7 @@ public class InconsistencyCheckingVirtualTest {
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 
 		manager.removeAxiom(ontology,ObjectPropertyAssertion(r1, a, b)); //
@@ -119,7 +117,7 @@ public class InconsistencyCheckingVirtualTest {
 	} 
 	
 	//@Test
-	public void testDisjointDataPropInconsistency() throws OWLOntologyCreationException {
+	public void testDisjointDataPropInconsistency() throws OWLException {
 
 		//hasAgeFirst(a, 21), hasAge(a, 21), disjoint(hasAgeFirst, hasAge)
 		manager.addAxiom(ontology, DataPropertyAssertion(d1, a, Literal(21)));
@@ -128,7 +126,7 @@ public class InconsistencyCheckingVirtualTest {
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 		
 		manager.removeAxiom(ontology, DataPropertyAssertion(d1, a, Literal(21)));
@@ -138,7 +136,7 @@ public class InconsistencyCheckingVirtualTest {
 	} 
 	
 	@Test
-	public void testFunctionalObjPropInconsistency() throws OWLOntologyCreationException {
+	public void testFunctionalObjPropInconsistency() throws OWLException {
 
 		//hasMother(a,b), hasMother(a,c), func(hasMother)
 		manager.addAxiom(ontology,ObjectPropertyAssertion(r1, a, b)); //
@@ -147,7 +145,7 @@ public class InconsistencyCheckingVirtualTest {
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 
 		manager.removeAxiom(ontology,ObjectPropertyAssertion(r1, a, b)); //
@@ -156,7 +154,7 @@ public class InconsistencyCheckingVirtualTest {
 	} 
 	
 	//@Test
-	public void testFunctionalDataPropInconsistency() throws OWLOntologyCreationException {
+	public void testFunctionalDataPropInconsistency() throws OWLException {
 
 		//hasAge(a, 18), hasAge(a, 21), func(hasAge)
 		manager.addAxiom(ontology, DataPropertyAssertion(d2, book, Literal("Jules Verne")));
@@ -165,7 +163,7 @@ public class InconsistencyCheckingVirtualTest {
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
+		boolean consistent = reasoner.isQuestConsistent();
 		assertFalse(consistent);
 		
 		manager.removeAxiom(ontology, DataPropertyAssertion(d1, a, Literal(18)));

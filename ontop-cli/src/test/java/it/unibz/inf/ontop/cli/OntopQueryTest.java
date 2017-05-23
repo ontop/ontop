@@ -53,9 +53,9 @@ public class OntopQueryTest {
     @Test
     public void testOntopQueryAnnotations_Ontology (){
         String[] argv = {"query",
-                "-m", "../quest-test/src/test/resources/annotation/doid.obda",
-                "-t", "../quest-test/src/test/resources/annotation/doid.owl",
-                "-q", "../quest-test/src/test/resources/annotation/q1.q",
+                "-m", "../ontop-docker-tests/src/test/resources/pgsql/annotation/doid.obda",
+                "-t", "../ontop-docker-tests/src/test/resources/pgsql/annotation/doid.owl",
+                "-q", "../ontop-docker-tests/src/test/resources/pgsql/annotation/q1.q",
                 "--enable-annotations"
         };
         Ontop.main(argv);
