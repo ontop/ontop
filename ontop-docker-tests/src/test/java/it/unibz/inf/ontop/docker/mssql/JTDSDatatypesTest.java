@@ -29,7 +29,7 @@ public class JTDSDatatypesTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "/mssql/datatype/datatypesjtds.owl";
 	static final String obdafile = "/mssql/datatype/datatypejtds.obda";
-	static final String propertiesfile = "/datatype/datatypejtds.properties";
+	static final String propertiesfile = "/mssql/datatype/datatypejtds.properties";
 
 	public JTDSDatatypesTest() {
 		super(owlfile, obdafile, propertiesfile);
