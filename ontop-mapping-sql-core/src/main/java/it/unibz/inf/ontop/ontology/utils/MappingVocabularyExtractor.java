@@ -29,7 +29,7 @@ public class MappingVocabularyExtractor {
                         if (secondArgType == null) {
                             // TODO: this should only happen for data properties (no ambiguity for object property).
                             throw new IllegalArgumentException("In the target of a mapping assertion, the atom "
-                                    + f + " does have a type for its second argument. This type is required.");
+                                    + f + " does not have a type for its second argument. This type is required.");
                         }
                         else if (secondArgType.equals(Predicate.COL_TYPE.OBJECT))
                             ontologyVocabulary.createObjectProperty(f.getFunctionSymbol().getName());
