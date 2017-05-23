@@ -20,32 +20,29 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.Statement;
-
-import com.google.common.collect.ImmutableList;
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
-
 import java.util.LinkedList;
 import java.util.List;
-
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static org.junit.Assert.assertEquals;
@@ -134,6 +131,8 @@ public class VirtualABoxMaterializerTest {
 
 	}
 
+
+
 	private static OBDAModel createMapping() throws DuplicateMappingException {
 
     	// TODO: we should not have to create an high-level configuration just for constructing these objects...
@@ -161,9 +160,9 @@ public class VirtualABoxMaterializerTest {
 
 		List<Function> body = new LinkedList<Function>();
 		body.add(DATA_FACTORY.getFunction(person, personTemplate));
-		body.add(DATA_FACTORY.getFunction(fn, personTemplate, DATA_FACTORY.getVariable("fn")));
-		body.add(DATA_FACTORY.getFunction(ln, personTemplate, DATA_FACTORY.getVariable("ln")));
-		body.add(DATA_FACTORY.getFunction(age, personTemplate, DATA_FACTORY.getVariable("age")));
+		body.add(DATA_FACTORY.getFunction(fn, personTemplate, DATA_FACTORY.getTypedTerm(DATA_FACTORY.getVariable("fn"), Predicate.COL_TYPE.LITERAL)));
+		body.add(DATA_FACTORY.getFunction(ln, personTemplate, DATA_FACTORY.getTypedTerm( DATA_FACTORY.getVariable("ln"), Predicate.COL_TYPE.LITERAL)));
+		body.add(DATA_FACTORY.getFunction(age, personTemplate, DATA_FACTORY.getTypedTerm( DATA_FACTORY.getVariable("age"), Predicate.COL_TYPE.LITERAL)));
 		body.add(DATA_FACTORY.getFunction(hasschool, personTemplate, schoolTemplate));
 		body.add(DATA_FACTORY.getFunction(school, schoolTemplate));
 

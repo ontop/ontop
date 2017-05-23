@@ -1,9 +1,0 @@
-[PrefixDeclaration]
-:		http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#
-
-[MappingDeclaration] @collection [[
-mappingId	MAPID-4aa07a17589a46fa8756f8c2d462c23d
-target		:{id} a :Man ; :friendOf :{id} . 
-source		select id from client
-]]
-
