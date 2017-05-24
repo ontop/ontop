@@ -258,27 +258,25 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
     private ImmutableSet<Variable> extractRequiredAndCooccuringVariables(IntermediateQuery query, InnerJoinNode joinNode) {
         Stream<Variable> requiredVariablesByAncestorStream = Stream.concat(
                 query.getVariablesRequiredByAncestors(joinNode).stream(),
-                joinNode.getLocallyRequiredVariables().stream());
+                joinNode.getRequiredVariables(query).stream());
 
         /*
-         * NB: takes into multiple occurrences of a variable within the same data node. For other nodes, count
-         * only the first occurrence.
+         * NB: looks fro into multiple occurrences of a variable within the same data node
          */
-        ImmutableMultiset<Variable> childrenVariableBag = query.getChildren(joinNode).stream()
-                .flatMap(c -> (c instanceof DataNode)
+        Stream<Variable> innerCooccuringVariableStream = query.getChildren(joinNode).stream()
+                .filter(c -> c instanceof DataNode)
+                .map(c -> (DataNode) c)
+                .flatMap(c ->
                         // Multiset
-                        ? ((DataNode) c).getProjectionAtom().getArguments().stream()
+                        c.getProjectionAtom().getArguments().stream()
                         .filter(t -> t instanceof Variable)
                         .map(v -> (Variable) v)
-                        // Set
-                        : query.getVariables(c).stream())
-                .collect(ImmutableCollectors.toMultiset());
+                        .collect(ImmutableCollectors.toMultiset())
+                        .entrySet().stream()
+                                .filter(e -> e.getCount() > 1)
+                                .map(Multiset.Entry::getElement));
 
-        Stream<Variable> cooccuringVariableStream = childrenVariableBag.entrySet().stream()
-                .filter(e -> e.getCount() > 1)
-                .map(Multiset.Entry::getElement);
-
-        return Stream.concat(requiredVariablesByAncestorStream, cooccuringVariableStream)
+        return Stream.concat(requiredVariablesByAncestorStream, innerCooccuringVariableStream)
                 .collect(ImmutableCollectors.toSet());
     }
 

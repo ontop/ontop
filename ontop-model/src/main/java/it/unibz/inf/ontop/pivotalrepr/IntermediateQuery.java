@@ -141,5 +141,12 @@ public interface IntermediateQuery {
 
     IntermediateQueryFactory getFactory();
 
+    /**
+     * Minimal set of variables such that a construction node projecting exactly these variables could be inserted
+     * just above this node without altering the query semantics.
+     *
+     * The assumption is made that the query is consistent.
+     * Therefore this method should not be used for validation.
+     */
     ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode);
 }

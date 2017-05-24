@@ -20,26 +20,24 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLIndividual;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
 
-@Ignore
 public class MarriageTest {
 
 	private Connection conn;;
@@ -114,19 +112,19 @@ public class MarriageTest {
     public void testSpouse() throws Exception {
         String queryBind = "PREFIX : <http://example.org/marriage/voc#>\n" +
                 "\n" +
-                "SELECT ?x \n" +
+                "SELECT DISTINCT ?x \n" +
                 "WHERE {\n" +
                 "  ?x a :Spouse .\n" +
                 "}";
 
-        ImmutableList<String> expectedValues = ImmutableList.of(
+        ImmutableSet<String> expectedValues = ImmutableSet.of(
                 "http://example.com/person/1",
                 "http://example.com/person/2"
         );
         checkReturnedValues(queryBind, expectedValues);
     }
 
-    private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
+    private void checkReturnedValues(String query, Set<String> expectedValues) throws Exception {
 
 		QuestOWLFactory factory = new QuestOWLFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -144,26 +142,19 @@ public class MarriageTest {
         OntopOWLConnection conn = reasoner.getConnection();
         OntopOWLStatement st = conn.createStatement();
 
-        int i = 0;
-        List<String> returnedValues = new ArrayList<>();
+        Set<String> returnedValues = new HashSet<>();
         try {
             QuestOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.nextRow()) {
-                OWLObject ind1 = rs.getOWLObject("x");
-                // log.debug(ind1.toString());
-                returnedValues.add(ind1.toString());
-                System.out.println(ind1);
-                i++;
+                OWLIndividual ind1 = rs.getOWLIndividual("x");
+                returnedValues.add(ind1.toStringID());
             }
-        } catch (Exception e) {
-            throw e;
         } finally {
             conn.close();
             reasoner.dispose();
         }
         assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
                 returnedValues.equals(expectedValues));
-        assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
 
     }
 
