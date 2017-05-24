@@ -119,7 +119,9 @@ public class DirectMappingEngine {
 				? extractMappings(inputObdaModel.get())
 				: extractMappings();
 
-		ImmutableOntologyVocabulary newVocabulary = MappingVocabularyExtractor.extractVocabulary(newMapping.getMappings());
+		ImmutableOntologyVocabulary newVocabulary = MappingVocabularyExtractor.extractVocabulary(
+				newMapping.getMappings().stream()
+						.flatMap(ax -> ax.getTargetQuery().stream()));
 
 		OWLOntology newOntology = inputOntology.isPresent()
 				? updateOntology(inputOntology.get(), newVocabulary)
