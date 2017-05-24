@@ -2,24 +2,22 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 public class MappingVocabularyValidator extends VocabularyValidator {
 
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
-
-    public MappingVocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc,
-                               NativeQueryLanguageComponentFactory nativeQLFactory) {
+    public MappingVocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
         super(reasoner, voc);
-        this.nativeQLFactory = nativeQLFactory;
     }
 
     /***
@@ -32,25 +30,35 @@ public class MappingVocabularyValidator extends VocabularyValidator {
      *
      * If there is a mapping:
      *
-     * q(x,y):- hasFather(x,y) <- SELECT x, y FROM t
+     * q(x,y):- hasFather(x,y) <- t(x,y)
      *
      * This will be replaced by the mapping
      *
-     * q(x,y):- hasChild(y,x) <- SELECT x, y FROM t
+     * q(x,y):- hasChild(y,x) <- t(x,y)
      *
      * The same is done for classes.
      *
-     * @param originalMappings
-     * @return
      */
-    public ImmutableList<OBDAMappingAxiom> replaceEquivalences(Collection<OBDAMappingAxiom> originalMappings) {
+    public ImmutableList<CQIE> replaceEquivalences(Collection<CQIE> mappingAssertions) {
+        return mappingAssertions.stream()
+                .map(this::transformMappingAssertion)
+                .collect(ImmutableCollectors.toList());
+    }
 
-        Collection<OBDAMappingAxiom> result = new ArrayList<OBDAMappingAxiom>(originalMappings.size());
-        for (OBDAMappingAxiom mapping : originalMappings) {
-            List<Function> targetQuery = mapping.getTargetQuery();
-            List<Function> newTargetQuery = replaceEquivalences(targetQuery);
-            result.add(nativeQLFactory.create(mapping.getId(), mapping.getSourceQuery(), newTargetQuery));
+    private CQIE transformMappingAssertion(CQIE mappingAssertion) {
+        List<Function> newHeads = replaceEquivalences(ImmutableList.of(mappingAssertion.getHead()));
+
+        switch (newHeads.size()) {
+            case 1:
+                return DATA_FACTORY.getCQIE(newHeads.get(0), mappingAssertion.getBody());
+            default:
+                throw new EquivalenceReplacingException("Only one head must be returned after replacing equivalences");
         }
-        return ImmutableList.copyOf(result);
+    }
+
+    private class EquivalenceReplacingException extends OntopInternalBugException {
+        private EquivalenceReplacingException(String message) {
+            super(message);
+        }
     }
 }

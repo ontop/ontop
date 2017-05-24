@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
@@ -76,7 +75,7 @@ public class MetaMappingExpander {
 	 * @return
 	 * 		expanded normal mappings
 	 */
-	public static Collection<OBDAMappingAxiom> expand(Collection<OBDAMappingAxiom> mappings,
+	public static ImmutableList<OBDAMappingAxiom> expand(Collection<OBDAMappingAxiom> mappings,
 													  OntopMappingSQLSettings settings, DBMetadata metadata,
 													  NativeQueryLanguageComponentFactory nativeQLFactory)
 			throws MetaMappingExpansionException {
@@ -124,10 +123,13 @@ public class MetaMappingExpander {
 		if (!errorMessages.isEmpty())
 			throw new MetaMappingExpansionException(Joiner.on("\n").join(errorMessages));
 
-		return expandedMappings;
+		return ImmutableList.copyOf(expandedMappings);
 	}
 
-	private static List<OBDAMappingAxiom> instantiateMapping(Connection connection, DBMetadata metadata, String id, Function target, String sql, NativeQueryLanguageComponentFactory nativeQLFactory) throws SQLException, JSQLParserException, InvalidSelectQueryException, UnsupportedSelectQueryException {
+	private static List<OBDAMappingAxiom> instantiateMapping(Connection connection, DBMetadata metadata, String id,
+															 Function target, String sql,
+															 NativeQueryLanguageComponentFactory nativeQLFactory)
+			throws SQLException, JSQLParserException, InvalidSelectQueryException, UnsupportedSelectQueryException {
 
 		ImmutableList<SelectExpressionItem> queryColumns = getQueryColumns(metadata, sql);
 
@@ -193,7 +195,8 @@ public class MetaMappingExpander {
 
 
 
-	private static ImmutableList<SelectExpressionItem> getQueryColumns(DBMetadata metadata, String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
+	private static ImmutableList<SelectExpressionItem> getQueryColumns(DBMetadata metadata, String sql)
+			throws InvalidSelectQueryException, UnsupportedSelectQueryException {
 
 		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata);
 
@@ -235,7 +238,8 @@ public class MetaMappingExpander {
 	}
 
 	private static List<List<String>> getTemplateValues(Connection connection, String sql,
-														ImmutableList<SelectExpressionItem> templateColumns) throws SQLException, JSQLParserException {
+														ImmutableList<SelectExpressionItem> templateColumns)
+			throws SQLException, JSQLParserException {
 
 
 		// The query for params is almost the same with the original source query, except that
