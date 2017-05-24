@@ -96,7 +96,7 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 				choices.append("]");
 			}
 			String msg = String.format("%s : %s : %s : %s : %s", info.name, info.value, choices.toString(), info.required, info.description);
-			System.out.println(msg);
+			log.info(msg);
 		}
 	}
 

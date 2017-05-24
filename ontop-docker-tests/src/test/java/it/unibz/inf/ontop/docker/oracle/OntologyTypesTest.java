@@ -27,7 +27,6 @@ import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -101,9 +100,9 @@ public class OntologyTypesTest {
 		while (rs.nextRow()) {
 			count++;
 			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + rs.getOWLObject(i));
-				System.out.print(" ");
+				log.info(rs.getSignature().get(i-1));
+				log.info("=" + rs.getOWLObject(i));
+				log.info(" ");
 			}
 			System.out.println();
 		}
@@ -119,28 +118,28 @@ public class OntologyTypesTest {
 		//no value in the mapping
 		//xsd:long in the ontology, asking for the general case we will not have any result
 		String query1 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
+				"select DISTINCT * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
 		runTests(false, query1, 0);
 //
 //        //no value in the mapping
 		//xsd:long in the ontology
 		String query1b = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
+				"select DISTINCT * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
 
 		runTests(false, query1b, 3);
 
 		//no value in the mapping
 		//xsd:string in the ontology
 		String query2 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
+				"select DISTINCT * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
 
 		runTests(false, query2, 3);
 
 		//no value in the ontology
 		//rdfs:Literal in the mapping
 		String query3 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
+				"select DISTINCT * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
 
 		runTests(false, query3, 3);
 
@@ -148,7 +147,7 @@ public class OntologyTypesTest {
 		//no value in the mapping
 		//value in the oracle database is decimal
 		String query4 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
+				"select DISTINCT * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
 
 		runTests(false, query4, 3);
 
@@ -156,7 +155,7 @@ public class OntologyTypesTest {
 		//value in the mapping is xsd:long
 
 		String query5 = "PREFIX franz: <http://www.franz.com/>" +
-				"select * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
+				"select DISTINCT * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
 
 		runTests(false, query5, 3);
 
@@ -164,7 +163,7 @@ public class OntologyTypesTest {
 		//value in the mapping is xsd:positiveInteger
 
 		String query6 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
+				"select DISTINCT * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
 
 		runTests(false, query6, 3);
 
@@ -177,28 +176,28 @@ public class OntologyTypesTest {
 		//no value in the mapping
 		//xsd:long in the ontology, asking for the general case we will not have any result
 		String query1 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
+				"select  DISTINCT * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
 		runTests(true, query1, 0);
 //
 //        //no value in the mapping
 		//xsd:long in the ontology
 		String query1b = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
+				"select DISTINCT * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
 
 		runTests(true, query1b, 3);
 
 		//no value in the mapping
 		//xsd:string in the ontology
 		String query2 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
+				"select DISTINCT * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
 
 		runTests(true, query2, 3);
 
 		//no value in the ontology
 		//rdfs:Literal in the mapping
 		String query3 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
+				"select DISTINCT * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
 
 		runTests(true, query3, 3);
 
@@ -206,7 +205,7 @@ public class OntologyTypesTest {
 		//no value in the mapping
 		//value in the oracle database is decimal
 		String query4 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
+				"select DISTINCT * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
 
 		runTests(true,  query4, 3);
 
@@ -214,7 +213,7 @@ public class OntologyTypesTest {
 		//value in the mapping is xsd:long
 
 		String query5 = "PREFIX franz: <http://www.franz.com/>" +
-				"select * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
+				"select DISTINCT * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
 
 		runTests(true,  query5, 3);
 
@@ -222,7 +221,7 @@ public class OntologyTypesTest {
 		//value in the mapping is xsd:positiveInteger
 
 		String query6 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
+				"select DISTINCT * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
 
 		runTests(true, query6, 3);
 	}
