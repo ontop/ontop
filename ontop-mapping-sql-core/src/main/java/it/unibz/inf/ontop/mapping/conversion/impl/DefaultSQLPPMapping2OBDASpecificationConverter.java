@@ -203,9 +203,12 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         // Apply TMappings
         List<CQIE> saturatedMapping = applyTMappings(canonicalMapping, tBox, true, dbMetadata);
 
+        // A second time is needed before the optimization applied after mapping saturation is NOT NULL-AWARE...
+        addNOTNULLToMappings(saturatedMapping, dbMetadata);
+
         if(LOGGER.isDebugEnabled()) {
             String finalMappings = Joiner.on("\n").join(saturatedMapping);
-            LOGGER.debug("Set of mappings before canonical IRI rewriting: \n {}", finalMappings);
+            LOGGER.debug("Set of mappings after saturation: \n {}", finalMappings);
         }
 
         // Adding "triple(x,y,z)" mappings for support of unbounded
