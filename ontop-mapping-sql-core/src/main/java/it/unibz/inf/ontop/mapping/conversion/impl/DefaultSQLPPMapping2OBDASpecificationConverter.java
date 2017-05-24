@@ -80,8 +80,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
 
-        ImmutableList<OBDAMappingAxiom> expandedMappingAxioms = normalizeMappingAxioms(initialPPMapping.getMappings(),
-                dbMetadata);
+        ImmutableList<OBDAMappingAxiom> expandedMappingAxioms = MetaMappingExpander.expand(
+                initialPPMapping.getMappings(), settings, dbMetadata, nativeQLFactory);
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)
         ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(expandedMappingAxioms, dbMetadata);
@@ -92,6 +92,43 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
          */
         return transformMapping(initialMappingRules, dbMetadata, optionalOntology, initialPPMapping.getMetadata(),
                 executorRegistry);
+    }
+
+    /**
+     * Makes use of the DB connection
+     */
+    private RDBMetadata extractDBMetadata(final OBDAModel ppMapping, Optional<DBMetadata> optionalDBMetadata,
+                                          Optional<File> constraintFile)
+            throws DBMetadataExtractionException, MetaMappingExpansionException {
+
+        try (Connection localConnection = createConnection()) {
+            return optionalDBMetadata.isPresent()
+                    ? dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata.get(), constraintFile)
+                    : dbMetadataExtractor.extract(ppMapping, localConnection, constraintFile);
+        }
+        /*
+         * Problem while creating the connection
+         */
+        catch (SQLException e) {
+            throw new DBMetadataExtractionException(e.getMessage());
+        }
+    }
+
+    /**
+     * May also views in the DBMetadata!
+     */
+    private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<OBDAMappingAxiom> mappingAxioms, RDBMetadata dbMetadata) {
+
+
+        ImmutableList<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappingAxioms, dbMetadata);
+
+        LOGGER.debug("Original mapping size: {}", unfoldingProgram.size());
+
+        // TODO: move it to the converter
+        // Normalizing language tags and equalities
+        normalizeMapping(unfoldingProgram);
+
+        return unfoldingProgram;
     }
 
     private OBDASpecification transformMapping(ImmutableList<CQIE> initialMappingRules,
@@ -123,67 +160,6 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox, ontology.getVocabulary());
     }
 
-    /**
-     * Makes use of the DB connection
-     */
-    private RDBMetadata extractDBMetadata(final OBDAModel ppMapping, Optional<DBMetadata> optionalDBMetadata,
-                                          Optional<File> constraintFile)
-            throws DBMetadataExtractionException, MetaMappingExpansionException {
-
-        try (Connection localConnection = createConnection()) {
-            return optionalDBMetadata.isPresent()
-                    ? dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata.get(), constraintFile)
-                    : dbMetadataExtractor.extract(ppMapping, localConnection, constraintFile);
-        }
-        /*
-         * Problem while creating the connection
-         */
-        catch (SQLException e) {
-            throw new DBMetadataExtractionException(e.getMessage());
-        }
-    }
-
-    private ImmutableList<OBDAMappingAxiom> normalizeMappingAxioms(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                                   final RDBMetadata dbMetadata)
-            throws MetaMappingExpansionException {
-
-        Collection<OBDAMappingAxiom> expandedMappingAxioms;
-
-        /*
-         * Expand the meta mapping
-         */
-        expandedMappingAxioms = MetaMappingExpander.expand(mappingAxioms, settings, dbMetadata, nativeQLFactory);
-
-       /*
-        *  TODO: do it later, on Datalog (before mapping saturation)
-        *  add sameAsInverse
-        */
-        Collection<OBDAMappingAxiom> normalizedMappingAxioms;
-        if (settings.isSameAsInMappingsEnabled())
-            normalizedMappingAxioms = MappingSameAs.addSameAsInverse(expandedMappingAxioms, nativeQLFactory);
-        else
-            normalizedMappingAxioms = expandedMappingAxioms;
-
-        return ImmutableList.copyOf(normalizedMappingAxioms);
-    }
-
-
-    /**
-     * May also views in the DBMetadata!
-     */
-    private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<OBDAMappingAxiom> mappingAxioms, RDBMetadata dbMetadata) {
-
-
-        ImmutableList<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappingAxioms, dbMetadata);
-
-        LOGGER.debug("Original mapping size: {}", unfoldingProgram.size());
-
-        // TODO: move it to the converter
-        // Normalizing language tags and equalities
-        normalizeMapping(unfoldingProgram);
-
-        return unfoldingProgram;
-    }
 
     private ImmutableList<CQIE> insertFacts(ImmutableList<CQIE> mapping, Ontology ontology,
                                             UriTemplateMatcher uriTemplateMatcher) {
@@ -209,7 +185,11 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         ImmutableList<CQIE> equivalenceFreeMappingRules = replaceEquivalences(mapping, tBox, ontology);
 
-        List<CQIE> canonicalMapping = new ArrayList<>(equivalenceFreeMappingRules);
+        ImmutableList<CQIE> sameAsEnrichedRules = settings.isSameAsInMappingsEnabled()
+                ? MappingSameAs.addSameAsInverse(equivalenceFreeMappingRules)
+                : equivalenceFreeMappingRules;
+
+        List<CQIE> canonicalMapping = new ArrayList<>(sameAsEnrichedRules);
         canonicalMapping = new CanonicalIRIRewriter().buildCanonicalIRIMappings(canonicalMapping);
 
         // Apply TMappings
@@ -302,7 +282,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             Predicate p = ca.getConcept().getPredicate();
             Function head = DATA_FACTORY.getFunction(p,
                     uriTemplateMatcher.generateURIFunction(c.getURI()));
-            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.<Function> emptyList());
+            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -318,7 +298,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             Function head = DATA_FACTORY.getFunction(p,
                     uriTemplateMatcher.generateURIFunction(s.getURI()),
                     uriTemplateMatcher.generateURIFunction(o.getURI()));
-            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.<Function> emptyList());
+            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -335,13 +315,16 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
             Function head;
             if(o.getLanguage()!=null){
-                head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral(o.getValue()),o.getLanguage()));
+                head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(
+                        DATA_FACTORY.getConstantLiteral(s.getURI())),
+                        DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral(o.getValue()),o.getLanguage()));
             }
             else {
 
-                head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(o, o.getType()));
+                head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(
+                        DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(o, o.getType()));
             }
-            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.<Function> emptyList());
+            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count ++;
@@ -363,10 +346,13 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
                 ValueConstant o = (ValueConstant) v;
 
                 if (o.getLanguage() != null) {
-                    head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral(o.getValue()), o.getLanguage()));
+                    head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(
+                            DATA_FACTORY.getConstantLiteral(s.getURI())),
+                            DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral(o.getValue()), o.getLanguage()));
                 } else {
 
-                    head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(o, o.getType()));
+                    head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(
+                            DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(o, o.getType()));
                 }
             } else {
 
@@ -518,7 +504,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      * Returns false if it detects that the variable is guaranteed not being null.
      */
     private static boolean isNullable(Variable variable, List<Function> bodyAtoms, DBMetadata metadata) {
-        /**
+        /*
          * NB: only looks for data atoms in a flat mapping (no algebraic (meta-)predicate such as LJ).
          */
         ImmutableList<Function> definingAtoms = bodyAtoms.stream()
@@ -532,7 +518,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
                 return true;
             case 1:
                 break;
-            /**
+            /*
              * Implicit joining conditions so not nullable.
              *
              * Rare.
@@ -543,17 +529,17 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         Function definingAtom = definingAtoms.get(0);
 
-        /**
+        /*
          * Look for non-null
          */
         if (hasNonNullColumnForVariable(definingAtom, variable, metadata))
             return false;
 
-        /**
+        /*
          * TODO: check filtering conditions
          */
 
-        /**
+        /*
          * Implicit equality inside the data atom.
          *
          * Rare.
@@ -564,7 +550,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             return false;
         }
 
-        /**
+        /*
          * No constraint found --> may be null
          */
         return true;
