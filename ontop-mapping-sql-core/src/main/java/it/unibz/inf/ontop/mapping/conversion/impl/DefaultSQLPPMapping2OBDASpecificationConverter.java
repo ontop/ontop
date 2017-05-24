@@ -192,16 +192,16 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         List<CQIE> canonicalMapping = new ArrayList<>(sameAsEnrichedRules);
         canonicalMapping = new CanonicalIRIRewriter().buildCanonicalIRIMappings(canonicalMapping);
 
-        // Apply TMappings
-        List<CQIE> saturatedMapping = applyTMappings(canonicalMapping, tBox, true, dbMetadata);
-
         /*
          * Adding NOT NULL conditions to the variables used in the head
          * of all mappings to preserve SQL-RDF semantics
          *
-         * TODO: do it before the mapping saturation (when converting the axioms into a Datalog rules)
+         * Historical note: it was (wrongly) done BEFORE the saturation
          */
-        addNOTNULLToMappings(saturatedMapping, dbMetadata);
+        addNOTNULLToMappings(canonicalMapping, dbMetadata);
+
+        // Apply TMappings
+        List<CQIE> saturatedMapping = applyTMappings(canonicalMapping, tBox, true, dbMetadata);
 
         if(LOGGER.isDebugEnabled()) {
             String finalMappings = Joiner.on("\n").join(saturatedMapping);
