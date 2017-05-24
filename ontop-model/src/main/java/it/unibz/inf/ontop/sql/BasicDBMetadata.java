@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -29,6 +31,8 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     private boolean isStillMutable;
     @Nullable
     private ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> uniqueConstraints;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadata.class);
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion, QuotedIDFactory idfac) {
         this(driverName, driverVersion, databaseProductName, databaseVersion, idfac, new HashMap<>(), new HashMap<>(),
@@ -89,7 +93,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
                 schema.put(noSchemaID, td);
             }
             else {
-                System.err.println("DUPLICATE TABLE NAMES, USE QUALIFIED NAMES:\n" + td + "\nAND\n" + schema.get(noSchemaID));
+                LOGGER.warn("DUPLICATE TABLE NAMES, USE QUALIFIED NAMES:\n" + td + "\nAND\n" + schema.get(noSchemaID));
                 //schema.remove(noSchemaID);
                 // TODO (ROMAN 8 Oct 2015): think of a better way of resolving ambiguities
             }
