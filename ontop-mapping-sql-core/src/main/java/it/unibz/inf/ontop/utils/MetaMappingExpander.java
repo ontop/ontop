@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
@@ -49,10 +50,7 @@ import net.sf.jsqlparser.statement.select.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
@@ -78,7 +76,10 @@ public class MetaMappingExpander {
 	 * @return
 	 * 		expanded normal mappings
 	 */
-	public static Collection<OBDAMappingAxiom> expand(Collection<OBDAMappingAxiom> mappings, Connection connection, DBMetadata metadata, NativeQueryLanguageComponentFactory nativeQLFactory) throws MetaMappingExpansionException {
+	public static Collection<OBDAMappingAxiom> expand(Collection<OBDAMappingAxiom> mappings,
+													  OntopMappingSQLSettings settings, DBMetadata metadata,
+													  NativeQueryLanguageComponentFactory nativeQLFactory)
+			throws MetaMappingExpansionException {
 
 		List<String> errorMessages = new LinkedList<>();
 
@@ -93,24 +94,27 @@ public class MetaMappingExpander {
 				String id = mapping.getId();
 				SourceQuery sourceQuery = mapping.getSourceQuery();
 
-				for (Function atom : mapping.getTargetQuery()) {
-					if (!atom.getFunctionSymbol().isTriplePredicate()) {
-						// for normal mappings, we do not need to expand it.
-						String newId = IDGenerator.getNextUniqueID(id + "#");
+				try (Connection connection = createConnection(settings)) {
 
-						OBDAMappingAxiom newMapping = nativeQLFactory.create(newId, sourceQuery, Collections.singletonList(atom));
+					for (Function atom : mapping.getTargetQuery()) {
+						if (!atom.getFunctionSymbol().isTriplePredicate()) {
+							// for normal mappings, we do not need to expand it.
+							String newId = IDGenerator.getNextUniqueID(id + "#");
 
-						expandedMappings.add(newMapping);
-					}
-					else {
-						try {
-							expandedMappings.addAll(instantiateMapping(connection, metadata, id, atom, sourceQuery.toString(), nativeQLFactory));
+							OBDAMappingAxiom newMapping = nativeQLFactory.create(newId, sourceQuery, Collections.singletonList(atom));
+
+							expandedMappings.add(newMapping);
+						} else {
+							try {
+								expandedMappings.addAll(instantiateMapping(connection, metadata, id, atom, sourceQuery.toString(), nativeQLFactory));
+							} catch (Exception e) {
+								log.warn("Parse exception, check no SQL reserved keywords have been used " + e.getMessage());
+								errorMessages.add(e.getMessage());
+							}
 						}
-						catch (Exception e) {
-							log.warn("Parse exception, check no SQL reserved keywords have been used " + e.getMessage());
-							errorMessages.add(e.getMessage());
-						}
 					}
+				} catch (SQLException e) {
+					throw new MetaMappingExpansionException(e);
 				}
 			}
 			else
@@ -387,5 +391,10 @@ public class MetaMappingExpander {
 			String uriTemplate = ((ValueConstant) templateTerm).getValue();
 			return URITemplates.format(uriTemplate, values);
 		}
+	}
+
+	private static Connection createConnection(OntopMappingSQLSettings settings) throws SQLException {
+		return DriverManager.getConnection(settings.getJdbcUrl(),
+				settings.getJdbcUser(), settings.getJdbcPassword());
 	}
 }
