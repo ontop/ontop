@@ -11,10 +11,14 @@ import java.util.Map;
 import java.util.Set;
 
 import it.unibz.inf.ontop.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CQContainmentCheckUnderLIDs.class);
 	
 	private final Map<CQIE,IndexedCQ> indexedCQcache = new HashMap<>();
 	
@@ -190,7 +194,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		for (int i = 0; i < databaseAtoms.size(); i++) {
 			Function atomToBeRemoved = databaseAtoms.get(i);
 			if (checkRedundant(db, groundTerms, atomToBeRemoved)) {
-				System.out.println("  REDUNDANT " + ++redundantCounter + ": " + atomToBeRemoved + " IN " + query);
+				LOGGER.warn("  REDUNDANT " + ++redundantCounter + ": " + atomToBeRemoved + " IN " + query);
 				query.getBody().remove(atomToBeRemoved);
 				databaseAtoms.remove(atomToBeRemoved);
 				i--;

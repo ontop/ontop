@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.mapping.conversion.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.MappingException;
-import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
+import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
@@ -20,7 +17,6 @@ import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 import it.unibz.inf.ontop.ontology.*;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -51,20 +47,6 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapping2OBDASpecificationConverter {
 
-    private static final OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
-
-    private static class DBMetadataAndMappingAxioms {
-        private final ImmutableList<OBDAMappingAxiom> axioms;
-        private final RDBMetadata dbMetadata;
-
-        private DBMetadataAndMappingAxioms(ImmutableList<OBDAMappingAxiom> axioms, RDBMetadata dbMetadata) {
-            this.axioms = axioms;
-            this.dbMetadata = dbMetadata;
-        }
-    }
-
-
-
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSQLPPMapping2OBDASpecificationConverter.class);
 
     private final OntopMappingSQLSettings settings;
@@ -94,40 +76,46 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         this.mappingNormalizer = mappingNormalizer;
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Override
     public OBDASpecification convert(final OBDAModel initialPPMapping, Optional<DBMetadata> optionalDBMetadata,
                                      Optional<Ontology> optionalOntology, Optional<File> constraintFile,
                                      ExecutorRegistry executorRegistry)
             throws DBMetadataExtractionException, MappingException {
 
+        RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
 
-        // NB: this method should disappear
-        final OBDAModel fixedPPMapping = fixMappingAxioms(initialPPMapping, optionalOntology);
+        ImmutableList<OBDAMappingAxiom> normalizedMappingAxioms = normalizeMappingAxioms(initialPPMapping.getMappings(),
+                dbMetadata);
 
         Ontology ontology = optionalOntology
                 //  extract ontology from the mapping if it does not exist
-                .orElseGet(() -> MappingVocabularyExtractor.extractOntology(fixedPPMapping));
+                .orElseGet(() -> MappingVocabularyExtractor.extractOntology(normalizedMappingAxioms));
+
+        /*
+         * TODO: move this code
+         *
+         *   - IRI or literal ambiguity detection --> remove or move to the MappingParser (probably useless now)
+         *   - Object/data property inconsistency between mapping axioms and the ontology
+         *       --> merge it with the "repair" step
+         */
+        final ImmutableList<OBDAMappingAxiom> fixedMappingAxioms = mappingVocabularyFixer.fixMappingAxioms(
+                normalizedMappingAxioms, ontology.getVocabulary());
 
         // TODO: extract it later (after creating rules)
         TBoxReasoner tBox = TBoxReasonerImpl.create(ontology, settings.isEquivalenceOptimizationEnabled());
 
         // NB: this will be moved away
-        OBDAModel simplifiedPPMapping = replaceEquivalences(fixedPPMapping, tBox, ontology);
+        ImmutableList<OBDAMappingAxiom> simplifiedMappingAxioms = replaceEquivalences(fixedMappingAxioms, tBox, ontology);
 
-        // TODO: in the future, should only extract the DBMetadata
-        DBMetadataAndMappingAxioms dbMetadataAndAxioms = extractDBMetadataAndNormalizeMappingAxioms(
-                simplifiedPPMapping, optionalDBMetadata, constraintFile);
-
-        RDBMetadata dbMetadata = dbMetadataAndAxioms.dbMetadata;
-
-        // NB: may also views in the DBMetadata (for non-understood SQL queries)
-        ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(dbMetadataAndAxioms.axioms, dbMetadata);
+        // NB: may also add views in the DBMetadata (for non-understood SQL queries)
+        ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(simplifiedMappingAxioms, dbMetadata);
         dbMetadata.freeze();
 
         /*
          * Transformations at the Datalog level
          */
-        return transformMapping(initialMappingRules, tBox, ontology, dbMetadata, fixedPPMapping.getMetadata(),
+        return transformMapping(initialMappingRules, tBox, ontology, dbMetadata, initialPPMapping.getMetadata(),
                 executorRegistry);
     }
 
@@ -136,20 +124,15 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      * TODO: do it later (on Datalog rules, not on OBDAMappingAxioms)
      *
      */
-    private OBDAModel replaceEquivalences(OBDAModel fixedPPMapping, TBoxReasoner tBox, Ontology ontology) {
+    private ImmutableList<OBDAMappingAxiom> replaceEquivalences(ImmutableList<OBDAMappingAxiom> mappingAxioms,
+                                                                TBoxReasoner tBox, Ontology ontology) {
         if (settings.isEquivalenceOptimizationEnabled()) {
-            MappingVocabularyValidator vocabularyValidator = new MappingVocabularyValidator(tBox, ontology.getVocabulary(),
-                    nativeQLFactory);
-            try {
-                return fixedPPMapping.newModel(vocabularyValidator.replaceEquivalences(
-                        fixedPPMapping.getMappings()));
-            } catch (DuplicateMappingException e) {
-                throw new IllegalStateException(
-                        "Bug: duplicated mapping produced after replacing the equivalences. \n" + e.getMessage());
-            }
+            MappingVocabularyValidator vocabularyValidator = new MappingVocabularyValidator(tBox,
+                    ontology.getVocabulary(), nativeQLFactory);
+            return vocabularyValidator.replaceEquivalences(mappingAxioms);
         }
         else
-            return fixedPPMapping;
+            return mappingAxioms;
     }
 
 
@@ -177,46 +160,16 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     }
 
     /**
-     * TODO: move this code
-     *
-     *   - IRI or literal ambiguity detection --> remove or move to the MappingParser (probably useless now)
-     *   - Object/data property inconsistency between mapping axioms and the ontology
-     *       --> merge it with the "repair" step
-     */
-    private OBDAModel fixMappingAxioms(OBDAModel initialPPMapping, Optional<Ontology> optionalOntology) {
-        if (optionalOntology.isPresent()) {
-            Ontology ontology = optionalOntology.get();
-            return mappingVocabularyFixer.fixOBDAModel(initialPPMapping, ontology.getVocabulary());
-        }
-        else {
-            //BC: Why are we not checking? Inconsistent processing
-            return initialPPMapping;
-        }
-
-    }
-
-
-    /**
      * Makes use of the DB connection
      */
-    private DBMetadataAndMappingAxioms extractDBMetadataAndNormalizeMappingAxioms(final OBDAModel fixedPPMapping,
-                                                                                  Optional<DBMetadata> optionalDBMetadata,
-                                                                                  Optional<File> constraintFile)
+    private RDBMetadata extractDBMetadata(final OBDAModel ppMapping, Optional<DBMetadata> optionalDBMetadata,
+                                          Optional<File> constraintFile)
             throws DBMetadataExtractionException, MetaMappingExpansionException {
 
         try (Connection localConnection = createConnection()) {
-
-            /*
-             * Extracts the DBMetadata
-             */
-            RDBMetadata dbMetadata = extractDBMetadata(fixedPPMapping, optionalDBMetadata, localConnection, constraintFile);
-            ImmutableList<OBDAMappingAxiom> mappingAxioms = fixedPPMapping.getMappings();
-
-            // TODO: move all this logic somewhere else (in several places)
-            ImmutableList<OBDAMappingAxiom> normalizedMappingAxioms = normalizeMappingAxioms(mappingAxioms,
-                    dbMetadata, localConnection);
-
-            return new DBMetadataAndMappingAxioms(normalizedMappingAxioms, dbMetadata);
+            return optionalDBMetadata.isPresent()
+                    ? dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata.get(), constraintFile)
+                    : dbMetadataExtractor.extract(ppMapping, localConnection, constraintFile);
         }
         /*
          * Problem while creating the connection
@@ -226,19 +179,19 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         }
     }
 
-
-
+    /**
+     * TODO: infer datatypes from the DBMetadata?
+     */
     private ImmutableList<OBDAMappingAxiom> normalizeMappingAxioms(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                                   final RDBMetadata dbMetadata, Connection localConnection)
+                                                                   final RDBMetadata dbMetadata)
             throws MetaMappingExpansionException {
 
-        /**
+        Collection<OBDAMappingAxiom> expandedMappingAxioms;
+
+        /*
          * Expand the meta mapping
-         *
-         * TODO: reimplement it to work on instances of the class Mapping (not on OBDAMappingAxioms).
          */
-        Collection<OBDAMappingAxiom> expandedMappingAxioms =
-            MetaMappingExpander.expand(mappingAxioms, localConnection, dbMetadata, nativeQLFactory);
+        expandedMappingAxioms = MetaMappingExpander.expand(mappingAxioms, settings, dbMetadata, nativeQLFactory);
 
        /*
         *  TODO: do it later, on Datalog (before mapping saturation)
@@ -663,22 +616,6 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
                 .filter(i -> arguments.get(i - 1).equals(variable))
                 .mapToObj(relation::getAttribute)
                 .anyMatch(att -> !att.canNull());
-    }
-
-
-
-    /**
-     * NB: also injects user-supplied constraints, i.e. primary
-     * and foreign keys not present in the database metadata.
-     *
-     */
-    private RDBMetadata extractDBMetadata(final OBDAModel fixedPPMapping,
-                                          Optional<DBMetadata> optionalDBMetadata, Connection localConnection,
-                                          Optional<File> constraintFile)
-            throws DBMetadataExtractionException {
-        return optionalDBMetadata.isPresent()
-                ? dbMetadataExtractor.extract(fixedPPMapping, localConnection, optionalDBMetadata.get(), constraintFile)
-                : dbMetadataExtractor.extract(fixedPPMapping, localConnection, constraintFile);
     }
 
     private Connection createConnection() throws SQLException {
