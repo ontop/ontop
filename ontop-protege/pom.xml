@@ -116,11 +116,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-reformulation-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>ontop-system-sql-owlapi</artifactId>
             <version>${project.version}</version>
         </dependency>
