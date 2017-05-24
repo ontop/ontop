@@ -653,7 +653,7 @@ public class RDBMetadataExtractionTools {
 					else {
 						builder = null; // do not add this foreign key 
 						                // because there is no table it refers to
-						System.err.println("Cannot find table: " + refId + " for FK " + currentName);
+						log.warn("Cannot find table: " + refId + " for FK " + currentName);
 					}
 				}
 				if (builder != null) {
