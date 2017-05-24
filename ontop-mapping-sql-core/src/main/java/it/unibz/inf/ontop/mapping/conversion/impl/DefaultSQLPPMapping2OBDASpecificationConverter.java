@@ -22,7 +22,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.*;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
@@ -44,13 +43,12 @@ import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapping2OBDASpecificationConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSQLPPMapping2OBDASpecificationConverter.class);
 
     private final OntopMappingSQLSettings settings;
-    private final MappingVocabularyFixer mappingVocabularyFixer;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final TMappingExclusionConfig tMappingExclusionConfig;
@@ -60,14 +58,12 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
     @Inject
     private DefaultSQLPPMapping2OBDASpecificationConverter(OntopMappingSQLSettings settings,
-                                                           MappingVocabularyFixer mappingVocabularyFixer,
                                                            NativeQueryLanguageComponentFactory nativeQLFactory,
                                                            TMappingExclusionConfig tMappingExclusionConfig,
                                                            Datalog2QueryMappingConverter mappingConverter,
                                                            SpecificationFactory specificationFactory,
                                                            MappingNormalizer mappingNormalizer) {
         this.settings = settings;
-        this.mappingVocabularyFixer = mappingVocabularyFixer;
         this.nativeQLFactory = nativeQLFactory;
         this.dbMetadataExtractor = nativeQLFactory.create();
         this.tMappingExclusionConfig = tMappingExclusionConfig;
@@ -76,7 +72,6 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         this.mappingNormalizer = mappingNormalizer;
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Override
     public OBDASpecification convert(final OBDAModel initialPPMapping, Optional<DBMetadata> optionalDBMetadata,
                                      Optional<Ontology> optionalOntology, Optional<File> constraintFile,
@@ -85,78 +80,18 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
 
-        ImmutableList<OBDAMappingAxiom> normalizedMappingAxioms = normalizeMappingAxioms(initialPPMapping.getMappings(),
-                dbMetadata);
-
-        Ontology ontology = optionalOntology
-                //  extract ontology from the mapping if it does not exist
-                .orElseGet(() -> MappingVocabularyExtractor.extractOntology(normalizedMappingAxioms));
-
-        /*
-         * TODO: move this code
-         *
-         *   - IRI or literal ambiguity detection --> remove or move to the MappingParser (probably useless now)
-         *   - Object/data property inconsistency between mapping axioms and the ontology
-         *       --> merge it with the "repair" step
-         */
-        final ImmutableList<OBDAMappingAxiom> fixedMappingAxioms = mappingVocabularyFixer.fixMappingAxioms(
-                normalizedMappingAxioms, ontology.getVocabulary());
-
-        // TODO: extract it later (after creating rules)
-        TBoxReasoner tBox = TBoxReasonerImpl.create(ontology, settings.isEquivalenceOptimizationEnabled());
-
-        // NB: this will be moved away
-        ImmutableList<OBDAMappingAxiom> simplifiedMappingAxioms = replaceEquivalences(fixedMappingAxioms, tBox, ontology);
+        ImmutableList<OBDAMappingAxiom> expandedMappingAxioms = MetaMappingExpander.expand(
+                initialPPMapping.getMappings(), settings, dbMetadata, nativeQLFactory);
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)
-        ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(simplifiedMappingAxioms, dbMetadata);
+        ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(expandedMappingAxioms, dbMetadata);
         dbMetadata.freeze();
 
         /*
          * Transformations at the Datalog level
          */
-        return transformMapping(initialMappingRules, tBox, ontology, dbMetadata, initialPPMapping.getMetadata(),
+        return transformMapping(initialMappingRules, dbMetadata, optionalOntology, initialPPMapping.getMetadata(),
                 executorRegistry);
-    }
-
-
-    /**
-     * TODO: do it later (on Datalog rules, not on OBDAMappingAxioms)
-     *
-     */
-    private ImmutableList<OBDAMappingAxiom> replaceEquivalences(ImmutableList<OBDAMappingAxiom> mappingAxioms,
-                                                                TBoxReasoner tBox, Ontology ontology) {
-        if (settings.isEquivalenceOptimizationEnabled()) {
-            MappingVocabularyValidator vocabularyValidator = new MappingVocabularyValidator(tBox,
-                    ontology.getVocabulary(), nativeQLFactory);
-            return vocabularyValidator.replaceEquivalences(mappingAxioms);
-        }
-        else
-            return mappingAxioms;
-    }
-
-
-    private OBDASpecification transformMapping(ImmutableList<CQIE> initialMappingRules,
-                                               TBoxReasoner tBox, Ontology ontology,
-                                               RDBMetadata dbMetadata, MappingMetadata mappingMetadata,
-                                               ExecutorRegistry executorRegistry) throws MappingException {
-
-        // TODO: replace equivalences here
-
-        // Adding data typing on the mapping axioms.
-        ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypesAndValidate(initialMappingRules, tBox, ontology, dbMetadata);
-
-        ImmutableList<CQIE> mappingRulesWithFacts = insertFacts(fullyTypedRules, ontology,
-                mappingMetadata.getUriTemplateMatcher());
-
-        ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, dbMetadata);
-
-        Mapping saturatedMapping = mappingConverter.convertMappingRules(saturatedMappingRules, dbMetadata,
-                executorRegistry, mappingMetadata);
-
-        Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
-
-        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox, ontology.getVocabulary());
     }
 
     /**
@@ -180,34 +115,6 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     }
 
     /**
-     * TODO: infer datatypes from the DBMetadata?
-     */
-    private ImmutableList<OBDAMappingAxiom> normalizeMappingAxioms(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                                   final RDBMetadata dbMetadata)
-            throws MetaMappingExpansionException {
-
-        Collection<OBDAMappingAxiom> expandedMappingAxioms;
-
-        /*
-         * Expand the meta mapping
-         */
-        expandedMappingAxioms = MetaMappingExpander.expand(mappingAxioms, settings, dbMetadata, nativeQLFactory);
-
-       /*
-        *  TODO: do it later, on Datalog (before mapping saturation)
-        *  add sameAsInverse
-        */
-        Collection<OBDAMappingAxiom> normalizedMappingAxioms;
-        if (settings.isSameAsInMappingsEnabled())
-            normalizedMappingAxioms = MappingSameAs.addSameAsInverse(expandedMappingAxioms, nativeQLFactory);
-        else
-            normalizedMappingAxioms = expandedMappingAxioms;
-
-        return ImmutableList.copyOf(normalizedMappingAxioms);
-    }
-
-
-    /**
      * May also views in the DBMetadata!
      */
     private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<OBDAMappingAxiom> mappingAxioms, RDBMetadata dbMetadata) {
@@ -223,6 +130,36 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         return unfoldingProgram;
     }
+
+    private OBDASpecification transformMapping(ImmutableList<CQIE> initialMappingRules,
+                                               RDBMetadata dbMetadata, Optional<Ontology> optionalOntology,
+                                               MappingMetadata mappingMetadata,
+                                               ExecutorRegistry executorRegistry) throws MappingException {
+
+        Ontology ontology = optionalOntology
+                //  extract ontology from the mapping if it does not exist
+                .orElseGet(() -> MappingVocabularyExtractor.extractOntology(initialMappingRules.stream()
+                        .map(CQIE::getHead)));
+
+        TBoxReasoner tBox = TBoxReasonerImpl.create(ontology, settings.isEquivalenceOptimizationEnabled());
+
+        // Adding data typing on the mapping axioms.
+        ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypesAndValidate(initialMappingRules, tBox, ontology, dbMetadata);
+
+        ImmutableList<CQIE> mappingRulesWithFacts = insertFacts(fullyTypedRules, ontology,
+                mappingMetadata.getUriTemplateMatcher());
+
+        ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, ontology,
+                dbMetadata);
+
+        Mapping saturatedMapping = mappingConverter.convertMappingRules(saturatedMappingRules, dbMetadata,
+                executorRegistry, mappingMetadata);
+
+        Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
+
+        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox, ontology.getVocabulary());
+    }
+
 
     private ImmutableList<CQIE> insertFacts(ImmutableList<CQIE> mapping, Ontology ontology,
                                             UriTemplateMatcher uriTemplateMatcher) {
@@ -243,39 +180,58 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     }
 
 
-    private ImmutableList<CQIE> saturateMapping(ImmutableList<CQIE> mapping, TBoxReasoner tBox, RDBMetadata dbMetadata) {
-        List<CQIE> mutableMapping = new ArrayList<>(mapping);
+    private ImmutableList<CQIE> saturateMapping(ImmutableList<CQIE> mapping, TBoxReasoner tBox, Ontology ontology,
+                                                RDBMetadata dbMetadata) {
 
-        mutableMapping = new CanonicalIRIRewriter().buildCanonicalIRIMappings(mutableMapping);
+        ImmutableList<CQIE> equivalenceFreeMappingRules = replaceEquivalences(mapping, tBox, ontology);
 
-        // Apply TMappings
-        mutableMapping = applyTMappings(mutableMapping, tBox, true, dbMetadata);
+        ImmutableList<CQIE> sameAsEnrichedRules = settings.isSameAsInMappingsEnabled()
+                ? MappingSameAs.addSameAsInverse(equivalenceFreeMappingRules)
+                : equivalenceFreeMappingRules;
+
+        List<CQIE> canonicalMapping = new ArrayList<>(sameAsEnrichedRules);
+        canonicalMapping = new CanonicalIRIRewriter().buildCanonicalIRIMappings(canonicalMapping);
 
         /*
          * Adding NOT NULL conditions to the variables used in the head
          * of all mappings to preserve SQL-RDF semantics
          *
-         * TODO: do it before the mapping saturation (when converting the axioms into a Datalog rules)
+         * Historical note: it was (wrongly) done BEFORE the saturation
          */
-        addNOTNULLToMappings(mutableMapping, dbMetadata);
+        addNOTNULLToMappings(canonicalMapping, dbMetadata);
+
+        // Apply TMappings
+        List<CQIE> saturatedMapping = applyTMappings(canonicalMapping, tBox, true, dbMetadata);
+
+        // A second time is needed before the optimization applied after mapping saturation is NOT NULL-AWARE...
+        addNOTNULLToMappings(saturatedMapping, dbMetadata);
 
         if(LOGGER.isDebugEnabled()) {
-            String finalMappings = Joiner.on("\n").join(mutableMapping);
-            LOGGER.debug("Set of mappings before canonical IRI rewriting: \n {}", finalMappings);
+            String finalMappings = Joiner.on("\n").join(saturatedMapping);
+            LOGGER.debug("Set of mappings after saturation: \n {}", finalMappings);
         }
 
         // Adding "triple(x,y,z)" mappings for support of unbounded
         // predicates and variables as class names (implemented in the
         // sparql translator)
-        mutableMapping.addAll(generateTripleMappings(mutableMapping));
+        saturatedMapping.addAll(generateTripleMappings(saturatedMapping));
 
         if (LOGGER.isDebugEnabled())
-            LOGGER.debug("Final set of mappings: \n {}", Joiner.on("\n").join(mutableMapping));
+            LOGGER.debug("Final set of mappings: \n {}", Joiner.on("\n").join(saturatedMapping));
 
-        return ImmutableList.copyOf(mutableMapping);
+        return ImmutableList.copyOf(saturatedMapping);
     }
 
-
+    private ImmutableList<CQIE> replaceEquivalences(ImmutableList<CQIE> mappingRules,
+                                                    TBoxReasoner tBox, Ontology ontology) {
+        if (settings.isEquivalenceOptimizationEnabled()) {
+            MappingVocabularyValidator vocabularyValidator = new MappingVocabularyValidator(tBox,
+                    ontology.getVocabulary());
+            return vocabularyValidator.replaceEquivalences(mappingRules);
+        }
+        else
+            return mappingRules;
+    }
 
     /**
      * Normalize language tags (make them lower-case) and equalities
@@ -329,7 +285,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             Predicate p = ca.getConcept().getPredicate();
             Function head = DATA_FACTORY.getFunction(p,
                     uriTemplateMatcher.generateURIFunction(c.getURI()));
-            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.<Function> emptyList());
+            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -345,7 +301,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             Function head = DATA_FACTORY.getFunction(p,
                     uriTemplateMatcher.generateURIFunction(s.getURI()),
                     uriTemplateMatcher.generateURIFunction(o.getURI()));
-            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.<Function> emptyList());
+            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -362,13 +318,16 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
             Function head;
             if(o.getLanguage()!=null){
-                head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral(o.getValue()),o.getLanguage()));
+                head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(
+                        DATA_FACTORY.getConstantLiteral(s.getURI())),
+                        DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral(o.getValue()),o.getLanguage()));
             }
             else {
 
-                head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(o, o.getType()));
+                head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(
+                        DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(o, o.getType()));
             }
-            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.<Function> emptyList());
+            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count ++;
@@ -390,10 +349,13 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
                 ValueConstant o = (ValueConstant) v;
 
                 if (o.getLanguage() != null) {
-                    head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral(o.getValue()), o.getLanguage()));
+                    head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(
+                            DATA_FACTORY.getConstantLiteral(s.getURI())),
+                            DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral(o.getValue()), o.getLanguage()));
                 } else {
 
-                    head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(o, o.getType()));
+                    head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(
+                            DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(o, o.getType()));
                 }
             } else {
 
@@ -420,9 +382,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      * Then, validates that the use of properties in the mapping is compliant with the ontology and the standard vocabularies
      *  (e.g., owl:sameAs, obda:canonicalIRI)
      *
-     * TODO: split these two different concerns
-     *
-     * --> Should be moved to the MappingExtraction part
+     * TODO: split these two different concerns (validation could reuse some logic of the MappingVocabularyFixer)
      *
      */
     public ImmutableList<CQIE> inferMissingDataTypesAndValidate(ImmutableList<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,
@@ -441,10 +401,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     /***
      * Adding NOT NULL conditions to the variables used in the head
      * of all mappings to preserve SQL-RDF semantics
-     * @param unfoldingProgram
-     * @param metadata
+     *
      */
-
     private static void addNOTNULLToMappings(List<CQIE> unfoldingProgram, DBMetadata metadata) {
 
         for (CQIE mapping : unfoldingProgram) {
@@ -549,7 +507,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      * Returns false if it detects that the variable is guaranteed not being null.
      */
     private static boolean isNullable(Variable variable, List<Function> bodyAtoms, DBMetadata metadata) {
-        /**
+        /*
          * NB: only looks for data atoms in a flat mapping (no algebraic (meta-)predicate such as LJ).
          */
         ImmutableList<Function> definingAtoms = bodyAtoms.stream()
@@ -563,7 +521,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
                 return true;
             case 1:
                 break;
-            /**
+            /*
              * Implicit joining conditions so not nullable.
              *
              * Rare.
@@ -574,17 +532,17 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         Function definingAtom = definingAtoms.get(0);
 
-        /**
+        /*
          * Look for non-null
          */
         if (hasNonNullColumnForVariable(definingAtom, variable, metadata))
             return false;
 
-        /**
+        /*
          * TODO: check filtering conditions
          */
 
-        /**
+        /*
          * Implicit equality inside the data atom.
          *
          * Rare.
@@ -595,7 +553,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             return false;
         }
 
-        /**
+        /*
          * No constraint found --> may be null
          */
         return true;
