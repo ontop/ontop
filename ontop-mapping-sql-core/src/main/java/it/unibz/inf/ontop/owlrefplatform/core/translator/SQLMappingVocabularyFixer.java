@@ -238,7 +238,9 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
         Function newatom;
         if (arguments.size() == 1) {
             Term t0 = arguments.get(0);
-            if ((t0 instanceof Function) && ((Function)t0).getFunctionSymbol() instanceof URITemplatePredicate) {
+            if ((t0 instanceof Function) && (
+                    (((Function)t0).getFunctionSymbol() instanceof URITemplatePredicate)
+                    || (((Function)t0).getFunctionSymbol() instanceof BNodePredicate))) {
                 newatom = DATA_FACTORY.getFunction(predicate, arguments.get(0));
             } else {
                 String message = String.format("" +
@@ -252,13 +254,16 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
         } else if (arguments.size() == 2) {
 
             Term t0 = arguments.get(0);
-            if ((t0 instanceof Function) && ((Function) t0).getFunctionSymbol() instanceof URITemplatePredicate) {
+            if ((t0 instanceof Function) && ((((Function) t0).getFunctionSymbol() instanceof URITemplatePredicate)
+                    || (((Function) t0).getFunctionSymbol() instanceof BNodePredicate))) {
 
                 //object property
                 if (predicate.isObjectProperty()) {
 
                     Term t1 = arguments.get(1);
-                    if ((t1 instanceof Function) && ((Function) t1).getFunctionSymbol() instanceof URITemplatePredicate) {
+                    if ((t1 instanceof Function) && (
+                            (((Function) t1).getFunctionSymbol() instanceof URITemplatePredicate)
+                            || (((Function) t1).getFunctionSymbol() instanceof BNodePredicate) )) {
                         newatom = DATA_FACTORY.getFunction(predicate, arguments.get(0), arguments.get(1));
 
                     } else {
