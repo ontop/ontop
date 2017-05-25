@@ -143,21 +143,22 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         TBoxReasoner tBox = TBoxReasonerImpl.create(ontology, settings.isEquivalenceOptimizationEnabled());
 
+        ImmutableOntologyVocabulary vocabulary = ontology.getVocabulary();
+
         // Adding data typing on the mapping axioms.
-        ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypesAndValidate(initialMappingRules, tBox, ontology, dbMetadata);
+        ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypesAndValidate(initialMappingRules, tBox, vocabulary, dbMetadata);
 
         ImmutableList<CQIE> mappingRulesWithFacts = insertFacts(fullyTypedRules, ontology,
                 mappingMetadata.getUriTemplateMatcher());
 
-        ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, ontology,
-                dbMetadata);
+        ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, vocabulary, dbMetadata);
 
         Mapping saturatedMapping = mappingConverter.convertMappingRules(saturatedMappingRules, dbMetadata,
                 executorRegistry, mappingMetadata);
 
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
-        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox, ontology.getVocabulary());
+        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox, vocabulary);
     }
 
 
@@ -180,10 +181,11 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     }
 
 
-    private ImmutableList<CQIE> saturateMapping(ImmutableList<CQIE> mapping, TBoxReasoner tBox, Ontology ontology,
+    private ImmutableList<CQIE> saturateMapping(ImmutableList<CQIE> mapping, TBoxReasoner tBox,
+                                                ImmutableOntologyVocabulary vocabulary,
                                                 RDBMetadata dbMetadata) {
 
-        ImmutableList<CQIE> equivalenceFreeMappingRules = replaceEquivalences(mapping, tBox, ontology);
+        ImmutableList<CQIE> equivalenceFreeMappingRules = replaceEquivalences(mapping, tBox, vocabulary);
 
         ImmutableList<CQIE> sameAsEnrichedRules = settings.isSameAsInMappingsEnabled()
                 ? MappingSameAs.addSameAsInverse(equivalenceFreeMappingRules)
@@ -223,10 +225,9 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     }
 
     private ImmutableList<CQIE> replaceEquivalences(ImmutableList<CQIE> mappingRules,
-                                                    TBoxReasoner tBox, Ontology ontology) {
+                                                    TBoxReasoner tBox, ImmutableOntologyVocabulary vocabulary) {
         if (settings.isEquivalenceOptimizationEnabled()) {
-            MappingVocabularyValidator vocabularyValidator = new MappingVocabularyValidator(tBox,
-                    ontology.getVocabulary());
+            MappingVocabularyValidator vocabularyValidator = new MappingVocabularyValidator(tBox, vocabulary);
             return vocabularyValidator.replaceEquivalences(mappingRules);
         }
         else
@@ -386,9 +387,10 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      *
      */
     public ImmutableList<CQIE> inferMissingDataTypesAndValidate(ImmutableList<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,
-                                                       Ontology ontology, DBMetadata metadata) throws MappingException {
+                                                       ImmutableOntologyVocabulary vocabulary, DBMetadata metadata)
+            throws MappingException {
 
-        VocabularyValidator vocabularyValidator = new VocabularyValidator(tBoxReasoner, ontology.getVocabulary());
+        VocabularyValidator vocabularyValidator = new VocabularyValidator(tBoxReasoner, vocabulary);
 
         MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata, tBoxReasoner, vocabularyValidator);
         for (CQIE rule : unfoldingProgram) {
