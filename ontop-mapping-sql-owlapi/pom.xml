@@ -7,23 +7,18 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>ontop-system-sql-owlapi</artifactId>
+    <artifactId>ontop-mapping-sql-owlapi</artifactId>
     <packaging>jar</packaging>
-    <name>ontop-system-sql-owlapi</name>
+    <name>ontop-mapping-sql-owlapi</name>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-system-sql</artifactId>
+            <artifactId>ontop-mapping-sql-all</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-mapping-sql-owlapi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-system-owlapi</artifactId>
+            <artifactId>ontop-mapping-owlapi</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -71,9 +66,12 @@
             <artifactId>rdf4j-queryparser-sparql</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <groupId>net.sourceforge.owlapi</groupId>
+            <artifactId>owlapi-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.owlapi</groupId>
+            <artifactId>owlapi-apibinding</artifactId>
         </dependency>
     </dependencies>
 
