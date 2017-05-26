@@ -13,12 +13,12 @@ public interface OntopOBDASpecificationConfiguration extends OntopOBDAConfigurat
      * TODO: is it necessary?
      *
      */
-    Optional<OBDASpecification> loadSpecification() throws IOException, OBDASpecificationException;
+    Optional<OBDASpecification> loadSpecification() throws OBDASpecificationException;
 
     /**
      * Only call it if you are sure that mapping assertions have been provided
      */
-    default OBDASpecification loadProvidedSpecification() throws IOException, OBDASpecificationException {
+    default OBDASpecification loadProvidedSpecification() throws OBDASpecificationException {
         return loadSpecification()
                 .orElseThrow(() -> new IllegalStateException("No OBDA specification has been provided. " +
                         "Do not call this method unless you are sure of the specification provision."));

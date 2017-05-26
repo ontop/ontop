@@ -150,7 +150,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			/**
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */
-		} catch (IOException | OBDASpecificationException e) {
+		} catch (OBDASpecificationException e) {
 			throw new IllegalConfigurationException(e.getMessage(), owlConfiguration);
 		}
 
