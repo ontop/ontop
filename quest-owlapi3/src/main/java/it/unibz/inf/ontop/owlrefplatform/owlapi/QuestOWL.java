@@ -146,7 +146,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		this.engineFactory = injector.getInstance(OntopEngineFactory.class);
 
 		try {
-			obdaSpecification = ontopConfiguration.loadProvidedSpecification();
+			obdaSpecification = ontopConfiguration.loadSpecification();
 			/**
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.exception.MissingInputMappingException;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
@@ -78,7 +79,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
      * However, the expected usage is to use the other method loadSpecification(...).
      */
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws OBDASpecificationException {
+    public OBDASpecification loadSpecification() throws OBDASpecificationException {
         return loadSpecification(
                 Optional::empty,
                 Optional::empty,
@@ -89,7 +90,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                 );
     }
 
-    Optional<OBDASpecification> loadSpecification(OntologySupplier ontologySupplier,
+    OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
                                                   Supplier<Optional<PreProcessedMapping>> ppMappingSupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
@@ -109,8 +110,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Optional<PreProcessedMapping> optionalPPMapping = ppMappingSupplier.get();
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();
-            return Optional.of(extractor.extract(ppMapping, optionalMetadata, optionalOntology, optionalConstraintFile,
-                    getExecutorRegistry()));
+            return extractor.extract(ppMapping, optionalMetadata, optionalOntology, optionalConstraintFile,
+                    getExecutorRegistry());
         }
 
         /*
@@ -119,8 +120,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Optional<File> optionalMappingFile = mappingFileSupplier.get();
         if (optionalMappingFile.isPresent()) {
             File mappingFile = optionalMappingFile.get();
-            return Optional.of(extractor.extract(mappingFile, optionalMetadata, optionalOntology, optionalConstraintFile,
-                    getExecutorRegistry()));
+            return extractor.extract(mappingFile, optionalMetadata, optionalOntology, optionalConstraintFile,
+                    getExecutorRegistry());
         }
 
         /*
@@ -129,8 +130,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Optional<Reader> optionalMappingReader = mappingReaderSupplier.get();
         if (optionalMappingReader.isPresent()) {
             Reader mappingReader = optionalMappingReader.get();
-            return Optional.of(extractor.extract(mappingReader, optionalMetadata, optionalOntology,
-                    optionalConstraintFile, getExecutorRegistry()));
+            return extractor.extract(mappingReader, optionalMetadata, optionalOntology,
+                    optionalConstraintFile, getExecutorRegistry());
         }
 
         /*
@@ -139,11 +140,11 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Optional<Model> optionalMappingGraph = mappingGraphSupplier.get();
         if (optionalMappingGraph.isPresent()) {
             Model mappingGraph = optionalMappingGraph.get();
-            return Optional.of(extractor.extract(mappingGraph, optionalMetadata, optionalOntology,
-                    optionalConstraintFile, getExecutorRegistry()));
+            return extractor.extract(mappingGraph, optionalMetadata, optionalOntology,
+                    optionalConstraintFile, getExecutorRegistry());
         }
 
-        return Optional.empty();
+        throw new MissingInputMappingException();
     }
 
     protected Stream<Module> buildGuiceModules() {
