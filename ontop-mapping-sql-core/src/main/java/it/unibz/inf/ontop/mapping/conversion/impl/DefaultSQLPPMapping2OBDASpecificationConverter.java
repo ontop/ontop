@@ -176,7 +176,6 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         return addAssertionsAsFacts(mapping, ontology.getClassAssertions(),
                 ontology.getObjectPropertyAssertions(), ontology.getDataPropertyAssertions(), annotationAssertions,
                 uriTemplateMatcher);
-
     }
 
 

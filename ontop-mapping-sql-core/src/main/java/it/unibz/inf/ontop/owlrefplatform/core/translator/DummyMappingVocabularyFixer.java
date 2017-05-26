@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
  * Fixes nothing.
  *
  */
+@Deprecated
 public class DummyMappingVocabularyFixer implements MappingVocabularyFixer {
     /**
      * Returns the same model (fixes nothing).
