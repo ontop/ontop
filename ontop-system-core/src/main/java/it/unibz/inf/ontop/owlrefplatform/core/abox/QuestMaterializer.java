@@ -81,7 +81,7 @@ public class QuestMaterializer {
 
 	public QuestMaterializer(@Nonnull OntopSystemConfiguration configuration,
 							 @Nonnull ImmutableSet<Predicate> selectedVocabulary,
-							 boolean doStreamResults) throws IOException, OBDASpecificationException {
+							 boolean doStreamResults) throws OBDASpecificationException {
 
 		this.doStreamResults = doStreamResults;
 
