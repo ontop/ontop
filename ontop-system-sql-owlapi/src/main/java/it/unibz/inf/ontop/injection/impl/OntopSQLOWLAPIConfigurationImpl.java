@@ -34,7 +34,7 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
     }
 
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws OBDASpecificationException {
+    public OBDASpecification loadSpecification() throws OBDASpecificationException {
         return loadSpecification(mappingOWLConfiguration::loadOntology);
     }
 

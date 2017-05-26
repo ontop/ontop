@@ -90,7 +90,7 @@ public class QuestMaterializer {
 		Injector injector = configuration.getInjector();
 		OntopEngineFactory engineFactory = injector.getInstance(OntopEngineFactory.class);
 
-		this.queryEngine = engineFactory.create(configuration.loadProvidedSpecification(),
+		this.queryEngine = engineFactory.create(configuration.loadSpecification(),
 				configuration.getExecutorRegistry());
 		this.inputQueryFactory = injector.getInstance(InputQueryFactory.class);
 	}
@@ -103,7 +103,7 @@ public class QuestMaterializer {
 		Injector injector = configuration.getInjector();
 		OntopEngineFactory engineFactory = injector.getInstance(OntopEngineFactory.class);
 
-		OBDASpecification obdaSpecification = configuration.loadProvidedSpecification();
+		OBDASpecification obdaSpecification = configuration.loadSpecification();
 
 		this.selectedVocabulary = extractVocabulary(obdaSpecification.getVocabulary());
 		this.queryEngine = engineFactory.create(obdaSpecification, configuration.getExecutorRegistry());
