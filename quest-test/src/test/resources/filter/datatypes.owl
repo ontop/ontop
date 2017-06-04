@@ -1,0 +1,389 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE Ontology [
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY xml "http://www.w3.org/XML/1998/namespace" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://ontop.inf.unibz.it/test/datatypes"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     ontologyIRI="http://ontop.inf.unibz.it/test/datatypes">
+    <Prefix name="" IRI="http://ontop.inf.unibz.it/test/datatypes#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Declaration>
+        <Class IRI="#Row"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasBigInt"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasBigSerial"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasBinary"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasBinaryType"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasBinaryVarying"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasBit"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasBlob"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasBoolean"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasBooleanType"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasChar"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasCharacter"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasCharacterType"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasDate"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasDateTime"/>
+    </Declaration>
+     <Declaration>
+            <DataProperty IRI="#hasDateTime2"/>
+        </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasDateTimeString"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasDateTimeType"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasDec"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasDecimal"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasDouble"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasEnum"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasFloat"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasInt"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasInteger"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasInterval"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasLongBlob"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasLongText"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasMediumBlob"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasMediumInt"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasMediumText"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasNChar"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasNCharVarying"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasNVarChar2"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasName"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasNumber"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasNumeric"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasNumericType"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasReal"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasSerial"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasSet"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasSmallInt"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasText"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasTime"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasTimeTZ"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasTimestamp"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasTimestampString"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasTimestampTZ"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasTimestampTZString"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasTinyBlob"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasTinyInt"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasTinyText"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasVarBinary"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasVarChar"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasVarChar2"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasYear"/>
+    </Declaration>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasBigInt"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasBigSerial"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasBinary"/>
+        <DataProperty IRI="#hasBinaryType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasBinaryVarying"/>
+        <DataProperty IRI="#hasBinaryType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasBit"/>
+        <DataProperty IRI="#hasBooleanType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasBlob"/>
+        <DataProperty IRI="#hasBinaryType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasBoolean"/>
+        <DataProperty IRI="#hasBooleanType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasChar"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasCharacter"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasDate"/>
+        <DataProperty IRI="#hasDateTimeType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasDateTime"/>
+        <DataProperty IRI="#hasDateTimeType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+         <DataProperty IRI="#hasDateTime2"/>
+       <DataProperty IRI="#hasDateTimeType"/>
+    </SubDataPropertyOf>
+     <SubDataPropertyOf>
+        <DataProperty IRI="#hasDateTimeString"/>
+        <DataProperty abbreviatedIRI="owl:topDataProperty"/>
+     </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasDec"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasDecimal"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasDouble"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasEnum"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasFloat"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasInt"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasInteger"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasInterval"/>
+        <DataProperty IRI="#hasDateTimeType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasLongBlob"/>
+        <DataProperty IRI="#hasBinaryType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasLongText"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasMediumBlob"/>
+        <DataProperty IRI="#hasBinaryType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasMediumInt"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasMediumText"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasNChar"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasNCharVarying"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasNVarChar2"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasName"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasNumber"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasNumeric"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasReal"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasSerial"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasSet"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasSmallInt"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasText"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasTime"/>
+        <DataProperty IRI="#hasDateTimeType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasTimeTZ"/>
+        <DataProperty IRI="#hasDateTimeType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasTimestamp"/>
+        <DataProperty IRI="#hasDateTimeType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasTimestampTZ"/>
+        <DataProperty IRI="#hasDateTimeType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasTinyBlob"/>
+        <DataProperty IRI="#hasBinaryType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasTinyInt"/>
+        <DataProperty IRI="#hasNumericType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasTinyText"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasVarBinary"/>
+        <DataProperty IRI="#hasBinaryType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasVarChar"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasVarChar2"/>
+        <DataProperty IRI="#hasCharacterType"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasYear"/>
+        <DataProperty IRI="#hasDateTimeType"/>
+    </SubDataPropertyOf>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 3.2.3.1824) http://owlapi.sourceforge.net -->
+
