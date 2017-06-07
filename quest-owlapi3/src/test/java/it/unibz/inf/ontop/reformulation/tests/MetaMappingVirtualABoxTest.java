@@ -27,8 +27,6 @@ import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,11 +155,11 @@ public class MetaMappingVirtualABoxTest {
         ) {
             assertTrue(rs2.nextRow());
 			OWLObject ind1 = rs2.getOWLObject("x");
-            //OWLIndividual ind2 = rs.getOWLIndividual("y");
-			OWLLiteral val = rs2.getOWLLiteral("y");
+            OWLObject ind2 = rs2.getOWLObject("y");
+			//OWLLiteral val = rs2.getOWLLiteral("y");
             assertEquals("<uri1>", ind1.toString());
-            //assertEquals("<uri1>", ind2.toString());
-            assertEquals("\"A\"^^xsd:string", ToStringRenderer.getInstance().getRendering(val));
+            assertEquals("<A>", ind2.toString());
+            //assertEquals("\"A\"^^xsd:string", ToStringRenderer.getInstance().getRendering(val));
         }
 	}
 

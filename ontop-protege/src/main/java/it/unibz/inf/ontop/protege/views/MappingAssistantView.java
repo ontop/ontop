@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.views;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
@@ -53,7 +53,8 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
     @Override
     protected void initialiseOWLView() throws Exception {
 
-        Injector defaultInjector = OntopMappingSQLAllConfiguration.defaultBuilder().build().getInjector();
+        OntopSQLOWLAPIConfiguration defaultConfiguration = OntopSQLOWLAPIConfiguration.defaultBuilder().build();
+        Injector defaultInjector = defaultConfiguration.getInjector();
         NativeQueryLanguageComponentFactory nativeQLFactory = defaultInjector.getInstance(
                 NativeQueryLanguageComponentFactory.class);
 
@@ -62,7 +63,8 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
 
         activeOBDAModel = obdaModelManager.getActiveOBDAModelWrapper();
 
-        MappingAssistantPanel queryPanel = new MappingAssistantPanel(activeOBDAModel, nativeQLFactory);
+        MappingAssistantPanel queryPanel = new MappingAssistantPanel(activeOBDAModel, nativeQLFactory,
+                defaultConfiguration.getSettings());
 
         queryPanel.setBorder(new TitledBorder("SQL Query Editor"));
 

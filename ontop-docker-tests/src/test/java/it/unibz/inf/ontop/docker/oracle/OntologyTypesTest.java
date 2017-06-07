@@ -100,9 +100,9 @@ public class OntologyTypesTest {
 		while (rs.nextRow()) {
 			count++;
 			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + rs.getOWLObject(i));
-				System.out.print(" ");
+				log.info(rs.getSignature().get(i-1));
+				log.info("=" + rs.getOWLObject(i));
+				log.info(" ");
 			}
 			System.out.println();
 		}
