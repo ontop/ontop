@@ -60,10 +60,11 @@ public class ProjectionShrinkingOptimizerImpl implements ProjectionShrinkingOpti
             } catch (EmptyQueryException e) {
                 throw new IllegalStateException("The projection shrinker should not empty the query");
             }
-            focusNode = optimizationResults.getOptionalNewNode().orElseThrow(
+
+            focusNode = optimizationResults.getNewNodeOrReplacingChild().orElseThrow(
                     () -> new IllegalStateException("A replacing node should be generated"));
         }
-        for(QueryNode childNode: query.getChildren(focusNode)) {
+        for (QueryNode childNode : query.getChildren(focusNode)) {
             query = optimizeSubtree(childNode, query, retainedVariables);
         }
         return query;

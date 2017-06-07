@@ -64,7 +64,7 @@ public class CompanyTest  {
 	@Before
 	public void setUp() throws Exception {
 
-		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questjunitdb","fish", "fish");
+		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questjunitdb","sa", "");
 		java.sql.Statement s = sqlConnection.createStatement();
 		String text = new Scanner( new File("src/test/resources/optional/company-h2.sql") ).useDelimiter("\\A").next();
 		s.execute(text);

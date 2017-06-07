@@ -248,16 +248,16 @@ public abstract class AbstractVirtualModeTest extends TestCase {
                 * Print the query summary 
                 */
         String sqlQuery = ((SQLExecutableQuery) st.getExecutableQuery(query)).getSQL();
-        System.out.println();
-        System.out.println("The input SPARQL query:");
-        System.out.println("=======================");
-        System.out.println(query);
-        System.out.println();
-        System.out.println("The output SQL query:");
-        System.out.println("=====================");
-        System.out.println(sqlQuery);
-        System.out.println("Query Execution Time:");
-        System.out.println("=====================");
-        System.out.println((t2-t1) + "ms");
+        log.info("");
+        log.info("The input SPARQL query:");
+        log.info("=======================");
+        log.info(query);
+        log.info("");
+        log.info("The output SQL query:");
+        log.info("=====================");
+        log.info(sqlQuery);
+        log.info("Query Execution Time:");
+        log.info("=====================");
+        log.info((t2-t1) + "ms");
     }
 }

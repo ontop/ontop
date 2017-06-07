@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLSettings;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
@@ -84,9 +85,12 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
     private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
+	private final OntopQueryAnsweringSQLSettings settings;
 
-    public MappingAssistantPanel(OBDAModelWrapper model, NativeQueryLanguageComponentFactory nativeQLFactory) {
+	public MappingAssistantPanel(OBDAModelWrapper model, NativeQueryLanguageComponentFactory nativeQLFactory,
+								 OntopQueryAnsweringSQLSettings settings) {
 		obdaModel = model;
+		this.settings = settings;
 		prefixManager = obdaModel.getPrefixManager();
         this.nativeQLFactory = nativeQLFactory;
 		initComponents();
@@ -984,7 +988,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 //                        //TODO: find a way to get the current preferences. Necessary if an third-party adapter should be used.
 //						OntopStandaloneSQLSettings defaultPreferences = OntopSQLOWLAPIConfiguration.defaultBuilder().build().getSettings();
-						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "");
+						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "",
+								settings);
 						String sqlString = txtQueryEditor.getText();
 
 						int rowCount = fetchSize();
