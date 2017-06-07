@@ -160,7 +160,7 @@ public class QuestMaterializer {
 		preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
 		questInstance = new Quest(ontology, this.model, preferences);
-		questInstance.setQueryingAnnotationsInOntology(true);
+		questInstance.setQueryingAnnotationsInOntology(false);
 
 		questInstance.setupRepository();
 	}
