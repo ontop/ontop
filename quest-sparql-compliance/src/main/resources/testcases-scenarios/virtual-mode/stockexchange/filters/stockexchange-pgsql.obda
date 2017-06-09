@@ -8,9 +8,9 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl jdbc:postgresql://10.7.20.39/stockexchange
+connectionUrl jdbc:postgresql://tom.inf.unibz.it:7777/stockexchange_new
 username	postgres
-password	postgres
+password	postgres2
 driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[

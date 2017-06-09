@@ -11,9 +11,9 @@ bsbm-inst:	http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/
 
 [SourceDeclaration]
 sourceUri	BSBM-Benchmark
-connectionUrl	jdbc:mysql://10.7.20.39/bsbm250k
-username	fish
-password	fish
+connectionUrl	jdbc:mysql://tom.inf.unibz.it:3694/bsbm250k
+username	root
+password	mysql
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[

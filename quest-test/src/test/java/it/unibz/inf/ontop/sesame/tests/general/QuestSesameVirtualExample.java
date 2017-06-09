@@ -22,13 +22,7 @@ package it.unibz.inf.ontop.sesame.tests.general;
 
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.List;
-
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.openrdf.model.Model;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -48,7 +42,11 @@ import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.List;
 
 public class QuestSesameVirtualExample {
 
@@ -156,7 +154,7 @@ public class QuestSesameVirtualExample {
 		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		//set jdbc params in config
 		pref.setCurrentValueOf(QuestPreferences.DBNAME, "books");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:mysql://10.7.20.39/books?sessionVariables=sql_mode='ANSI'");
+		pref.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:mysql://tom.inf.unibz.it:3694/books?sessionVariables=sql_mode='ANSI'");
 		pref.setCurrentValueOf(QuestPreferences.DBUSER, "fish");
 		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, "fish");
 		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");

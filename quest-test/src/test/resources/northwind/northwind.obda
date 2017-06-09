@@ -3,9 +3,9 @@
 
 [SourceDeclaration]
 sourceUri	northwind
-connectionUrl	jdbc:mysql://10.7.20.39/northwindSpaced
-username	fish
-password	fish
+connectionUrl	jdbc:mysql://tom.inf.unibz.it:3694/northwindSpaced
+username	root
+password	mysql
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[

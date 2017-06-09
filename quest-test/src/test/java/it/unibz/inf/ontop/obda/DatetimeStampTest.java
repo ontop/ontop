@@ -108,9 +108,9 @@ public class DatetimeStampTest {
     public void testR2rml() throws Exception {
 
 
-        String jdbcurl = "jdbc:mysql://10.7.20.39/northwind";
-        String username = "fish";
-        String password = "fish";
+        String jdbcurl = "jdbc:mysql://tom.inf.unibz.it:3694/northwind";
+        String username = "root";
+        String password = "mysql";
         String driverclass = "com.mysql.jdbc.Driver";
 
         OBDADataFactory f = OBDADataFactoryImpl.getInstance();

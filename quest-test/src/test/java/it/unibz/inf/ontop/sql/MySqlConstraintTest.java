@@ -28,17 +28,17 @@ public class MySqlConstraintTest extends AbstractConstraintTest {
 
 	@Override
 	protected String getConnectionPassword() {
-		return "fish";
+		return "mysql";
 	}
 
 	@Override
 	protected String getConnectionString() {
-		return "jdbc:mysql://10.7.20.39/dbconstraints";
+		return "jdbc:mysql://tom.inf.unibz.it:3694/dbconstraints";
 	}
 
 	@Override
 	protected String getConnectionUsername() {
-		return "fish";
+		return "root";
 	}
 
 	@Override

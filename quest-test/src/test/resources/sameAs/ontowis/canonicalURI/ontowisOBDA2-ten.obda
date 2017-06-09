@@ -6,9 +6,9 @@ obda:   https://w3id.org/obda/vocabulary#
 
 [SourceDeclaration]
 sourceUri	viewTest
-connectionUrl	jdbc:postgresql://10.7.20.39/ontowis_100m
+connectionUrl	jdbc:postgresql://tom.inf.unibz.it:7777/ontowis_100m
 username	postgres
-password	postgres
+password	postgres2
 driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[

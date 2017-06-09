@@ -93,9 +93,9 @@ public class R2rmlCheckerTest {
 				QuestConstants.FALSE);
 
 
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
+		String jdbcurl = "jdbc:mysql://tom.inf.unibz.it:3694/npd_clean_no_spatial";
+		String username = "root";
+		String password = "mysql";
 		String driverclass = "com.mysql.jdbc.Driver";
 
 		OBDADataFactory f = OBDADataFactoryImpl.getInstance();

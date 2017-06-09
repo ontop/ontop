@@ -3,9 +3,9 @@
 
 [SourceDeclaration]
 sourceUri	viewTest
-connectionUrl	jdbc:db2://10.7.20.39:50001/wisc100m
-username	db2inst2
-password	fish
+connectionUrl	jdbc:db2://tom.inf.unibz.it:50000/wisc100m
+username	db2inst1
+password	obda-pwd
 driverClass	com.ibm.db2.jcc.DB2Driver
 
 [MappingDeclaration] @collection [[

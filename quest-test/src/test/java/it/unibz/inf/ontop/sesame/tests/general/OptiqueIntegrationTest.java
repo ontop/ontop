@@ -2,15 +2,8 @@ package it.unibz.inf.ontop.sesame.tests.general;
 
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.openrdf.model.Model;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -20,11 +13,7 @@ import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
+import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -33,7 +22,11 @@ import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 public class OptiqueIntegrationTest extends TestCase {
 
@@ -78,11 +71,11 @@ public class OptiqueIntegrationTest extends TestCase {
 		pref.setCurrentValueOf(QuestPreferences.REWRITE, "true");
 		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		// set jdbc params in config
-		pref.setCurrentValueOf(QuestPreferences.DBNAME, "npd");
+		pref.setCurrentValueOf(QuestPreferences.DBNAME, "npd_clean_no_spatial");
 		pref.setCurrentValueOf(QuestPreferences.JDBC_URL,
-				"jdbc:mysql://10.7.20.39/npd?sessionVariables=sql_mode='ANSI'");
-		pref.setCurrentValueOf(QuestPreferences.DBUSER, "fish");
-		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, "fish");
+				"jdbc:mysql://tom.inf.unibz.it:3694/npd_clean_no_spatial?sessionVariables=sql_mode='ANSI'");
+		pref.setCurrentValueOf(QuestPreferences.DBUSER, "root");
+		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, "mysql");
 		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER,"com.mysql.jdbc.Driver");
 	}
 
@@ -147,7 +140,7 @@ public class OptiqueIntegrationTest extends TestCase {
 		String sparqlQuery = "SELECT ?x WHERE {?x a <http://sws.ifi.uio.no/vocab/npd-v2#Field>}" ; 
 		//read expected result
 		//int expectedResult = 14366 ;
-		int expectedResult = 101;
+		int expectedResult = 98;
 		
 		int obtainedResult = runQuery(sparqlQuery);
 		System.out.println(obtainedResult);

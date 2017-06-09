@@ -10,7 +10,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 sourceUri	RandBStockExchange
 connectionUrl
 username	fish
-password	fish
+password	obda-pwd
 driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[

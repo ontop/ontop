@@ -20,9 +20,9 @@ nlxv:		http://sws.ifi.uio.no/vocab/norlex#
 
 [SourceDeclaration]
 sourceUri	x
-connectionUrl	jdbc:postgresql://obdalin3.inf.unibz.it/npd_no_spatial
+connectionUrl	jdbc:postgresql://tom.inf.unibz.it:7777/npd_no_spatial
 username	postgres
-password	postgres
+password	postgres2
 driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[

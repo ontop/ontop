@@ -6,9 +6,9 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	lubm
-connectionUrl	jdbc:postgresql://10.7.20.39/lubm1
+connectionUrl	jdbc:postgresql://tom.inf.unibz.it:7777/lubm1
 username	postgres
-password	postgres
+password	postgres2
 driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
