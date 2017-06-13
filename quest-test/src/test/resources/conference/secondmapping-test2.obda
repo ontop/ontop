@@ -3,9 +3,9 @@
 
 [SourceDeclaration]
 sourceUri	database_conference
-connectionUrl	jdbc:mysql://10.7.20.39/conference
-username	fish
-password	fish
+connectionUrl	jdbc:mysql://tom.inf.unibz.it:3694/conference
+username	root
+password	mysql
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[

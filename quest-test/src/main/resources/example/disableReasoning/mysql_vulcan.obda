@@ -5,7 +5,7 @@
 sourceUri	mysql
 connectionUrl	jdbc:mysql://vulcan/ontowis_100k
 username	test
-password	fish
+password	mysql
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[

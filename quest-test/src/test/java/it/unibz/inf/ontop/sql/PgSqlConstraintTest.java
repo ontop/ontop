@@ -28,12 +28,12 @@ public class PgSqlConstraintTest extends AbstractConstraintTest {
 
 	@Override
 	protected String getConnectionPassword() {
-		return "postgres";
+		return "postgres2";
 	}
 
 	@Override
 	protected String getConnectionString() {
-		return "jdbc:postgresql://10.7.20.39/dbconstraints";
+		return "jdbc:postgresql://tom.inf.unibz.it:7777/dbconstraints";
 	}
 
 	@Override

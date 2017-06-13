@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.sesame.SemanticIndexManager;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -38,7 +39,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import it.unibz.inf.ontop.sesame.SemanticIndexManager;
 
 import java.io.File;
 import java.net.URI;
@@ -51,9 +51,9 @@ import java.sql.Connection;
 public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 
 	String driver = "com.mysql.jdbc.Driver";
-	String url = "jdbc:mysql://10.7.20.39/si_test?sessionVariables=sql_mode='ANSI'";
-	String username = "fish";
-	String password = "fish";
+	String url = "jdbc:mysql://tom.inf.unibz.it:3694/si_test?sessionVariables=sql_mode='ANSI'";
+	String username = "root";
+	String password = "mysql";
 	
 	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_0.owl";
 

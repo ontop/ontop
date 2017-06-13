@@ -9,7 +9,7 @@ xsd:		http://www.w3.org/2001/XMLSchema#
 sourceUri	lubm
 connectionUrl	jdbc:postgresql://localhost:7777/
 username	postgres
-password	postgres
+password	postgres2
 driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[

@@ -12,7 +12,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 [SourceDeclaration]
 sourceUri	BSBM-Benchmark
 connectionUrl	
-username	fish
+username	root
 password	fish
 driverClass	com.ibm.db2.jcc.DB2Driver
 

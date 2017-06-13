@@ -3,9 +3,9 @@
 
 [SourceDeclaration]
 sourceUri	Friends
-connectionUrl	jdbc:mysql://10.7.20.39/stockexchange
-username	fish
-password	fish
+connectionUrl	jdbc:mysql://tom.inf.unibz.it:3694/stockexchange_new
+username	root
+password	mysql
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[

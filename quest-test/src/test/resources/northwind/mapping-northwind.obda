@@ -7,9 +7,9 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	file:/Users/elem/git/ontop/obdalib-r2rml/src/test/resources/mapping-northwind.ttl
-connectionUrl	jdbc:mysql://10.7.20.39/northwind
-username	fish
-password	fish
+connectionUrl	jdbc:mysql://tom.inf.unibz.it:3694/northwind
+username	root
+password	mysql
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[

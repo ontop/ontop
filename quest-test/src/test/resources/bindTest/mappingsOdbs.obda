@@ -3,9 +3,9 @@
 
 [SourceDeclaration]
 sourceUri	database
-connectionUrl	jdbc:mysql://10.7.20.39/sakila
-username	test
-password	ontop2014
+connectionUrl	jdbc:mysql://tom.inf.unibz.it:3694/sakila
+username	root
+password	mysql
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[

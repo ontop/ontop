@@ -5,7 +5,7 @@
 sourceUri	viewTest
 connectionUrl	jdbc:mysql://localhost/ontowis_10k
 username	root
-password	fish
+password	mysql
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[

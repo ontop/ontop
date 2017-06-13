@@ -8,9 +8,9 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl jdbc:db2://10.7.20.39:50001/stock
-username	db2inst2
-password	fish
+connectionUrl jdbc:db2://tom.inf.unibz.it:50000/stocknew
+username	db2inst1
+password	obda-pwd
 driverClass	com.ibm.db2.jcc.DB2Driver
 
 [MappingDeclaration] @collection [[

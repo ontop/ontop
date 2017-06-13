@@ -29,7 +29,7 @@ public class Db2MetadataInfoTest extends AbstractDbMetadataInfoTest {
 
 	@Override
 	protected String getConnectionString() {
-		return "jdbc:db2://10.7.20.39:50001/datatypes";
+		return "jdbc:db2://tom.inf.unibz.it:50000/datatypes";
 	}
 
 	@Override

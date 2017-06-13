@@ -16,7 +16,7 @@ public class OntopBootstrapTest {
                 "-b", "http://www.example.org/",
                 "-m", "src/test/resources/bootstrapped-univ-benchQL.obda",
                 "-t", "src/test/resources/bootstrapped-univ-benchQL.owl",
-                "-l", "jdbc:mysql://10.7.20.39/lubm1",
+                "-l", "jdbc:mysql://tom.inf.unibz.it:3694/lubm1",
                 "-u", "fish",
                 "-p", "fish",
                 "-d", "com.mysql.jdbc.Driver"

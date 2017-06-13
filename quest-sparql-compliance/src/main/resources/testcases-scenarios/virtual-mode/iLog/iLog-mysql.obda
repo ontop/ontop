@@ -10,9 +10,9 @@ iLogOntology:	http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#
 
 [SourceDeclaration]
 sourceUri	iLogDB
-connectionUrl	jdbc:mysql://10.7.20.39/ilogdb
-username	fish
-password	fish
+connectionUrl	jdbc:mysql://tom.inf.unibz.it:3694/ilogdb
+username	root
+password	mysql
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[

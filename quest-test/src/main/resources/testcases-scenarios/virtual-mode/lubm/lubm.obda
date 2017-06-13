@@ -6,9 +6,9 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	lubm
-connectionUrl	jdbc:mysql://10.7.20.39/lubm1
-username	fish
-password	fish
+connectionUrl	jdbc:mysql://tom.inf.unibz.it:3694/lubm1
+username	root
+password	mysql
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[

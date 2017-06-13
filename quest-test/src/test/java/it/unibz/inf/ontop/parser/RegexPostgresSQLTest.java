@@ -149,10 +149,10 @@ public class RegexPostgresSQLTest {
 	 */
 	@Test
 	public void testPostgresRegexNot() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :StockBroker}";
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :PhysicalPerson}";
 		runTests(query);
 		int numberResults = runTests(query);
-		assertEquals(2, numberResults);
+		assertEquals(3, numberResults);
 	}
 	
 
