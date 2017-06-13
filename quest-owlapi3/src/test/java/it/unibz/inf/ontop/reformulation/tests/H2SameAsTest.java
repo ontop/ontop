@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -47,7 +46,7 @@ import static org.junit.Assert.assertTrue;
 /***
  * Test same as using h2 simple database on wellbores
  */
-@Ignore
+
 public class H2SameAsTest {
 
 	private OntopOWLConnection conn;
