@@ -22,17 +22,17 @@ public abstract class OntopMappingOntologyRelatedCommand implements OntopCommand
 
     @Option(type = OptionType.COMMAND, name = {"-u", "--username"}, title = "jdbcUserName",
             description = "user name for the jdbc connection (only for R2RML mapping)")
-    protected String jdbcUserName;
+    protected String jdbcUserName = "";
 
     @Option(type = OptionType.COMMAND, name = {"-p", "--password"}, title = "jdbcPassword",
             description = "password for the jdbc connection  (only for R2RML mapping)")
-    protected String jdbcPassword;
+    protected String jdbcPassword = "";
 
     @Option(type = OptionType.COMMAND, name = {"-l", "--url"}, title = "jdbcURL",
             description = "jdbcURL for the jdbc connection  (only for R2RML mapping)")
-    protected String jdbcURL;
+    protected String jdbcURL = "";
 
     @Option(type = OptionType.COMMAND, name = {"-d", "--driver-class"}, title = "jdbcDriver",
             description = "class name of the jdbc Driver (only for R2RML mapping)")
-    protected String jdbcDriverClass;
+    protected String jdbcDriverClass = "";
 }
