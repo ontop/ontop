@@ -22,6 +22,9 @@ package it.unibz.inf.ontop.model.impl;
 
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public abstract class AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
 
 	private static final long serialVersionUID = 5512895151633505075L;
@@ -29,12 +32,28 @@ public abstract class AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
 	private String id;
 	
 	public AbstractOBDAMappingAxiom(String id) {
-		this.id = id;
+
+
+		try {
+			this.id = new URL(id).toString();
+
+		} catch (MalformedURLException e) {
+			this.id = "urn:"+ id;
+		}
+
+
+
 	}
 	
 	@Override
 	public void setId(String id) {
-		this.id = id;
+
+		try {
+			this.id = new URL(id).toString();
+
+		} catch (MalformedURLException e) {
+			this.id = "urn:"+ id;
+		}
 	}
 
 	@Override
