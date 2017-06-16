@@ -141,7 +141,7 @@ public class VirtualABoxMaterializerTest {
 		Injector injector = configuration.getInjector();
 		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 		SpecificationFactory specificationFactory = injector.getInstance(SpecificationFactory.class);
-		OBDAFactoryWithException obdaFactory = injector.getInstance(OBDAFactoryWithException.class);
+		SQLPPMappingFactory ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
 
     			/*
 		 * Setting up the OBDA model and the mappings
@@ -176,7 +176,7 @@ public class VirtualABoxMaterializerTest {
 
 		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
-		return obdaFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), mappingMetadata);
+		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), mappingMetadata);
 	}
 
 //	public void testTwoSources() throws Exception {

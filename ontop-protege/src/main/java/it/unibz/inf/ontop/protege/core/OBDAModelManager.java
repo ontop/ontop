@@ -98,7 +98,7 @@ public class OBDAModelManager implements Disposable {
 	private boolean loadingData;
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
-    private final OBDAFactoryWithException obdaFactory;
+    private final SQLPPMappingFactory ppMappingFactory;
 	private final SpecificationFactory specificationFactory;
 	private File implicitDBConstraintFile;
 
@@ -117,7 +117,7 @@ public class OBDAModelManager implements Disposable {
 
 		this.specificationFactory = defaultInjector.getInstance(SpecificationFactory.class);
 		this.nativeQLFactory = defaultInjector.getInstance(NativeQueryLanguageComponentFactory.class);
-		this.obdaFactory = defaultInjector.getInstance(OBDAFactoryWithException.class);
+		this.ppMappingFactory = defaultInjector.getInstance(SQLPPMappingFactory.class);
 
 		if (!(editorKit instanceof OWLEditorKit)) {
 			throw new IllegalArgumentException("The OBDA Plugin only works with OWLEditorKit instances.");
@@ -439,7 +439,7 @@ public class OBDAModelManager implements Disposable {
         PrefixDocumentFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
         PrefixManagerWrapper prefixWrapper = new PrefixManagerWrapper(prefixManager);
 
-		activeOBDAModel = new OBDAModelWrapper(specificationFactory, obdaFactory, prefixWrapper);
+		activeOBDAModel = new OBDAModelWrapper(specificationFactory, ppMappingFactory, prefixWrapper);
 		activeOBDAModel.addSourceListener(dlistener);
 		activeOBDAModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);

@@ -39,7 +39,7 @@ import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
 
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
@@ -50,7 +50,7 @@ public class SQLMappingParserUsingOwlTest {
 
     private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
-    private final OBDAFactoryWithException modelFactory;
+    private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
     private final SQLMappingParser mappingParser;
 
@@ -87,7 +87,7 @@ public class SQLMappingParserUsingOwlTest {
 
         mappingParser = injector.getInstance(SQLMappingParser.class);
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-        modelFactory = injector.getInstance(OBDAFactoryWithException.class);
+        ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
     }
 
     @Before
@@ -143,7 +143,7 @@ public class SQLMappingParserUsingOwlTest {
      */
 
     private void saveRegularFile() throws Exception {
-        SQLPPMapping ppMapping = modelFactory.createSQLPreProcessedMapping(ImmutableList.of(),
+        SQLPPMapping ppMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(),
                 specificationFactory.createMetadata(specificationFactory.createPrefixManager(ImmutableMap.of()),
                         UriTemplateMatcher.create(Stream.of())));
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);

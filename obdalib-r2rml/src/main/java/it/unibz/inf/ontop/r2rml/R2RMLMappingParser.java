@@ -15,7 +15,7 @@ import org.eclipse.rdf4j.rio.RDFParseException;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
 import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
@@ -30,15 +30,15 @@ import java.io.Reader;
 public class R2RMLMappingParser implements SQLMappingParser {
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
-    private final OBDAFactoryWithException obdaFactory;
+    private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
 
 
     @Inject
     private R2RMLMappingParser(NativeQueryLanguageComponentFactory nativeQLFactory,
-                               OBDAFactoryWithException obdaFactory, SpecificationFactory specificationFactory) {
+                               SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory) {
         this.nativeQLFactory = nativeQLFactory;
-        this.obdaFactory = obdaFactory;
+        this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
     }
 
@@ -83,7 +83,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
         PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
         MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
 
-        return obdaFactory.createSQLPreProcessedMapping(sourceMappings, mappingMetadata);
+        return ppMappingFactory.createSQLPreProcessedMapping(sourceMappings, mappingMetadata);
     }
 
 
