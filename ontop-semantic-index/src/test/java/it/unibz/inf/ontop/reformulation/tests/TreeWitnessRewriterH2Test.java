@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
@@ -74,7 +74,7 @@ public class TreeWitnessRewriterH2Test{
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel = null;
+	private SQLPPMapping obdaModel = null;
 	private OWLOntology ontology;
 
 	List<TestQuery> testQueries = new LinkedList<TestQuery>();

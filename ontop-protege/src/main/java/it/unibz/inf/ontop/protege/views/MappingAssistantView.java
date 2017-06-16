@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.protege.views;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
@@ -58,7 +58,7 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
         NativeQueryLanguageComponentFactory nativeQLFactory = defaultInjector.getInstance(
                 NativeQueryLanguageComponentFactory.class);
 
-        obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
+        obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
         obdaModelManager.addListener(this);
 
         activeOBDAModel = obdaModelManager.getActiveOBDAModelWrapper();

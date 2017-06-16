@@ -36,8 +36,8 @@ import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,74 +61,74 @@ public class ParserFileTest extends TestCase {
 
 	// @Test
 	public void testStockExchange_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
-		OBDAModel model = load(ROOT + "virtual/stockexchange-pgsql.owl");
-		execute(model, new URI("RandBStockExchange"));
+		SQLPPMapping ppMapping = load(ROOT + "virtual/stockexchange-pgsql.owl");
+		execute(ppMapping, new URI("RandBStockExchange"));
 	}
 
 	// @Test
 	public void testImdbGroup4_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
-		OBDAModel model = load(ROOT + "virtual/imdb-group4-pgsql.owl");
-		execute(model, new URI("kbdb_imdb"));
+		SQLPPMapping ppMapping = load(ROOT + "virtual/imdb-group4-pgsql.owl");
+		execute(ppMapping, new URI("kbdb_imdb"));
 	}
 
 	// @Test
 	public void testImdbGroup4_Oracle() throws URISyntaxException, InvalidMappingException, IOException {
-		OBDAModel model = load(ROOT + "virtual/imdb-group4-oracle.owl");
-		execute(model, new URI("kbdb_imdb"));
+		SQLPPMapping ppMapping = load(ROOT + "virtual/imdb-group4-oracle.owl");
+		execute(ppMapping, new URI("kbdb_imdb"));
 	}
 
 	// @Test
 	public void testAdolenaSlim_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
-		OBDAModel model = load(ROOT + "virtual/adolena-slim-pgsql.owl");
-		execute(model, new URI("nap"));
+		SQLPPMapping ppMapping = load(ROOT + "virtual/adolena-slim-pgsql.owl");
+		execute(ppMapping, new URI("nap"));
 	}
 
 	// @Test
 	public void testBooksApril20_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
-		OBDAModel model = load(ROOT + "virtual/books-april20-pgsql.owl");
-		execute(model, new URI("datasource"));
+		SQLPPMapping ppMapping = load(ROOT + "virtual/books-april20-pgsql.owl");
+		execute(ppMapping, new URI("datasource"));
 	}
 
 	// @Test
 	public void testHgt090303_Mysql() throws URISyntaxException, InvalidMappingException, IOException {
-		OBDAModel model = load(ROOT + "virtual/hgt-090303-mysql.owl");
-		execute(model, new URI("HGT"));
+		SQLPPMapping ppMapping = load(ROOT + "virtual/hgt-090303-mysql.owl");
+		execute(ppMapping, new URI("HGT"));
 	}
 
 	// @Test
 	public void testHgt090324_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
-		OBDAModel model = load(ROOT + "virtual/hgt-090324-pgsql.owl");
-		execute(model, new URI("HGT"));
+		SQLPPMapping ppMapping = load(ROOT + "virtual/hgt-090324-pgsql.owl");
+		execute(ppMapping, new URI("HGT"));
 	}
 
 	// @Test
 	public void testHgt091007_Oracle() throws URISyntaxException, InvalidMappingException, IOException {
-		OBDAModel model = load(ROOT + "virtual/hgt-091007-oracle.owl");
-		execute(model, new URI("HGT"));
+		SQLPPMapping ppMapping = load(ROOT + "virtual/hgt-091007-oracle.owl");
+		execute(ppMapping, new URI("HGT"));
 	}
 
 	// @Test
 	public void testMpsOntologiaGcc_DB2() throws URISyntaxException, InvalidMappingException, IOException {
-		OBDAModel model = load(ROOT + "virtual/mps-ontologiagcc-db2.owl");
-		execute(model, new URI("sourceGCC"));
+		SQLPPMapping ppMapping = load(ROOT + "virtual/mps-ontologiagcc-db2.owl");
+		execute(ppMapping, new URI("sourceGCC"));
 	}
 
 	// @Test
 	public void testOperationNoyauV5_Oracle() throws URISyntaxException, InvalidMappingException, IOException {
-		OBDAModel model = load(ROOT + "virtual/operation-noyau-v5-oracle.owl");
-		execute(model, new URI("PgmOpe"));
+		SQLPPMapping ppMapping = load(ROOT + "virtual/operation-noyau-v5-oracle.owl");
+		execute(ppMapping, new URI("PgmOpe"));
 	}
 
 	// @Test
 	public void testOperationNoyauV6_Oracle() throws URISyntaxException, InvalidMappingException, IOException {
-		OBDAModel model = load(ROOT + "virtual/operation-noyau-v6-oracle.owl");
-		execute(model, new URI("CORIOLIS-CRAQ"));
-		execute(model, new URI("PROGOS-CRAQ"));
+		SQLPPMapping ppMapping = load(ROOT + "virtual/operation-noyau-v6-oracle.owl");
+		execute(ppMapping, new URI("CORIOLIS-CRAQ"));
+		execute(ppMapping, new URI("PROGOS-CRAQ"));
 	}
 
 	// ------- Utility methods
 
-	private void execute(OBDAModel model, URI identifier) {
+	private void execute(SQLPPMapping ppMapping, URI identifier) {
 
 		RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
@@ -137,19 +137,19 @@ public class ParserFileTest extends TestCase {
          * Problems found in the mapping file.
          * --> Do nothing.
          *
-         * Before, tests were analyzing the incomplete OBDA model.
+         * Before, tests were analyzing the incomplete ppMapping.
          * TODO: discuss this difference due to the new interface.
          *
          */
-        if (model == null) {
+        if (ppMapping == null) {
             return;
         }
 
-		OBDAModel controller = model;
-		ImmutableList<OBDAMappingAxiom> mappings = controller.getMappings();
+		SQLPPMapping controller = ppMapping;
+		ImmutableList<SQLPPMappingAxiom> mappings = controller.getPPMappingAxioms();
 
 		log.debug("=========== " + identifier + " ===========");
-		for (OBDAMappingAxiom axiom : mappings) {
+		for (SQLPPMappingAxiom axiom : mappings) {
 			String query = axiom.getSourceQuery().toString();
 			boolean result = parse(query, idfac);
 
@@ -162,7 +162,7 @@ public class ParserFileTest extends TestCase {
 		}
 	}
 
-	private OBDAModel load(String file) throws InvalidMappingException, IOException {
+	private SQLPPMapping load(String file) throws InvalidMappingException, IOException {
 		final String obdafile = file.substring(0, file.length() - 3) + "obda";
         try {
             return mappingParser.parse(new File(obdafile));

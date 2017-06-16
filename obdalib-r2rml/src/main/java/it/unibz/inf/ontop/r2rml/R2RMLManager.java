@@ -38,7 +38,7 @@ import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDALibConstants;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.ValueConstant;
@@ -134,9 +134,9 @@ public class R2RMLManager {
 	 * @param myModel - the Model structure containing mappings
 	 * @return ArrayList<OBDAMappingAxiom> - list of mapping axioms read from the Model
 	 */
-	public ImmutableList<OBDAMappingAxiom> getMappings(Graph myModel) {
+	public ImmutableList<SQLPPMappingAxiom> getMappings(Graph myModel) {
 
-		List<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
+		List<SQLPPMappingAxiom> mappings = new ArrayList<SQLPPMappingAxiom>();
 
 		// retrieve the TriplesMap nodes
 		Collection<TriplesMap> tripleMaps = r2rmlParser.getMappingNodes(myModel);
@@ -144,7 +144,7 @@ public class R2RMLManager {
 		for (TriplesMap tm : tripleMaps) {
 
 			// for each node get a mapping
-			OBDAMappingAxiom mapping;
+			SQLPPMappingAxiom mapping;
 
 			try {
 				mapping = getMapping(tm);
@@ -155,7 +155,7 @@ public class R2RMLManager {
                 }
 
 				// pass 2 - check for join conditions, add to list
-				List<OBDAMappingAxiom> joinMappings = getJoinMappings(tripleMaps, tm);
+				List<SQLPPMappingAxiom> joinMappings = getJoinMappings(tripleMaps, tm);
 				if (joinMappings != null) {
 					mappings.addAll(joinMappings);
 				}
@@ -172,12 +172,12 @@ public class R2RMLManager {
 	 * @return
 	 * @throws Exception
 	 */
-	private OBDAMappingAxiom getMapping(TriplesMap tm) throws Exception {
+	private SQLPPMappingAxiom getMapping(TriplesMap tm) throws Exception {
 		String sourceQuery = r2rmlParser.getSQLQuery(tm);
 		List<Function> body = getMappingTripleAtoms(tm);
 		//Function head = getHeadAtom(body);
 		//CQIE targetQuery = DATA_FACTORY.getCQIE(head, body);
-		OBDAMappingAxiom mapping = nativeQLFactory.create("mapping-"+tm.hashCode(), MAPPING_FACTORY.getSQLQuery(sourceQuery), body);
+		SQLPPMappingAxiom mapping = nativeQLFactory.create("mapping-"+tm.hashCode(), MAPPING_FACTORY.getSQLQuery(sourceQuery), body);
         if (body.isEmpty()){
             //we do not have a target query
             System.out.println("WARNING a mapping without target query will not be introduced : "+ mapping.toString());
@@ -193,9 +193,9 @@ public class R2RMLManager {
 	 * @return
 	 * @throws Exception
 	 */
-	private List<OBDAMappingAxiom> getJoinMappings(Collection<TriplesMap> tripleMaps, TriplesMap tm) throws Exception {
+	private List<SQLPPMappingAxiom> getJoinMappings(Collection<TriplesMap> tripleMaps, TriplesMap tm) throws Exception {
 		String sourceQuery = "";
-		List<OBDAMappingAxiom> joinMappings = new ArrayList<OBDAMappingAxiom>();
+		List<SQLPPMappingAxiom> joinMappings = new ArrayList<SQLPPMappingAxiom>();
 		for (PredicateObjectMap pobm: tm.getPredicateObjectMaps()) {
 			
 			for(RefObjectMap robm : pobm.getRefObjectMaps()) {
@@ -235,7 +235,7 @@ public class R2RMLManager {
 			}
 			//finally, create mapping and add it to the list
                 //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
-			OBDAMappingAxiom mapping = nativeQLFactory.create("mapping-join-"+robm.hashCode(), MAPPING_FACTORY.getSQLQuery(sourceQuery), body);
+			SQLPPMappingAxiom mapping = nativeQLFactory.create("mapping-join-"+robm.hashCode(), MAPPING_FACTORY.getSQLQuery(sourceQuery), body);
 			System.out.println("WARNING joinMapping introduced : "+mapping.toString());
 			joinMappings.add(mapping);
 		}

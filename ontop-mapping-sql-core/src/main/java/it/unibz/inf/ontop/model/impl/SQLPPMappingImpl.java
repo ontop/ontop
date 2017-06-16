@@ -26,21 +26,21 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 
 
-public class OBDAModelImpl implements OBDAModel {
+public class SQLPPMappingImpl implements SQLPPMapping {
 	private final MappingMetadata mappingMetadata;
 
-	private final ImmutableList<OBDAMappingAxiom> mappings;
-    private final ImmutableMap<String, OBDAMappingAxiom> mappingIndexById;
+	private final ImmutableList<SQLPPMappingAxiom> mappings;
+    private final ImmutableMap<String, SQLPPMappingAxiom> mappingIndexById;
 
     /**
      * Normal constructor. Used by the QuestComponentFactory.
      */
-    public OBDAModelImpl(ImmutableList<OBDAMappingAxiom> newMappings,
-                         MappingMetadata mappingMetadata) throws DuplicateMappingException {
+    public SQLPPMappingImpl(ImmutableList<SQLPPMappingAxiom> newMappings,
+                            MappingMetadata mappingMetadata) throws DuplicateMappingException {
 
         checkDuplicates(newMappings);
         this.mappings = newMappings;
@@ -51,10 +51,10 @@ public class OBDAModelImpl implements OBDAModel {
     /**
      * No mapping should be duplicate among all the data sources.
      */
-    private static void checkDuplicates(ImmutableList<OBDAMappingAxiom> mappings)
+    private static void checkDuplicates(ImmutableList<SQLPPMappingAxiom> mappings)
             throws DuplicateMappingException {
 
-        Set<OBDAMappingAxiom> mappingSet = new HashSet<>(mappings);
+        Set<SQLPPMappingAxiom> mappingSet = new HashSet<>(mappings);
 
         int duplicateCount = mappings.size() - mappingSet.size();
 
@@ -64,7 +64,7 @@ public class OBDAModelImpl implements OBDAModel {
         if (duplicateCount > 0) {
             Set<String> duplicateIds = new HashSet<>();
             int remaining = duplicateCount;
-            for (OBDAMappingAxiom mapping : mappings) {
+            for (SQLPPMappingAxiom mapping : mappings) {
                 if (mappingSet.contains(mapping)) {
                     mappingSet.remove(mapping);
                 }
@@ -83,10 +83,10 @@ public class OBDAModelImpl implements OBDAModel {
         }
     }
 
-    private static ImmutableMap<String, OBDAMappingAxiom> indexMappingsById(ImmutableList<OBDAMappingAxiom> mappings)
+    private static ImmutableMap<String, SQLPPMappingAxiom> indexMappingsById(ImmutableList<SQLPPMappingAxiom> mappings)
             throws IllegalArgumentException {
-        Map<String, OBDAMappingAxiom> mappingIndexById = new HashMap<>();
-        for (OBDAMappingAxiom axiom : mappings) {
+        Map<String, SQLPPMappingAxiom> mappingIndexById = new HashMap<>();
+        for (SQLPPMappingAxiom axiom : mappings) {
             String id = axiom.getId();
             if (mappingIndexById.containsKey(id)) {
                 // Should have already been detected by checkDuplicates.
@@ -97,22 +97,10 @@ public class OBDAModelImpl implements OBDAModel {
         return ImmutableMap.copyOf(mappingIndexById);
     }
 
-
     @Override
-    public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings) throws DuplicateMappingException {
-        return newModel(newMappings, mappingMetadata);
-    }
-
-    @Override
-    public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings,
-                              MappingMetadata mappingMetadata) throws DuplicateMappingException {
-        return new OBDAModelImpl(newMappings, mappingMetadata);
-    }
-
-    @Override
-    public OBDAModel clone() {
+    public SQLPPMapping clone() {
         try {
-            return new OBDAModelImpl(mappings, mappingMetadata);
+            return new SQLPPMappingImpl(mappings, mappingMetadata);
         } catch (DuplicateMappingException e) {
             throw new RuntimeException("Unexpected error (inconsistent cloning): " + e.getMessage());
         }
@@ -124,12 +112,12 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
     @Override
-    public OBDAMappingAxiom getMapping(String mappingId) {
-        return mappingIndexById.get(mappingId);
+    public SQLPPMappingAxiom getPPMappingAxiom(String axiomId) {
+        return mappingIndexById.get(axiomId);
     }
 
 	@Override
-	public ImmutableList<OBDAMappingAxiom> getMappings() {
+	public ImmutableList<SQLPPMappingAxiom> getPPMappingAxioms() {
         return mappings;
 	}
 }

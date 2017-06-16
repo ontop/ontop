@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.owlapi.OBDAModelValidator;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -606,7 +606,7 @@ public class OBDAModelManager implements Disposable {
 			// Setting up a new OBDA model and retrieve the object.
 			setupNewOBDAModel();
 			OBDAModelWrapper activeModelWrapper = getActiveOBDAModelWrapper();
-			OBDAModel activeOBDAModel = activeModelWrapper.getCurrentImmutableOBDAModel();
+			SQLPPMapping activeOBDAModel = activeModelWrapper.getCurrentImmutableOBDAModel();
 
 			OWLModelManager mmgr = owlEditorKit.getOWLWorkspace().getOWLModelManager();
 
@@ -749,7 +749,7 @@ public class OBDAModelManager implements Disposable {
 
                     // Save the OBDA model
                     File obdaFile = new File(URI.create(obdaDocumentIri));
-					OBDAModel obdaModel = activeOBDAModel.getCurrentImmutableOBDAModel();
+					SQLPPMapping obdaModel = activeOBDAModel.getCurrentImmutableOBDAModel();
 					OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(obdaModel);
 					writer.save(obdaFile);
 

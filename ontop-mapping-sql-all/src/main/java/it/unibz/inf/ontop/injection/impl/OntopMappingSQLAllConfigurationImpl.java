@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllSettings;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.eclipse.rdf4j.model.Model;
 
@@ -53,11 +53,11 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
     }
 
     @Override
-    public Optional<OBDAModel> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
+    public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
         return loadPPMapping(Optional::empty);
     }
 
-    Optional<OBDAModel> loadPPMapping(OntologySupplier ontologySupplier)
+    Optional<SQLPPMapping> loadPPMapping(OntologySupplier ontologySupplier)
             throws MappingIOException, InvalidMappingException, DuplicateMappingException {
         return loadPPMapping(ontologySupplier,
                 () -> options.mappingFile,

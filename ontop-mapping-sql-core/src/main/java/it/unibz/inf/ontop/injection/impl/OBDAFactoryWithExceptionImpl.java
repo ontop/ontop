@@ -5,8 +5,8 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
@@ -48,15 +48,15 @@ public class OBDAFactoryWithExceptionImpl
      * OBDA model creation
      */
     @Override
-    public OBDAModel createOBDAModel(ImmutableList<OBDAMappingAxiom> newMappings,
-                                     MappingMetadata mappingMetadata)
+    public SQLPPMapping createSQLPreProcessedMapping(ImmutableList<SQLPPMappingAxiom> newMappings,
+                                                     MappingMetadata mappingMetadata)
             throws DuplicateMappingException {
         try {
             /**
              * Instantiation
              */
-            Constructor constructor = findFirstConstructor(OBDAModel.class);
-            return (OBDAModel) constructor.newInstance(newMappings, mappingMetadata);
+            Constructor constructor = findFirstConstructor(SQLPPMapping.class);
+            return (SQLPPMapping) constructor.newInstance(newMappings, mappingMetadata);
             /**
              * Exception management
              */

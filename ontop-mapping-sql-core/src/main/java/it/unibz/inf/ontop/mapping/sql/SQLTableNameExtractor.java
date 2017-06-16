@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.mapping.sql;
  */
 
 
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
 import it.unibz.inf.ontop.model.SourceQuery;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
@@ -49,11 +49,11 @@ import java.util.*;
 public class SQLTableNameExtractor {
 
 
-	public static Set<RelationID> getRealTables(QuotedIDFactory idfac, Collection<OBDAMappingAxiom> mappings)
+	public static Set<RelationID> getRealTables(QuotedIDFactory idfac, Collection<SQLPPMappingAxiom> mappings)
 			throws JSQLParserException {
 		List<String> errorMessage = new LinkedList<>();
 		Set<RelationID> tables = new HashSet<>();
-		for (OBDAMappingAxiom axiom : mappings) {
+		for (SQLPPMappingAxiom axiom : mappings) {
 			try {
 				if (!(axiom.getSourceQuery() instanceof OBDASQLQuery)) {
 					throw new IllegalArgumentException("getRealTables() only works for SQL-* mappings");

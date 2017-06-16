@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.protege.gui.component;
  */
 
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;

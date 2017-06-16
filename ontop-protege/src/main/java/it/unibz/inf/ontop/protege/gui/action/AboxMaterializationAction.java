@@ -22,9 +22,8 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.model.SQLPPMapping;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -69,7 +68,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 	private static final boolean DO_STREAM_RESULTS = true;
 
 	private OWLEditorKit editorKit = null;
-	private OBDAModel obdaModel = null;
+	private SQLPPMapping obdaModel = null;
 	private OWLWorkspace workspace;
 	private OWLModelManager modelManager;
 	private String lineSeparator;
@@ -81,7 +80,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		editorKit = (OWLEditorKit)getEditorKit();
 		workspace = editorKit.getWorkspace();
 		modelManager = editorKit.getOWLModelManager();
-		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelWrapper()
+		obdaModel = ((OBDAModelManager)editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModelWrapper()
 				.getCurrentImmutableOBDAModel();
 		lineSeparator = System.getProperty("line.separator");
 	}
@@ -213,7 +212,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 				OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 						// TODO: should we keep it?
 						.enableOntologyAnnotationQuerying(true)
-						.obdaModel(obdaModel)
+						.ppMapping(obdaModel)
 						.ontology(ontology)
 						.build();
 
@@ -265,7 +264,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 				OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 						// TODO: should we keep it?
 						.enableOntologyAnnotationQuerying(true)
-						.obdaModel(obdaModel)
+						.ppMapping(obdaModel)
 						.ontology(ontology)
 						.build();
 

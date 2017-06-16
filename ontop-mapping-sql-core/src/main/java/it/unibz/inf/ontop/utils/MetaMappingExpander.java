@@ -75,16 +75,16 @@ public class MetaMappingExpander {
 	 * @return
 	 * 		expanded normal mappings
 	 */
-	public static ImmutableList<OBDAMappingAxiom> expand(Collection<OBDAMappingAxiom> mappings,
-													  OntopMappingSQLSettings settings, DBMetadata metadata,
-													  NativeQueryLanguageComponentFactory nativeQLFactory)
+	public static ImmutableList<SQLPPMappingAxiom> expand(Collection<SQLPPMappingAxiom> mappings,
+														  OntopMappingSQLSettings settings, DBMetadata metadata,
+														  NativeQueryLanguageComponentFactory nativeQLFactory)
 			throws MetaMappingExpansionException {
 
 		List<String> errorMessages = new LinkedList<>();
 
-		List<OBDAMappingAxiom> expandedMappings = new LinkedList<>();
+		List<SQLPPMappingAxiom> expandedMappings = new LinkedList<>();
 
-		for (OBDAMappingAxiom mapping : mappings) {
+		for (SQLPPMappingAxiom mapping : mappings) {
 
 			boolean split = mapping.getTargetQuery().stream()
 					.anyMatch(atom -> atom.getFunctionSymbol().isTriplePredicate());
@@ -100,7 +100,7 @@ public class MetaMappingExpander {
 							// for normal mappings, we do not need to expand it.
 							String newId = IDGenerator.getNextUniqueID(id + "#");
 
-							OBDAMappingAxiom newMapping = nativeQLFactory.create(newId, sourceQuery, Collections.singletonList(atom));
+							SQLPPMappingAxiom newMapping = nativeQLFactory.create(newId, sourceQuery, Collections.singletonList(atom));
 
 							expandedMappings.add(newMapping);
 						} else {
@@ -126,9 +126,9 @@ public class MetaMappingExpander {
 		return ImmutableList.copyOf(expandedMappings);
 	}
 
-	private static List<OBDAMappingAxiom> instantiateMapping(Connection connection, DBMetadata metadata, String id,
-															 Function target, String sql,
-															 NativeQueryLanguageComponentFactory nativeQLFactory)
+	private static List<SQLPPMappingAxiom> instantiateMapping(Connection connection, DBMetadata metadata, String id,
+															  Function target, String sql,
+															  NativeQueryLanguageComponentFactory nativeQLFactory)
 			throws SQLException, JSQLParserException, InvalidSelectQueryException, UnsupportedSelectQueryException {
 
 		ImmutableList<SelectExpressionItem> queryColumns = getQueryColumns(metadata, sql);
@@ -149,7 +149,7 @@ public class MetaMappingExpander {
 
 		List<List<String>> templateValues = getTemplateValues(connection, sql, templateColumns);
 
-		List<OBDAMappingAxiom> expandedMappings = new ArrayList<>(templateValues.size());
+		List<SQLPPMappingAxiom> expandedMappings = new ArrayList<>(templateValues.size());
 
 		for(List<String> values : templateValues) {
 			// create a new  query with the changed projection and selection
@@ -182,7 +182,7 @@ public class MetaMappingExpander {
 
 			String newId = IDGenerator.getNextUniqueID(id + "#");
 
-			OBDAMappingAxiom mapping = nativeQLFactory.create(newId, newSourceQuery,
+			SQLPPMappingAxiom mapping = nativeQLFactory.create(newId, newSourceQuery,
 					Collections.singletonList(newTarget));
 
 			expandedMappings.add(mapping);

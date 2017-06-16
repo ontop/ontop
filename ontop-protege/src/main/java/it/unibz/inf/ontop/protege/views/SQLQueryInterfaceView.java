@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
@@ -49,7 +49,7 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 	@Override
 	protected void initialiseOWLView() throws Exception {
 
-		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
+		apic = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
 		apic.addListener(this);
 
 		dsController = apic.getActiveOBDAModelWrapper();

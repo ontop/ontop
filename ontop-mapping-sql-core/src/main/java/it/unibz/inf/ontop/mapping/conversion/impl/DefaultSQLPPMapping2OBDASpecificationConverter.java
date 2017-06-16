@@ -73,15 +73,15 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     }
 
     @Override
-    public OBDASpecification convert(final OBDAModel initialPPMapping, Optional<DBMetadata> optionalDBMetadata,
+    public OBDASpecification convert(final SQLPPMapping initialPPMapping, Optional<DBMetadata> optionalDBMetadata,
                                      Optional<Ontology> optionalOntology, Optional<File> constraintFile,
                                      ExecutorRegistry executorRegistry)
             throws DBMetadataExtractionException, MappingException {
 
         RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
 
-        ImmutableList<OBDAMappingAxiom> expandedMappingAxioms = MetaMappingExpander.expand(
-                initialPPMapping.getMappings(), settings, dbMetadata, nativeQLFactory);
+        ImmutableList<SQLPPMappingAxiom> expandedMappingAxioms = MetaMappingExpander.expand(
+                initialPPMapping.getPPMappingAxioms(), settings, dbMetadata, nativeQLFactory);
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)
         ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(expandedMappingAxioms, dbMetadata);
@@ -97,7 +97,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     /**
      * Makes use of the DB connection
      */
-    private RDBMetadata extractDBMetadata(final OBDAModel ppMapping, Optional<DBMetadata> optionalDBMetadata,
+    private RDBMetadata extractDBMetadata(final SQLPPMapping ppMapping, Optional<DBMetadata> optionalDBMetadata,
                                           Optional<File> constraintFile)
             throws DBMetadataExtractionException, MetaMappingExpansionException {
 
@@ -117,7 +117,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     /**
      * May also views in the DBMetadata!
      */
-    private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<OBDAMappingAxiom> mappingAxioms, RDBMetadata dbMetadata) {
+    private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<SQLPPMappingAxiom> mappingAxioms, RDBMetadata dbMetadata) {
 
 
         ImmutableList<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappingAxioms, dbMetadata);
