@@ -29,7 +29,7 @@ import it.unibz.inf.ontop.mapping.sql.SQLSourceQueryValidator;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
@@ -61,9 +61,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	private TargetQueryVocabularyValidator validatortrg;
 
-	private OBDAModelWrapper mapc;
+	private OBDAModel mapc;
 
-	private OBDAModelWrapper apic;
+	private OBDAModel apic;
 
 	private OBDADataSource selectedSource;
 
@@ -83,8 +83,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
          * @param validator
          *            TargetQueryVocabularyValidator
 	 */
-	public MappingManagerPanel(OBDAModelWrapper apic, TargetQueryVocabularyValidator validator,
-							   NativeQueryLanguageComponentFactory nativeQLFactory) {
+	public MappingManagerPanel(OBDAModel apic, TargetQueryVocabularyValidator validator,
+                               NativeQueryLanguageComponentFactory nativeQLFactory) {
 
 		validatortrg = validator;
 		
@@ -175,7 +175,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		}
 	}
 
-	public void setOBDAModel(OBDAModelWrapper omodel) {
+	public void setOBDAModel(OBDAModel omodel) {
 		
 		this.apic = omodel;
 		this.mapc = apic;
@@ -614,7 +614,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
-		OBDAModelWrapper controller = mapc;
+		OBDAModel controller = mapc;
 		URI current_srcuri = selectedSource.getSourceID();
 
 		for (int i = 0; i < currentSelection.length; i++) {
@@ -669,7 +669,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		// The manager panel can handle multiple deletions.
 		Object[] values = mappingList.getSelectedValues();
 
-		OBDAModelWrapper controller = mapc;
+		OBDAModel controller = mapc;
 		URI srcuri = selectedSource.getSourceID();
 
 		for (int i = 0; i < values.length; i++) {

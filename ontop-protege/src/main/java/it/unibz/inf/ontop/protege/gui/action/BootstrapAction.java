@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import org.protege.editor.core.ui.action.ProtegeAction;
@@ -53,7 +53,7 @@ public class BootstrapAction extends ProtegeAction {
 	private OBDAModelManager modelManager;
 	private String baseUri = "";
 	private OWLOntology currentOnto;
-	private OBDAModelWrapper currentModel;
+	private OBDAModel currentModel;
 	private OBDADataSource currentSource;
 
 	private Logger log = LoggerFactory.getLogger(BootstrapAction.class);
@@ -76,7 +76,7 @@ public class BootstrapAction extends ProtegeAction {
 	public void actionPerformed(ActionEvent e) {
 
 		currentOnto = owlManager.getActiveOntology();
-		currentModel = modelManager.getActiveOBDAModelWrapper();
+		currentModel = modelManager.getActiveOBDAModel();
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
@@ -151,7 +151,7 @@ public class BootstrapAction extends ProtegeAction {
 		}
 
 		public void run(String baseUri, OWLOntology currentOnto,
-						OBDAModelWrapper currentModel, OBDADataSource currentSource)
+                        OBDAModel currentModel, OBDADataSource currentSource)
 				throws Exception {
 
 			String url = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
@@ -165,7 +165,7 @@ public class BootstrapAction extends ProtegeAction {
 					.jdbcUser(username)
 					.jdbcPassword(password)
 					.jdbcDriver(driver)
-					.ppMapping(currentModel.getCurrentImmutableOBDAModel())
+					.ppMapping(currentModel.getCurrentPPMapping())
 					.ontology(currentOnto)
 					.build();
 

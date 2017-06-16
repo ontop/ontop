@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
@@ -61,7 +61,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private static final long serialVersionUID = 4351696247473906680L;
 
 	/** Fields */
-	private OBDAModelWrapper obdaModel;
+	private OBDAModel obdaModel;
 	private OBDADataSource dataSource;
 	private JDialog parent;
 	private TargetQueryVocabularyValidator validator;
@@ -76,9 +76,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	/**
 	 * Create the dialog for inserting a new mapping.
 	 */
-	public NewMappingDialogPanel(OBDAModelWrapper obdaModel, JDialog parent, OBDADataSource dataSource,
-								 TargetQueryVocabularyValidator validator,
-								 NativeQueryLanguageComponentFactory nativeQLFactory) {
+	public NewMappingDialogPanel(OBDAModel obdaModel, JDialog parent, OBDADataSource dataSource,
+                                 TargetQueryVocabularyValidator validator,
+                                 NativeQueryLanguageComponentFactory nativeQLFactory) {
 
 		DialogUtils.installEscapeCloseOperation(parent);
 		this.obdaModel = obdaModel;
@@ -185,7 +185,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			final boolean isValid = validator.validate(targetQuery);
 			if (isValid) {
 				try {
-					OBDAModelWrapper mapcon = obdaModel;
+					OBDAModel mapcon = obdaModel;
 					URI sourceID = dataSource.getSourceID();
 					System.out.println(sourceID.toString()+" \n");
 

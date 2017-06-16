@@ -64,6 +64,6 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 	@Override
 	public void activeOntologyChanged() {
-		editor.setNewDatasource(obdaModelManager.getActiveOBDAModelWrapper());
+		editor.setNewDatasource(obdaModelManager.getActiveOBDAModel());
 	}
 }

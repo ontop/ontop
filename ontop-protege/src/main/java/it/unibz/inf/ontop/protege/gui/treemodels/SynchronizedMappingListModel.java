@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
 
 import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 import it.unibz.inf.ontop.protege.core.OBDAMappingListener;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 
 import javax.swing.*;
 import java.net.URI;
@@ -33,11 +33,11 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 
 	private static final long serialVersionUID = 2317408823037931358L;
 	
-	private OBDAModelWrapper obdaModel;
+	private OBDAModel obdaModel;
 	private URI focusedSource;
 	private List<TreeModelFilter<SQLPPMappingAxiom>> filters;
 
-	public SynchronizedMappingListModel(OBDAModelWrapper obdaModel) {
+	public SynchronizedMappingListModel(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
 		obdaModel.addMappingsListener(this);
 		filters = new LinkedList<TreeModelFilter<SQLPPMappingAxiom>>();

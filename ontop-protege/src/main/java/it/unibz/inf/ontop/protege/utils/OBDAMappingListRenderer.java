@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
 
@@ -74,7 +74,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	private QueryPainter painter;
 	private SQLQueryPainter sqlpainter;
 
-	public OBDAMappingListRenderer(OBDAModelWrapper obdaModel, TargetQueryVocabularyValidator validator) {
+	public OBDAMappingListRenderer(OBDAModel obdaModel, TargetQueryVocabularyValidator validator) {
 
 		prefixManager = obdaModel.getPrefixManager();
 
