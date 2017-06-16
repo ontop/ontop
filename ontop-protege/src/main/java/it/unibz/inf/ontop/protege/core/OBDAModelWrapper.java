@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
@@ -60,7 +60,7 @@ public class OBDAModelWrapper {
      *  This variable is frequently re-affected.
      */
     private final static OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
-    private final OBDAFactoryWithException obdaFactory;
+    private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
     private Optional<OBDADataSource> source;
 
@@ -72,11 +72,11 @@ public class OBDAModelWrapper {
     private final OntologyVocabulary ontologyVocabulary;
 
     public OBDAModelWrapper(SpecificationFactory specificationFactory,
-                            OBDAFactoryWithException obdaFactory, PrefixManagerWrapper prefixManager) {
+                            SQLPPMappingFactory ppMappingFactory, PrefixManagerWrapper prefixManager) {
         this.specificationFactory = specificationFactory;
-        this.obdaFactory = obdaFactory;
+        this.ppMappingFactory = ppMappingFactory;
         this.prefixManager = prefixManager;
-        this.obdaModel = createNewOBDAModel(specificationFactory, obdaFactory, prefixManager);
+        this.obdaModel = createNewOBDAModel(specificationFactory, ppMappingFactory, prefixManager);
         this.sourceListeners = new ArrayList<>();
         this.mappingListeners = new ArrayList<>();
         source = Optional.empty();
@@ -255,7 +255,7 @@ public class OBDAModelWrapper {
     }
 
     public void reset() {
-        obdaModel = createNewOBDAModel(specificationFactory, obdaFactory, prefixManager);
+        obdaModel = createNewOBDAModel(specificationFactory, ppMappingFactory, prefixManager);
     }
 
 
@@ -357,7 +357,7 @@ public class OBDAModelWrapper {
         }
     }
 
-    private static SQLPPMapping createNewOBDAModel(SpecificationFactory specificationFactory, OBDAFactoryWithException obdaFactory,
+    private static SQLPPMapping createNewOBDAModel(SpecificationFactory specificationFactory, SQLPPMappingFactory obdaFactory,
                                                    PrefixManagerWrapper prefixManager) {
         try {
             return obdaFactory.createSQLPreProcessedMapping(ImmutableList.of(), specificationFactory.createMetadata(prefixManager,

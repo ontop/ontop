@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
@@ -28,7 +28,7 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
     protected void configure() {
         bind(OntopMappingSQLSettings.class).toInstance(settings);
 
-        bindFromPreferences(OBDAFactoryWithException.class);
+        bindFromPreferences(SQLPPMappingFactory.class);
         bindFromPreferences(SQLMappingParser.class);
         bindFromPreferences(SQLPPMapping2OBDASpecificationConverter.class);
         bindFromPreferences(MappingVocabularyFixer.class);

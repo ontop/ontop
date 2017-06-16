@@ -77,7 +77,7 @@ public class DirectMappingEngine {
 	private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final SpecificationFactory specificationFactory;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
-	private final OBDAFactoryWithException obdaFactory;
+	private final SQLPPMappingFactory ppMappingFactory;
 	private final OntopSQLCoreSettings settings;
 	private final JDBCConnectionManager connManager;
 
@@ -98,11 +98,11 @@ public class DirectMappingEngine {
 	@Inject
 	private DirectMappingEngine(OntopSQLCoreSettings settings, SpecificationFactory specificationFactory,
                                 NativeQueryLanguageComponentFactory nativeQLFactory,
-                                OBDAFactoryWithException obdaFactory) {
+                                SQLPPMappingFactory ppMappingFactory) {
 		connManager = JDBCConnectionManager.getJDBCConnectionManager();
 		this.specificationFactory = specificationFactory;
 		this.nativeQLFactory = nativeQLFactory;
-		this.obdaFactory = obdaFactory;
+		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
 	}
 
@@ -193,7 +193,7 @@ public class DirectMappingEngine {
 	private SQLPPMapping extractPPMapping() throws DuplicateMappingException, SQLException {
 		it.unibz.inf.ontop.io.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, UriTemplateMatcher.create(Stream.empty()));
-		SQLPPMapping emptyPPMapping = obdaFactory.createSQLPreProcessedMapping(ImmutableList.of(), mappingMetadata);
+		SQLPPMapping emptyPPMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), mappingMetadata);
 		return extractPPMapping(emptyPPMapping);
 	}
 
@@ -236,7 +236,7 @@ public class DirectMappingEngine {
 		mappings.addAll(ppMapping.getPPMappingAxioms());
 		mappings.addAll(mappingAxioms);
 
-		return obdaFactory.createSQLPreProcessedMapping(ImmutableList.copyOf(mappings), ppMapping.getMetadata());
+		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.copyOf(mappings), ppMapping.getMetadata());
 	}
 
 

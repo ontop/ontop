@@ -34,7 +34,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import org.eclipse.rdf4j.model.Model;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
 
 import it.unibz.inf.ontop.parser.TargetQueryParser;
@@ -74,7 +74,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private static final Logger LOG = LoggerFactory.getLogger(OntopNativeMappingParser.class);
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
-    private final OBDAFactoryWithException obdaFactory;
+    private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
 
     /**
@@ -83,9 +83,9 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     @Inject
     private OntopNativeMappingParser(NativeQueryLanguageComponentFactory nativeQLFactory,
                                      SpecificationFactory specificationFactory,
-                                     OBDAFactoryWithException obdaFactory) {
+                                     SQLPPMappingFactory ppMappingFactory) {
         this.nativeQLFactory = nativeQLFactory;
-        this.obdaFactory = obdaFactory;
+        this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
     }
 
@@ -98,7 +98,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     public SQLPPMapping parse(File file) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
         checkFile(file);
         try (Reader reader = new FileReader(file)) {
-            return load(reader, specificationFactory, nativeQLFactory, obdaFactory, file.getName());
+            return load(reader, specificationFactory, nativeQLFactory, ppMappingFactory, file.getName());
         } catch (IOException e) {
             throw new MappingIOException(e);
         }
@@ -106,7 +106,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 
     @Override
     public SQLPPMapping parse(Reader reader) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
-        return load(reader, specificationFactory, nativeQLFactory, obdaFactory, ".obda file");
+        return load(reader, specificationFactory, nativeQLFactory, ppMappingFactory, ".obda file");
     }
 
     @Override
@@ -134,7 +134,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      */
 	private static SQLPPMapping load(Reader reader, SpecificationFactory specificationFactory,
                                      NativeQueryLanguageComponentFactory nativeQLFactory,
-                                     OBDAFactoryWithException obdaFactory, String fileName)
+                                     SQLPPMappingFactory ppMappingFactory, String fileName)
             throws MappingIOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
 
         final Map<String, String> prefixes = new HashMap<>();
@@ -210,7 +210,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                         .map(t -> (Function) t));
 
         MappingMetadata metadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
-        return obdaFactory.createSQLPreProcessedMapping(mappingAxioms, metadata);
+        return ppMappingFactory.createSQLPreProcessedMapping(mappingAxioms, metadata);
 	}
     
     /*
