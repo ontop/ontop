@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.ConnectionTools;
 import it.unibz.inf.ontop.protege.utils.CustomTraversalPolicy;
@@ -55,7 +55,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
     private OBDADataSource currentDataSource;
 
-	private OBDAModelWrapper obdaModel;
+	private OBDAModel obdaModel;
 
     private ComboBoxItemListener comboListener;
 
@@ -68,7 +68,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         this.owlEditorKit = owlEditorKit;
         OBDAModelManager obdaModelManager = (OBDAModelManager) owlEditorKit.get(SQLPPMappingImpl.class.getName());
-        OBDAModelWrapper model = obdaModelManager.getActiveOBDAModelWrapper();
+        OBDAModel model = obdaModelManager.getActiveOBDAModel();
 
         timer = new Timer(200, e -> handleTimer());
 
@@ -111,7 +111,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         }
     }
 
-    public void setNewDatasource(OBDAModelWrapper model) {
+    public void setNewDatasource(OBDAModel model) {
         obdaModel = model;
         resetTextFields();
 

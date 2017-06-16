@@ -39,15 +39,15 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 	 */
 	private static class FlexibleConfigurationBuilder {
 		private Optional<Properties> optionalProperties = Optional.empty();
-		private Optional<OBDAModelWrapper> optionalObdaModelWrapper = Optional.empty();
+		private Optional<OBDAModel> optionalObdaModel = Optional.empty();
 		private Optional<File> optionalImplicitDBConstraintFile = Optional.empty();
 
 		public OntopSQLOWLAPIConfiguration buildOntopSQLOWLAPIConfiguration() {
 			OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder();
 			optionalProperties
 					.ifPresent(builder::properties);
-			optionalObdaModelWrapper
-					.ifPresent(w -> builder.ppMapping(w.getCurrentImmutableOBDAModel()));
+			optionalObdaModel
+					.ifPresent(w -> builder.ppMapping(w.getCurrentPPMapping()));
 			optionalImplicitDBConstraintFile
 					.ifPresent(builder::basicImplicitConstraintFile);
 
@@ -58,8 +58,8 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 			this.optionalProperties = Optional.of(properties);
 		}
 
-		public void setOBDAModelWrapper(OBDAModelWrapper modelWrapper) {
-			this.optionalObdaModelWrapper = Optional.of(modelWrapper);
+		public void setOBDAModel(OBDAModel obdaModel) {
+			this.optionalObdaModel = Optional.of(obdaModel);
 		}
 
 		public void setImplicitDBConstraintFile(File implicitDBConstraintFile) {
@@ -85,8 +85,8 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
         configBuilder.setProperties(preferences);
 	}
 
-	public void setOBDAModelWrapper(OBDAModelWrapper modelWrapper) {
-        configBuilder.setOBDAModelWrapper(modelWrapper);
+	public void setOBDAModelWrapper(OBDAModel modelWrapper) {
+        configBuilder.setOBDAModel(modelWrapper);
 	}
 
 	/**

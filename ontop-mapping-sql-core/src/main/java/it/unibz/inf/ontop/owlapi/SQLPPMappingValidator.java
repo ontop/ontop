@@ -29,7 +29,7 @@ import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import java.util.List;
 
 /***
- * Validates an OBDAModel (mappings) against the vocabulary of an ontology
+ * Validates a SQLPPMapping against the vocabulary of an ontology
  * and adds type information to the mapping predicates
  *
  * Used by the Protege plugin in
@@ -40,10 +40,7 @@ import java.util.List;
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  * 
  */
-
-//TODO: move to a more appropriate package
-
-public class OBDAModelValidator {
+public class SQLPPMappingValidator {
 
 	public static void validate(SQLPPMapping ppMapping, ImmutableOntologyVocabulary vocabulary) throws Exception {
 

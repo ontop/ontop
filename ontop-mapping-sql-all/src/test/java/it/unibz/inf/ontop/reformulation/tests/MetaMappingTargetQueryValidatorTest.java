@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlapi.OBDAModelValidator;
+import it.unibz.inf.ontop.owlapi.SQLPPMappingValidator;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.model.SQLPPMapping;
@@ -71,7 +71,7 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 
 		// run validator
 		try {
-			OBDAModelValidator.validate(ppMapping, vocabulary);
+			SQLPPMappingValidator.validate(ppMapping, vocabulary);
 		}
 		catch (Exception e) {
 			fail("The target query has problem:" + e.getMessage());
