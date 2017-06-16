@@ -22,10 +22,10 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
-import it.unibz.inf.ontop.r2rml.OBDAModelToR2RMLConverter;
+import it.unibz.inf.ontop.r2rml.SQLPPMappingToR2RMLConverter;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -53,7 +53,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit)getEditorKit();		
-		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelWrapper();
+		obdaModel = ((OBDAModelManager)editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModelWrapper();
 		modelManager = editorKit.getOWLModelManager();
 	}
 
@@ -93,7 +93,7 @@ public class R2RMLExportAction extends ProtegeAction {
 					NativeQueryLanguageComponentFactory nativeQLFactory = OntopModelConfiguration.defaultBuilder()
 							.build().getInjector().getInstance(NativeQueryLanguageComponentFactory.class);
 
-					OBDAModelToR2RMLConverter writer = new OBDAModelToR2RMLConverter(obdaModel.getCurrentImmutableOBDAModel(),
+					SQLPPMappingToR2RMLConverter writer = new SQLPPMappingToR2RMLConverter(obdaModel.getCurrentImmutableOBDAModel(),
 							modelManager.getActiveOntology(),
 							nativeQLFactory);
                     writer.write(file);

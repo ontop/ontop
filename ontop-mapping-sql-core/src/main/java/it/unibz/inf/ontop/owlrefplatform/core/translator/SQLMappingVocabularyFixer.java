@@ -30,7 +30,6 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
 
@@ -65,8 +64,8 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 
 
     @Override
-	public ImmutableList<OBDAMappingAxiom> fixMappingAxioms(ImmutableList<OBDAMappingAxiom> mappingAxioms,
-                                                            ImmutableOntologyVocabulary vocabulary) {
+	public ImmutableList<SQLPPMappingAxiom> fixMappingAxioms(ImmutableList<SQLPPMappingAxiom> mappingAxioms,
+                                                             ImmutableOntologyVocabulary vocabulary) {
         log.debug("Fixing OBDA Model");
         return ImmutableList.copyOf(fixMappingPredicates(mappingAxioms, vocabulary, nativeQLFactory));
     }
@@ -79,9 +78,9 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 	 * @param vocabulary
 	 * @return
 	 */
-	private static ImmutableList<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings,
-                                                      ImmutableOntologyVocabulary vocabulary,
-													  NativeQueryLanguageComponentFactory nativeQLFactory) {
+	private static ImmutableList<SQLPPMappingAxiom> fixMappingPredicates(Collection<SQLPPMappingAxiom> originalMappings,
+                                                                         ImmutableOntologyVocabulary vocabulary,
+                                                                         NativeQueryLanguageComponentFactory nativeQLFactory) {
 		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 
         Map<String, Predicate> urimap = new HashMap<>();
@@ -98,8 +97,8 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
             urimap.put(p.getName(), p.getPredicate());
 
 
-        Collection<OBDAMappingAxiom> result = new ArrayList<>();
-        for (OBDAMappingAxiom mapping : originalMappings) {
+        Collection<SQLPPMappingAxiom> result = new ArrayList<>();
+        for (SQLPPMappingAxiom mapping : originalMappings) {
             List<Function> targetQuery = mapping.getTargetQuery();
             List<Function> newbody = new LinkedList<>();
 
@@ -157,7 +156,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 		return ImmutableList.copyOf(result);
     }
 
-    private static Function fixSameAsPredicate(OBDAMappingAxiom mapping, String sameAsPredName, List<Term> arguments) {
+    private static Function fixSameAsPredicate(SQLPPMappingAxiom mapping, String sameAsPredName, List<Term> arguments) {
 
         Function fixedTarget;
         if (arguments.size() == 2) {
@@ -203,7 +202,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
         return fixedTarget;
     }
 
-    private static Function fixTripleAtom(OBDAMappingAxiom mapping, List<Term> arguments) {
+    private static Function fixTripleAtom(SQLPPMappingAxiom mapping, List<Term> arguments) {
         Function newatom;
         Term t0 = arguments.get(0);
         if ((t0 instanceof Function) && ((Function) t0).getFunctionSymbol() instanceof URITemplatePredicate) {
@@ -222,7 +221,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
         return newatom;
     }
 
-    private static Function fixOntologyPredicate(OBDAMappingAxiom mapping, Predicate predTarget, List<Term> arguments, Predicate predicate) {
+    private static Function fixOntologyPredicate(SQLPPMappingAxiom mapping, Predicate predTarget, List<Term> arguments, Predicate predicate) {
         Function newatom;
         if (arguments.size() == 1) {
             Term t0 = arguments.get(0);
@@ -321,7 +320,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
         return newatom;
     }
 
-    private static Function fixUndeclaredPredicate(OBDAMappingAxiom mapping, String undeclaredPredName, List<Term> arguments) {
+    private static Function fixUndeclaredPredicate(SQLPPMappingAxiom mapping, String undeclaredPredName, List<Term> arguments) {
         Function fixedTarget;
         if (arguments.size() == 1) {
             Term t0 = arguments.get(0);

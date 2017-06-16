@@ -47,7 +47,7 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 			optionalProperties
 					.ifPresent(builder::properties);
 			optionalObdaModelWrapper
-					.ifPresent(w -> builder.obdaModel(w.getCurrentImmutableOBDAModel()));
+					.ifPresent(w -> builder.ppMapping(w.getCurrentImmutableOBDAModel()));
 			optionalImplicitDBConstraintFile
 					.ifPresent(builder::basicImplicitConstraintFile);
 

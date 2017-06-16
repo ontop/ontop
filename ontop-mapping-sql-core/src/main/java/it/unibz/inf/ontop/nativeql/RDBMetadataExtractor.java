@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.nativeql;
 
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 
@@ -21,10 +21,10 @@ import java.util.Optional;
  */
 public interface RDBMetadataExtractor {
 
-    RDBMetadata extract(OBDAModel model, @Nullable Connection dbConnection, Optional<File> constraintFile)
+    RDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection dbConnection, Optional<File> constraintFile)
             throws DBMetadataExtractionException;
 
-    RDBMetadata extract(OBDAModel model, @Nullable Connection dbConnection,
-                       DBMetadata partiallyDefinedMetadata, Optional<File> constraintFile)
+    RDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection dbConnection,
+                        DBMetadata partiallyDefinedMetadata, Optional<File> constraintFile)
             throws DBMetadataExtractionException;
 }

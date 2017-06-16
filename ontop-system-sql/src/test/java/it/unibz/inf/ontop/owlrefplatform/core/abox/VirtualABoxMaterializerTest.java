@@ -87,10 +87,10 @@ public class VirtualABoxMaterializerTest {
 	@Test
 	public void testOneSource() throws Exception {
 
-    	OBDAModel ppMapping = createMapping();
+    	SQLPPMapping ppMapping = createMapping();
 
 		OntopStandaloneSQLConfiguration configuration = createAndInitConfiguration()
-				.obdaModel(ppMapping)
+				.ppMapping(ppMapping)
 				.build();
 		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
@@ -133,7 +133,7 @@ public class VirtualABoxMaterializerTest {
 
 
 
-	private static OBDAModel createMapping() throws DuplicateMappingException {
+	private static SQLPPMapping createMapping() throws DuplicateMappingException {
 
     	// TODO: we should not have to create an high-level configuration just for constructing these objects...
 		OntopStandaloneSQLConfiguration configuration = createAndInitConfiguration()
@@ -166,7 +166,7 @@ public class VirtualABoxMaterializerTest {
 		body.add(DATA_FACTORY.getFunction(hasschool, personTemplate, schoolTemplate));
 		body.add(DATA_FACTORY.getFunction(school, schoolTemplate));
 
-		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
+		SQLPPMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 
 		UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
 				body.stream()
@@ -176,7 +176,7 @@ public class VirtualABoxMaterializerTest {
 
 		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
-		return obdaFactory.createOBDAModel(ImmutableList.of(map1), mappingMetadata);
+		return obdaFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), mappingMetadata);
 	}
 
 //	public void testTwoSources() throws Exception {

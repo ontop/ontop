@@ -25,9 +25,9 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPMapping;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import org.protege.editor.core.Disposable;
@@ -58,7 +58,7 @@ public class R2RMLImportAction extends ProtegeAction {
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit) getEditorKit();
-		obdaModelController = ((OBDAModelManager) editorKit.get(OBDAModelImpl.class
+		obdaModelController = ((OBDAModelManager) editorKit.get(SQLPPMappingImpl.class
 				.getName())).getActiveOBDAModelWrapper();
 		modelManager = editorKit.getOWLWorkspace().getOWLModelManager();
 	}
@@ -111,12 +111,12 @@ public class R2RMLImportAction extends ProtegeAction {
 					URI sourceID = dataSource.getSourceID();
 
 					try {
-						OBDAModel parsedModel = configuration.loadProvidedPPMapping();
+						SQLPPMapping parsedModel = configuration.loadProvidedPPMapping();
 
 						/**
 						 * TODO: improve this inefficient method (batch processing, not one by one)
 						 */
-						for (OBDAMappingAxiom mapping : parsedModel.getMappings()) {
+						for (SQLPPMappingAxiom mapping : parsedModel.getPPMappingAxioms()) {
 							if (mapping.getTargetQuery().toString().contains("BNODE")) {
 								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 							} else {

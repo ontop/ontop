@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -63,7 +63,7 @@ public class BootstrapAction extends ProtegeAction {
 		editorKit = (OWLEditorKit) getEditorKit();
 		workspace = editorKit.getWorkspace();
 		owlManager = editorKit.getOWLModelManager();
-		modelManager = ((OBDAModelManager) editorKit.get(OBDAModelImpl.class
+		modelManager = ((OBDAModelManager) editorKit.get(SQLPPMappingImpl.class
 				.getName()));
 	}
 
@@ -165,7 +165,7 @@ public class BootstrapAction extends ProtegeAction {
 					.jdbcUser(username)
 					.jdbcPassword(password)
 					.jdbcDriver(driver)
-					.obdaModel(currentModel.getCurrentImmutableOBDAModel())
+					.ppMapping(currentModel.getCurrentImmutableOBDAModel())
 					.ontology(currentOnto)
 					.build();
 

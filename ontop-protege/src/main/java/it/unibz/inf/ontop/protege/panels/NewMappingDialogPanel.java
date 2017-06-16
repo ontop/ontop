@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
@@ -193,7 +192,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source);
 					System.out.println(body.toString()+" \n");
 
-					OBDAMappingAxiom newmapping = nativeQLFactory.create(txtMappingID.getText().trim(), body, targetQuery);
+					SQLPPMappingAxiom newmapping = nativeQLFactory.create(txtMappingID.getText().trim(), body, targetQuery);
 					System.out.println(newmapping.toString()+" \n");
 
 					if (mapping == null) {
@@ -590,7 +589,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
     private javax.swing.JTextPane txtTargetQuery;
     // End of variables declaration//GEN-END:variables
 
-	private OBDAMappingAxiom mapping;
+	private SQLPPMappingAxiom mapping;
 
 	private List<Function> parse(String query) {
 		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getPrefixManager().getPrefixMap());
@@ -622,7 +621,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	 * set, this means that this dialog is "updating" a mapping, and not
 	 * creating a new one.
 	 */
-	public void setMapping(OBDAMappingAxiom mapping) {
+	public void setMapping(SQLPPMappingAxiom mapping) {
 		this.mapping = mapping;
 
 		cmdInsertMapping.setText("Update");

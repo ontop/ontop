@@ -143,10 +143,10 @@ public class SQLMappingParserUsingOwlTest {
      */
 
     private void saveRegularFile() throws Exception {
-        OBDAModel model = modelFactory.createOBDAModel(ImmutableList.of(),
+        SQLPPMapping ppMapping = modelFactory.createSQLPreProcessedMapping(ImmutableList.of(),
                 specificationFactory.createMetadata(specificationFactory.createPrefixManager(ImmutableMap.of()),
                         UriTemplateMatcher.create(Stream.of())));
-        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
+        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
         writer.save(new File("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
     }
 
@@ -155,22 +155,22 @@ public class SQLMappingParserUsingOwlTest {
      */
 
     private void loadRegularFile() throws Exception {
-        OBDAModel model = loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda");
+        SQLPPMapping ppMapping = loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda");
 
         // Check the content
-        assertEquals(model.getMetadata().getPrefixManager().getPrefixMap().size(), 5);
-        assertEquals(model.getMappings().size(), 0);
+        assertEquals(ppMapping.getMetadata().getPrefixManager().getPrefixMap().size(), 5);
+        assertEquals(ppMapping.getPPMappingAxioms().size(), 0);
     }
 
     private void loadFileWithMultipleDataSources() throws Exception {
-        OBDAModel model = loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolMultipleDataSources.obda");
+        SQLPPMapping ppMapping = loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolMultipleDataSources.obda");
 
         // Check the content
-        assertEquals(model.getMetadata().getPrefixManager().getPrefixMap().size(), 6);
-        assertEquals(model.getMappings().size(), 2);
+        assertEquals(ppMapping.getMetadata().getPrefixManager().getPrefixMap().size(), 6);
+        assertEquals(ppMapping.getPPMappingAxioms().size(), 2);
     }
 
-    private OBDAModel loadObdaFile(String fileLocation) throws MappingIOException,
+    private SQLPPMapping loadObdaFile(String fileLocation) throws MappingIOException,
             InvalidPredicateDeclarationException, InvalidMappingException, DuplicateMappingException {
         // Load the OBDA model
         return mappingParser.parse(new File(fileLocation));
@@ -183,8 +183,8 @@ public class SQLMappingParserUsingOwlTest {
         return prefixManager;
     }
     
-    private Map<URI, ImmutableList<OBDAMappingAxiom>> addSampleMappings(URI sourceId) {
-        Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>();
+    private Map<URI, ImmutableList<SQLPPMappingAxiom>> addSampleMappings(URI sourceId) {
+        Map<URI, ImmutableList<SQLPPMappingAxiom>> mappingIndex = new HashMap<>();
         // Add some mappings
         try {
             mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[0][0],
@@ -199,8 +199,8 @@ public class SQLMappingParserUsingOwlTest {
         return mappingIndex;
     }
     
-    private Map<URI, ImmutableList<OBDAMappingAxiom>> addMoreSampleMappings(
-            Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex, URI sourceId) {
+    private Map<URI, ImmutableList<SQLPPMappingAxiom>> addMoreSampleMappings(
+            Map<URI, ImmutableList<SQLPPMappingAxiom>> mappingIndex, URI sourceId) {
         // Add some mappings
         try {
             mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[3][0],

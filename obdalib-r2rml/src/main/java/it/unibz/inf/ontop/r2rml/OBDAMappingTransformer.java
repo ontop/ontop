@@ -55,8 +55,6 @@ import org.apache.commons.rdf.rdf4j.RDF4J;
 import java.util.Collection;
 
 
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -92,7 +90,7 @@ public class OBDAMappingTransformer {
     /**
 	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 */
-	public TriplesMap getTriplesMap(OBDAMappingAxiom axiom,
+	public TriplesMap getTriplesMap(SQLPPMappingAxiom axiom,
                                     PrefixManager prefixmng) {
 
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();

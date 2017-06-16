@@ -22,9 +22,9 @@ public interface NativeQueryLanguageComponentFactory {
 
     RDBMetadataExtractor create();
 
-    OBDAMappingAxiom create(String id, @Assisted("sourceQuery") SourceQuery sourceQuery,
-                            @Assisted("targetQuery") List<Function> targetQuery);
+    SQLPPMappingAxiom create(String id, @Assisted("sourceQuery") SourceQuery sourceQuery,
+                             @Assisted("targetQuery") List<Function> targetQuery);
 
-    OBDAMappingAxiom create(@Assisted("sourceQuery") SourceQuery sourceQuery,
-                            @Assisted("targetQuery") List<Function> targetQuery);
+    SQLPPMappingAxiom create(@Assisted("sourceQuery") SourceQuery sourceQuery,
+                             @Assisted("targetQuery") List<Function> targetQuery);
 }

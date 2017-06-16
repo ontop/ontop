@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.injection;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 
 /**
  * Some object instantiations may throw exceptions that
@@ -18,6 +18,6 @@ import it.unibz.inf.ontop.model.OBDAModel;
  */
 public interface OBDAFactoryWithException {
 
-    OBDAModel createOBDAModel(ImmutableList<OBDAMappingAxiom> newMappings,
-                              MappingMetadata metadata) throws DuplicateMappingException;
+    SQLPPMapping createSQLPreProcessedMapping(ImmutableList<SQLPPMappingAxiom> newMappings,
+                                              MappingMetadata metadata) throws DuplicateMappingException;
 }

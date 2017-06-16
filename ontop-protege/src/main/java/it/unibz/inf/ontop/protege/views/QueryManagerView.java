@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanel;
@@ -50,7 +50,7 @@ public class QueryManagerView extends AbstractOWLViewComponent implements OBDAMo
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
-		obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
+		obdaController = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
 		obdaController.addListener(this);
 
 		setLayout(new BorderLayout());

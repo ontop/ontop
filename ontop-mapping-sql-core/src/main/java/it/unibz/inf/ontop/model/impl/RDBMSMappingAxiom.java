@@ -27,12 +27,12 @@ import java.util.List;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
 import it.unibz.inf.ontop.model.SourceQuery;
 import it.unibz.inf.ontop.utils.IDGenerator;
 
-public class RDBMSMappingAxiom extends AbstractOBDAMappingAxiom
+public class RDBMSMappingAxiom extends AbstractSQLPPMappingAxiom
 {
 	private static final long serialVersionUID = 5793656631843898419L;
 	
@@ -77,12 +77,12 @@ public class RDBMSMappingAxiom extends AbstractOBDAMappingAxiom
 	}
 
 	@Override
-	public OBDAMappingAxiom clone() {
+	public SQLPPMappingAxiom clone() {
 		List<Function> newbody = new ArrayList<>(targetQuery.size());
 		for (Function f : targetQuery)
 			newbody.add((Function)f.clone());
 
-		OBDAMappingAxiom clone = new RDBMSMappingAxiom(this.getId(), sourceQuery.clone(), newbody);
+		SQLPPMappingAxiom clone = new RDBMSMappingAxiom(this.getId(), sourceQuery.clone(), newbody);
 		return clone;
 	}
 	
