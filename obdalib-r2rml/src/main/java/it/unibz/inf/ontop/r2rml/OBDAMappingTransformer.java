@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.r2rml;
  * #L%
  */
 
-import com.google.common.collect.ImmutableMap;
 import eu.optique.api.mapping.*;
 import eu.optique.api.mapping.TermMap.TermMapType;
 import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
@@ -79,10 +78,7 @@ public class OBDAMappingTransformer {
 		String random_number = IDGenerator.getNextUniqueID("");
 		
 		//triplesMap node
-		String mapping_id = axiom.getId();
-		if (!mapping_id.startsWith("http://"))
-			mapping_id = "http://example.org/" + mapping_id;
-		Resource mainNode = vf.createURI(mapping_id);
+		Resource mainNode = vf.createURI(axiom.getId());
 		statements.add(vf.createStatement(mainNode, vf.createURI(OBDAVocabulary.RDF_TYPE), R2RMLVocabulary.TriplesMap));
 		
 		//creating logical table node
@@ -258,13 +254,7 @@ public class OBDAMappingTransformer {
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
 		List<Function> tquery = axiom.getTargetQuery();
 
-		String random_number = IDGenerator.getNextUniqueID("");
-
 		//triplesMap node
-		String mapping_id = axiom.getId();
-		if (!mapping_id.startsWith("http://"))
-			mapping_id = "http://example.org/" + mapping_id;
-		Resource mainNode = vf.createURI(mapping_id);
 
         R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
 		MappingFactory mfact = mm.getMappingFactory();
@@ -282,7 +272,7 @@ public class OBDAMappingTransformer {
 		
 		//process target query
 		for (Function func : tquery) {
-			random_number = IDGenerator.getNextUniqueID("");
+
 			Predicate pred = func.getFunctionSymbol();
 			String predName = pred.getName();
 			URI predUri = null; String predURIString ="";
@@ -458,7 +448,7 @@ public class OBDAMappingTransformer {
 
 		return tm;
 	}
-	
+
 	public OWLOntology getOntology() {
 		return ontology;
 	}
