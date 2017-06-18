@@ -34,14 +34,16 @@ package it.unibz.inf.ontop.sql;
 
 public class QuotedIDFactoryMySQL implements QuotedIDFactory {
 
-	private final String quotationString; 
+	private final String quotationString;
+	private final boolean caseSensitiveTableNames;
 	
 	/**
 	 * used only in DBMetadataExtractor
 	 */
 	
-	QuotedIDFactoryMySQL(String quotationString) {
+	QuotedIDFactoryMySQL(boolean caseSensitiveTableNames, String quotationString) {
 		this.quotationString = quotationString;
+		this.caseSensitiveTableNames = caseSensitiveTableNames;
 	}
 
 	@Override
@@ -71,15 +73,15 @@ public class QuotedIDFactoryMySQL implements QuotedIDFactory {
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
 		
 		if (s.startsWith("\"") && s.endsWith("\"")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
+			return new QuotedID(s.substring(1, s.length() - 1), quotationString, caseSensitiveTableNames);
 		if (s.startsWith("`") && s.endsWith("`")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
+			return new QuotedID(s.substring(1, s.length() - 1), quotationString, caseSensitiveTableNames);
 		if (s.startsWith("[") && s.endsWith("]")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
+			return new QuotedID(s.substring(1, s.length() - 1), quotationString, caseSensitiveTableNames);
 		if (s.startsWith("'") && s.endsWith("'")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
+			return new QuotedID(s.substring(1, s.length() - 1), quotationString, caseSensitiveTableNames);
 
-		return new QuotedID(s, QuotedID.NO_QUOTATION);
+		return new QuotedID(s, QuotedID.NO_QUOTATION, caseSensitiveTableNames);
 	}
 	
 	@Override

@@ -28,17 +28,17 @@ public class Db2ConstraintTest extends AbstractConstraintTest {
 
 	@Override
 	protected String getConnectionPassword() {
-		return "fish";
+		return "obda-pwd";
 	}
 
 	@Override
 	protected String getConnectionString() {
-		return "jdbc:db2://10.7.20.39:50001/dbconst";
+		return "jdbc:db2://tom.inf.unibz.it:50000/sbooks";
 	}
 
 	@Override
 	protected String getConnectionUsername() {
-		return "db2inst2";
+		return "db2inst1";
 	}
 
 	@Override

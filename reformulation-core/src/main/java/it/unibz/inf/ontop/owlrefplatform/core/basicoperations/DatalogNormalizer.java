@@ -47,26 +47,6 @@ public class DatalogNormalizer {
 
 
 	/***
-	 * This expands all AND trees into individual comparison atoms in the body
-	 * of the query. Nested AND trees inside Join or LeftJoin atoms are not
-	 * touched.
-	 * 
-	 * @param query
-	 * @return
-	 */
-	public static void unfoldANDTrees(CQIE query) {
-		List<Function> body = query.getBody();
-		/* Collecting all necessary conditions */
-		for (int i = 0; i < body.size(); i++) {
-			Function currentAtom = body.get(i);
-			if (currentAtom.getFunctionSymbol() == ExpressionOperation.AND) {
-				body.remove(i);
-				body.addAll(getUnfolderAtomList(currentAtom));
-			}
-		}
-	}
-
-	/***
 	 * This expands all Join that can be directly added as conjuncts to a
 	 * query's body. Nested Join trees inside left joins are not touched.
 	 * 
@@ -88,7 +68,7 @@ public class DatalogNormalizer {
 	 * the join (the single data atom plus possibly extra boolean conditions and
 	 * adds them to the node that is the parent of the join).
 	 * 
-	 * @param query
+	 * @param body
 	 * @return
 	 */
 	private static void unfoldJoinTrees(List body, boolean isJoin) {
@@ -184,8 +164,7 @@ public class DatalogNormalizer {
 	 * JOINs, which generate wrong ON or WHERE conditions.
 	 * 
 	 * 
-	 * @param currentTerms
-	 * @param substitutions
+	 * @param query
 	 */
 	public static void pullOutEqualities(CQIE query) {
 		Substitution substitutions = new SubstitutionImpl();
@@ -434,7 +413,7 @@ public class DatalogNormalizer {
 	 * atom is unique.
 	 * 
 	 * @param atoms
-	 * @param branch
+	 * @param focusBranch
 	 * @return
 	 */
 	private static Set<Variable> getProblemVariablesForBranchN(List<Term> atoms, int focusBranch) {
@@ -635,56 +614,6 @@ public class DatalogNormalizer {
 
 	}
 
-	/***
-	 * Takes an AND atom and breaks it into a list of individual condition
-	 * atoms.
-	 * 
-	 * @param atom
-	 * @return
-	 */
-	public static List<Function> getUnfolderAtomList(Function atom) {
-		if (atom.getFunctionSymbol() != ExpressionOperation.AND) {
-			throw new InvalidParameterException();
-		}
-		List<Term> innerFunctionalTerms = new LinkedList<>();
-		for (Term term : atom.getTerms()) {
-			innerFunctionalTerms.addAll(getUnfolderTermList((Function) term));
-		}
-		List<Function> newatoms = new LinkedList<>();
-		for (Term innerterm : innerFunctionalTerms) {
-			Function f = (Function) innerterm;
-			Function newatom = fac.getFunction(f.getFunctionSymbol(), f.getTerms());
-			newatoms.add(newatom);
-		}
-		return newatoms;
-	}
-
-	/***
-	 * Takes an AND atom and breaks it into a list of individual condition
-	 * atoms.
-	 * 
-	 * @param atom
-	 * @return
-	 */
-	public static List<Term> getUnfolderTermList(Function term) {
-
-		List<Term> result = new LinkedList<>();
-
-		if (term.getFunctionSymbol() != ExpressionOperation.AND) {
-			result.add(term);
-		} else {
-			List<Term> terms = term.getTerms();
-			for (Term currentterm : terms) {
-				if (currentterm instanceof Function) {
-					result.addAll(getUnfolderTermList((Function) currentterm));
-				} else {
-					result.add(currentterm);
-				}
-			}
-		}
-
-		return result;
-	}
 
 	// THE FOLLOWING COMMENT IS TAKEN FROM THE CODE ABOVE, THE FUNCTIONALITY IT
 	// DESCRIBES

@@ -40,10 +40,8 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.search.EntitySearcher;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
 /**
  * Transform OBDA mappings in R2rml mappings
  * @author Sarah, Mindas, Timi, Guohui, Martin
@@ -80,10 +78,7 @@ public class OBDAMappingTransformer {
 		String random_number = IDGenerator.getNextUniqueID("");
 		
 		//triplesMap node
-		String mapping_id = axiom.getId();
-		if (!mapping_id.startsWith("http://"))
-			mapping_id = "http://example.org/" + mapping_id;
-		Resource mainNode = vf.createURI(mapping_id);
+		Resource mainNode = vf.createURI(axiom.getId());
 		statements.add(vf.createStatement(mainNode, vf.createURI(OBDAVocabulary.RDF_TYPE), R2RMLVocabulary.TriplesMap));
 		
 		//creating logical table node
@@ -248,24 +243,18 @@ public class OBDAMappingTransformer {
 	}
 
 	/**
-	 * Get R2RML TriplesMap from OBDA mapping axiom
+	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 * @param axiom
 	 * @param prefixmng
 	 * @return
 	 */
-	public TriplesMap getTriplesMap(OBDAMappingAxiom axiom,
-			PrefixManager prefixmng) {
-		
+	public TriplesMap getTripleMap(OBDAMappingAxiom axiom,
+									PrefixManager prefixmng) {
+
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
 		List<Function> tquery = axiom.getTargetQuery();
-		
-		String random_number = IDGenerator.getNextUniqueID("");
-		
+
 		//triplesMap node
-		String mapping_id = axiom.getId();
-		if (!mapping_id.startsWith("http://"))
-			mapping_id = "http://example.org/" + mapping_id;
-		Resource mainNode = vf.createURI(mapping_id);
 
         R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
 		MappingFactory mfact = mm.getMappingFactory();
@@ -279,15 +268,16 @@ public class OBDAMappingTransformer {
 		Template templs = mfact.createTemplate(subjectTemplate);
 		SubjectMap sm = mfact.createSubjectMap(templs);
 		
-		TriplesMap tm = mfact.createTriplesMap(lt, sm);
+		TriplesMap tm = mfact.createTriplesMap(lt, sm, axiom.getId());
 		
 		//process target query
 		for (Function func : tquery) {
-			random_number = IDGenerator.getNextUniqueID("");
+
 			Predicate pred = func.getFunctionSymbol();
 			String predName = pred.getName();
 			URI predUri = null; String predURIString ="";
-			
+			Optional<Template> templp = Optional.empty();
+
 			if (pred.isTriplePredicate()) {
 				//triple
 				Function predf = (Function)func.getTerm(1);
@@ -297,9 +287,10 @@ public class OBDAMappingTransformer {
 						predUri = vf.createURI(pred.getName());
 					}
 					else {
-						//custom predicate
+						//template
 						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
 						predUri = vf.createURI(predURIString);
+                        templp = Optional.of(mfact.createTemplate(subjectTemplate));
 					}
 				}	
 			} 
@@ -319,8 +310,9 @@ public class OBDAMappingTransformer {
 				sm.addClass(predUri);
 				
 			} else {
-//                PredicateMap predM = null;
-				PredicateMap predM = mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, predURIString);
+				PredicateMap predM = templp.isPresent()?
+				mfact.createPredicateMap(templp.get()):
+				mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, predURIString);
 				ObjectMap obm = null; PredicateObjectMap pom = null;
                 Term object = null;
 				if (!pred.isTriplePredicate()) {
@@ -456,7 +448,7 @@ public class OBDAMappingTransformer {
 
 		return tm;
 	}
-	
+
 	public OWLOntology getOntology() {
 		return ontology;
 	}

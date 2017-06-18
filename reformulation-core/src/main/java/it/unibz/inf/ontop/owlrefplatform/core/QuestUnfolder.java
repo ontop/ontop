@@ -9,10 +9,7 @@ import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingProcessor;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.*;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.parser.PreprocessProjection;
 import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
@@ -72,28 +69,31 @@ public class QuestUnfolder {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
 
-		/**
-		 * add sameAsInverse
-		 */
-		mappings.addAll(MappingSameAs.addSameAsInverse(mappings));
 
-		/** 
+		/*
 		 * Substitute select * with column names  (performs the operation `in place')
 		 */
 		preprocessProjection(mappings, metadata);
 
-		/**
+		/*
 		 * Split the mapping (creates a new set of mappings)
 		 */
 		Collection<OBDAMappingAxiom> splittedMappings = MappingSplitter.splitMappings(mappings);
-		
-		/**
+
+		/*
 		 * Expand the meta mapping (creates a new set of mappings)
 		 */
 		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata.getQuotedIDFactory());
 		Collection<OBDAMappingAxiom> expandedMappings = metaMappingExpander.expand(splittedMappings);
-		
-		List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(expandedMappings, metadata);
+
+        /*
+         * add sameAsInverse
+         */
+        if (sameAs) {
+            expandedMappings = MappingSameAs.addSameAsInverse(expandedMappings);
+        }
+
+        List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(expandedMappings, metadata);
 		
 		
 		log.debug("Original mapping size: {}", unfoldingProgram.size());
@@ -124,6 +124,13 @@ public class QuestUnfolder {
 			addSameAsMapping(unfoldingProgram);
 		}
 
+        if(log.isDebugEnabled()) {
+            String finalMappings = Joiner.on("\n").join(unfoldingProgram);
+            log.debug("Set of mappings before canonical IRI rewriting: \n {}", finalMappings);
+        }
+
+		unfoldingProgram = new CanonicalIRIRewriter().buildCanonicalIRIMappings(unfoldingProgram);
+
 		// Collecting URI templates
 		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
 
@@ -131,6 +138,7 @@ public class QuestUnfolder {
 		// predicates and variables as class names (implemented in the
 		// sparql translator)
 		unfoldingProgram.addAll(generateTripleMappings(unfoldingProgram));
+
 
 		if(log.isDebugEnabled()) {
 			String finalMappings = Joiner.on("\n").join(unfoldingProgram);

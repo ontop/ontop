@@ -108,7 +108,7 @@
     obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
     mf:action
             [ qt:query <transactions-finantialinstrument.rq> ] ;
-    mf:result <transactions-finantialinstrument.ttl> ;
+    mf:result <transactions-finantialinstrument-new.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-db2.obda> .
     
@@ -118,7 +118,7 @@
     obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
     mf:action
             [ qt:query <transaction-stock-type.rq> ] ;
-    mf:result <transaction-stock-type.ttl> ;
+    mf:result <transaction-stocknew-type.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-db2.obda> .
 
@@ -128,7 +128,7 @@
     obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
     mf:action
             [ qt:query <transaction-offer-stock.rq> ] ;
-    mf:result <transaction-offer-stock.ttl> ;
+    mf:result <transaction-offer-stocknew.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-db2.obda> .
     

@@ -148,7 +148,7 @@ public class RegexMySQLTest {
 	 */
 	@Test
 	public void testOracleRegexLikeUppercase() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :StockBroker}";
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :PhysicalPerson}";
 		int numberResults = runTests(query);
 		assertEquals(1, numberResults);
 	}

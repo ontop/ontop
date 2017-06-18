@@ -389,7 +389,7 @@ public class Mapping2DatalogConverter {
 
             Term t1 = visitEx(left);
             if (t1 == null)
-                throw new RuntimeException("Unable to find column name for variable: " +left);
+                throw new RuntimeException("Unable to find column name for variable: " + left + " in context " + expression);
 
             Term t2 = visitEx(right);
 
@@ -413,22 +413,24 @@ public class Mapping2DatalogConverter {
                     compositeTerm = fac.getSQLFunctionLike(t1, t2);
                     break;
                 case "~":
-                    compositeTerm = fac.getFunctionRegex(t1, t2, fac.getConstantLiteral(""));
+                    compositeTerm = fac.getFunction(ExpressionOperation.REGEX, t1, t2, fac.getConstantLiteral(""));
                     break;
                 case "~*":
-                    compositeTerm = fac.getFunctionRegex(t1, t2, fac.getConstantLiteral("i")); // i flag for case insensitivity
+                    compositeTerm = fac.getFunction(ExpressionOperation.REGEX, t1, t2, fac.getConstantLiteral("i")); // i flag for case insensitivity
                     break;
                 case "!~":
-                    compositeTerm = fac.getFunctionNOT(fac.getFunctionRegex(t1, t2, fac.getConstantLiteral("")));
+                    compositeTerm = fac.getFunctionNOT(
+                            fac.getFunction(ExpressionOperation.REGEX, t1, t2, fac.getConstantLiteral("")));
                     break;
                 case "!~*":
-                    compositeTerm = fac.getFunctionNOT(fac.getFunctionRegex(t1, t2, fac.getConstantLiteral("i")));
+                    compositeTerm = fac.getFunctionNOT(
+                            fac.getFunction(ExpressionOperation.REGEX,t1, t2, fac.getConstantLiteral("i")));
                     break;
                 case "REGEXP":
-                    compositeTerm = fac.getFunctionRegex(t1, t2, fac.getConstantLiteral("i"));
+                    compositeTerm = fac.getFunction(ExpressionOperation.REGEX, t1, t2, fac.getConstantLiteral("i"));
                     break;
                 case "REGEXP BINARY":
-                    compositeTerm = fac.getFunctionRegex(t1, t2, fac.getConstantLiteral(""));
+                    compositeTerm = fac.getFunction(ExpressionOperation.REGEX, t1, t2, fac.getConstantLiteral(""));
                     break;
                 default:
                     throw new UnsupportedOperationException("Unknown operator: " + op);
@@ -453,7 +455,7 @@ public class Mapping2DatalogConverter {
                     Term t1 = visitEx(first);
                     if (t1 == null)
                         throw new RuntimeException("Unable to find column name for variable: "
-                                + first);
+                                + first + " in context " + func);
 
                     // second parameter is a pattern, so generally a regex string
                     Expression second = expressions.get(1);
@@ -470,7 +472,7 @@ public class Mapping2DatalogConverter {
                     else {
                         t3 = fac.getConstantLiteral("");
                     }
-                    result = fac.getFunctionRegex(t1, t2, t3);
+                    result = fac.getFunction(ExpressionOperation.REGEX, t1, t2, t3);
                 } 
                 else
                 	throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function Regex");
@@ -486,7 +488,7 @@ public class Mapping2DatalogConverter {
 
                     if (t1 == null)
                         throw new RuntimeException("Unable to find source expression: "
-                                + first);
+                                + first + " in context " + func);
 
                     // second parameter is a string
                     Expression second = expressions.get(1);
@@ -503,7 +505,8 @@ public class Mapping2DatalogConverter {
                     else {
                         in_string = fac.getConstantLiteral("");
                     }
-                    result = fac.getFunctionReplace(t1, out_string, in_string);
+                    result = fac.getFunction(ExpressionOperation.REPLACE, t1, out_string, in_string,
+                                fac.getConstantLiteral("")); // the 4th argument is flags
                 } 
                 else
                     throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
@@ -525,14 +528,14 @@ public class Mapping2DatalogConverter {
                         Expression second = expressions.get(i+1);
                         Term second_string = visitEx(second);
 
-                        topConcat = fac.getFunctionConcat(first_string, second_string);
+                        topConcat = fac.getFunction(ExpressionOperation.CONCAT, first_string, second_string);
                     }
                     else {
 
                         Expression second = expressions.get(i);
                         Term second_string = visitEx(second);
 
-                        topConcat = fac.getFunctionConcat(topConcat, second_string);
+                        topConcat = fac.getFunction(ExpressionOperation.CONCAT, topConcat, second_string);
                     }
 
                 }
@@ -702,7 +705,7 @@ public class Mapping2DatalogConverter {
             Term var = getVariable(column);
             if (var == null) {
                 throw new RuntimeException(
-                        "Unable to find column name for variable: " + column);
+                        "Unable to find column name for variable: " + column + " in context " + expression);
             }
 
             if (!expression.isNot()) {

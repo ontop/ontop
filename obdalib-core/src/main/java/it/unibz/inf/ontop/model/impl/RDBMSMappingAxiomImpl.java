@@ -20,12 +20,13 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
+import org.openrdf.model.impl.URIImpl;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
 
@@ -36,6 +37,7 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements O
 
 	protected RDBMSMappingAxiomImpl(String id, OBDASQLQuery sourceQuery, List<Function> targetQuery) {
 		super(id);
+		setId(getValidMappingId(id));
 		setSourceQuery(sourceQuery);
 		setTargetQuery(targetQuery);
 	}
@@ -78,4 +80,18 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements O
 		bf.append(targetQuery.toString());
 		return bf.toString();
 	}
+
+	// R2RML needs an id with a valid URI
+
+	private String getValidMappingId(String mapping_id) {
+
+		try {
+			new URIImpl(mapping_id);
+
+		} catch (IllegalArgumentException e) {
+			mapping_id = "urn:" + mapping_id;
+		}
+		return mapping_id;
+	}
+
 }

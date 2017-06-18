@@ -98,6 +98,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				.put(ExpressionOperation.ADD, "%s + %s")
 				.put(ExpressionOperation.SUBTRACT, "%s - %s")
 				.put(ExpressionOperation.MULTIPLY, "%s * %s")
+				.put(ExpressionOperation.DIVIDE, "%s / %s")
 				.put(ExpressionOperation.ABS, "ABS(%s)")
 				.put(ExpressionOperation.CEIL, sqladapter.ceil())
 				.put(ExpressionOperation.FLOOR, "FLOOR(%s)")
@@ -915,7 +916,8 @@ public class SQLGenerator implements SQLQueryGenerator {
                     	return "NULL";
                 }
             }
-            else if (pred1 == ExpressionOperation.REPLACE || pred1 == ExpressionOperation.SUBSTR ||
+            else if (pred1 == ExpressionOperation.REPLACE || pred1 == ExpressionOperation.SUBSTR2 ||
+					pred1 == ExpressionOperation.SUBSTR3 ||
             		pred1 == ExpressionOperation.UCASE || pred1 == ExpressionOperation.LCASE ||
             		pred1 == ExpressionOperation.STRBEFORE || pred1 == ExpressionOperation.STRAFTER) {
                 Term rep1 = func1.getTerm(0);
@@ -978,7 +980,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 					else 
 						type = COL_TYPE.LITERAL;
 				} 
-				else if (function == ExpressionOperation.REPLACE || function == ExpressionOperation.SUBSTR || 
+				else if (function == ExpressionOperation.REPLACE || function == ExpressionOperation.SUBSTR2 ||
+						function == ExpressionOperation.SUBSTR3 ||
 						function == ExpressionOperation.LCASE || function == ExpressionOperation.UCASE || 
 						function == ExpressionOperation.STRBEFORE || function == ExpressionOperation.STRAFTER) {
 					// ROMAN (23 Dec 2015): STRBEFORE AND STRAFTER RETURN THE TYPE OF THE FIRST ARGUMENT
@@ -1358,112 +1361,94 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String orig = getSQLString(function.getTerm(0), index, false);
 				String out_str = getSQLString(function.getTerm(1), index, false);
 				String in_str = getSQLString(function.getTerm(2), index, false);
-				String result = sqladapter.strReplace(orig, out_str, in_str);
-				return result;
-			} 
+				// TODO: handle flags
+				return sqladapter.strReplace(orig, out_str, in_str);
+			}
 			else if (functionSymbol ==  ExpressionOperation.CONCAT) {
 				String left = getSQLString(function.getTerm(0), index, false);
 				String right = getSQLString(function.getTerm(1), index, false);
-				String result = sqladapter.strConcat(new String[]{left, right});
-				return result;
+				return sqladapter.strConcat(new String[]{left, right});
 			}
 			else if (functionSymbol == ExpressionOperation.STRLEN) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.strLength(literal);
-				return result;
-			} 
+				return sqladapter.strLength(literal);
+			}
 			else if (functionSymbol == ExpressionOperation.YEAR) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateYear(literal);
-				return result;
-			} 
+				return sqladapter.dateYear(literal);
+			}
 			else if (functionSymbol == ExpressionOperation.MINUTES) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateMinutes(literal);
-				return result;
-			} 
+				return sqladapter.dateMinutes(literal);
+			}
 			else if (functionSymbol == ExpressionOperation.DAY) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateDay(literal);
-				return result;
-			} 
+				return sqladapter.dateDay(literal);
+			}
 			else if (functionSymbol == ExpressionOperation.MONTH) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateMonth(literal);
-				return result;
-			}  
+				return sqladapter.dateMonth(literal);
+			}
 			else if (functionSymbol == ExpressionOperation.SECONDS) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateSeconds(literal);
-				return result;
-			} 
+				return sqladapter.dateSeconds(literal);
+			}
 			else if (functionSymbol == ExpressionOperation.HOURS) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateHours(literal);
-				return result;
-			} 
+				return sqladapter.dateHours(literal);
+			}
 			else if (functionSymbol == ExpressionOperation.TZ) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateTZ(literal);
-				return result;
-			} 
+				return sqladapter.dateTZ(literal);
+			}
 			else if (functionSymbol == ExpressionOperation.ENCODE_FOR_URI) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.strEncodeForUri(literal);
-				return result;
+				return sqladapter.strEncodeForUri(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.UCASE) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.strUcase(literal);
-				return result;
+				return sqladapter.strUcase(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.MD5) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.MD5(literal);
-				return result;
-			} 
+				return sqladapter.MD5(literal);
+			}
 			else if (functionSymbol == ExpressionOperation.SHA1) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.SHA1(literal);
-				return result;
-			} 
+				return sqladapter.SHA1(literal);
+			}
 			else if (functionSymbol == ExpressionOperation.SHA256) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.SHA256(literal);
-				return result;
-			} 
+				return sqladapter.SHA256(literal);
+			}
 			else if (functionSymbol == ExpressionOperation.SHA512) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.SHA512(literal); //TODO FIX
-				return result;
+				return sqladapter.SHA512(literal); //TODO FIX
 			}
 			else if (functionSymbol == ExpressionOperation.LCASE) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.strLcase(literal);
-				return result;
-			}  
-			else if (functionSymbol == ExpressionOperation.SUBSTR) {
+				return sqladapter.strLcase(literal);
+			}
+			else if (functionSymbol == ExpressionOperation.SUBSTR2) {
 				String string = getSQLString(function.getTerm(0), index, false);
 				String start = getSQLString(function.getTerm(1), index, false);
-				if (function.getTerms().size() == 2){
-					return sqladapter.strSubstr(string, start);
-				}
+				return sqladapter.strSubstr(string, start);
+			}
+			else if (functionSymbol == ExpressionOperation.SUBSTR3) {
+				String string = getSQLString(function.getTerm(0), index, false);
+				String start = getSQLString(function.getTerm(1), index, false);
 				String end = getSQLString(function.getTerm(2), index, false);
-				String result = sqladapter.strSubstr(string, start, end);
-
-				return result;
+				return sqladapter.strSubstr(string, start, end);
 			}
 			else if (functionSymbol == ExpressionOperation.STRBEFORE) {
 				String string = getSQLString(function.getTerm(0), index, false);
 				String before = getSQLString(function.getTerm(1), index, false);
-				String result = sqladapter.strBefore(string, before);
-				return result;
+				return sqladapter.strBefore(string, before);
 			}
 			else if (functionSymbol == ExpressionOperation.STRAFTER) {
 				String string = getSQLString(function.getTerm(0), index, false);
 				String after = getSQLString(function.getTerm(1), index, false);
-				String result = sqladapter.strAfter(string, after);
-				return result;
+				return sqladapter.strAfter(string, after);
 			}
 		}
 

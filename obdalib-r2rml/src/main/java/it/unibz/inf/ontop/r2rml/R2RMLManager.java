@@ -140,7 +140,7 @@ public class R2RMLManager {
 	 * @throws Exception
 	 */
 	private OBDAMappingAxiom getMapping(TriplesMap tm) throws Exception {
-		String sourceQuery = r2rmlParser.getSQLQuery(tm);
+		String sourceQuery = r2rmlParser.getSQLQuery(tm).trim();
 		List<Function> body = getMappingTripleAtoms(tm);
 		//Function head = getHeadAtom(body);
 		//CQIE targetQuery = fac.getCQIE(head, body);

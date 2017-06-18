@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.sesame.tests.general;
 
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.openrdf.model.Model;
@@ -23,7 +24,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -77,9 +77,9 @@ public class DatetimeStampSesameTest extends TestCase {
 		// set jdbc params in config
 		pref.setCurrentValueOf(QuestPreferences.DBNAME, "northwind");
 		pref.setCurrentValueOf(QuestPreferences.JDBC_URL,
-				"jdbc:mysql://10.7.20.39/northwind?sessionVariables=sql_mode='ANSI'");
-		pref.setCurrentValueOf(QuestPreferences.DBUSER, "fish");
-		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, "fish");
+				"jdbc:mysql://tom.inf.unibz.it:3694/northwind?sessionVariables=sql_mode='ANSI'");
+		pref.setCurrentValueOf(QuestPreferences.DBUSER, "root");
+		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, "mysql");
 		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER,"com.mysql.jdbc.Driver");
 	}
 

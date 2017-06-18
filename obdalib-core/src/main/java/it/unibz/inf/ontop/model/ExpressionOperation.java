@@ -41,7 +41,8 @@ public enum ExpressionOperation implements OperationPredicate {
 	STRLEN("STRLEN", COL_TYPE.INTEGER, COL_TYPE.LITERAL), 
 	UCASE("UCASE", COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	LCASE("LCASE", COL_TYPE.LITERAL, COL_TYPE.LITERAL), 
-	SUBSTR("SUBSTR", COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.INTEGER, COL_TYPE.INTEGER),
+	SUBSTR2("SUBSTR2", COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.INTEGER),
+	SUBSTR3("SUBSTR3", COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.INTEGER, COL_TYPE.INTEGER),
 	STRBEFORE("STRBEFORE", COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	STRAFTER("STRAFTER", COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL), 
 	REPLACE("REPLACE", COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
@@ -161,5 +162,14 @@ public enum ExpressionOperation implements OperationPredicate {
 	@Override
 	public boolean isAnnotationProperty() {
 		return false;
-	}	
+	}
+
+	@Override
+	public boolean isSameAsProperty() {
+		return false;
+	}
+	@Override
+	public boolean isCanonicalIRIProperty() {
+		return false;
+	}
 }

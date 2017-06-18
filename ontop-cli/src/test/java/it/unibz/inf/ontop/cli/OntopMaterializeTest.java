@@ -38,7 +38,7 @@ public class OntopMaterializeTest {
                 "-m", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.ttl",
                 "-t", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.owl",
                 "-f", "turtle", "-o", "/tmp/univ-benchQL-triples.ttl",
-                "-l",	"jdbc:mysql://10.7.20.39/lubm1",
+                "-l",	"jdbc:mysql://tom.inf.unibz.it:3694/lubm1",
                 "-u",	"fish",
                 "-p",	"fish",
                 "-d",	"com.mysql.jdbc.Driver"
@@ -52,7 +52,7 @@ public class OntopMaterializeTest {
         String[] argv = {"materialize",
                 "-m", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.ttl",
                 "-f", "turtle", "-o", "/tmp/univ-benchQL-triples.ttl",
-                "-l",	"jdbc:mysql://10.7.20.39/lubm1",
+                "-l",	"jdbc:mysql://tom.inf.unibz.it:3694/lubm1",
                 "-u",	"fish",
                 "-p",	"fish",
                 "-d",	"com.mysql.jdbc.Driver"
@@ -66,7 +66,7 @@ public class OntopMaterializeTest {
         String[] argv = {"materialize", "-m", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.ttl",
                 "-t", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.owl",
                 "-f", "turtle", "-o", "/tmp/",
-                "-U",	"jdbc:mysql://10.7.20.39/lubm1",
+                "-U",	"jdbc:mysql://tom.inf.unibz.it:3694/lubm1",
                 "-u",	"fish",
                 "-p",	"fish",
                 "-d",	"com.mysql.jdbc.Driver",
@@ -94,6 +94,22 @@ public class OntopMaterializeTest {
 
         };
         Ontop.main(argv);
+    }
+
+    @Ignore("too expensive")
+    @Test
+    public void testOntopMaterializeSeparateFiles2 (){
+        String[] argv = {"materialize",
+                "-m", "../quest-test/src/test/resources/example/npd-v2-ql_a.ttl",
+                "-t", "../quest-test/src/test/resources/example/npd-v2-ql_a.owl",
+                "-f", "turtle", "-o", "/tmp/npd",
+                "-l",	"jdbc:mysql://tom.inf.unibz.it:3694/npd",
+                "-u",	"fish",
+                "-p",	"fish",
+                "-d",	"com.mysql.jdbc.Driver",
+                "--separate-files"};
+        Ontop.main(argv);
+
     }
 
 }

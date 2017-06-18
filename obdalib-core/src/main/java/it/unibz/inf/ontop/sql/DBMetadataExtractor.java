@@ -125,18 +125,29 @@ public class DBMetadataExtractor {
 		
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
-		
+		if (printouts) {
+			System.out.println("=================================\nDBMetadataExtractor REPORT: " + productName);
+			System.out.println("storesLowerCaseIdentifiers: " + md.storesLowerCaseIdentifiers());
+			System.out.println("storesUpperCaseIdentifiers: " + md.storesUpperCaseIdentifiers());
+			System.out.println("storesMixedCaseIdentifiers: " + md.storesMixedCaseIdentifiers());
+			System.out.println("supportsMixedCaseIdentifiers: " + md.supportsMixedCaseIdentifiers());
+			System.out.println("storesLowerCaseQuotedIdentifiers: " + md.storesLowerCaseQuotedIdentifiers());
+			System.out.println("storesUpperCaseQuotedIdentifiers: " + md.storesUpperCaseQuotedIdentifiers());
+			System.out.println("storesMixedCaseQuotedIdentifiers: " + md.storesMixedCaseQuotedIdentifiers());
+			System.out.println("supportsMixedCaseQuotedIdentifiers: " + md.supportsMixedCaseQuotedIdentifiers());
+			System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
+		}
+
 		QuotedIDFactory idfac;
-		// treat Exareme as a case-sensitive DB engine (like MS SQL Server)
-		if (md.storesMixedCaseIdentifiers()) {
-			 //  MySQL
-			if (productName.contains("MySQL"))  {
-				//System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());		
-				idfac = new QuotedIDFactoryMySQL("`"); 
-			}
-			else
-				// "SQL Server" = MS SQL Server
-				idfac = new QuotedIDFactoryIdentity("\"");
+		//  MySQL
+		if (productName.contains("MySQL"))  {
+			//System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
+			idfac = new QuotedIDFactoryMySQL(md.storesMixedCaseIdentifiers(), "`");
+		}
+		else if (md.storesMixedCaseIdentifiers()) {
+			// treat Exareme as a case-sensitive DB engine (like MS SQL Server)
+			// "SQL Server" = MS SQL Server
+			idfac = new QuotedIDFactoryIdentity("\"");
 		}
 		else {
 			if (md.storesLowerCaseIdentifiers())
@@ -230,7 +241,12 @@ public class DBMetadataExtractor {
 			// catalog is ignored for now (rs.getString("TABLE_CAT"))
 			try (ResultSet rs = md.getColumns(null, seedId.getSchemaName(), seedId.getTableName(), null)) {
 				while (rs.next()) {
-					RelationID relationId = RelationID.createRelationIdFromDatabaseRecord(idfac, rs.getString("TABLE_SCHEM"), 
+					String schema = rs.getString("TABLE_SCHEM");
+					// MySQL workaround
+					if (schema == null)
+						schema = rs.getString("TABLE_CAT");
+
+					RelationID relationId = RelationID.createRelationIdFromDatabaseRecord(idfac, schema,
 										rs.getString("TABLE_NAME"));
 					QuotedID attributeId = QuotedID.createIdFromDatabaseRecord(idfac, rs.getString("COLUMN_NAME"));
 					if (printouts)
@@ -264,7 +280,12 @@ public class DBMetadataExtractor {
 					System.out.println(fk +  ";");
 				System.out.println("");
 			}
-		}	
+		}
+
+		if (printouts) {
+			System.out.println("RESULTING METADATA:\n" + metadata);
+			System.out.println("DBMetadataExtractor END OF REPORT\n=================================");
+		}
 	}
 	
 	
@@ -591,14 +612,20 @@ public class DBMetadataExtractor {
 				
 				if (builder != null) {
 					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(idfac, rs.getString("COLUMN_NAME"));
-					// ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending, 
+					// ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending,
 					//        may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
 					// CARDINALITY int => When TYPE is tableIndexStatistic, then this is the number of rows in the table; 
 					//                      otherwise, it is the number of unique values in the index.
 					// PAGES int => When TYPE is tableIndexStatisic then this is the number of pages used for the table, 
 					//                    otherwise it is the number of pages used for the current index.
 					// FILTER_CONDITION String => Filter condition, if any. (may be null)
-					builder.add(relation.getAttribute(attrId));
+					Attribute attr = relation.getAttribute(attrId);
+					if (attr == null) { // Compensate for the bug in PostgreSQL JBDC driver that
+						// strips off the quatation marks
+						attrId = QuotedID.createIdFromDatabaseRecord(idfac, "\"" + rs.getString("COLUMN_NAME") + "\"");
+						attr = relation.getAttribute(attrId);
+					}
+					builder.add(attr);
 				}
 			}
 			if (builder != null)

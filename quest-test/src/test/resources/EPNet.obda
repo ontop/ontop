@@ -14,9 +14,9 @@ pleiades:	http://pleiades.stoa.org/places/
 
 [SourceDeclaration]
 sourceUri	Corpus2
-connectionUrl	jdbc:postgresql://obdalin3.inf.unibz.it/EPNet
+connectionUrl	jdbc:postgresql://tom.inf.unibz.it:7777/EPNet
 username    postgres
-password    postgres
+password    postgres2
 driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[

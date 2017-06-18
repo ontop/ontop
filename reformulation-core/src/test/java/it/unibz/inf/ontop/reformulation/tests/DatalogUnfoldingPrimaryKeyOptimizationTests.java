@@ -154,7 +154,8 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		body.add(fac.getFunction(fac.getDataPropertyPredicate("id"), fac.getVariable("m"), fac.getVariable("p")));
 		CQIE query = fac.getCQIE(head, body);
 
-		DatalogProgram input = fac.getDatalogProgram(Collections.singletonList(query));
+		DatalogProgram input = fac.getDatalogProgram();
+		input.appendRule(query);
 		DatalogProgram output = unfolder.unfold(input);
 		System.out.println("input " + input);
 
@@ -183,7 +184,8 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		body.add(fac.getFunction(fac.getDataPropertyPredicate("lastname"), fac.getVariable("s2"), fac.getVariable("o")));
 		query = fac.getCQIE(head, body);
 
-		input = fac.getDatalogProgram(Collections.singletonList(query));
+		input = fac.getDatalogProgram();
+		input.appendRule(query);
 		output = unfolder.unfold(input);
 		System.out.println("input " + input);
 

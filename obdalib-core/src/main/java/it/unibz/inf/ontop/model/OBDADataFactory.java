@@ -47,8 +47,6 @@ public interface OBDADataFactory extends Serializable {
 	
 	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers);
 
-	public DatalogProgram getDatalogProgram(Collection<CQIE> rules);
-
 	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules);
 
 
@@ -84,7 +82,9 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Predicate getClassPredicate(String name);
 
-	Predicate getOWLSameASPredicate();
+	public Predicate getOWLSameAsPredicate();
+
+	public Predicate getOBDACanonicalIRI();
 	
 
 	public JdbcTypeMapper getJdbcTypeMapper();
@@ -144,22 +144,6 @@ public interface OBDADataFactory extends Serializable {
 	// ROMAN (23 Dec 2015): LIKE comes only from mappings
 	public Function getSQLFunctionLike(Term term1, Term term2);
 	
-	public Function getFunctionRegex(Term term1, Term term2, Term term3);
-	
-	public Function getFunctionReplace(Term term1, Term term2, Term term3);
-	
-	/* Functions on strings */
-
-    public Function getFunctionConcat(Term term1, Term term2);
-    
- // added by Nika: 
-    
-	public Function getFunctionSubstring(Term term1, Term term2, Term term3);
-
-	public Function getFunctionSubstring(Term term1, Term term2);
-
-	
-
 
 	/*
 	 * Casting values cast(source-value AS destination-type)

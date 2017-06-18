@@ -172,7 +172,7 @@ public class AnnotationMovieTest {
 
 
         String results = runTestQuery(p, queryBind);
-        assertEquals("<1>", results);
+        assertEquals("<1004191>", results);
     }
 
     @Test //no class in the ontology
@@ -191,7 +191,7 @@ public class AnnotationMovieTest {
 
 
         String results = runTestQuery(p, queryBind);
-        assertEquals("<http://www.imdb.com/name/1>", results);
+        assertEquals("<http://www.imdb.com/name/1004191>", results);
     }
 
     @Test //no dataproperty in the ontology

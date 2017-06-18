@@ -29,7 +29,7 @@ public class MySqlMetadataInfoTest extends AbstractDbMetadataInfoTest {
 
 	@Override
 	protected String getConnectionString() {
-		return "jdbc:mysql://10.7.20.39/datatypes";
+		return "jdbc:mysql://tom.inf.unibz.it:3694/datatypes";
 	}
 
 	@Override

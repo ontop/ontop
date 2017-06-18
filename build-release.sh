@@ -70,13 +70,13 @@ else
 fi
 
 # location for protege clean folder
-PROTEGE_COPY_FILENAME=Protege-5.0.0-platform-independent
-PROTEGE_MAIN_FOLDER_NAME=Protege-5.0.0
+PROTEGE_COPY_FILENAME=Protege-5.2.0-platform-independent
+PROTEGE_MAIN_FOLDER_NAME=Protege-5.2.0
 PROTEGE_MAIN_PLUGIN=ontop-protege-plugin
 
 # location and name for jetty distribution (should be ZIP)
-JETTY_COPY_FILENAME=jetty-distribution-8.1.9
-JETTY_INNER_FOLDERNAME=jetty-distribution-8.1.9
+JETTY_COPY_FILENAME=jetty-distribution-9.4.6
+JETTY_INNER_FOLDERNAME=jetty-distribution-9.4.6
 
 # name of the wars for sesame and workbench WEB-APPs  (these have to be already customized with stylesheets)
 OPENRDF_SESAME_FILENAME=openrdf-sesame
