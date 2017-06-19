@@ -38,11 +38,11 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
     }
 
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws OBDASpecificationException {
+    public OBDASpecification loadSpecification() throws OBDASpecificationException {
         return loadSpecification(Optional::empty);
     }
 
-    Optional<OBDASpecification> loadSpecification(OntologySupplier ontologySupplier)
+    OBDASpecification loadSpecification(OntologySupplier ontologySupplier)
             throws OBDASpecificationException {
 
         return loadSpecification(ontologySupplier,

@@ -5,12 +5,7 @@ import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 
 
-/**
- * Fixes the relational mapping axioms
- *
- * TODO: should we generalize it other mapping axioms?
- *
- */
+@Deprecated
 public interface MappingVocabularyFixer {
     ImmutableList<SQLPPMappingAxiom> fixMappingAxioms(ImmutableList<SQLPPMappingAxiom> mappingAxioms,
                                                       ImmutableOntologyVocabulary vocabulary);

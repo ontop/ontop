@@ -42,7 +42,7 @@ private void setup()  throws Exception {
 	Injector injector = configuration.getInjector();
 	OntopEngineFactory engineFactory = injector.getInstance(OntopEngineFactory.class);
 
-	queryEngine = engineFactory.create(configuration.loadProvidedSpecification(),
+	queryEngine = engineFactory.create(configuration.loadSpecification(),
 			configuration.getExecutorRegistry());
 	queryEngine.connect();
 	
