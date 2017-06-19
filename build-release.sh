@@ -76,7 +76,7 @@ PROTEGE_MAIN_PLUGIN=ontop-protege-plugin
 
 # location and name for jetty distribution (should be ZIP)
 JETTY_COPY_FILENAME=jetty-distribution-9.4.6
-JETTY_INNER_FOLDERNAME=jetty-distribution-9.4.6
+JETTY_INNER_FOLDERNAME=jetty-distribution-9.4.6.v20170531
 
 # name of the wars for sesame and workbench WEB-APPs  (these have to be already customized with stylesheets)
 OPENRDF_SESAME_FILENAME=openrdf-sesame
@@ -186,11 +186,16 @@ cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${QUEST_JETTY_DIST}/ontop-jetty-
 
 JETTY_FOLDER=${JETTY_INNER_FOLDERNAME}
 cd ${QUEST_JETTY_DIST}
-mkdir -p ${JETTY_INNER_FOLDERNAME}/webapps
-cp ${BUILD_ROOT}/quest-distribution/${QUEST_SESAME_DIST}/${OPENRDF_SESAME_FILENAME}.war ${JETTY_FOLDER}/webapps
-cp ${BUILD_ROOT}/quest-distribution/${QUEST_SESAME_DIST}/${OPENRDF_WORKBENCH_FILENAME}.war ${JETTY_FOLDER}/webapps
 
-zip ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/webapps/* || exit 1
+mkdir -p ${JETTY_FOLDER}/ontop-base/webapps
+
+cp ${BUILD_ROOT}/quest-distribution/${QUEST_SESAME_DIST}/${OPENRDF_SESAME_FILENAME}.war ${JETTY_FOLDER}/ontop-base/webapps
+cp ${BUILD_ROOT}/quest-distribution/${QUEST_SESAME_DIST}/${OPENRDF_WORKBENCH_FILENAME}.war ${JETTY_FOLDER}/ontop-base/webapps
+cp ${ONTOP_DEP_HOME}/start.ini ${JETTY_FOLDER}/ontop-base
+cp ${ONTOP_DEP_HOME}/README-ontop.TXT ${JETTY_FOLDER}
+
+zip -r ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/ontop-base/ || exit 1
+zip ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/README-ontop.TXT || exit 1
 
 rm -fr ${JETTY_FOLDER}
 cd ${BUILD_ROOT}/quest-distribution
