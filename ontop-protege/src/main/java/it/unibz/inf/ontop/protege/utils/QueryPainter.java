@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Vector;
 
 public class QueryPainter {
-	private final OBDAModelWrapper apic;
+	private final OBDAModel apic;
 
 	private SimpleAttributeSet black;
 	private SimpleAttributeSet brackets;
@@ -84,7 +84,7 @@ public class QueryPainter {
 	private List<ValidatorListener> validatorListeners = new LinkedList<QueryPainter.ValidatorListener>();
 	private TurtleOBDASyntaxParser textParser;
 
-	public QueryPainter(OBDAModelWrapper apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
+	public QueryPainter(OBDAModel apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
 		this.apic = apic;
 		this.parent = parent;
 		this.validator = validator;

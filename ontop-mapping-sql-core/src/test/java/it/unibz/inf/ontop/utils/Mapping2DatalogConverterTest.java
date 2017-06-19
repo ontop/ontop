@@ -95,8 +95,8 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm.getPrefixMap());
 		List<Function> target = targetParser.parse(targetString);
 
-		OBDAMappingAxiom mappingAxiom = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(source), target);
-		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
+		SQLPPMappingAxiom mappingAxiom = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(source), target);
+		ArrayList<SQLPPMappingAxiom> mappingList = new ArrayList<SQLPPMappingAxiom>();
 		mappingList.add(mappingAxiom);
 
 		List<CQIE> dp = Mapping2DatalogConverter.constructDatalogProgram(mappingList, md);

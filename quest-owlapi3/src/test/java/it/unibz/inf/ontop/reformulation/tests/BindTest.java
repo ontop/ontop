@@ -96,10 +96,8 @@ public class BindTest {
 
     @After
     public void tearDown() throws Exception {
-
         dropTables();
         conn.close();
-
     }
 
     private void dropTables() throws SQLException, IOException {

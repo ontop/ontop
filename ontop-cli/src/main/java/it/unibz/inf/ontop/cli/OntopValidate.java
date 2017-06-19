@@ -98,7 +98,7 @@ public class OntopValidate extends OntopReasoningCommandBase {
 
         try {
             config.loadSpecification();
-        } catch (IOException | OBDASpecificationException e) {
+        } catch (OBDASpecificationException e) {
             System.out.format("ERROR: There is a problem loading the mapping file %s\n", mappingFile);
             e.printStackTrace();
             System.exit(1);

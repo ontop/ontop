@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
@@ -26,8 +26,6 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
- * Mutable wrapper that follows the previous implementation of OBDAModel.
- * The latter implementation is now immutable.
  *
  *
  * For the moment, this class always use the same factories
@@ -38,7 +36,6 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
  *
  *
  * An OBDA model contains mapping information.
- * This interface is generic regarding the targeted native query language.
  *
  * An OBDA model is a container for the database and mapping declarations needed to define a
  * Virtual ABox or Virtual RDF graph. That is, this is a manager for a
@@ -53,38 +50,35 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
  * <p>
  *
  */
-public class OBDAModelWrapper {
+public class OBDAModel {
 
-    /**
-     *  Immutable OBDA model.
-     *  This variable is frequently re-affected.
-     */
     private final static OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
-    private final OBDAFactoryWithException obdaFactory;
+    private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
     private Optional<OBDADataSource> source;
 
-    private OBDAModel obdaModel;
+    // Immutable (will often be re-affected)
+    private SQLPPMapping ppMapping;
     private PrefixManagerWrapper prefixManager;
 
     private final List<OBDAModelListener> sourceListeners;
     private final List<OBDAMappingListener> mappingListeners;
     private final OntologyVocabulary ontologyVocabulary;
 
-    public OBDAModelWrapper(SpecificationFactory specificationFactory,
-                            OBDAFactoryWithException obdaFactory, PrefixManagerWrapper prefixManager) {
+    public OBDAModel(SpecificationFactory specificationFactory,
+                     SQLPPMappingFactory ppMappingFactory, PrefixManagerWrapper prefixManager) {
         this.specificationFactory = specificationFactory;
-        this.obdaFactory = obdaFactory;
+        this.ppMappingFactory = ppMappingFactory;
         this.prefixManager = prefixManager;
-        this.obdaModel = createNewOBDAModel(specificationFactory, obdaFactory, prefixManager);
+        this.ppMapping = createNewPPMapping(specificationFactory, ppMappingFactory, prefixManager);
         this.sourceListeners = new ArrayList<>();
         this.mappingListeners = new ArrayList<>();
         source = Optional.empty();
         ontologyVocabulary = ONTOLOGY_FACTORY.createVocabulary();
     }
 
-    public OBDAModel getCurrentImmutableOBDAModel() {
-        return obdaModel;
+    public SQLPPMapping getCurrentPPMapping() {
+        return ppMapping;
     }
 
     /**
@@ -104,17 +98,17 @@ public class OBDAModelWrapper {
                 .build();
         SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
 
-        OBDAModel newObdaModel = mappingParser.parse(mappingFile);
+        SQLPPMapping newObdaModel = mappingParser.parse(mappingFile);
 
         ImmutableMap<String, String> mergedPrefixes = Stream.concat(
-                obdaModel.getMetadata().getPrefixManager().getPrefixMap().entrySet().stream(),
+                ppMapping.getMetadata().getPrefixManager().getPrefixMap().entrySet().stream(),
                 newObdaModel.getMetadata().getPrefixManager().getPrefixMap().entrySet().stream())
                 .distinct()
                 .collect(ImmutableCollectors.toMap());
 
         PrefixManager mergedPrefixManager = specificationFactory.createPrefixManager(mergedPrefixes);
 
-        ImmutableList<OBDAMappingAxiom> mappingAxioms = newObdaModel.getMappings();
+        ImmutableList<SQLPPMappingAxiom> mappingAxioms = newObdaModel.getPPMappingAxioms();
 
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                 mappingAxioms.stream()
@@ -123,23 +117,23 @@ public class OBDAModelWrapper {
                         .filter(t -> t instanceof Function)
                         .map(t -> (Function) t));
 
-        obdaModel = obdaModel.newModel(newObdaModel.getMappings(),
+        ppMapping = ppMappingFactory.createSQLPreProcessedMapping(newObdaModel.getPPMappingAxioms(),
                 specificationFactory.createMetadata(mergedPrefixManager, uriTemplateMatcher));
     }
 
     public PrefixManager getPrefixManager() {
-        return obdaModel.getMetadata().getPrefixManager();
+        return ppMapping.getMetadata().getPrefixManager();
     }
 
-    public ImmutableList<OBDAMappingAxiom> getMappings(URI sourceUri) {
+    public ImmutableList<SQLPPMappingAxiom> getMappings(URI sourceUri) {
         if (sourceUri.equals(getSourceId()))
-            return obdaModel.getMappings();
+            return ppMapping.getPPMappingAxioms();
         else
             return ImmutableList.of();
     }
 
-    public ImmutableMap<URI, ImmutableList<OBDAMappingAxiom>> getMappings() {
-        return ImmutableMap.of(getSourceId(), obdaModel.getMappings());
+    public ImmutableMap<URI, ImmutableList<SQLPPMappingAxiom>> getMappings() {
+        return ImmutableMap.of(getSourceId(), ppMapping.getPPMappingAxioms());
     }
 
     public ImmutableList<OBDADataSource> getSources() {
@@ -148,8 +142,8 @@ public class OBDAModelWrapper {
                 : ImmutableList.of();
     }
 
-    public OBDAMappingAxiom getMapping(String mappingId) {
-        return obdaModel.getMapping(mappingId);
+    public SQLPPMappingAxiom getMapping(String mappingId) {
+        return ppMapping.getPPMappingAxiom(mappingId);
     }
 
     public void addPrefix(String prefix, String uri) {
@@ -162,7 +156,7 @@ public class OBDAModelWrapper {
 
     public int renamePredicate(Predicate removedPredicate, Predicate newPredicate) {
         int modifiedCount = 0;
-        for (OBDAMappingAxiom mapping : obdaModel.getMappings()) {
+        for (SQLPPMappingAxiom mapping : ppMapping.getPPMappingAxioms()) {
             CQIE cq = (CQIE) mapping.getTargetQuery();
             List<Function> body = cq.getBody();
             for (int idx = 0; idx < body.size(); idx++) {
@@ -179,7 +173,7 @@ public class OBDAModelWrapper {
         return modifiedCount;
     }
 
-    private void fireMappingUpdated(URI sourceURI, String mappingId, OBDAMappingAxiom mapping) {
+    private void fireMappingUpdated(URI sourceURI, String mappingId, SQLPPMappingAxiom mapping) {
         for (OBDAMappingListener listener : mappingListeners) {
             listener.mappingUpdated(sourceURI);
         }
@@ -187,7 +181,7 @@ public class OBDAModelWrapper {
 
     public int deletePredicate(Predicate removedPredicate) {
         int modifiedCount = 0;
-        for (OBDAMappingAxiom mapping : obdaModel.getMappings()) {
+        for (SQLPPMappingAxiom mapping : ppMapping.getPPMappingAxioms()) {
             CQIE cq = (CQIE) mapping.getTargetQuery();
             List<Function> body = cq.getBody();
             for (int idx = 0; idx < body.size(); idx++) {
@@ -254,14 +248,14 @@ public class OBDAModelWrapper {
     }
 
     public void reset() {
-        obdaModel = createNewOBDAModel(specificationFactory, obdaFactory, prefixManager);
+        ppMapping = createNewPPMapping(specificationFactory, ppMappingFactory, prefixManager);
     }
 
 
-    public void addMapping(URI sourceID, OBDAMappingAxiom mappingAxiom, boolean disableFiringMappingInsertedEvent)
+    public void addMapping(URI sourceID, SQLPPMappingAxiom mappingAxiom, boolean disableFiringMappingInsertedEvent)
             throws DuplicateMappingException {
-        ImmutableList<OBDAMappingAxiom> sourceMappings = obdaModel.getMappings();
-        List<OBDAMappingAxiom> newSourceMappings;
+        ImmutableList<SQLPPMappingAxiom> sourceMappings = ppMapping.getPPMappingAxioms();
+        List<SQLPPMappingAxiom> newSourceMappings;
         if (sourceMappings == null) {
             newSourceMappings = Arrays.asList(mappingAxiom);
         }
@@ -273,7 +267,8 @@ public class OBDAModelWrapper {
             newSourceMappings.add(mappingAxiom);
         }
         try {
-            obdaModel = obdaModel.newModel(ImmutableList.copyOf(newSourceMappings));
+            ppMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.copyOf(newSourceMappings),
+                    ppMapping.getMetadata());
         } catch (DuplicateMappingException e) {
             throw new RuntimeException("Duplicated mappings should have been detected earlier.");
         }
@@ -282,16 +277,16 @@ public class OBDAModelWrapper {
     }
 
     public void removeMapping(URI dataSourceURI, String mappingId) {
-        OBDAMappingAxiom mapping = obdaModel.getMapping(mappingId);
+        SQLPPMappingAxiom mapping = ppMapping.getPPMappingAxiom(mappingId);
         if (mapping == null)
             return;
 
-        ImmutableList<OBDAMappingAxiom> newMappingAssertions = obdaModel.getMappings().stream()
+        ImmutableList<SQLPPMappingAxiom> newMappingAssertions = ppMapping.getPPMappingAxioms().stream()
                 .filter(a -> ! a.getId().equals(mappingId))
                 .collect(ImmutableCollectors.toList());
 
         try {
-            obdaModel = obdaModel.newModel(newMappingAssertions);
+            ppMapping = ppMappingFactory.createSQLPreProcessedMapping(newMappingAssertions, ppMapping.getMetadata());
         } catch (DuplicateMappingException e) {
             throw new RuntimeException("Duplicated mappings should have been detected earlier.");
         }
@@ -300,14 +295,14 @@ public class OBDAModelWrapper {
     }
 
     public void updateMappingsSourceQuery(URI sourceURI, String mappingId, OBDASQLQuery nativeSourceQuery) {
-        OBDAMappingAxiom mapping = getMapping(mappingId);
+        SQLPPMappingAxiom mapping = getMapping(mappingId);
         // TODO: make it immutable
         mapping.setSourceQuery(nativeSourceQuery);
         fireMappingUpdated(sourceURI, mapping.getId(), mapping);
     }
 
     public void updateTargetQueryMapping(URI sourceID, String id, List<Function> targetQuery) {
-        OBDAMappingAxiom mapping = getMapping(id);
+        SQLPPMappingAxiom mapping = getMapping(id);
         if (mapping == null) {
             return;
         }
@@ -317,7 +312,7 @@ public class OBDAModelWrapper {
     }
 
     public void updateMapping(URI dataSourceIRI, String formerMappingId, String newMappingId) {
-        OBDAMappingAxiom mapping = getMapping(formerMappingId);
+        SQLPPMappingAxiom mapping = getMapping(formerMappingId);
         if (mapping != null) {
             mapping.setId(newMappingId);
             fireMappingUpdated(dataSourceIRI, formerMappingId, mapping);
@@ -325,7 +320,7 @@ public class OBDAModelWrapper {
     }
 
     public int indexOf(URI currentSource, String mappingId) {
-        ImmutableList<OBDAMappingAxiom> sourceMappings = obdaModel.getMappings();
+        ImmutableList<SQLPPMappingAxiom> sourceMappings = ppMapping.getPPMappingAxioms();
         if (sourceMappings == null) {
             return -1;
         }
@@ -354,10 +349,10 @@ public class OBDAModelWrapper {
         }
     }
 
-    private static OBDAModel createNewOBDAModel(SpecificationFactory specificationFactory, OBDAFactoryWithException obdaFactory,
-                                                PrefixManagerWrapper prefixManager) {
+    private static SQLPPMapping createNewPPMapping(SpecificationFactory specificationFactory, SQLPPMappingFactory obdaFactory,
+                                                   PrefixManagerWrapper prefixManager) {
         try {
-            return obdaFactory.createOBDAModel(ImmutableList.of(), specificationFactory.createMetadata(prefixManager,
+            return obdaFactory.createSQLPreProcessedMapping(ImmutableList.of(), specificationFactory.createMetadata(prefixManager,
                     UriTemplateMatcher.create(Stream.of())));
             /**
              * No mapping so should never happen

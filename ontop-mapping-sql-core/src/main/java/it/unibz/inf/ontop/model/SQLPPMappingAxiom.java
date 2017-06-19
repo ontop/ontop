@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.model;
 import java.io.Serializable;
 import java.util.List;
 
-public interface OBDAMappingAxiom extends Cloneable, Serializable {
+public interface SQLPPMappingAxiom extends Cloneable, Serializable {
 
 	void setSourceQuery(SourceQuery query);
 
@@ -37,6 +37,6 @@ public interface OBDAMappingAxiom extends Cloneable, Serializable {
 
 	public String getId();
 
-	public OBDAMappingAxiom clone();
+	public SQLPPMappingAxiom clone();
 
 }

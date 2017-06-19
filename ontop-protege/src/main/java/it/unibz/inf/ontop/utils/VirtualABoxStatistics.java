@@ -22,11 +22,9 @@ package it.unibz.inf.ontop.utils;
 
 import it.unibz.inf.ontop.exception.NoDatasourceSelectedException;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.utils.ConnectionTools;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -43,7 +41,7 @@ import org.slf4j.LoggerFactory;
 public class VirtualABoxStatistics {
 
 	private final OBDADataSource source;
-	private final OBDAModel model;
+	private final SQLPPMapping model;
 
 	private HashMap<String, HashMap<String, Integer>> statistics = new HashMap<String, HashMap<String, Integer>>();
 
@@ -52,13 +50,10 @@ public class VirtualABoxStatistics {
 	Logger log = LoggerFactory.getLogger(VirtualABoxStatistics.class);
 
 	/**
-	 * Inserts the OBDA model to this utility class.
-	 * 
-	 * @param model
-	 *            The mandatory OBDA model.
+	 * Inserts the PPMapping to this utility class.
 	 */
-	public VirtualABoxStatistics(OBDAModel model, OBDADataSource source) {
-		this.model = model;
+	public VirtualABoxStatistics(SQLPPMapping ppMapping, OBDADataSource source) {
+		this.model = ppMapping;
 		this.source = source;
 	}
 
@@ -136,10 +131,10 @@ public class VirtualABoxStatistics {
 	}
 
 	public void refresh() {
-		List<OBDAMappingAxiom> mappingList = model.getMappings();
+		List<SQLPPMappingAxiom> mappingList = model.getPPMappingAxioms();
 
 		HashMap<String, Integer> mappingStat = new HashMap<String, Integer>();
-		for (OBDAMappingAxiom mapping : mappingList) {
+		for (SQLPPMappingAxiom mapping : mappingList) {
 			String mappingId = mapping.getId();
 			int triplesCount = 0;
 			try {

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.sql;
 
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.model.DBMetadata;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintExtractor;
@@ -46,18 +46,18 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
     }
 
     @Override
-    public RDBMetadata extract(OBDAModel obdaModel, Connection connection, Optional<File> constraintFile)
+    public RDBMetadata extract(SQLPPMapping ppMapping, Connection connection, Optional<File> constraintFile)
             throws DBMetadataExtractionException {
         try {
             RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection);
-            return extract(obdaModel, connection, metadata, constraintFile);
+            return extract(ppMapping, connection, metadata, constraintFile);
         } catch (SQLException e) {
             throw new DBMetadataExtractionException(e.getMessage());
         }
     }
 
     @Override
-    public RDBMetadata extract(OBDAModel model, @Nullable Connection connection,
+    public RDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection connection,
                                DBMetadata partiallyDefinedMetadata, Optional<File> constraintFile)
             throws DBMetadataExtractionException {
 
@@ -83,7 +83,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
                     // Parse mappings. Just to get the table names in use
 
-                    Set<RelationID> realTables = getRealTables(metadata.getQuotedIDFactory(), model.getMappings());
+                    Set<RelationID> realTables = getRealTables(metadata.getQuotedIDFactory(), ppMapping.getPPMappingAxioms());
                     implicitConstraints.ifPresent(c -> {
                         // Add the tables referred to by user-supplied foreign keys
                         Set<RelationID> referredTables = c.getReferredTables(metadata.getQuotedIDFactory());

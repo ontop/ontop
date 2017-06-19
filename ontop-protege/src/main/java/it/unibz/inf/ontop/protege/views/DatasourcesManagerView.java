@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.panels.DatasourceParameterEditorPanel;
@@ -48,7 +48,7 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 	@Override
 	protected void initialiseOWLView() throws Exception {
 		
-		obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
+		obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
 		obdaModelManager.addListener(this);
 
         //OWLModelManager owlModelManager = getOWLEditorKit().getOWLModelManager();
@@ -64,6 +64,6 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 	@Override
 	public void activeOntologyChanged() {
-		editor.setNewDatasource(obdaModelManager.getActiveOBDAModelWrapper());
+		editor.setNewDatasource(obdaModelManager.getActiveOBDAModel());
 	}
 }
