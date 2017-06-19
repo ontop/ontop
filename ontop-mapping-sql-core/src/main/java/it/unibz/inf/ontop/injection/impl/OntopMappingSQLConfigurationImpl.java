@@ -17,7 +17,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusio
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
@@ -44,7 +44,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
     }
 
     boolean isInputMappingDefined() {
-        return options.predefinedMappingModel.isPresent();
+        return options.ppMapping.isPresent();
     }
 
     /**
@@ -75,11 +75,11 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
      * To be overloaded
      */
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws OBDASpecificationException {
+    public OBDASpecification loadSpecification() throws OBDASpecificationException {
         return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
-    Optional<OBDASpecification> loadSpecification(OntologySupplier ontologySupplier,
+    OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
                                                   Supplier<Optional<Model>> mappingGraphSupplier,
@@ -87,7 +87,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
             throws OBDASpecificationException {
         return mappingConfiguration.loadSpecification(
                 ontologySupplier,
-                () -> options.predefinedMappingModel.map(m -> (PreProcessedMapping) m),
+                () -> options.ppMapping.map(m -> (PreProcessedMapping) m),
                 mappingFileSupplier,
                 mappingReaderSupplier,
                 mappingGraphSupplier,
@@ -97,21 +97,21 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
 
 
     @Override
-    public Optional<OBDAModel> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
+    public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
         return loadPPMapping(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
     /**
      * TODO: also consider the other steps
      */
-    Optional<OBDAModel> loadPPMapping(OntologySupplier ontologySupplier,
-                                      Supplier<Optional<File>> mappingFileSupplier,
-                                      Supplier<Optional<Reader>> mappingReaderSupplier,
-                                      Supplier<Optional<Model>> mappingGraphSupplier)
+    Optional<SQLPPMapping> loadPPMapping(OntologySupplier ontologySupplier,
+                                         Supplier<Optional<File>> mappingFileSupplier,
+                                         Supplier<Optional<Reader>> mappingReaderSupplier,
+                                         Supplier<Optional<Model>> mappingGraphSupplier)
             throws MappingIOException, InvalidMappingException, DuplicateMappingException {
 
-        if (options.predefinedMappingModel.isPresent()) {
-            return options.predefinedMappingModel;
+        if (options.ppMapping.isPresent()) {
+            return options.ppMapping;
         }
 
         SQLMappingParser parser = getInjector().getInstance(SQLMappingParser.class);
@@ -157,13 +157,13 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
     public static class OntopMappingSQLOptions {
         final OntopSQLOptions sqlOptions;
         final OntopMappingOptions mappingOptions;
-        final Optional<OBDAModel> predefinedMappingModel;
+        final Optional<SQLPPMapping> ppMapping;
 
-        private OntopMappingSQLOptions(Optional<OBDAModel> predefinedMappingModel, OntopSQLOptions sqlOptions,
+        private OntopMappingSQLOptions(Optional<SQLPPMapping> ppMapping, OntopSQLOptions sqlOptions,
                                        OntopMappingOptions mappingOptions) {
             this.sqlOptions = sqlOptions;
             this.mappingOptions = mappingOptions;
-            this.predefinedMappingModel = predefinedMappingModel;
+            this.ppMapping = ppMapping;
         }
     }
 
@@ -173,7 +173,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
         private final B builder;
         private final Supplier<Boolean> isMappingDefinedSupplier;
         private final Runnable declareMappingDefinedCB;
-        private Optional<OBDAModel> obdaModel = Optional.empty();
+        private Optional<SQLPPMapping> ppMapping = Optional.empty();
 
         /**
          * Default constructor
@@ -190,19 +190,19 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
          * Not for end-users! Please consider giving a mapping file or a mapping reader.
          */
         @Override
-        public B obdaModel(@Nonnull OBDAModel obdaModel) {
+        public B ppMapping(@Nonnull SQLPPMapping ppMapping) {
             if (isMappingDefinedSupplier.get()) {
                 throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
             declareMappingDefinedCB.run();
-            this.obdaModel = Optional.of(obdaModel);
+            this.ppMapping = Optional.of(ppMapping);
             return builder;
         }
 
 
         final OntopMappingSQLOptions generateMappingSQLOptions(OntopSQLOptions sqlOptions,
                                                                OntopMappingOptions mappingOptions) {
-            return new OntopMappingSQLOptions(obdaModel, sqlOptions, mappingOptions);
+            return new OntopMappingSQLOptions(ppMapping, sqlOptions, mappingOptions);
         }
 
         Properties generateProperties() {
@@ -226,8 +226,8 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
         }
 
         @Override
-        public B obdaModel(@Nonnull OBDAModel obdaModel) {
-            return localBuilderFragment.obdaModel(obdaModel);
+        public B ppMapping(@Nonnull SQLPPMapping ppMapping) {
+            return localBuilderFragment.ppMapping(ppMapping);
         }
 
         @Override

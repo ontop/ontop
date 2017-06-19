@@ -19,13 +19,13 @@ import java.util.List;
  */
 public class OntopNativeMappingSerializer {
 
-    private final OBDAModel model;
+    private final SQLPPMapping ppMapping;
 
     /**
      * TODO: may consider building it through Assisted Injection.
      */
-    public OntopNativeMappingSerializer(OBDAModel model) {
-        this.model = model;
+    public OntopNativeMappingSerializer(SQLPPMapping ppMapping) {
+        this.ppMapping = ppMapping;
     }
 
     /**
@@ -57,7 +57,7 @@ public class OntopNativeMappingSerializer {
      */
 
     private void writePrefixDeclaration(BufferedWriter writer) throws IOException {
-        final ImmutableMap<String, String> prefixMap = model.getMetadata().getPrefixManager().getPrefixMap();
+        final ImmutableMap<String, String> prefixMap = ppMapping.getMetadata().getPrefixManager().getPrefixMap();
 
         if (prefixMap.size() == 0) {
             return; // do nothing if there is no prefixes to write
@@ -78,7 +78,7 @@ public class OntopNativeMappingSerializer {
         writer.write("\n");
 
         boolean needLineBreak = false;
-        for (OBDAMappingAxiom axiom : model.getMappings()) {
+        for (SQLPPMappingAxiom axiom : ppMapping.getPPMappingAxioms()) {
             if (!(axiom.getSourceQuery() instanceof OBDASQLQuery)) {
                 throw new IllegalArgumentException("The ontop native mapping serializer only supports OBDAMappingAxioms with OBDASQLQueries");
             }
@@ -100,7 +100,7 @@ public class OntopNativeMappingSerializer {
     }
 
     private String printTargetQuery(List<Function> query) {
-        return TargetQueryRenderer.encode(query, model.getMetadata().getPrefixManager());
+        return TargetQueryRenderer.encode(query, ppMapping.getMetadata().getPrefixManager());
     }
 
     private String printSourceQuery(OBDASQLQuery query) {

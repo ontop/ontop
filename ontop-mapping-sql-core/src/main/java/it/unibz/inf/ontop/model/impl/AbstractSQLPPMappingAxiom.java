@@ -20,15 +20,15 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 
-public abstract class AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
+public abstract class AbstractSQLPPMappingAxiom implements SQLPPMappingAxiom {
 
 	private static final long serialVersionUID = 5512895151633505075L;
 
 	private String id;
 	
-	public AbstractOBDAMappingAxiom(String id) {
+	public AbstractSQLPPMappingAxiom(String id) {
 		this.id = id;
 	}
 	
@@ -47,5 +47,5 @@ public abstract class AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
 		return id.hashCode();
 	}
 	
-	public abstract OBDAMappingAxiom clone();
+	public abstract SQLPPMappingAxiom clone();
 }

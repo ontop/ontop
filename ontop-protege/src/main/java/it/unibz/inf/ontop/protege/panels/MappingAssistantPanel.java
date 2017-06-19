@@ -31,7 +31,7 @@ import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.MapItem;
 import it.unibz.inf.ontop.protege.gui.PredicateItem;
@@ -67,7 +67,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private static final long serialVersionUID = 1L;
 
-	private final OBDAModelWrapper obdaModel;
+	private final OBDAModel obdaModel;
 	
 	private final PrefixManager prefixManager;
 	
@@ -87,8 +87,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final OntopQueryAnsweringSQLSettings settings;
 
-	public MappingAssistantPanel(OBDAModelWrapper model, NativeQueryLanguageComponentFactory nativeQLFactory,
-								 OntopQueryAnsweringSQLSettings settings) {
+	public MappingAssistantPanel(OBDAModel model, NativeQueryLanguageComponentFactory nativeQLFactory,
+                                 OntopQueryAnsweringSQLSettings settings) {
 		obdaModel = model;
 		this.settings = settings;
 		prefixManager = obdaModel.getPrefixManager();
@@ -528,7 +528,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				return;
 			}
 			// Create the mapping axiom
-            OBDAMappingAxiom mappingAxiom = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(source), target);
+            SQLPPMappingAxiom mappingAxiom = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(source), target);
 			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom, false);
 			
 			// Clear the form afterwards

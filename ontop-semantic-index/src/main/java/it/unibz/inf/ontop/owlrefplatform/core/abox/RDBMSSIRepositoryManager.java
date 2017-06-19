@@ -856,9 +856,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	
-	public ImmutableList<OBDAMappingAxiom> getMappings() {
+	public ImmutableList<SQLPPMappingAxiom> getMappings() {
 
-		List<OBDAMappingAxiom> result = new LinkedList<>();
+		List<SQLPPMappingAxiom> result = new LinkedList<>();
 
 		/*
 		 * PART 2: Creating the mappings
@@ -904,7 +904,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				List<Function> targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+				SQLPPMappingAxiom basicmapping = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
 			}
 		}
@@ -942,7 +942,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				List<Function> targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+				SQLPPMappingAxiom basicmapping = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -974,7 +974,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				List<Function> targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
-				OBDAMappingAxiom basicmapping = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+				SQLPPMappingAxiom basicmapping = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
 		}
