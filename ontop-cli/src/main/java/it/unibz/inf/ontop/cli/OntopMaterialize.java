@@ -275,7 +275,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             }
 
             OntopSQLOWLAPIConfiguration initialConfiguration = configBuilder.build();
-            //OBDAModel obdaModel = initialConfiguration.loadProvidedSpecification();
+            //OBDAModel obdaModel = initialConfiguration.loadSpecification();
 
             OWLOntology ontology;
             OntopSQLOWLAPIConfiguration materializerConfiguration;

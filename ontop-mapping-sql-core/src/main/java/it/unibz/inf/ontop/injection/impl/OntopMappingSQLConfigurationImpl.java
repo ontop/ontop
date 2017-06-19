@@ -75,11 +75,11 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
      * To be overloaded
      */
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws OBDASpecificationException {
+    public OBDASpecification loadSpecification() throws OBDASpecificationException {
         return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
-    Optional<OBDASpecification> loadSpecification(OntologySupplier ontologySupplier,
+    OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
                                                   Supplier<Optional<Model>> mappingGraphSupplier,

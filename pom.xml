@@ -66,9 +66,12 @@
 		<module>ontop-mapping-native</module>
 		<module>ontop-mapping-sql-all</module>
 		<module>ontop-ontology-owlapi</module>
+		<module>ontop-mapping-owlapi</module>
+		<module>ontop-mapping-sql-owlapi</module>
 		<module>ontop-query-answering-core</module>
 		<module>ontop-query-answering-sql</module>
 		<module>ontop-system-core</module>
+		<module>ontop-system-owlapi</module>
 		<module>ontop-system-sql</module>
 		<module>ontop-system-sql-owlapi</module>
 		<module>obdalib-owlapi3</module>

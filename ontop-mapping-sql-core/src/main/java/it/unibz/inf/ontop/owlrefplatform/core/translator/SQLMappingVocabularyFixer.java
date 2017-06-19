@@ -51,6 +51,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
  * 
  * @author mariano
  */
+@Deprecated
 public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 
     private static final Logger log = LoggerFactory.getLogger(SQLMappingVocabularyFixer.class);
