@@ -19,7 +19,7 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-b", "--base-iri"}, title = "base IRI",
             description = "base uri of the generated mapping")
-    private String baseIRI;
+    protected String baseIRI = "";
 
     @Override
     public void run() {
