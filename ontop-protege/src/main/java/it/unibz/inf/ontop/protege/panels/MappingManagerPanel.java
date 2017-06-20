@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.mapping.sql.SQLSourceQueryValidator;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -625,19 +626,18 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 					break;
 				}
 			}
-			String new_id = id + "(" + new_index + ")";
+			String newId = id + "(" + new_index + ")";
 
 			// inserting the new mapping
 			try {
 
 				SQLPPTriplesMap oldmapping = controller.getMapping(id);
-				SQLPPTriplesMap newmapping = null;
-				newmapping = oldmapping.clone();
-				newmapping.setId(new_id);
+				SQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, oldmapping.getSourceQuery(),
+                        oldmapping.getTargetAtoms());
 				controller.addMapping(current_srcuri, newmapping, false);
 
 			} catch (DuplicateMappingException e) {
-				JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + new_id);
+				JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + newId);
 				return;
 			}
 		}

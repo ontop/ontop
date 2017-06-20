@@ -85,7 +85,7 @@ public class R2RMLExportAction extends ProtegeAction {
                 if(approve == JFileChooser.APPROVE_OPTION) {
                     File file = fc.getSelectedFile();
 
-					SQLPPMappingToR2RMLConverter writer = new SQLPPMappingToR2RMLConverter(obdaModel.getCurrentPPMapping(),
+					SQLPPMappingToR2RMLConverter writer = new SQLPPMappingToR2RMLConverter(obdaModel.generatePPMapping(),
 							modelManager.getActiveOntology());
                     writer.write(file);
                     JOptionPane.showMessageDialog(workspace, "R2RML Export completed.");

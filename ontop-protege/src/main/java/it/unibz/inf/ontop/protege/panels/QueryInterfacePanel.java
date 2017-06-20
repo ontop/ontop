@@ -325,7 +325,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	}// GEN-LAST:event_getSPARQLSQLExpansionActionPerformed
 
 	private void cmdAttachPrefixActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonAdvancedPropertiesActionPerformed
-		SelectPrefixPanel dialog = new SelectPrefixPanel(apic.getPrefixManager(), queryTextPane);
+		SelectPrefixPanel dialog = new SelectPrefixPanel(apic.getMutablePrefixManager(), queryTextPane);
 		dialog.show();
 	}// GEN-LAST:event_buttonAdvancedPropertiesActionPerformed
 

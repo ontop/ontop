@@ -20,9 +20,10 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -34,7 +35,6 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
-import java.util.List;
 
 public class OBDAMappingListRenderer implements ListCellRenderer {
 
@@ -76,7 +76,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 
 	public OBDAMappingListRenderer(OBDAModel obdaModel, TargetQueryVocabularyValidator validator) {
 
-		prefixManager = obdaModel.getPrefixManager();
+		prefixManager = obdaModel.getMutablePrefixManager();
 
 
 		trgQueryTextPane = new JTextPane();
@@ -368,7 +368,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	}
 
 	private void prepareTextPanes(SQLPPTriplesMap value, boolean selected) {
-		List<Function> targetQuery = value.getTargetQuery();
+		ImmutableList<ImmutableFunctionalTerm> targetQuery = value.getTargetAtoms();
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
  		trgQueryTextPane.setText(trgQuery);
 

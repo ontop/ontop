@@ -98,7 +98,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		obdaController = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
 		obdaController.addListener(this);
 
-		prefixManager = obdaController.getActiveOBDAModel().getPrefixManager();
+		prefixManager = obdaController.getActiveOBDAModel().getMutablePrefixManager();
 
 		queryEditorPanel = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), obdaController.getQueryController());
 		queryEditorPanel.setPreferredSize(new Dimension(400, 250));
