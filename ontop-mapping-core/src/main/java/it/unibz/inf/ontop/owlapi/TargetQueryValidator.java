@@ -72,35 +72,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 			// of these components (i.e., class, object property, data property).
 			boolean isPredicateValid = isClass || isObjectProp || isDataProp || isAnnotProp || isTriple || isSameAs || isCanonicalIRI;
 
-			String debugMsg = "The predicate: [" + p.getName() + "]";
-			if (isPredicateValid) {
-				Predicate predicate;
-				if (isClass) {
-					predicate = DATA_FACTORY.getClassPredicate(p.getName());
-					debugMsg += " is a Class.";
-				} else if (isObjectProp) {
-					predicate = DATA_FACTORY.getObjectPropertyPredicate(p.getName());
-					debugMsg += " is an Object property.";
-				} else if (isDataProp) {
-					predicate = DATA_FACTORY.getDataPropertyPredicate(p.getName(), COL_TYPE.LITERAL);
-					debugMsg += " is a Data property.";
-				}
-                else if (isAnnotProp){
-                    predicate =  DATA_FACTORY.getAnnotationPropertyPredicate(p.getName());
-                    debugMsg += " is an Annotation property.";
-                }
-				else if (isSameAs){
-					predicate =  DATA_FACTORY.getOWLSameAsPredicate();
-					debugMsg += " is the owl:sameAs property.";
-				}
-				else if (isCanonicalIRI){
-                    predicate =  DATA_FACTORY.getOBDACanonicalIRI();
-                    debugMsg += " is the obda:isCanonicalIRIOf property.";
-                } else {
-                    predicate = DATA_FACTORY.getPredicate(p.getName(), atom.getArity());
-                }
-				atom.setPredicate(predicate); // TODO Fix the API!
-			} else {
+			if (!isPredicateValid) {
 				invalidPredicates.add(p.getName());
 			}
 		}
