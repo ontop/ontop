@@ -48,7 +48,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
 
     private void setSelections(final DisposableProperties preference) {
 
-//        String value = (String) preference.getProperty(QuestPreferences.REFORMULATION_TECHNIQUE);
+//        String value = (String) preference.getProperty(QuestPreferences.REFO  RMULATION_TECHNIQUE);
 //        if (value.equals(UCQBASED)) {
 //            cmbReformulationMethods.setSelectedIndex(0);
 //        }

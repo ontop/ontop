@@ -30,9 +30,9 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
 
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.*;
 import org.slf4j.Logger;
@@ -55,20 +55,18 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 
     private static final Logger log = LoggerFactory.getLogger(SQLMappingVocabularyFixer.class);
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
 
     @Inject
-    private SQLMappingVocabularyFixer(NativeQueryLanguageComponentFactory nativeQLFactory) {
-        this.nativeQLFactory = nativeQLFactory;
+    private SQLMappingVocabularyFixer() {
     }
 
 
     @Override
-	public ImmutableList<SQLPPMappingAxiom> fixMappingAxioms(ImmutableList<SQLPPMappingAxiom> mappingAxioms,
-                                                             ImmutableOntologyVocabulary vocabulary) {
+	public ImmutableList<SQLPPTriplesMap> fixMappingAxioms(ImmutableList<SQLPPTriplesMap> mappingAxioms,
+                                                           ImmutableOntologyVocabulary vocabulary) {
         log.debug("Fixing OBDA Model");
-        return ImmutableList.copyOf(fixMappingPredicates(mappingAxioms, vocabulary, nativeQLFactory));
+        return ImmutableList.copyOf(fixMappingPredicates(mappingAxioms, vocabulary));
     }
 
 	/***
@@ -79,9 +77,8 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 	 * @param vocabulary
 	 * @return
 	 */
-	private static ImmutableList<SQLPPMappingAxiom> fixMappingPredicates(Collection<SQLPPMappingAxiom> originalMappings,
-                                                                         ImmutableOntologyVocabulary vocabulary,
-                                                                         NativeQueryLanguageComponentFactory nativeQLFactory) {
+	private static ImmutableList<SQLPPTriplesMap> fixMappingPredicates(Collection<SQLPPTriplesMap> originalMappings,
+                                                                       ImmutableOntologyVocabulary vocabulary) {
 		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 
         Map<String, Predicate> urimap = new HashMap<>();
@@ -98,24 +95,18 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
             urimap.put(p.getName(), p.getPredicate());
 
 
-        Collection<SQLPPMappingAxiom> result = new ArrayList<>();
-        for (SQLPPMappingAxiom mapping : originalMappings) {
-            List<Function> targetQuery = mapping.getTargetQuery();
-            List<Function> newbody = new LinkedList<>();
+        Collection<SQLPPTriplesMap> result = new ArrayList<>();
+        for (SQLPPTriplesMap mapping : originalMappings) {
+            ImmutableList<ImmutableFunctionalTerm> targetQuery = mapping.getTargetAtoms();
+            ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
 
-            for (Function atom : targetQuery) {
+            for (ImmutableFunctionalTerm atom : targetQuery) {
                 Predicate predTarget = atom.getFunctionSymbol();
 
 				/* Fixing terms */
-                List<Term> arguments = new ArrayList<>();
-//                for (Term term : atom.getTerms()) {
-//                    //newTerms.add(fixTerm(term));
-//                    newTerms.add(fixTerm(term));
-//                }
+                ImmutableList<? extends ImmutableTerm> arguments = atom.getArguments();
 
-                arguments = atom.getTerms();
-
-                Function newatom = null;
+                ImmutableFunctionalTerm newatom = null;
 
                 Predicate predicate = urimap.get(predTarget.getName());
                 if (predicate == null) {
@@ -148,44 +139,45 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
                     newatom = fixOntologyPredicate(mapping, predTarget, arguments, predicate);
                 }
 
-                newbody.add(newatom);
+                bodyBuilder.add(newatom);
             } //end for
 
-            result.add(nativeQLFactory.create(mapping.getId(), mapping.getSourceQuery(), newbody));
+            result.add(new OntopNativeSQLPPTriplesMap(mapping.getId(), mapping.getSourceQuery(), bodyBuilder.build()));
         }
 //		log.debug("Repair done. Returning {} mappings", result.size());
 		return ImmutableList.copyOf(result);
     }
 
-    private static Function fixSameAsPredicate(SQLPPMappingAxiom mapping, String sameAsPredName, List<Term> arguments) {
+    private static ImmutableFunctionalTerm fixSameAsPredicate(SQLPPTriplesMap mapping, String sameAsPredName,
+                                                              List<? extends ImmutableTerm> arguments) {
 
-        Function fixedTarget;
+        ImmutableFunctionalTerm fixedTarget;
         if (arguments.size() == 2) {
-            Term t0 = arguments.get(0);
-            Term t1 = arguments.get(1);
-            if (t0 instanceof Function && t1 instanceof Function) {
+            ImmutableTerm t0 = arguments.get(0);
+            ImmutableTerm t1 = arguments.get(1);
+            if (t0 instanceof ImmutableFunctionalTerm && t1 instanceof ImmutableFunctionalTerm) {
 
 
 
-                    Function ft0 = (Function) t0;
-                    Function ft1 = (Function) t1;
+                ImmutableFunctionalTerm ft0 = (ImmutableFunctionalTerm) t0;
+                ImmutableFunctionalTerm ft1 = (ImmutableFunctionalTerm) t1;
 
-                    boolean t0uri = (ft0.getFunctionSymbol() instanceof URITemplatePredicate);
-                    boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);
+                boolean t0uri = (ft0.getFunctionSymbol() instanceof URITemplatePredicate);
+                boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);
 
-                    if (t0uri && t1uri) {
-                        Predicate pred = DATA_FACTORY.getObjectPropertyPredicate(sameAsPredName);
-                        fixedTarget = DATA_FACTORY.getFunction(pred, t0, t1);
+                if (t0uri && t1uri) {
+                    Predicate pred = DATA_FACTORY.getObjectPropertyPredicate(sameAsPredName);
+                    fixedTarget = DATA_FACTORY.getImmutableFunctionalTerm(pred, t0, t1);
 
-                    } else {
-                        String message = String.format("" +
-                                "Error with property <%s> used in the mapping\n" +
-                                "   %s \n" +
-                                "The reason is: \n" +
-                                "owl:sameAs should be used between two IRIs, use  `<{val}>` to build an IRI for the object {%s} .. ", sameAsPredName, mapping, t1);
+                } else {
+                    String message = String.format("" +
+                            "Error with property <%s> used in the mapping\n" +
+                            "   %s \n" +
+                            "The reason is: \n" +
+                            "owl:sameAs should be used between two IRIs, use  `<{val}>` to build an IRI for the object {%s} .. ", sameAsPredName, mapping, t1);
 
-                        throw new IllegalArgumentException(message);
-                    }
+                    throw new IllegalArgumentException(message);
+                }
 
             } else {
                 String message = String.format("" +
@@ -203,12 +195,12 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
         return fixedTarget;
     }
 
-    private static Function fixTripleAtom(SQLPPMappingAxiom mapping, List<Term> arguments) {
-        Function newatom;
+    private static ImmutableFunctionalTerm fixTripleAtom(SQLPPTriplesMap mapping, List<? extends ImmutableTerm> arguments) {
+        ImmutableFunctionalTerm newatom;
         Term t0 = arguments.get(0);
         if ((t0 instanceof Function) && ((Function) t0).getFunctionSymbol() instanceof URITemplatePredicate) {
 
-                newatom = DATA_FACTORY.getTripleAtom(arguments.get(0), arguments.get(1), arguments.get(2));
+                newatom = DATA_FACTORY.getImmutableTripleAtom(arguments.get(0), arguments.get(1), arguments.get(2));
 
         } else {
             String message = String.format("" +
@@ -222,14 +214,15 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
         return newatom;
     }
 
-    private static Function fixOntologyPredicate(SQLPPMappingAxiom mapping, Predicate predTarget, List<Term> arguments, Predicate predicate) {
-        Function newatom;
+    private static ImmutableFunctionalTerm fixOntologyPredicate(SQLPPTriplesMap mapping, Predicate predTarget,
+                                                                List<? extends ImmutableTerm> arguments, Predicate predicate) {
+        ImmutableFunctionalTerm newatom;
         if (arguments.size() == 1) {
             Term t0 = arguments.get(0);
             if ((t0 instanceof Function) && (
                     (((Function)t0).getFunctionSymbol() instanceof URITemplatePredicate)
                     || (((Function)t0).getFunctionSymbol() instanceof BNodePredicate))) {
-                newatom = DATA_FACTORY.getFunction(predicate, arguments.get(0));
+                newatom = DATA_FACTORY.getImmutableFunctionalTerm(predicate, arguments.get(0));
             } else {
                 String message = String.format("" +
                         "Error with class <%s> used in the mapping\n" +
@@ -252,7 +245,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
                     if ((t1 instanceof Function) && (
                             (((Function) t1).getFunctionSymbol() instanceof URITemplatePredicate)
                             || (((Function) t1).getFunctionSymbol() instanceof BNodePredicate) )) {
-                        newatom = DATA_FACTORY.getFunction(predicate, arguments.get(0), arguments.get(1));
+                        newatom = DATA_FACTORY.getImmutableFunctionalTerm(predicate, arguments.get(0), arguments.get(1));
 
                     } else {
 
@@ -270,7 +263,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
                     if (predicate.isDataProperty()) {
 
 
-                        newatom = DATA_FACTORY.getFunction(predicate, arguments.get(0), arguments.get(1));
+                        newatom = DATA_FACTORY.getImmutableFunctionalTerm(predicate, arguments.get(0), arguments.get(1));
 
                     } else { //case of annotation property
 
@@ -279,7 +272,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 
                             Term t1 = arguments.get(1);
                             if ((t1 instanceof Function) && ((Function) t1).getFunctionSymbol() instanceof URITemplatePredicate) {
-                                newatom = DATA_FACTORY.getFunction(predTarget, arguments.get(0), arguments.get(1));
+                                newatom = DATA_FACTORY.getImmutableFunctionalTerm(predTarget, arguments.get(0), arguments.get(1));
 
                             } else {
 
@@ -295,12 +288,12 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
                             //we understood from the mappings that the annotation property can be treated as data property
                         } else if (predTarget.isDataProperty()) {
 
-                            newatom = DATA_FACTORY.getFunction(predTarget, arguments.get(0), arguments.get(1));
+                            newatom = DATA_FACTORY.getImmutableFunctionalTerm(predTarget, arguments.get(0), arguments.get(1));
 
                         } else { //annotation property not clear, is treated as a data property
 
                             Predicate pred = DATA_FACTORY.getDataPropertyPredicate(predTarget.getName());
-                            newatom = DATA_FACTORY.getFunction(pred, arguments.get(0), arguments.get(1));
+                            newatom = DATA_FACTORY.getImmutableFunctionalTerm(pred, arguments.get(0), arguments.get(1));
 
                         }
                     }
@@ -321,13 +314,14 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
         return newatom;
     }
 
-    private static Function fixUndeclaredPredicate(SQLPPMappingAxiom mapping, String undeclaredPredName, List<Term> arguments) {
-        Function fixedTarget;
+    private static ImmutableFunctionalTerm fixUndeclaredPredicate(SQLPPTriplesMap mapping, String undeclaredPredName,
+                                                                  List<? extends ImmutableTerm> arguments) {
+        ImmutableFunctionalTerm fixedTarget;
         if (arguments.size() == 1) {
             Term t0 = arguments.get(0);
             if ((t0 instanceof Function) && ((Function)t0).getFunctionSymbol() instanceof URITemplatePredicate) {
                 Predicate pred = DATA_FACTORY.getClassPredicate(undeclaredPredName);
-                fixedTarget = DATA_FACTORY.getFunction(pred, arguments.get(0));
+                fixedTarget = DATA_FACTORY.getImmutableFunctionalTerm(pred, arguments.get(0));
             } else {
                 String message = String.format("" +
                         "Error with class <%s> used in the mapping\n" +
@@ -337,8 +331,8 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
                 throw new IllegalArgumentException(message);
             }
         } else if (arguments.size() == 2) {
-            Term t0 = arguments.get(0);
-            Term t1 = arguments.get(1);
+            ImmutableTerm t0 = arguments.get(0);
+            ImmutableTerm t1 = arguments.get(1);
             if (t0 instanceof Function) {
 
                 if ((t1 instanceof Function)) {
@@ -351,10 +345,10 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 
                     if (t0uri && t1uri) {
                         Predicate pred = DATA_FACTORY.getObjectPropertyPredicate(undeclaredPredName);
-                        fixedTarget = DATA_FACTORY.getFunction(pred, t0, t1);
+                        fixedTarget = DATA_FACTORY.getImmutableFunctionalTerm(pred, t0, t1);
                     } else {
                         Predicate pred = DATA_FACTORY.getDataPropertyPredicate(undeclaredPredName);
-                        fixedTarget = DATA_FACTORY.getFunction(pred, t0, t1);
+                        fixedTarget = DATA_FACTORY.getImmutableFunctionalTerm(pred, t0, t1);
                     }
                 } else {
                     //cases we cannot recognize

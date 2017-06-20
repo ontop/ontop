@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.renderer;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -39,10 +40,9 @@ public class TargetQueryRenderer {
 	 * Transforms the given <code>OBDAQuery</code> into a string. The method requires
 	 * a prefix manager to shorten full IRI name.
 	 */
-	public static String encode(List<Function> input, PrefixManager prefixManager) {
+	public static String encode(ImmutableList<ImmutableFunctionalTerm> body, PrefixManager prefixManager) {
 
 		TurtleWriter turtleWriter = new TurtleWriter();
-		List<Function> body = input;
 		for (Function atom : body) {
 			String subject, predicate, object = "";
 			String originalString = atom.getFunctionSymbol().toString();

@@ -8,10 +8,7 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
-import it.unibz.inf.ontop.model.SQLPPMapping;
-import it.unibz.inf.ontop.model.UriTemplateMatcher;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
@@ -152,14 +149,14 @@ class SILoadingTools {
         SpecificationFactory specificationFactory = defaultConfiguration.getInjector().getInstance(SpecificationFactory.class);
         PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 
-        ImmutableList<SQLPPMappingAxiom> mappingAxioms = dataRepository.getMappings();
+        ImmutableList<SQLPPTriplesMap> mappingAxioms = dataRepository.getMappings();
 
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                 mappingAxioms.stream()
-                        .flatMap(ax -> ax.getTargetQuery().stream())
-                        .flatMap(atom -> atom.getTerms().stream())
-                        .filter(t -> t instanceof Function)
-                        .map(t -> (Function) t));
+                        .flatMap(ax -> ax.getTargetAtoms().stream())
+                        .flatMap(atom -> atom.getArguments().stream())
+                        .filter(t -> t instanceof ImmutableFunctionalTerm)
+                        .map(t -> (ImmutableFunctionalTerm) t));
 
         try {
             return new SQLPPMappingImpl(mappingAxioms,

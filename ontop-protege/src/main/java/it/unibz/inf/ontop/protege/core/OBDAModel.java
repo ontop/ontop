@@ -108,16 +108,16 @@ public class OBDAModel {
 
         PrefixManager mergedPrefixManager = specificationFactory.createPrefixManager(mergedPrefixes);
 
-        ImmutableList<SQLPPMappingAxiom> mappingAxioms = newObdaModel.getPPMappingAxioms();
+        ImmutableList<SQLPPTriplesMap> mappingAxioms = newObdaModel.getTripleMaps();
 
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                 mappingAxioms.stream()
-                        .flatMap(ax -> ax.getTargetQuery().stream())
-                        .flatMap(atom -> atom.getTerms().stream())
+                        .flatMap(ax -> ax.getTargetAtoms().stream())
+                        .flatMap(atom -> atom.getArguments().stream())
                         .filter(t -> t instanceof Function)
                         .map(t -> (Function) t));
 
-        ppMapping = ppMappingFactory.createSQLPreProcessedMapping(newObdaModel.getPPMappingAxioms(),
+        ppMapping = ppMappingFactory.createSQLPreProcessedMapping(newObdaModel.getTripleMaps(),
                 specificationFactory.createMetadata(mergedPrefixManager, uriTemplateMatcher));
     }
 
@@ -125,15 +125,15 @@ public class OBDAModel {
         return ppMapping.getMetadata().getPrefixManager();
     }
 
-    public ImmutableList<SQLPPMappingAxiom> getMappings(URI sourceUri) {
+    public ImmutableList<SQLPPTriplesMap> getMappings(URI sourceUri) {
         if (sourceUri.equals(getSourceId()))
-            return ppMapping.getPPMappingAxioms();
+            return ppMapping.getTripleMaps();
         else
             return ImmutableList.of();
     }
 
-    public ImmutableMap<URI, ImmutableList<SQLPPMappingAxiom>> getMappings() {
-        return ImmutableMap.of(getSourceId(), ppMapping.getPPMappingAxioms());
+    public ImmutableMap<URI, ImmutableList<SQLPPTriplesMap>> getMappings() {
+        return ImmutableMap.of(getSourceId(), ppMapping.getTripleMaps());
     }
 
     public ImmutableList<OBDADataSource> getSources() {
@@ -142,7 +142,7 @@ public class OBDAModel {
                 : ImmutableList.of();
     }
 
-    public SQLPPMappingAxiom getMapping(String mappingId) {
+    public SQLPPTriplesMap getMapping(String mappingId) {
         return ppMapping.getPPMappingAxiom(mappingId);
     }
 
@@ -156,7 +156,7 @@ public class OBDAModel {
 
     public int renamePredicate(Predicate removedPredicate, Predicate newPredicate) {
         int modifiedCount = 0;
-        for (SQLPPMappingAxiom mapping : ppMapping.getPPMappingAxioms()) {
+        for (SQLPPTriplesMap mapping : ppMapping.getTripleMaps()) {
             CQIE cq = (CQIE) mapping.getTargetQuery();
             List<Function> body = cq.getBody();
             for (int idx = 0; idx < body.size(); idx++) {
@@ -173,7 +173,7 @@ public class OBDAModel {
         return modifiedCount;
     }
 
-    private void fireMappingUpdated(URI sourceURI, String mappingId, SQLPPMappingAxiom mapping) {
+    private void fireMappingUpdated(URI sourceURI, String mappingId, SQLPPTriplesMap mapping) {
         for (OBDAMappingListener listener : mappingListeners) {
             listener.mappingUpdated(sourceURI);
         }
@@ -181,7 +181,7 @@ public class OBDAModel {
 
     public int deletePredicate(Predicate removedPredicate) {
         int modifiedCount = 0;
-        for (SQLPPMappingAxiom mapping : ppMapping.getPPMappingAxioms()) {
+        for (SQLPPTriplesMap mapping : ppMapping.getTripleMaps()) {
             CQIE cq = (CQIE) mapping.getTargetQuery();
             List<Function> body = cq.getBody();
             for (int idx = 0; idx < body.size(); idx++) {
@@ -252,10 +252,10 @@ public class OBDAModel {
     }
 
 
-    public void addMapping(URI sourceID, SQLPPMappingAxiom mappingAxiom, boolean disableFiringMappingInsertedEvent)
+    public void addMapping(URI sourceID, SQLPPTriplesMap mappingAxiom, boolean disableFiringMappingInsertedEvent)
             throws DuplicateMappingException {
-        ImmutableList<SQLPPMappingAxiom> sourceMappings = ppMapping.getPPMappingAxioms();
-        List<SQLPPMappingAxiom> newSourceMappings;
+        ImmutableList<SQLPPTriplesMap> sourceMappings = ppMapping.getTripleMaps();
+        List<SQLPPTriplesMap> newSourceMappings;
         if (sourceMappings == null) {
             newSourceMappings = Arrays.asList(mappingAxiom);
         }
@@ -277,11 +277,11 @@ public class OBDAModel {
     }
 
     public void removeMapping(URI dataSourceURI, String mappingId) {
-        SQLPPMappingAxiom mapping = ppMapping.getPPMappingAxiom(mappingId);
+        SQLPPTriplesMap mapping = ppMapping.getPPMappingAxiom(mappingId);
         if (mapping == null)
             return;
 
-        ImmutableList<SQLPPMappingAxiom> newMappingAssertions = ppMapping.getPPMappingAxioms().stream()
+        ImmutableList<SQLPPTriplesMap> newMappingAssertions = ppMapping.getTripleMaps().stream()
                 .filter(a -> ! a.getId().equals(mappingId))
                 .collect(ImmutableCollectors.toList());
 
@@ -295,14 +295,14 @@ public class OBDAModel {
     }
 
     public void updateMappingsSourceQuery(URI sourceURI, String mappingId, OBDASQLQuery nativeSourceQuery) {
-        SQLPPMappingAxiom mapping = getMapping(mappingId);
+        SQLPPTriplesMap mapping = getMapping(mappingId);
         // TODO: make it immutable
         mapping.setSourceQuery(nativeSourceQuery);
         fireMappingUpdated(sourceURI, mapping.getId(), mapping);
     }
 
     public void updateTargetQueryMapping(URI sourceID, String id, List<Function> targetQuery) {
-        SQLPPMappingAxiom mapping = getMapping(id);
+        SQLPPTriplesMap mapping = getMapping(id);
         if (mapping == null) {
             return;
         }
@@ -312,7 +312,7 @@ public class OBDAModel {
     }
 
     public void updateMapping(URI dataSourceIRI, String formerMappingId, String newMappingId) {
-        SQLPPMappingAxiom mapping = getMapping(formerMappingId);
+        SQLPPTriplesMap mapping = getMapping(formerMappingId);
         if (mapping != null) {
             mapping.setId(newMappingId);
             fireMappingUpdated(dataSourceIRI, formerMappingId, mapping);
@@ -320,7 +320,7 @@ public class OBDAModel {
     }
 
     public int indexOf(URI currentSource, String mappingId) {
-        ImmutableList<SQLPPMappingAxiom> sourceMappings = ppMapping.getPPMappingAxioms();
+        ImmutableList<SQLPPTriplesMap> sourceMappings = ppMapping.getTripleMaps();
         if (sourceMappings == null) {
             return -1;
         }

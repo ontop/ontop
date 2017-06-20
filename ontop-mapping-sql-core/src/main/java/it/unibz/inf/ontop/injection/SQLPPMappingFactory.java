@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 
 /**
@@ -18,6 +18,6 @@ import it.unibz.inf.ontop.model.SQLPPMapping;
  */
 public interface SQLPPMappingFactory {
 
-    SQLPPMapping createSQLPreProcessedMapping(ImmutableList<SQLPPMappingAxiom> newMappings,
+    SQLPPMapping createSQLPreProcessedMapping(ImmutableList<SQLPPTriplesMap> newMappings,
                                               MappingMetadata metadata) throws DuplicateMappingException;
 }

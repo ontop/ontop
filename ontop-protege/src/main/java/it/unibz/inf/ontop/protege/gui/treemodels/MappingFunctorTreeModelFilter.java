@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  */
 
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
@@ -32,14 +32,14 @@ import java.util.List;
  * This filter receives a string and returns true if any mapping contains the
  * functor in some of the atoms in the head
  */
-public class MappingFunctorTreeModelFilter extends TreeModelFilter<SQLPPMappingAxiom> {
+public class MappingFunctorTreeModelFilter extends TreeModelFilter<SQLPPTriplesMap> {
 
 	public MappingFunctorTreeModelFilter() {
 		super.bNegation = false;
 	}
 
 	@Override
-	public boolean match(SQLPPMappingAxiom object) {
+	public boolean match(SQLPPTriplesMap object) {
 		final List<Function> atoms = object.getTargetQuery();
 
 		boolean isMatch = false;

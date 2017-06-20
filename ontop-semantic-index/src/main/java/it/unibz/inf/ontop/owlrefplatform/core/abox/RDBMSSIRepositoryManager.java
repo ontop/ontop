@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.RDBMSMappingAxiom;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.ClassExpression;
@@ -856,9 +856,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	
-	public ImmutableList<SQLPPMappingAxiom> getMappings() {
+	public ImmutableList<SQLPPTriplesMap> getMappings() {
 
-		List<SQLPPMappingAxiom> result = new LinkedList<>();
+		List<SQLPPTriplesMap> result = new LinkedList<>();
 
 		/*
 		 * PART 2: Creating the mappings
@@ -903,8 +903,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				List<Function> targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				SQLPPMappingAxiom basicmapping = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(ope.getPredicate(),
+						view.getId().getType1(), view.getId().getType2());
+				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
 			}
 		}
@@ -941,8 +942,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				List<Function> targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				SQLPPMappingAxiom basicmapping = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(dpe.getPredicate(),
+						view.getId().getType1(), view.getId().getType2());
+				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery),
+						targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -973,8 +976,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				List<Function> targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
-				SQLPPMappingAxiom basicmapping = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
+				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -1014,27 +1017,27 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	
-	private List<Function> constructTargetQuery(Predicate predicate, COL_TYPE type) {
+	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, COL_TYPE type) {
 
 		Variable X = DATA_FACTORY.getVariable("X");
 
 		//Predicate headPredicate = DATA_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
 		//Function head = DATA_FACTORY.getFunction(headPredicate, X);
 
-		Function subjectTerm;
+		ImmutableFunctionalTerm subjectTerm;
 		if (type == COL_TYPE.OBJECT) 
-			subjectTerm = DATA_FACTORY.getUriTemplate(X);
+			subjectTerm = DATA_FACTORY.getImmutableUriTemplate(X);
 		else {
 			assert (type == COL_TYPE.BNODE); 
-			subjectTerm = DATA_FACTORY.getBNodeTemplate(X);
+			subjectTerm = DATA_FACTORY.getImmutableBNodeTemplate(X);
 		}
-		
-		Function body = DATA_FACTORY.getFunction(predicate, subjectTerm);
-		return Collections.singletonList(body);
+
+		ImmutableFunctionalTerm body = DATA_FACTORY.getImmutableFunctionalTerm(predicate, subjectTerm);
+		return ImmutableList.of(body);
 	}
 	
 	
-	private List<Function> constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
+	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
 
 		Variable X = DATA_FACTORY.getVariable("X");
 		Variable Y = DATA_FACTORY.getVariable("Y");
@@ -1042,24 +1045,24 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		//Predicate headPredicate = DATA_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
 		//Function head = DATA_FACTORY.getFunction(headPredicate, X, Y);
 
-		Function subjectTerm;
+		ImmutableFunctionalTerm subjectTerm;
 		if (type1 == COL_TYPE.OBJECT) 
-			subjectTerm = DATA_FACTORY.getUriTemplate(X);
+			subjectTerm = DATA_FACTORY.getImmutableUriTemplate(X);
 		else {
 			assert (type1 == COL_TYPE.BNODE); 
-			subjectTerm = DATA_FACTORY.getBNodeTemplate(X);
+			subjectTerm = DATA_FACTORY.getImmutableBNodeTemplate(X);
 		}
 		
-		Function objectTerm;
+		ImmutableFunctionalTerm objectTerm;
 		switch (type2) {
 			case BNODE:
-				objectTerm = DATA_FACTORY.getBNodeTemplate(Y);
+				objectTerm = DATA_FACTORY.getImmutableBNodeTemplate(Y);
 				break;
 			case OBJECT:
-				objectTerm = DATA_FACTORY.getUriTemplate(Y);
+				objectTerm = DATA_FACTORY.getImmutableUriTemplate(Y);
 				break;
 			case LITERAL_LANG:	
-				objectTerm = DATA_FACTORY.getTypedTerm(Y, DATA_FACTORY.getVariable("Z"));
+				objectTerm = DATA_FACTORY.getImmutableTypedTerm(Y, DATA_FACTORY.getVariable("Z"));
 				break;
 			case DATE:
 			case TIME:
@@ -1067,11 +1070,11 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				// R: these three types were not covered by the old switch
 				throw new RuntimeException("Unsuported type: " + type2);
 			default:
-				objectTerm = DATA_FACTORY.getTypedTerm(Y, type2);
+				objectTerm = DATA_FACTORY.getImmutableTypedTerm(Y, type2);
 		}
 
-		Function body = DATA_FACTORY.getFunction(predicate, subjectTerm, objectTerm);
-		return Collections.singletonList(body);
+		ImmutableFunctionalTerm body = DATA_FACTORY.getImmutableFunctionalTerm(predicate, subjectTerm, objectTerm);
+		return ImmutableList.of(body);
 	}
 
 	
