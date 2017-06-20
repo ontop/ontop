@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -87,15 +85,8 @@ public class R2RMLExportAction extends ProtegeAction {
                 if(approve == JFileChooser.APPROVE_OPTION) {
                     File file = fc.getSelectedFile();
 
-					/**
-					 * TODO: improve this
-					 */
-					NativeQueryLanguageComponentFactory nativeQLFactory = OntopModelConfiguration.defaultBuilder()
-							.build().getInjector().getInstance(NativeQueryLanguageComponentFactory.class);
-
 					SQLPPMappingToR2RMLConverter writer = new SQLPPMappingToR2RMLConverter(obdaModel.getCurrentPPMapping(),
-							modelManager.getActiveOntology(),
-							nativeQLFactory);
+							modelManager.getActiveOntology());
                     writer.write(file);
                     JOptionPane.showMessageDialog(workspace, "R2RML Export completed.");
                 }

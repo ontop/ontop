@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 
@@ -46,8 +46,8 @@ public class SQLPPMappingValidator {
 
 		 TargetQueryVocabularyValidator validator = new TargetQueryValidator(vocabulary);
 
-		 for (SQLPPMappingAxiom mapping : ppMapping.getPPMappingAxioms()) {
-			 List<Function> tq = mapping.getTargetQuery();
+		 for (SQLPPTriplesMap mapping : ppMapping.getTripleMaps()) {
+			 List<? extends Function> tq = mapping.getTargetAtoms();
 			 boolean bSuccess = validator.validate(tq);
 			 if (!bSuccess) {
 				 throw new Exception("Found an invalid target query: " + tq.toString());

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.io;
 
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
@@ -78,20 +79,17 @@ public class OntopNativeMappingSerializer {
         writer.write("\n");
 
         boolean needLineBreak = false;
-        for (SQLPPMappingAxiom axiom : ppMapping.getPPMappingAxioms()) {
-            if (!(axiom.getSourceQuery() instanceof OBDASQLQuery)) {
-                throw new IllegalArgumentException("The ontop native mapping serializer only supports OBDAMappingAxioms with OBDASQLQueries");
-            }
+        for (SQLPPTriplesMap axiom : ppMapping.getTripleMaps()) {
 
             if (needLineBreak) {
                 writer.write("\n");
             }
             writer.write(OntopNativeMappingParser.Label.mappingId.name() + "\t" + axiom.getId() + "\n");
 
-            List<Function> targetQuery = axiom.getTargetQuery();
+            ImmutableList<ImmutableFunctionalTerm> targetQuery = axiom.getTargetAtoms();
             writer.write(OntopNativeMappingParser.Label.target.name() + "\t\t" + printTargetQuery(targetQuery) + "\n");
 
-            OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
+            OBDASQLQuery sourceQuery = axiom.getSourceQuery();
             writer.write(OntopNativeMappingParser.Label.source.name() + "\t\t" + printSourceQuery(sourceQuery) + "\n");
             needLineBreak = true;
         }
@@ -99,7 +97,7 @@ public class OntopNativeMappingSerializer {
         writer.write("\n\n");
     }
 
-    private String printTargetQuery(List<Function> query) {
+    private String printTargetQuery(ImmutableList<ImmutableFunctionalTerm> query) {
         return TargetQueryRenderer.encode(query, ppMapping.getMetadata().getPrefixManager());
     }
 

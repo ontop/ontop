@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLSettings;
 import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.mapping.extraction.impl.MutableSQLPPTriplesMapImpl;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
@@ -84,15 +84,12 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
     private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
     private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
 
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final OntopQueryAnsweringSQLSettings settings;
 
-	public MappingAssistantPanel(OBDAModel model, NativeQueryLanguageComponentFactory nativeQLFactory,
-                                 OntopQueryAnsweringSQLSettings settings) {
+	public MappingAssistantPanel(OBDAModel model, OntopQueryAnsweringSQLSettings settings) {
 		obdaModel = model;
 		this.settings = settings;
 		prefixManager = obdaModel.getPrefixManager();
-        this.nativeQLFactory = nativeQLFactory;
 		initComponents();
 
                 if (obdaModel.getSources().size() > 0) {
@@ -528,7 +525,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				return;
 			}
 			// Create the mapping axiom
-            SQLPPMappingAxiom mappingAxiom = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(source), target);
+            SQLPPTriplesMap mappingAxiom = new MutableSQLPPTriplesMapImpl(MAPPING_FACTORY.getSQLQuery(source), target);
 			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom, false);
 			
 			// Clear the form afterwards

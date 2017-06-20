@@ -27,7 +27,7 @@ import java.util.List;
 
 public interface TargetQueryVocabularyValidator {
 
-	boolean validate(List<Function> targetQuery);
+	boolean validate(List<? extends Function> targetQuery);
 
 	List<String> getInvalidPredicates();
 

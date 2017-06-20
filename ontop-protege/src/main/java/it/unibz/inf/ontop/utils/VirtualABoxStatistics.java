@@ -131,10 +131,10 @@ public class VirtualABoxStatistics {
 	}
 
 	public void refresh() {
-		List<SQLPPMappingAxiom> mappingList = model.getPPMappingAxioms();
+		List<SQLPPTriplesMap> mappingList = model.getTripleMaps();
 
 		HashMap<String, Integer> mappingStat = new HashMap<String, Integer>();
-		for (SQLPPMappingAxiom mapping : mappingList) {
+		for (SQLPPTriplesMap mapping : mappingList) {
 			String mappingId = mapping.getId();
 			int triplesCount = 0;
 			try {

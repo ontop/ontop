@@ -83,7 +83,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
                     // Parse mappings. Just to get the table names in use
 
-                    Set<RelationID> realTables = getRealTables(metadata.getQuotedIDFactory(), ppMapping.getPPMappingAxioms());
+                    Set<RelationID> realTables = getRealTables(metadata.getQuotedIDFactory(), ppMapping.getTripleMaps());
                     implicitConstraints.ifPresent(c -> {
                         // Add the tables referred to by user-supplied foreign keys
                         Set<RelationID> referredTables = c.getReferredTables(metadata.getQuotedIDFactory());

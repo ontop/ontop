@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.protege.utils;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
@@ -316,11 +316,11 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		preferredWidth = list.getParent().getParent().getWidth();
 
 		minTextHeight = this.plainFontHeight + 6;
-		Component c = prepareRenderer((SQLPPMappingAxiom) value, isSelected);
+		Component c = prepareRenderer((SQLPPTriplesMap) value, isSelected);
 		return c;
 	}
 
-	private Component prepareRenderer(SQLPPMappingAxiom value, boolean isSelected) {
+	private Component prepareRenderer(SQLPPTriplesMap value, boolean isSelected) {
 		renderingComponent.setOpaque(false);
 		prepareTextPanes(value, isSelected);
 
@@ -367,7 +367,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		return renderingComponent;
 	}
 
-	private void prepareTextPanes(SQLPPMappingAxiom value, boolean selected) {
+	private void prepareTextPanes(SQLPPTriplesMap value, boolean selected) {
 		List<Function> targetQuery = value.getTargetQuery();
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
  		trgQueryTextPane.setText(trgQuery);

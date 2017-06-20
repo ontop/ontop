@@ -52,7 +52,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	}
 	
 	@Override
-	public boolean validate(List<Function> targetQuery) {
+	public boolean validate(List<? extends Function> targetQuery) {
 		// Reset the invalid list
 		invalidPredicates.clear();
 

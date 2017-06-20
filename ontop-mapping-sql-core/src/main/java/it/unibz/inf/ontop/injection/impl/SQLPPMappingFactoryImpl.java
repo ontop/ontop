@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 
 import javax.inject.Inject;
@@ -44,7 +44,7 @@ public class SQLPPMappingFactoryImpl implements SQLPPMappingFactory {
      * SQLPPPMapping creation
      */
     @Override
-    public SQLPPMapping createSQLPreProcessedMapping(ImmutableList<SQLPPMappingAxiom> ppMappingAxioms,
+    public SQLPPMapping createSQLPreProcessedMapping(ImmutableList<SQLPPTriplesMap> ppMappingAxioms,
                                                      MappingMetadata mappingMetadata)
             throws DuplicateMappingException {
         try {

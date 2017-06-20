@@ -97,7 +97,6 @@ public class OBDAModelManager implements Disposable {
 	 */
 	private boolean loadingData;
 
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final SQLPPMappingFactory ppMappingFactory;
 	private final SpecificationFactory specificationFactory;
 	private File implicitDBConstraintFile;
@@ -116,7 +115,6 @@ public class OBDAModelManager implements Disposable {
 				.build().getInjector();
 
 		this.specificationFactory = defaultInjector.getInstance(SpecificationFactory.class);
-		this.nativeQLFactory = defaultInjector.getInstance(NativeQueryLanguageComponentFactory.class);
 		this.ppMappingFactory = defaultInjector.getInstance(SQLPPMappingFactory.class);
 
 		if (!(editorKit instanceof OWLEditorKit)) {
@@ -138,10 +136,6 @@ public class OBDAModelManager implements Disposable {
 
 		// Printing the version information to the console
 		//	System.out.println("Using " + VersionInfo.getVersionInfo().toString() + "\n");
-	}
-
-	public NativeQueryLanguageComponentFactory getNativeQLFactory() {
-		return nativeQLFactory;
 	}
 
 	/***

@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  */
 
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
 
 import java.util.List;
@@ -30,14 +30,14 @@ import java.util.List;
  * This filter receives a string in the constructor and returns true if accepts
  * any mapping containing the string in the head or body
  */
-public class MappingStringTreeModelFilter extends TreeModelFilter<SQLPPMappingAxiom> {
+public class MappingStringTreeModelFilter extends TreeModelFilter<SQLPPTriplesMap> {
 
 	public MappingStringTreeModelFilter() {
 		super.bNegation = false;
 	}
 
 	@Override
-	public boolean match(SQLPPMappingAxiom object) {
+	public boolean match(SQLPPTriplesMap object) {
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {
 			// Check in the Mapping ID
@@ -48,7 +48,7 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<SQLPPMappingAx
 			}
 
 			// Check in the Mapping Target Query
-			final List<Function> atoms = object.getTargetQuery();
+			final List<? extends Function> atoms = object.getTargetAtoms();
 			for (int i = 0; i < atoms.size(); i++) {
 				Function predicate = atoms.get(i);
 				isMatch = isMatch || MappingHeadVariableTreeModelFilter.match(keyword.trim(), predicate);
