@@ -24,9 +24,8 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.mapping.extraction.MutableSQLPPTriplesMap;
-import it.unibz.inf.ontop.mapping.extraction.impl.MutableSQLPPTriplesMapImpl;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
@@ -86,7 +85,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		this.dataSource = dataSource;
 		this.validator = validator;
 
-		prefixManager = obdaModel.getPrefixManager();
+		prefixManager = obdaModel.getMutablePrefixManager();
 
 		initComponents();
 
@@ -191,16 +190,16 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source);
 					System.out.println(body.toString()+" \n");
 
-					MutableSQLPPTriplesMap newmapping = new MutableSQLPPTriplesMapImpl(txtMappingID.getText().trim(), body, targetQuery);
-					System.out.println(newmapping.toString()+" \n");
+					String newId = txtMappingID.getText().trim();
 
 					if (mapping == null) {
 						// Case when we are creating a new mapping
+						OntopNativeSQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, body, targetQuery);
 						mapcon.addMapping(sourceID, newmapping, false);
 					} else {
 						// Case when we are updating an existing mapping
-						mapcon.updateMappingsSourceQuery(sourceID, mapping.getId(), body);
-						mapcon.updateTargetQueryMapping(sourceID, mapping.getId(), targetQuery);
+						mapcon.updateMappingsSourceQuery(sourceID, newId, body);
+						mapcon.updateTargetQueryMapping(sourceID, newId, targetQuery);
 						mapcon.updateMapping(sourceID, mapping.getId(), txtMappingID.getText().trim());
 					}
 				} catch (DuplicateMappingException e) {
@@ -591,7 +590,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private SQLPPTriplesMap mapping;
 
 	private ImmutableList<ImmutableFunctionalTerm> parse(String query) {
-		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getPrefixManager().getPrefixMap());
+		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getMutablePrefixManager().getPrefixMap());
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {

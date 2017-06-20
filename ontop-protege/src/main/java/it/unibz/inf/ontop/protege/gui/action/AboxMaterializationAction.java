@@ -81,7 +81,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		workspace = editorKit.getWorkspace();
 		modelManager = editorKit.getOWLModelManager();
 		ppMapping = ((OBDAModelManager)editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModel()
-				.getCurrentPPMapping();
+				.generatePPMapping();
 		lineSeparator = System.getProperty("line.separator");
 	}
 

@@ -76,7 +76,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 	
 	public PropertyMappingPanel(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
-		prefixManager = obdaModel.getPrefixManager();
+		prefixManager = obdaModel.getMutablePrefixManager();
 		initComponents();
 	}
 

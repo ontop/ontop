@@ -20,7 +20,9 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.Term;
 
@@ -38,7 +40,7 @@ public class MappingHeadVariableTreeModelFilter extends TreeModelFilter<SQLPPTri
 
 	@Override
 	public boolean match(SQLPPTriplesMap object) {
-		final List<Function> atoms = object.getTargetQuery();
+		ImmutableList<ImmutableFunctionalTerm> atoms = object.getTargetAtoms();
 
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {

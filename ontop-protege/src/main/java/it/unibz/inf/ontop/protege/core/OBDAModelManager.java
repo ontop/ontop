@@ -431,7 +431,7 @@ public class OBDAModelManager implements Disposable {
 
         // Setup the prefixes
         PrefixDocumentFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
-        PrefixManagerWrapper prefixWrapper = new PrefixManagerWrapper(prefixManager);
+        MutablePrefixManager prefixWrapper = new MutablePrefixManager(prefixManager);
 
 		activeOBDAModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixWrapper);
 		activeOBDAModel.addSourceListener(dlistener);
@@ -589,7 +589,7 @@ public class OBDAModelManager implements Disposable {
 				ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit.get(
 						QuestPreferences.class.getName());
 
-				OBDAModel currentOBDAModel = getActiveOBDAModel().getCurrentPPMapping();
+				OBDAModel currentOBDAModel = getActiveOBDAModel().generatePPMapping();
 				questFactory.load(currentOBDAModel, reasonerPreference);
 			} */
 		}
@@ -705,7 +705,7 @@ public class OBDAModelManager implements Disposable {
                     log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
                 }
                 // adding type information to the mapping predicates
-                SQLPPMappingValidator.validate(activeOBDAModel.getCurrentPPMapping(), activeOBDAModel.getOntologyVocabulary());
+                SQLPPMappingValidator.validate(activeOBDAModel.generatePPMapping(), activeOBDAModel.getOntologyVocabulary());
             }
             catch (Exception e) {
 				InvalidOntopConfigurationException ex = new InvalidOntopConfigurationException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
@@ -742,7 +742,7 @@ public class OBDAModelManager implements Disposable {
 
                     // Save the OBDA model
                     File obdaFile = new File(URI.create(obdaDocumentIri));
-					SQLPPMapping ppMapping = activeOBDAModel.getCurrentPPMapping();
+					SQLPPMapping ppMapping = activeOBDAModel.generatePPMapping();
 					OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
 					writer.save(obdaFile);
 

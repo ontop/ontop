@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.NoDatasourceSelectedException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.protege.utils.ConnectionTools;
@@ -138,10 +139,10 @@ public class VirtualABoxStatistics {
 			String mappingId = mapping.getId();
 			int triplesCount = 0;
 			try {
-				OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
+				OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 				int tuples = getTuplesCount(sourceQuery);
 
-				List<Function> targetQuery = mapping.getTargetQuery();
+				ImmutableList<ImmutableFunctionalTerm> targetQuery = mapping.getTargetAtoms();
 				int atoms = targetQuery.size();
 
 				triplesCount = tuples * atoms;
