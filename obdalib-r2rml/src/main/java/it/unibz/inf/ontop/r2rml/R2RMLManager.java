@@ -173,7 +173,7 @@ public class R2RMLManager {
 	 * @throws Exception
 	 */
 	private SQLPPMappingAxiom getMapping(TriplesMap tm) throws Exception {
-		String sourceQuery = r2rmlParser.getSQLQuery(tm);
+		String sourceQuery = r2rmlParser.getSQLQuery(tm).trim();
 		List<Function> body = getMappingTripleAtoms(tm);
 		//Function head = getHeadAtom(body);
 		//CQIE targetQuery = DATA_FACTORY.getCQIE(head, body);
@@ -259,7 +259,7 @@ public class R2RMLManager {
 		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, arity), dvars);
 		return head;
 	}
-	
+
 	/**
 	 * Get OBDA mapping body terms from R2RML TriplesMap
 	 * @param tm

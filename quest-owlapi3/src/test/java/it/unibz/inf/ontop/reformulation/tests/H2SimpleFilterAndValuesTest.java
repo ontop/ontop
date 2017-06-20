@@ -39,7 +39,8 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 /***
- * Tests that h2 datatypes
+ * Test use of  VALUES ?sx { <http://www.safepec.org#Ship>}
+ * and  use of FILTER (?sx = <http://www.safepec.org#Ship> )
  */
 public class H2SimpleFilterAndValuesTest {
 	final String owlFile = "src/test/resources/filter/datatypes.owl";
@@ -119,52 +120,6 @@ public class H2SimpleFilterAndValuesTest {
 	}
 
 
-	/**
-	 * Test use of date
-	 * @throws Exception
-	 */
-	@Test
-	public void testDate() throws Exception {
-		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?s ?x\n" +
-                "WHERE {\n" +
-                "   ?s a :Row; :hasDate ?x\n" +
-                "   FILTER ( ?x = \"2013-03-18\"^^xsd:date ) .\n" +
-                "}";
-		String val = runQueryReturnLiteral(query);
-		assertEquals("\"2013-03-18\"", val);
-	}
-
-
-	@Test
-	public void testDate2() throws Exception {
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x\n" +
-                "WHERE {\n" +
-                "   ?x a :Row; :hasDate \"2013-03-18\"^^xsd:date\n" +
-                "}";
-        String val = runQueryReturnIndividual(query);
-        assertEquals("<http://ontop.inf.unibz.it/test/datatypes#datetime-1>", val);
-    }
-
-
-	private String runQueryReturnIndividual(String query) throws OWLException, SQLException {
-		OntopOWLStatement st = conn.createStatement();
-		String retval;
-		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
-
-			assertTrue(rs.nextRow());
-			OWLIndividual ind1 = rs.getOWLIndividual("x");
-			retval = ind1.toString();
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			conn.close();
-			reasoner.dispose();
-		}
-		return retval;
-	}
-
 	private String runQueryReturnLiteral(String query) throws OWLException, SQLException {
 		OntopOWLStatement st = conn.createStatement();
 		String retval;
@@ -172,7 +127,7 @@ public class H2SimpleFilterAndValuesTest {
 			QuestOWLResultSet rs = st.executeTuple(query);
 
 			assertTrue(rs.nextRow());
-			OWLLiteral ind1 = rs.getOWLLiteral("x");
+			OWLLiteral ind1 = rs.getOWLLiteral("y");
 			retval = ind1.toString();
 
 		} catch (Exception e) {
@@ -186,5 +141,65 @@ public class H2SimpleFilterAndValuesTest {
 
 
 
+    /**
+	 * Test use of Filter and Values with class or property
+	 * @throws Exception
+	 */
+
+
+	@Test
+	public void testFilterClass() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x ?y\n" +
+				"WHERE {\n" +
+				"   ?z a ?x; :hasDate ?y\n" +
+				"   FILTER ( ?x = :Row ) .\n" +
+				"}";
+		String val = runQueryReturnLiteral(query);
+		assertEquals("\"2013-03-18\"", val);
+	}
+
+	@Test
+	public void testValuesClass() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x ?y\n" +
+				"WHERE {\n" +
+				"   ?z a ?x; :hasDate ?y\n" +
+				"   VALUES ?x { :Row } .\n" +
+				"}";
+		String val = runQueryReturnLiteral(query);
+		assertEquals("\"2013-03-18\"", val);
+	}
+
+	@Test
+	public void testFilterProperty() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x ?y\n" +
+				"WHERE {\n" +
+				"   ?z a :Row; ?x ?y\n" +
+				"   FILTER ( ?x = :hasDate ) .\n" +
+				"}";
+		String val = runQueryReturnLiteral(query);
+		assertEquals("\"2013-03-18\"", val);
+	}
+
+	@Test
+	public void testValuesProperty() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x ?y\n" +
+				"WHERE {\n" +
+				"   ?z a :Row; ?x ?y\n" +
+				"   VALUES ?x { :hasDate } .\n" +
+				"}";
+		String val = runQueryReturnLiteral(query);
+		assertEquals("\"2013-03-18\"", val);
+	}
+
+
+	@Test
+	public void testValuesProperty2() throws Exception {
+		String query = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT * WHERE"
+				+ "{ ?x a  :Row .  ?x ?v ?y . VALUES ?v { :hasSmallInt } }";
+
+
+		String val = runQueryReturnLiteral(query);
+		assertEquals("\"1\"^^xsd:integer", val);
+	}
 }
 

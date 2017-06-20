@@ -70,19 +70,20 @@ else
 fi
 
 # location for protege clean folder
-PROTEGE_COPY_FILENAME=Protege-5.1.0-platform-independent
-PROTEGE_MAIN_FOLDER_NAME=Protege-5.1.0
+PROTEGE_COPY_FILENAME=Protege-5.2.0-platform-independent
+PROTEGE_MAIN_FOLDER_NAME=Protege-5.2.0
 
-# location and name for jetty distribution (should be zip)
-JETTY_COPY_FILENAME=jetty-distribution-9.4.0.v20161208
-JETTY_INNER_FOLDERNAME=jetty-distribution-9.4.0.v20161208
+
+# location and name for jetty distribution (should be ZIP)
+JETTY_COPY_FILENAME=jetty-distribution-9.4.6
+JETTY_INNER_FOLDERNAME=jetty-distribution-9.4.6.v20170531
 
 # location and name for tomcat distribution (should be zip)
 TOMCAT_FILENAME=apache-tomcat-8.5.9
 
 # folder names of the output
 PROTEGE_DIST=ontop-protege
-ONTOP_JETTY_DIST=ontop-jetty
+QUEST_JETTY_DIST=ontop-jetty
 ONTOP_TOMCAT_DIST=ontop-tomcat
 ONTOP_DIST=ontop-dist
 
@@ -173,10 +174,13 @@ cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${ONTOP_JETTY_DIST}/ontop-jetty-
 
 JETTY_FOLDER=${JETTY_INNER_FOLDERNAME}
 cd ${ONTOP_JETTY_DIST}
-mkdir -p ${JETTY_INNER_FOLDERNAME}/webapps
-cp ${BUILD_ROOT}/distribution/ontop-webapps/*.war ${JETTY_FOLDER}/webapps
+mkdir -p ${JETTY_INNER_FOLDERNAME}/ontop-base/webapps
+cp ${BUILD_ROOT}/distribution/ontop-webapps/*.war ${JETTY_FOLDER}/ontop-base/webapps
+cp ${ONTOP_DEP_HOME}/start.ini ${JETTY_FOLDER}/ontop-base
+cp ${ONTOP_DEP_HOME}/README-ontop.TXT ${JETTY_FOLDER}
 
-zip ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/webapps/* || exit 1
+zip -r ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/ontop-base/ || exit 1
+zip ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/README-ontop.TXT || exit 1
 
 rm -fr ${JETTY_FOLDER}
 cd ${BUILD_ROOT}/distribution
