@@ -9,7 +9,7 @@
 
     <artifactId>ontop-query-answering-sql</artifactId>
     <packaging>jar</packaging>
-    <name>ontop-query-answering-core</name>
+    <name>ontop-query-answering-sql</name>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
