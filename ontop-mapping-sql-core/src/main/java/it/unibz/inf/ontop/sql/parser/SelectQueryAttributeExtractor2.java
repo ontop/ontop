@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
@@ -264,6 +263,12 @@ public class SelectQueryAttributeExtractor2 {
         @Override
         public void visit(ValuesList valuesList) {
             throw new UnsupportedSelectQueryRuntimeException("ValuesLists are not supported", valuesList);
+        }
+
+        @Override
+        public void visit(TableFunction tableFunction) {
+            throw new UnsupportedSelectQueryRuntimeException("TableFunction are not supported", tableFunction);
+
         }
     }
 
