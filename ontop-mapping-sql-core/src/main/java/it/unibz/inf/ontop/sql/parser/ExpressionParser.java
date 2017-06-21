@@ -417,6 +417,11 @@ public class ExpressionParser {
         }
 
         @Override
+        public void visit(HexValue expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
+
+        @Override
         public void visit(StringValue expression) {
             throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
         }
@@ -491,7 +496,52 @@ public class ExpressionParser {
         }
 
 
+        @Override
+        public void visit(UserVariable expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
 
+        @Override
+        public void visit(NumericBind expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
+
+        @Override
+        public void visit(KeepExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
+
+        @Override
+        public void visit(MySQLGroupConcat expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
+
+        @Override
+        public void visit(RowConstructor expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
+
+        @Override
+        public void visit(OracleHint expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
+
+        @Override
+        public void visit(TimeKeyExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
+
+        @Override
+        public void visit(DateTimeLiteralExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
+
+        @Override
+        public void visit(NotExpression expression) {
+            result = ImmutableList.of(DATA_FACTORY.getFunctionNOT(termVisitor.getTerm(expression.getExpression())));
+//            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+
+        }
 
 
 
@@ -570,6 +620,11 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("Analytic expressions is not supported", expression);
         }
 
+        @Override
+        public void visit(WithinGroupExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("WithinGroup expressions is not supported", expression);
+        }
+
         // OracleHierarchicalExpression can only occur in the form of a clause after WHERE
         @Override
         public void visit(OracleHierarchicalExpression expression) {
@@ -585,6 +640,11 @@ public class ExpressionParser {
         @Override
         public void visit(JsonExpression expression) {
             throw new UnsupportedSelectQueryRuntimeException("JSON expressions are not supported", expression);
+        }
+
+        @Override
+        public void visit(JsonOperator expression) {
+            throw new UnsupportedSelectQueryRuntimeException("JsonOperator expressions is not supported", expression);
         }
 
         @Override
@@ -667,6 +727,11 @@ public class ExpressionParser {
         @Override
         public void visit(LongValue expression) {
             process(expression.getStringValue(), Predicate.COL_TYPE.LONG);
+        }
+
+        @Override
+        public void visit(HexValue expression) {
+            throw new UnsupportedSelectQueryRuntimeException("HEX is not supported", expression);
         }
 
         @Override
@@ -864,6 +929,52 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("Not a term", expression);
         }
 
+        @Override //SELECT @col FROM table1
+        public void visit(UserVariable expression) {
+            throw new UnsupportedSelectQueryRuntimeException("User variables are not supported yet", expression);
+        }
+
+        @Override //SELECT a FROM b WHERE c = :1
+        public void visit(NumericBind expression) {
+            throw new UnsupportedSelectQueryRuntimeException("NumericBind is not supported yet", expression);
+        }
+
+        @Override //KEEP (DENSE_RANK FIRST ORDER BY col1)
+        public void visit(KeepExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Keep Expression is not supported yet", expression);
+
+        }
+
+        @Override
+        public void visit(MySQLGroupConcat expression) {
+            throw new UnsupportedSelectQueryRuntimeException("MySQLGroupConcat is not supported yet", expression);
+        }
+
+        @Override
+        public void visit(RowConstructor expression) {
+            throw new UnsupportedSelectQueryRuntimeException("RowConstructor is not supported yet", expression);
+        }
+
+        @Override
+        public void visit(OracleHint expression) {
+            throw new UnsupportedSelectQueryRuntimeException("OracleHint is not supported yet", expression);
+        }
+
+        @Override
+        public void visit(TimeKeyExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("TimeKeyExpression is not supported yet", expression);
+        }
+
+        @Override
+        public void visit(DateTimeLiteralExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("DateTimeLiteralExpression is not supported yet", expression);
+        }
+
+        @Override
+        public void visit(NotExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a term", expression);
+        }
+
         @Override
         public void visit(RegExpMatchOperator expression) {
             throw new UnsupportedSelectQueryRuntimeException("Not a term", expression);
@@ -975,6 +1086,11 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("Analytic expressions is not supported", expression);
         }
 
+        @Override //SELECT LISTAGG(col1, '##') WITHIN GROUP (ORDER BY col1) FROM table1
+        public void visit(WithinGroupExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("WithinGroup expressions is not supported", expression);
+        }
+
         // OracleHierarchicalExpression can only occur in the form of a clause after WHERE
         @Override
         public void visit(OracleHierarchicalExpression expression) {
@@ -990,6 +1106,11 @@ public class ExpressionParser {
         @Override
         public void visit(JsonExpression expression) {
             throw new UnsupportedSelectQueryRuntimeException("JSON expressions are not supported", expression);
+        }
+
+        @Override
+        public void visit(JsonOperator expression) {
+            throw new UnsupportedSelectQueryRuntimeException("JSON operators are not supported", expression);
         }
 
         @Override
