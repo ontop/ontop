@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.protege.core;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
@@ -42,7 +43,7 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 		private Optional<OBDAModel> optionalObdaModel = Optional.empty();
 		private Optional<File> optionalImplicitDBConstraintFile = Optional.empty();
 
-		public OntopSQLOWLAPIConfiguration buildOntopSQLOWLAPIConfiguration() {
+		public OntopSQLOWLAPIConfiguration buildOntopSQLOWLAPIConfiguration(OWLOntology currentOntology) {
 			OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder();
 			optionalProperties
 					.ifPresent(builder::properties);
@@ -50,6 +51,8 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 					.ifPresent(w -> builder.ppMapping(w.generatePPMapping()));
 			optionalImplicitDBConstraintFile
 					.ifPresent(builder::basicImplicitConstraintFile);
+
+			builder.ontology(currentOntology);
 
 			return builder.build();
 		}
@@ -100,6 +103,7 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 
     @Override
     public OWLReasonerConfiguration getConfiguration(ReasonerProgressMonitor monitor) {
-		return new QuestOWLConfiguration(configBuilder.buildOntopSQLOWLAPIConfiguration(), monitor);
+		OWLOntology activeOntology = getOWLModelManager().getActiveOntology();
+		return new QuestOWLConfiguration(configBuilder.buildOntopSQLOWLAPIConfiguration(activeOntology), monitor);
     }
 }
