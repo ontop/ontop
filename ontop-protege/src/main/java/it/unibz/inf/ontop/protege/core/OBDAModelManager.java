@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.protege.core;
 import com.google.common.base.Optional;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.QueryIOManager;
@@ -630,9 +631,18 @@ public class OBDAModelManager implements Disposable {
 			ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 			if (factory instanceof OntopReasonerInfo) {
                 OntopReasonerInfo questfactory = (OntopReasonerInfo) factory;
-                DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
-                questfactory.setPreferences(reasonerPreference.clone());
-                questfactory.setOBDAModel(getActiveOBDAModel());
+                DisposableProperties disposableProperties = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
+
+				OBDAModel obdaModel = getActiveOBDAModel();
+
+				/*
+				 * Data source connection information overwrites "plugin" properties.
+				 */
+				Properties properties = disposableProperties.clone();
+				properties.putAll(DataSource2PropertiesConvertor.convert(obdaModel.getDatasource()));
+
+                questfactory.setPreferences(properties);
+                questfactory.setOBDAModel(obdaModel);
                 if(applyImplicitDBConstraints)
                     questfactory.setImplicitDBConstraintFile(implicitDBConstraintFile);
             }
