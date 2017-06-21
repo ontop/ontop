@@ -17,6 +17,6 @@ source		select id, date, time, datetime, datetime2, datetimeoffset, smalldatetim
 
 mappingId	Boolean Types
 target		:boolean-{id} a :Row ; :hasBit {bit} .
-source		select id, bit from Boolean
+source		select id, "bit" from Boolean
 ]]
 
