@@ -27,10 +27,8 @@ import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDADataSourceFactory;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlapi.SQLPPMappingValidator;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -85,7 +83,6 @@ public class OBDAModelManager implements Disposable {
     private boolean applyImplicitDBConstraints = false;
 	
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
-	private static final OBDADataSourceFactory DS_FACTORY = OBDADataSourceFactoryImpl.getInstance();
 
 	/***
 	 * This is the instance responsible for listening for Protege ontology
@@ -787,12 +784,7 @@ public class OBDAModelManager implements Disposable {
 	}
 
 	private static void loadDataSource(OBDAModel obdaModel, DisposableProperties properties) {
-		java.util.Optional<OBDADataSource> initialDataSource = obdaModel.getDatasource();
-
-		java.util.Optional<String> jdbcName = properties.getOptionalProperty(JDBC_NAME);
-
-		OBDADataSource dataSource = initialDataSource
-				.orElseGet(() -> DS_FACTORY.getDataSource(URI.create(jdbcName.orElse("ds1"))));
+		OBDADataSource dataSource = obdaModel.getDatasource();
 
 		properties.getOptionalProperty(JDBC_URL)
 				.ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, v));
@@ -802,9 +794,6 @@ public class OBDAModelManager implements Disposable {
 				.ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, v));
 		properties.getOptionalProperty(JDBC_DRIVER)
 				.ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, v));
-
-		if (!initialDataSource.isPresent())
-			obdaModel.addSource(dataSource);
 
 	}
 
