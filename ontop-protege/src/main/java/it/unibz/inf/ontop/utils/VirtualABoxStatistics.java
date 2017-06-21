@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.exception.NoDatasourceSelectedException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.utils.ConnectionTools;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -33,7 +32,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +44,6 @@ public class VirtualABoxStatistics {
 	private final OBDAModel obdaModel;
 
 	private HashMap<String, HashMap<String, Integer>> statistics = new HashMap<String, HashMap<String, Integer>>();
-
-	private JDBCConnectionManager conn = JDBCConnectionManager.getJDBCConnectionManager();
 
 	Logger log = LoggerFactory.getLogger(VirtualABoxStatistics.class);
 
@@ -129,11 +125,7 @@ public class VirtualABoxStatistics {
 	}
 
 	public void refresh() {
-		Optional<OBDADataSource> optionalSource = obdaModel.getDatasource();
-		if (!optionalSource.isPresent())
-			return;
-
-		OBDADataSource source = optionalSource.get();
+		OBDADataSource source = obdaModel.getDatasource();
 		List<SQLPPTriplesMap> mappingList = obdaModel.generatePPMapping().getTripleMaps();
 
 
