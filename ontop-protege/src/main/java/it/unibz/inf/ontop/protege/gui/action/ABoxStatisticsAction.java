@@ -47,8 +47,7 @@ public class ABoxStatisticsAction extends ProtegeAction {
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit)getEditorKit();		
 		obdaModel = ((OBDAModelManager)editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModel();
-		statistics = new VirtualABoxStatistics(obdaModel.generatePPMapping(),
-				obdaModel.getDatasource().get());
+		statistics = new VirtualABoxStatistics(obdaModel);
 	}
 
 	@Override
