@@ -27,8 +27,11 @@ import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDADataSourceFactory;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlapi.SQLPPMappingValidator;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.querymanager.*;
@@ -53,15 +56,18 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.FileReader;
 import java.net.URI;
 import java.util.*;
 
+import static it.unibz.inf.ontop.injection.OntopSQLCoreSettings.*;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class OBDAModelManager implements Disposable {
 
 	private static final String OBDA_EXT = ".obda"; // The default OBDA file extension.
 	private static final String QUERY_EXT = ".q"; // The default query file extension.
+	private static final String PROPERTY_EXT = ".properties"; // The default property file extension.
 	private static final String DBPREFS_EXT = ".db_prefs"; // The default db_prefs (currently only user constraints) file extension.
 
 	private final OWLEditorKit owlEditorKit;
@@ -79,6 +85,7 @@ public class OBDAModelManager implements Disposable {
     private boolean applyImplicitDBConstraints = false;
 	
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
+	private static final OBDADataSourceFactory DS_FACTORY = OBDADataSourceFactoryImpl.getInstance();
 
 	/***
 	 * This is the instance responsible for listening for Protege ontology
@@ -577,7 +584,7 @@ public class OBDAModelManager implements Disposable {
                     DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit
                             .get(DisposableProperties.class.getName());
                     questfactory.setPreferences(reasonerPreference.clone());
-                    questfactory.setOBDAModelWrapper(activeOBDAModel);
+                    questfactory.setOBDAModel(activeOBDAModel);
                 }
 				return;
             }
@@ -628,7 +635,7 @@ public class OBDAModelManager implements Disposable {
                 OntopReasonerInfo questfactory = (OntopReasonerInfo) factory;
                 DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
                 questfactory.setPreferences(reasonerPreference.clone());
-                questfactory.setOBDAModelWrapper(getActiveOBDAModel());
+                questfactory.setOBDAModel(getActiveOBDAModel());
                 if(applyImplicitDBConstraints)
                     questfactory.setImplicitDBConstraintFile(implicitDBConstraintFile);
             }
@@ -669,11 +676,22 @@ public class OBDAModelManager implements Disposable {
 
 				String obdaDocumentIri = owlName + OBDA_EXT;
 				String queryDocumentIri = owlName + QUERY_EXT;
+				String propertyFilePath = owlName + PROPERTY_EXT;
 				String implicitDBConstraintFilePath = owlName + DBPREFS_EXT;
 
 				File obdaFile = new File(URI.create(obdaDocumentIri));
 				File queryFile = new File(URI.create(queryDocumentIri));
+				File propertyFile = new File(URI.create(propertyFilePath));
 				implicitDBConstraintFile = new File(URI.create(implicitDBConstraintFilePath));
+
+				/*
+				 * Loads the properties (and the data source)
+				 */
+				if (propertyFile.exists()) {
+					DisposableProperties properties = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
+					properties.load(new FileReader(propertyFile));
+					loadDataSource(activeOBDAModel, properties);
+				}
 
 
                 if (obdaFile.exists()) {
@@ -766,6 +784,28 @@ public class OBDAModelManager implements Disposable {
                 triggerOntologyChanged();
             }
 		}
+	}
+
+	private static void loadDataSource(OBDAModel obdaModel, DisposableProperties properties) {
+		java.util.Optional<OBDADataSource> initialDataSource = obdaModel.getDatasource();
+
+		java.util.Optional<String> jdbcName = properties.getOptionalProperty(JDBC_NAME);
+
+		OBDADataSource dataSource = initialDataSource
+				.orElseGet(() -> DS_FACTORY.getDataSource(URI.create(jdbcName.orElse("ds1"))));
+
+		properties.getOptionalProperty(JDBC_URL)
+				.ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, v));
+		properties.getOptionalProperty(JDBC_USER)
+				.ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, v));
+		properties.getOptionalProperty(JDBC_PASSWORD)
+				.ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, v));
+		properties.getOptionalProperty(JDBC_DRIVER)
+				.ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, v));
+
+		if (!initialDataSource.isPresent())
+			obdaModel.addSource(dataSource);
+
 	}
 
 	public void fireActiveOBDAModelChange() {

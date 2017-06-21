@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
@@ -101,19 +102,11 @@ public class OBDAModel {
         }
     }
 
-    /**
-     * The sources and mappings are taken from the parsed model
-     * and the ontology taken from the previous model
-     *
-     * UGLY!
-     */
-    public void parseMappings(File mappingFile) throws DuplicateMappingException, InvalidMappingException, IOException, MappingIOException {
-        Properties properties = source
-                .map(DataSource2PropertiesConvertor::convert)
-                .orElseThrow(() -> new IllegalStateException("Cannot parse the mapping without a data source"));
 
-        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .properties(properties)
+    public void parseMappings(File mappingFile) throws DuplicateMappingException, InvalidMappingException, IOException, MappingIOException {
+
+        // TODO: should we take into account the plugin properties?
+        OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(mappingFile)
                 .build();
         SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);

@@ -574,7 +574,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         } else {
             currentDataSource = currentsource;
             String driverClass = currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-            if(driverClass.isEmpty())
+            if(driverClass == null || driverClass.isEmpty())
             {
                 txtJdbcDriver.setSelectedIndex(0);
             }

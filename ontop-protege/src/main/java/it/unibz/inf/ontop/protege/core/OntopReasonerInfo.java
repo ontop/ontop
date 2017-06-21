@@ -85,8 +85,8 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
         configBuilder.setProperties(preferences);
 	}
 
-	public void setOBDAModelWrapper(OBDAModel modelWrapper) {
-        configBuilder.setOBDAModel(modelWrapper);
+	public void setOBDAModel(OBDAModel obdaModel) {
+        configBuilder.setOBDAModel(obdaModel);
 	}
 
 	/**
