@@ -791,6 +791,7 @@ public class OBDAModelManager implements Disposable {
 					properties.store(outputStream, null);
 					outputStream.flush();
 					outputStream.close();
+					log.info("Property file saved to {}", propertyFilePath);
 				}
 
             } catch (Exception e) {
