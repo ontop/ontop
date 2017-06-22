@@ -49,7 +49,6 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSQLPPMapping2OBDASpecificationConverter.class);
 
     private final OntopMappingSQLSettings settings;
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final TMappingExclusionConfig tMappingExclusionConfig;
     private final Datalog2QueryMappingConverter mappingConverter;
@@ -64,7 +63,6 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
                                                            SpecificationFactory specificationFactory,
                                                            MappingNormalizer mappingNormalizer) {
         this.settings = settings;
-        this.nativeQLFactory = nativeQLFactory;
         this.dbMetadataExtractor = nativeQLFactory.create();
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.mappingConverter = mappingConverter;
@@ -80,8 +78,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
 
-        ImmutableList<SQLPPMappingAxiom> expandedMappingAxioms = MetaMappingExpander.expand(
-                initialPPMapping.getPPMappingAxioms(), settings, dbMetadata, nativeQLFactory);
+        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
+                initialPPMapping.getTripleMaps(), settings, dbMetadata);
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)
         ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(expandedMappingAxioms, dbMetadata);
@@ -117,7 +115,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     /**
      * May also views in the DBMetadata!
      */
-    private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<SQLPPMappingAxiom> mappingAxioms, RDBMetadata dbMetadata) {
+    private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<SQLPPTriplesMap> mappingAxioms, RDBMetadata dbMetadata) {
 
 
         ImmutableList<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappingAxioms, dbMetadata);

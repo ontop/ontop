@@ -20,16 +20,16 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 
-public class MappingIDTreeModelFilter extends TreeModelFilter<SQLPPMappingAxiom> {
+public class MappingIDTreeModelFilter extends TreeModelFilter<SQLPPTriplesMap> {
 
 	public MappingIDTreeModelFilter() {
 		super.bNegation = false;
 	}
 
 	@Override
-	public boolean match(SQLPPMappingAxiom object) {
+	public boolean match(SQLPPTriplesMap object) {
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {
 			isMatch = match(keyword.trim(), object.getId());

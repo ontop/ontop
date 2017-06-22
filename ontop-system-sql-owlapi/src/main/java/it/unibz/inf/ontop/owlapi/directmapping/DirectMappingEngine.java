@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
@@ -76,7 +77,6 @@ public class DirectMappingEngine {
 
 	private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final SpecificationFactory specificationFactory;
-	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final SQLPPMappingFactory ppMappingFactory;
 	private final OntopSQLCoreSettings settings;
 	private final JDBCConnectionManager connManager;
@@ -97,11 +97,9 @@ public class DirectMappingEngine {
 
 	@Inject
 	private DirectMappingEngine(OntopSQLCoreSettings settings, SpecificationFactory specificationFactory,
-                                NativeQueryLanguageComponentFactory nativeQLFactory,
                                 SQLPPMappingFactory ppMappingFactory) {
 		connManager = JDBCConnectionManager.getJDBCConnectionManager();
 		this.specificationFactory = specificationFactory;
-		this.nativeQLFactory = nativeQLFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
 	}
@@ -120,8 +118,8 @@ public class DirectMappingEngine {
 				: extractPPMapping();
 
 		ImmutableOntologyVocabulary newVocabulary = MappingVocabularyExtractor.extractVocabulary(
-				newPPMapping.getPPMappingAxioms().stream()
-						.flatMap(ax -> ax.getTargetQuery().stream()));
+				newPPMapping.getTripleMaps().stream()
+						.flatMap(ax -> ax.getTargetAtoms().stream()));
 
 		OWLOntology newOntology = inputOntology.isPresent()
 				? updateOntology(inputOntology.get(), newVocabulary)
@@ -199,7 +197,7 @@ public class DirectMappingEngine {
 
 	private SQLPPMapping extractPPMapping(SQLPPMapping ppMapping)
 			throws DuplicateMappingException, SQLException {
-		currentMappingIndex = ppMapping.getPPMappingAxioms().size() + 1;
+		currentMappingIndex = ppMapping.getTripleMaps().size() + 1;
 		return bootstrapMappings(ppMapping);
 	}
 
@@ -227,13 +225,13 @@ public class DirectMappingEngine {
 		if (baseIRI == null || baseIRI.isEmpty())
 			this.baseIRI = ppMapping.getMetadata().getPrefixManager().getDefaultPrefix();
 		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
-		List<SQLPPMappingAxiom> mappingAxioms = new ArrayList<>();
+		List<SQLPPTriplesMap> mappingAxioms = new ArrayList<>();
 		for (DatabaseRelationDefinition td : tables) {
 			mappingAxioms.addAll(getMapping(td, baseIRI));
 		}
 
-		List<SQLPPMappingAxiom> mappings = new ArrayList<>();
-		mappings.addAll(ppMapping.getPPMappingAxioms());
+		List<SQLPPTriplesMap> mappings = new ArrayList<>();
+		mappings.addAll(ppMapping.getTripleMaps());
 		mappings.addAll(mappingAxioms);
 
 		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.copyOf(mappings), ppMapping.getMetadata());
@@ -248,19 +246,19 @@ public class DirectMappingEngine {
 	 * 
 	 *  @return a List of OBDAMappingAxiom-s
 	 */
-	private List<SQLPPMappingAxiom> getMapping(DatabaseRelationDefinition table, String baseUri) {
+	private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {
 
 		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, DATA_FACTORY);
 
-		List<SQLPPMappingAxiom> axioms = new ArrayList<>();
-		axioms.add(nativeQLFactory.create("MAPPING-ID"+ currentMappingIndex, SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));
+		List<SQLPPTriplesMap> axioms = new ArrayList<>();
+		axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));
 		currentMappingIndex++;
 		
-		Map<String, List<Function>> refAxioms = dmap.getRefAxioms(table);
-		for (Map.Entry<String, List<Function>> e : refAxioms.entrySet()) {
+		Map<String, ImmutableList<ImmutableFunctionalTerm>> refAxioms = dmap.getRefAxioms(table);
+		for (Map.Entry<String, ImmutableList<ImmutableFunctionalTerm>> e : refAxioms.entrySet()) {
             OBDASQLQuery sqlQuery = SQL_MAPPING_FACTORY.getSQLQuery(e.getKey());
-            List<Function> targetQuery = e.getValue();
-            axioms.add(nativeQLFactory.create("MAPPING-ID"+ currentMappingIndex, sqlQuery, targetQuery));
+			ImmutableList<ImmutableFunctionalTerm> targetQuery = e.getValue();
+            axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, sqlQuery, targetQuery));
 			currentMappingIndex++;
 		}
 		

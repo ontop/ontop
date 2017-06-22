@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.r2rml;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.ObjectMap;
 import eu.optique.r2rml.api.model.PredicateMap;
@@ -29,13 +30,8 @@ import eu.optique.r2rml.api.model.Template;
 import eu.optique.r2rml.api.model.TermMap;
 import eu.optique.r2rml.api.model.TriplesMap;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
-import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.DatatypePredicate;
-import it.unibz.inf.ontop.model.ExpressionOperation;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.impl.DatatypePredicateImpl;
 import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.Graph;
@@ -128,7 +124,7 @@ public class R2RMLParser {
 		return predobjs;
 	}
 
-	public Term getSubjectAtom(TriplesMap tm) throws Exception {
+	public ImmutableTerm getSubjectAtom(TriplesMap tm) throws Exception {
 		return getSubjectAtom(tm, "");
 	}
 
@@ -140,8 +136,8 @@ public class R2RMLParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public Term getSubjectAtom(TriplesMap tm, String joinCond) throws Exception {
-		Term subjectAtom = null;
+	public ImmutableTerm getSubjectAtom(TriplesMap tm, String joinCond) throws Exception {
+		ImmutableTerm subjectAtom = null;
 		String subj = "";
 		classPredicates.clear();
 
@@ -174,7 +170,7 @@ public class R2RMLParser {
 		if (subj != null) {
 			if(template == null && (termType.equals(R2RMLVocabulary.iri))){
 
-				subjectAtom = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getVariable(subj));
+				subjectAtom = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getVariable(subj));
 
 			}
 			else {
@@ -242,22 +238,22 @@ public class R2RMLParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Function> getBodyURIPredicates(PredicateObjectMap pom) {
-		List<Function> predicateAtoms = new ArrayList<>();
+	public List<ImmutableFunctionalTerm> getBodyURIPredicates(PredicateObjectMap pom) {
+		List<ImmutableFunctionalTerm> predicateAtoms = new ArrayList<>();
 
 		// process PREDICATEMAP
 		for (PredicateMap pm : pom.getPredicateMaps()) {
 			Template t = pm.getTemplate();
 			if (t != null) {
 				// create uri("...",var)
-				Function predicateAtom = getURIFunction(t.toString());
+				ImmutableFunctionalTerm predicateAtom = getURIFunction(t.toString());
 				predicateAtoms.add(predicateAtom);
 			}
 
 			// process column declaration
 			String c = pm.getColumn();
 			if (c != null) {
-				Function predicateAtom = getURIFunction(c);
+				ImmutableFunctionalTerm predicateAtom = getURIFunction(c);
 				predicateAtoms.add(predicateAtom);
 			}
 		}
@@ -265,7 +261,7 @@ public class R2RMLParser {
 
 	}
 
-	public Term getObjectAtom(PredicateObjectMap pom) {
+	public ImmutableTerm getObjectAtom(PredicateObjectMap pom) {
 		return getObjectAtom(pom, "");
 	}
 
@@ -290,8 +286,8 @@ public class R2RMLParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public Term getObjectAtom(PredicateObjectMap pom, String joinCond) {
-		Term objectAtom = null;
+	public ImmutableTerm getObjectAtom(PredicateObjectMap pom, String joinCond) {
+		ImmutableTerm objectAtom = null;
 		if (pom.getObjectMaps().isEmpty()) {
 			return null;
 		}
@@ -328,9 +324,12 @@ public class R2RMLParser {
 //				}
 
 				if (constantObj instanceof Literal){
-                    objectAtom = DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral( ((Literal) constantObj).getLexicalForm()), COL_TYPE.LITERAL); // .RDFS_LITERAL;
+                    objectAtom = DATA_FACTORY.getImmutableTypedTerm(
+                    		DATA_FACTORY.getConstantLiteral( ((Literal) constantObj).getLexicalForm()),
+							COL_TYPE.LITERAL); // .RDFS_LITERAL;
                 } else if (constantObj instanceof IRI){
-                    objectAtom = DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral( ((IRI) constantObj).getIRIString()), COL_TYPE.LITERAL);
+                    objectAtom = DATA_FACTORY.getImmutableTypedTerm(
+                    		DATA_FACTORY.getConstantLiteral( ((IRI) constantObj).getIRIString()), COL_TYPE.LITERAL);
 
                 }
 			}
@@ -393,7 +392,7 @@ public class R2RMLParser {
 
 			} else if(termMapType.equals(TermMap.TermMapType.COLUMN_VALUED)){
 				if(typ.equals(R2RMLVocabulary.iri)) {
-					objectAtom = DATA_FACTORY.getUriTemplate(objectAtom);
+					objectAtom = DATA_FACTORY.getImmutableUriTemplate(objectAtom);
 				}
 			}
 
@@ -402,10 +401,9 @@ public class R2RMLParser {
 		// we check if it is a literal with language tag
 
 		if (lan != null) {
-			Term langAtom = DATA_FACTORY.getTypedTerm(objectAtom, lan);
-			objectAtom = langAtom;
+			objectAtom = DATA_FACTORY.getImmutableTypedTerm(objectAtom, lan);
 		}else if ((typ.equals(R2RMLVocabulary.literal)) && (concat)){
-			objectAtom = DATA_FACTORY.getTypedTerm(objectAtom, COL_TYPE.LITERAL);
+			objectAtom = DATA_FACTORY.getImmutableTypedTerm(objectAtom, COL_TYPE.LITERAL);
 		}
 
 		// we check if it is a typed literal
@@ -417,11 +415,7 @@ public class R2RMLParser {
 				logger.warn("Unsupported datatype will not be converted: "
 						+ datatype.toString());
 			} else {
-				Term dtAtom = DATA_FACTORY.getTypedTerm(objectAtom, type);
-				// Predicate dtype = new
-				// DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
-				// Term dtAtom = DATA_FACTORY.getFunction(dtype, objectAtom);
-				objectAtom = dtAtom;
+				objectAtom = DATA_FACTORY.getImmutableTypedTerm(objectAtom, type);
 			}
 		}
 
@@ -476,7 +470,7 @@ public class R2RMLParser {
 	 *            - the atom as string
 	 * @return the contructed Function atom
 	 */
-	private Function getTermTypeAtom(String string, Object type, String joinCond) {
+	private ImmutableFunctionalTerm getTermTypeAtom(String string, Object type, String joinCond) {
 
 		if (type.equals(R2RMLVocabulary.iri)) {
 
@@ -493,15 +487,15 @@ public class R2RMLParser {
 		return null;
 	}
 
-	private Function getURIFunction(String string, String joinCond) {
+	private ImmutableFunctionalTerm getURIFunction(String string, String joinCond) {
 		return getTypedFunction(string, 1, joinCond);
 	}
 
-	private Function getURIFunction(String string) {
+	private ImmutableFunctionalTerm getURIFunction(String string) {
 		return getTypedFunction(string, 1);
 	}
 
-	public Function getTypedFunction(String parsedString, int type) {
+	public ImmutableFunctionalTerm getTypedFunction(String parsedString, int type) {
 		return getTypedFunction(parsedString, type, "");
 	}
 	
@@ -531,10 +525,10 @@ public class R2RMLParser {
 	 *            - CHILD_ or PARENT_ prefix for variables
 	 * @return the constructed Function atom
 	 */
-	public Function getTypedFunction(String parsedString, int type,
+	public ImmutableFunctionalTerm getTypedFunction(String parsedString, int type,
 			String joinCond) {
 
-		List<Term> terms = new ArrayList<Term>();
+		List<ImmutableTerm> terms = new ArrayList<>();
 		String string = (parsedString);
 		if (!string.contains("{")) {
 			if (type < 3) {
@@ -593,37 +587,37 @@ public class R2RMLParser {
 		string = string.replace("[", "{");
 		string = string.replace("]", "}");
 
-		Term uriTemplate = null;
+		ImmutableTerm uriTemplate = null;
 		switch (type) {
 		// constant uri
 		case 0:
 			uriTemplate = DATA_FACTORY.getConstantLiteral(string);
 			terms.add(0, uriTemplate); // the URI template is always on the
 										// first position in the term list
-			return DATA_FACTORY.getUriTemplate(terms);
+			return DATA_FACTORY.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 			// URI or IRI
 		case 1:
 			uriTemplate = DATA_FACTORY.getConstantLiteral(string);
 			terms.add(0, uriTemplate); // the URI template is always on the
 										// first position in the term list
-			return DATA_FACTORY.getUriTemplate(terms);
+			return DATA_FACTORY.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 			// BNODE
 		case 2:
 			uriTemplate = DATA_FACTORY.getConstantBNode(string);
 			terms.add(0, uriTemplate); // the URI template is always on the
 										// first position in the term list
-			return DATA_FACTORY.getBNodeTemplate(terms);
+			return DATA_FACTORY.getImmutableBNodeTemplate(ImmutableList.copyOf(terms));
 			// simple LITERAL
 		case 3:
 			uriTemplate = terms.remove(0);
 			// pred = DATATYPE_FACTORY.getTypePredicate(); // OBDAVocabulary.RDFS_LITERAL;
 			// the URI template is always on the first position in the term list
 			// terms.add(0, uriTemplate);
-			return DATA_FACTORY.getTypedTerm(uriTemplate, COL_TYPE.LITERAL);
+			return DATA_FACTORY.getImmutableTypedTerm(uriTemplate, COL_TYPE.LITERAL);
 		case 4://concat
-			Function f = DATA_FACTORY.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
+			ImmutableFunctionalTerm f = DATA_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
             for(int j=2;j<terms.size();j++){
-                f = DATA_FACTORY.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
+                f = DATA_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, f, terms.get(j));
             }
             return f;
 		}

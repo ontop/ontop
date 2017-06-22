@@ -12,7 +12,6 @@ import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.r2rml.SQLPPMappingToR2RMLConverter;
@@ -95,8 +94,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
             return;
         }
 
-        SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, ontology,
-                config.getInjector().getInstance(NativeQueryLanguageComponentFactory.class));
+        SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, ontology);
 
         final Collection<TriplesMap> tripleMaps = converter.getTripleMaps();
 //        final RDF4JR2RMLMappingManager mm = RDF4JR2RMLMappingManager.getInstance();

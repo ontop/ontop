@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 
 import java.util.List;
 
@@ -34,25 +34,25 @@ public interface FilteredModel {
 	 * @param filter
 	 *            Adds a new filter
 	 */
-	public void addFilter(TreeModelFilter<SQLPPMappingAxiom> filter);
+	public void addFilter(TreeModelFilter<SQLPPTriplesMap> filter);
 
 	/**
 	 * @param filters
 	 *            Adds a list of filters
 	 */
-	public void addFilters(List<TreeModelFilter<SQLPPMappingAxiom>> filters);
+	public void addFilters(List<TreeModelFilter<SQLPPTriplesMap>> filters);
 
 	/**
 	 * @param filter
 	 *            Remove a filter of the list of filters
 	 */
-	public void removeFilter(TreeModelFilter<SQLPPMappingAxiom> filter);
+	public void removeFilter(TreeModelFilter<SQLPPTriplesMap> filter);
 
 	/**
 	 * @param filters
 	 *            Remove a list of filters
 	 */
-	public void removeFilter(List<TreeModelFilter<SQLPPMappingAxiom>> filters);
+	public void removeFilter(List<TreeModelFilter<SQLPPTriplesMap>> filters);
 
 	/**
 	 * Remove all the current filters
