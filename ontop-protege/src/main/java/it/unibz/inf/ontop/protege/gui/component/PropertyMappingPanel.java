@@ -145,10 +145,10 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
         pnlAddProperty.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 3, 0));
         pnlAddProperty.setLayout(new java.awt.BorderLayout(3, 0));
         Vector<Object> v = new Vector<Object>();
-        for (DataPropertyExpression dp : obdaModel.getOntologyVocabulary().getDataProperties()) {
+        for (DataPropertyExpression dp : obdaModel.getCurrentVocabulary().getDataProperties()) {
             v.addElement(new PredicateItem(dp.getPredicate(), prefixManager));
         }
-        for (ObjectPropertyExpression op : obdaModel.getOntologyVocabulary().getObjectProperties()) {
+        for (ObjectPropertyExpression op : obdaModel.getCurrentVocabulary().getObjectProperties()) {
             v.addElement(new PredicateItem(op.getPredicate(), prefixManager));
         }
         cboPropertyAutoSuggest = new AutoSuggestComboBox(v);
