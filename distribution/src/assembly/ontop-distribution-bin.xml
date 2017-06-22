@@ -14,7 +14,7 @@
 
 	<fileSets>
 		<fileSet>
-			<directory>${project.basedir}/../obdalib-core/copyright</directory>
+			<directory>${project.basedir}/../licenses</directory>
 			<outputDirectory>/copyright</outputDirectory>
 			<includes>
 				<include>*</include>
