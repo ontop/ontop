@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.mapping.extraction.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
 import it.unibz.inf.ontop.model.SQLPPTriplesMap;
@@ -11,7 +10,7 @@ import it.unibz.inf.ontop.model.SQLPPTriplesMap;
  */
 public class OntopNativeSQLPPTriplesMap extends AbstractSQLPPTriplesMap {
 
-    private final PPMappingAssertionProvenance provenance;
+    private final OntopNativeSQLPPTriplesMapProvenance provenance;
 
     public OntopNativeSQLPPTriplesMap(String id, OBDASQLQuery sqlQuery, ImmutableList<ImmutableFunctionalTerm> targetAtoms) {
         super(targetAtoms, sqlQuery, id);
@@ -26,12 +25,12 @@ public class OntopNativeSQLPPTriplesMap extends AbstractSQLPPTriplesMap {
     /**
      * TODO: create it (same object for all the target atoms)
      */
-    private static PPMappingAssertionProvenance createProvenance(OntopNativeSQLPPTriplesMap triplesMap) {
-        return null;
+    private static OntopNativeSQLPPTriplesMapProvenance createProvenance(OntopNativeSQLPPTriplesMap triplesMap) {
+        return new OntopNativeSQLPPTriplesMapProvenance(triplesMap);
     }
 
     @Override
-    public PPMappingAssertionProvenance getProvenance(ImmutableFunctionalTerm targetAtom) {
+    public OntopNativeSQLPPTriplesMapProvenance getProvenance(ImmutableFunctionalTerm targetAtom) {
         return provenance;
     }
 

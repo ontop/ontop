@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.model;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedTriplesMap;
 
-import java.io.Serializable;
 
 public interface SQLPPTriplesMap extends PreProcessedTriplesMap {
 
