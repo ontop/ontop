@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.net.URI;
 import java.util.*;
@@ -571,6 +572,19 @@ public class OBDAModelManager implements Disposable {
 			}
 		}
 
+		private DisposableProperties getPluginProperties() {
+			return (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
+		}
+
+		/**
+		 * Data source connection information overwrites "plugin" properties.
+		 */
+		private Properties snapshotProperties() {
+			Properties properties = getPluginProperties().clone();
+			properties.putAll(DataSource2PropertiesConvertor.convert(getActiveOBDAModel().getDatasource()));
+			return properties;
+		}
+
 		private void handleReasonerChanged() {
 			OBDAModel activeOBDAModel = getActiveOBDAModel();
 
@@ -579,9 +593,8 @@ public class OBDAModelManager implements Disposable {
 
                 if (fac instanceof OntopReasonerInfo) {
                     OntopReasonerInfo questfactory = (OntopReasonerInfo) fac;
-                    DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit
-                            .get(DisposableProperties.class.getName());
-                    questfactory.setPreferences(reasonerPreference.clone());
+                    Properties properties = snapshotProperties();
+                    questfactory.setPreferences(properties);
                     questfactory.setOBDAModel(activeOBDAModel);
                 }
 				return;
@@ -631,18 +644,9 @@ public class OBDAModelManager implements Disposable {
 			ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 			if (factory instanceof OntopReasonerInfo) {
                 OntopReasonerInfo questfactory = (OntopReasonerInfo) factory;
-                DisposableProperties disposableProperties = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
 
-				OBDAModel obdaModel = getActiveOBDAModel();
-
-				/*
-				 * Data source connection information overwrites "plugin" properties.
-				 */
-				Properties properties = disposableProperties.clone();
-				properties.putAll(DataSource2PropertiesConvertor.convert(obdaModel.getDatasource()));
-
-                questfactory.setPreferences(properties);
-                questfactory.setOBDAModel(obdaModel);
+                questfactory.setPreferences(snapshotProperties());
+                questfactory.setOBDAModel(getActiveOBDAModel());
                 if(applyImplicitDBConstraints)
                     questfactory.setImplicitDBConstraintFile(implicitDBConstraintFile);
             }
@@ -695,11 +699,10 @@ public class OBDAModelManager implements Disposable {
 				 * Loads the properties (and the data source)
 				 */
 				if (propertyFile.exists()) {
-					DisposableProperties properties = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
+					DisposableProperties properties = getPluginProperties();
 					properties.load(new FileReader(propertyFile));
 					loadDataSource(activeOBDAModel, properties);
 				}
-
 
                 if (obdaFile.exists()) {
                     try {
@@ -755,32 +758,40 @@ public class OBDAModelManager implements Disposable {
                     return;
                 }
 
-                if(!activeOBDAModel.getSources().isEmpty()) {
+				//String owlName = Files.getNameWithoutExtension(owlDocumentIriString);
 
-                    //String owlName = Files.getNameWithoutExtension(owlDocumentIriString);
+				int i = owlDocumentIriString.lastIndexOf(".");
+				String owlName = owlDocumentIriString.substring(0,i);
 
-					int i = owlDocumentIriString.lastIndexOf(".");
-					String owlName = owlDocumentIriString.substring(0,i);
+				String obdaDocumentIri = owlName + OBDA_EXT;
+				String queryDocumentIri = owlName + QUERY_EXT;
 
-					String obdaDocumentIri = owlName + OBDA_EXT;
-                    String queryDocumentIri = owlName + QUERY_EXT;
+				// Save the OBDA model
+				File obdaFile = new File(URI.create(obdaDocumentIri));
+				SQLPPMapping ppMapping = activeOBDAModel.generatePPMapping();
+				OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
+				writer.save(obdaFile);
 
-                    // Save the OBDA model
-                    File obdaFile = new File(URI.create(obdaDocumentIri));
-					SQLPPMapping ppMapping = activeOBDAModel.generatePPMapping();
-					OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
-					writer.save(obdaFile);
+				log.info("mapping file saved to {}", obdaFile);
 
-                    log.info("mapping file saved to {}", obdaFile);
+				if (!queryController.getElements().isEmpty()) {
+					// Save the queries
+					File queryFile = new File(URI.create(queryDocumentIri));
+					QueryIOManager queryIO = new QueryIOManager(queryController);
+					queryIO.save(queryFile);
+					log.info("query file saved to {}", queryFile);
+				}
 
-                    if (!queryController.getElements().isEmpty()) {
-                        // Save the queries
-                        File queryFile = new File(URI.create(queryDocumentIri));
-                        QueryIOManager queryIO = new QueryIOManager(queryController);
-                        queryIO.save(queryFile);
-						log.info("query file saved to {}", queryFile);
-					}
-                }
+
+				Properties properties = snapshotProperties();
+				if (!properties.isEmpty()) {
+					String propertyFilePath = owlName + PROPERTY_EXT;
+					File propertyFile = new File(URI.create(propertyFilePath));
+					FileOutputStream outputStream = new FileOutputStream(propertyFile);
+					properties.store(outputStream, null);
+					outputStream.flush();
+					outputStream.close();
+				}
 
             } catch (Exception e) {
                 log.error(e.getMessage());
