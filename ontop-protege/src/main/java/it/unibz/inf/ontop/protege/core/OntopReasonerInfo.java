@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -29,52 +28,14 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
-import java.io.File;
-import java.util.Optional;
-import java.util.Properties;
 
 public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 
-	/**
-	 * Mutable
-	 */
-	private static class FlexibleConfigurationBuilder {
-		private Optional<Properties> optionalProperties = Optional.empty();
-		private Optional<OBDAModel> optionalObdaModel = Optional.empty();
-		private Optional<File> optionalImplicitDBConstraintFile = Optional.empty();
 
-		public OntopSQLOWLAPIConfiguration buildOntopSQLOWLAPIConfiguration(OWLOntology currentOntology) {
-			OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder();
-			optionalProperties
-					.ifPresent(builder::properties);
-			optionalObdaModel
-					.ifPresent(w -> builder.ppMapping(w.generatePPMapping()));
-			optionalImplicitDBConstraintFile
-					.ifPresent(builder::basicImplicitConstraintFile);
+	private OntopConfigurationManager configurationGenerator;
+	private final OntopOWLFactory factory = new OntopOWLFactory();
 
-			builder.ontology(currentOntology);
-
-			return builder.build();
-		}
-
-		public void setProperties(Properties properties) {
-			this.optionalProperties = Optional.of(properties);
-		}
-
-		public void setOBDAModel(OBDAModel obdaModel) {
-			this.optionalObdaModel = Optional.of(obdaModel);
-		}
-
-		public void setImplicitDBConstraintFile(File implicitDBConstraintFile) {
-			this.optionalImplicitDBConstraintFile = Optional.ofNullable(implicitDBConstraintFile);
-		}
-	}
-
-    private OntopOWLFactory factory = new OntopOWLFactory();
-
-    private final FlexibleConfigurationBuilder configBuilder = new FlexibleConfigurationBuilder();
-
-    @Override
+	@Override
 	public BufferingMode getRecommendedBuffering() {
 		return BufferingMode.BUFFERING;
 	}
@@ -84,26 +45,13 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 		return factory;
 	}
 
-	public void setPreferences(Properties preferences) {
-        configBuilder.setProperties(preferences);
-	}
-
-	public void setOBDAModel(OBDAModel obdaModel) {
-        configBuilder.setOBDAModel(obdaModel);
-	}
-
-	/**
-	 * Allows the user to supply database keys that are not in the database metadata
-	 *
-	 * @param implicitDBConstraintFile The user-supplied path to the file to database constraints
-	 */
-	public void setImplicitDBConstraintFile(File implicitDBConstraintFile) {
-		configBuilder.setImplicitDBConstraintFile(implicitDBConstraintFile);
-	}
-
-    @Override
+	@Override
     public OWLReasonerConfiguration getConfiguration(ReasonerProgressMonitor monitor) {
 		OWLOntology activeOntology = getOWLModelManager().getActiveOntology();
-		return new QuestOWLConfiguration(configBuilder.buildOntopSQLOWLAPIConfiguration(activeOntology), monitor);
+		return new QuestOWLConfiguration(configurationGenerator.buildOntopSQLOWLAPIConfiguration(activeOntology), monitor);
     }
+
+	public void setConfigurationGenerator(OntopConfigurationManager configurationGenerator) {
+		this.configurationGenerator = configurationGenerator;
+	}
 }
