@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.protege.core;
 import com.google.common.base.Optional;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.QueryIOManager;
@@ -83,6 +82,8 @@ public class OBDAModelManager implements Disposable {
 	private final JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
 
     private boolean applyImplicitDBConstraints = false;
+
+    private final OntopConfigurationManager configurationManager;
 	
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
 
@@ -112,7 +113,7 @@ public class OBDAModelManager implements Disposable {
 
 	public OBDAModelManager(EditorKit editorKit) {
 
-		/**
+		/*
 		 * TODO: avoid this use
 		 */
 		// Default injector
@@ -153,6 +154,9 @@ public class OBDAModelManager implements Disposable {
 
 		// Printing the version information to the console
 		//	System.out.println("Using " + VersionInfo.getVersionInfo().toString() + "\n");
+
+		DisposableProperties settings = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
+		configurationManager = new OntopConfigurationManager(obdaModel, settings);
 	}
 
 	/***
@@ -471,49 +475,8 @@ public class OBDAModelManager implements Disposable {
 
 			case REASONER_CHANGED:
 				log.info("REASONER CHANGED");
-				handleReasonerChanged();
 				break;
 			}
-		}
-
-		private DisposableProperties getPluginProperties() {
-			return (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
-		}
-
-		/**
-		 * Data source connection information overwrites "plugin" properties.
-		 */
-		private Properties snapshotProperties() {
-			Properties properties = getPluginProperties().clone();
-			properties.putAll(DataSource2PropertiesConvertor.convert(getActiveOBDAModel().getDatasource()));
-			return properties;
-		}
-
-		private void handleReasonerChanged() {
-			OBDAModel activeOBDAModel = getActiveOBDAModel();
-
-			if ((!initializing) && (owlEditorKit != null) && (activeOBDAModel != null)) {
-                ProtegeOWLReasonerInfo fac = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
-
-                if (fac instanceof OntopReasonerInfo) {
-                    OntopReasonerInfo questfactory = (OntopReasonerInfo) fac;
-                    Properties properties = snapshotProperties();
-                    questfactory.setPreferences(properties);
-                    questfactory.setOBDAModel(activeOBDAModel);
-                }
-				return;
-            }
-
-/*			OWLReasonerManager reasonerManager = owlEditorKit.getOWLModelManager().getOWLReasonerManager();
-			ProtegeOWLReasonerInfo factory = reasonerManager.getCurrentReasonerFactory();
-			if (factory instanceof ProtegeOBDAOWLReformulationPlatformFactory) {
-				ProtegeOBDAOWLReformulationPlatformFactory questFactory = (ProtegeOBDAOWLReformulationPlatformFactory) factory;
-				ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit.get(
-						QuestPreferences.class.getName());
-
-				OBDAModel currentOBDAModel = getActiveOBDAModel().generatePPMapping();
-				questFactory.load(currentOBDAModel, reasonerPreference);
-			} */
 		}
 
 		/**
@@ -531,14 +494,12 @@ public class OBDAModelManager implements Disposable {
 			obdaModel.reset(owlPrefixManager);
 			loadVocabularyAndDefaultPrefix(obdaModel, mmgr.getOntologies(), ontology);
 
+			configurationManager.clearImplicitDBConstraintFile();;
+
 			ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 			if (factory instanceof OntopReasonerInfo) {
                 OntopReasonerInfo questfactory = (OntopReasonerInfo) factory;
-
-                questfactory.setPreferences(snapshotProperties());
-                questfactory.setOBDAModel(getActiveOBDAModel());
-                if(applyImplicitDBConstraints)
-                    questfactory.setImplicitDBConstraintFile(implicitDBConstraintFile);
+                questfactory.setConfigurationGenerator(configurationManager);
             }
 			fireActiveOBDAModelChange();
 
@@ -569,13 +530,14 @@ public class OBDAModelManager implements Disposable {
 				File propertyFile = new File(URI.create(propertyFilePath));
 				implicitDBConstraintFile = new File(URI.create(implicitDBConstraintFilePath));
 
+				if(applyImplicitDBConstraints)
+					configurationManager.setImplicitDBConstraintFile(implicitDBConstraintFile);
+
 				/*
 				 * Loads the properties (and the data source)
 				 */
 				if (propertyFile.exists()) {
-					DisposableProperties properties = getPluginProperties();
-					properties.load(new FileReader(propertyFile));
-					loadDataSource(obdaModel, properties);
+					configurationManager.loadPropertyFile(propertyFile);
 				}
 
                 if (obdaFile.exists()) {
@@ -651,7 +613,7 @@ public class OBDAModelManager implements Disposable {
 				}
 
 
-				Properties properties = snapshotProperties();
+				Properties properties = configurationManager.snapshotProperties();
 				if (!properties.isEmpty()) {
 					String propertyFilePath = owlName + PROPERTY_EXT;
 					File propertyFile = new File(URI.create(propertyFilePath));
@@ -694,20 +656,6 @@ public class OBDAModelManager implements Disposable {
 				.transform(IRI::toString)
 				.or("");
 		obdaModel.addPrefix(PrefixManager.DEFAULT_PREFIX, OBDAModelManager.getProperPrefixURI(unsafeDefaultPrefix));
-	}
-
-	private static void loadDataSource(OBDAModel obdaModel, DisposableProperties properties) {
-		OBDADataSource dataSource = obdaModel.getDatasource();
-
-		properties.getOptionalProperty(JDBC_URL)
-				.ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, v));
-		properties.getOptionalProperty(JDBC_USER)
-				.ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, v));
-		properties.getOptionalProperty(JDBC_PASSWORD)
-				.ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, v));
-		properties.getOptionalProperty(JDBC_DRIVER)
-				.ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, v));
-
 	}
 
 	public void fireActiveOBDAModelChange() {
