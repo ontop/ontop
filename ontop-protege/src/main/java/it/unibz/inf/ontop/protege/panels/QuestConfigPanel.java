@@ -28,8 +28,6 @@ import it.unibz.inf.ontop.protege.core.DisposableProperties;
 
 import java.awt.*;
 
-import static it.unibz.inf.ontop.model.impl.DeprecatedConstants.*;
-
 public class QuestConfigPanel extends javax.swing.JPanel {
 
     private static final long serialVersionUID = 602382682995021070L;
@@ -80,14 +78,21 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         chkAnnotations = new javax.swing.JCheckBox();
         chkSameAs = new javax.swing.JCheckBox();
         filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
+        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
 
-        setMinimumSize(new java.awt.Dimension(620, 560));
-        setPreferredSize(new java.awt.Dimension(620, 560));
-        setLayout(new java.awt.BorderLayout());
+        setMinimumSize(new java.awt.Dimension(620, 300));
+        setPreferredSize(new java.awt.Dimension(620, 300));
+        setLayout(new java.awt.GridBagLayout());
 
         labelNote.setText("<html><b>Note:</b> You will need to restart Ontop Reasoner for any changes to take effect.<p/>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (i.e., select \"Reasoner-> None\" and then \"Reasoner -> Ontop\" in Protege's menu)</html>");
         labelNote.setAlignmentX(0.5F);
-        add(labelNote, java.awt.BorderLayout.PAGE_START);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        add(labelNote, gridBagConstraints);
 
         pnlReformulationMethods.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "First Order reformulation"));
         pnlReformulationMethods.setMinimumSize(new java.awt.Dimension(620, 120));
@@ -151,7 +156,23 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.weightx = 2.0;
         pnlReformulationMethods.add(filler2, gridBagConstraints);
 
-        add(pnlReformulationMethods, java.awt.BorderLayout.PAGE_END);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.ipadx = 10;
+        gridBagConstraints.ipady = 10;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        add(pnlReformulationMethods, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LAST_LINE_START;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(filler1, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void chkRewriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkRewriteActionPerformed
@@ -175,6 +196,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
     private javax.swing.JCheckBox chkRewrite;
     private javax.swing.JCheckBox chkSameAs;
     private javax.swing.ButtonGroup datalocationGroup;
+    private javax.swing.Box.Filler filler1;
     private javax.swing.Box.Filler filler2;
     private javax.swing.JLabel labelNote;
     private javax.swing.ButtonGroup mapper;
