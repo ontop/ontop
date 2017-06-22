@@ -6,7 +6,7 @@ package it.unibz.inf.ontop.exception;
  * To be specialized
  *
  */
-public class OBDASpecificationException extends Exception {
+public class OBDASpecificationException extends RuntimeException {
 
     protected OBDASpecificationException(String message) {
         super(message);

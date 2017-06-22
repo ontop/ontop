@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingNormalizer;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
+import it.unibz.inf.ontop.mapping.extraction.validation.PPMappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
@@ -75,6 +76,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
                                      Optional<Ontology> optionalOntology, Optional<File> constraintFile,
                                      ExecutorRegistry executorRegistry)
             throws DBMetadataExtractionException, MappingException {
+
+        optionalOntology.ifPresent(o -> PPMappingOntologyComplianceValidator.validate(initialPPMapping, o));
 
         RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
 
