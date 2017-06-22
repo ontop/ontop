@@ -20,13 +20,12 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.NoDatasourceSelectedException;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.utils.ConnectionTools;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,24 +41,14 @@ import org.slf4j.LoggerFactory;
  */
 public class VirtualABoxStatistics {
 
-	private final OBDADataSource source;
-	private final OBDAModel model;
+	private final OBDAModel obdaModel;
 
 	private HashMap<String, HashMap<String, Integer>> statistics = new HashMap<String, HashMap<String, Integer>>();
 
-	private JDBCConnectionManager conn = JDBCConnectionManager.getJDBCConnectionManager();
-
 	Logger log = LoggerFactory.getLogger(VirtualABoxStatistics.class);
 
-	/**
-	 * Inserts the OBDA model to this utility class.
-	 * 
-	 * @param model
-	 *            The mandatory OBDA model.
-	 */
-	public VirtualABoxStatistics(OBDAModel model, OBDADataSource source) {
-		this.model = model;
-		this.source = source;
+	public VirtualABoxStatistics(OBDAModel obdaModel) {
+		this.obdaModel = obdaModel;
 	}
 
 	/**
@@ -136,17 +125,19 @@ public class VirtualABoxStatistics {
 	}
 
 	public void refresh() {
-		List<OBDAMappingAxiom> mappingList = model.getMappings();
+		OBDADataSource source = obdaModel.getDatasource();
+		List<SQLPPTriplesMap> mappingList = obdaModel.generatePPMapping().getTripleMaps();
+
 
 		HashMap<String, Integer> mappingStat = new HashMap<String, Integer>();
-		for (OBDAMappingAxiom mapping : mappingList) {
+		for (SQLPPTriplesMap mapping : mappingList) {
 			String mappingId = mapping.getId();
 			int triplesCount = 0;
 			try {
-				OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
-				int tuples = getTuplesCount(sourceQuery);
+				OBDASQLQuery sourceQuery = mapping.getSourceQuery();
+				int tuples = getTuplesCount(sourceQuery, source);
 
-				List<Function> targetQuery = mapping.getTargetQuery();
+				ImmutableList<ImmutableFunctionalTerm> targetQuery = mapping.getTargetAtoms();
 				int atoms = targetQuery.size();
 
 				triplesCount = tuples * atoms;
@@ -156,11 +147,11 @@ public class VirtualABoxStatistics {
 			}
 			mappingStat.put(mappingId, triplesCount);
 		}
-		String sourceId = source.getSourceID().toString();
-		statistics.put(sourceId, mappingStat);
+		statistics.put(source.getSourceID().toString(), mappingStat);
 	}
 
-	private int getTuplesCount(OBDASQLQuery query) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
+	private int getTuplesCount(OBDASQLQuery query, OBDADataSource source)
+			throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
 		Statement st = null;
 		ResultSet rs = null;
 		int count = -1;

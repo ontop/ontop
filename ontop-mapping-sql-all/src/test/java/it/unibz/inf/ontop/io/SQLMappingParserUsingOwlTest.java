@@ -21,9 +21,6 @@ package it.unibz.inf.ontop.io;
  */
 
 import java.io.File;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
@@ -35,11 +32,9 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import org.junit.Before;
 import org.junit.Test;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
 
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
@@ -48,9 +43,7 @@ import static org.junit.Assert.assertEquals;
 
 public class SQLMappingParserUsingOwlTest {
 
-    private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
-    private final OBDAFactoryWithException modelFactory;
+    private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
     private final SQLMappingParser mappingParser;
 
@@ -86,8 +79,7 @@ public class SQLMappingParserUsingOwlTest {
         specificationFactory = injector.getInstance(SpecificationFactory.class);
 
         mappingParser = injector.getInstance(SQLMappingParser.class);
-        nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-        modelFactory = injector.getInstance(OBDAFactoryWithException.class);
+        ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
     }
 
     @Before
@@ -143,10 +135,10 @@ public class SQLMappingParserUsingOwlTest {
      */
 
     private void saveRegularFile() throws Exception {
-        OBDAModel model = modelFactory.createOBDAModel(ImmutableList.of(),
+        SQLPPMapping ppMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(),
                 specificationFactory.createMetadata(specificationFactory.createPrefixManager(ImmutableMap.of()),
                         UriTemplateMatcher.create(Stream.of())));
-        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
+        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
         writer.save(new File("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
     }
 
@@ -155,22 +147,22 @@ public class SQLMappingParserUsingOwlTest {
      */
 
     private void loadRegularFile() throws Exception {
-        OBDAModel model = loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda");
+        SQLPPMapping ppMapping = loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda");
 
         // Check the content
-        assertEquals(model.getMetadata().getPrefixManager().getPrefixMap().size(), 5);
-        assertEquals(model.getMappings().size(), 0);
+        assertEquals(ppMapping.getMetadata().getPrefixManager().getPrefixMap().size(), 5);
+        assertEquals(ppMapping.getTripleMaps().size(), 0);
     }
 
     private void loadFileWithMultipleDataSources() throws Exception {
-        OBDAModel model = loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolMultipleDataSources.obda");
+        SQLPPMapping ppMapping = loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolMultipleDataSources.obda");
 
         // Check the content
-        assertEquals(model.getMetadata().getPrefixManager().getPrefixMap().size(), 6);
-        assertEquals(model.getMappings().size(), 2);
+        assertEquals(ppMapping.getMetadata().getPrefixManager().getPrefixMap().size(), 6);
+        assertEquals(ppMapping.getTripleMaps().size(), 2);
     }
 
-    private OBDAModel loadObdaFile(String fileLocation) throws MappingIOException,
+    private SQLPPMapping loadObdaFile(String fileLocation) throws MappingIOException,
             InvalidPredicateDeclarationException, InvalidMappingException, DuplicateMappingException {
         // Load the OBDA model
         return mappingParser.parse(new File(fileLocation));
@@ -181,37 +173,5 @@ public class SQLMappingParserUsingOwlTest {
         PrefixManager prefixManager = new SimplePrefixManager(ImmutableMap.of(PrefixManager.DEFAULT_PREFIX,
                 "http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#"));
         return prefixManager;
-    }
-    
-    private Map<URI, ImmutableList<OBDAMappingAxiom>> addSampleMappings(URI sourceId) {
-        Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>();
-        // Add some mappings
-        try {
-            mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[0][0],
-                    MAPPING_FACTORY.getSQLQuery(mappings[0][1]), parser.parse(mappings[0][2]))));
-            mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[1][0],
-                    MAPPING_FACTORY.getSQLQuery(mappings[1][1]), parser.parse(mappings[1][2]))));
-            mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[2][0],
-                    MAPPING_FACTORY.getSQLQuery(mappings[2][1]), parser.parse(mappings[2][2]))));
-        } catch (Exception e) {
-            // NO-OP
-        }
-        return mappingIndex;
-    }
-    
-    private Map<URI, ImmutableList<OBDAMappingAxiom>> addMoreSampleMappings(
-            Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex, URI sourceId) {
-        // Add some mappings
-        try {
-            mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[3][0],
-                    MAPPING_FACTORY.getSQLQuery(mappings[3][1]), parser.parse(mappings[3][2]))));
-            mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[4][0],
-                    MAPPING_FACTORY.getSQLQuery(mappings[4][1]), parser.parse(mappings[4][2]))));
-            mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[5][0],
-                    MAPPING_FACTORY.getSQLQuery(mappings[5][1]), parser.parse(mappings[5][2]))));
-        } catch (Exception e) {
-            // NO-OP
-        }
-        return mappingIndex;
     }
 }

@@ -20,8 +20,10 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 
 import java.util.List;
 
@@ -30,15 +32,15 @@ import java.util.List;
  * true if any mapping contains an atom in the head whose predicate matches
  * predicate.
  */
-public class MappingPredicateTreeModelFilter extends TreeModelFilter<OBDAMappingAxiom> {
+public class MappingPredicateTreeModelFilter extends TreeModelFilter<SQLPPTriplesMap> {
 
 	public MappingPredicateTreeModelFilter() {
 		super.bNegation = false;
 	}
 
 	@Override
-	public boolean match(OBDAMappingAxiom object) {
-		final List<Function> atoms = object.getTargetQuery();
+	public boolean match(SQLPPTriplesMap object) {
+		ImmutableList<ImmutableFunctionalTerm> atoms = object.getTargetAtoms();
 
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {

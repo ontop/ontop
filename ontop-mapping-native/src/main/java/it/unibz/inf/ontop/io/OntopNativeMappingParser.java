@@ -31,10 +31,10 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import org.eclipse.rdf4j.model.Model;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
 
 import it.unibz.inf.ontop.parser.TargetQueryParser;
@@ -73,19 +73,16 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(OntopNativeMappingParser.class);
 
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
-    private final OBDAFactoryWithException obdaFactory;
+    private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
 
     /**
      * Create an SQL Mapping Parser for generating an OBDA model.
      */
     @Inject
-    private OntopNativeMappingParser(NativeQueryLanguageComponentFactory nativeQLFactory,
-                                     SpecificationFactory specificationFactory,
-                                     OBDAFactoryWithException obdaFactory) {
-        this.nativeQLFactory = nativeQLFactory;
-        this.obdaFactory = obdaFactory;
+    private OntopNativeMappingParser(SpecificationFactory specificationFactory,
+                                     SQLPPMappingFactory ppMappingFactory) {
+        this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
     }
 
@@ -95,22 +92,22 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      *
      */
     @Override
-    public OBDAModel parse(File file) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
+    public SQLPPMapping parse(File file) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
         checkFile(file);
         try (Reader reader = new FileReader(file)) {
-            return load(reader, specificationFactory, nativeQLFactory, obdaFactory, file.getName());
+            return load(reader, specificationFactory, ppMappingFactory, file.getName());
         } catch (IOException e) {
             throw new MappingIOException(e);
         }
     }
 
     @Override
-    public OBDAModel parse(Reader reader) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
-        return load(reader, specificationFactory, nativeQLFactory, obdaFactory, ".obda file");
+    public SQLPPMapping parse(Reader reader) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
+        return load(reader, specificationFactory, ppMappingFactory, ".obda file");
     }
 
     @Override
-    public OBDAModel parse(Model mappingGraph) throws InvalidMappingException, DuplicateMappingException {
+    public SQLPPMapping parse(Model mappingGraph) throws InvalidMappingException, DuplicateMappingException {
         throw new IllegalArgumentException("The Ontop native mapping language has no RDF serialization. Passing a RDF graph" +
                 "to the OntopNativeMappingParser is thus invalid.");
     }
@@ -132,13 +129,12 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      *
      * TODO: refactor it. Way too complex.
      */
-	private static OBDAModel load(Reader reader, SpecificationFactory specificationFactory,
-                                  NativeQueryLanguageComponentFactory nativeQLFactory,
-                                  OBDAFactoryWithException obdaFactory, String fileName)
+	private static SQLPPMapping load(Reader reader, SpecificationFactory specificationFactory,
+                                     SQLPPMappingFactory ppMappingFactory, String fileName)
             throws MappingIOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
 
         final Map<String, String> prefixes = new HashMap<>();
-        final List<OBDAMappingAxiom> mappings = new ArrayList<>();
+        final List<SQLPPTriplesMap> mappings = new ArrayList<>();
         final List<Indicator> invalidMappingIndicators = new ArrayList<>();
 
         List<TargetQueryParser> parsers = null;
@@ -179,8 +175,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                         if (parsers == null) {
                             parsers = createParsers(ImmutableMap.copyOf(prefixes));
                         }
-                        mappings.addAll(readMappingDeclaration(lineNumberReader, parsers, invalidMappingIndicators,
-                                nativeQLFactory));
+                        mappings.addAll(readMappingDeclaration(lineNumberReader, parsers, invalidMappingIndicators));
                     } else {
                         throw new IOException("Unknown syntax: " + line);
                     }
@@ -200,17 +195,17 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         }
 
         PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.copyOf(prefixes));
-        ImmutableList<OBDAMappingAxiom> mappingAxioms = ImmutableList.copyOf(mappings);
+        ImmutableList<SQLPPTriplesMap> mappingAxioms = ImmutableList.copyOf(mappings);
 
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                 mappingAxioms.stream()
-                        .flatMap(ax -> ax.getTargetQuery().stream())
-                        .flatMap(atom -> atom.getTerms().stream())
-                        .filter(t -> t instanceof Function)
-                        .map(t -> (Function) t));
+                        .flatMap(ax -> ax.getTargetAtoms().stream())
+                        .flatMap(atom -> atom.getArguments().stream())
+                        .filter(t -> t instanceof ImmutableFunctionalTerm)
+                        .map(t -> (ImmutableFunctionalTerm) t));
 
         MappingMetadata metadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
-        return obdaFactory.createOBDAModel(mappingAxioms, metadata);
+        return ppMappingFactory.createSQLPreProcessedMapping(mappingAxioms, metadata);
 	}
     
     /*
@@ -235,17 +230,16 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      * @return The updated mapping set of the current source
      * @throws IOException
      */
-    private static List<OBDAMappingAxiom> readMappingDeclaration(LineNumberReader reader,
-                                                                 List<TargetQueryParser> parsers,
-                                                                 List<Indicator> invalidMappingIndicators,
-                                                                 NativeQueryLanguageComponentFactory nativeQLFactory)
+    private static List<SQLPPTriplesMap> readMappingDeclaration(LineNumberReader reader,
+                                                                List<TargetQueryParser> parsers,
+                                                                List<Indicator> invalidMappingIndicators)
             throws IOException {
-        List<OBDAMappingAxiom> currentSourceMappings = new ArrayList<>();
+        List<SQLPPTriplesMap> currentSourceMappings = new ArrayList<>();
 
         String mappingId = "";
         String currentLabel = ""; // the reader is working on which label
         StringBuffer sourceQuery = null;
-        List<Function> targetQuery = null;
+        ImmutableList<ImmutableFunctionalTerm> targetQuery = null;
         int wsCount = 0;  // length of whitespace used as the separator
         boolean isMappingValid = true; // a flag to load the mapping to the model if valid
         
@@ -259,8 +253,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 	            	// Save the mapping to the model (if valid) at this point
 	                if (isMappingValid) {
 	                    currentSourceMappings =
-                                addNewMapping(mappingId, sourceQuery.toString(), targetQuery, currentSourceMappings,
-                                        nativeQLFactory);
+                                addNewMapping(mappingId, sourceQuery.toString(), targetQuery, currentSourceMappings);
 	                    mappingId = "";
 	                    sourceQuery = null;
 	                    targetQuery = null;
@@ -332,19 +325,18 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         
         // Save the last mapping entry to the model
         if (!mappingId.isEmpty() && isMappingValid) {
-            currentSourceMappings = addNewMapping(mappingId, sourceQuery.toString(), targetQuery,
-                    currentSourceMappings, nativeQLFactory);
+            currentSourceMappings = addNewMapping(mappingId, sourceQuery.toString(), targetQuery, currentSourceMappings);
         }
 
         return currentSourceMappings;
     }
 
-	private static List<Function> loadTargetQuery(String targetString,
+	private static ImmutableList<ImmutableFunctionalTerm> loadTargetQuery(String targetString,
                                         List<TargetQueryParser> parsers) throws UnparsableTargetQueryException {
         Map<TargetQueryParser, TargetQueryParserException> exceptions = new HashMap<>();
 		for (TargetQueryParser parser : parsers) {
             try {
-            	List<Function> parse = parser.parse(targetString);
+                ImmutableList<ImmutableFunctionalTerm> parse = parser.parse(targetString);
 				return parse;
             } catch (TargetQueryParserException e) {
             	exceptions.put(parser, e);
@@ -364,10 +356,11 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 		return count;
 	}
 
-    private static List<OBDAMappingAxiom> addNewMapping(String mappingId, String sourceQuery, List<Function> targetQuery,
-                                                        List<OBDAMappingAxiom> currentSourceMappings,
-                                                        NativeQueryLanguageComponentFactory nativeQLFactory) {
-        OBDAMappingAxiom mapping = nativeQLFactory.create(mappingId, SQL_MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+    private static List<SQLPPTriplesMap> addNewMapping(String mappingId, String sourceQuery,
+                                                       ImmutableList<ImmutableFunctionalTerm> targetQuery,
+                                                       List<SQLPPTriplesMap> currentSourceMappings) {
+        SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap(
+                mappingId, SQL_MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
         if (!currentSourceMappings.contains(mapping)) {
             currentSourceMappings.add(mapping);
         }

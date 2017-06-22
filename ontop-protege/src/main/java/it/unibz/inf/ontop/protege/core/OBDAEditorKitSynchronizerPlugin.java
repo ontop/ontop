@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
@@ -88,7 +88,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		/**
 		 * TODO: Not sound!! remove it!!!
 		 */
-		getEditorKit().put(OBDAModelImpl.class.getName(), instance);
+		getEditorKit().put(SQLPPMappingImpl.class.getName(), instance);
 
 		// getEditorKit().getModelManager().put(APIController.class.getName(),
 		// instance);

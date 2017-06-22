@@ -12,10 +12,9 @@ import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.r2rml.OBDAModelToR2RMLConverter;
+import it.unibz.inf.ontop.model.SQLPPMapping;
+import it.unibz.inf.ontop.r2rml.SQLPPMappingToR2RMLConverter;
 import org.apache.commons.rdf.jena.JenaGraph;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.graph.Graph;
@@ -74,12 +73,12 @@ public class OntopOBDAToR2RML implements OntopCommand {
 
         OntopSQLOWLAPIConfiguration config = configBuilder.build();
 
-        OBDAModel model;
+        SQLPPMapping ppMapping;
         /*
          * load the mapping in native Ontop syntax
          */
         try {
-            model = config.loadProvidedPPMapping();
+            ppMapping = config.loadProvidedPPMapping();
         } catch ( InvalidMappingException | DuplicateMappingException | MappingIOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -95,8 +94,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
             return;
         }
 
-        OBDAModelToR2RMLConverter converter = new OBDAModelToR2RMLConverter(model, ontology,
-                config.getInjector().getInstance(NativeQueryLanguageComponentFactory.class));
+        SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, ontology);
 
         final Collection<TriplesMap> tripleMaps = converter.getTripleMaps();
 //        final RDF4JR2RMLMappingManager mm = RDF4JR2RMLMappingManager.getInstance();

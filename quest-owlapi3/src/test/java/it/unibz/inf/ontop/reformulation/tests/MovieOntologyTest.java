@@ -52,7 +52,7 @@ public class MovieOntologyTest extends TestCase {
         QuestOWL reasoner = factory.createReasoner(config);
 
 				
-		//for (Entry<URI, ArrayList<OBDAMappingAxiom>> m: obdaModel.getMappings().entrySet()) {
+		//for (Entry<URI, ArrayList<OBDAMappingAxiom>> m: obdaModel.getTripleMaps().entrySet()) {
 		//	System.out.println(m.getKey());
 		//	for (OBDAMappingAxiom mm :  m.getValue()) {
 		//		System.out.println(mm);

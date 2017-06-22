@@ -39,7 +39,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -302,10 +302,10 @@ public class RDB2RDFTest {
 		OntopSQLOWLAPIConfiguration initialConfiguration = createInMemoryBuilder().build();
 		DirectMappingEngine.BootstrappingResults results = DirectMappingEngine.bootstrap(initialConfiguration, BASE_IRI);
 
-		OBDAModel bootstrappedMapping = results.getMapping();
+		SQLPPMapping bootstrappedMapping = results.getPPMapping();
 
 		return createInMemoryBuilder()
-				.obdaModel(bootstrappedMapping)
+				.ppMapping(bootstrappedMapping)
 				.build();
 	}
 

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.impl;
+package it.unibz.inf.ontop.model;
 
 /*
  * #%L
@@ -20,32 +20,21 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.mapping.extraction.PreProcessedTriplesMap;
 
-public abstract class AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
+import java.io.Serializable;
 
-	private static final long serialVersionUID = 5512895151633505075L;
+public interface SQLPPTriplesMap extends PreProcessedTriplesMap {
 
-	private String id;
-	
-	public AbstractOBDAMappingAxiom(String id) {
-		this.id = id;
-	}
-	
-	@Override
-	public void setId(String id) {
-		this.id = id;
-	}
+	OBDASQLQuery getSourceQuery();
 
-	@Override
-	public String getId() {
-		return id;
-	}
-	
-	@Override
-	public int hashCode() {
-		return id.hashCode();
-	}
-	
-	public abstract OBDAMappingAxiom clone();
+	String getId();
+
+	/**
+	 * PPMappingAssertion: a SQLPPTriplesMap with a single target atom.
+	 */
+	SQLPPTriplesMap extractPPMappingAssertion(ImmutableFunctionalTerm atom);
+
+	SQLPPTriplesMap extractPPMappingAssertions(String newId, ImmutableList<ImmutableFunctionalTerm> atoms);
 }

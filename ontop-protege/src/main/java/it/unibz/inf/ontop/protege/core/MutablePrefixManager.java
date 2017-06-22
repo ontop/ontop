@@ -34,11 +34,11 @@ import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
  * This PrefixManager is meant to 'wrap' Protege's prefix manager. That way any
  * prefix defined in Protege are transparently passed to all OBDA lib classes.
  */
-public class PrefixManagerWrapper extends AbstractPrefixManager {
+public class MutablePrefixManager extends AbstractPrefixManager {
 
     PrefixDocumentFormat owlmapper;
 
-	public PrefixManagerWrapper(PrefixDocumentFormat owlmapper) {
+	public MutablePrefixManager(PrefixDocumentFormat owlmapper) {
 		this.owlmapper = owlmapper;
 	}
 	
@@ -88,5 +88,10 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 		}
 		Collections.sort(namespaceList, Collections.reverseOrder());
 		return namespaceList;
+	}
+
+	public void addPrefixes(ImmutableMap<String, String> prefixMap) {
+		prefixMap.entrySet()
+				.forEach(e -> owlmapper.setPrefix(e.getKey(), e.getValue()));
 	}
 }

@@ -24,6 +24,7 @@ import org.protege.editor.core.Disposable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 import static it.unibz.inf.ontop.injection.OntopMappingSettings.OPTIMIZE_EQUIVALENCES;
@@ -71,5 +72,9 @@ public class DisposableProperties extends Properties implements Disposable {
 
 	public boolean getBoolean(String key) {
 		return Boolean.parseBoolean(getProperty(key));
+	}
+
+	public Optional<String> getOptionalProperty(String key) {
+		return Optional.ofNullable(getProperty(key));
 	}
 }

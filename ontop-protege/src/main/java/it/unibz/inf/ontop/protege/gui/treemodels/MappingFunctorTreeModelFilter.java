@@ -20,10 +20,8 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.Variable;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
 
 import java.util.List;
@@ -32,15 +30,15 @@ import java.util.List;
  * This filter receives a string and returns true if any mapping contains the
  * functor in some of the atoms in the head
  */
-public class MappingFunctorTreeModelFilter extends TreeModelFilter<OBDAMappingAxiom> {
+public class MappingFunctorTreeModelFilter extends TreeModelFilter<SQLPPTriplesMap> {
 
 	public MappingFunctorTreeModelFilter() {
 		super.bNegation = false;
 	}
 
 	@Override
-	public boolean match(OBDAMappingAxiom object) {
-		final List<Function> atoms = object.getTargetQuery();
+	public boolean match(SQLPPTriplesMap object) {
+		ImmutableList<ImmutableFunctionalTerm> atoms = object.getTargetAtoms();
 
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {

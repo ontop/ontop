@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.r2rml;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.*;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.LogicalTable;
@@ -55,8 +56,6 @@ import org.apache.commons.rdf.rdf4j.RDF4J;
 import java.util.Collection;
 
 
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -92,11 +91,11 @@ public class OBDAMappingTransformer {
     /**
 	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 */
-	public TriplesMap getTriplesMap(OBDAMappingAxiom axiom,
+	public TriplesMap getTriplesMap(SQLPPTriplesMap axiom,
                                     PrefixManager prefixmng) {
 
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
-		List<Function> tquery = axiom.getTargetQuery();
+		ImmutableList<ImmutableFunctionalTerm> tquery = axiom.getTargetAtoms();
 
 		String random_number = IDGenerator.getNextUniqueID("");
 

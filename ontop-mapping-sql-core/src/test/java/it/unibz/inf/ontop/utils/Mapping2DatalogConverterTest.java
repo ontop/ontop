@@ -20,13 +20,14 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.RDBMSMappingAxiom;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.sql.RDBMetadata;
@@ -41,6 +42,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class Mapping2DatalogConverterTest extends TestCase {
 
@@ -93,10 +96,12 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
 		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm.getPrefixMap());
-		List<Function> target = targetParser.parse(targetString);
+		ImmutableList<ImmutableFunctionalTerm> target = targetParser.parse(targetString).stream()
+				.map(DATA_FACTORY::getImmutableFunctionalTerm)
+				.collect(ImmutableCollectors.toList());
 
-		OBDAMappingAxiom mappingAxiom = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(source), target);
-		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
+		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), target);
+		ArrayList<SQLPPTriplesMap> mappingList = new ArrayList<SQLPPTriplesMap>();
 		mappingList.add(mappingAxiom);
 
 		List<CQIE> dp = Mapping2DatalogConverter.constructDatalogProgram(mappingList, md);

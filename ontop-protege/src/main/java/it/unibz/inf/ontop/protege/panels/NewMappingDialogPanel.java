@@ -20,16 +20,16 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
@@ -62,7 +62,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private static final long serialVersionUID = 4351696247473906680L;
 
 	/** Fields */
-	private OBDAModelWrapper obdaModel;
+	private OBDAModel obdaModel;
 	private OBDADataSource dataSource;
 	private JDialog parent;
 	private TargetQueryVocabularyValidator validator;
@@ -72,23 +72,20 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 	/** Logger */
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
-	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
 	/**
 	 * Create the dialog for inserting a new mapping.
 	 */
-	public NewMappingDialogPanel(OBDAModelWrapper obdaModel, JDialog parent, OBDADataSource dataSource,
-								 TargetQueryVocabularyValidator validator,
-								 NativeQueryLanguageComponentFactory nativeQLFactory) {
+	public NewMappingDialogPanel(OBDAModel obdaModel, JDialog parent, OBDADataSource dataSource,
+                                 TargetQueryVocabularyValidator validator) {
 
 		DialogUtils.installEscapeCloseOperation(parent);
 		this.obdaModel = obdaModel;
 		this.parent = parent;
 		this.dataSource = dataSource;
 		this.validator = validator;
-		this.nativeQLFactory = nativeQLFactory;
 
-		prefixManager = obdaModel.getPrefixManager();
+		prefixManager = obdaModel.getMutablePrefixManager();
 
 		initComponents();
 
@@ -181,28 +178,28 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private void insertMapping(String target, String source) {
-		List<Function> targetQuery = parse(target);
+		ImmutableList<ImmutableFunctionalTerm> targetQuery = parse(target);
 		if (targetQuery != null) {
 			final boolean isValid = validator.validate(targetQuery);
 			if (isValid) {
 				try {
-					OBDAModelWrapper mapcon = obdaModel;
+					OBDAModel mapcon = obdaModel;
 					URI sourceID = dataSource.getSourceID();
 					System.out.println(sourceID.toString()+" \n");
 
 					OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source);
 					System.out.println(body.toString()+" \n");
 
-					OBDAMappingAxiom newmapping = nativeQLFactory.create(txtMappingID.getText().trim(), body, targetQuery);
-					System.out.println(newmapping.toString()+" \n");
+					String newId = txtMappingID.getText().trim();
 
 					if (mapping == null) {
 						// Case when we are creating a new mapping
+						OntopNativeSQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, body, targetQuery);
 						mapcon.addMapping(sourceID, newmapping, false);
 					} else {
 						// Case when we are updating an existing mapping
-						mapcon.updateMappingsSourceQuery(sourceID, mapping.getId(), body);
-						mapcon.updateTargetQueryMapping(sourceID, mapping.getId(), targetQuery);
+						mapcon.updateMappingsSourceQuery(sourceID, newId, body);
+						mapcon.updateTargetQueryMapping(sourceID, newId, targetQuery);
 						mapcon.updateMapping(sourceID, mapping.getId(), txtMappingID.getText().trim());
 					}
 				} catch (DuplicateMappingException e) {
@@ -590,10 +587,10 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
     private javax.swing.JTextPane txtTargetQuery;
     // End of variables declaration//GEN-END:variables
 
-	private OBDAMappingAxiom mapping;
+	private SQLPPTriplesMap mapping;
 
-	private List<Function> parse(String query) {
-		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getPrefixManager().getPrefixMap());
+	private ImmutableList<ImmutableFunctionalTerm> parse(String query) {
+		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getMutablePrefixManager().getPrefixMap());
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
@@ -622,7 +619,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	 * set, this means that this dialog is "updating" a mapping, and not
 	 * creating a new one.
 	 */
-	public void setMapping(OBDAMappingAxiom mapping) {
+	public void setMapping(SQLPPTriplesMap mapping) {
 		this.mapping = mapping;
 
 		cmdInsertMapping.setText("Update");
@@ -632,7 +629,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		txtSourceQuery.setText(srcQuery);
 
-		List<Function> targetQuery = mapping.getTargetQuery();
+		ImmutableList<ImmutableFunctionalTerm> targetQuery = mapping.getTargetAtoms();
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
 		txtTargetQuery.setText(trgQuery);
 	}
