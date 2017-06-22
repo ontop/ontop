@@ -133,28 +133,19 @@ public class TargetQueryRenderer {
 			Predicate functionSymbol = function.getFunctionSymbol();
 			String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
 			if (function.isDataTypeFunction()) {
-				// if the function symbol is a data type predicate
-				if (DATATYPE_FACTORY.isString(functionSymbol)) {
-					// if it is rdfs:Literal
-					int arity = function.getArity();
-					if (arity == 1) {
-						// without the language tag
-						Term var = function.getTerms().get(0);
-						sb.append(getDisplayName(var, prefixManager));
-						sb.append("^^rdfs:Literal");
-					} else if (arity == 2) {
-						// with the language tag
-						Term var = function.getTerms().get(0);
-						Term lang = function.getTerms().get(1);
-						sb.append(getDisplayName(var, prefixManager));
-						sb.append("@");
-						if (lang instanceof ValueConstant) {
-							// Don't pass this to getDisplayName() because 
-							// language constant is not written as @"lang-tag"
-							sb.append(((ValueConstant) lang).getValue());
-						} else {
-							sb.append(getDisplayName(lang, prefixManager));
-						}
+				// Language tag case
+				if (DATATYPE_FACTORY.isString(functionSymbol) && (functionSymbol.getArity() == 2)) {
+					// with the language tag
+					Term var = function.getTerms().get(0);
+					Term lang = function.getTerms().get(1);
+					sb.append(getDisplayName(var, prefixManager));
+					sb.append("@");
+					if (lang instanceof ValueConstant) {
+						// Don't pass this to getDisplayName() because
+						// language constant is not written as @"lang-tag"
+						sb.append(((ValueConstant) lang).getValue());
+					} else {
+						sb.append(getDisplayName(lang, prefixManager));
 					}
 				} else { // for the other data types
 					Term var = function.getTerms().get(0);
@@ -204,7 +195,6 @@ public class TargetQueryRenderer {
 				sb.append("\"");
 				getNestedConcats(sb, terms.get(0),terms.get(1));
 				sb.append("\"");
-				//sb.append("^^rdfs:Literal");
 			}
 			else { // for any ordinary function symbol
 				sb.append(fname);
