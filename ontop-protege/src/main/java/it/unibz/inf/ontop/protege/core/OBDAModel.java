@@ -120,10 +120,10 @@ public class OBDAModel {
                 .build();
         SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
 
-        SQLPPMapping newObdaModel = mappingParser.parse(mappingFile);
-        prefixManager.addPrefixes(newObdaModel.getMetadata().getPrefixManager().getPrefixMap());
+        SQLPPMapping ppMapping = mappingParser.parse(mappingFile);
+        prefixManager.addPrefixes(ppMapping.getMetadata().getPrefixManager().getPrefixMap());
         // New map
-        triplesMapMap = newObdaModel.getTripleMaps().stream()
+        triplesMapMap = ppMapping.getTripleMaps().stream()
                 .collect(collectTriplesMaps(
                         SQLPPTriplesMap::getId,
                         m -> m));
