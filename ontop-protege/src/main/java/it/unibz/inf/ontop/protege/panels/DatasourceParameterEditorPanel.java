@@ -22,17 +22,16 @@ package it.unibz.inf.ontop.protege.panels;
 
 
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.ConnectionTools;
 import it.unibz.inf.ontop.protege.utils.CustomTraversalPolicy;
 import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
-import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;
@@ -148,8 +147,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         lblDatabasePassword = new javax.swing.JLabel();
         lblJdbcDriver = new javax.swing.JLabel();
         lblConnectionStatus = new javax.swing.JLabel();
-        pnlCommandButton = new javax.swing.JPanel();
-        cmdSave = new javax.swing.JButton();
         cmdHelp = new javax.swing.JButton();
         pnlInformation = new javax.swing.JPanel();
 
@@ -184,7 +181,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(30, 0, 2, 10);
+        gridBagConstraints.insets = new java.awt.Insets(30, 0, 2, 30);
         pnlDataSourceParameters.add(txtJdbcUrl, gridBagConstraints);
 
         txtDatabaseUsername.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
@@ -202,7 +199,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(3, 0, 2, 10);
+        gridBagConstraints.insets = new java.awt.Insets(3, 0, 2, 30);
         pnlDataSourceParameters.add(txtDatabaseUsername, gridBagConstraints);
 
         txtDatabasePassword.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
@@ -218,7 +215,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(3, 0, 2, 10);
+        gridBagConstraints.insets = new java.awt.Insets(3, 0, 2, 30);
         pnlDataSourceParameters.add(txtDatabasePassword, gridBagConstraints);
 
         txtJdbcDriver.setEditable(true);
@@ -236,7 +233,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(3, 0, 2, 10);
+        gridBagConstraints.insets = new java.awt.Insets(3, 0, 2, 30);
         pnlDataSourceParameters.add(txtJdbcDriver, gridBagConstraints);
 
         cmdTestConnection.setIcon(IconLoader.getImageIcon("images/execute.png"));
@@ -343,33 +340,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.insets = new java.awt.Insets(8, 0, 10, 10);
         pnlDataSourceParameters.add(lblConnectionStatus, gridBagConstraints);
 
-        pnlCommandButton.setFocusable(false);
-        pnlCommandButton.setMinimumSize(new java.awt.Dimension(210, 27));
-        pnlCommandButton.setPreferredSize(new java.awt.Dimension(210, 27));
-        pnlCommandButton.setLayout(new java.awt.GridBagLayout());
-
-        cmdSave.setText("Save");
-        cmdSave.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdSave.setContentAreaFilled(false);
-        cmdSave.setIconTextGap(5);
-        cmdSave.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        cmdSave.setMaximumSize(new java.awt.Dimension(105, 25));
-        cmdSave.setMinimumSize(new java.awt.Dimension(105, 25));
-        cmdSave.setPreferredSize(new java.awt.Dimension(105, 25));
-        cmdSave.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSaveActionPerformed(evt);
-            }
-        });
-        pnlCommandButton.add(cmdSave, new java.awt.GridBagConstraints());
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(30, 0, 0, 0);
-        pnlDataSourceParameters.add(pnlCommandButton, gridBagConstraints);
-
         cmdHelp.setFont(new java.awt.Font("Dialog", 1, 13)); // NOI18N
         cmdHelp.setForeground(new java.awt.Color(53, 113, 163));
         cmdHelp.setIcon(IconLoader.getImageIcon("images/gtk-help.png"));
@@ -383,7 +353,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
         pnlDataSourceParameters.add(cmdHelp, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -411,17 +381,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     private void txtJdbcDriverActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtJdbcDriverActionPerformed
         fieldChangeHandler(null);
     }// GEN-LAST:event_txtJdbcDriverActionPerformed
-
-    private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdNewActionPerformed
-        // save the obdaModel to an .obda file disk
-        try {
-            ProtegeManager.getInstance().saveEditorKit(owlEditorKit);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Exception occurred while saving the mapping", "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
-
-    }// GEN-LAST:event_cmdSaveActionPerformed
 
     private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdTestConnectionActionPerformed
 
@@ -501,14 +460,12 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdHelp;
-    private javax.swing.JButton cmdSave;
     private javax.swing.JButton cmdTestConnection;
     private javax.swing.JLabel lblConnectionStatus;
     private javax.swing.JLabel lblDatabasePassword;
     private javax.swing.JLabel lblDatabaseUsername;
     private javax.swing.JLabel lblJdbcDriver;
     private javax.swing.JLabel lblJdbcUrl;
-    private javax.swing.JPanel pnlCommandButton;
     private javax.swing.JPanel pnlDataSourceParameters;
     private javax.swing.JPanel pnlInformation;
     private javax.swing.JPasswordField txtDatabasePassword;
