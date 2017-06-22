@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 
 /**
@@ -15,8 +15,8 @@ public class DummyMappingVocabularyFixer implements MappingVocabularyFixer {
      *
      */
     @Override
-    public ImmutableList<SQLPPMappingAxiom> fixMappingAxioms(ImmutableList<SQLPPMappingAxiom> mappingAxioms,
-                                                             ImmutableOntologyVocabulary vocabulary) {
+    public ImmutableList<SQLPPTriplesMap> fixMappingAxioms(ImmutableList<SQLPPTriplesMap> mappingAxioms,
+                                                           ImmutableOntologyVocabulary vocabulary) {
         return mappingAxioms;
     }
 }

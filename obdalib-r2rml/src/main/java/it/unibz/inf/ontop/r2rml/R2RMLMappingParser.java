@@ -6,20 +6,16 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.UriTemplateMatcher;
+import it.unibz.inf.ontop.model.*;
 import org.apache.commons.rdf.rdf4j.RDF4J;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
-import it.unibz.inf.ontop.model.SQLPPMapping;
 
 import java.io.File;
 import java.io.Reader;
@@ -29,15 +25,12 @@ import java.io.Reader;
  */
 public class R2RMLMappingParser implements SQLMappingParser {
 
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
 
 
     @Inject
-    private R2RMLMappingParser(NativeQueryLanguageComponentFactory nativeQLFactory,
-                               SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory) {
-        this.nativeQLFactory = nativeQLFactory;
+    private R2RMLMappingParser(SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
     }
@@ -47,7 +40,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
     public SQLPPMapping parse(File mappingFile) throws InvalidMappingException, MappingIOException, DuplicateMappingException {
 
         try {
-            R2RMLManager r2rmlManager = new R2RMLManager(mappingFile, nativeQLFactory);
+            R2RMLManager r2rmlManager = new R2RMLManager(mappingFile);
             return parse(r2rmlManager);
         } catch (RDFParseException | RDFHandlerException e) {
             throw new InvalidMappingException(e.getMessage());
@@ -64,20 +57,20 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
     @Override
     public SQLPPMapping parse(Model mappingGraph) throws InvalidMappingException, DuplicateMappingException {
-        R2RMLManager r2rmlManager = new R2RMLManager(new RDF4J().asGraph(mappingGraph), nativeQLFactory);
+        R2RMLManager r2rmlManager = new R2RMLManager(new RDF4J().asGraph(mappingGraph));
         return parse(r2rmlManager);
     }
 
     private SQLPPMapping parse(R2RMLManager manager) throws DuplicateMappingException {
         //TODO: make the R2RMLManager simpler.
-        ImmutableList<SQLPPMappingAxiom> sourceMappings = manager.getMappings(manager.getModel());
+        ImmutableList<SQLPPTriplesMap> sourceMappings = manager.getMappings(manager.getModel());
 
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                 sourceMappings.stream()
-                        .flatMap(ax -> ax.getTargetQuery().stream())
-                        .flatMap(atom -> atom.getTerms().stream())
-                        .filter(t -> t instanceof Function)
-                        .map(t -> (Function) t));
+                        .flatMap(ax -> ax.getTargetAtoms().stream())
+                        .flatMap(atom -> atom.getArguments().stream())
+                        .filter(t -> t instanceof ImmutableFunctionalTerm)
+                        .map(t -> (ImmutableFunctionalTerm) t));
 
         //TODO: try to extract prefixes from the R2RML mappings
         PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());

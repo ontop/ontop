@@ -27,10 +27,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.rdf4j.RDF4JGraph;
@@ -41,7 +41,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -53,17 +52,15 @@ import java.util.stream.Collectors;
 
 public class SQLPPMappingToR2RMLConverter {
 
-	private List<SQLPPMappingAxiom> ppMappingAxioms;
+	private List<SQLPPTriplesMap> ppMappingAxioms;
 	private PrefixManager prefixmng;
 	private OWLOntology ontology;
-	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
-    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, OWLOntology ontology, NativeQueryLanguageComponentFactory nativeQLFactory)
+    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, OWLOntology ontology)
 	{
-		this.ppMappingAxioms = ppMapping.getPPMappingAxioms();
+		this.ppMappingAxioms = ppMapping.getTripleMaps();
 		this.prefixmng = ppMapping.getMetadata().getPrefixManager();
 		this.ontology = ontology;
-		this.nativeQLFactory = nativeQLFactory;
 	}
 
 	public Collection <TriplesMap> getTripleMaps() {
@@ -74,7 +71,7 @@ public class SQLPPMappingToR2RMLConverter {
 				.collect(Collectors.toList());
 	}
 
-	private ImmutableSet<SQLPPMappingAxiom> splitMappingAxioms(List<SQLPPMappingAxiom> mappingAxioms) {
+	private ImmutableSet<SQLPPTriplesMap> splitMappingAxioms(List<SQLPPTriplesMap> mappingAxioms) {
 		/*
 		 * Delimiter string d used for assigning ids to split mapping axioms.
 		 * If a mapping axiom with id j is split into multiple ones,
@@ -86,7 +83,7 @@ public class SQLPPMappingToR2RMLConverter {
 				.collect(ImmutableCollectors.toSet());
 	}
 
-	private String getSplitMappingAxiomIdDelimiterSubstring(List<SQLPPMappingAxiom> mappingAxioms) {
+	private String getSplitMappingAxiomIdDelimiterSubstring(List<SQLPPTriplesMap> mappingAxioms) {
 		String delimiterSubstring = "";
 		boolean matched;
 		do {
@@ -98,10 +95,10 @@ public class SQLPPMappingToR2RMLConverter {
 		return delimiterSubstring;
 	}
 
-	private ImmutableList<SQLPPMappingAxiom> splitMappingAxiom(SQLPPMappingAxiom mappingAxiom, String delimiterSubstring) {
-		Multimap<Function, Function> subjectTermToTargetTriples = ArrayListMultimap.create();
-		for(Function targetTriple : mappingAxiom.getTargetQuery()){
-			Function subjectTerm = getFirstFunctionalTerm(targetTriple)
+	private ImmutableList<SQLPPTriplesMap> splitMappingAxiom(SQLPPTriplesMap mappingAxiom, String delimiterSubstring) {
+		Multimap<ImmutableFunctionalTerm, ImmutableFunctionalTerm> subjectTermToTargetTriples = ArrayListMultimap.create();
+		for(ImmutableFunctionalTerm targetTriple : mappingAxiom.getTargetAtoms()){
+			ImmutableFunctionalTerm subjectTerm = getFirstFunctionalTerm(targetTriple)
 						.orElseThrow( () -> new IllegalStateException("Invalid OBDA mapping"));
 			subjectTermToTargetTriples.put(subjectTerm, targetTriple);
 		}
@@ -116,20 +113,19 @@ public class SQLPPMappingToR2RMLConverter {
 			}
 			// Generate one mapping axiom per subject
 			return subjectTermToTargetTriples.asMap().entrySet().stream()
-					.map(e -> nativeQLFactory.create(
+					.map(e -> mappingAxiom.extractPPMappingAssertions(
 							subjectTermToMappingIndex.get(e.getKey()),
-							mappingAxiom.getSourceQuery(),
-							new ArrayList<Function>(e.getValue())))
+							ImmutableList.copyOf(e.getValue())))
 					.collect(ImmutableCollectors.toList());
 		}
 		return ImmutableList.of(mappingAxiom);
 	}
 
-	private Optional<Function> getFirstFunctionalTerm (Function inputFunction) {
-		return inputFunction.getTerms().stream()
+	private Optional<ImmutableFunctionalTerm> getFirstFunctionalTerm (ImmutableFunctionalTerm inputFunction) {
+		return inputFunction.getArguments().stream()
 				.findFirst()
-				.filter(t -> t instanceof Function)
-				.map(t -> (Function) t);
+				.filter(t -> t instanceof ImmutableFunctionalTerm)
+				.map(t -> (ImmutableFunctionalTerm) t);
 	}
 
 

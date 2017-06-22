@@ -21,11 +21,10 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -96,7 +95,6 @@ public class R2RMLImportAction extends ProtegeAction {
 					e.printStackTrace();
 				}
 				if (file != null) {
-					Disposable d = editorKit.get(NativeQueryLanguageComponentFactory.class.getName());
 
 					/**
 					 * Uses the predefined data source for creating the OBDAModel.
@@ -116,8 +114,8 @@ public class R2RMLImportAction extends ProtegeAction {
 						/**
 						 * TODO: improve this inefficient method (batch processing, not one by one)
 						 */
-						for (SQLPPMappingAxiom mapping : parsedModel.getPPMappingAxioms()) {
-							if (mapping.getTargetQuery().toString().contains("BNODE")) {
+						for (SQLPPTriplesMap mapping : parsedModel.getTripleMaps()) {
+							if (mapping.getTargetAtoms().toString().contains("BNODE")) {
 								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 							} else {
 								obdaModelController.addMapping(sourceID, mapping, false);

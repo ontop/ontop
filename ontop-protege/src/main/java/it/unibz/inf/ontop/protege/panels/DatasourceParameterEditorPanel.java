@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.protege.panels;
 
 
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDADataSourceFactory;
-import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -49,11 +47,8 @@ import java.util.List;
 
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
-    private static final OBDADataSourceFactory DATASOURCE_FACTORY = OBDADataSourceFactoryImpl.getInstance();
     private static final long serialVersionUID = 3506358479342412849L;
     private final OWLEditorKit owlEditorKit;
-
-    private OBDADataSource currentDataSource;
 
 	private OBDAModel obdaModel;
 
@@ -115,11 +110,10 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         obdaModel = model;
         resetTextFields();
 
-        /**
+        /*
          * Selects the first data source if it exists
          */
-        obdaModel.getDatasource()
-                .ifPresent(this::currentDatasourceChange);
+        currentDatasourceChange();
     }
 
 
@@ -419,11 +413,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     }// GEN-LAST:event_txtJdbcDriverActionPerformed
 
     private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdNewActionPerformed
-        if (currentDataSource == null) {
-            if (!createNewDatasource()) {
-                return;
-            }
-        }
         // save the obdaModel to an .obda file disk
         try {
             ProtegeManager.getInstance().saveEditorKit(owlEditorKit);
@@ -434,34 +423,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
     }// GEN-LAST:event_cmdSaveActionPerformed
 
-    private boolean createNewDatasource() {
-
-        URI uri = URI.create("datasource1");
-
-        //create new datasource
-        OBDADataSource newDatasource = DATASOURCE_FACTORY.getDataSource(uri);
-        String username = txtDatabaseUsername.getText();
-        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-        String password = new String(txtDatabasePassword.getPassword());
-        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-        String driver = txtJdbcDriver.getSelectedIndex() == 0 ? "" : (String) txtJdbcDriver.getSelectedItem();
-        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-        String url = txtJdbcUrl.getText();
-        newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-        currentDataSource = newDatasource;
-        obdaModel.addSource(currentDataSource);
-
-
-        return true;
-    }
-
     private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdTestConnectionActionPerformed
-
-        if (currentDataSource == null) {
-            if (!createNewDatasource()) {
-                return;
-            }
-        }
 
         lblConnectionStatus.setText("Establishing connection...");
         lblConnectionStatus.setForeground(Color.BLACK);
@@ -474,7 +436,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
                 } catch (Exception e) {
                     // NO-OP
                 }
-                Connection conn = ConnectionTools.getConnection(currentDataSource);
+                Connection conn = ConnectionTools.getConnection(obdaModel.getDatasource());
                 if (conn == null)
                     throw new SQLException("Error connecting to the database");
                 lblConnectionStatus.setForeground(Color.GREEN.darker());
@@ -501,12 +463,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     }// GEN-LAST:event_fieldChangeHandler
 
     private void updateSourceValues() {
-        if (currentDataSource == null) {
-            createNewDatasource();
-            return;
-
-        }
-
         JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
         try {
             man.closeConnection();
@@ -515,6 +471,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         }
 
         String username = txtDatabaseUsername.getText();
+        OBDADataSource currentDataSource = obdaModel.getDatasource();
         currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
         String password = new String(txtDatabasePassword.getPassword());
         currentDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
@@ -560,43 +517,30 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     private javax.swing.JTextField txtJdbcUrl;
     // End of variables declaration//GEN-END:variables
 
-    private void currentDatasourceChange(OBDADataSource currentsource) {
+    private void currentDatasourceChange() {
+        OBDADataSource source = obdaModel.getDatasource();
 
         comboListener.setNotify(false);
-        if (currentsource == null) {
-            currentDataSource = null;
+        String driverClass = source.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+        if(driverClass == null || driverClass.isEmpty())
+        {
             txtJdbcDriver.setSelectedIndex(0);
-            txtDatabaseUsername.setText("");
-            txtDatabasePassword.setText("");
-            txtJdbcUrl.setText("");
-            lblConnectionStatus.setText("");
-
-        } else {
-            currentDataSource = currentsource;
-            String driverClass = currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-            if(driverClass.isEmpty())
-            {
-                txtJdbcDriver.setSelectedIndex(0);
-            }
-            else
-            {
-                txtJdbcDriver.setSelectedItem(driverClass);
-            }
-            txtDatabaseUsername.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME));
-            txtDatabasePassword.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
-            txtJdbcUrl.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_URL));
-            lblConnectionStatus.setText("");
-
         }
+        else
+        {
+            txtJdbcDriver.setSelectedItem(driverClass);
+        }
+        txtDatabaseUsername.setText(source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME));
+        txtDatabasePassword.setText(source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
+        txtJdbcUrl.setText(source.getParameter(RDBMSourceParameterConstants.DATABASE_URL));
+        lblConnectionStatus.setText("");
+
         comboListener.setNotify(true);
     }
 
     @Override
     public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
-
-        currentDatasourceChange(newSource);
-
-
+        currentDatasourceChange();
     }
 
 

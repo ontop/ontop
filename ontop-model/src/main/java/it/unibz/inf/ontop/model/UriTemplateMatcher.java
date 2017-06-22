@@ -36,28 +36,28 @@ public class UriTemplateMatcher {
 	private UriTemplateMatcher() {
 	}
 
-	private final Map<Pattern, Function> uriTemplateMatcher = new HashMap<>();
+	private final Map<Pattern, ImmutableFunctionalTerm> uriTemplateMatcher = new HashMap<>();
 
 	public static UriTemplateMatcher createFromTargetAtoms(Stream<TargetAtom> targetAtoms) {
 		return create(targetAtoms
 				.map(TargetAtom::getSubstitution)
 				// URI constructors can be found in the co-domain of the substitution
 				.flatMap(s -> s.getImmutableMap().values().stream())
-				.filter(t -> t instanceof Function)
-				.map(t -> (Function) t));
+				.filter(t -> t instanceof ImmutableFunctionalTerm)
+				.map(t -> (ImmutableFunctionalTerm) t));
 	}
 
 	/**
 	 * TODO: refactor using streaming.
 	 */
-	public static UriTemplateMatcher create(Stream<? extends Function> targetAtomStream) {
+	public static UriTemplateMatcher create(Stream<? extends ImmutableFunctionalTerm> targetAtomStream) {
 		Set<String> templateStrings = new HashSet<>();
 		
 		UriTemplateMatcher uriTemplateMatcher  = new UriTemplateMatcher();
 
-		ImmutableList<? extends Function> targetAtoms = targetAtomStream.collect(ImmutableCollectors.toList());
+		ImmutableList<? extends ImmutableFunctionalTerm> targetAtoms = targetAtomStream.collect(ImmutableCollectors.toList());
 
-		for (Function fun : targetAtoms) {
+		for (ImmutableFunctionalTerm fun : targetAtoms) {
 
 		 // Collecting URI templates and making pattern matchers for them.
 			if (!(fun.getFunctionSymbol() instanceof URITemplatePredicate)) {
@@ -79,7 +79,7 @@ public class UriTemplateMatcher {
 					continue;
 				}
 
-				Function templateFunction = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getVariable("x"));
+				ImmutableFunctionalTerm templateFunction = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getVariable("x"));
 				Pattern matcher = Pattern.compile("(.+)");
 				uriTemplateMatcher.uriTemplateMatcher.put(matcher, templateFunction);
 				templateStrings.add("(.+)");
@@ -107,8 +107,8 @@ public class UriTemplateMatcher {
 	 * have a corresponding function, and the parameters for this function. The
 	 * parameters are the values for the groups of the pattern.
 	 */
-	public Function generateURIFunction(String uriString) {
-		Function functionURI = null;
+	public ImmutableFunctionalTerm generateURIFunction(String uriString) {
+		ImmutableFunctionalTerm functionURI = null;
 
 		List<Pattern> patternsMatched = new LinkedList<>();
 		for (Pattern pattern : uriTemplateMatcher.keySet()) {
@@ -128,8 +128,8 @@ public class UriTemplateMatcher {
 
 		Collections.sort(patternsMatched, comparator); 
 		for (Pattern pattern : patternsMatched) {
-			Function matchingFunction = uriTemplateMatcher.get(pattern);
-			Term baseParameter = matchingFunction.getTerms().get(0);
+			ImmutableFunctionalTerm matchingFunction = uriTemplateMatcher.get(pattern);
+			ImmutableTerm baseParameter = matchingFunction.getTerm(0);
 			if (baseParameter instanceof Constant) {
 				/*
 				 * This is a general template function of the form
@@ -138,13 +138,13 @@ public class UriTemplateMatcher {
 				 */
 				Matcher matcher = pattern.matcher(uriString);
 				if ( matcher.matches()) {
-					List<Term> values = new ArrayList<>(matcher.groupCount());
+					ImmutableList.Builder<ImmutableTerm> values = ImmutableList.builder();
 					values.add(baseParameter);
 					for (int i = 0; i < matcher.groupCount(); i++) {
 						String value = matcher.group(i + 1);
 						values.add(DATA_FACTORY.getConstantLiteral(value));
 					}
-					functionURI = DATA_FACTORY.getUriTemplate(values);
+					functionURI = DATA_FACTORY.getImmutableUriTemplate(values.build());
 				}
 			} 
 			else if (baseParameter instanceof Variable) {
@@ -152,7 +152,7 @@ public class UriTemplateMatcher {
 				 * This is a direct mapping to a column, uri(x)
 				 * we need to match x with the subjectURI
 				 */
-				functionURI = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(uriString));
+				functionURI = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getConstantLiteral(uriString));
 			}
 			break;
 		}
@@ -160,7 +160,7 @@ public class UriTemplateMatcher {
 			/* If we cannot match against a template, we try to match against the most general template (which will
 			 * generate empty queries later in the query answering process
 			 */
-			functionURI = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(uriString));
+			functionURI = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getConstantLiteral(uriString));
 		}
 			
 		return functionURI;

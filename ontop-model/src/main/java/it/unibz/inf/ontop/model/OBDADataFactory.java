@@ -55,6 +55,7 @@ public interface OBDADataFactory extends Serializable {
 
 
 	public Function getTripleAtom(Term subject, Term predicate, Term object);
+	ImmutableFunctionalTerm getImmutableTripleAtom(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object);
 
 	/**
 	 * Construct a {@link Predicate} object.
@@ -97,6 +98,10 @@ public interface OBDADataFactory extends Serializable {
 	public Function getUriTemplate(Term...terms);
 
 	public Function getUriTemplate(List<Term> terms);
+
+	ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableTerm...terms);
+
+	ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableList<ImmutableTerm> terms);
 	
 	public Function getUriTemplateForDatatype(String type);
 	
@@ -104,6 +109,10 @@ public interface OBDADataFactory extends Serializable {
 	public Function getBNodeTemplate(List<Term> terms);
 
 	public Function getBNodeTemplate(Term... terms);
+
+	ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableTerm... terms);
+
+	ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableList<ImmutableTerm> terms);
 	
 	/**
 	 * Construct a {@link Function} object. A function expression consists of
@@ -132,7 +141,7 @@ public interface OBDADataFactory extends Serializable {
 
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms);
 
-	public ImmutableTerm getImmutableFunctionalTerm(Function functionalTerm);
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Function functionalTerm);
 
 	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableTerm... terms);
 
@@ -276,6 +285,10 @@ public interface OBDADataFactory extends Serializable {
 	public Function getTypedTerm(Term value, String language);
 	public Function getTypedTerm(Term value, Term language);
 	public Function getTypedTerm(Term value, Predicate.COL_TYPE type);
+
+	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language);
+	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, ImmutableTerm language);
+	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, Predicate.COL_TYPE type);
 	
 	/**
 	 * Construct a {@link ValueConstant} object with a system-assigned name

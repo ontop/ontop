@@ -144,6 +144,28 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		Predicate pred = datatypeFactory.getTypePredicate(COL_TYPE.LITERAL_LANG);
 		return getFunction(pred, value, lang);
 	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, COL_TYPE type) {
+		Predicate pred = datatypeFactory.getTypePredicate(type);
+		if (pred == null)
+			throw new RuntimeException("Unknown data type!");
+
+		return getImmutableFunctionalTerm(pred, value);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, ImmutableTerm language) {
+		Predicate pred = datatypeFactory.getTypePredicate(COL_TYPE.LITERAL_LANG);
+		return getImmutableFunctionalTerm(pred, value, language);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language) {
+		ValueConstant lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.STRING);
+		Predicate pred = datatypeFactory.getTypePredicate(COL_TYPE.LITERAL_LANG);
+		return getImmutableFunctionalTerm(pred, value, lang);
+	}
 	
 	@Override
 	public ValueConstant getConstantFreshLiteral() {
@@ -233,7 +255,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public ImmutableTerm getImmutableFunctionalTerm(Function functionalTerm) {
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Function functionalTerm) {
 		if (GroundTermTools.isGroundTerm(functionalTerm)) {
 			return new GroundFunctionalTermImpl(functionalTerm);
 		}
@@ -363,7 +385,19 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		Predicate uriPred = new URITemplatePredicateImpl(terms.length);
 		return getFunction(uriPred, terms);		
 	}
-	
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableTerm... terms) {
+		Predicate pred = new URITemplatePredicateImpl(terms.length);
+		return getImmutableFunctionalTerm(pred, terms);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableList<ImmutableTerm> terms) {
+		Predicate pred = new URITemplatePredicateImpl(terms.size());
+		return getImmutableFunctionalTerm(pred, terms);
+	}
+
 	@Override
 	public Function getUriTemplate(List<Term> terms) {
 		Predicate uriPred = new URITemplatePredicateImpl(terms.size());
@@ -380,7 +414,19 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		Predicate pred = new BNodePredicateImpl(terms.length);
 		return getFunction(pred, terms);
 	}
-	
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableTerm... terms) {
+		Predicate pred = new BNodePredicateImpl(terms.length);
+		return getImmutableFunctionalTerm(pred, terms);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableList<ImmutableTerm> terms) {
+		Predicate pred = new BNodePredicateImpl(terms.size());
+		return getImmutableFunctionalTerm(pred, terms);
+	}
+
 	@Override
 	public Function getBNodeTemplate(List<Term> terms) {
 		Predicate pred = new BNodePredicateImpl(terms.size());
@@ -630,6 +676,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Function getTripleAtom(Term subject, Term predicate, Term object) {
 		return getFunction(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableTripleAtom(ImmutableTerm subject, ImmutableTerm predicate,
+														  ImmutableTerm object) {
+		return getImmutableFunctionalTerm(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
 	}
 
 	private int suffix = 0;

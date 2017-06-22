@@ -21,14 +21,14 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.mapping.sql.SQLSourceQueryValidator;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -53,7 +53,6 @@ import java.util.List;
 public class MappingManagerPanel extends JPanel implements DatasourceSelectorListener {
 
 	private static final long serialVersionUID = -486013653814714526L;
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
 	private Thread validatorThread;
 
@@ -83,13 +82,11 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
          * @param validator
          *            TargetQueryVocabularyValidator
 	 */
-	public MappingManagerPanel(OBDAModel apic, TargetQueryVocabularyValidator validator,
-                               NativeQueryLanguageComponentFactory nativeQLFactory) {
+	public MappingManagerPanel(OBDAModel apic, TargetQueryVocabularyValidator validator) {
 
 		validatortrg = validator;
 		
 		mappingsTree = new JTree();
-        this.nativeQLFactory = nativeQLFactory;
 
 		initComponents();
 		addMenu();
@@ -232,7 +229,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	}
 
 	public void editMapping() {
-		SQLPPMappingAxiom mapping = (SQLPPMappingAxiom) mappingList.getSelectedValue();
+		SQLPPTriplesMap mapping = (SQLPPTriplesMap) mappingList.getSelectedValue();
 		if (mapping == null) {
 			return;
 		}
@@ -241,8 +238,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("Edit Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg,
-                nativeQLFactory);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
 		panel.setMapping(mapping);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 500);
@@ -471,7 +467,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 				return;
 			}
 			try {
-				List<TreeModelFilter<SQLPPMappingAxiom>> filters = parseSearchString(txtFilter.getText());
+				List<TreeModelFilter<SQLPPTriplesMap>> filters = parseSearchString(txtFilter.getText());
 				if (filters == null) {
 					throw new Exception("Impossible to parse search string");
 				}
@@ -519,7 +515,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
             }
             outputField.addText("Validating " + path.size() + " SQL queries.\n", outputField.NORMAL);
             for (int i = 0; i < path.size(); i++) {
-                SQLPPMappingAxiom o = (SQLPPMappingAxiom) path.get(i);
+                SQLPPTriplesMap o = (SQLPPTriplesMap) path.get(i);
                 String id = o.getId();
                 outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
                 OntopSQLCoreConfiguration config = OntopSQLCoreConfiguration.defaultBuilder()
@@ -581,7 +577,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	}// GEN-LAST:event_menuValidateBodyActionPerformed
 
 	private void menuExecuteBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuExecuteBodyActionPerformed
-		SQLPPMappingAxiom mapping = mappingList.getSelectedValue();
+		SQLPPTriplesMap mapping = mappingList.getSelectedValue();
 		if (mapping == null) {
 			return;
 		}
@@ -618,7 +614,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		URI current_srcuri = selectedSource.getSourceID();
 
 		for (int i = 0; i < currentSelection.length; i++) {
-			SQLPPMappingAxiom mapping = (SQLPPMappingAxiom) currentSelection[i];
+			SQLPPTriplesMap mapping = (SQLPPTriplesMap) currentSelection[i];
 
 			String id = mapping.getId();
 
@@ -630,19 +626,18 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 					break;
 				}
 			}
-			String new_id = id + "(" + new_index + ")";
+			String newId = id + "(" + new_index + ")";
 
 			// inserting the new mapping
 			try {
 
-				SQLPPMappingAxiom oldmapping = controller.getMapping(id);
-				SQLPPMappingAxiom newmapping = null;
-				newmapping = oldmapping.clone();
-				newmapping.setId(new_id);
+				SQLPPTriplesMap oldmapping = controller.getMapping(id);
+				SQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, oldmapping.getSourceQuery(),
+                        oldmapping.getTargetAtoms());
 				controller.addMapping(current_srcuri, newmapping, false);
 
 			} catch (DuplicateMappingException e) {
-				JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + new_id);
+				JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + newId);
 				return;
 			}
 		}
@@ -673,7 +668,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		URI srcuri = selectedSource.getSourceID();
 
 		for (int i = 0; i < values.length; i++) {
-			SQLPPMappingAxiom mapping = (SQLPPMappingAxiom) values[i];
+			SQLPPTriplesMap mapping = (SQLPPTriplesMap) values[i];
 			if (mapping!=null)
 			controller.removeMapping(srcuri, mapping.getId());
 		}
@@ -695,8 +690,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("New Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg,
-                nativeQLFactory);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
 		panel.setID(id);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 500);
@@ -720,7 +714,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel labelMappings;
     private javax.swing.JLabel lblInsertFilter;
-    private javax.swing.JList<SQLPPMappingAxiom> mappingList;
+    private javax.swing.JList<SQLPPTriplesMap> mappingList;
     private javax.swing.JScrollPane mappingScrollPane;
     private javax.swing.JPopupMenu menuMappings;
     private javax.swing.JPanel pnlExtraButtons;
@@ -737,9 +731,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * @return A list of filter objects or null if the string was empty or
 	 *         erroneous
 	 */
-	private List<TreeModelFilter<SQLPPMappingAxiom>> parseSearchString(String textToParse) throws Exception {
+	private List<TreeModelFilter<SQLPPTriplesMap>> parseSearchString(String textToParse) throws Exception {
 
-		List<TreeModelFilter<SQLPPMappingAxiom>> listOfFilters = null;
+		List<TreeModelFilter<SQLPPTriplesMap>> listOfFilters = null;
 
 		if (textToParse != null) {
 			ANTLRStringStream inputStream = new ANTLRStringStream(textToParse);
@@ -760,7 +754,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * This function add the list of current filters to the model and then the
 	 * Tree is refreshed shows the mappings after the filters have been applied.
 	 */
-	private void applyFilters(List<TreeModelFilter<SQLPPMappingAxiom>> filters) {
+	private void applyFilters(List<TreeModelFilter<SQLPPTriplesMap>> filters) {
 		FilteredModel model = (FilteredModel) mappingList.getModel();
 		model.removeAllFilters();
 		model.addFilters(filters);

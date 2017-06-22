@@ -28,6 +28,7 @@ package it.unibz.inf.ontop.r2rml;
 
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 
 import com.google.common.collect.ImmutableList;
@@ -35,10 +36,9 @@ import eu.optique.r2rml.api.model.Join;
 import eu.optique.r2rml.api.model.PredicateObjectMap;
 import eu.optique.r2rml.api.model.RefObjectMap;
 import eu.optique.r2rml.api.model.TriplesMap;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDALibConstants;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.ValueConstant;
@@ -74,22 +74,21 @@ public class R2RMLManager {
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private R2RMLParser r2rmlParser;
 	private Graph myModel;
-	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
 	/**
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the full path of the file
 	 */
-	public R2RMLManager(String file, NativeQueryLanguageComponentFactory nativeQLFactory)
+	public R2RMLManager(String file)
 			throws RDFParseException, MappingIOException, RDFHandlerException {
-		this(new File(file), nativeQLFactory);
+		this(new File(file));
 	}
 	
 	/**
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the File object
 	 */
-	public R2RMLManager(File file, NativeQueryLanguageComponentFactory nativeQLFactory)
+	public R2RMLManager(File file)
 			throws MappingIOException, RDFParseException, RDFHandlerException {
 
 		try {
@@ -102,8 +101,6 @@ public class R2RMLManager {
 			parser.parse(in, documentUrl.toString());
 			this.myModel = new RDF4J().asGraph(model);
 			r2rmlParser = new R2RMLParser();
-
-			this.nativeQLFactory = nativeQLFactory;
 		} catch (IOException e) {
 			throw new MappingIOException(e);
 		}
@@ -114,10 +111,9 @@ public class R2RMLManager {
 	 * Constructor to start the parser from an RDF Model
 	 * @param model - the sesame Model containing mappings
 	 */
-	public R2RMLManager(Graph model, NativeQueryLanguageComponentFactory nativeQLFactory){
+	public R2RMLManager(Graph model){
 		myModel = model;
 		r2rmlParser = new R2RMLParser();
-		this.nativeQLFactory = nativeQLFactory;
 	}
 	
 	/**
@@ -134,9 +130,9 @@ public class R2RMLManager {
 	 * @param myModel - the Model structure containing mappings
 	 * @return ArrayList<OBDAMappingAxiom> - list of mapping axioms read from the Model
 	 */
-	public ImmutableList<SQLPPMappingAxiom> getMappings(Graph myModel) {
+	public ImmutableList<SQLPPTriplesMap> getMappings(Graph myModel) {
 
-		List<SQLPPMappingAxiom> mappings = new ArrayList<SQLPPMappingAxiom>();
+		List<SQLPPTriplesMap> mappings = new ArrayList<SQLPPTriplesMap>();
 
 		// retrieve the TriplesMap nodes
 		Collection<TriplesMap> tripleMaps = r2rmlParser.getMappingNodes(myModel);
@@ -144,7 +140,7 @@ public class R2RMLManager {
 		for (TriplesMap tm : tripleMaps) {
 
 			// for each node get a mapping
-			SQLPPMappingAxiom mapping;
+			SQLPPTriplesMap mapping;
 
 			try {
 				mapping = getMapping(tm);
@@ -155,7 +151,7 @@ public class R2RMLManager {
                 }
 
 				// pass 2 - check for join conditions, add to list
-				List<SQLPPMappingAxiom> joinMappings = getJoinMappings(tripleMaps, tm);
+				List<SQLPPTriplesMap> joinMappings = getJoinMappings(tripleMaps, tm);
 				if (joinMappings != null) {
 					mappings.addAll(joinMappings);
 				}
@@ -172,12 +168,14 @@ public class R2RMLManager {
 	 * @return
 	 * @throws Exception
 	 */
-	private SQLPPMappingAxiom getMapping(TriplesMap tm) throws Exception {
+	private SQLPPTriplesMap getMapping(TriplesMap tm) throws Exception {
 		String sourceQuery = r2rmlParser.getSQLQuery(tm).trim();
-		List<Function> body = getMappingTripleAtoms(tm);
+		ImmutableList<ImmutableFunctionalTerm> body = getMappingTripleAtoms(tm);
 		//Function head = getHeadAtom(body);
 		//CQIE targetQuery = DATA_FACTORY.getCQIE(head, body);
-		SQLPPMappingAxiom mapping = nativeQLFactory.create("mapping-"+tm.hashCode(), MAPPING_FACTORY.getSQLQuery(sourceQuery), body);
+		// TODO: consider a R2RML-specific type of triples map
+		SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap("mapping-"+tm.hashCode(),
+				MAPPING_FACTORY.getSQLQuery(sourceQuery), body);
         if (body.isEmpty()){
             //we do not have a target query
             System.out.println("WARNING a mapping without target query will not be introduced : "+ mapping.toString());
@@ -193,18 +191,18 @@ public class R2RMLManager {
 	 * @return
 	 * @throws Exception
 	 */
-	private List<SQLPPMappingAxiom> getJoinMappings(Collection<TriplesMap> tripleMaps, TriplesMap tm) throws Exception {
+	private List<SQLPPTriplesMap> getJoinMappings(Collection<TriplesMap> tripleMaps, TriplesMap tm) throws Exception {
 		String sourceQuery = "";
-		List<SQLPPMappingAxiom> joinMappings = new ArrayList<SQLPPMappingAxiom>();
+		List<SQLPPTriplesMap> joinMappings = new ArrayList<SQLPPTriplesMap>();
 		for (PredicateObjectMap pobm: tm.getPredicateObjectMaps()) {
 			
 			for(RefObjectMap robm : pobm.getRefObjectMaps()) {
 				sourceQuery = robm.getJointQuery();
 				
 				List <Join> conds = robm.getJoinConditions();
-				List<Function> body = new ArrayList<Function>();
-				List<Term> terms = new ArrayList<Term>();
-				Term joinSubject1 = r2rmlParser.getSubjectAtom(tm);
+				ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
+				List<ImmutableTerm> terms = new ArrayList<>();
+				ImmutableTerm joinSubject1 = r2rmlParser.getSubjectAtom(tm);
 				
 				TriplesMap parent = robm.getParentMap();
 				TriplesMap parentTriple = null;
@@ -217,14 +215,13 @@ public class R2RMLManager {
 					}
 				}
 				
-				Term joinSubject2 = r2rmlParser.getSubjectAtom(parentTriple);
+				ImmutableTerm joinSubject2 = r2rmlParser.getSubjectAtom(parentTriple);
 				terms.add(joinSubject1);
 				terms.add(joinSubject2);
 				
 			List<Predicate> joinPredicates = r2rmlParser.getBodyPredicates(pobm);
 			for (Predicate pred : joinPredicates) {
-				Function bodyAtom = DATA_FACTORY.getFunction(pred, terms);
-				body.add(bodyAtom);
+				bodyBuilder.add(DATA_FACTORY.getImmutableFunctionalTerm(pred, ImmutableList.copyOf(terms)));
 			}
 
 			//Function head = getHeadAtom(body);
@@ -235,7 +232,9 @@ public class R2RMLManager {
 			}
 			//finally, create mapping and add it to the list
                 //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
-			SQLPPMappingAxiom mapping = nativeQLFactory.create("mapping-join-"+robm.hashCode(), MAPPING_FACTORY.getSQLQuery(sourceQuery), body);
+			// TODO: use a R2RML-specific class	instead
+			SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap("mapping-join-"+robm.hashCode(),
+					MAPPING_FACTORY.getSQLQuery(sourceQuery), bodyBuilder.build());
 			System.out.println("WARNING joinMapping introduced : "+mapping.toString());
 			joinMappings.add(mapping);
 		}
@@ -259,24 +258,24 @@ public class R2RMLManager {
 		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, arity), dvars);
 		return head;
 	}
-
+	
 	/**
 	 * Get OBDA mapping body terms from R2RML TriplesMap
 	 * @param tm
 	 * @return
 	 * @throws Exception
 	 */
-	private List<Function> getMappingTripleAtoms(TriplesMap tm) throws Exception {
+	private ImmutableList<ImmutableFunctionalTerm> getMappingTripleAtoms(TriplesMap tm) throws Exception {
 		//the body to return
-		List<Function> body = new ArrayList<Function>();
+		ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
 		
 		//get subject
-		Term subjectAtom = r2rmlParser.getSubjectAtom(tm);		
+		ImmutableTerm subjectAtom = r2rmlParser.getSubjectAtom(tm);
 		
 		//get any class predicates, construct atom Class(subject), add to body
 		List<Predicate> classPredicates = r2rmlParser.getClassPredicates();
 		for (Predicate classPred : classPredicates) {
-			body.add(DATA_FACTORY.getFunction(classPred, subjectAtom));
+			bodyBuilder.add(DATA_FACTORY.getImmutableFunctionalTerm(classPred, subjectAtom));
 		}		
 
 		for (PredicateObjectMap pom : tm.getPredicateObjectMaps()) {
@@ -285,10 +284,10 @@ public class R2RMLManager {
 			//get body predicate
 			List<Predicate> bodyPredicates = r2rmlParser.getBodyPredicates(pom);
 			//predicates that contain a variable are separately treated
-			List<Function> bodyURIPredicates = r2rmlParser.getBodyURIPredicates(pom);
+			List<ImmutableFunctionalTerm> bodyURIPredicates = r2rmlParser.getBodyURIPredicates(pom);
 			
 			//get object atom
-			Term objectAtom = r2rmlParser.getObjectAtom(pom);
+			ImmutableTerm objectAtom = r2rmlParser.getObjectAtom(pom);
 			
 			if (objectAtom == null) {
 				// skip, object is a join
@@ -310,20 +309,19 @@ public class R2RMLManager {
 					Set<Variable> vars = new HashSet<>();
 					TermUtils.addReferencedVariablesTo(vars, objectAtom);
 					if (vars.isEmpty()) { 	
-						Function funcObjectAtom = (Function) objectAtom;
-						Term term0 = funcObjectAtom.getTerm(0);
-						if (term0 instanceof Function) {
-							Function constPred = (Function) term0;
+						ImmutableFunctionalTerm funcObjectAtom = (ImmutableFunctionalTerm) objectAtom;
+						ImmutableTerm term0 = funcObjectAtom.getTerm(0);
+						if (term0 instanceof ImmutableFunctionalTerm) {
+							ImmutableFunctionalTerm constPred = (ImmutableFunctionalTerm) term0;
 							Predicate newpred = constPred.getFunctionSymbol();
-							Function bodyAtom = DATA_FACTORY.getFunction(newpred, subjectAtom);
-							body.add(bodyAtom);
+							ImmutableFunctionalTerm bodyAtom = DATA_FACTORY.getImmutableFunctionalTerm(newpred, subjectAtom);
+							bodyBuilder.add(bodyAtom);
 						}
 						else if (term0 instanceof ValueConstant) {
 							ValueConstant vconst = (ValueConstant) term0;
 							String predName = vconst.getValue();
 							Predicate newpred = DATA_FACTORY.getPredicate(predName, 1);
-							Function bodyAtom = DATA_FACTORY.getFunction(newpred, subjectAtom);
-							body.add(bodyAtom);
+							bodyBuilder.add(DATA_FACTORY.getImmutableFunctionalTerm(newpred, subjectAtom));
 						} 
 						else 
 							throw new IllegalStateException();
@@ -331,30 +329,29 @@ public class R2RMLManager {
 					else { // if object is a variable
 						// TODO (ROMAN): double check -- the list terms appears to accumulate the PO pairs
 						//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
-						Function rdftype = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
+						ImmutableFunctionalTerm rdftype = DATA_FACTORY.getImmutableUriTemplate(
+								DATA_FACTORY.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 						//terms.add(rdftype);
 						//terms.add(objectAtom);
-						Function bodyAtom = DATA_FACTORY.getTripleAtom(subjectAtom, rdftype, objectAtom);
-						body.add(bodyAtom); // DATA_FACTORY.getFunction(newpred, terms)
+						ImmutableFunctionalTerm bodyAtom = DATA_FACTORY.getImmutableTripleAtom(subjectAtom, rdftype, objectAtom);
+						bodyBuilder.add(bodyAtom); // DATA_FACTORY.getFunction(newpred, terms)
 					}
 				} 
 				else {
 					// create predicate(subject, object) and add it to the body
-					Function bodyAtom = DATA_FACTORY.getFunction(bodyPred, subjectAtom, objectAtom);
-					body.add(bodyAtom);
+					bodyBuilder.add(DATA_FACTORY.getImmutableFunctionalTerm(bodyPred, subjectAtom, objectAtom));
 				}
 			}
 			
 			//treat predicates that contain a variable (column or template declarations)
-			for (Function predFunction : bodyURIPredicates) {
+			for (ImmutableFunctionalTerm predFunction : bodyURIPredicates) {
 				//create triple(subj, predURIFunction, objAtom) terms
 				//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 				//terms.add(predFunction);
 				//terms.add(objectAtom);
-				Function bodyAtom = DATA_FACTORY.getTripleAtom(subjectAtom, predFunction, objectAtom);
-				body.add(bodyAtom);   // objectAtom
+				bodyBuilder.add(DATA_FACTORY.getImmutableTripleAtom(subjectAtom, predFunction, objectAtom));   // objectAtom
 			}
 		}
-		return body;
+		return bodyBuilder.build();
 	}
 }

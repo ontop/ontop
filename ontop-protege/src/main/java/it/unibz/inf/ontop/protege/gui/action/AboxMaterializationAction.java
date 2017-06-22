@@ -68,7 +68,6 @@ public class AboxMaterializationAction extends ProtegeAction {
 	private static final boolean DO_STREAM_RESULTS = true;
 
 	private OWLEditorKit editorKit = null;
-	private SQLPPMapping ppMapping = null;
 	private OWLWorkspace workspace;
 	private OWLModelManager modelManager;
 	private String lineSeparator;
@@ -80,8 +79,6 @@ public class AboxMaterializationAction extends ProtegeAction {
 		editorKit = (OWLEditorKit)getEditorKit();
 		workspace = editorKit.getWorkspace();
 		modelManager = editorKit.getOWLModelManager();
-		ppMapping = ((OBDAModelManager)editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModel()
-				.getCurrentPPMapping();
 		lineSeparator = System.getProperty("line.separator");
 	}
 
@@ -209,6 +206,9 @@ public class AboxMaterializationAction extends ProtegeAction {
 						throw new Exception("Unknown format: " + format);
 				}
 
+				SQLPPMapping ppMapping = ((OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModel()
+						.generatePPMapping();
+
 				OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 						// TODO: should we keep it?
 						.enableOntologyAnnotationQuerying(true)
@@ -261,6 +261,9 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 		if (response == JOptionPane.YES_OPTION) {
 			try {
+				SQLPPMapping ppMapping = ((OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModel()
+						.generatePPMapping();
+
 				OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 						// TODO: should we keep it?
 						.enableOntologyAnnotationQuerying(true)

@@ -24,9 +24,9 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
@@ -75,37 +75,34 @@ public class MetaMappingExpander {
 	 * @return
 	 * 		expanded normal mappings
 	 */
-	public static ImmutableList<SQLPPMappingAxiom> expand(Collection<SQLPPMappingAxiom> mappings,
-														  OntopMappingSQLSettings settings, DBMetadata metadata,
-														  NativeQueryLanguageComponentFactory nativeQLFactory)
+	public static ImmutableList<SQLPPTriplesMap> expand(Collection<SQLPPTriplesMap> mappings,
+														OntopMappingSQLSettings settings, DBMetadata metadata)
 			throws MetaMappingExpansionException {
 
 		List<String> errorMessages = new LinkedList<>();
 
-		List<SQLPPMappingAxiom> expandedMappings = new LinkedList<>();
+		List<SQLPPTriplesMap> expandedMappings = new LinkedList<>();
 
-		for (SQLPPMappingAxiom mapping : mappings) {
+		for (SQLPPTriplesMap mapping : mappings) {
 
-			boolean split = mapping.getTargetQuery().stream()
+			boolean split = mapping.getTargetAtoms().stream()
 					.anyMatch(atom -> atom.getFunctionSymbol().isTriplePredicate());
 
 			if (split) {
 				String id = mapping.getId();
-				SourceQuery sourceQuery = mapping.getSourceQuery();
+				OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 
 				try (Connection connection = createConnection(settings)) {
 
-					for (Function atom : mapping.getTargetQuery()) {
+					for (ImmutableFunctionalTerm atom : mapping.getTargetAtoms()) {
 						if (!atom.getFunctionSymbol().isTriplePredicate()) {
 							// for normal mappings, we do not need to expand it.
-							String newId = IDGenerator.getNextUniqueID(id + "#");
-
-							SQLPPMappingAxiom newMapping = nativeQLFactory.create(newId, sourceQuery, Collections.singletonList(atom));
+							SQLPPTriplesMap newMapping = mapping.extractPPMappingAssertion(atom);
 
 							expandedMappings.add(newMapping);
 						} else {
 							try {
-								expandedMappings.addAll(instantiateMapping(connection, metadata, id, atom, sourceQuery.toString(), nativeQLFactory));
+								expandedMappings.addAll(instantiateMapping(connection, metadata, id, atom, sourceQuery.toString()));
 							} catch (Exception e) {
 								log.warn("Parse exception, check no SQL reserved keywords have been used " + e.getMessage());
 								errorMessages.add(e.getMessage());
@@ -126,9 +123,8 @@ public class MetaMappingExpander {
 		return ImmutableList.copyOf(expandedMappings);
 	}
 
-	private static List<SQLPPMappingAxiom> instantiateMapping(Connection connection, DBMetadata metadata, String id,
-															  Function target, String sql,
-															  NativeQueryLanguageComponentFactory nativeQLFactory)
+	private static List<SQLPPTriplesMap> instantiateMapping(Connection connection, DBMetadata metadata, String id,
+															ImmutableFunctionalTerm target, String sql)
 			throws SQLException, JSQLParserException, InvalidSelectQueryException, UnsupportedSelectQueryException {
 
 		ImmutableList<SelectExpressionItem> queryColumns = getQueryColumns(metadata, sql);
@@ -149,7 +145,7 @@ public class MetaMappingExpander {
 
 		List<List<String>> templateValues = getTemplateValues(connection, sql, templateColumns);
 
-		List<SQLPPMappingAxiom> expandedMappings = new ArrayList<>(templateValues.size());
+		List<SQLPPTriplesMap> expandedMappings = new ArrayList<>(templateValues.size());
 
 		for(List<String> values : templateValues) {
 			// create a new  query with the changed projection and selection
@@ -174,16 +170,17 @@ public class MetaMappingExpander {
 			// (similarly for properties)
 
 			String predicateName = getPredicateName(templateAtom.getTerm(0), values);
-			Function newTarget = (arity == 1)
-					? DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate(predicateName),
+			ImmutableFunctionalTerm newTarget = (arity == 1)
+					? DATA_FACTORY.getImmutableFunctionalTerm(DATA_FACTORY.getClassPredicate(predicateName),
 					target.getTerm(0))
-					: DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate(predicateName),
+					: DATA_FACTORY.getImmutableFunctionalTerm(DATA_FACTORY.getObjectPropertyPredicate(predicateName),
 					target.getTerm(0), target.getTerm(2));
 
 			String newId = IDGenerator.getNextUniqueID(id + "#");
 
-			SQLPPMappingAxiom mapping = nativeQLFactory.create(newId, newSourceQuery,
-					Collections.singletonList(newTarget));
+			// TODO: see how to keep the provenance
+			SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap(newId, newSourceQuery,
+					ImmutableList.of(newTarget));
 
 			expandedMappings.add(mapping);
 

@@ -96,7 +96,7 @@ public class BootstrapAction extends ProtegeAction {
 		ouri.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(ouri);
 		JTextField base_uri = new JTextField();
-		base_uri.setText(currentModel.getPrefixManager().getDefaultPrefix()
+		base_uri.setText(currentModel.getMutablePrefixManager().getDefaultPrefix()
 				.replace("#", "/"));
 		base_uri.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(base_uri);
@@ -165,7 +165,7 @@ public class BootstrapAction extends ProtegeAction {
 					.jdbcUser(username)
 					.jdbcPassword(password)
 					.jdbcDriver(driver)
-					.ppMapping(currentModel.getCurrentPPMapping())
+					.ppMapping(currentModel.generatePPMapping())
 					.ontology(currentOnto)
 					.build();
 

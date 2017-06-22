@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.gui.treemodels.MappingFunctorTreeModelFilter;
 import it.unibz.inf.ontop.protege.gui.treemodels.MappingSQLStringTreeModelFilter;
 import it.unibz.inf.ontop.protege.gui.treemodels.MappingStringTreeModelFilter;
@@ -94,17 +94,17 @@ public class MappingFilterParser extends Parser {
 
     // $ANTLR start "parse"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:42:1: parse returns [ArrayList<TreeModelFilter<OBDAMappingAxiom>> filterList] : f1= filter ( SEMI f2= filter )* EOF ;
-    public final ArrayList<TreeModelFilter<SQLPPMappingAxiom>> parse() throws RecognitionException {
-        ArrayList<TreeModelFilter<SQLPPMappingAxiom>> filterList = null;
+    public final ArrayList<TreeModelFilter<SQLPPTriplesMap>> parse() throws RecognitionException {
+        ArrayList<TreeModelFilter<SQLPPTriplesMap>> filterList = null;
 
 
-        TreeModelFilter<SQLPPMappingAxiom> f1 =null;
+        TreeModelFilter<SQLPPTriplesMap> f1 =null;
 
-        TreeModelFilter<SQLPPMappingAxiom> f2 =null;
+        TreeModelFilter<SQLPPTriplesMap> f2 =null;
 
 
 
-          filterList = new ArrayList<TreeModelFilter<SQLPPMappingAxiom>>();
+          filterList = new ArrayList<TreeModelFilter<SQLPPTriplesMap>>();
 
         try {
             // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:46:3: (f1= filter ( SEMI f2= filter )* EOF )
@@ -174,12 +174,12 @@ public class MappingFilterParser extends Parser {
 
     // $ANTLR start "filter"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:51:1: filter returns [TreeModelFilter<OBDAMappingAxiom> value] : ( (not= NOT )? ( type COLON )? keyword ) ;
-    public final TreeModelFilter<SQLPPMappingAxiom> filter() throws RecognitionException {
-        TreeModelFilter<SQLPPMappingAxiom> value = null;
+    public final TreeModelFilter<SQLPPTriplesMap> filter() throws RecognitionException {
+        TreeModelFilter<SQLPPTriplesMap> value = null;
 
 
         Token not=null;
-        TreeModelFilter<SQLPPMappingAxiom> type1 =null;
+        TreeModelFilter<SQLPPTriplesMap> type1 =null;
 
         String[] keyword2 =null;
 
@@ -278,8 +278,8 @@ public class MappingFilterParser extends Parser {
 
     // $ANTLR start "type"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\inf\\obda\\gui\\swing\\utils\\MappingFilter.g:68:1: type returns [TreeModelFilter<OBDAMappingAxiom> value] : ( ID | TEXT | TARGET | SOURCE | FUNCT | PRED );
-    public final TreeModelFilter<SQLPPMappingAxiom> type() throws RecognitionException {
-        TreeModelFilter<SQLPPMappingAxiom> value = null;
+    public final TreeModelFilter<SQLPPTriplesMap> type() throws RecognitionException {
+        TreeModelFilter<SQLPPTriplesMap> value = null;
 
 
         try {

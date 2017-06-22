@@ -20,8 +20,10 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.Term;
 
 import java.util.List;
@@ -30,15 +32,15 @@ import java.util.List;
  * This Filter receives a string and returns true if any mapping contains the
  * string given in any of its head atoms.
  */
-public class MappingHeadVariableTreeModelFilter extends TreeModelFilter<SQLPPMappingAxiom> {
+public class MappingHeadVariableTreeModelFilter extends TreeModelFilter<SQLPPTriplesMap> {
 
 	public MappingHeadVariableTreeModelFilter() {
 		super.bNegation = false;
 	}
 
 	@Override
-	public boolean match(SQLPPMappingAxiom object) {
-		final List<Function> atoms = object.getTargetQuery();
+	public boolean match(SQLPPTriplesMap object) {
+		ImmutableList<ImmutableFunctionalTerm> atoms = object.getTargetAtoms();
 
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {
