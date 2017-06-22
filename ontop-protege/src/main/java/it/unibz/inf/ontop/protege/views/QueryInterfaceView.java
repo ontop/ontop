@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.views;
  */
 
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlapi.OWLResultSetWriter;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
@@ -95,12 +95,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	
 	@Override
 	protected void initialiseOWLView() throws Exception {
-		obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
+		obdaController = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
 		obdaController.addListener(this);
 
-		prefixManager = obdaController.getActiveOBDAModelWrapper().getPrefixManager();
+		prefixManager = obdaController.getActiveOBDAModel().getMutablePrefixManager();
 
-		queryEditorPanel = new QueryInterfacePanel(obdaController.getActiveOBDAModelWrapper(), obdaController.getQueryController());
+		queryEditorPanel = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), obdaController.getQueryController());
 		queryEditorPanel.setPreferredSize(new Dimension(400, 250));
 		queryEditorPanel.setMinimumSize(new Dimension(400, 250));
 
@@ -542,6 +542,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	@Override
 	public void activeOntologyChanged() {
-		queryEditorPanel.setOBDAModel(this.obdaController.getActiveOBDAModelWrapper());
+		queryEditorPanel.setOBDAModel(this.obdaController.getActiveOBDAModel());
 	}
 }

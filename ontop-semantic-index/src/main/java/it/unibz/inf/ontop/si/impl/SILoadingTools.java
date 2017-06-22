@@ -8,11 +8,8 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.UriTemplateMatcher;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
@@ -113,7 +110,7 @@ class SILoadingTools {
     private static OntopSQLOWLAPIConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
                                                   Optional<OWLOntology> optionalOntology,
                                                   String jdbcUrl, Properties properties) throws SemanticIndexException {
-        OBDAModel ppMapping = createPPMapping(dataRepository);
+        SQLPPMapping ppMapping = createPPMapping(dataRepository);
 
         /**
          * Tbox: ontology without the ABox axioms (are in the DB now).
@@ -133,7 +130,7 @@ class SILoadingTools {
             optionalTBox = Optional.empty();
 
         OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .obdaModel(ppMapping)
+                .ppMapping(ppMapping)
                 .properties(properties)
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(DEFAULT_USER)
@@ -146,23 +143,23 @@ class SILoadingTools {
         return builder.build();
     }
 
-    private static OBDAModel createPPMapping(RDBMSSIRepositoryManager dataRepository) {
+    private static SQLPPMapping createPPMapping(RDBMSSIRepositoryManager dataRepository) {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
                 .build();
         SpecificationFactory specificationFactory = defaultConfiguration.getInjector().getInstance(SpecificationFactory.class);
         PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 
-        ImmutableList<OBDAMappingAxiom> mappingAxioms = dataRepository.getMappings();
+        ImmutableList<SQLPPTriplesMap> mappingAxioms = dataRepository.getMappings();
 
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                 mappingAxioms.stream()
-                        .flatMap(ax -> ax.getTargetQuery().stream())
-                        .flatMap(atom -> atom.getTerms().stream())
-                        .filter(t -> t instanceof Function)
-                        .map(t -> (Function) t));
+                        .flatMap(ax -> ax.getTargetAtoms().stream())
+                        .flatMap(atom -> atom.getArguments().stream())
+                        .filter(t -> t instanceof ImmutableFunctionalTerm)
+                        .map(t -> (ImmutableFunctionalTerm) t));
 
         try {
-            return new OBDAModelImpl(mappingAxioms,
+            return new SQLPPMappingImpl(mappingAxioms,
                     specificationFactory.createMetadata(prefixManager, uriTemplateMatcher));
 
         } catch (DuplicateMappingException e) {

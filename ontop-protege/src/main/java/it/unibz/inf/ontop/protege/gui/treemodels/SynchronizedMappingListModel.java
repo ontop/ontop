@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDAMappingListener;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 
 import javax.swing.*;
 import java.net.URI;
@@ -33,14 +33,14 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 
 	private static final long serialVersionUID = 2317408823037931358L;
 	
-	private OBDAModelWrapper obdaModel;
+	private OBDAModel obdaModel;
 	private URI focusedSource;
-	private List<TreeModelFilter<OBDAMappingAxiom>> filters;
+	private List<TreeModelFilter<SQLPPTriplesMap>> filters;
 
-	public SynchronizedMappingListModel(OBDAModelWrapper obdaModel) {
+	public SynchronizedMappingListModel(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
 		obdaModel.addMappingsListener(this);
-		filters = new LinkedList<TreeModelFilter<OBDAMappingAxiom>>();
+		filters = new LinkedList<TreeModelFilter<SQLPPTriplesMap>>();
 	}
 
 	public void setFocusedSource(URI source) {
@@ -49,25 +49,25 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 	}
 
 	@Override
-	public void addFilter(TreeModelFilter<OBDAMappingAxiom> filter) {
+	public void addFilter(TreeModelFilter<SQLPPTriplesMap> filter) {
 		filters.add(filter);
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
-	public void addFilters(List<TreeModelFilter<OBDAMappingAxiom>> filters) {
+	public void addFilters(List<TreeModelFilter<SQLPPTriplesMap>> filters) {
 		this.filters.addAll(filters);
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
-	public void removeFilter(TreeModelFilter<OBDAMappingAxiom> filter) {
+	public void removeFilter(TreeModelFilter<SQLPPTriplesMap> filter) {
 		filters.remove(filter);
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
-	public void removeFilter(List<TreeModelFilter<OBDAMappingAxiom>> filters) {
+	public void removeFilter(List<TreeModelFilter<SQLPPTriplesMap>> filters) {
 		this.filters.removeAll(filters);
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
@@ -83,11 +83,11 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 		if (focusedSource == null)
 			return 0;
 
-		List<OBDAMappingAxiom> mappings = obdaModel.getMappings(focusedSource);
+		List<SQLPPTriplesMap> mappings = obdaModel.getMappings(focusedSource);
 		int filteredCount = 0;
-		for (OBDAMappingAxiom mapping : mappings) {
+		for (SQLPPTriplesMap mapping : mappings) {
 			boolean passedAllFilters = true;
-			for (TreeModelFilter<OBDAMappingAxiom> filter : filters) {
+			for (TreeModelFilter<SQLPPTriplesMap> filter : filters) {
 				passedAllFilters = passedAllFilters && filter.match(mapping);
 			}
 			if (passedAllFilters)
@@ -98,11 +98,11 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 
 	@Override
 	public Object getElementAt(int index) {
-		List<OBDAMappingAxiom> mappings = obdaModel.getMappings(focusedSource);
+		List<SQLPPTriplesMap> mappings = obdaModel.getMappings(focusedSource);
 		int filteredCount = -1;
-		for (OBDAMappingAxiom mapping : mappings) {
+		for (SQLPPTriplesMap mapping : mappings) {
 			boolean passedAllFilters = true;
-			for (TreeModelFilter<OBDAMappingAxiom> filter : filters) {
+			for (TreeModelFilter<SQLPPTriplesMap> filter : filters) {
 				passedAllFilters = passedAllFilters && filter.match(mapping);
 			}
 			if (passedAllFilters) {

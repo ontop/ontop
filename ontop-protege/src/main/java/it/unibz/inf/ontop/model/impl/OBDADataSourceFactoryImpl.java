@@ -22,11 +22,6 @@ public class OBDADataSourceFactoryImpl implements OBDADataSourceFactory {
     }
 
     @Override
-    public OBDADataSource getDataSource(URI id) {
-        return new DataSourceImpl(id);
-    }
-
-    @Override
     public OBDADataSource getJDBCDataSource(String jdbcurl, String username,
                                             String password, String driverclass) {
         URI id = URI.create(UUID.randomUUID().toString());

@@ -20,12 +20,10 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
-import it.unibz.inf.ontop.r2rml.OBDAModelToR2RMLConverter;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.r2rml.SQLPPMappingToR2RMLConverter;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -45,7 +43,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	private static final long serialVersionUID = -1211395039869926309L;
 
 	private OWLEditorKit editorKit = null;
-	private OBDAModelWrapper obdaModel = null;
+	private OBDAModel obdaModel = null;
 	private OWLModelManager modelManager= null;
 	
 	private Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
@@ -53,7 +51,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit)getEditorKit();		
-		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelWrapper();
+		obdaModel = ((OBDAModelManager)editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModel();
 		modelManager = editorKit.getOWLModelManager();
 	}
 
@@ -87,15 +85,8 @@ public class R2RMLExportAction extends ProtegeAction {
                 if(approve == JFileChooser.APPROVE_OPTION) {
                     File file = fc.getSelectedFile();
 
-					/**
-					 * TODO: improve this
-					 */
-					NativeQueryLanguageComponentFactory nativeQLFactory = OntopModelConfiguration.defaultBuilder()
-							.build().getInjector().getInstance(NativeQueryLanguageComponentFactory.class);
-
-					OBDAModelToR2RMLConverter writer = new OBDAModelToR2RMLConverter(obdaModel.getCurrentImmutableOBDAModel(),
-							modelManager.getActiveOntology(),
-							nativeQLFactory);
+					SQLPPMappingToR2RMLConverter writer = new SQLPPMappingToR2RMLConverter(obdaModel.generatePPMapping(),
+							modelManager.getActiveOntology());
                     writer.write(file);
                     JOptionPane.showMessageDialog(workspace, "R2RML Export completed.");
                 }

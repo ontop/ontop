@@ -25,12 +25,10 @@ import java.util.Set;
 
 public interface OBDADataSource {
 
-    @Deprecated
 	public abstract void setParameter(String parameter_uri, String value);
 
 	public abstract URI getSourceID();
 
-    @Deprecated
 	public abstract void setNewID(URI newid);
 
 	public abstract String getParameter(String parameter_uri);

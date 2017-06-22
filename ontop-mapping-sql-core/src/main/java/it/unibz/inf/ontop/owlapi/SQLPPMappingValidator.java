@@ -22,14 +22,14 @@ package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 
 import java.util.List;
 
 /***
- * Validates an OBDAModel (mappings) against the vocabulary of an ontology
+ * Validates a SQLPPMapping against the vocabulary of an ontology
  * and adds type information to the mapping predicates
  *
  * Used by the Protege plugin in
@@ -40,17 +40,14 @@ import java.util.List;
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  * 
  */
+public class SQLPPMappingValidator {
 
-//TODO: move to a more appropriate package
-
-public class OBDAModelValidator {
-
-	public static void validate(OBDAModel obdaModel, ImmutableOntologyVocabulary vocabulary) throws Exception {
+	public static void validate(SQLPPMapping ppMapping, ImmutableOntologyVocabulary vocabulary) throws Exception {
 
 		 TargetQueryVocabularyValidator validator = new TargetQueryValidator(vocabulary);
 
-		 for (OBDAMappingAxiom mapping : obdaModel.getMappings()) {
-			 List<Function> tq = mapping.getTargetQuery();
+		 for (SQLPPTriplesMap mapping : ppMapping.getTripleMaps()) {
+			 List<? extends Function> tq = mapping.getTargetAtoms();
 			 boolean bSuccess = validator.validate(tq);
 			 if (!bSuccess) {
 				 throw new Exception("Found an invalid target query: " + tq.toString());

@@ -20,20 +20,20 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
 
 /**
  * This filter receives a string in the constructor and returns true if any mapping contains the string in the body.
  */
-public class MappingSQLStringTreeModelFilter extends TreeModelFilter<OBDAMappingAxiom> {
+public class MappingSQLStringTreeModelFilter extends TreeModelFilter<SQLPPTriplesMap> {
 
 	public MappingSQLStringTreeModelFilter() {
 		super.bNegation = false;
 	}
 
 	@Override
-	public boolean match(OBDAMappingAxiom object) {
+	public boolean match(SQLPPTriplesMap object) {
 		final OBDASQLQuery bodyquery = (OBDASQLQuery) object.getSourceQuery();
 
 		boolean isMatch = false;

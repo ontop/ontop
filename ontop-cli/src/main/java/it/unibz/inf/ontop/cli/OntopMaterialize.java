@@ -25,12 +25,11 @@ import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
@@ -112,11 +111,11 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             ImmutableCollection<Predicate> predicates = extractPredicates(ontology);
 
             // Loads it only once
-            OBDAModel obdaModel = configuration.loadProvidedPPMapping();
+            SQLPPMapping ppMapping = configuration.loadProvidedPPMapping();
             OntopSQLOWLAPIConfiguration materializationConfig = createAndInitConfigurationBuilder()
                     .propertyFile(propertiesFile)
                     // To avoid parsing it again and again
-                    .obdaModel(obdaModel)
+                    .ppMapping(ppMapping)
                     .build();
 
             int i = 1;

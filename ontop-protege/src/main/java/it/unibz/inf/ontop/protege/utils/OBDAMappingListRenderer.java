@@ -20,12 +20,13 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
 
@@ -34,7 +35,6 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
-import java.util.List;
 
 public class OBDAMappingListRenderer implements ListCellRenderer {
 
@@ -74,9 +74,9 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	private QueryPainter painter;
 	private SQLQueryPainter sqlpainter;
 
-	public OBDAMappingListRenderer(OBDAModelWrapper obdaModel, TargetQueryVocabularyValidator validator) {
+	public OBDAMappingListRenderer(OBDAModel obdaModel, TargetQueryVocabularyValidator validator) {
 
-		prefixManager = obdaModel.getPrefixManager();
+		prefixManager = obdaModel.getMutablePrefixManager();
 
 
 		trgQueryTextPane = new JTextPane();
@@ -316,11 +316,11 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		preferredWidth = list.getParent().getParent().getWidth();
 
 		minTextHeight = this.plainFontHeight + 6;
-		Component c = prepareRenderer((OBDAMappingAxiom) value, isSelected);
+		Component c = prepareRenderer((SQLPPTriplesMap) value, isSelected);
 		return c;
 	}
 
-	private Component prepareRenderer(OBDAMappingAxiom value, boolean isSelected) {
+	private Component prepareRenderer(SQLPPTriplesMap value, boolean isSelected) {
 		renderingComponent.setOpaque(false);
 		prepareTextPanes(value, isSelected);
 
@@ -367,8 +367,8 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		return renderingComponent;
 	}
 
-	private void prepareTextPanes(OBDAMappingAxiom value, boolean selected) {
-		List<Function> targetQuery = value.getTargetQuery();
+	private void prepareTextPanes(SQLPPTriplesMap value, boolean selected) {
+		ImmutableList<ImmutableFunctionalTerm> targetQuery = value.getTargetAtoms();
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
  		trgQueryTextPane.setText(trgQuery);
 

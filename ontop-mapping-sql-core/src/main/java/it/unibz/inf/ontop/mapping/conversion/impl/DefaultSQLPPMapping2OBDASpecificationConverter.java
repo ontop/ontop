@@ -49,7 +49,6 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSQLPPMapping2OBDASpecificationConverter.class);
 
     private final OntopMappingSQLSettings settings;
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final TMappingExclusionConfig tMappingExclusionConfig;
     private final Datalog2QueryMappingConverter mappingConverter;
@@ -64,7 +63,6 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
                                                            SpecificationFactory specificationFactory,
                                                            MappingNormalizer mappingNormalizer) {
         this.settings = settings;
-        this.nativeQLFactory = nativeQLFactory;
         this.dbMetadataExtractor = nativeQLFactory.create();
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.mappingConverter = mappingConverter;
@@ -73,15 +71,15 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     }
 
     @Override
-    public OBDASpecification convert(final OBDAModel initialPPMapping, Optional<DBMetadata> optionalDBMetadata,
+    public OBDASpecification convert(final SQLPPMapping initialPPMapping, Optional<DBMetadata> optionalDBMetadata,
                                      Optional<Ontology> optionalOntology, Optional<File> constraintFile,
                                      ExecutorRegistry executorRegistry)
             throws DBMetadataExtractionException, MappingException {
 
         RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
 
-        ImmutableList<OBDAMappingAxiom> expandedMappingAxioms = MetaMappingExpander.expand(
-                initialPPMapping.getMappings(), settings, dbMetadata, nativeQLFactory);
+        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
+                initialPPMapping.getTripleMaps(), settings, dbMetadata);
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)
         ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(expandedMappingAxioms, dbMetadata);
@@ -97,7 +95,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     /**
      * Makes use of the DB connection
      */
-    private RDBMetadata extractDBMetadata(final OBDAModel ppMapping, Optional<DBMetadata> optionalDBMetadata,
+    private RDBMetadata extractDBMetadata(final SQLPPMapping ppMapping, Optional<DBMetadata> optionalDBMetadata,
                                           Optional<File> constraintFile)
             throws DBMetadataExtractionException, MetaMappingExpansionException {
 
@@ -117,7 +115,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     /**
      * May also views in the DBMetadata!
      */
-    private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<OBDAMappingAxiom> mappingAxioms, RDBMetadata dbMetadata) {
+    private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<SQLPPTriplesMap> mappingAxioms, RDBMetadata dbMetadata) {
 
 
         ImmutableList<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappingAxioms, dbMetadata);
@@ -143,21 +141,22 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         TBoxReasoner tBox = TBoxReasonerImpl.create(ontology, settings.isEquivalenceOptimizationEnabled());
 
+        ImmutableOntologyVocabulary vocabulary = ontology.getVocabulary();
+
         // Adding data typing on the mapping axioms.
-        ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypesAndValidate(initialMappingRules, tBox, ontology, dbMetadata);
+        ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypesAndValidate(initialMappingRules, tBox, vocabulary, dbMetadata);
 
         ImmutableList<CQIE> mappingRulesWithFacts = insertFacts(fullyTypedRules, ontology,
                 mappingMetadata.getUriTemplateMatcher());
 
-        ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, ontology,
-                dbMetadata);
+        ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, vocabulary, dbMetadata);
 
         Mapping saturatedMapping = mappingConverter.convertMappingRules(saturatedMappingRules, dbMetadata,
                 executorRegistry, mappingMetadata);
 
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
-        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox, ontology.getVocabulary());
+        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox, vocabulary);
     }
 
 
@@ -179,10 +178,11 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     }
 
 
-    private ImmutableList<CQIE> saturateMapping(ImmutableList<CQIE> mapping, TBoxReasoner tBox, Ontology ontology,
+    private ImmutableList<CQIE> saturateMapping(ImmutableList<CQIE> mapping, TBoxReasoner tBox,
+                                                ImmutableOntologyVocabulary vocabulary,
                                                 RDBMetadata dbMetadata) {
 
-        ImmutableList<CQIE> equivalenceFreeMappingRules = replaceEquivalences(mapping, tBox, ontology);
+        ImmutableList<CQIE> equivalenceFreeMappingRules = replaceEquivalences(mapping, tBox, vocabulary);
 
         ImmutableList<CQIE> sameAsEnrichedRules = settings.isSameAsInMappingsEnabled()
                 ? MappingSameAs.addSameAsInverse(equivalenceFreeMappingRules)
@@ -222,10 +222,9 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     }
 
     private ImmutableList<CQIE> replaceEquivalences(ImmutableList<CQIE> mappingRules,
-                                                    TBoxReasoner tBox, Ontology ontology) {
+                                                    TBoxReasoner tBox, ImmutableOntologyVocabulary vocabulary) {
         if (settings.isEquivalenceOptimizationEnabled()) {
-            MappingVocabularyValidator vocabularyValidator = new MappingVocabularyValidator(tBox,
-                    ontology.getVocabulary());
+            MappingVocabularyValidator vocabularyValidator = new MappingVocabularyValidator(tBox, vocabulary);
             return vocabularyValidator.replaceEquivalences(mappingRules);
         }
         else
@@ -385,9 +384,10 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      *
      */
     public ImmutableList<CQIE> inferMissingDataTypesAndValidate(ImmutableList<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,
-                                                       Ontology ontology, DBMetadata metadata) throws MappingException {
+                                                       ImmutableOntologyVocabulary vocabulary, DBMetadata metadata)
+            throws MappingException {
 
-        VocabularyValidator vocabularyValidator = new VocabularyValidator(tBoxReasoner, ontology.getVocabulary());
+        VocabularyValidator vocabularyValidator = new VocabularyValidator(tBoxReasoner, vocabulary);
 
         MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata, tBoxReasoner, vocabularyValidator);
         for (CQIE rule : unfoldingProgram) {

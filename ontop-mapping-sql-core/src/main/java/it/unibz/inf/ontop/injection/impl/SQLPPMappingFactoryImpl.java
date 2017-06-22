@@ -2,26 +2,22 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-/**
- * TODO: describe
- */
-public class OBDAFactoryWithExceptionImpl
-        implements OBDAFactoryWithException {
+public class SQLPPMappingFactoryImpl implements SQLPPMappingFactory {
 
     private final OntopMappingSettings settings;
 
     @Inject
-    private OBDAFactoryWithExceptionImpl(OntopMappingSettings settings) {
+    private SQLPPMappingFactoryImpl(OntopMappingSettings settings) {
         this.settings = settings;
     }
 
@@ -45,18 +41,18 @@ public class OBDAFactoryWithExceptionImpl
     }
 
     /**
-     * OBDA model creation
+     * SQLPPPMapping creation
      */
     @Override
-    public OBDAModel createOBDAModel(ImmutableList<OBDAMappingAxiom> newMappings,
-                                     MappingMetadata mappingMetadata)
+    public SQLPPMapping createSQLPreProcessedMapping(ImmutableList<SQLPPTriplesMap> ppMappingAxioms,
+                                                     MappingMetadata mappingMetadata)
             throws DuplicateMappingException {
         try {
             /**
              * Instantiation
              */
-            Constructor constructor = findFirstConstructor(OBDAModel.class);
-            return (OBDAModel) constructor.newInstance(newMappings, mappingMetadata);
+            Constructor constructor = findFirstConstructor(SQLPPMapping.class);
+            return (SQLPPMapping) constructor.newInstance(ppMappingAxioms, mappingMetadata);
             /**
              * Exception management
              */

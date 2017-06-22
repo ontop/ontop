@@ -20,12 +20,13 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -43,7 +44,7 @@ import java.util.List;
 import java.util.Vector;
 
 public class QueryPainter {
-	private final OBDAModelWrapper apic;
+	private final OBDAModel apic;
 
 	private SimpleAttributeSet black;
 	private SimpleAttributeSet brackets;
@@ -84,13 +85,13 @@ public class QueryPainter {
 	private List<ValidatorListener> validatorListeners = new LinkedList<QueryPainter.ValidatorListener>();
 	private TurtleOBDASyntaxParser textParser;
 
-	public QueryPainter(OBDAModelWrapper apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
+	public QueryPainter(OBDAModel apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
 		this.apic = apic;
 		this.parent = parent;
 		this.validator = validator;
 		this.doc = parent.getStyledDocument();
 		this.parent = parent;
-		this.textParser = new TurtleOBDASyntaxParser(apic.getPrefixManager().getPrefixMap());
+		this.textParser = new TurtleOBDASyntaxParser(apic.getMutablePrefixManager().getPrefixMap());
 
 		prepareStyles();
 		prepareTextPane();
@@ -167,7 +168,7 @@ public class QueryPainter {
 			throw new Exception(msg);
 		}
 
-		List<Function> query = textParser.parse(text);
+		ImmutableList<ImmutableFunctionalTerm> query = textParser.parse(text);
 
 		if (query == null) {
 			invalid = true;
@@ -224,7 +225,7 @@ public class QueryPainter {
 					int index = errorstring.indexOf("Location: line");
 					if (index != -1) {
 						String location = errorstring.substring(index + 15);
-						int prefixlines = apic.getPrefixManager().getPrefixMap().keySet().size();
+						int prefixlines = apic.getMutablePrefixManager().getPrefixMap().keySet().size();
 						String[] coordinates = location.split(":");
 
 						int errorline = Integer.valueOf(coordinates[0]) - prefixlines;
@@ -353,10 +354,10 @@ public class QueryPainter {
 	 * @throws Exception
 	 */
 	public void recolorQuery() throws Exception {
-		PrefixManager man = apic.getPrefixManager();
+		PrefixManager man = apic.getMutablePrefixManager();
 
 		String input = doc.getText(0, doc.getLength());
-		List<Function> current_query = parse(input);
+		ImmutableList<ImmutableFunctionalTerm> current_query = parse(input);
 
 		if (current_query == null) {
             JOptionPane.showMessageDialog(null, "An error occured while parsing the mappings. For more info, see the logs.");
@@ -439,7 +440,7 @@ public class QueryPainter {
 		tasks.clear();
 	}
 
-	private List<Function> parse(String query) {
+	private ImmutableList<ImmutableFunctionalTerm> parse(String query) {
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
