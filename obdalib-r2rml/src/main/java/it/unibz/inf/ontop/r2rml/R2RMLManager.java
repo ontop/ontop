@@ -169,7 +169,7 @@ public class R2RMLManager {
 	 * @throws Exception
 	 */
 	private SQLPPTriplesMap getMapping(TriplesMap tm) throws Exception {
-		String sourceQuery = r2rmlParser.getSQLQuery(tm);
+		String sourceQuery = r2rmlParser.getSQLQuery(tm).trim();
 		ImmutableList<ImmutableFunctionalTerm> body = getMappingTripleAtoms(tm);
 		//Function head = getHeadAtom(body);
 		//CQIE targetQuery = DATA_FACTORY.getCQIE(head, body);

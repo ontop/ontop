@@ -81,7 +81,7 @@ public class OBDAMappingTransformer {
     private String baseIRIString;
 
     OBDAMappingTransformer() {
-        this("http://example.org/");
+        this("urn:");
 	}
 
     OBDAMappingTransformer(String baseIRIString) {
@@ -96,8 +96,6 @@ public class OBDAMappingTransformer {
 
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
 		ImmutableList<ImmutableFunctionalTerm> tquery = axiom.getTargetAtoms();
-
-		String random_number = IDGenerator.getNextUniqueID("");
 
 		//triplesMap node
 		String mapping_id = axiom.getId();
@@ -124,7 +122,7 @@ public class OBDAMappingTransformer {
 		
 		//process target query
 		for (Function func : tquery) {
-			random_number = IDGenerator.getNextUniqueID("");
+
 			Predicate pred = func.getFunctionSymbol();
 			String predName = pred.getName();
 			IRI predUri = null;
