@@ -4,8 +4,8 @@ The [-ontop-](http://ontop.inf.ubibz.it) framework is an open source project ava
 [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.txt). 
 By downloading these packages you are agreeing with them.
 
-* Current version: 1.18.0
-* Release date: 26/05/2016
+* Current version: 1.18.1
+* Release date: 16/06/2017
 * [Changelog](https://github.com/ontop/ontop/wiki/OntopReleases)
 
 
@@ -21,7 +21,9 @@ By downloading these packages you are agreeing with them.
 
 - `ontop-protege-bundle.zip` : Protege 5.0 bundled with Ontop and JDBC plugins. This is ready to run package, use the run.sh, run.command or run.bat start scripts.
 
-- `ontop-jetty-bundle.zip` : Jetty 8 + Sesame workbench + Ontop ready to run a SPARQL end-point.
+- `ontop-jetty-bundle.zip` : Jetty 9 + Sesame workbench + Ontop ready to run a SPARQL end-point.
+
+- `ontop-tomcat-bundle.zip` : Tomcat 9 + Sesame workbench + Ontop ready to run a SPARQL end-point.
 
 ## Samples
 
