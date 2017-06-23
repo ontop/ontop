@@ -114,9 +114,8 @@ public class OBDAModel {
     }
 
 
-    public void parseMappings(File mappingFile) throws DuplicateMappingException, InvalidMappingException, IOException, MappingIOException {
-        // TODO: should we take into account the plugin properties?
-        Properties properties = DataSource2PropertiesConvertor.convert(source);
+    public void parseMappings(File mappingFile, Properties properties) throws DuplicateMappingException,
+            InvalidMappingException, IOException, MappingIOException {
 
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(mappingFile)

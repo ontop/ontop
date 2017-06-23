@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlapi.SQLPPMappingValidator;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.querymanager.*;
@@ -55,11 +54,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.net.URI;
 import java.util.*;
 
-import static it.unibz.inf.ontop.injection.OntopSQLCoreSettings.*;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class OBDAModelManager implements Disposable {
@@ -80,8 +77,6 @@ public class OBDAModelManager implements Disposable {
 	private final List<OBDAModelManagerListener> obdaManagerListeners;
 
 	private final JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
-
-    private boolean applyImplicitDBConstraints = false;
 
     private final OntopConfigurationManager configurationManager;
 	
@@ -104,10 +99,6 @@ public class OBDAModelManager implements Disposable {
 	 */
 	private boolean loadingData;
 
-    private final SQLPPMappingFactory ppMappingFactory;
-	private final SpecificationFactory specificationFactory;
-	private File implicitDBConstraintFile;
-
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private java.util.Optional<OWLOntologyID> lastKnownOntologyId;
 
@@ -124,8 +115,8 @@ public class OBDAModelManager implements Disposable {
 				.jdbcPassword("")
 				.build().getInjector();
 
-		this.specificationFactory = defaultInjector.getInstance(SpecificationFactory.class);
-		this.ppMappingFactory = defaultInjector.getInstance(SQLPPMappingFactory.class);
+		SpecificationFactory specificationFactory = defaultInjector.getInstance(SpecificationFactory.class);
+		SQLPPMappingFactory ppMappingFactory = defaultInjector.getInstance(SQLPPMappingFactory.class);
 
 		lastKnownOntologyId = java.util.Optional.empty();
 
@@ -494,7 +485,7 @@ public class OBDAModelManager implements Disposable {
 			obdaModel.reset(owlPrefixManager);
 			loadVocabularyAndDefaultPrefix(obdaModel, mmgr.getOntologies(), ontology);
 
-			configurationManager.clearImplicitDBConstraintFile();;
+			configurationManager.clearImplicitDBConstraintFile();
 
 			ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 			if (factory instanceof OntopReasonerInfo) {
@@ -528,9 +519,9 @@ public class OBDAModelManager implements Disposable {
 				File obdaFile = new File(URI.create(obdaDocumentIri));
 				File queryFile = new File(URI.create(queryDocumentIri));
 				File propertyFile = new File(URI.create(propertyFilePath));
-				implicitDBConstraintFile = new File(URI.create(implicitDBConstraintFilePath));
+				File implicitDBConstraintFile = new File(URI.create(implicitDBConstraintFilePath));
 
-				if(applyImplicitDBConstraints)
+				if(implicitDBConstraintFile.exists())
 					configurationManager.setImplicitDBConstraintFile(implicitDBConstraintFile);
 
 				/*
@@ -543,7 +534,7 @@ public class OBDAModelManager implements Disposable {
                 if (obdaFile.exists()) {
                     try {
                         // Load the OBDA model
-						obdaModel.parseMappings(obdaFile);
+						obdaModel.parseMappings(obdaFile, configurationManager.snapshotProperties());
                     } catch (Exception ex) {
                         throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
                     }
@@ -554,15 +545,6 @@ public class OBDAModelManager implements Disposable {
                     } catch (Exception ex) {
                         queryController.reset();
                         throw new Exception("Exception occurred while loading Query document: " + queryFile + "\n\n" + ex.getMessage());
-                    }
-                    applyImplicitDBConstraints = false;
-                    if (implicitDBConstraintFile.exists()){
-                        try {
-                            // Load user-supplied constraints
-                            applyImplicitDBConstraints = true;
-                        } catch (Exception ex) {
-                            throw new Exception("Exception occurred while loading database preference file : " + implicitDBConstraintFile + "\n\n" + ex.getMessage());
-                        }
                     }
                 } else {
                     log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
