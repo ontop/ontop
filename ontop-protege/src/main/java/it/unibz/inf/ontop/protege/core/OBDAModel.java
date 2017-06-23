@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,25 +61,28 @@ public class OBDAModel {
     private Map<String, SQLPPTriplesMap> triplesMapMap;
     // Mutable
     private final OBDADataSource source;
-
+    // Mutable and replaced after reset
     private MutablePrefixManager prefixManager;
+    // Mutable and replaced after reset
+    private OntologyVocabulary currentMutableVocabulary;
+
 
     private final List<OBDAModelListener> sourceListeners;
     private final List<OBDAMappingListener> mappingListeners;
-    private final OntologyVocabulary ontologyVocabulary;
 
     private static final OBDADataSourceFactory DS_FACTORY = OBDADataSourceFactoryImpl.getInstance();
 
     public OBDAModel(SpecificationFactory specificationFactory,
-                     SQLPPMappingFactory ppMappingFactory, MutablePrefixManager prefixManager) {
+                     SQLPPMappingFactory ppMappingFactory, PrefixDocumentFormat owlPrefixManager) {
         this.specificationFactory = specificationFactory;
         this.ppMappingFactory = ppMappingFactory;
-        this.prefixManager = prefixManager;
+        this.prefixManager = new MutablePrefixManager(owlPrefixManager);
         this.triplesMapMap = new LinkedHashMap<>();
+
         this.sourceListeners = new ArrayList<>();
         this.mappingListeners = new ArrayList<>();
         source = initDataSource();
-        ontologyVocabulary = ONTOLOGY_FACTORY.createVocabulary();
+        currentMutableVocabulary = ONTOLOGY_FACTORY.createVocabulary();
     }
 
     private static OBDADataSource initDataSource() {
@@ -110,9 +114,8 @@ public class OBDAModel {
     }
 
 
-    public void parseMappings(File mappingFile) throws DuplicateMappingException, InvalidMappingException, IOException, MappingIOException {
-        // TODO: should we take into account the plugin properties?
-        Properties properties = DataSource2PropertiesConvertor.convert(source);
+    public void parseMappings(File mappingFile, Properties properties) throws DuplicateMappingException,
+            InvalidMappingException, IOException, MappingIOException {
 
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(mappingFile)
@@ -120,10 +123,10 @@ public class OBDAModel {
                 .build();
         SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
 
-        SQLPPMapping newObdaModel = mappingParser.parse(mappingFile);
-        prefixManager.addPrefixes(newObdaModel.getMetadata().getPrefixManager().getPrefixMap());
+        SQLPPMapping ppMapping = mappingParser.parse(mappingFile);
+        prefixManager.addPrefixes(ppMapping.getMetadata().getPrefixManager().getPrefixMap());
         // New map
-        triplesMapMap = newObdaModel.getTripleMaps().stream()
+        triplesMapMap = ppMapping.getTripleMaps().stream()
                 .collect(collectTriplesMaps(
                         SQLPPTriplesMap::getId,
                         m -> m));
@@ -294,10 +297,12 @@ public class OBDAModel {
     }
 
     /**
-     * Removes the mapping assertions
+     *
      */
-    public void reset() {
+    public void reset(PrefixDocumentFormat owlPrefixMapper) {
         triplesMapMap.clear();
+        prefixManager = new MutablePrefixManager(owlPrefixMapper);
+        currentMutableVocabulary = ONTOLOGY_FACTORY.createVocabulary();
     }
 
 
@@ -386,8 +391,8 @@ public class OBDAModel {
         return source;
     }
 
-    public OntologyVocabulary getOntologyVocabulary() {
-        return ontologyVocabulary;
+    public OntologyVocabulary getCurrentVocabulary() {
+        return currentMutableVocabulary;
 
     }
 
