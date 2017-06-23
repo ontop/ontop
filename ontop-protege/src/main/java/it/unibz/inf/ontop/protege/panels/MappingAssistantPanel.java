@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
+ *
  * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
@@ -23,6 +24,7 @@ package it.unibz.inf.ontop.protege.panels;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLSettings;
+import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
@@ -33,6 +35,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.OntopConfigurationManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.MapItem;
 import it.unibz.inf.ontop.protege.gui.PredicateItem;
@@ -43,6 +46,8 @@ import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.sql.*;
+import org.protege.editor.owl.model.OWLModelManager;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import javax.swing.*;
 import javax.swing.plaf.metal.MetalComboBoxButton;
@@ -69,7 +74,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private static final long serialVersionUID = 1L;
 
 	private final OBDAModel obdaModel;
-	
+	private final OntopConfigurationManager configurationManager;
+	private final OWLModelManager owlModelManager;
+
 	private final PrefixManager prefixManager;
 	
 	private OBDADataSource selectedSource;
@@ -85,11 +92,11 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
     private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
     private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
 
-	private final OntopQueryAnsweringSQLSettings settings;
-
-	public MappingAssistantPanel(OBDAModel model, OntopQueryAnsweringSQLSettings settings) {
+	public MappingAssistantPanel(OBDAModel model, OntopConfigurationManager configurationManager,
+								 OWLModelManager owlModelManager) {
 		obdaModel = model;
-		this.settings = settings;
+		this.configurationManager = configurationManager;
+		this.owlModelManager = owlModelManager;
 		prefixManager = obdaModel.getMutablePrefixManager();
 		initComponents();
 
@@ -984,8 +991,10 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						// Construct the sql query
 						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-//                        //TODO: find a way to get the current preferences. Necessary if an third-party adapter should be used.
-//						OntopStandaloneSQLSettings defaultPreferences = OntopSQLOWLAPIConfiguration.defaultBuilder().build().getSettings();
+						OWLOntology activeOntology = owlModelManager.getActiveOntology();
+						OntopStandaloneSQLSettings settings = configurationManager.buildOntopSQLOWLAPIConfiguration(activeOntology)
+								.getSettings();
+
 						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "",
 								settings);
 						String sqlString = txtQueryEditor.getText();

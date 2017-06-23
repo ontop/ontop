@@ -51,14 +51,13 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
     @Override
     protected void initialiseOWLView() throws Exception {
 
-        OntopSQLOWLAPIConfiguration defaultConfiguration = OntopSQLOWLAPIConfiguration.defaultBuilder().build();
-
         obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
         obdaModelManager.addListener(this);
 
         activeOBDAModel = obdaModelManager.getActiveOBDAModel();
 
-        MappingAssistantPanel queryPanel = new MappingAssistantPanel(activeOBDAModel, defaultConfiguration.getSettings());
+        MappingAssistantPanel queryPanel = new MappingAssistantPanel(activeOBDAModel, obdaModelManager.getConfigurationManager(),
+                getOWLModelManager());
 
         queryPanel.setBorder(new TitledBorder("SQL Query Editor"));
 

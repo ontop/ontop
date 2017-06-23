@@ -78,7 +78,7 @@ public class OBDAModelManager implements Disposable {
 
 	private final JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
 
-    private final OntopConfigurationManager configurationManager;
+	private final OntopConfigurationManager configurationManager;
 	
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
 
@@ -148,6 +148,10 @@ public class OBDAModelManager implements Disposable {
 
 		DisposableProperties settings = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
 		configurationManager = new OntopConfigurationManager(obdaModel, settings);
+	}
+
+	public OntopConfigurationManager getConfigurationManager() {
+		return configurationManager;
 	}
 
 	/***
