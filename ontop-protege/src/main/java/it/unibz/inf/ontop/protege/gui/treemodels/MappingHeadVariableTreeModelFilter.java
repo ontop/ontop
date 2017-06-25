@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  */
 
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 import it.unibz.inf.ontop.model.Term;
 
 import java.util.List;
@@ -30,14 +30,14 @@ import java.util.List;
  * This Filter receives a string and returns true if any mapping contains the
  * string given in any of its head atoms.
  */
-public class MappingHeadVariableTreeModelFilter extends TreeModelFilter<OBDAMappingAxiom> {
+public class MappingHeadVariableTreeModelFilter extends TreeModelFilter<SQLPPMappingAxiom> {
 
 	public MappingHeadVariableTreeModelFilter() {
 		super.bNegation = false;
 	}
 
 	@Override
-	public boolean match(OBDAMappingAxiom object) {
+	public boolean match(SQLPPMappingAxiom object) {
 		final List<Function> atoms = object.getTargetQuery();
 
 		boolean isMatch = false;

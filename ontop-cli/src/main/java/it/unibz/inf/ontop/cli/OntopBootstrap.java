@@ -19,7 +19,7 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-b", "--base-iri"}, title = "base IRI",
             description = "base uri of the generated mapping")
-    private String baseIRI;
+    protected String baseIRI = "";
 
     @Override
     public void run() {
@@ -41,7 +41,7 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
             File ontologyFile = new File(owlFile);
             File obdaFile = new File(mappingFile);
 
-            OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(results.getMapping());
+            OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(results.getPPMapping());
             writer.save(obdaFile);
 
             OWLOntology onto = results.getOntology();

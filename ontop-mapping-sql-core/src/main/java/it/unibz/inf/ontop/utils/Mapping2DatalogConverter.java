@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.sql.RDBMetadata;
@@ -48,7 +48,7 @@ public class Mapping2DatalogConverter {
     /**
      * returns a Datalog representation of the mappings
      */
-    public static ImmutableList<CQIE> constructDatalogProgram(Collection<OBDAMappingAxiom> mappingAxioms, DBMetadata metadata0) {
+    public static ImmutableList<CQIE> constructDatalogProgram(Collection<SQLPPMappingAxiom> mappingAxioms, DBMetadata metadata0) {
 
         ImmutableList.Builder<CQIE> datalogProgram = ImmutableList.builder();
 
@@ -58,7 +58,7 @@ public class Mapping2DatalogConverter {
 
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 
-        for (OBDAMappingAxiom mappingAxiom : mappingAxioms) {
+        for (SQLPPMappingAxiom mappingAxiom : mappingAxioms) {
             try {
                 SourceQuery sourceQuery = mappingAxiom.getSourceQuery();
 

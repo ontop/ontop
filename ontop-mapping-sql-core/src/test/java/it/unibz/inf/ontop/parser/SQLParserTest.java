@@ -21,18 +21,18 @@ package it.unibz.inf.ontop.parser;
  */
 
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.parser.RAExpression;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
-
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class SQLParserTest {
 
@@ -150,6 +150,28 @@ public class SQLParserTest {
 		r18.addAttribute(idfac.createAttributeID("PostalCode"), 1, "VARCHAR(20)", false);
 		r18.addAttribute(idfac.createAttributeID("Address"), 1, "VARCHAR(20)", false);
 		r18.addAttribute(idfac.createAttributeID("Country"), 1, "VARCHAR(20)", false);
+
+
+		DatabaseRelationDefinition r19 = metadata.createDatabaseRelation(idfac.createRelationID("oreda", "pm_maint_items"));
+		r19.addAttribute(idfac.createAttributeID("owner_id"), 0, "INT", false);
+		r19.addAttribute(idfac.createAttributeID("inst_id"), 0, "INT", false);
+		r19.addAttribute(idfac.createAttributeID("i_id"), 0, "INT", false);
+		r19.addAttribute(idfac.createAttributeID("ec_code"), 1, "VARCHAR(20)", false);
+		r19.addAttribute(idfac.createAttributeID("mi_code"), 1, "VARCHAR(10)", false);
+		r19.addAttribute(idfac.createAttributeID("su_code"), 1, "VARCHAR(10)", false);
+		r19.addAttribute(idfac.createAttributeID("mc_code"), 1, "VARCHAR(8)", false);
+		r19.addAttribute(idfac.createAttributeID("mac_code"), 1, "VARCHAR(8)", false);
+		r19.addAttribute(idfac.createAttributeID("pm_interval"), 0, "INT", false);
+
+		DatabaseRelationDefinition r20 = metadata.createDatabaseRelation(idfac.createRelationID("oreda", "pm_program"));
+		r20.addAttribute(idfac.createAttributeID("owner_id"), 0, "INT", false);
+		r20.addAttribute(idfac.createAttributeID("inst_id"), 0, "INT", false);
+		r20.addAttribute(idfac.createAttributeID("i_id"), 0, "INT", false);
+		r20.addAttribute(idfac.createAttributeID("ec_code"), 1, "VARCHAR(20)", false);
+		r20.addAttribute(idfac.createAttributeID("su_code"), 1, "VARCHAR(10)", false);
+		r20.addAttribute(idfac.createAttributeID("mc_code"), 1, "VARCHAR(8)", false);
+		r20.addAttribute(idfac.createAttributeID("mac_code"), 1, "VARCHAR(8)", false);
+		r20.addAttribute(idfac.createAttributeID("pm_interval"), 0, "INT", false);
 
 		sqp = new SelectQueryParser(metadata);
 	}
@@ -923,6 +945,22 @@ public class SQLParserTest {
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
 		assertEquals(4, re.getAttributes().size());
+	}
+
+	@Test
+	public void test_double_subquery() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = sqp.parse("SELECT * FROM (SELECT * FROM oreda.pm_maint_items) AS child, (SELECT * FROM oreda.pm_program) AS parent  WHERE child.i_id=parent.i_id AND child.inst_id=parent.inst_id AND child.su_code=parent.su_code AND child.pm_interval=parent.pm_interval AND child.mc_code=parent.mc_code AND child.mac_code=parent.mac_code AND child.owner_id=parent.owner_id");
+		assertEquals(2, re.getDataAtoms().size());
+		assertEquals(7, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().size());
+	}
+
+	@Ignore
+	public void test_recursive() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = sqp.parse("WITH RECURSIVE fibonacci(indice, site_id) AS ( VALUES (1, 1) UNION ALL SELECT site_id, indice+site_id FROM fibonacci WHERE site_id < 1000000 ) SELECT site_id FROM fibonacci");
+		assertEquals(2, re.getDataAtoms().size());
+		assertEquals(7, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().size());
 	}
 
 }

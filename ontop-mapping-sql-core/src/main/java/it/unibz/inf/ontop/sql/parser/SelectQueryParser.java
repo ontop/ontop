@@ -3,8 +3,10 @@ package it.unibz.inf.ontop.sql.parser;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.sql.parser.exceptions.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -286,6 +288,11 @@ public class SelectQueryParser {
         @Override
         public void visit(ValuesList valuesList) {
             throw new UnsupportedSelectQueryRuntimeException("ValuesLists are not supported", valuesList);
+        }
+
+        @Override
+        public void visit(TableFunction tableFunction) {
+            throw new UnsupportedSelectQueryRuntimeException("TableFunction are not supported", tableFunction);
         }
     }
 

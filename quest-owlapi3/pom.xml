@@ -35,7 +35,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-system-core</artifactId>
+			<artifactId>ontop-system-owlapi</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

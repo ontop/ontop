@@ -20,10 +20,9 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -62,7 +61,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	private OBDADataQueryAction<String> retrieveUCQUnfoldingAction;
 	private OBDADataQueryAction<?> retrieveEQLUnfoldingAction;
 	
-	private OBDAModelWrapper apic;
+	private OBDAModel apic;
 
 	private QueryController qc;
 	
@@ -75,7 +74,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	/** 
 	 * Creates new form QueryInterfacePanel
 	 */
-	public QueryInterfacePanel(OBDAModelWrapper apic, QueryController qc) {
+	public QueryInterfacePanel(OBDAModel apic, QueryController qc) {
 		this.qc = qc;
 		this.apic = apic;
 		
@@ -105,7 +104,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		}
 	}
 
-	public void setOBDAModel(OBDAModelWrapper api) {
+	public void setOBDAModel(OBDAModel api) {
 		this.apic = api;
 	}
 

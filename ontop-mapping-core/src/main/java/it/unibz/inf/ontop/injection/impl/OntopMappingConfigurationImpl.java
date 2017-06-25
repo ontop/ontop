@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.exception.MissingInputMappingException;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
@@ -17,7 +18,6 @@ import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
@@ -51,11 +51,6 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
     }
 
     @Override
-    public Optional<ImplicitDBConstraintsReader> getImplicitDBConstraintsReader() {
-        return options.implicitDBConstraintsReader;
-    }
-
-    @Override
     public Optional<TMappingExclusionConfig> getTmappingExclusions() {
         return options.excludeFromTMappings;
     }
@@ -84,8 +79,9 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
      * However, the expected usage is to use the other method loadSpecification(...).
      */
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws OBDASpecificationException {
+    public OBDASpecification loadSpecification() throws OBDASpecificationException {
         return loadSpecification(
+                Optional::empty,
                 Optional::empty,
                 Optional::empty,
                 Optional::empty,
@@ -94,15 +90,17 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                 );
     }
 
-    Optional<OBDASpecification> loadSpecification(OntologySupplier ontologySupplier,
+    OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
                                                   Supplier<Optional<PreProcessedMapping>> ppMappingSupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
-                                                  Supplier<Optional<Model>> mappingGraphSupplier
+                                                  Supplier<Optional<Model>> mappingGraphSupplier,
+                                                  Supplier<Optional<File>> constraintFileSupplier
                                                   ) throws OBDASpecificationException {
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
-         Optional<Ontology> optionalOntology = ontologySupplier.get();
+        Optional<Ontology> optionalOntology = ontologySupplier.get();
+        Optional<File> optionalConstraintFile = constraintFileSupplier.get();
 
         Optional<DBMetadata> optionalMetadata = options.dbMetadata;
 
@@ -112,7 +110,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Optional<PreProcessedMapping> optionalPPMapping = ppMappingSupplier.get();
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();
-            return Optional.of(extractor.extract(ppMapping, optionalMetadata, optionalOntology, getExecutorRegistry()));
+            return extractor.extract(ppMapping, optionalMetadata, optionalOntology, optionalConstraintFile,
+                    getExecutorRegistry());
         }
 
         /*
@@ -121,7 +120,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Optional<File> optionalMappingFile = mappingFileSupplier.get();
         if (optionalMappingFile.isPresent()) {
             File mappingFile = optionalMappingFile.get();
-            return Optional.of(extractor.extract(mappingFile, optionalMetadata, optionalOntology, getExecutorRegistry()));
+            return extractor.extract(mappingFile, optionalMetadata, optionalOntology, optionalConstraintFile,
+                    getExecutorRegistry());
         }
 
         /*
@@ -130,7 +130,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Optional<Reader> optionalMappingReader = mappingReaderSupplier.get();
         if (optionalMappingReader.isPresent()) {
             Reader mappingReader = optionalMappingReader.get();
-            return Optional.of(extractor.extract(mappingReader, optionalMetadata, optionalOntology, getExecutorRegistry()));
+            return extractor.extract(mappingReader, optionalMetadata, optionalOntology,
+                    optionalConstraintFile, getExecutorRegistry());
         }
 
         /*
@@ -139,10 +140,11 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Optional<Model> optionalMappingGraph = mappingGraphSupplier.get();
         if (optionalMappingGraph.isPresent()) {
             Model mappingGraph = optionalMappingGraph.get();
-            return Optional.of(extractor.extract(mappingGraph, optionalMetadata, optionalOntology, getExecutorRegistry()));
+            return extractor.extract(mappingGraph, optionalMetadata, optionalOntology,
+                    optionalConstraintFile, getExecutorRegistry());
         }
 
-        return Optional.empty();
+        throw new MissingInputMappingException();
     }
 
     protected Stream<Module> buildGuiceModules() {
@@ -157,15 +159,12 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         final OntopOBDAOptions obdaOptions;
         final OntopOptimizationOptions optimizationOptions;
-        private final Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader;
         private final Optional<TMappingExclusionConfig> excludeFromTMappings;
         final Optional<DBMetadata> dbMetadata;
 
-        private OntopMappingOptions(Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader,
-                                    Optional<DBMetadata> dbMetadata,
+        private OntopMappingOptions(Optional<DBMetadata> dbMetadata,
                                     Optional<TMappingExclusionConfig> excludeFromTMappings,
                                     OntopOBDAOptions obdaOptions, OntopOptimizationOptions optimizationOptions) {
-            this.implicitDBConstraintsReader = implicitDBConstraintsReader;
             this.excludeFromTMappings = excludeFromTMappings;
             this.obdaOptions = obdaOptions;
             this.optimizationOptions = optimizationOptions;
@@ -177,7 +176,6 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             implements OntopMappingBuilderFragment<B> {
 
         private final B builder;
-        private Optional<ImplicitDBConstraintsReader> userConstraints = Optional.empty();
         private Optional<Boolean> obtainFullMetadata = Optional.empty();
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
         private Optional<DBMetadata> dbMetadata = Optional.empty();
@@ -185,12 +183,6 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         DefaultOntopMappingBuilderFragment(B builder) {
             this.builder = builder;
-        }
-
-        @Override
-        public B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
-            this.userConstraints = Optional.of(constraints);
-            return builder;
         }
 
         @Override
@@ -219,8 +211,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions,
                                                          OntopOptimizationOptions optimizationOptions) {
-            return new OntopMappingOptions(userConstraints, dbMetadata, excludeFromTMappings, obdaOptions,
-                    optimizationOptions);
+            return new OntopMappingOptions(dbMetadata, excludeFromTMappings, obdaOptions, optimizationOptions);
         }
 
         Properties generateProperties() {
@@ -244,11 +235,6 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             B builder = (B) this;
             this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>(builder);
             this.optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
-        }
-
-        @Override
-        public B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
-            return mappingBuilderFragment.dbConstraintsReader(constraints);
         }
 
         @Override

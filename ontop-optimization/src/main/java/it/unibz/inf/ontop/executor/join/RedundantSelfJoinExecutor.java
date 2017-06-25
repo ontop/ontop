@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.executor.join;
 
 import com.google.common.collect.*;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -21,8 +19,7 @@ import java.util.Optional;
  * Naturally assumes that the data atoms are leafs.
  *
  */
-@Singleton
-public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements InnerJoinExecutor {
+public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements InnerJoinExecutor {
 
     /**
      * Safety, to prevent infinite loops
@@ -30,8 +27,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
     private static final int MAX_ITERATIONS = 100;
     private final IntermediateQueryFactory iqFactory;
 
-    @Inject
-    private RedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory) {
+    protected RedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
     }
 
@@ -47,7 +43,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
 
         ImmutableMultimap<AtomPredicate, DataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
 
-        /**
+        /*
          * Tries to optimize if there are data nodes
          */
         int i=0;
@@ -56,8 +52,8 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
             ImmutableList<Variable> priorityVariables = prioritizeVariables(query, topJoinNode);
 
             try {
-                Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, priorityVariables,
-                        query.getDBMetadata().getUniqueConstraints());
+                Optional<ConcreteProposal> optionalConcreteProposal = propose(topJoinNode, initialMap, priorityVariables,
+                        query, query.getDBMetadata());
 
                 if (!optionalConcreteProposal.isPresent()) {
                     break;
@@ -69,8 +65,8 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
                     NodeCentricOptimizationResults<InnerJoinNode> result = applyOptimization(query, treeComponent,
                             topJoinNode, concreteProposal);
 
-                    /**
-                     *
+                    /*
+                     * No change --> breaks the loop
                      */
                     if (result.getOptionalNewNode().isPresent()) {
                         int oldSize = initialMap.size();
@@ -90,7 +86,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
                         return result;
                     }
                 }
-                /**
+                /*
                  * No unification --> empty result
                  */
             } catch (AtomUnificationException e) {
@@ -98,7 +94,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
             }
         }
 
-        /**
+        /*
          * Safety
          */
         if (i >= MAX_ITERATIONS) {
@@ -113,57 +109,27 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
     /**
      * Throws an AtomUnificationException when the results are guaranteed to be empty
      */
-    private Optional<ConcreteProposal> propose(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
+    private Optional<ConcreteProposal> propose(InnerJoinNode joinNode, ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
                                                ImmutableList<Variable> priorityVariables,
-                                               ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> primaryKeys)
+                                               IntermediateQuery query, DBMetadata dbMetadata)
             throws AtomUnificationException {
 
         ImmutableList.Builder<PredicateLevelProposal> proposalListBuilder = ImmutableList.builder();
 
         for (AtomPredicate predicate : initialDataNodeMap.keySet()) {
             ImmutableCollection<DataNode> initialNodes = initialDataNodeMap.get(predicate);
-            PredicateLevelProposal predicateProposal;
-            if (primaryKeys.containsKey(predicate)) {
-                predicateProposal = proposePerPredicate(initialNodes, primaryKeys.get(predicate));
-            }
-            else {
-                predicateProposal = new PredicateLevelProposal(initialNodes);
-            }
-            proposalListBuilder.add(predicateProposal);
+            Optional<PredicateLevelProposal> predicateProposal = proposePerPredicate(joinNode, initialNodes, predicate, dbMetadata,
+                    priorityVariables, query);
+            predicateProposal.ifPresent(proposalListBuilder::add);
         }
 
         return createConcreteProposal(proposalListBuilder.build(), priorityVariables);
     }
 
-    /**
-     * TODO: explain
-     *
-     */
-    private PredicateLevelProposal proposePerPredicate(ImmutableCollection<DataNode> dataNodes,
-                                                       ImmutableCollection<ImmutableList<Integer>> primaryKeyPositions)
-            throws AtomUnificationException {
-        final ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap
-                = groupByPrimaryKeyArguments(dataNodes, primaryKeyPositions);
-
-        return proposeForGroupingMap(groupingMap);
-    }
-
-    /**
-     * dataNodes and primaryKeyPositions are given for the same predicate
-     * TODO: explain
-     */
-    private static ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupByPrimaryKeyArguments(
-            ImmutableCollection<DataNode> dataNodes,
-            ImmutableCollection<ImmutableList<Integer>> collectionOfPrimaryKeyPositions) {
-        ImmutableMultimap.Builder<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMapBuilder = ImmutableMultimap.builder();
-
-        for (ImmutableList<Integer> primaryKeyPositions : collectionOfPrimaryKeyPositions) {
-            for (DataNode dataNode : dataNodes) {
-                groupingMapBuilder.put(extractPrimaryKeyArguments(dataNode.getProjectionAtom(), primaryKeyPositions), dataNode);
-            }
-        }
-        return groupingMapBuilder.build();
-    }
+    protected abstract Optional<PredicateLevelProposal> proposePerPredicate(InnerJoinNode joinNode, ImmutableCollection<DataNode> initialNodes,
+                                                                            AtomPredicate predicate, DBMetadata dbMetadata,
+                                                                            ImmutableList<Variable> priorityVariables,
+                                                                            IntermediateQuery query) throws AtomUnificationException;
 
     /**
      * Assumes that the data atoms are leafs.
@@ -176,36 +142,32 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
                                                                                      InnerJoinNode topJoinNode,
                                                                                      ConcreteProposal proposal)
             throws EmptyQueryException {
-        /**
+        /*
          * First, add and remove non-top nodes
          */
         proposal.getDataNodesToRemove()
                 .forEach(treeComponent::removeSubTree);
 
-        proposal.getNewDataNodes()
-                .forEach(newNode -> treeComponent.addChild(topJoinNode, newNode,
-                        Optional.<BinaryOrderedOperatorNode.ArgumentPosition>empty(), false));
-
-        return getJoinNodeCentricOptimizationResults(query, treeComponent, topJoinNode, proposal);
+        return updateJoinNodeAndPropagateSubstitution(query, treeComponent, topJoinNode, proposal);
     }
     
     private NodeCentricOptimizationResults<InnerJoinNode> removeSubTree(IntermediateQuery query,
                                                                         QueryTreeComponent treeComponent,
                                                                         InnerJoinNode topJoinNode) throws EmptyQueryException {
-        /**
+        /*
          * Replaces by an EmptyNode
          */
         EmptyNode emptyNode = iqFactory.createEmptyNode(query.getVariables(topJoinNode));
         treeComponent.replaceSubTree(topJoinNode, emptyNode);
 
-        /**
+        /*
          * Removes the empty node
          * (may throw an EmptyQuery)
          */
         RemoveEmptyNodeProposal removalProposal = new RemoveEmptyNodeProposalImpl(emptyNode, false);
         NodeTrackingResults<EmptyNode> removalResults = query.applyProposal(removalProposal);
 
-        /**
+        /*
          * If the query is not empty, changes the type of the results
          */
         return new NodeCentricOptimizationResultsImpl<>(query,

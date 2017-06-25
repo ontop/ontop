@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.panels.OBDAModelStatisticsPanel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
@@ -40,14 +40,14 @@ public class ABoxStatisticsAction extends ProtegeAction {
 	private static final long serialVersionUID = 3322509244957306932L;
 
 	private OWLEditorKit editorKit = null;
-	private OBDAModelWrapper obdaModel = null;
+	private OBDAModel obdaModel = null;
 	private VirtualABoxStatistics statistics = null;
 		
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit)getEditorKit();		
-		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelWrapper();
-		statistics = new VirtualABoxStatistics(obdaModel.getCurrentImmutableOBDAModel(),
+		obdaModel = ((OBDAModelManager)editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModel();
+		statistics = new VirtualABoxStatistics(obdaModel.getCurrentPPMapping(),
 				obdaModel.getDatasource().get());
 	}
 

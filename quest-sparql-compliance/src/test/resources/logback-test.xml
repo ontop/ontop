@@ -9,7 +9,7 @@
   </appender>
 
 
-  <root level="DEBUG">
+  <root level="debug">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

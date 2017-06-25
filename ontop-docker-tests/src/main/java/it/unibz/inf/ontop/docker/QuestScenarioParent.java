@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
+
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.eclipse.rdf4j.common.io.IOUtil;
@@ -74,13 +75,13 @@ public abstract class QuestScenarioParent extends TestCase {
 		String getMainManifestFile();
 	}
 
-	public QuestScenarioParent(String testURI, String name, String queryFileURL, String resultFileURL, 
-			String owlFileURL, String obdaFileURL) {
+	public QuestScenarioParent(String testURI, String name, String queryFileURL, String resultFileURL,
+                               String owlFileURL, String obdaFileURL) {
 		this(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, "");
 	}
 
 	public QuestScenarioParent(String testURI, String name, String queryFileURL, String resultFileURL,
-			String owlFileURL, String obdaFileURL, String parameterFileURL) {
+                               String owlFileURL, String obdaFileURL, String parameterFileURL) {
 		super(name);
 		this.testURI = testURI;
 		this.queryFileURL = queryFileURL;

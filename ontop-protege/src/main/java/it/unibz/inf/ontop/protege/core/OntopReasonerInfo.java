@@ -21,15 +21,14 @@ package it.unibz.inf.ontop.protege.core;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
+import java.io.File;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -40,17 +39,17 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 	 */
 	private static class FlexibleConfigurationBuilder {
 		private Optional<Properties> optionalProperties = Optional.empty();
-		private Optional<OBDAModelWrapper> optionalObdaModelWrapper = Optional.empty();
-		private Optional<ImplicitDBConstraintsReader> optionalDBConstraintReader = Optional.empty();
+		private Optional<OBDAModel> optionalObdaModel = Optional.empty();
+		private Optional<File> optionalImplicitDBConstraintFile = Optional.empty();
 
 		public OntopSQLOWLAPIConfiguration buildOntopSQLOWLAPIConfiguration() {
 			OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder();
 			optionalProperties
-					.ifPresent(p -> builder.properties(p));
-			optionalObdaModelWrapper
-					.ifPresent(w -> builder.obdaModel(w.getCurrentImmutableOBDAModel()));
-			optionalDBConstraintReader
-					.ifPresent(r -> builder.dbConstraintsReader(r));
+					.ifPresent(builder::properties);
+			optionalObdaModel
+					.ifPresent(w -> builder.ppMapping(w.getCurrentPPMapping()));
+			optionalImplicitDBConstraintFile
+					.ifPresent(builder::basicImplicitConstraintFile);
 
 			return builder.build();
 		}
@@ -59,12 +58,12 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 			this.optionalProperties = Optional.of(properties);
 		}
 
-		public void setOBDAModelWrapper(OBDAModelWrapper modelWrapper) {
-			this.optionalObdaModelWrapper = Optional.of(modelWrapper);
+		public void setOBDAModel(OBDAModel obdaModel) {
+			this.optionalObdaModel = Optional.of(obdaModel);
 		}
 
-		public void setDBConstraintReader(ImplicitDBConstraintsReader dBConstraintReader) {
-			this.optionalDBConstraintReader = Optional.ofNullable(dBConstraintReader);
+		public void setImplicitDBConstraintFile(File implicitDBConstraintFile) {
+			this.optionalImplicitDBConstraintFile = Optional.ofNullable(implicitDBConstraintFile);
 		}
 	}
 
@@ -86,17 +85,17 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
         configBuilder.setProperties(preferences);
 	}
 
-	public void setOBDAModelWrapper(OBDAModelWrapper modelWrapper) {
-        configBuilder.setOBDAModelWrapper(modelWrapper);
+	public void setOBDAModelWrapper(OBDAModel modelWrapper) {
+        configBuilder.setOBDAModel(modelWrapper);
 	}
 
 	/**
 	 * Allows the user to supply database keys that are not in the database metadata
 	 *
-	 * @param uc The user-supplied database constraints
+	 * @param implicitDBConstraintFile The user-supplied path to the file to database constraints
 	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraintsReader uc) {
-		configBuilder.setDBConstraintReader(uc);
+	public void setImplicitDBConstraintFile(File implicitDBConstraintFile) {
+		configBuilder.setImplicitDBConstraintFile(implicitDBConstraintFile);
 	}
 
     @Override
