@@ -26,50 +26,52 @@ public class MappingOntologyMismatchTest {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR +"marriage_valid.obda");
     }
 
-//    @Ignore("TODO: support it")
     @Test(expected = MappingOntologyMismatchException.class)
+//    @Test
     public void testAbusiveTypedDataPropertyUsageInsteadOfObject() throws OBDASpecificationException {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_abusive_typed_data_prop.obda");
     }
 
-    @Ignore("TODO: support it")
     @Test(expected = MappingOntologyMismatchException.class)
+//    @Test
     public void testAbusiveTypedDataPropertyUsageInsteadOfClass() throws OBDASpecificationException {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_abusive_typed_data_prop2.obda");
     }
 
     @Ignore("TODO: support it")
-    @Test(expected = MappingOntologyMismatchException.class)
+//    @Test(expected = MappingOntologyMismatchException.class)
+    @Test
     public void testAbusiveUntypedDataPropertyUsageInsteadOfObject() throws OBDASpecificationException {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_abusive_untyped_data_prop.obda");
     }
 
-    @Ignore("TODO: support it")
     @Test(expected = MappingOntologyMismatchException.class)
+//    @Test
     public void testAbusiveObjectPropertyUsageInsteadOfData1() throws OBDASpecificationException {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_abusive_object_prop1.obda");
     }
 
-    @Ignore("TODO: support it")
     @Test(expected = MappingOntologyMismatchException.class)
+//    @Test
     public void testAbusiveObjectPropertyUsageInsteadOfData2() throws OBDASpecificationException {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_abusive_object_prop2.obda");
     }
 
-    @Ignore("TODO: support it")
     @Test(expected = MappingOntologyMismatchException.class)
+//    @Test
     public void testAbusiveObjectPropertyUsageInsteadOfClass() throws OBDASpecificationException {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_abusive_object_prop3.obda");
     }
 
-//    @Ignore("TODO: support it")
     @Test(expected = MappingOntologyMismatchException.class)
+//    @Test
     public void testAbusiveClass() throws OBDASpecificationException {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_abusive_class.obda");
     }
 
     @Ignore("TODO: support it")
     @Test(expected = MappingOntologyMismatchException.class)
+//    @Test
     public void testWrongDatatype() throws OBDASpecificationException {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_wrong_datatype.obda");
     }

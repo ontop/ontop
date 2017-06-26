@@ -1,35 +1,65 @@
 package it.unibz.inf.ontop.mapping.extraction.validation;
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedTriplesMap;
-import it.unibz.inf.ontop.model.DatatypePredicate;
-import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.mapping.extraction.validation.PPMappingOntologyComplianceValidator.PredicateType.*;
+
 public class PPMappingOntologyComplianceValidator {
 
-    private static enum ErrorType {
-        CLASS_DATATYPEPROPERTY,
-        CLASS_OBJECTPROPERTY,
-        CLASS_ANNOTATIONPROPERTY,
-//        DATATYPEPROPERTY_OBJECTPROPERTY,
-//        DATATYPEPROPERTY_OBJECTPROPERTY,
-//        DATATYPEPROPERTY_OBJECTPROPERTY,
-//        DATATYPEPROPERTY_OBJECTPROPERTY,
-        DATATYPEPROPERTY_OBJECTPROPERTY
-
-
+    public enum PredicateType {
+        CLASS,
+        OBJECT_PROPERTY,
+        ANNOTATION_PROPERTY,
+        DATATYPE_PROPERTY,
+        TRIPLE_PREDICATE
     };
+
+    private static ImmutableMap<PredicateType, String> PredicateTypeToErrorMessageSubstring =
+            ImmutableMap.<PredicateType, String>builder()
+                    .put(PredicateType.CLASS, "a Class")
+                    .put(DATATYPE_PROPERTY, "a Datatype Property")
+                    .put(ANNOTATION_PROPERTY, "an Annotation Property")
+                    .put(OBJECT_PROPERTY, "an Object Property")
+                    .build();
+
+    private static class Mismatch {
+
+        private final String predicateName;
+        private final PredicateType typeInMapping;
+        private final PredicateType typeInOntology;
+
+        public Mismatch(String predicateName, PredicateType typeInMapping, PredicateType typeInOntology) {
+            this.predicateName = predicateName;
+            this.typeInMapping = typeInMapping;
+            this.typeInOntology = typeInOntology;
+        }
+
+        public String getPredicateName() {
+            return predicateName;
+        }
+
+        public PredicateType getTypeInMapping() {
+            return typeInMapping;
+        }
+
+        public PredicateType getTypeInOntology() {
+            return typeInOntology;
+        }
+    }
 
     public static boolean validate(PreProcessedMapping preProcessedMapping, Ontology ontology) throws
             MappingOntologyMismatchException {
-        return  preProcessedMapping.getTripleMaps().stream()
-                .allMatch(t -> validate((PreProcessedTriplesMap)t, ontology.getVocabulary()));
+        return preProcessedMapping.getTripleMaps().stream()
+                .allMatch(t -> validate((PreProcessedTriplesMap) t, ontology.getVocabulary()));
     }
 
     private static boolean validate(PreProcessedTriplesMap triplesMap, ImmutableOntologyVocabulary
@@ -39,120 +69,105 @@ public class PPMappingOntologyComplianceValidator {
     }
 
     private static boolean validate(PreProcessedTriplesMap triplesMap, ImmutableFunctionalTerm targetTriple, ImmutableOntologyVocabulary ontologySignature) throws MappingOntologyMismatchException {
-        if (isClassAssertion(targetTriple)) {
-            return validateClassAssertion(targetTriple, triplesMap, ontologySignature);
-        }
-        if (isDataAssertion(targetTriple)) {
-            return validateDataAssertion(targetTriple, triplesMap, ontologySignature);
-        }
-        if (isObjectAssertion(targetTriple)) {
-            return validateObjectAssertion(targetTriple, triplesMap, ontologySignature);
-        }
-        return true;
-    }
+        String predicateName = targetTriple.getFunctionSymbol().getName();
+        Optional<Mismatch> mismatch = lookForMismatch(
+                predicateName,
+                ontologySignature,
+                getPredicateType(targetTriple)
+        );
 
-    private static boolean validateObjectAssertion(ImmutableFunctionalTerm targetTriple, PreProcessedTriplesMap triplesMap, ImmutableOntologyVocabulary ontologySignature) {
-        return false;
-    }
-
-    private static boolean isObjectAssertion(ImmutableFunctionalTerm targetTriple) {
-        return targetTriple.getArity() == 2 &&
-                targetTriple.getTerm(2) instanceof ImmutableFunctionalTerm &&
-                ((ImmutableFunctionalTerm) targetTriple.getTerm(2)).getFunctionSymbol() instanceof DatatypePredicate;
-    }
-
-    private static boolean validateDataAssertion(ImmutableFunctionalTerm targetTriple, PreProcessedTriplesMap triplesMap, ImmutableOntologyVocabulary ontologySignature) {
-        String predicateString = targetTriple.getFunctionSymbol().getName();
-        Optional<String> errorMessage = Optional.empty();
-
-        if(ontologySignature.containsObjectProperty(predicateString)){
-            errorMessage = Optional.of(generateMisMatchMessage(targetTriple, triplesMap, ErrorType.DATATYPEPROPERTY_OBJECTPROPERTY));
-        }
-        if(errorMessage.isPresent()){
-            throw new MappingOntologyMismatchException(errorMessage.get());
+        if (mismatch.isPresent()) {
+            throw new MappingOntologyMismatchException(
+                    generateMisMatchMessage(
+                            targetTriple,
+                            triplesMap,
+                            mismatch.get()
+                    ));
         }
         return true;
     }
 
-    private static boolean isDataAssertion(ImmutableFunctionalTerm targetTriple) {
-        return targetTriple.getArity() == 2 &&
-                targetTriple.getTerm(2) instanceof ImmutableFunctionalTerm &&
-                ((ImmutableFunctionalTerm) targetTriple.getTerm(2)).getFunctionSymbol() instanceof DatatypePredicate;
+    private static PredicateType getPredicateType(ImmutableFunctionalTerm targetTriple) {
+
+        Predicate predicate = targetTriple.getFunctionSymbol();
+        if (predicate.isClass()) {
+            return CLASS;
+        }
+        if (predicate.isDataProperty()) {
+            return DATATYPE_PROPERTY;
+        }
+        if (predicate.isObjectProperty()) {
+            return OBJECT_PROPERTY;
+        }
+        if (predicate.isAnnotationProperty()) {
+            return ANNOTATION_PROPERTY;
+        }
+        if (predicate.isTriplePredicate()) {
+            return TRIPLE_PREDICATE;
+        }
+        throw new IllegalArgumentException("Unexpected type for predicate: " + predicate + " in target triple " + targetTriple);
     }
 
-    private static boolean validateClassAssertion(ImmutableFunctionalTerm targetTriple, PreProcessedTriplesMap triplesMap,
-                                                  ImmutableOntologyVocabulary ontologySignature) throws MappingOntologyMismatchException {
-        String className = targetTriple.getFunctionSymbol().getName();
-        Optional<String> errorMessage = Optional.empty();
+    private static Optional<Mismatch> lookForMismatch(String predicateName, ImmutableOntologyVocabulary ontologySignature, PredicateType typeInMapping) {
 
-        if(ontologySignature.containsDataProperty(className)){
-            errorMessage = Optional.of(generateMisMatchMessage(targetTriple, triplesMap, ErrorType.CLASS_DATATYPEPROPERTY));
+        if (typeInMapping == TRIPLE_PREDICATE){
+            return Optional.empty();
         }
-        if(ontologySignature.containsAnnotationProperty(className)){
-            errorMessage = Optional.of(generateMisMatchMessage(targetTriple, triplesMap, ErrorType.CLASS_ANNOTATIONPROPERTY));
+
+        if (typeInMapping != DATATYPE_PROPERTY &&
+                typeInMapping != ANNOTATION_PROPERTY &&
+                ontologySignature.containsDataProperty(predicateName)) {
+            return Optional.of(
+                    new Mismatch(
+                            predicateName,
+                            typeInMapping,
+                            DATATYPE_PROPERTY
+                    ));
         }
-        if(ontologySignature.containsObjectProperty(className)){
-            errorMessage = Optional.of(generateMisMatchMessage(targetTriple, triplesMap, ErrorType.CLASS_OBJECTPROPERTY));
+        if (typeInMapping != OBJECT_PROPERTY &&
+                typeInMapping != ANNOTATION_PROPERTY &&
+                ontologySignature.containsObjectProperty(predicateName)) {
+            return Optional.of(
+                    new Mismatch(
+                            predicateName,
+                            typeInMapping,
+                            OBJECT_PROPERTY
+                    ));
         }
-        if(errorMessage.isPresent()){
-            throw new MappingOntologyMismatchException(errorMessage.get());
+        if (typeInMapping != CLASS &&
+                ontologySignature.containsClass(predicateName)) {
+            return Optional.of(
+                    new Mismatch(
+                            predicateName,
+                            typeInMapping,
+                            CLASS
+                    ));
         }
-        return true;
+        if (typeInMapping != ANNOTATION_PROPERTY &&
+                typeInMapping != DATATYPE_PROPERTY &&
+                typeInMapping != OBJECT_PROPERTY &&
+                ontologySignature.containsAnnotationProperty(predicateName)) {
+            return Optional.of(
+                    new Mismatch(
+                            predicateName,
+                            typeInMapping,
+                            ANNOTATION_PROPERTY
+                    ));
+        }
+        return Optional.empty();
     }
 
-    private static String generateMisMatchMessage(ImmutableFunctionalTerm targetTriple, PreProcessedTriplesMap
-            triplesMap, ErrorType errorType) {
+    private static String generateMisMatchMessage(ImmutableFunctionalTerm targetTriple, PreProcessedTriplesMap triplesMap, Mismatch mismatch) {
 
-        String typeInMapping;
-        String typeInOntology;
-
-
-        String message ="";
-
-
-        switch (errorType) {
-            case CLASS_DATATYPEPROPERTY:
-            case CLASS_OBJECTPROPERTY:
-            case CLASS_ANNOTATIONPROPERTY:
-                typeInMapping = "a class";
-                break;
-            default:
-                throw new IllegalArgumentException("Unexpected mismatch");
-        }
-
-        switch (errorType) {
-            case CLASS_DATATYPEPROPERTY:
-                typeInOntology = "a Datatype property";
-                break;
-            case CLASS_OBJECTPROPERTY:
-                typeInOntology = "an Object property";
-                break;
-            case CLASS_ANNOTATIONPROPERTY:
-                 typeInOntology = "an Annotation property";
-                break;
-            default:
-                throw new IllegalArgumentException("Unexpected mismatch");
-        }
-
-
-
-        message = targetTriple.getFunctionSymbol().getName()+
-                " is used both as "+
-                typeInOntology+
-                " in the ontology, and as "+
-                typeInMapping+
-                " in target atom "+
-                targetTriple+
-                " of the triplesMap: \n[\n"+
-                triplesMap.getProvenance(targetTriple).getProvenanceInfo()+
+        return mismatch.getPredicateName() +
+                " is used both as " +
+                PredicateTypeToErrorMessageSubstring.get(mismatch.getTypeInOntology()) +
+                " in the ontology, and as " +
+                PredicateTypeToErrorMessageSubstring.get(mismatch.getTypeInMapping()) +
+                " in target atom " +
+                targetTriple +
+                " of the triplesMap: \n[\n" +
+                triplesMap.getProvenance(targetTriple).getProvenanceInfo() +
                 "\n]";
-
-        System.out.println(message);
-        return message;
-    }
-
-
-    private static boolean isClassAssertion(Function function) {
-        return function.getArity() == 1;
     }
 }
