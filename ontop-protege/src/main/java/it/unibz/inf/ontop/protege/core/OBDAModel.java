@@ -7,11 +7,12 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
+import it.unibz.inf.ontop.io.OldSyntaxMappingConverter;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
@@ -19,6 +20,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
@@ -123,7 +125,19 @@ public class OBDAModel {
                 .build();
         SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
 
-        SQLPPMapping ppMapping = mappingParser.parse(mappingFile);
+        OldSyntaxMappingConverter converter =  new OldSyntaxMappingConverter(new FileReader(mappingFile), mappingFile.getName());
+        Optional<OBDADataSource> newOptionalDataSource= converter.getOBDADataSource();
+
+        if (newOptionalDataSource.isPresent()){
+            OBDADataSource newDataSource = newOptionalDataSource.get();
+            source.setNewID(newDataSource.getSourceID());
+            source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, newDataSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL));
+            source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, newDataSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME));
+            source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, newDataSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
+            source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, newDataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+        }
+
+        SQLPPMapping ppMapping = mappingParser.parse(converter.getOutputReader());
         prefixManager.addPrefixes(ppMapping.getMetadata().getPrefixManager().getPrefixMap());
         // New map
         triplesMapMap = ppMapping.getTripleMaps().stream()
