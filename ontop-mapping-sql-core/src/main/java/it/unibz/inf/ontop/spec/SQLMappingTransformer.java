@@ -4,16 +4,13 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.model.DBMetadata;
-import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Optional;
 
-/**
- * TODO: find a better name
- */
-public interface MappingTransformer {
-
-    OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Optional<TBoxReasoner> tBox)
-            throws MappingException, OntologyException;
+public class SQLMappingTransformer implements MappingTransformer{
+    @Override
+    public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Optional<TBoxReasoner> tBox) throws
+            MappingException, OntologyException {
+    }
 }

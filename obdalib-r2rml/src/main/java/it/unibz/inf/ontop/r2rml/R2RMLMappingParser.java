@@ -6,6 +6,8 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.*;
 import org.apache.commons.rdf.rdf4j.RDF4J;
 import org.eclipse.rdf4j.model.Model;
@@ -15,7 +17,7 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.mapping.SQLMappingParser;
+import it.unibz.inf.ontop.model.SQLMappingParser;
 
 import java.io.File;
 import java.io.Reader;

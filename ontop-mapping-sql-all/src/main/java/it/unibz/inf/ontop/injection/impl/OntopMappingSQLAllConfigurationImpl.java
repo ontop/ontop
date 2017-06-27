@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllSettings;
-import it.unibz.inf.ontop.model.SQLPPMapping;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.eclipse.rdf4j.model.Model;
 

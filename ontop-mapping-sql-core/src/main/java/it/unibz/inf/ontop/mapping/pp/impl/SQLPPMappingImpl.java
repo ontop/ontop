@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.impl;
+package it.unibz.inf.ontop.mapping.pp.impl;
 
 /*
  * #%L
@@ -26,8 +26,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.SQLPPMapping;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 
 
 public class SQLPPMappingImpl implements SQLPPMapping {

@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.SQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 
 

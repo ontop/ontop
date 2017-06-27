@@ -1,6 +1,6 @@
-package it.unibz.inf.ontop.model.impl;
+package it.unibz.inf.ontop.mapping.pp.impl;
 
-import it.unibz.inf.ontop.mapping.extraction.PPTriplesMapProvenance;
+import it.unibz.inf.ontop.mapping.pp.PPTriplesMapProvenance;
 
 import java.util.stream.Collectors;
 

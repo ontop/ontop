@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
-import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
+import it.unibz.inf.ontop.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
 import org.eclipse.rdf4j.model.Model;

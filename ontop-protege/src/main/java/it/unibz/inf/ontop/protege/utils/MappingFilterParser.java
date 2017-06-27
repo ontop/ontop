@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.SQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.gui.treemodels.MappingFunctorTreeModelFilter;
 import it.unibz.inf.ontop.protege.gui.treemodels.MappingSQLStringTreeModelFilter;
 import it.unibz.inf.ontop.protege.gui.treemodels.MappingStringTreeModelFilter;

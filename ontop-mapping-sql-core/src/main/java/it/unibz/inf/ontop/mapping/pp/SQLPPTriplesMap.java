@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model;
+package it.unibz.inf.ontop.mapping.pp;
 
 /*
  * #%L
@@ -21,7 +21,8 @@ package it.unibz.inf.ontop.model;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.mapping.extraction.PreProcessedTriplesMap;
+import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.OBDASQLQuery;
 
 
 public interface SQLPPTriplesMap extends PreProcessedTriplesMap {

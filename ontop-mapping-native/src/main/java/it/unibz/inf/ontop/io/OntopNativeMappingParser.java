@@ -30,12 +30,14 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import org.eclipse.rdf4j.model.Model;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
-import it.unibz.inf.ontop.mapping.SQLMappingParser;
+import it.unibz.inf.ontop.model.SQLMappingParser;
 
 import it.unibz.inf.ontop.parser.TargetQueryParser;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;

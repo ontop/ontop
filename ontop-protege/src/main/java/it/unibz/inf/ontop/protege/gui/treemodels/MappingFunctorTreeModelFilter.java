@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
 

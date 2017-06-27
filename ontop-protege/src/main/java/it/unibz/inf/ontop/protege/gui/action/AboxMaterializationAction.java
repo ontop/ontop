@@ -22,8 +22,8 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.SQLPPMapping;
-import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;

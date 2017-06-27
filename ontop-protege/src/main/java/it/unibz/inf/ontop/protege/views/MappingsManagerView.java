@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.views;
  */
 
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlapi.TargetQueryValidator;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;

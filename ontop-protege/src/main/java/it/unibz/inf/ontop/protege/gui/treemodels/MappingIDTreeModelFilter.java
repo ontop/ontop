@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.SQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 
 public class MappingIDTreeModelFilter extends TreeModelFilter<SQLPPTriplesMap> {
 

@@ -12,12 +12,12 @@ import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl.OntopMappingOptions;
-import it.unibz.inf.ontop.mapping.SQLMappingParser;
+import it.unibz.inf.ontop.model.SQLMappingParser;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
-import it.unibz.inf.ontop.model.SQLPPMapping;
+import it.unibz.inf.ontop.mapping.pp.PreProcessedMapping;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;

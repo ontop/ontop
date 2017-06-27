@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.SQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;

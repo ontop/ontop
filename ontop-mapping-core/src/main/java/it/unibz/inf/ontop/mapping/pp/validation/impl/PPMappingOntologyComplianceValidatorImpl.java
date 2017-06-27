@@ -1,18 +1,16 @@
-package it.unibz.inf.ontop.mapping.extraction.validation.impl;
+package it.unibz.inf.ontop.mapping.pp.validation.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
-import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
-import it.unibz.inf.ontop.mapping.extraction.PreProcessedTriplesMap;
-import it.unibz.inf.ontop.mapping.extraction.validation.PPMappingOntologyComplianceValidator;
+import it.unibz.inf.ontop.mapping.pp.PreProcessedMapping;
+import it.unibz.inf.ontop.mapping.pp.PreProcessedTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.validation.PPMappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
 
 import java.util.Optional;
-
-import static it.unibz.inf.ontop.mapping.extraction.validation.impl.PPMappingOntologyComplianceValidatorImpl.PredicateType.*;
 
 
 public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntologyComplianceValidator {

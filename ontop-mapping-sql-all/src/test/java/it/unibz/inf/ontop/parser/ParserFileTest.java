@@ -35,9 +35,9 @@ import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.mapping.SQLMappingParser;
-import it.unibz.inf.ontop.model.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.SQLPPMapping;
+import it.unibz.inf.ontop.model.SQLMappingParser;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

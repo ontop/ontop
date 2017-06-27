@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.mapping.extraction;
+package it.unibz.inf.ontop.mapping.pp;
 
 /**
  * To be specialized per concrete mapping language (e.g. R2RML, Ontop Native format and so on)

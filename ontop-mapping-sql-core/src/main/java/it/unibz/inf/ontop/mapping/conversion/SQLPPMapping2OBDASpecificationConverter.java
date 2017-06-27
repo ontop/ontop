@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.model.DBMetadata;
-import it.unibz.inf.ontop.model.SQLPPMapping;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.ontology.Ontology;
 
 import java.io.File;

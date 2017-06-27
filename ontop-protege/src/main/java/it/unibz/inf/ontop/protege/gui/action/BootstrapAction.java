@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;

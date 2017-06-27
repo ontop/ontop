@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.SQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.sql.RDBMetadata;

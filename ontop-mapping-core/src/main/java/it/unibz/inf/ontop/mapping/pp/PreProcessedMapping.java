@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.mapping.extraction;
+package it.unibz.inf.ontop.mapping.pp;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.mapping.MappingMetadata;

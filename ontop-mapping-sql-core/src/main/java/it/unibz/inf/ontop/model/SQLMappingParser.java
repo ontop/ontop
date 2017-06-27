@@ -1,10 +1,10 @@
-package it.unibz.inf.ontop.mapping;
+package it.unibz.inf.ontop.model;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 
 import it.unibz.inf.ontop.exception.MappingIOException;
-import it.unibz.inf.ontop.model.SQLPPMapping;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import org.eclipse.rdf4j.model.Model;
 
 import java.io.File;

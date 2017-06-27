@@ -1,7 +1,5 @@
-package it.unibz.inf.ontop.model;
+package it.unibz.inf.ontop.mapping.pp;
 
-
-import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 
 /**
  * SQL-specific PreProcessedMapping

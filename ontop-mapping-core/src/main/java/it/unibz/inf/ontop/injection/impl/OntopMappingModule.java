@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.mapping.MappingNormalizer;
 import it.unibz.inf.ontop.mapping.MappingSaturator;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
-import it.unibz.inf.ontop.mapping.extraction.validation.PPMappingOntologyComplianceValidator;
+import it.unibz.inf.ontop.mapping.pp.validation.PPMappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 
 

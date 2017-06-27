@@ -1,10 +1,9 @@
-package it.unibz.inf.ontop.model.impl;
+package it.unibz.inf.ontop.mapping.pp.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.mapping.extraction.PPTriplesMapProvenance;
 import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
-import it.unibz.inf.ontop.model.SQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.IDGenerator;
 
 

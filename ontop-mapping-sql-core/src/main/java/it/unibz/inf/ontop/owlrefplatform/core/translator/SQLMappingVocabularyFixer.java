@@ -30,9 +30,10 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.*;
 
-import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.*;
 import org.slf4j.Logger;

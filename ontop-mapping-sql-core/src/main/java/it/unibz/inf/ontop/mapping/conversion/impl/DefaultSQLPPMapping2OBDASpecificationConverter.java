@@ -12,7 +12,9 @@ import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingNormalizer;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
-import it.unibz.inf.ontop.mapping.extraction.validation.PPMappingOntologyComplianceValidator;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.validation.PPMappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
@@ -81,12 +83,12 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             throws DBMetadataExtractionException, MappingException {
 
 
-        optionalOntology.ifPresent(o -> ontologyComplianceValidator.validate(initialPPMapping, o));
+//        optionalOntology.ifPresent(o -> ontologyComplianceValidator.validate(initialPPMapping, o));
 
-        RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
+  //      RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
 
-        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
-                initialPPMapping.getTripleMaps(), settings, dbMetadata);
+    //    ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
+      //          initialPPMapping.getTripleMaps(), settings, dbMetadata);
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)
         ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(expandedMappingAxioms, dbMetadata);
@@ -120,7 +122,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     }
 
     /**
-     * May also views in the DBMetadata!
+     * May also add views in the DBMetadata!
      */
     private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<SQLPPTriplesMap> mappingAxioms, RDBMetadata dbMetadata) {
 

@@ -28,7 +28,7 @@ package it.unibz.inf.ontop.r2rml;
 
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 
 import com.google.common.collect.ImmutableList;
@@ -38,7 +38,7 @@ import eu.optique.r2rml.api.model.RefObjectMap;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDALibConstants;
-import it.unibz.inf.ontop.model.SQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.ValueConstant;
