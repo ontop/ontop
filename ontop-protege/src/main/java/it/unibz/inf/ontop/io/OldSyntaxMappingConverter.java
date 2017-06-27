@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.MappingIOException;
-import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.OBDADataSourceFactory;
 import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
 import org.slf4j.Logger;
@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.Optional;
+import java.util.Properties;
 
 /**
  * Refer to the Ontop Native Mapping Language for SQL, get DataSource information from the file
@@ -50,7 +51,7 @@ public class OldSyntaxMappingConverter {
 
     private static final OBDADataSourceFactory DS_FACTORY = OBDADataSourceFactoryImpl.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(OldSyntaxMappingConverter.class);
-    private OBDADataSource dataSource;
+    private Properties dataSourceProperties;
     private Reader outputReader;
 
 
@@ -66,9 +67,9 @@ public class OldSyntaxMappingConverter {
 
     //return the extracted obda data source
 
-    public Optional<OBDADataSource> getOBDADataSource() throws InvalidMappingException, DuplicateMappingException, MappingIOException {
+    public Optional<Properties> getOBDADataSourceProperties() throws InvalidMappingException, DuplicateMappingException, MappingIOException {
 
-        return Optional.of(dataSource);
+        return Optional.of(dataSourceProperties);
 
     }
 
@@ -89,7 +90,7 @@ public class OldSyntaxMappingConverter {
             while ((line = lineNumberReader.readLine()) != null) {
                 try {
                     if (line.contains(SOURCE_DECLARATION_TAG)) {
-                        LOG.warn("Old Syntax OBDA file the datasource declaration will be removed from the mapping file.");
+                        LOG.warn("Old Syntax in the OBDA file, the datasource declaration will be removed from the mapping file.");
 
                         readSourceDeclaration(lineNumberReader);
 
@@ -118,30 +119,32 @@ public class OldSyntaxMappingConverter {
 	//read and store datasource information
     private void readSourceDeclaration(LineNumberReader reader) throws IOException {
         String line;
-        String jdbcUrl = "", userName= "", password= "", driverClass = "";
-        String sourceUri = "";
+        dataSourceProperties  = new Properties();
+
         while (!(line = reader.readLine()).isEmpty()) {
             int lineNumber = reader.getLineNumber();
             String[] tokens = line.split("[\t| ]+", 2);
 
             final String parameter = tokens[0].trim();
             final String inputParameter = tokens[1].trim();
+
             if (parameter.equals(Label.sourceUri.name())) {
-                sourceUri = inputParameter;
+                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_NAME, inputParameter);
             } else if (parameter.equals(Label.connectionUrl.name())) {
-                 jdbcUrl = inputParameter;
+                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_URL, inputParameter);
             } else if (parameter.equals(Label.username.name())) {
-                 userName = inputParameter;
+                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_USER, inputParameter);
             } else if (parameter.equals(Label.password.name())) {
-                 password = inputParameter;
+                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_PASSWORD, inputParameter);
             } else if (parameter.equals(Label.driverClass.name())) {
-                 driverClass =  inputParameter;
+                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_DRIVER, inputParameter);
+
             } else {
                 String msg = String.format("Unknown parameter name \"%s\" at line: %d.", parameter, lineNumber);
                 throw new IOException(msg);
             }
         }
-        dataSource = DS_FACTORY.getJDBCDataSource(sourceUri, jdbcUrl,userName,password,driverClass);
+
     }
 
 }
