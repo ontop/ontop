@@ -7,12 +7,12 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.io.OldSyntaxMappingConverter;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
@@ -22,6 +22,7 @@ import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -116,28 +117,31 @@ public class OBDAModel {
     }
 
 
-    public void parseMappings(File mappingFile, Properties properties) throws DuplicateMappingException,
+    public void parseMapping(File mappingFile, Properties properties) throws DuplicateMappingException,
             InvalidMappingException, IOException, MappingIOException {
 
-        OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(mappingFile)
-                .properties(properties)
-                .build();
-        SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
 
-        OldSyntaxMappingConverter converter =  new OldSyntaxMappingConverter(new FileReader(mappingFile), mappingFile.getName());
-        Optional<OBDADataSource> newOptionalDataSource= converter.getOBDADataSource();
+        Reader mappingFileReader = new FileReader(mappingFile);
+        OldSyntaxMappingConverter converter =  new OldSyntaxMappingConverter(mappingFileReader, mappingFile.getName());
 
-        if (newOptionalDataSource.isPresent()){
+        Optional<OBDADataSource> newOptionalDataSource = converter.getOBDADataSource();
+
+        if (newOptionalDataSource.isPresent()) {
+
             OBDADataSource newDataSource = newOptionalDataSource.get();
-            source.setNewID(newDataSource.getSourceID());
-            source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, newDataSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL));
-            source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, newDataSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME));
-            source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, newDataSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
-            source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, newDataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+            properties.putAll(DataSource2PropertiesConvertor.convert(newDataSource));
+
+            mappingFileReader = converter.getOutputReader();
         }
 
-        SQLPPMapping ppMapping = mappingParser.parse(converter.getOutputReader());
+        OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
+                .nativeOntopMappingReader(mappingFileReader)
+                .properties(properties)
+                .build();
+
+        SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
+
+        SQLPPMapping ppMapping = mappingParser.parse(mappingFileReader);
         prefixManager.addPrefixes(ppMapping.getMetadata().getPrefixManager().getPrefixMap());
         // New map
         triplesMapMap = ppMapping.getTripleMaps().stream()

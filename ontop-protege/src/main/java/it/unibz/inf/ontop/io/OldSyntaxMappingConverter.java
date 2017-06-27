@@ -34,7 +34,8 @@ import java.io.*;
 import java.util.Optional;
 
 /**
- * Refer to the Ontop Native Mapping Language for SQL, remove DataSource information from the file
+ * Refer to the Ontop Native Mapping Language for SQL, get DataSource information from the file
+ * and return a Reader with the mapping information without the SourceDeclaration
  *
  */
 public class OldSyntaxMappingConverter {
@@ -54,14 +55,16 @@ public class OldSyntaxMappingConverter {
 
 
     /**
-     * Create an SQL Mapping Parser for generating an OBDA model.
+     *  Read the old Syntax obda mapping file and extract the data source information
      */
 
     public OldSyntaxMappingConverter(Reader fileReader, String fileName) throws InvalidMappingExceptionWithIndicator, MappingIOException, DuplicateMappingException {
 
-        outputReader = new StringReader(load(fileReader, fileName).toString());
+        outputReader = new StringReader(extractSourceDeclaration(fileReader, fileName).toString());
 
     }
+
+    //return the extracted obda data source
 
     public Optional<OBDADataSource> getOBDADataSource() throws InvalidMappingException, DuplicateMappingException, MappingIOException {
 
@@ -69,12 +72,13 @@ public class OldSyntaxMappingConverter {
 
     }
 
+    //return the content of the  mapping file without the source declaration part
     public Reader getOutputReader() {
         return outputReader;
     }
 
 
-	private  Writer load(Reader reader, String fileName )
+	private  Writer extractSourceDeclaration(Reader reader, String fileName )
             throws MappingIOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
 		
 		String line;
@@ -111,7 +115,7 @@ public class OldSyntaxMappingConverter {
 
 	}
 
-	//read datasource information and store it as a property
+	//read and store datasource information
     private void readSourceDeclaration(LineNumberReader reader) throws IOException {
         String line;
         String jdbcUrl = "", userName= "", password= "", driverClass = "";
