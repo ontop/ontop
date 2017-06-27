@@ -35,41 +35,45 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
 
     @Override
     public OBDASpecification extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                     ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
 
         MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(mappingFile, dbMetadata, ontology,
-                executorRegistry);
+                constraintFile, executorRegistry);
         return mappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(),
                 ontology);
     }
 
     @Override
     public OBDASpecification extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                     ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
         MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(mappingReader, dbMetadata, ontology,
-                executorRegistry);
+                constraintFile, executorRegistry);
         return mappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(),
                 ontology);
     }
 
     @Override
     public OBDASpecification extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                     ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
         MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(mappingGraph, dbMetadata, ontology,
-                executorRegistry);
+                constraintFile, executorRegistry);
         return mappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(),
                 ontology);
     }
 
     @Override
     public OBDASpecification extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                     ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
         MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, dbMetadata, ontology,
-                executorRegistry);
+                constraintFile, executorRegistry);
         return mappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(),
                 ontology);
     }

@@ -23,13 +23,15 @@ public class JoinCompositeExecutor
 
     @Inject
     private JoinCompositeExecutor(JoinBooleanExpressionExecutor expressionExecutor,
-                                  RedundantSelfJoinExecutor selfJoinExecutor,
+                                  UCRedundantSelfJoinExecutor ucSelfJoinExecutor,
+                                  LooseNUFCRedundantSelfJoinExecutor nufcSelfJoinExecutor,
                                   RedundantJoinFKExecutor fkExecutor) {
         ImmutableList.Builder<SimpleNodeCentricExecutor<InnerJoinNode, InnerJoinOptimizationProposal>>
                 executorBuilder = ImmutableList.builder();
         executorBuilder.add(expressionExecutor);
-        executorBuilder.add(selfJoinExecutor);
+        executorBuilder.add(ucSelfJoinExecutor);
         executorBuilder.add(fkExecutor);
+        executorBuilder.add(nufcSelfJoinExecutor);
 
         executors = executorBuilder.build();
     }

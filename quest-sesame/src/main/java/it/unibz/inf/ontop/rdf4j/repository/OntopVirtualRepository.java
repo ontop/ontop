@@ -84,7 +84,7 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	public void initialize() throws RepositoryException{
 		initialized = true;
 		try {
-			OBDASpecification obdaSpecification = configuration.loadProvidedSpecification();
+			OBDASpecification obdaSpecification = configuration.loadSpecification();
 			OntopEngineFactory factory = configuration.getInjector().getInstance(OntopEngineFactory.class);
 
 			queryEngine = factory.create(obdaSpecification, configuration.getExecutorRegistry());

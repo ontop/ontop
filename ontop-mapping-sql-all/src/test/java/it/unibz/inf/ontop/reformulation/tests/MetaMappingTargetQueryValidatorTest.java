@@ -26,10 +26,10 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlapi.OBDAModelValidator;
+import it.unibz.inf.ontop.owlapi.SQLPPMappingValidator;
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +62,7 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 				.jdbcPassword(password)
 				.build();
 
-		OBDAModel obdaModel = configuration.loadProvidedPPMapping();
+		SQLPPMapping ppMapping = configuration.loadProvidedPPMapping();
 
 		/**
 		 * TODO: do we want to consider a non-empty vocabulary?
@@ -71,7 +71,7 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 
 		// run validator
 		try {
-			OBDAModelValidator.validate(obdaModel, vocabulary);
+			SQLPPMappingValidator.validate(ppMapping, vocabulary);
 		}
 		catch (Exception e) {
 			fail("The target query has problem:" + e.getMessage());

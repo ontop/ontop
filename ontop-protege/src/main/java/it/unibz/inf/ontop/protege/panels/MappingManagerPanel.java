@@ -27,9 +27,9 @@ import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.mapping.sql.SQLSourceQueryValidator;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
@@ -61,9 +61,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	private TargetQueryVocabularyValidator validatortrg;
 
-	private OBDAModelWrapper mapc;
+	private OBDAModel mapc;
 
-	private OBDAModelWrapper apic;
+	private OBDAModel apic;
 
 	private OBDADataSource selectedSource;
 
@@ -83,8 +83,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
          * @param validator
          *            TargetQueryVocabularyValidator
 	 */
-	public MappingManagerPanel(OBDAModelWrapper apic, TargetQueryVocabularyValidator validator,
-							   NativeQueryLanguageComponentFactory nativeQLFactory) {
+	public MappingManagerPanel(OBDAModel apic, TargetQueryVocabularyValidator validator,
+                               NativeQueryLanguageComponentFactory nativeQLFactory) {
 
 		validatortrg = validator;
 		
@@ -175,7 +175,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		}
 	}
 
-	public void setOBDAModel(OBDAModelWrapper omodel) {
+	public void setOBDAModel(OBDAModel omodel) {
 		
 		this.apic = omodel;
 		this.mapc = apic;
@@ -232,7 +232,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	}
 
 	public void editMapping() {
-		OBDAMappingAxiom mapping = (OBDAMappingAxiom) mappingList.getSelectedValue();
+		SQLPPMappingAxiom mapping = (SQLPPMappingAxiom) mappingList.getSelectedValue();
 		if (mapping == null) {
 			return;
 		}
@@ -471,7 +471,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 				return;
 			}
 			try {
-				List<TreeModelFilter<OBDAMappingAxiom>> filters = parseSearchString(txtFilter.getText());
+				List<TreeModelFilter<SQLPPMappingAxiom>> filters = parseSearchString(txtFilter.getText());
 				if (filters == null) {
 					throw new Exception("Impossible to parse search string");
 				}
@@ -519,7 +519,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
             }
             outputField.addText("Validating " + path.size() + " SQL queries.\n", outputField.NORMAL);
             for (int i = 0; i < path.size(); i++) {
-                OBDAMappingAxiom o = (OBDAMappingAxiom) path.get(i);
+                SQLPPMappingAxiom o = (SQLPPMappingAxiom) path.get(i);
                 String id = o.getId();
                 outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
                 OntopSQLCoreConfiguration config = OntopSQLCoreConfiguration.defaultBuilder()
@@ -581,7 +581,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	}// GEN-LAST:event_menuValidateBodyActionPerformed
 
 	private void menuExecuteBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuExecuteBodyActionPerformed
-		OBDAMappingAxiom mapping = mappingList.getSelectedValue();
+		SQLPPMappingAxiom mapping = mappingList.getSelectedValue();
 		if (mapping == null) {
 			return;
 		}
@@ -614,11 +614,11 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
-		OBDAModelWrapper controller = mapc;
+		OBDAModel controller = mapc;
 		URI current_srcuri = selectedSource.getSourceID();
 
 		for (int i = 0; i < currentSelection.length; i++) {
-			OBDAMappingAxiom mapping = (OBDAMappingAxiom) currentSelection[i];
+			SQLPPMappingAxiom mapping = (SQLPPMappingAxiom) currentSelection[i];
 
 			String id = mapping.getId();
 
@@ -635,8 +635,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			// inserting the new mapping
 			try {
 
-				OBDAMappingAxiom oldmapping = controller.getMapping(id);
-				OBDAMappingAxiom newmapping = null;
+				SQLPPMappingAxiom oldmapping = controller.getMapping(id);
+				SQLPPMappingAxiom newmapping = null;
 				newmapping = oldmapping.clone();
 				newmapping.setId(new_id);
 				controller.addMapping(current_srcuri, newmapping, false);
@@ -669,11 +669,11 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		// The manager panel can handle multiple deletions.
 		Object[] values = mappingList.getSelectedValues();
 
-		OBDAModelWrapper controller = mapc;
+		OBDAModel controller = mapc;
 		URI srcuri = selectedSource.getSourceID();
 
 		for (int i = 0; i < values.length; i++) {
-			OBDAMappingAxiom mapping = (OBDAMappingAxiom) values[i];
+			SQLPPMappingAxiom mapping = (SQLPPMappingAxiom) values[i];
 			if (mapping!=null)
 			controller.removeMapping(srcuri, mapping.getId());
 		}
@@ -720,7 +720,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel labelMappings;
     private javax.swing.JLabel lblInsertFilter;
-    private javax.swing.JList<OBDAMappingAxiom> mappingList;
+    private javax.swing.JList<SQLPPMappingAxiom> mappingList;
     private javax.swing.JScrollPane mappingScrollPane;
     private javax.swing.JPopupMenu menuMappings;
     private javax.swing.JPanel pnlExtraButtons;
@@ -737,9 +737,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * @return A list of filter objects or null if the string was empty or
 	 *         erroneous
 	 */
-	private List<TreeModelFilter<OBDAMappingAxiom>> parseSearchString(String textToParse) throws Exception {
+	private List<TreeModelFilter<SQLPPMappingAxiom>> parseSearchString(String textToParse) throws Exception {
 
-		List<TreeModelFilter<OBDAMappingAxiom>> listOfFilters = null;
+		List<TreeModelFilter<SQLPPMappingAxiom>> listOfFilters = null;
 
 		if (textToParse != null) {
 			ANTLRStringStream inputStream = new ANTLRStringStream(textToParse);
@@ -760,7 +760,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * This function add the list of current filters to the model and then the
 	 * Tree is refreshed shows the mappings after the filters have been applied.
 	 */
-	private void applyFilters(List<TreeModelFilter<OBDAMappingAxiom>> filters) {
+	private void applyFilters(List<TreeModelFilter<SQLPPMappingAxiom>> filters) {
 		FilteredModel model = (FilteredModel) mappingList.getModel();
 		model.removeAllFilters();
 		model.addFilters(filters);

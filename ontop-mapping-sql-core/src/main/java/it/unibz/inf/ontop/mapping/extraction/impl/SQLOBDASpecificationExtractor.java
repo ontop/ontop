@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.model.DBMetadata;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.ontology.Ontology;
 import org.eclipse.rdf4j.model.Model;
 
@@ -32,44 +32,49 @@ public class SQLOBDASpecificationExtractor implements OBDASpecificationExtractor
 
     @Override
     public OBDASpecification extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                     ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
 
-        OBDAModel ppMapping =  mappingParser.parse(mappingFile);
-        return convertToDataSourceModel(ppMapping, dbMetadata, ontology, executorRegistry);
+        SQLPPMapping ppMapping =  mappingParser.parse(mappingFile);
+        return convertToDataSourceModel(ppMapping, dbMetadata, ontology, constraintFile, executorRegistry);
     }
 
     @Override
     public OBDASpecification extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                     ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
-        OBDAModel ppModel =  mappingParser.parse(mappingReader);
-        return convertToDataSourceModel(ppModel, dbMetadata, ontology, executorRegistry);
+        SQLPPMapping ppMapping =  mappingParser.parse(mappingReader);
+        return convertToDataSourceModel(ppMapping, dbMetadata, ontology, constraintFile, executorRegistry);
     }
 
     @Override
     public OBDASpecification extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                     ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
-        OBDAModel ppModel =  mappingParser.parse(mappingGraph);
-        return convertToDataSourceModel(ppModel, dbMetadata, ontology, executorRegistry);
+        SQLPPMapping ppMapping =  mappingParser.parse(mappingGraph);
+        return convertToDataSourceModel(ppMapping, dbMetadata, ontology, constraintFile, executorRegistry);
     }
 
     @Override
     public OBDASpecification extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                     ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
-        if (ppMapping instanceof OBDAModel) {
-            return convertToDataSourceModel((OBDAModel) ppMapping, dbMetadata, ontology, executorRegistry);
+        if (ppMapping instanceof SQLPPMapping) {
+            return convertToDataSourceModel((SQLPPMapping) ppMapping, dbMetadata, ontology, constraintFile, executorRegistry);
         }
         else {
             throw new IllegalArgumentException("SQLDataSourceModelExtractor only accepts OBDAModel as PreProcessedMapping");
         }
     }
 
-    private OBDASpecification convertToDataSourceModel(OBDAModel ppMapping, Optional<DBMetadata> dbMetadata,
-                                                       Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
+    private OBDASpecification convertToDataSourceModel(SQLPPMapping ppMapping, Optional<DBMetadata> dbMetadata,
+                                                       Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                                       ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
-        return converter.convert(ppMapping, dbMetadata, ontology, executorRegistry);
+        return converter.convert(ppMapping, dbMetadata, ontology, constraintFile, executorRegistry);
     }
 }

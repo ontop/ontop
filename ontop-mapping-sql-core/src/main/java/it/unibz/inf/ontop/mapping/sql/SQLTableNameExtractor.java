@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.mapping.sql;
  */
 
 
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 import it.unibz.inf.ontop.model.SourceQuery;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RelationID;
@@ -49,11 +49,11 @@ import java.util.*;
 public class SQLTableNameExtractor {
 
 
-	public static Set<RelationID> getRealTables(QuotedIDFactory idfac, Collection<OBDAMappingAxiom> mappings)
+	public static Set<RelationID> getRealTables(QuotedIDFactory idfac, Collection<SQLPPMappingAxiom> mappings)
 			throws JSQLParserException {
 		List<String> errorMessage = new LinkedList<>();
 		Set<RelationID> tables = new HashSet<>();
-		for (OBDAMappingAxiom axiom : mappings) {
+		for (SQLPPMappingAxiom axiom : mappings) {
 			try {
 				if (!(axiom.getSourceQuery() instanceof OBDASQLQuery)) {
 					throw new IllegalArgumentException("getRealTables() only works for SQL-* mappings");
@@ -72,7 +72,7 @@ public class SQLTableNameExtractor {
 					tables.add(table);
 			} catch (Exception e) {
 				errorMessage.add("Error in mapping with id: " + axiom.getId() + " \n Description: "
-						+ e.getMessage() + " \nMapping: [" + axiom.toString() + "]");
+						+ ((e.getMessage()!= null) ? e.getMessage() : e.getCause())  + " \nMapping: [" + axiom.toString() + "]");
 
 			}
 		}
@@ -141,8 +141,8 @@ public class SQLTableNameExtractor {
              */
 			@Override
 			public void visit(SetOperationList list) {
-				for (PlainSelect plainSelect : list.getPlainSelects())
-					visit(plainSelect);
+				for (SelectBody plainSelect : list.getSelects())
+					plainSelect.accept(this);
 			}
 
 			@Override
@@ -189,6 +189,11 @@ public class SQLTableNameExtractor {
 
 			@Override
 			public void visit(ValuesList valuesList) {
+			}
+
+			@Override
+			public void visit(TableFunction tableFunction) {
+
 			}
 		};
 
@@ -294,6 +299,11 @@ public class SQLTableNameExtractor {
 
 			@Override
 			public void visit(LongValue longValue) {
+			}
+
+			@Override
+			public void visit(HexValue hexValue) {
+
 			}
 
 			@Override
@@ -414,6 +424,10 @@ public class SQLTableNameExtractor {
 			}
 
 			@Override
+			public void visit(WithinGroupExpression withinGroupExpression) {
+			}
+
+			@Override
 			public void visit(ExtractExpression eexpr) {
 			}
 
@@ -444,7 +458,47 @@ public class SQLTableNameExtractor {
 			}
 
 			@Override
+			public void visit(JsonOperator jsonOperator) {
+			}
+
+			@Override
 			public void visit(RegExpMySQLOperator arg0) {
+			}
+
+			@Override
+			public void visit(UserVariable userVariable) {
+			}
+
+			@Override
+			public void visit(NumericBind numericBind) {
+			}
+
+			@Override
+			public void visit(KeepExpression keepExpression) {
+			}
+
+			@Override
+			public void visit(MySQLGroupConcat mySQLGroupConcat) {
+			}
+
+			@Override
+			public void visit(RowConstructor rowConstructor) {
+			}
+
+			@Override
+			public void visit(OracleHint oracleHint) {
+			}
+
+			@Override
+			public void visit(TimeKeyExpression timeKeyExpression) {
+			}
+
+			@Override
+			public void visit(DateTimeLiteralExpression dateTimeLiteralExpression) {
+			}
+
+			@Override
+			public void visit(NotExpression notExpression) {
 			}
 
 			@Override

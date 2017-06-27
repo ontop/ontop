@@ -160,6 +160,11 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
+        return getLocallyRequiredVariables();
+    }
+
+    @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
     }

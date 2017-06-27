@@ -1,19 +1,22 @@
 package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
-import it.unibz.inf.ontop.model.OBDAModel;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 
 /**
  * Fixes nothing.
  *
  */
+@Deprecated
 public class DummyMappingVocabularyFixer implements MappingVocabularyFixer {
     /**
      * Returns the same model (fixes nothing).
      *
      */
     @Override
-    public OBDAModel fixOBDAModel(OBDAModel model, ImmutableOntologyVocabulary vocabulary) {
-        return model;
+    public ImmutableList<SQLPPMappingAxiom> fixMappingAxioms(ImmutableList<SQLPPMappingAxiom> mappingAxioms,
+                                                             ImmutableOntologyVocabulary vocabulary) {
+        return mappingAxioms;
     }
 }

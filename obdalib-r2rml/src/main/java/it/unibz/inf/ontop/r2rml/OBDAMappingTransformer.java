@@ -55,8 +55,6 @@ import org.apache.commons.rdf.rdf4j.RDF4J;
 import java.util.Collection;
 
 
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -82,7 +80,7 @@ public class OBDAMappingTransformer {
     private String baseIRIString;
 
     OBDAMappingTransformer() {
-        this("http://example.org/");
+        this("urn:");
 	}
 
     OBDAMappingTransformer(String baseIRIString) {
@@ -92,13 +90,11 @@ public class OBDAMappingTransformer {
     /**
 	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 */
-	public TriplesMap getTriplesMap(OBDAMappingAxiom axiom,
+	public TriplesMap getTriplesMap(SQLPPMappingAxiom axiom,
                                     PrefixManager prefixmng) {
 
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
 		List<Function> tquery = axiom.getTargetQuery();
-
-		String random_number = IDGenerator.getNextUniqueID("");
 
 		//triplesMap node
 		String mapping_id = axiom.getId();
@@ -125,7 +121,7 @@ public class OBDAMappingTransformer {
 		
 		//process target query
 		for (Function func : tquery) {
-			random_number = IDGenerator.getNextUniqueID("");
+
 			Predicate pred = func.getFunctionSymbol();
 			String predName = pred.getName();
 			IRI predUri = null;

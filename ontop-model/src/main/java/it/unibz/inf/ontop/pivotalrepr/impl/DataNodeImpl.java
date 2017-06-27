@@ -1,8 +1,18 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.model.DataAtom;
+import it.unibz.inf.ontop.model.ImmutableSubstitution;
+import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.pivotalrepr.DataNode;
+import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
+import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
+import it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposal;
+import it.unibz.inf.ontop.pivotalrepr.SubstitutionResults;
+import it.unibz.inf.ontop.pivotalrepr.TrueNode;
+
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
  *
@@ -28,12 +38,19 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        ImmutableSet.Builder<Variable> variableBuilder = ImmutableSet.builder();
-        for (VariableOrGroundTerm term : atom.getArguments()) {
-            if (term instanceof Variable)
-                variableBuilder.add((Variable)term);
-        }
-        return variableBuilder.build();
+
+        return atom.getArguments()
+                .stream()
+                .filter(Variable.class::isInstance)
+                .map(Variable.class::cast)
+                .collect(toImmutableSet());
+
+//        ImmutableSet.Builder<Variable> variableBuilder = ImmutableSet.builder();
+//        for (VariableOrGroundTerm term : atom.getArguments()) {
+//            if (term instanceof Variable)
+//                variableBuilder.add((Variable)term);
+//        }
+//        return variableBuilder.build();
     }
 
     protected static <T extends DataNode> SubstitutionResults<T> applySubstitution(
@@ -64,4 +81,8 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
         return getLocalVariables();
     }
 
+    @Override
+    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
+        return getLocallyRequiredVariables();
+    }
 }

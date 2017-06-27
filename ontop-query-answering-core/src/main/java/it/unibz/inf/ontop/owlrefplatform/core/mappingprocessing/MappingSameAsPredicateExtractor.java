@@ -21,25 +21,35 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  */
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.AtomPredicate;
+import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.UnionFriendlyBindingExtractor;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class MappingSameAsPredicateExtractor {
 
     private final Mapping mapping;
-    private Map<ValueConstant, ValueConstant> sameAsMap;
+    private Set<ImmutableTerm> sameAsSet;
 
     private Set<Predicate> dataPropertiesAndClassesMapped;
 
     private Set<Predicate> objectPropertiesMapped;
 
+    private final UnionFriendlyBindingExtractor extractor = new UnionFriendlyBindingExtractor();
+
     /**
      * Constructs a mapping containing the URI of owl:sameAs
      */
     public MappingSameAsPredicateExtractor(Mapping mapping) throws IllegalArgumentException {
+
 
         this.mapping = mapping;
 
@@ -56,30 +66,20 @@ public class MappingSameAsPredicateExtractor {
      */
     private void retrieveSameAsMappingsURIs() {
 
-        sameAsMap = new HashMap<>();
 
         for (AtomPredicate predicate : mapping.getPredicates()) {
 
-            if (predicate.isSameAsProperty() ) { // we check for owl same as
+            if (predicate.getName().equals(OBDAVocabulary.SAME_AS) ) { // we check for owl same as
 
                 IntermediateQuery definition = mapping.getDefinition(predicate)
                         .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
                                 "(-> inconsistent)"));
 
-                DistinctVariableOnlyDataAtom projectionAtom = definition.getProjectionAtom();
 
-                Term term1 = projectionAtom.getTerm(0);
-                Term term2 = projectionAtom.getTerm(1);
-
-                if (term1 instanceof Function && term2 instanceof Function) {
-
-                    Function uri1 = (Function) term1;
-                    ValueConstant prefix1 = (ValueConstant) uri1.getTerm(0);
-
-                    Function uri2 = (Function) term2;
-                    ValueConstant prefix2 = (ValueConstant) uri2.getTerm(0);
-                    sameAsMap.put(prefix1, prefix2);
-
+                SameAsIRIsExtractor extractor = new SameAsIRIsExtractor(definition);
+                Optional<ImmutableSet<ImmutableTerm>> sameAsIRIs = extractor.getIRIs();
+                if(sameAsIRIs.isPresent()){
+                   sameAsSet = sameAsIRIs.get();
 
                 } else
                     throw new IllegalArgumentException("owl:samesAs is not built properly");
@@ -102,63 +102,32 @@ public class MappingSameAsPredicateExtractor {
                     .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
                             "(-> inconsistent)"));
 
-            DistinctVariableOnlyDataAtom projectionAtom = definition.getProjectionAtom();
 
-            if (projectionAtom.getArity() == 2) {
 
-                Function term1 = (Function) projectionAtom.getTerm(0);
-                Function term2 = (Function) projectionAtom.getTerm(1);
-                boolean t1uri = (term1.getFunctionSymbol() instanceof URITemplatePredicate);
-                boolean t2uri = (term2.getFunctionSymbol() instanceof URITemplatePredicate);
+            if (!(predicate.getName().equals(OBDAVocabulary.SAME_AS) )) {
 
-                //predicate is object property
-                if (t1uri && t2uri ) {
+                    SameAsIRIsExtractor extractor = new SameAsIRIsExtractor(definition);
+                    Optional<ImmutableSet<ImmutableTerm>> predicatesIRIs = extractor.getIRIs();
 
-                    if(!predicate.isSameAsProperty()){
+                    if(predicatesIRIs.isPresent()){
+                        ImmutableSet<ImmutableTerm> predicatesIRIsSet = predicatesIRIs.get();
 
-                        Term prefix1 = term1.getTerm(0);
-                        Term prefix2 =  term2.getTerm(0);
-
-                        if (sameAsMap.containsKey(prefix1) ||  (sameAsMap.containsKey(prefix2))) {
-
-                            objectPropertiesMapped.add(predicate);
+                        if (!Sets.intersection(sameAsSet, predicatesIRIsSet).isEmpty()){
+                            if(extractor.isObjectProperty()){
+                                objectPropertiesMapped.add(predicate);
+                            }
+                            else{
+                                dataPropertiesAndClassesMapped.add(predicate);
+                            }
 
                         }
 
-                    }
-
-                }
-                //predicate is data property or a class
-                else {
-
-                    Term prefix1 = term1.getTerm(0);
+                    } else
+                        throw new IllegalArgumentException("property is not built properly");
 
 
-                    if (sameAsMap.containsKey(prefix1)) {
-//                        Function dataProperty = DATA_FACTORY.getFunction(functionSymbol,prefix1, term2);
-                        dataPropertiesAndClassesMapped.add(predicate);
-                    }
+            }
 
-
-                }
-
-            } else if (projectionAtom.getArity() == 1) { //case of class
-
-                Term term1 = projectionAtom.getTerm(0);
-                if (term1 instanceof Function) {
-                    Function uri1 = (Function) term1;
-                    if (uri1.getFunctionSymbol() instanceof URITemplatePredicate) {
-
-                        Term prefix1 = uri1.getTerm(0);
-
-                        if (sameAsMap.containsKey(prefix1)) {
-                            dataPropertiesAndClassesMapped.add(predicate);
-                        }
-                    }
-                }
-
-            } else
-                throw new IllegalArgumentException("error finding owl:sameAs related to " + projectionAtom);
 
         }
 

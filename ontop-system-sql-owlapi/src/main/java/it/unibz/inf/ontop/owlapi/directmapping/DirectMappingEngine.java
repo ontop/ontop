@@ -57,16 +57,16 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 public class DirectMappingEngine {
 
 	public static class BootstrappingResults {
-		private final OBDAModel mapping;
+		private final SQLPPMapping ppMapping;
 		private final OWLOntology ontology;
 
-		public BootstrappingResults(OBDAModel mapping, OWLOntology ontology) {
-			this.mapping = mapping;
+		public BootstrappingResults(SQLPPMapping ppMapping, OWLOntology ontology) {
+			this.ppMapping = ppMapping;
 			this.ontology = ontology;
 		}
 
-		public OBDAModel getMapping() {
-			return mapping;
+		public SQLPPMapping getPPMapping() {
+			return ppMapping;
 		}
 
 		public OWLOntology getOntology() {
@@ -77,7 +77,7 @@ public class DirectMappingEngine {
 	private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final SpecificationFactory specificationFactory;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
-	private final OBDAFactoryWithException obdaFactory;
+	private final SQLPPMappingFactory ppMappingFactory;
 	private final OntopSQLCoreSettings settings;
 	private final JDBCConnectionManager connManager;
 
@@ -98,34 +98,36 @@ public class DirectMappingEngine {
 	@Inject
 	private DirectMappingEngine(OntopSQLCoreSettings settings, SpecificationFactory specificationFactory,
                                 NativeQueryLanguageComponentFactory nativeQLFactory,
-                                OBDAFactoryWithException obdaFactory) {
+                                SQLPPMappingFactory ppMappingFactory) {
 		connManager = JDBCConnectionManager.getJDBCConnectionManager();
 		this.specificationFactory = specificationFactory;
 		this.nativeQLFactory = nativeQLFactory;
-		this.obdaFactory = obdaFactory;
+		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
 	}
 
 	/**
 	 * NOT THREAD-SAFE (not reentrant)
 	 */
-	private BootstrappingResults bootstrapMappingAndOntology(String baseIRI, Optional<OBDAModel> inputObdaModel,
+	private BootstrappingResults bootstrapMappingAndOntology(String baseIRI, Optional<SQLPPMapping> inputPPMapping,
 															 Optional<OWLOntology> inputOntology)
 			throws SQLException, OWLOntologyCreationException, OWLOntologyStorageException, DuplicateMappingException {
 
 		setBaseURI(baseIRI);
 
-		OBDAModel newMapping = inputObdaModel.isPresent()
-				? extractMappings(inputObdaModel.get())
-				: extractMappings();
+		SQLPPMapping newPPMapping = inputPPMapping.isPresent()
+				? extractPPMapping(inputPPMapping.get())
+				: extractPPMapping();
 
-		ImmutableOntologyVocabulary newVocabulary = MappingVocabularyExtractor.extractVocabulary(newMapping);
+		ImmutableOntologyVocabulary newVocabulary = MappingVocabularyExtractor.extractVocabulary(
+				newPPMapping.getPPMappingAxioms().stream()
+						.flatMap(ax -> ax.getTargetQuery().stream()));
 
 		OWLOntology newOntology = inputOntology.isPresent()
 				? updateOntology(inputOntology.get(), newVocabulary)
 				: updateOntology(createEmptyOntology(baseIRI), newVocabulary);
 
-		return new BootstrappingResults(newMapping, newOntology);
+		return new BootstrappingResults(newPPMapping, newOntology);
 	}
 
 	private static OWLOntology createEmptyOntology(String baseIRI) throws OWLOntologyCreationException {
@@ -188,53 +190,53 @@ public class DirectMappingEngine {
 	 *
 	 * @return a new OBDA Model containing all the extracted mappings
 	 */
-	private OBDAModel extractMappings() throws DuplicateMappingException, SQLException {
+	private SQLPPMapping extractPPMapping() throws DuplicateMappingException, SQLException {
 		it.unibz.inf.ontop.io.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, UriTemplateMatcher.create(Stream.empty()));
-		OBDAModel emptyModel = obdaFactory.createOBDAModel(ImmutableList.of(), mappingMetadata);
-		return extractMappings(emptyModel);
+		SQLPPMapping emptyPPMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), mappingMetadata);
+		return extractPPMapping(emptyPPMapping);
 	}
 
-	private OBDAModel extractMappings(OBDAModel model)
+	private SQLPPMapping extractPPMapping(SQLPPMapping ppMapping)
 			throws DuplicateMappingException, SQLException {
-		currentMappingIndex = model.getMappings().size() + 1;
-		return bootstrapMappings(model);
+		currentMappingIndex = ppMapping.getPPMappingAxioms().size() + 1;
+		return bootstrapMappings(ppMapping);
 	}
 
 
 	/***
-	 * extract mappings from given datasource, and insert them into the given model
+	 * extract mappings from given datasource, and insert them into the pre-processed mapping
 	 *
 	 * Duplicate Exception may happen,
 	 * since mapping id is generated randomly and same id may occur
 	 */
-	private OBDAModel bootstrapMappings(OBDAModel model)
+	private SQLPPMapping bootstrapMappings(SQLPPMapping ppMapping)
 			throws SQLException, DuplicateMappingException {
-		if (model == null) {
+		if (ppMapping == null) {
 			throw new IllegalArgumentException("Model should not be null");
 		}
 		Connection conn = connManager.getConnection(settings);
 		RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn);
 		// this operation is EXPENSIVE
 		RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
-		return bootstrapMappings(metadata, model);
+		return bootstrapMappings(metadata, ppMapping);
 	}
 
 
-	private OBDAModel bootstrapMappings(RDBMetadata metadata, OBDAModel model) throws DuplicateMappingException {
+	private SQLPPMapping bootstrapMappings(RDBMetadata metadata, SQLPPMapping ppMapping) throws DuplicateMappingException {
 		if (baseIRI == null || baseIRI.isEmpty())
-			this.baseIRI = model.getMetadata().getPrefixManager().getDefaultPrefix();
+			this.baseIRI = ppMapping.getMetadata().getPrefixManager().getDefaultPrefix();
 		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
-		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<>();
+		List<SQLPPMappingAxiom> mappingAxioms = new ArrayList<>();
 		for (DatabaseRelationDefinition td : tables) {
 			mappingAxioms.addAll(getMapping(td, baseIRI));
 		}
 
-		List<OBDAMappingAxiom> mappings = new ArrayList<>();
-		mappings.addAll(model.getMappings());
+		List<SQLPPMappingAxiom> mappings = new ArrayList<>();
+		mappings.addAll(ppMapping.getPPMappingAxioms());
 		mappings.addAll(mappingAxioms);
 
-		return model.newModel(ImmutableList.copyOf(mappings), model.getMetadata());
+		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.copyOf(mappings), ppMapping.getMetadata());
 	}
 
 
@@ -246,11 +248,11 @@ public class DirectMappingEngine {
 	 * 
 	 *  @return a List of OBDAMappingAxiom-s
 	 */
-	private List<OBDAMappingAxiom> getMapping(DatabaseRelationDefinition table, String baseUri) {
+	private List<SQLPPMappingAxiom> getMapping(DatabaseRelationDefinition table, String baseUri) {
 
 		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, DATA_FACTORY);
 
-		List<OBDAMappingAxiom> axioms = new ArrayList<>();
+		List<SQLPPMappingAxiom> axioms = new ArrayList<>();
 		axioms.add(nativeQLFactory.create("MAPPING-ID"+ currentMappingIndex, SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));
 		currentMappingIndex++;
 		

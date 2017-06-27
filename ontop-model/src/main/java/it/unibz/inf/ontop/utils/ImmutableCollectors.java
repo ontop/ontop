@@ -49,6 +49,19 @@ public class ImmutableCollectors {
         }
     }
 
+    private static class ImmutableMultisetCollector<T> extends ImmutableCollectionCollector<T, ImmutableMultiset.Builder<T>,
+            ImmutableMultiset<T>> {
+        @Override
+        public Supplier<ImmutableMultiset.Builder<T>> supplier() {
+            return ImmutableMultiset::builder;
+        }
+
+        @Override
+        public Set<Characteristics> characteristics() {
+            return Sets.newHashSet(Characteristics.CONCURRENT, Characteristics.UNORDERED);
+        }
+    }
+
     private static class ImmutableListCollector<T> extends ImmutableCollectionCollector<T, ImmutableList.Builder<T>,
             ImmutableList<T>> {
         @Override
@@ -82,6 +95,10 @@ public class ImmutableCollectors {
 
     public static <E> ImmutableSetCollector<E> toSet() {
         return new ImmutableSetCollector<>();
+    }
+
+    public static <E> ImmutableMultisetCollector<E> toMultiset() {
+        return new ImmutableMultisetCollector<>();
     }
 
     public static <T, K, U> Collector<T, ? ,ImmutableMap<K,U>> toMap(Function<? super T, ? extends K> keyMapper,
