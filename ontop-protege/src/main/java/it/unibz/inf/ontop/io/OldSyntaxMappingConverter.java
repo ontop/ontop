@@ -69,7 +69,7 @@ public class OldSyntaxMappingConverter {
 
     public Optional<Properties> getOBDADataSourceProperties() throws InvalidMappingException, DuplicateMappingException, MappingIOException {
 
-        return Optional.of(dataSourceProperties);
+        return Optional.ofNullable(dataSourceProperties);
 
     }
 
@@ -111,6 +111,8 @@ public class OldSyntaxMappingConverter {
         } catch (IOException e) {
             throw new MappingIOException(e);
         }
+
+
 
         return fileWriter;
 

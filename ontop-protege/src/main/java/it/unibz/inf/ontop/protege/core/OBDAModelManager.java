@@ -546,7 +546,7 @@ public class OBDAModelManager implements Disposable {
 					try {
                     	//convert old syntax OBDA file
 						Reader mappingReader = new FileReader(obdaFile);
-						OldSyntaxMappingConverter converter =  new OldSyntaxMappingConverter(mappingReader, obdaFile.getName());
+						OldSyntaxMappingConverter converter =  new OldSyntaxMappingConverter(new FileReader(obdaFile), obdaFile.getName());
 						java.util.Optional<Properties> optionalDataSourceProperties = converter.getOBDADataSourceProperties();
 
 						if (optionalDataSourceProperties.isPresent()) {
