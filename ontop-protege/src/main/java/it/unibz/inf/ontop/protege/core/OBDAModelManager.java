@@ -22,13 +22,17 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.base.Optional;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.io.OldSyntaxMappingConverter;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.owlapi.SQLPPMappingValidator;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.querymanager.*;
@@ -54,6 +58,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.Reader;
 import java.net.URI;
 import java.util.*;
 
@@ -528,7 +534,7 @@ public class OBDAModelManager implements Disposable {
 				if(implicitDBConstraintFile.exists())
 					configurationManager.setImplicitDBConstraintFile(implicitDBConstraintFile);
 
-				/*
+				/*cd
 				 * Loads the properties (and the data source)
 				 */
 				if (propertyFile.exists()) {
@@ -536,9 +542,19 @@ public class OBDAModelManager implements Disposable {
 				}
 
                 if (obdaFile.exists()) {
-                    try {
+
+					try {
+                    	//convert old syntax OBDA file
+						Reader mappingReader = new FileReader(obdaFile);
+						OldSyntaxMappingConverter converter =  new OldSyntaxMappingConverter(mappingReader, obdaFile.getName());
+						java.util.Optional<Properties> optionalDataSourceProperties = converter.getOBDADataSourceProperties();
+
+						if (optionalDataSourceProperties.isPresent()) {
+							configurationManager.loadProperties(optionalDataSourceProperties.get());
+							mappingReader = converter.getOutputReader();
+						}
                         // Load the OBDA model
-						obdaModel.parseMappings(obdaFile, configurationManager.snapshotProperties());
+						obdaModel.parseMapping(mappingReader, configurationManager.snapshotProperties());
                     } catch (Exception ex) {
                         throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
                     }

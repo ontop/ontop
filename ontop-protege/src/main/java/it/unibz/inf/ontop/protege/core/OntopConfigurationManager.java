@@ -70,6 +70,14 @@ public class OntopConfigurationManager {
         loadDataSource(obdaModel, settings);
     }
 
+    /**
+     * Loads the properties in the global settings and in data source.
+     */
+    public void loadProperties(Properties properties) throws IOException {
+        settings.putAll(properties);
+        loadDataSource(obdaModel, settings);
+    }
+
     private static void loadDataSource(OBDAModel obdaModel, DisposableProperties properties) {
         OBDADataSource dataSource = obdaModel.getDatasource();
 

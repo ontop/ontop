@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
@@ -18,8 +17,8 @@ import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -114,16 +113,18 @@ public class OBDAModel {
     }
 
 
-    public void parseMappings(File mappingFile, Properties properties) throws DuplicateMappingException,
+    public void parseMapping(Reader mappingReader, Properties properties) throws DuplicateMappingException,
             InvalidMappingException, IOException, MappingIOException {
 
+
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(mappingFile)
+                .nativeOntopMappingReader(mappingReader)
                 .properties(properties)
                 .build();
+
         SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
 
-        SQLPPMapping ppMapping = mappingParser.parse(mappingFile);
+        SQLPPMapping ppMapping = mappingParser.parse(mappingReader);
         prefixManager.addPrefixes(ppMapping.getMetadata().getPrefixManager().getPrefixMap());
         // New map
         triplesMapMap = ppMapping.getTripleMaps().stream()
