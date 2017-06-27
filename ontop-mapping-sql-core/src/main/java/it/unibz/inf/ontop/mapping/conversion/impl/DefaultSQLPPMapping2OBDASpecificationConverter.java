@@ -55,6 +55,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     private final Datalog2QueryMappingConverter mappingConverter;
     private final SpecificationFactory specificationFactory;
     private final MappingNormalizer mappingNormalizer;
+    private final PPMappingOntologyComplianceValidator ontologyComplianceValidator;
 
     @Inject
     private DefaultSQLPPMapping2OBDASpecificationConverter(OntopMappingSQLSettings settings,
@@ -62,13 +63,15 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
                                                            TMappingExclusionConfig tMappingExclusionConfig,
                                                            Datalog2QueryMappingConverter mappingConverter,
                                                            SpecificationFactory specificationFactory,
-                                                           MappingNormalizer mappingNormalizer) {
+                                                           MappingNormalizer mappingNormalizer,
+                                                           PPMappingOntologyComplianceValidator ontologyComplianceValidator) {
         this.settings = settings;
         this.dbMetadataExtractor = nativeQLFactory.create();
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.mappingConverter = mappingConverter;
         this.specificationFactory = specificationFactory;
         this.mappingNormalizer = mappingNormalizer;
+        this.ontologyComplianceValidator = ontologyComplianceValidator;
     }
 
     @Override
@@ -77,7 +80,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
                                      ExecutorRegistry executorRegistry)
             throws DBMetadataExtractionException, MappingException {
 
-        optionalOntology.ifPresent(o -> PPMappingOntologyComplianceValidator.validate(initialPPMapping, o));
+
+        optionalOntology.ifPresent(o -> ontologyComplianceValidator.validate(initialPPMapping, o));
 
         RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
 

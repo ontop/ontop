@@ -202,11 +202,11 @@ public class MappingDataTypeRepair {
                 //if a datatype was already assigned in the ontology
                 if (dataType != null) {
 
-                    //check that no datatype mismatch is present
-                    if (!functionSymbol.equals(dataType.getPredicate())) {
-                        throw new PredicateRedefinitionException("Ontology datatype " + dataType + " for " + predicate +
-                        		"\ndoes not correspond to datatype " + functionSymbol + " in mappings");
-                    }
+//                    //check that no datatype mismatch is present
+//                    if (!functionSymbol.equals(dataType.getPredicate())) {
+//                        throw new PredicateRedefinitionException("Ontology datatype " + dataType + " for " + predicate +
+//                        		"\ndoes not correspond to datatype " + functionSymbol + " in mappings");
+//                    }
 
                     if (isBooleanDB2(dataType.getPredicate())) {
 
