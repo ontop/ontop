@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -206,15 +205,9 @@ public class AboxMaterializationAction extends ProtegeAction {
 						throw new Exception("Unknown format: " + format);
 				}
 
-				SQLPPMapping ppMapping = ((OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModel()
-						.generatePPMapping();
+				OBDAModelManager obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
 
-				OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-						// TODO: should we keep it?
-						.enableOntologyAnnotationQuerying(true)
-						.ppMapping(ppMapping)
-						.ontology(ontology)
-						.build();
+				OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
 
 				try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(configuration, DO_STREAM_RESULTS)) {
 
@@ -261,15 +254,12 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 		if (response == JOptionPane.YES_OPTION) {
 			try {
-				SQLPPMapping ppMapping = ((OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModel()
-						.generatePPMapping();
 
-				OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-						// TODO: should we keep it?
-						.enableOntologyAnnotationQuerying(true)
-						.ppMapping(ppMapping)
-						.ontology(ontology)
-						.build();
+
+				OBDAModelManager obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
+
+				OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
+
 
 				OWLAPIMaterializer individuals = new OWLAPIMaterializer(configuration, DO_STREAM_RESULTS);
 				Container container = workspace.getRootPane().getParent();

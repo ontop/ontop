@@ -35,7 +35,7 @@ public class OntopConfigurationManager {
         this.implicitDBConstraintFile = null;
     }
 
-    Properties snapshotProperties() {
+    public Properties snapshotProperties() {
         Properties properties = settings.clone();
         properties.putAll(DataSource2PropertiesConvertor.convert(obdaModel.getDatasource()));
         return properties;

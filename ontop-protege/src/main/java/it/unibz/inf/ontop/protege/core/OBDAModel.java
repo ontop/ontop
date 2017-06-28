@@ -307,6 +307,7 @@ public class OBDAModel {
     }
 
 
+    @Deprecated
     public void addMapping(URI sourceID, SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent)
             throws DuplicateMappingException {
         String mapId = triplesMap.getId();
@@ -318,6 +319,19 @@ public class OBDAModel {
         if (!disableFiringMappingInsertedEvent)
             fireMappingInserted(sourceID, mapId);
     }
+
+    public void addMapping(SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent)
+            throws DuplicateMappingException {
+        String mapId = triplesMap.getId();
+
+        if (triplesMapMap.containsKey(mapId))
+            throw new DuplicateMappingException("ID " + mapId);
+        triplesMapMap.put(mapId, triplesMap);
+
+        if (!disableFiringMappingInsertedEvent)
+            fireMappingInserted(source.getSourceID(), mapId);
+    }
+
 
     public void removeMapping(URI dataSourceURI, String mappingId) {
         if (triplesMapMap.remove(mappingId) != null)

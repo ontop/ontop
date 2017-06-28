@@ -22,11 +22,12 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import org.protege.editor.core.ui.action.ProtegeAction;
@@ -169,8 +170,11 @@ public class BootstrapAction extends ProtegeAction {
 					.ontology(currentOnto)
 					.build();
 
-			// Side-effect on the mapping and ontology objects
-			DirectMappingEngine.bootstrap(configuration, baseUri);
+			// Side-effect on the ontology object
+			DirectMappingEngine.BootstrappingResults results = DirectMappingEngine.bootstrap(configuration, baseUri);
+			for (SQLPPTriplesMap triplesMap: results.getPPMapping().getTripleMaps()) {
+				currentModel.addMapping(triplesMap, false);
+			}
 		}
 
 		@Override
