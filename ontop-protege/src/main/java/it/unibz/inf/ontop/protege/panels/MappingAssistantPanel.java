@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
+ *
  * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
@@ -20,11 +21,13 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLSettings;
+import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.OClass;
@@ -32,6 +35,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.OntopConfigurationManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.MapItem;
 import it.unibz.inf.ontop.protege.gui.PredicateItem;
@@ -42,6 +46,8 @@ import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.sql.*;
+import org.protege.editor.owl.model.OWLModelManager;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import javax.swing.*;
 import javax.swing.plaf.metal.MetalComboBoxButton;
@@ -68,7 +74,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private static final long serialVersionUID = 1L;
 
 	private final OBDAModel obdaModel;
-	
+	private final OntopConfigurationManager configurationManager;
+	private final OWLModelManager owlModelManager;
+
 	private final PrefixManager prefixManager;
 	
 	private OBDADataSource selectedSource;
@@ -84,15 +92,12 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
     private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
     private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
 
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
-	private final OntopQueryAnsweringSQLSettings settings;
-
-	public MappingAssistantPanel(OBDAModel model, NativeQueryLanguageComponentFactory nativeQLFactory,
-                                 OntopQueryAnsweringSQLSettings settings) {
+	public MappingAssistantPanel(OBDAModel model, OntopConfigurationManager configurationManager,
+								 OWLModelManager owlModelManager) {
 		obdaModel = model;
-		this.settings = settings;
-		prefixManager = obdaModel.getPrefixManager();
-        this.nativeQLFactory = nativeQLFactory;
+		this.configurationManager = configurationManager;
+		this.owlModelManager = owlModelManager;
+		prefixManager = obdaModel.getMutablePrefixManager();
 		initComponents();
 
                 if (obdaModel.getSources().size() > 0) {
@@ -293,7 +298,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
         pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
         Vector<Object> v = new Vector<Object>();
-        for (OClass c : obdaModel.getOntologyVocabulary().getClasses()) {
+        for (OClass c : obdaModel.getCurrentVocabulary().getClasses()) {
         	Predicate pred = c.getPredicate();
             v.addElement(new PredicateItem(pred, prefixManager));
         }
@@ -521,14 +526,14 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			}
 			// Prepare the mapping target
             List<MapItem> predicateObjectMapsList = pnlPropertyEditorList.getPredicateObjectMapsList();
-			List<Function> target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
+			ImmutableList<ImmutableFunctionalTerm> target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
 
 			if (target.isEmpty()) {
 				JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty. Add a class or a property", "Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			// Create the mapping axiom
-            SQLPPMappingAxiom mappingAxiom = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(source), target);
+            SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), target);
 			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom, false);
 			
 			// Clear the form afterwards
@@ -545,29 +550,29 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 	}// GEN-LAST:event_cmdCreateMappingActionPerformed
 	
-	private List<Function> prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
+	private ImmutableList<ImmutableFunctionalTerm> prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
 		// Create the body of the CQ
-		List<Function> body = new ArrayList<Function>();
+		ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
 		
 		// Store concept in the body, if any
-		Function subjectTerm = createSubjectTerm(predicateSubjectMap);
+		ImmutableTerm subjectTerm = createSubjectTerm(predicateSubjectMap);
 		if (!predicateSubjectMap.getName().equals("owl:Thing")) {
-			Function concept = DATA_FACTORY.getFunction(predicateSubjectMap.getSourcePredicate(), subjectTerm);
-			body.add(concept);
+			ImmutableFunctionalTerm concept = DATA_FACTORY.getImmutableFunctionalTerm(predicateSubjectMap.getSourcePredicate(), subjectTerm);
+			bodyBuilder.add(concept);
 		}
 		
 		// Store attributes and roles in the body
 		//List<Term> distinguishVariables = new ArrayList<Term>();
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
-				Term objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
-				Function attribute = DATA_FACTORY.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
-				body.add(attribute);
+				ImmutableTerm objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
+				ImmutableFunctionalTerm attribute = DATA_FACTORY.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				bodyBuilder.add(attribute);
 				//distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
-				Function objectRefTerm = createRefObjectTerm(predicateObjectMap);
-				Function role = DATA_FACTORY.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
-				body.add(role);
+				ImmutableFunctionalTerm objectRefTerm = createRefObjectTerm(predicateObjectMap);
+				ImmutableFunctionalTerm role = DATA_FACTORY.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
+				bodyBuilder.add(role);
 			}
 		}
 		// Create the head
@@ -575,10 +580,10 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		//Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 		
 		// Create and return the conjunctive query
-		return body;
+		return bodyBuilder.build();
 	}
 	
-	private Function createSubjectTerm(MapItem predicateSubjectMap) {
+	private ImmutableFunctionalTerm createSubjectTerm(MapItem predicateSubjectMap) {
 		String subjectTargetString = predicateSubjectMap.getTargetMapping();
 		String subjectUriTemplate = "";
 		if (writtenInFullUri(subjectTargetString)) {
@@ -589,7 +594,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		return getUriFunctionTerm(subjectUriTemplate);
 	}
 
-	private Term createObjectTerm(String column, Predicate datatype) {
+	private ImmutableTerm createObjectTerm(String column, Predicate datatype) {
 		List<FormatString> columnStrings = parse(column);
 		if (columnStrings.size() > 1) {
 			throw new RuntimeException("Invalid column mapping: " + column);
@@ -599,11 +604,11 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		if (datatype == null) {
 			return var;
 		} else {
-			return DATA_FACTORY.getFunction(datatype, var);
+			return DATA_FACTORY.getImmutableFunctionalTerm(datatype, var);
 		}
 	}
 	
-	private Function createRefObjectTerm(MapItem predicateObjectMap) {
+	private ImmutableFunctionalTerm createRefObjectTerm(MapItem predicateObjectMap) {
 		String predicateTargetString = predicateObjectMap.getTargetMapping();
 		String objectUriTemplate = "";
 		if (writtenInFullUri(predicateTargetString)) {
@@ -643,9 +648,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		return new MapItem(new PredicateItem(DATA_FACTORY.getClassPredicate("owl:Thing"), prefixManager));
 	}
 
-	private Function getUriFunctionTerm(String text) {
+	private ImmutableFunctionalTerm getUriFunctionTerm(String text) {
 		final String PLACEHOLDER = "{}";
-		List<Term> terms = new LinkedList<Term>();
+		List<ImmutableTerm> terms = new LinkedList<>();
 		List<FormatString> tokens = parse(text);
 		StringBuilder sb = new StringBuilder();
 		for (FormatString token : tokens) {
@@ -659,7 +664,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 		ValueConstant uriTemplate = DATA_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
 		terms.add(0, uriTemplate);
-		return DATA_FACTORY.getUriTemplate(terms);
+		return DATA_FACTORY.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 	}
 
 	// Column placeholder pattern
@@ -986,8 +991,10 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						// Construct the sql query
 						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-//                        //TODO: find a way to get the current preferences. Necessary if an third-party adapter should be used.
-//						OntopStandaloneSQLSettings defaultPreferences = OntopSQLOWLAPIConfiguration.defaultBuilder().build().getSettings();
+						OWLOntology activeOntology = owlModelManager.getActiveOntology();
+						OntopStandaloneSQLSettings settings = configurationManager.buildOntopSQLOWLAPIConfiguration(activeOntology)
+								.getSettings();
+
 						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "",
 								settings);
 						String sqlString = txtQueryEditor.getText();

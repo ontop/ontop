@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -53,18 +51,13 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
     @Override
     protected void initialiseOWLView() throws Exception {
 
-        OntopSQLOWLAPIConfiguration defaultConfiguration = OntopSQLOWLAPIConfiguration.defaultBuilder().build();
-        Injector defaultInjector = defaultConfiguration.getInjector();
-        NativeQueryLanguageComponentFactory nativeQLFactory = defaultInjector.getInstance(
-                NativeQueryLanguageComponentFactory.class);
-
         obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
         obdaModelManager.addListener(this);
 
         activeOBDAModel = obdaModelManager.getActiveOBDAModel();
 
-        MappingAssistantPanel queryPanel = new MappingAssistantPanel(activeOBDAModel, nativeQLFactory,
-                defaultConfiguration.getSettings());
+        MappingAssistantPanel queryPanel = new MappingAssistantPanel(activeOBDAModel, obdaModelManager.getConfigurationManager(),
+                getOWLModelManager());
 
         queryPanel.setBorder(new TitledBorder("SQL Query Editor"));
 

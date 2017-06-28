@@ -26,20 +26,20 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 
 
 public class SQLPPMappingImpl implements SQLPPMapping {
 	private final MappingMetadata mappingMetadata;
 
-	private final ImmutableList<SQLPPMappingAxiom> mappings;
-    private final ImmutableMap<String, SQLPPMappingAxiom> mappingIndexById;
+	private final ImmutableList<SQLPPTriplesMap> mappings;
+    private final ImmutableMap<String, SQLPPTriplesMap> mappingIndexById;
 
     /**
      * Normal constructor. Used by the QuestComponentFactory.
      */
-    public SQLPPMappingImpl(ImmutableList<SQLPPMappingAxiom> newMappings,
+    public SQLPPMappingImpl(ImmutableList<SQLPPTriplesMap> newMappings,
                             MappingMetadata mappingMetadata) throws DuplicateMappingException {
 
         checkDuplicates(newMappings);
@@ -51,10 +51,10 @@ public class SQLPPMappingImpl implements SQLPPMapping {
     /**
      * No mapping should be duplicate among all the data sources.
      */
-    private static void checkDuplicates(ImmutableList<SQLPPMappingAxiom> mappings)
+    private static void checkDuplicates(ImmutableList<SQLPPTriplesMap> mappings)
             throws DuplicateMappingException {
 
-        Set<SQLPPMappingAxiom> mappingSet = new HashSet<>(mappings);
+        Set<SQLPPTriplesMap> mappingSet = new HashSet<>(mappings);
 
         int duplicateCount = mappings.size() - mappingSet.size();
 
@@ -64,7 +64,7 @@ public class SQLPPMappingImpl implements SQLPPMapping {
         if (duplicateCount > 0) {
             Set<String> duplicateIds = new HashSet<>();
             int remaining = duplicateCount;
-            for (SQLPPMappingAxiom mapping : mappings) {
+            for (SQLPPTriplesMap mapping : mappings) {
                 if (mappingSet.contains(mapping)) {
                     mappingSet.remove(mapping);
                 }
@@ -83,10 +83,10 @@ public class SQLPPMappingImpl implements SQLPPMapping {
         }
     }
 
-    private static ImmutableMap<String, SQLPPMappingAxiom> indexMappingsById(ImmutableList<SQLPPMappingAxiom> mappings)
+    private static ImmutableMap<String, SQLPPTriplesMap> indexMappingsById(ImmutableList<SQLPPTriplesMap> mappings)
             throws IllegalArgumentException {
-        Map<String, SQLPPMappingAxiom> mappingIndexById = new HashMap<>();
-        for (SQLPPMappingAxiom axiom : mappings) {
+        Map<String, SQLPPTriplesMap> mappingIndexById = new HashMap<>();
+        for (SQLPPTriplesMap axiom : mappings) {
             String id = axiom.getId();
             if (mappingIndexById.containsKey(id)) {
                 // Should have already been detected by checkDuplicates.
@@ -112,12 +112,12 @@ public class SQLPPMappingImpl implements SQLPPMapping {
 	}
 
     @Override
-    public SQLPPMappingAxiom getPPMappingAxiom(String axiomId) {
+    public SQLPPTriplesMap getPPMappingAxiom(String axiomId) {
         return mappingIndexById.get(axiomId);
     }
 
 	@Override
-	public ImmutableList<SQLPPMappingAxiom> getPPMappingAxioms() {
+	public ImmutableList<SQLPPTriplesMap> getTripleMaps() {
         return mappings;
 	}
 }

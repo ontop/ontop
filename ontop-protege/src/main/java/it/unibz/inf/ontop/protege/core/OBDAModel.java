@@ -1,27 +1,29 @@
 package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
-import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
@@ -55,95 +57,99 @@ public class OBDAModel {
     private final static OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
-    private Optional<OBDADataSource> source;
+    private Map<String, SQLPPTriplesMap> triplesMapMap;
+    // Mutable
+    private final OBDADataSource source;
+    // Mutable and replaced after reset
+    private MutablePrefixManager prefixManager;
+    // Mutable and replaced after reset
+    private OntologyVocabulary currentMutableVocabulary;
 
-    // Immutable (will often be re-affected)
-    private SQLPPMapping ppMapping;
-    private PrefixManagerWrapper prefixManager;
 
     private final List<OBDAModelListener> sourceListeners;
     private final List<OBDAMappingListener> mappingListeners;
-    private final OntologyVocabulary ontologyVocabulary;
+
+    private static final OBDADataSourceFactory DS_FACTORY = OBDADataSourceFactoryImpl.getInstance();
 
     public OBDAModel(SpecificationFactory specificationFactory,
-                     SQLPPMappingFactory ppMappingFactory, PrefixManagerWrapper prefixManager) {
+                     SQLPPMappingFactory ppMappingFactory, PrefixDocumentFormat owlPrefixManager) {
         this.specificationFactory = specificationFactory;
         this.ppMappingFactory = ppMappingFactory;
-        this.prefixManager = prefixManager;
-        this.ppMapping = createNewPPMapping(specificationFactory, ppMappingFactory, prefixManager);
+        this.prefixManager = new MutablePrefixManager(owlPrefixManager);
+        this.triplesMapMap = new LinkedHashMap<>();
+
         this.sourceListeners = new ArrayList<>();
         this.mappingListeners = new ArrayList<>();
-        source = Optional.empty();
-        ontologyVocabulary = ONTOLOGY_FACTORY.createVocabulary();
+        source = initDataSource();
+        currentMutableVocabulary = ONTOLOGY_FACTORY.createVocabulary();
     }
 
-    public SQLPPMapping getCurrentPPMapping() {
-        return ppMapping;
+    private static OBDADataSource initDataSource() {
+        return DS_FACTORY.getJDBCDataSource("","","","");
     }
 
-    /**
-     * The mappings are merged, the sources and mappings are taken from the parsed model
-     * and the ontology taken from the previous model
-     *
-     * UGLY!
-     */
-    public void parseMappings(File mappingFile) throws DuplicateMappingException, InvalidMappingException, IOException, MappingIOException {
-        Properties properties = source
-                .map(DataSource2PropertiesConvertor::convert)
-                .orElseThrow(() -> new IllegalStateException("Cannot parse the mapping without a data source"));
+    public SQLPPMapping generatePPMapping() {
+        ImmutableList<SQLPPTriplesMap> triplesMaps = ImmutableList.copyOf(triplesMapMap.values());
 
-        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        try {
+            UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
+                    triplesMaps.stream()
+                            .flatMap(ax -> ax.getTargetAtoms().stream())
+                            .flatMap(atom -> atom.getArguments().stream())
+                            .filter(t -> t instanceof ImmutableFunctionalTerm)
+                            .map(t -> (ImmutableFunctionalTerm) t));
+
+            return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps,
+                    // TODO: give an immutable prefix manager!!
+                    specificationFactory.createMetadata(prefixManager,
+                    uriTemplateMatcher));
+            /**
+             * No mapping so should never happen
+             */
+        } catch(DuplicateMappingException e) {
+            throw new RuntimeException("A DuplicateMappingException has been thrown while no mapping has been given." +
+                    "What is going on? Message: " + e.getMessage());
+        }
+    }
+
+
+    public void parseMapping(Reader mappingReader, Properties properties) throws DuplicateMappingException,
+            InvalidMappingException, IOException, MappingIOException {
+
+
+        OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
+                .nativeOntopMappingReader(mappingReader)
                 .properties(properties)
-                .nativeOntopMappingFile(mappingFile)
                 .build();
+
         SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
 
-        SQLPPMapping newObdaModel = mappingParser.parse(mappingFile);
-
-        ImmutableMap<String, String> mergedPrefixes = Stream.concat(
-                ppMapping.getMetadata().getPrefixManager().getPrefixMap().entrySet().stream(),
-                newObdaModel.getMetadata().getPrefixManager().getPrefixMap().entrySet().stream())
-                .distinct()
-                .collect(ImmutableCollectors.toMap());
-
-        PrefixManager mergedPrefixManager = specificationFactory.createPrefixManager(mergedPrefixes);
-
-        ImmutableList<SQLPPMappingAxiom> mappingAxioms = newObdaModel.getPPMappingAxioms();
-
-        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
-                mappingAxioms.stream()
-                        .flatMap(ax -> ax.getTargetQuery().stream())
-                        .flatMap(atom -> atom.getTerms().stream())
-                        .filter(t -> t instanceof Function)
-                        .map(t -> (Function) t));
-
-        ppMapping = ppMappingFactory.createSQLPreProcessedMapping(newObdaModel.getPPMappingAxioms(),
-                specificationFactory.createMetadata(mergedPrefixManager, uriTemplateMatcher));
+        SQLPPMapping ppMapping = mappingParser.parse(mappingReader);
+        prefixManager.addPrefixes(ppMapping.getMetadata().getPrefixManager().getPrefixMap());
+        // New map
+        triplesMapMap = ppMapping.getTripleMaps().stream()
+                .collect(collectTriplesMaps(
+                        SQLPPTriplesMap::getId,
+                        m -> m));
     }
 
-    public PrefixManager getPrefixManager() {
-        return ppMapping.getMetadata().getPrefixManager();
+    public MutablePrefixManager getMutablePrefixManager() {
+        return prefixManager;
     }
 
-    public ImmutableList<SQLPPMappingAxiom> getMappings(URI sourceUri) {
+    public ImmutableList<SQLPPTriplesMap> getMappings(URI sourceUri) {
         if (sourceUri.equals(getSourceId()))
-            return ppMapping.getPPMappingAxioms();
+            return ImmutableList.copyOf(triplesMapMap.values());
         else
             return ImmutableList.of();
     }
 
-    public ImmutableMap<URI, ImmutableList<SQLPPMappingAxiom>> getMappings() {
-        return ImmutableMap.of(getSourceId(), ppMapping.getPPMappingAxioms());
-    }
-
     public ImmutableList<OBDADataSource> getSources() {
-        return source.isPresent()
-                ? ImmutableList.of(source.get())
-                : ImmutableList.of();
+        return ImmutableList.of(source);
     }
 
-    public SQLPPMappingAxiom getMapping(String mappingId) {
-        return ppMapping.getPPMappingAxiom(mappingId);
+    public SQLPPTriplesMap getMapping(String mappingId) {
+        return triplesMapMap.get(mappingId);
     }
 
     public void addPrefix(String prefix, String uri) {
@@ -155,56 +161,100 @@ public class OBDAModel {
 
 
     public int renamePredicate(Predicate removedPredicate, Predicate newPredicate) {
-        int modifiedCount = 0;
-        for (SQLPPMappingAxiom mapping : ppMapping.getPPMappingAxioms()) {
-            CQIE cq = (CQIE) mapping.getTargetQuery();
-            List<Function> body = cq.getBody();
-            for (int idx = 0; idx < body.size(); idx++) {
-                Function oldAtom = body.get(idx);
-                if (!oldAtom.getFunctionSymbol().equals(removedPredicate)) {
-                    continue;
-                }
-                modifiedCount += 1;
-                Function newAtom = DATA_FACTORY.getFunction(newPredicate, oldAtom.getTerms());
-                body.set(idx, newAtom);
-            }
-            fireMappingUpdated(getSourceId(), mapping.getId(), mapping);
-        }
-        return modifiedCount;
+        AtomicInteger counter = new AtomicInteger();
+
+        triplesMapMap = triplesMapMap.entrySet().stream()
+                .collect(collectTriplesMaps(
+                        Map.Entry::getKey,
+                        e -> renamePredicate(e.getValue(), removedPredicate, newPredicate, counter)));
+
+        return counter.get();
     }
 
-    private void fireMappingUpdated(URI sourceURI, String mappingId, SQLPPMappingAxiom mapping) {
+    private SQLPPTriplesMap renamePredicate(SQLPPTriplesMap formerTriplesMap,
+                                            Predicate removedPredicate, Predicate newPredicate,
+                                            AtomicInteger counter) {
+        int formerCount = counter.get();
+
+        ImmutableList<ImmutableFunctionalTerm> newTargetAtoms = formerTriplesMap.getTargetAtoms().stream()
+                .map(a -> {
+                    if (a.getFunctionSymbol().equals(removedPredicate)) {
+                        counter.incrementAndGet();
+                        return  DATA_FACTORY.getImmutableFunctionalTerm(newPredicate,
+                                ImmutableList.copyOf(a.getArguments()));
+                    }
+                    return a;
+                })
+                .collect(ImmutableCollectors.toList());
+
+        if (counter.get() > formerCount) {
+            SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(formerTriplesMap.getId(),
+                    formerTriplesMap.getSourceQuery(), newTargetAtoms);
+
+            fireMappingUpdated(getSourceId(), newTriplesMap.getId(), newTriplesMap);
+            return newTriplesMap;
+        }
+        else
+            return formerTriplesMap;
+
+    }
+
+    private void fireMappingUpdated(URI sourceURI, String mappingId, SQLPPTriplesMap mapping) {
         for (OBDAMappingListener listener : mappingListeners) {
             listener.mappingUpdated(sourceURI);
         }
     }
 
     public int deletePredicate(Predicate removedPredicate) {
-        int modifiedCount = 0;
-        for (SQLPPMappingAxiom mapping : ppMapping.getPPMappingAxioms()) {
-            CQIE cq = (CQIE) mapping.getTargetQuery();
-            List<Function> body = cq.getBody();
-            for (int idx = 0; idx < body.size(); idx++) {
-                Function oldatom = body.get(idx);
-                if (!oldatom.getFunctionSymbol().equals(removedPredicate)) {
-                    continue;
-                }
-                modifiedCount += 1;
-                body.remove(idx);
+        AtomicInteger counter = new AtomicInteger();
+
+        triplesMapMap = triplesMapMap.values().stream()
+                .map(m -> deletePredicate(m, removedPredicate, counter))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(collectTriplesMaps(
+                        SQLPPTriplesMap::getId,
+                        m -> m));
+
+        return counter.get();
+    }
+
+    /**
+     * TODO: find a better name
+     */
+    private Optional<SQLPPTriplesMap> deletePredicate(SQLPPTriplesMap formerTriplesMap, Predicate removedPredicate,
+                                                      AtomicInteger counter) {
+        int initialCount = counter.get();
+
+        ImmutableList<ImmutableFunctionalTerm> newTargetAtoms = formerTriplesMap.getTargetAtoms().stream()
+                .filter(a -> {
+                    if (a.getFunctionSymbol().equals(removedPredicate)) {
+                        counter.incrementAndGet();
+                        return false;
+                    }
+                    return true;
+                })
+                .collect(ImmutableCollectors.toList());
+
+        if (counter.get() > initialCount) {
+            if (newTargetAtoms.isEmpty()) {
+                removeMapping(getSourceId(), formerTriplesMap.getId());
+                return Optional.empty();
             }
-            if (body.size() != 0) {
-                fireMappingUpdated(getSourceId(), mapping.getId(), mapping);
-            } else {
-                removeMapping(getSourceId(), mapping.getId());
+            else {
+                SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(formerTriplesMap.getId(),
+                        formerTriplesMap.getSourceQuery(),
+                        newTargetAtoms);
+                fireMappingUpdated(getSourceId(), newTriplesMap.getId(), newTriplesMap);
+                return Optional.of(newTriplesMap);
             }
         }
-        return modifiedCount;
+        else
+            return Optional.of(formerTriplesMap);
     }
 
     private URI getSourceId() {
-        return source
-                .map(OBDADataSource::getSourceID)
-                .orElseGet(() -> URI.create("ontop-data-source"));
+        return source.getSourceID();
     }
 
     public void addSourceListener(OBDAModelListener listener) {
@@ -247,86 +297,89 @@ public class OBDAModel {
         }
     }
 
-    public void reset() {
-        ppMapping = createNewPPMapping(specificationFactory, ppMappingFactory, prefixManager);
+    /**
+     *
+     */
+    public void reset(PrefixDocumentFormat owlPrefixMapper) {
+        triplesMapMap.clear();
+        prefixManager = new MutablePrefixManager(owlPrefixMapper);
+        currentMutableVocabulary = ONTOLOGY_FACTORY.createVocabulary();
     }
 
 
-    public void addMapping(URI sourceID, SQLPPMappingAxiom mappingAxiom, boolean disableFiringMappingInsertedEvent)
+    @Deprecated
+    public void addMapping(URI sourceID, SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent)
             throws DuplicateMappingException {
-        ImmutableList<SQLPPMappingAxiom> sourceMappings = ppMapping.getPPMappingAxioms();
-        List<SQLPPMappingAxiom> newSourceMappings;
-        if (sourceMappings == null) {
-            newSourceMappings = Arrays.asList(mappingAxiom);
-        }
-        else if (sourceMappings.contains(mappingAxiom)) {
-            throw new DuplicateMappingException("ID " + mappingAxiom.getId());
-        }
-        else {
-            newSourceMappings = new ArrayList<>(sourceMappings);
-            newSourceMappings.add(mappingAxiom);
-        }
-        try {
-            ppMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.copyOf(newSourceMappings),
-                    ppMapping.getMetadata());
-        } catch (DuplicateMappingException e) {
-            throw new RuntimeException("Duplicated mappings should have been detected earlier.");
-        }
+        String mapId = triplesMap.getId();
+
+        if (triplesMapMap.containsKey(mapId))
+            throw new DuplicateMappingException("ID " + mapId);
+        triplesMapMap.put(mapId, triplesMap);
+
         if (!disableFiringMappingInsertedEvent)
-            fireMappingInserted(sourceID, mappingAxiom.getId());
+            fireMappingInserted(sourceID, mapId);
     }
+
+    public void addMapping(SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent)
+            throws DuplicateMappingException {
+        String mapId = triplesMap.getId();
+
+        if (triplesMapMap.containsKey(mapId))
+            throw new DuplicateMappingException("ID " + mapId);
+        triplesMapMap.put(mapId, triplesMap);
+
+        if (!disableFiringMappingInsertedEvent)
+            fireMappingInserted(source.getSourceID(), mapId);
+    }
+
 
     public void removeMapping(URI dataSourceURI, String mappingId) {
-        SQLPPMappingAxiom mapping = ppMapping.getPPMappingAxiom(mappingId);
-        if (mapping == null)
-            return;
-
-        ImmutableList<SQLPPMappingAxiom> newMappingAssertions = ppMapping.getPPMappingAxioms().stream()
-                .filter(a -> ! a.getId().equals(mappingId))
-                .collect(ImmutableCollectors.toList());
-
-        try {
-            ppMapping = ppMappingFactory.createSQLPreProcessedMapping(newMappingAssertions, ppMapping.getMetadata());
-        } catch (DuplicateMappingException e) {
-            throw new RuntimeException("Duplicated mappings should have been detected earlier.");
-        }
-
-        fireMappingDeleted(dataSourceURI, mappingId);
+        if (triplesMapMap.remove(mappingId) != null)
+            fireMappingDeleted(dataSourceURI, mappingId);
     }
 
-    public void updateMappingsSourceQuery(URI sourceURI, String mappingId, OBDASQLQuery nativeSourceQuery) {
-        SQLPPMappingAxiom mapping = getMapping(mappingId);
-        // TODO: make it immutable
-        mapping.setSourceQuery(nativeSourceQuery);
-        fireMappingUpdated(sourceURI, mapping.getId(), mapping);
+    public void updateMappingsSourceQuery(URI sourceURI, String triplesMapId, OBDASQLQuery sourceQuery) {
+        SQLPPTriplesMap formerTriplesMap = getMapping(triplesMapId);
+
+        if (formerTriplesMap != null) {
+            SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(triplesMapId, sourceQuery,
+                    formerTriplesMap.getTargetAtoms());
+            triplesMapMap.put(triplesMapId, newTriplesMap);
+            fireMappingUpdated(sourceURI, triplesMapId, newTriplesMap);
+        }
     }
 
-    public void updateTargetQueryMapping(URI sourceID, String id, List<Function> targetQuery) {
-        SQLPPMappingAxiom mapping = getMapping(id);
-        if (mapping == null) {
-            return;
+    public void updateTargetQueryMapping(URI sourceID, String id, ImmutableList<ImmutableFunctionalTerm> targetQuery) {
+        SQLPPTriplesMap formerTriplesMap = getMapping(id);
+
+        if (formerTriplesMap != null) {
+            SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(id, formerTriplesMap.getSourceQuery(),
+                    targetQuery);
+            triplesMapMap.put(id, newTriplesMap);
+            fireMappingUpdated(sourceID, id, newTriplesMap);
         }
-        // TODO: make it immutable
-        mapping.setTargetQuery(targetQuery);
-        fireMappingUpdated(sourceID, mapping.getId(), mapping);
     }
 
     public void updateMapping(URI dataSourceIRI, String formerMappingId, String newMappingId) {
-        SQLPPMappingAxiom mapping = getMapping(formerMappingId);
-        if (mapping != null) {
-            mapping.setId(newMappingId);
-            fireMappingUpdated(dataSourceIRI, formerMappingId, mapping);
+        SQLPPTriplesMap formerTriplesMap = getMapping(formerMappingId);
+
+        if (formerTriplesMap != null) {
+            SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(newMappingId, formerTriplesMap.getSourceQuery(),
+                    formerTriplesMap.getTargetAtoms());
+            triplesMapMap.remove(formerMappingId);
+            triplesMapMap.put(newMappingId, newTriplesMap);
+            fireMappingUpdated(dataSourceIRI, formerMappingId, newTriplesMap);
         }
     }
 
     public int indexOf(URI currentSource, String mappingId) {
-        ImmutableList<SQLPPMappingAxiom> sourceMappings = ppMapping.getPPMappingAxioms();
+        ImmutableList<SQLPPTriplesMap> sourceMappings = ImmutableList.copyOf(triplesMapMap.values());
         if (sourceMappings == null) {
             return -1;
         }
 
         for(int i=0; i < sourceMappings.size(); i++) {
-            if (sourceMappings.get(i).getId() == mappingId)
+            if (sourceMappings.get(i).getId().equals(mappingId))
                 return i;
         }
         return -1;
@@ -349,30 +402,24 @@ public class OBDAModel {
         }
     }
 
-    private static SQLPPMapping createNewPPMapping(SpecificationFactory specificationFactory, SQLPPMappingFactory obdaFactory,
-                                                   PrefixManagerWrapper prefixManager) {
-        try {
-            return obdaFactory.createSQLPreProcessedMapping(ImmutableList.of(), specificationFactory.createMetadata(prefixManager,
-                    UriTemplateMatcher.create(Stream.of())));
-            /**
-             * No mapping so should never happen
-             */
-        } catch(DuplicateMappingException e) {
-            throw new RuntimeException("A DuplicateMappingException has been thrown while no mapping has been given." +
-                    "What is going on? Message: " + e.getMessage());
-        }
-    }
-
-    public Optional<OBDADataSource> getDatasource() {
+    public OBDADataSource getDatasource() {
         return source;
     }
 
-    public void addSource(OBDADataSource currentDataSource) {
-        source = Optional.of(currentDataSource);
+    public OntologyVocabulary getCurrentVocabulary() {
+        return currentMutableVocabulary;
+
     }
 
-    public OntologyVocabulary getOntologyVocabulary() {
-        return ontologyVocabulary;
-
+    private static <I> Collector<I, ?, LinkedHashMap<String, SQLPPTriplesMap>> collectTriplesMaps(
+            java.util.function.Function<I, String> keyFunction,
+            java.util.function.Function<I, SQLPPTriplesMap> mapFunction) {
+        return Collectors.toMap(
+                keyFunction,
+                mapFunction,
+                (u, v) -> {
+                    throw new IllegalStateException(String.format("Duplicate key %s", u));
+                },
+                LinkedHashMap::new);
     }
 }

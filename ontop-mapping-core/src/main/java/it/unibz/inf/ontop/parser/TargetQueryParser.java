@@ -20,11 +20,10 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import java.util.List;
-
-import it.unibz.inf.ontop.model.Function;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
 
 public interface TargetQueryParser {
 
-	public List<Function> parse(String input) throws TargetQueryParserException;
+	ImmutableList<ImmutableFunctionalTerm> parse(String input) throws TargetQueryParserException;
 }

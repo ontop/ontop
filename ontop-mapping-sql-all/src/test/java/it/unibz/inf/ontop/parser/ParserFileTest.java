@@ -36,7 +36,7 @@ import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.mapping.SQLMappingParser;
-import it.unibz.inf.ontop.model.SQLPPMappingAxiom;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,10 +146,10 @@ public class ParserFileTest extends TestCase {
         }
 
 		SQLPPMapping controller = ppMapping;
-		ImmutableList<SQLPPMappingAxiom> mappings = controller.getPPMappingAxioms();
+		ImmutableList<SQLPPTriplesMap> mappings = controller.getTripleMaps();
 
 		log.debug("=========== " + identifier + " ===========");
-		for (SQLPPMappingAxiom axiom : mappings) {
+		for (SQLPPTriplesMap axiom : mappings) {
 			String query = axiom.getSourceQuery().toString();
 			boolean result = parse(query, idfac);
 

@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.r2rml;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.*;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.LogicalTable;
@@ -90,11 +91,11 @@ public class OBDAMappingTransformer {
     /**
 	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 */
-	public TriplesMap getTriplesMap(SQLPPMappingAxiom axiom,
+	public TriplesMap getTriplesMap(SQLPPTriplesMap axiom,
                                     PrefixManager prefixmng) {
 
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
-		List<Function> tquery = axiom.getTargetQuery();
+		ImmutableList<ImmutableFunctionalTerm> tquery = axiom.getTargetAtoms();
 
 		//triplesMap node
 		String mapping_id = axiom.getId();

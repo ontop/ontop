@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.owlapi.directmapping;
  */
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.parser.EncodeForURI;
@@ -52,8 +53,8 @@ public class DirectMappingAxiomProducer {
 		return String.format("SELECT * FROM %s", table.getID().getSQLRendering());
 	}
 
-	public Map<String, List<Function>> getRefAxioms(DatabaseRelationDefinition table) {
-		Map<String, List<Function>> refAxioms = new HashMap<>();
+	public Map<String, ImmutableList<ImmutableFunctionalTerm>> getRefAxioms(DatabaseRelationDefinition table) {
+		Map<String, ImmutableList<ImmutableFunctionalTerm>> refAxioms = new HashMap<>();
 		for (ForeignKeyConstraint fk : table.getForeignKeys()) 
 			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
 		
@@ -118,24 +119,24 @@ public class DirectMappingAxiomProducer {
      *   - a literal triple for each column in a table where the column value is non-NULL.
      *
      */
-    public List<Function> getCQ(DatabaseRelationDefinition table) {
+    public ImmutableList<ImmutableFunctionalTerm> getCQ(DatabaseRelationDefinition table) {
 
-		List<Function> atoms = new ArrayList<>(table.getAttributes().size() + 1);
+		ImmutableList.Builder<ImmutableFunctionalTerm> atoms = ImmutableList.builder();
 
 		//Class Atom
-		Term sub = generateSubject(table, false);
-		atoms.add(df.getFunction(df.getClassPredicate(getTableIRI(table.getID())), sub));
+		ImmutableTerm sub = generateSubject(table, false);
+		atoms.add(df.getImmutableFunctionalTerm(df.getClassPredicate(getTableIRI(table.getID())), sub));
 
 		//DataType Atoms
 		for (Attribute att : table.getAttributes()) {
 			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
 			Variable objV = df.getVariable(att.getID().getName());
-			Term obj = df.getTypedTerm(objV, type);
+			ImmutableTerm obj = df.getImmutableTypedTerm(objV, type);
 			
-			atoms.add(df.getFunction(df.getDataPropertyPredicate(getLiteralPropertyIRI(att)), sub, obj));
+			atoms.add(df.getImmutableFunctionalTerm(df.getDataPropertyPredicate(getLiteralPropertyIRI(att)), sub, obj));
 		}
 
-		return atoms;
+		return atoms.build();
 	}
 
     /**
@@ -144,12 +145,13 @@ public class DirectMappingAxiomProducer {
      * - a reference triple for each <column name list> in a table's foreign keys where none of the column values is NULL.
      *
      */
-	private List<Function> getRefCQ(ForeignKeyConstraint fk) {
-        Term sub = generateSubject(fk.getRelation(), true);
-		Term obj = generateSubject(fk.getReferencedRelation(), true);
+	private ImmutableList<ImmutableFunctionalTerm> getRefCQ(ForeignKeyConstraint fk) {
+        ImmutableTerm sub = generateSubject(fk.getRelation(), true);
+		ImmutableTerm obj = generateSubject(fk.getReferencedRelation(), true);
 
-		Function atom = df.getFunction(df.getObjectPropertyPredicate(getReferencePropertyIRI(fk)), sub, obj);
-		return Collections.singletonList(atom);
+		ImmutableFunctionalTerm atom = df.getImmutableFunctionalTerm(
+				df.getObjectPropertyPredicate(getReferencePropertyIRI(fk)), sub, obj);
+		return ImmutableList.of(atom);
 	}
 
 
@@ -216,7 +218,7 @@ public class DirectMappingAxiomProducer {
      * @param td
      * @return
      */
-    private Term generateSubject(DatabaseRelationDefinition td, boolean ref) {
+    private ImmutableTerm generateSubject(DatabaseRelationDefinition td, boolean ref) {
 		
 		String varNamePrefix = "";
 		if (ref)
@@ -224,7 +226,7 @@ public class DirectMappingAxiomProducer {
 
 		UniqueConstraint pk = td.getPrimaryKey();
 		if (pk != null) {
-			List<Term> terms = new ArrayList<>(pk.getAttributes().size() + 1);
+			List<ImmutableTerm> terms = new ArrayList<>(pk.getAttributes().size() + 1);
 			
 			List<String> attributes = new ArrayList<>(pk.getAttributes().size());
 			for (Attribute att : pk.getAttributes()) 
@@ -236,14 +238,14 @@ public class DirectMappingAxiomProducer {
 			for (Attribute att : pk.getAttributes())
 				terms.add(df.getVariable(varNamePrefix + att.getID().getName()));
 
-			return df.getUriTemplate(terms);
+			return df.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 		}
 		else {
-			List<Term> vars = new ArrayList<>(td.getAttributes().size());
+			List<ImmutableTerm> vars = new ArrayList<>(td.getAttributes().size());
 			for (Attribute att : td.getAttributes())
 				vars.add(df.getVariable(varNamePrefix + att.getID().getName()));
 
-			return df.getBNodeTemplate(vars);
+			return df.getImmutableBNodeTemplate(ImmutableList.copyOf(vars));
 		}
 	}
     

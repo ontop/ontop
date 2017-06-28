@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
@@ -41,7 +42,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.LinkedList;
 import java.util.List;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
@@ -139,7 +139,6 @@ public class VirtualABoxMaterializerTest {
 		OntopStandaloneSQLConfiguration configuration = createAndInitConfiguration()
 				.build();
 		Injector injector = configuration.getInjector();
-		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 		SpecificationFactory specificationFactory = injector.getInstance(SpecificationFactory.class);
 		SQLPPMappingFactory ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
 
@@ -149,30 +148,35 @@ public class VirtualABoxMaterializerTest {
 
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
-		Function personTemplate = DATA_FACTORY.getUriTemplate(
+		ImmutableFunctionalTerm personTemplate = DATA_FACTORY.getImmutableUriTemplate(
 				DATA_FACTORY.getConstantLiteral("http://schools.com/person/{}-{}"),
 				DATA_FACTORY.getVariable("fn"),
 				DATA_FACTORY.getVariable("ln"));
 
-		Function schoolTemplate = DATA_FACTORY.getUriTemplate(
+		ImmutableFunctionalTerm schoolTemplate = DATA_FACTORY.getImmutableUriTemplate(
 				DATA_FACTORY.getConstantLiteral("{}"),
 				DATA_FACTORY.getVariable("schooluri"));
 
-		List<Function> body = new LinkedList<Function>();
-		body.add(DATA_FACTORY.getFunction(person, personTemplate));
-		body.add(DATA_FACTORY.getFunction(fn, personTemplate, DATA_FACTORY.getTypedTerm(DATA_FACTORY.getVariable("fn"), Predicate.COL_TYPE.LITERAL)));
-		body.add(DATA_FACTORY.getFunction(ln, personTemplate, DATA_FACTORY.getTypedTerm( DATA_FACTORY.getVariable("ln"), Predicate.COL_TYPE.LITERAL)));
-		body.add(DATA_FACTORY.getFunction(age, personTemplate, DATA_FACTORY.getTypedTerm( DATA_FACTORY.getVariable("age"), Predicate.COL_TYPE.LITERAL)));
-		body.add(DATA_FACTORY.getFunction(hasschool, personTemplate, schoolTemplate));
-		body.add(DATA_FACTORY.getFunction(school, schoolTemplate));
+		ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
+		bodyBuilder.add(DATA_FACTORY.getImmutableFunctionalTerm(person, personTemplate));
+		bodyBuilder.add(DATA_FACTORY.getImmutableFunctionalTerm(fn, personTemplate,
+				DATA_FACTORY.getImmutableTypedTerm(DATA_FACTORY.getVariable("fn"), Predicate.COL_TYPE.LITERAL)));
+		bodyBuilder.add(DATA_FACTORY.getImmutableFunctionalTerm(ln, personTemplate,
+				DATA_FACTORY.getImmutableTypedTerm( DATA_FACTORY.getVariable("ln"), Predicate.COL_TYPE.LITERAL)));
+		bodyBuilder.add(DATA_FACTORY.getImmutableFunctionalTerm(age, personTemplate,
+				DATA_FACTORY.getImmutableTypedTerm( DATA_FACTORY.getVariable("age"), Predicate.COL_TYPE.LITERAL)));
+		bodyBuilder.add(DATA_FACTORY.getImmutableFunctionalTerm(hasschool, personTemplate, schoolTemplate));
+		bodyBuilder.add(DATA_FACTORY.getImmutableFunctionalTerm(school, schoolTemplate));
 
-		SQLPPMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
+		ImmutableList<ImmutableFunctionalTerm> body = bodyBuilder.build();
+
+		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sql), body);
 
 		UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
 				body.stream()
-						.flatMap(atom -> atom.getTerms().stream())
-						.filter(t -> t instanceof Function)
-						.map(t -> (Function) t));
+						.flatMap(atom -> atom.getArguments().stream())
+						.filter(t -> t instanceof ImmutableFunctionalTerm)
+						.map(t -> (ImmutableFunctionalTerm) t));
 
 		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);

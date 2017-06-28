@@ -22,7 +22,7 @@ import java.io.Serializable;
  * #L%
  */
 
-public interface OBDASQLQuery extends SourceQuery {
+public interface OBDASQLQuery {
 
 	String getSQLQuery();
 

@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -68,7 +67,6 @@ public class AboxMaterializationAction extends ProtegeAction {
 	private static final boolean DO_STREAM_RESULTS = true;
 
 	private OWLEditorKit editorKit = null;
-	private SQLPPMapping ppMapping = null;
 	private OWLWorkspace workspace;
 	private OWLModelManager modelManager;
 	private String lineSeparator;
@@ -80,8 +78,6 @@ public class AboxMaterializationAction extends ProtegeAction {
 		editorKit = (OWLEditorKit)getEditorKit();
 		workspace = editorKit.getWorkspace();
 		modelManager = editorKit.getOWLModelManager();
-		ppMapping = ((OBDAModelManager)editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModel()
-				.getCurrentPPMapping();
 		lineSeparator = System.getProperty("line.separator");
 	}
 
@@ -209,12 +205,9 @@ public class AboxMaterializationAction extends ProtegeAction {
 						throw new Exception("Unknown format: " + format);
 				}
 
-				OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-						// TODO: should we keep it?
-						.enableOntologyAnnotationQuerying(true)
-						.ppMapping(ppMapping)
-						.ontology(ontology)
-						.build();
+				OBDAModelManager obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
+
+				OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
 
 				try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(configuration, DO_STREAM_RESULTS)) {
 
@@ -261,12 +254,12 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 		if (response == JOptionPane.YES_OPTION) {
 			try {
-				OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-						// TODO: should we keep it?
-						.enableOntologyAnnotationQuerying(true)
-						.ppMapping(ppMapping)
-						.ontology(ontology)
-						.build();
+
+
+				OBDAModelManager obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
+
+				OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
+
 
 				OWLAPIMaterializer individuals = new OWLAPIMaterializer(configuration, DO_STREAM_RESULTS);
 				Container container = workspace.getRootPane().getParent();
