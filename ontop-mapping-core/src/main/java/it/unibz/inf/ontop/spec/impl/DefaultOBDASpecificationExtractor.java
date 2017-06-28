@@ -1,80 +1,110 @@
 package it.unibz.inf.ontop.spec.impl;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.mapping.Mapping;
+import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.mapping.pp.PreProcessedMapping;
+import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.MappingExtractor;
-import it.unibz.inf.ontop.spec.MappingExtractor.MappingAndDBMetadata;
 import it.unibz.inf.ontop.spec.MappingTransformer;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import org.eclipse.rdf4j.model.Model;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.Reader;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 
-
-@Singleton
 public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtractor {
 
     private final MappingExtractor mappingExtractor;
     private final MappingTransformer mappingTransformer;
+    private final OntopMappingSettings settings;
+    private final Mapping2DatalogConverter mapping2DatalogConverter;
 
-    @Inject
-    private DefaultOBDASpecificationExtractor(MappingExtractor mappingExtractor, MappingTransformer mappingTransformer) {
+    public DefaultOBDASpecificationExtractor(MappingExtractor mappingExtractor, MappingTransformer mappingTransformer, OntopMappingSettings settings, Mapping2DatalogConverter mapping2DatalogConverter) {
         this.mappingExtractor = mappingExtractor;
         this.mappingTransformer = mappingTransformer;
+        this.settings = settings;
+        this.mapping2DatalogConverter = mapping2DatalogConverter;
     }
 
 
     @Override
-    public OBDASpecification extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+    public OBDASpecification extract(@Nonnull PreProcessedMapping ppMapping,
+                                     @Nonnull Optional<DBMetadata> metadata,
+                                     @Nonnull Optional<Ontology> ontology,
+                                     @Nonnull Optional<File> constraintFile,
                                      ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
-
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(mappingFile, dbMetadata, ontology,
-                constraintFile, executorRegistry);
-        return mappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(),
-                ontology);
+        return convert(ppMapping, metadata, ontology, constraintFile, executorRegistry);
     }
 
     @Override
-    public OBDASpecification extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
-                                     ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException {
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(mappingReader, dbMetadata, ontology,
-                constraintFile, executorRegistry);
-        return mappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(),
-                ontology);
+    public OBDASpecification extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile, ExecutorRegistry executorRegistry) throws OBDASpecificationException {
+        return extract(mappingExtractor.loadPPMapping(mappingFile), dbMetadata, ontology, constraintFile, executorRegistry );
     }
 
     @Override
-    public OBDASpecification extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
-                                     ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException {
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(mappingGraph, dbMetadata, ontology,
-                constraintFile, executorRegistry);
-        return mappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(),
-                ontology);
+    public OBDASpecification extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile, ExecutorRegistry executorRegistry) throws OBDASpecificationException {
+        return extract(mappingExtractor.loadPPMapping(mappingReader), dbMetadata, ontology, constraintFile, executorRegistry );
     }
 
     @Override
-    public OBDASpecification extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
-                                     ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException {
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, dbMetadata, ontology,
-                constraintFile, executorRegistry);
-        return mappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(),
-                ontology);
+    public OBDASpecification extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile, ExecutorRegistry executorRegistry) throws OBDASpecificationException {
+        return extract(mappingExtractor.loadPPMapping(mappingGraph), dbMetadata, ontology, constraintFile,
+                executorRegistry );
+    }
+
+    private OBDASpecification convert(PreProcessedMapping ppMapping, Optional<DBMetadata> optionalDBMetadata, Optional<Ontology> optionalOntology, Optional<File> constraintFile, ExecutorRegistry executorRegistry) {
+        Optional<TBoxReasoner> optionalInputTBox = loadInputTBox(optionalOntology);
+
+        MappingExtractor.MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
+                ppMapping,
+                optionalDBMetadata,
+                optionalInputTBox,
+                constraintFile,
+                executorRegistry
+        );
+
+        //Bootstrap the ontology from the mapping if it does not already exist
+        Ontology ontology = optionalOntology
+                .orElseGet(() -> bootstrapOntology(mappingAndDBMetadata.getMapping()));
+        TBoxReasoner tBox = optionalInputTBox
+                .orElseGet(() -> TBoxReasonerImpl.create(ontology, settings.isEquivalenceOptimizationEnabled()));
+
+        return mappingTransformer.transform(
+                mappingAndDBMetadata.getMapping(),
+                mappingAndDBMetadata.getDBMetadata(),
+                ontology,
+                tBox,
+                executorRegistry
+        );
+    }
+
+    private Optional<TBoxReasoner> loadInputTBox(Optional<Ontology> ontology) {
+        return ontology.isPresent() ?
+                Optional.of(
+                        TBoxReasonerImpl.create(
+                                ontology.get(),
+                                settings.isEquivalenceOptimizationEnabled()
+                        )) :
+                Optional.empty();
+    }
+
+    private Ontology bootstrapOntology(Mapping mapping) {
+
+        return MappingVocabularyExtractor.extractOntology(
+                mapping2DatalogConverter.convert(mapping)
+                        .map(CQIE::getHead)
+        );
     }
 }

@@ -3,9 +3,9 @@ package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.mapping.MappingCanonicalRewriter;
-import it.unibz.inf.ontop.mapping.MappingNormalizer;
-import it.unibz.inf.ontop.mapping.MappingSaturator;
+import it.unibz.inf.ontop.mapping.transf.MappingCanonicalRewriter;
+import it.unibz.inf.ontop.mapping.transf.MappingNormalizer;
+import it.unibz.inf.ontop.mapping.transf.MappingSaturator;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.mapping.pp.validation.PPMappingOntologyComplianceValidator;

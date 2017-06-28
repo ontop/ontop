@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.mapping.MappingNormalizer;
+import it.unibz.inf.ontop.mapping.transf.MappingNormalizer;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
@@ -32,7 +32,7 @@ import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
 import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
+import it.unibz.inf.ontop.utils.SQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,15 +83,15 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             throws DBMetadataExtractionException, MappingException {
 
 
-//        optionalOntology.ifPresent(o -> ontologyComplianceValidator.validate(initialPPMapping, o));
+        optionalOntology.ifPresent(o -> ontologyComplianceValidator.validate(initialPPMapping, o));
 
-  //      RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
+        RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
 
-    //    ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
-      //          initialPPMapping.getTripleMaps(), settings, dbMetadata);
+        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
+                initialPPMapping.getTripleMaps(), settings, dbMetadata);
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)
-        ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(expandedMappingAxioms, dbMetadata);
+        ImmutableList<CQIE> initialMappingRules = convertPPTriplesMaps(expandedMappingAxioms, dbMetadata);
         dbMetadata.freeze();
 
         /*
@@ -124,10 +124,10 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     /**
      * May also add views in the DBMetadata!
      */
-    private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<SQLPPTriplesMap> mappingAxioms, RDBMetadata dbMetadata) {
+    private ImmutableList<CQIE> convertPPTriplesMaps(ImmutableList<SQLPPTriplesMap> mappingAxioms, RDBMetadata dbMetadata) {
 
 
-        ImmutableList<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappingAxioms, dbMetadata);
+        ImmutableList<CQIE> unfoldingProgram = SQLPPMapping2DatalogConverter.constructDatalogProgram(mappingAxioms, dbMetadata);
 
         LOGGER.debug("Original mapping size: {}", unfoldingProgram.size());
 
@@ -153,10 +153,9 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         ImmutableOntologyVocabulary vocabulary = ontology.getVocabulary();
 
         // Adding data typing on the mapping axioms.
-        ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypesAndValidate(initialMappingRules, tBox, vocabulary, dbMetadata);
+        ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypes(initialMappingRules, tBox, vocabulary, dbMetadata);
 
-        ImmutableList<CQIE> mappingRulesWithFacts = insertFacts(fullyTypedRules, ontology,
-                mappingMetadata.getUriTemplateMatcher());
+        ImmutableList<CQIE> mappingRulesWithFacts = insertFacts(fullyTypedRules, ontology, mappingMetadata.getUriTemplateMatcher());
 
         ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, vocabulary, dbMetadata);
 
@@ -385,20 +384,14 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
     /***
      * Infers missing data types.
-     *
-     * Then, validates that the use of properties in the mapping is compliant with the ontology and the standard vocabularies
-     *  (e.g., owl:sameAs, obda:canonicalIRI)
-     *
-     * TODO: split these two different concerns (validation could reuse some logic of the MappingVocabularyFixer)
-     *
      */
-    public ImmutableList<CQIE> inferMissingDataTypesAndValidate(ImmutableList<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,
-                                                       ImmutableOntologyVocabulary vocabulary, DBMetadata metadata)
+    public ImmutableList<CQIE> inferMissingDataTypes(ImmutableList<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,
+                                                     ImmutableOntologyVocabulary vocabulary, DBMetadata metadata)
             throws MappingException {
 
         VocabularyValidator vocabularyValidator = new VocabularyValidator(tBoxReasoner, vocabulary);
 
-        MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata, tBoxReasoner, vocabularyValidator);
+        MappingDataTypeCompletion typeRepair = new MappingDataTypeCompletion(metadata, tBoxReasoner, vocabularyValidator);
         for (CQIE rule : unfoldingProgram) {
             typeRepair.insertDataTyping(rule);
         }

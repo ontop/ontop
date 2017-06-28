@@ -1,6 +1,7 @@
-package it.unibz.inf.ontop.mapping;
+package it.unibz.inf.ontop.mapping.transf;
 
 
+import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 

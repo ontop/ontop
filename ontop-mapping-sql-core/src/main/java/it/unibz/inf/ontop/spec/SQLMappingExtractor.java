@@ -18,9 +18,8 @@ import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
 import it.unibz.inf.ontop.sql.RDBMetadata;
-import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
+import it.unibz.inf.ontop.utils.SQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
 import org.eclipse.rdf4j.model.Model;
 import org.slf4j.Logger;
@@ -38,23 +37,46 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 
-public class SQLMappingExtractor implements MappingExtractor {
+public class SQLMappingExtractor implements MappingExtractor<RDBMetadata> {
+
+
+    class SQLMappingAndDBMetadata implements MappingExtractor.MappingAndDBMetadata<RDBMetadata> {
+        private final Mapping mapping;
+        private final RDBMetadata metadata;
+
+        SQLMappingAndDBMetadata(Mapping mapping, RDBMetadata metadata) {
+            this.mapping = mapping;
+            this.metadata = metadata;
+        }
+
+        @Override
+        public Mapping getMapping() {
+            return mapping;
+        }
+
+        @Override
+        public RDBMetadata getDBMetadata() {
+            return metadata;
+        }
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SQLMappingExtractor.class);
 
+    private final SQLMappingParser mappingParser;
     private final PPMappingOntologyComplianceValidator ontologyComplianceValidator;
     private final Datalog2QueryMappingConverter datalog2QueryMappingConverter;
-    // TODO: Move to the SQLOBDASpecificationExtractor (after isolating the DBMetadata expansion in convertMappingAxioms())
+    // TODO: Move to the OBDASpecificationExtractor (after isolating the DBMetadata expansion in convertMappingAxioms())
     private final RDBMetadataExtractor dbMetadataExtractor;
-    // TODO: Move to the SQLOBDASpecificationExtractor (after isolating the DBMetadata expansion in convertMappingAxioms())
+    // TODO: Move to the OBDASpecificationExtractor (after isolating the DBMetadata expansion in convertMappingAxioms())
     private final OntopMappingSQLSettings settings;
 
     @Inject
-    private SQLMappingExtractor(PPMappingOntologyComplianceValidator ontologyComplianceValidator,
+    private SQLMappingExtractor(SQLMappingParser mappingParser, PPMappingOntologyComplianceValidator ontologyComplianceValidator,
                                 RDBMetadataExtractor dbMetadataExtractor,
                                 OntopMappingSQLSettings settings,
                                 Datalog2QueryMappingConverter datalog2QueryMappingConverter) {
 
+        this.mappingParser = mappingParser;
         this.ontologyComplianceValidator = ontologyComplianceValidator;
         this.dbMetadataExtractor = dbMetadataExtractor;
         this.settings = settings;
@@ -62,27 +84,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     }
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull
-            Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile, ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
-       throw new IllegalStateException("This method should not be used");
-    }
-
-    @Override
-    public MappingAndDBMetadata extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull
-            Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile, ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
-        throw new IllegalStateException("This method should not be used");
-    }
-
-    @Override
-    public MappingAndDBMetadata extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull
-            Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile, ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException {
-        throw new IllegalStateException("This method should not be used");
-    }
-
-    @Override
-    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<TBoxReasoner> tBox,
-                                        @Nonnull Optional<File> constraintsFile, ExecutorRegistry executorRegistry)
+    public SQLMappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<RDBMetadata> dbMetadata, @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile, ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
         if (ppMapping instanceof SQLPPMapping) {
             return convertPPMapping((SQLPPMapping) ppMapping, dbMetadata, tBox, constraintsFile, executorRegistry);
@@ -90,7 +92,22 @@ public class SQLMappingExtractor implements MappingExtractor {
         throw new IllegalArgumentException("SQLMappingExtractor only accepts a SQLPPMapping as PreProcessedMapping");
     }
 
-    private MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<DBMetadata> optionalDBMetadata,
+    @Override
+    public PreProcessedMapping loadPPMapping(File mappingFile) {
+        return mappingParser.parse(mappingFile);
+    }
+
+    @Override
+    public PreProcessedMapping loadPPMapping(Reader mappingReader) {
+        return mappingParser.parse(mappingReader);
+    }
+
+    @Override
+    public PreProcessedMapping loadPPMapping(Model mappingGraph) {
+        return mappingParser.parse(mappingGraph);
+    }
+
+    private SQLMappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
                                                   Optional<TBoxReasoner> ontology, Optional<File> constraintFile,
                                                   ExecutorRegistry executorRegistry) {
 
@@ -104,7 +121,7 @@ public class SQLMappingExtractor implements MappingExtractor {
         );
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)
-        // TODO: isolate the DBMetadata expansion, move the DBMetada creation and expansion to the SQLOBDASpecificationExtractor, and return a simple Mapping instance (instead of MappingAndDBMetadata )
+        // TODO: isolate the DBMetadata expansion, move the DBMetada creation and expansion to the OBDASpecificationExtractor, and return a simple Mapping instance (instead of MappingAndDBMetadata )
         ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(expandedMappingAxioms, dbMetadata);
         dbMetadata.freeze();
 
@@ -114,16 +131,16 @@ public class SQLMappingExtractor implements MappingExtractor {
                 executorRegistry,
                 ppMapping.getMetadata()
         );
-        return new MappingAndDBMetadataImpl(mapping, dbMetadata);
+        return new SQLMappingAndDBMetadata(mapping, dbMetadata);
     }
 
 
     /**
      * Makes use of the DB connection
      */
-    // TODO: Move to the SQLOBDASpecificationExtractor (after isolating the DBMetadata expansion in convertMappingAxioms())
+    // TODO: Move to the OBDASpecificationExtractor (after isolating the DBMetadata expansion in convertMappingAxioms())
     // simple Mapping instance (instead of MappingAndDBMetadata )
-    private RDBMetadata extractDBMetadata(final SQLPPMapping ppMapping, Optional<DBMetadata> optionalDBMetadata,
+    private RDBMetadata extractDBMetadata(final SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
                                           Optional<File> constraintFile)
             throws DBMetadataExtractionException, MetaMappingExpansionException {
 
@@ -150,7 +167,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<SQLPPTriplesMap> mappingAxioms, RDBMetadata dbMetadata) {
 
 
-        ImmutableList<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappingAxioms, dbMetadata);
+        ImmutableList<CQIE> unfoldingProgram = SQLPPMapping2DatalogConverter.constructDatalogProgram(mappingAxioms, dbMetadata);
 
         LOGGER.debug("Original mapping size: {}", unfoldingProgram.size());
 

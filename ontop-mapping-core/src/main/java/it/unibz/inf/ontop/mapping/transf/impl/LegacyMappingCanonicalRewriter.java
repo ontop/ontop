@@ -1,10 +1,10 @@
-package it.unibz.inf.ontop.mapping.impl;
+package it.unibz.inf.ontop.mapping.transf.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.mapping.MappingCanonicalRewriter;
+import it.unibz.inf.ontop.mapping.transf.MappingCanonicalRewriter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.model.CQIE;

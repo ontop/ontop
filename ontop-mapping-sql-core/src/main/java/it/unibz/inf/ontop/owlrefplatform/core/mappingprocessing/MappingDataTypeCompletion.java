@@ -46,14 +46,14 @@ import java.util.Map;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-public class MappingDataTypeRepair {
+public class MappingDataTypeCompletion {
 
 	private final DBMetadata metadata;
 	private final boolean isDB2;
 	private final Map<Predicate, Datatype> dataTypesMap;
 	private final VocabularyValidator qvv;
 
-    private static final Logger log = LoggerFactory.getLogger(MappingDataTypeRepair.class);
+    private static final Logger log = LoggerFactory.getLogger(MappingDataTypeCompletion.class);
     private final JdbcTypeMapper jdbcTypeMapper;
 
     /**
@@ -66,7 +66,7 @@ public class MappingDataTypeRepair {
      * 
      * @param metadata The database metadata.
      */
-    public MappingDataTypeRepair(DBMetadata metadata, TBoxReasoner reasoner, VocabularyValidator qvv)
+    public MappingDataTypeCompletion(DBMetadata metadata, TBoxReasoner reasoner, VocabularyValidator qvv)
             throws PredicateRedefinitionException {
         this.metadata = metadata;
         String databaseName = metadata.getDbmsProductName();
@@ -107,7 +107,6 @@ public class MappingDataTypeRepair {
 				}
 			}
 		}
-
 		return dataTypesMap;
     }
 
@@ -200,15 +199,7 @@ public class MappingDataTypeRepair {
                 Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
 
                 //if a datatype was already assigned in the ontology
-                if (dataType != null) {
-
-//                    //check that no datatype mismatch is present
-//                    if (!functionSymbol.equals(dataType.getPredicate())) {
-//                        throw new PredicateRedefinitionException("Ontology datatype " + dataType + " for " + predicate +
-//                        		"\ndoes not correspond to datatype " + functionSymbol + " in mappings");
-//                    }
-
-                    if (isBooleanDB2(dataType.getPredicate())) {
+                if (dataType != null && isBooleanDB2(dataType.getPredicate())) {
 
                         Variable variable = (Variable) normal.getTerm(1);
 
@@ -219,7 +210,6 @@ public class MappingDataTypeRepair {
                         atom.setTerm(position, newTerm);
                     }
                 }
-            }
            else
                throw new UnknownDatatypeException("Unknown data type predicate: " + functionSymbol.getName());
         }
@@ -269,10 +259,6 @@ public class MappingDataTypeRepair {
         }
         return false;
     }
-    
-//	private boolean isDataProperty(Predicate predicate) {
-//		return predicate.getArity() == 2 && predicate.getType(1) == Predicate.COL_TYPE.LITERAL;
-//	}
     
     /**
      * returns COL_TYPE for one of the datatype ids

@@ -15,35 +15,40 @@ import java.io.File;
 import java.io.Reader;
 import java.util.Optional;
 
-public interface MappingExtractor {
+public interface MappingExtractor<T extends DBMetadata>{
 
     /**
      * TODO: in a near future, drop DBMetadata and use Mapping instead of this interface
      */
-    interface MappingAndDBMetadata {
+    interface MappingAndDBMetadata<T extends DBMetadata> {
         Mapping getMapping();
-        DBMetadata getDBMetadata();
+        T getDBMetadata();
     }
 
-    MappingAndDBMetadata extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
+//    MappingAndDBMetadata extract(@Nonnull File mappingFile, @Nonnull Optional<T> dbMetadata,
+//                                 @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile,
+//                                 ExecutorRegistry executorRegistry)
+//            throws MappingException, DBMetadataExtractionException;
+//
+//    MappingAndDBMetadata extract(@Nonnull Reader mappingReader, @Nonnull Optional<T> dbMetadata,
+//                                 @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile,
+//                                 ExecutorRegistry executorRegistry)
+//            throws MappingException, DBMetadataExtractionException;
+//
+//    MappingAndDBMetadata extract(@Nonnull Model mappingGraph, @Nonnull Optional<T> dbMetadata,
+//                                 @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile,
+//                                 ExecutorRegistry executorRegistry)
+//            throws MappingException, DBMetadataExtractionException;
+
+    MappingAndDBMetadata extract(@Nonnull PreProcessedMapping mapping, @Nonnull Optional<T> dbMetadata,
                                  @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile,
                                  ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException;
 
-    MappingAndDBMetadata extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile,
-                                 ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException;
+    PreProcessedMapping loadPPMapping(File mappingFile);
 
-    MappingAndDBMetadata extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile,
-                                 ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException;
+    PreProcessedMapping loadPPMapping(Reader mappingReader);
 
-    MappingAndDBMetadata extract(@Nonnull PreProcessedMapping mapping, @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile,
-                                 ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException;
-
+    PreProcessedMapping loadPPMapping(Model mappingGraph);
 
 }

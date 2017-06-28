@@ -46,7 +46,7 @@ import java.util.List;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-public class Mapping2DatalogConverterTest extends TestCase {
+public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final SpecificationFactory specificationFactory;
@@ -54,7 +54,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	private RDBMetadata md = RDBMetadataExtractionTools.createDummyMetadata();
 	private PrefixManager pm;
 
-    public Mapping2DatalogConverterTest() {
+    public SQLPPMapping2DatalogConverterTest() {
 		OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
 				.enableTestMode()
 				.build();
@@ -105,7 +105,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		ArrayList<SQLPPTriplesMap> mappingList = new ArrayList<SQLPPTriplesMap>();
 		mappingList.add(mappingAxiom);
 
-		List<CQIE> dp = Mapping2DatalogConverter.constructDatalogProgram(mappingList, md);
+		List<CQIE> dp = SQLPPMapping2DatalogConverter.constructDatalogProgram(mappingList, md);
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

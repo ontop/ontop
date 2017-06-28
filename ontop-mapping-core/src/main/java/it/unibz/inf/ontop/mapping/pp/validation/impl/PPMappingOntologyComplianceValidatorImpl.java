@@ -7,10 +7,14 @@ import it.unibz.inf.ontop.mapping.pp.PreProcessedTriplesMap;
 import it.unibz.inf.ontop.mapping.pp.validation.PPMappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.ontology.*;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
+import java.util.Map;
 import java.util.Optional;
+
+import static it.unibz.inf.ontop.mapping.pp.validation.impl.PPMappingOntologyComplianceValidatorImpl.PredicateType.*;
 
 
 public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntologyComplianceValidator {
@@ -37,21 +41,19 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
         private final PredicateType typeInMapping;
         private final PredicateType typeInOntology;
 
-        public Mismatch(String predicateName, PredicateType typeInMapping, PredicateType typeInOntology) {
+        private Mismatch(String predicateName, PredicateType typeInMapping, PredicateType typeInOntology) {
             this.predicateName = predicateName;
             this.typeInMapping = typeInMapping;
             this.typeInOntology = typeInOntology;
         }
 
-        public String getPredicateName() {
+        private String getPredicateName() {
             return predicateName;
         }
-
-        public PredicateType getTypeInMapping() {
+        private PredicateType getTypeInMapping() {
             return typeInMapping;
         }
-
-        public PredicateType getTypeInOntology() {
+        private PredicateType getTypeInOntology() {
             return typeInOntology;
         }
     }
@@ -169,5 +171,58 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
                 " of the triplesMap: \n[\n" +
                 triplesMap.getProvenance(targetTriple).getProvenanceInfo() +
                 "\n]";
+    }
+
+    /**
+     * Produces a map from datatypeProperty to corresponding datatype according to the ontology (the datatype may
+     * be
+     * inferred)
+     */
+    private static ImmutableMap<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner){
+
+        final ImmutableMap.Builder<Predicate, Datatype> dataTypesMap = ImmutableMap.builder();
+
+        // Traverse the graph searching for dataProperty
+        for (Equivalences<DataRangeExpression> nodes : reasoner.getDataRangeDAG()) {
+            DataRangeExpression node = nodes.getRepresentative();
+
+            for (Equivalences<DataRangeExpression> descendants : reasoner.getDataRangeDAG().getSub(nodes)) {
+                DataRangeExpression descendant = descendants.getRepresentative();
+                if (descendant != node)
+                    dataTypesMap.put(onDataRangeInclusion(descendant, node);
+            }
+            for (DataRangeExpression equivalent : nodes) {
+                if (equivalent != node) {
+                    onDataRangeInclusion(dataTypesMap, node, equivalent);
+                    onDataRangeInclusion(dataTypesMap, equivalent, node);
+                }
+            }
+        }
+        return dataTypesMap;
+    }
+
+    private static void onDataRangeInclusion(Map<Predicate, Datatype> dataTypesMap, DataRangeExpression sub,
+                                             DataRangeExpression sup){
+        //if sup is a datatype property we store it in the map
+        //it means that sub is of datatype sup
+        if (sup instanceof Datatype) {
+            Datatype supDataType = (Datatype)sup;
+            Predicate key;
+            if (sub instanceof Datatype) {
+                // datatype inclusion
+                key = ((Datatype)sub).getPredicate();
+            }
+            else if (sub instanceof DataPropertyRangeExpression) {
+                // range
+                key = ((DataPropertyRangeExpression)sub).getProperty().getPredicate();
+            }
+            else
+                return;
+
+            if (dataTypesMap.containsKey(key))
+                throw new PredicateRedefinitionException("Predicate " + key + " with " + dataTypesMap.get(key)
+                        + " is redefined as " + supDataType + " in the ontology");
+            dataTypesMap.put(key, supDataType);
+        }
     }
 }

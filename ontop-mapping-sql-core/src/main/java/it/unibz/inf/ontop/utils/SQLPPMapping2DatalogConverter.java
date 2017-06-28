@@ -43,7 +43,7 @@ import com.google.common.collect.ImmutableMap;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-public class Mapping2DatalogConverter {
+public class SQLPPMapping2DatalogConverter {
 
     /**
      * returns a Datalog representation of the mappings
