@@ -79,11 +79,15 @@ public class BootstrapAction extends ProtegeAction {
 				"Base URI - the prefix to be used for all generated classes and properties: ");
 		ouri.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(ouri);
+		Dimension minsize1 = new Dimension(10, 10);
+		panel.add(new Box.Filler(minsize1, minsize1, minsize1));
 		JTextField base_uri = new JTextField();
 		base_uri.setText(currentModel.getMutablePrefixManager().getDefaultPrefix()
 				.replace("#", "/"));
 		base_uri.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(base_uri);
+		Dimension minsize2 = new Dimension(20, 20);
+		panel.add(new Box.Filler(minsize2, minsize2, minsize2));
 		int res = JOptionPane.showOptionDialog(workspace, panel,
 				"Bootstrapping", JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.QUESTION_MESSAGE, null, null, null);
