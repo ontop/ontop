@@ -23,7 +23,10 @@
 
     <!-- http://siemens.com/ns#isDeployedIn -->
 
-    <owl:ObjectProperty rdf:about="http://siemens.com/ns#isDeployedIn"/>
+    <owl:ObjectProperty rdf:about="http://siemens.com/ns#isDeployedIn">
+        <rdfs:domain rdf:resource="http://siemens.com/ns#Turbine"/>
+        <rdfs:range rdf:resource="http://siemens.com/ns#Train"/>
+    </owl:ObjectProperty>
     
 
 
