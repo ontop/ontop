@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 
-public interface MissingDatatypeMappingExpander {
+public interface MappingDatatypeFiller {
 
     Mapping inferMissingDatatypes(Mapping mapping, TBoxReasoner tBox, ImmutableOntologyVocabulary
             vocabulary, DBMetadata dbMetadata, ExecutorRegistry executorRegistry);

@@ -10,30 +10,15 @@ import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import static it.unibz.inf.ontop.mapping.pp.validation.impl.PPMappingOntologyComplianceValidatorImpl.PredicateType.*;
 
 
 public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntologyComplianceValidator {
-
-    public enum PredicateType {
-        CLASS,
-        OBJECT_PROPERTY,
-        ANNOTATION_PROPERTY,
-        DATATYPE_PROPERTY,
-        TRIPLE_PREDICATE
-    };
-
-    private ImmutableMap<PredicateType, String> PredicateTypeToErrorMessageSubstring =
-            ImmutableMap.<PredicateType, String>builder()
-                    .put(CLASS, "a Class")
-                    .put(DATATYPE_PROPERTY, "a Datatype Property")
-                    .put(ANNOTATION_PROPERTY, "an Annotation Property")
-                    .put(OBJECT_PROPERTY, "an Object Property")
-                    .build();
 
     private class Mismatch {
 
@@ -50,31 +35,55 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
         private String getPredicateName() {
             return predicateName;
         }
+
         private PredicateType getTypeInMapping() {
             return typeInMapping;
         }
+
         private PredicateType getTypeInOntology() {
             return typeInOntology;
         }
     }
 
-    public boolean validate(PreProcessedMapping preProcessedMapping, Ontology ontology) throws
-            MappingOntologyMismatchException {
+    public enum PredicateType {
+        CLASS,
+        OBJECT_PROPERTY,
+        ANNOTATION_PROPERTY,
+        DATATYPE_PROPERTY,
+        TRIPLE_PREDICATE
+    };
+
+    private final ImmutableMap<PredicateType, String> PredicateTypeToErrorMessageSubstring =
+            ImmutableMap.<PredicateType, String>builder()
+                    .put(CLASS, "a Class")
+                    .put(DATATYPE_PROPERTY, "a Datatype Property")
+                    .put(ANNOTATION_PROPERTY, "an Annotation Property")
+                    .put(OBJECT_PROPERTY, "an Object Property")
+                    .build();
+
+
+
+    @Override
+    public boolean validateMapping(PreProcessedMapping preProcessedMapping, ImmutableOntologyVocabulary signature,
+                             TBoxReasoner tBox)
+            throws MappingOntologyMismatchException {
+        ImmutableMap<Predicate, Datatype> predicate2DatatypeMap = computePredicateToDataTypeMap(tBox);
         return preProcessedMapping.getTripleMaps().stream()
-                .allMatch(t -> validate((PreProcessedTriplesMap) t, ontology.getVocabulary()));
+                .allMatch(t -> validateTriplesMap((PreProcessedTriplesMap) t, signature, tBox));
     }
 
-    private boolean validate(PreProcessedTriplesMap triplesMap, ImmutableOntologyVocabulary
-            ontologySignature) {
+    private boolean validateTriplesMap(PreProcessedTriplesMap triplesMap, ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox) {
         return triplesMap.getTargetAtoms().stream()
-                .allMatch(f -> validate(triplesMap, f, ontologySignature));
+                .allMatch(f -> validateTriple(triplesMap, f, ontologySignature, tBox));
     }
 
-    private boolean validate(PreProcessedTriplesMap triplesMap, ImmutableFunctionalTerm targetTriple, ImmutableOntologyVocabulary ontologySignature) throws MappingOntologyMismatchException {
+    private boolean validateTriple(PreProcessedTriplesMap triplesMap, ImmutableFunctionalTerm targetTriple, ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox)
+            throws MappingOntologyMismatchException {
         String predicateName = targetTriple.getFunctionSymbol().getName();
         Optional<Mismatch> mismatch = lookForMismatch(
                 predicateName,
                 ontologySignature,
+                tBox,
                 getPredicateType(targetTriple)
         );
 
@@ -110,7 +119,7 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
         throw new IllegalArgumentException("Unexpected type for predicate: " + predicate + " in target triple " + targetTriple);
     }
 
-    private Optional<Mismatch> lookForMismatch(String predicateName, ImmutableOntologyVocabulary ontologySignature, PredicateType typeInMapping) {
+    private Optional<Mismatch> lookForMismatch(String predicateName, ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox, PredicateType typeInMapping) {
 
         if (typeInMapping == TRIPLE_PREDICATE) {
             return Optional.empty();
@@ -156,6 +165,8 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
                             ANNOTATION_PROPERTY
                     ));
         }
+
+
         return Optional.empty();
     }
 
@@ -175,54 +186,72 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
 
     /**
      * Produces a map from datatypeProperty to corresponding datatype according to the ontology (the datatype may
-     * be
-     * inferred)
+     * be inferred).
+     * This is a rewriting of method:
+     * it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair#getDataTypeFromOntology
+     * from Ontop v 1.18.1
      */
-    private static ImmutableMap<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner){
+    private ImmutableMap<Predicate, Datatype> computePredicateToDataTypeMap(TBoxReasoner reasoner) {
 
-        final ImmutableMap.Builder<Predicate, Datatype> dataTypesMap = ImmutableMap.builder();
+        // TODO: switch to guava > 2.1, and replace by Streams.stream(iterable)
+        return StreamSupport.stream(reasoner.getDataRangeDAG().spliterator(), false)
+                .flatMap(n -> getPartialPredicateToDatatypeMap(n, reasoner).entrySet().stream())
+                .collect(ImmutableCollectors.toMap());
+    }
 
-        // Traverse the graph searching for dataProperty
-        for (Equivalences<DataRangeExpression> nodes : reasoner.getDataRangeDAG()) {
-            DataRangeExpression node = nodes.getRepresentative();
 
-            for (Equivalences<DataRangeExpression> descendants : reasoner.getDataRangeDAG().getSub(nodes)) {
-                DataRangeExpression descendant = descendants.getRepresentative();
-                if (descendant != node)
-                    dataTypesMap.put(onDataRangeInclusion(descendant, node);
-            }
-            for (DataRangeExpression equivalent : nodes) {
-                if (equivalent != node) {
-                    onDataRangeInclusion(dataTypesMap, node, equivalent);
-                    onDataRangeInclusion(dataTypesMap, equivalent, node);
+    private ImmutableMap<Predicate, Datatype> getPartialPredicateToDatatypeMap(Equivalences<DataRangeExpression> nodeSet, TBoxReasoner reasoner) {
+
+        DataRangeExpression node = nodeSet.getRepresentative();
+
+        return ImmutableMap.<Predicate, Datatype>builder()
+                .putAll(getEquivalentNodesPartialMap(node, nodeSet))
+                .putAll(getDescendentNodesPartialMap(reasoner, node, nodeSet))
+                .build();
+    }
+
+    private ImmutableMap<Predicate, Datatype> getDescendentNodesPartialMap(TBoxReasoner reasoner, DataRangeExpression node, Equivalences<DataRangeExpression> nodeSet) {
+        if (node instanceof Datatype) {
+            return reasoner.getDataRangeDAG().getSub(nodeSet).stream()
+                    .map(s -> s.getRepresentative())
+                    .filter(d -> d != node)
+                    .map(d -> getPredicate(d))
+                    .filter(d -> d.isPresent())
+                    .collect(ImmutableCollectors.toMap(
+                            d -> d.get(),
+                            d -> (Datatype) node
+                    ));
+        }
+        return ImmutableMap.of();
+    }
+
+    private ImmutableMap<Predicate, Datatype> getEquivalentNodesPartialMap(DataRangeExpression node, Equivalences<DataRangeExpression> nodeSet) {
+        ImmutableMap.Builder<Predicate, Datatype> builder = ImmutableMap.builder();
+        for (DataRangeExpression equivalent : nodeSet) {
+            if (equivalent != node) {
+                if (equivalent instanceof Datatype) {
+                    getPredicate(node)
+                            .ifPresent(p -> builder.put(p, (Datatype) equivalent));
+                }
+                if (node instanceof Datatype) {
+                    getPredicate(equivalent)
+                            .ifPresent(p -> builder.put(p, (Datatype) node));
                 }
             }
         }
-        return dataTypesMap;
+        return builder.build();
     }
 
-    private static void onDataRangeInclusion(Map<Predicate, Datatype> dataTypesMap, DataRangeExpression sub,
-                                             DataRangeExpression sup){
-        //if sup is a datatype property we store it in the map
-        //it means that sub is of datatype sup
-        if (sup instanceof Datatype) {
-            Datatype supDataType = (Datatype)sup;
-            Predicate key;
-            if (sub instanceof Datatype) {
-                // datatype inclusion
-                key = ((Datatype)sub).getPredicate();
-            }
-            else if (sub instanceof DataPropertyRangeExpression) {
-                // range
-                key = ((DataPropertyRangeExpression)sub).getProperty().getPredicate();
-            }
-            else
-                return;
 
-            if (dataTypesMap.containsKey(key))
-                throw new PredicateRedefinitionException("Predicate " + key + " with " + dataTypesMap.get(key)
-                        + " is redefined as " + supDataType + " in the ontology");
-            dataTypesMap.put(key, supDataType);
+    //TODO: check whether the DataRange expression can be neither a Datatype nor a DataPropertyRangeExpression:
+    // if the answer is no, drop the Optional and throw an exception instead
+    private Optional<Predicate> getPredicate(DataRangeExpression expression) {
+        if (expression instanceof Datatype) {
+            return Optional.of(((Datatype) expression).getPredicate());
         }
+        if (expression instanceof DataPropertyRangeExpression) {
+            return Optional.of(((DataPropertyRangeExpression) expression).getProperty().getPredicate());
+        }
+        return Optional.empty();
     }
 }

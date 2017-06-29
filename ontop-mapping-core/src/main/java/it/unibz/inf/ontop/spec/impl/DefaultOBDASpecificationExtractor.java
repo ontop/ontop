@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.Reader;
 import java.util.Optional;
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 
 public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtractor {
 
@@ -30,7 +31,9 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
     private final OntopMappingSettings settings;
     private final Mapping2DatalogConverter mapping2DatalogConverter;
 
-    public DefaultOBDASpecificationExtractor(MappingExtractor mappingExtractor, MappingTransformer mappingTransformer, OntopMappingSettings settings, Mapping2DatalogConverter mapping2DatalogConverter) {
+    @Inject
+    private DefaultOBDASpecificationExtractor(MappingExtractor mappingExtractor, MappingTransformer mappingTransformer,
+                                         OntopMappingSettings settings, Mapping2DatalogConverter mapping2DatalogConverter) {
         this.mappingExtractor = mappingExtractor;
         this.mappingTransformer = mappingTransformer;
         this.settings = settings;
@@ -70,6 +73,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
         MappingExtractor.MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
                 ppMapping,
                 optionalDBMetadata,
+                optionalOntology,
                 optionalInputTBox,
                 constraintFile,
                 executorRegistry

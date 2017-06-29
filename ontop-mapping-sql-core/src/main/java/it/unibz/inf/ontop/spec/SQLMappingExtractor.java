@@ -15,9 +15,11 @@ import it.unibz.inf.ontop.mapping.pp.validation.PPMappingOntologyComplianceValid
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
+import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.utils.SQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
@@ -37,28 +39,8 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 
-public class SQLMappingExtractor implements MappingExtractor<RDBMetadata> {
+public class SQLMappingExtractor implements MappingExtractor {
 
-
-    class SQLMappingAndDBMetadata implements MappingExtractor.MappingAndDBMetadata<RDBMetadata> {
-        private final Mapping mapping;
-        private final RDBMetadata metadata;
-
-        SQLMappingAndDBMetadata(Mapping mapping, RDBMetadata metadata) {
-            this.mapping = mapping;
-            this.metadata = metadata;
-        }
-
-        @Override
-        public Mapping getMapping() {
-            return mapping;
-        }
-
-        @Override
-        public RDBMetadata getDBMetadata() {
-            return metadata;
-        }
-    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SQLMappingExtractor.class);
 
@@ -84,12 +66,40 @@ public class SQLMappingExtractor implements MappingExtractor<RDBMetadata> {
     }
 
     @Override
-    public SQLMappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<RDBMetadata> dbMetadata, @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile, ExecutorRegistry executorRegistry)
+    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata,
+                                        @Nonnull Optional<Ontology> ontology, @Nonnull Optional<TBoxReasoner> tBox,
+                                        @Nonnull Optional<File> constraintsFile, ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
-        if (ppMapping instanceof SQLPPMapping) {
-            return convertPPMapping((SQLPPMapping) ppMapping, dbMetadata, tBox, constraintsFile, executorRegistry);
+
+        if(ontology.isPresent() != tBox.isPresent()){
+            throw new IllegalArgumentException("the Ontology and TBoxReasoner must be both present, or none");
         }
-        throw new IllegalArgumentException("SQLMappingExtractor only accepts a SQLPPMapping as PreProcessedMapping");
+
+        SQLPPMapping castPPMapping = castPPMapping(ppMapping);
+        Optional<RDBMetadata> catDBMetadata = castDBMetadata(dbMetadata);
+
+        ontology.ifPresent(o -> ontologyComplianceValidator.validateMapping(castPPMapping, o.getVocabulary(), tBox.get()));
+        return convertPPMapping(castPPMapping, catDBMetadata, constraintsFile, executorRegistry);
+    }
+
+    private SQLPPMapping castPPMapping(PreProcessedMapping ppMapping) {
+        if(ppMapping instanceof SQLPPMapping){
+            return (SQLPPMapping) ppMapping;
+        }
+        throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName()+" only supports instances of " +
+                SQLPPMapping.class.getSimpleName());
+    }
+
+    private Optional<RDBMetadata> castDBMetadata(@Nonnull Optional<DBMetadata> optionalDBMetadata) {
+        if(optionalDBMetadata.isPresent()){
+            DBMetadata md = optionalDBMetadata.get();
+            if(optionalDBMetadata.get() instanceof RDBMetadata){
+                return Optional.of((RDBMetadata) md);
+            }
+            throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName()+" only supports instances of " +
+                    SQLPPMapping.class.getSimpleName());
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -107,11 +117,9 @@ public class SQLMappingExtractor implements MappingExtractor<RDBMetadata> {
         return mappingParser.parse(mappingGraph);
     }
 
-    private SQLMappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
-                                                  Optional<TBoxReasoner> ontology, Optional<File> constraintFile,
-                                                  ExecutorRegistry executorRegistry) {
+    private MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
+                                                  Optional<File> constraintFile, ExecutorRegistry executorRegistry) {
 
-        ontology.ifPresent(o -> ontologyComplianceValidator.validate(ppMapping, o));
 
         RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, constraintFile);
         ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
@@ -131,7 +139,7 @@ public class SQLMappingExtractor implements MappingExtractor<RDBMetadata> {
                 executorRegistry,
                 ppMapping.getMetadata()
         );
-        return new SQLMappingAndDBMetadata(mapping, dbMetadata);
+        return new MappingAndDBMetadataImpl(mapping, dbMetadata);
     }
 
 

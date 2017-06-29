@@ -20,18 +20,20 @@ public class DefaultMappingTransformer implements MappingTransformer{
     private final MappingCanonicalRewriter mappingCanonicalRewriter;
     private final MappingNormalizer mappingNormalizer;
     private final MappingSaturator mappingSaturator;
-    private final MissingDatatypeMappingExpander missingDatatypeMappingExpander;
-    private final ABoxFactsMappingExpander aBoxFactsMappingExpander;
+    private final MappingDatatypeFiller mappingDatatypeFiller;
+    private final ABoxFactIntoMappingConverter factConverter;
+    private final MappingMerger mappingMerger;
     private final OntopMappingSettings settings;
     private final SpecificationFactory specificationFactory;
 
     @Inject
-    public DefaultMappingTransformer(MappingCanonicalRewriter mappingCanonicalRewriter, MappingNormalizer mappingNormalizer, MappingSaturator mappingSaturator, MissingDatatypeMappingExpander missingDatatypeMappingExpander, ABoxFactsMappingExpander aBoxFactsMappingExpander, OntopMappingSettings settings, SpecificationFactory specificationFactory) {
+    public DefaultMappingTransformer(MappingCanonicalRewriter mappingCanonicalRewriter, MappingNormalizer mappingNormalizer, MappingSaturator mappingSaturator, MappingDatatypeFiller mappingDatatypeFiller, ABoxFactIntoMappingConverter inserter, MappingMerger mappingMerger, OntopMappingSettings settings, SpecificationFactory specificationFactory) {
         this.mappingCanonicalRewriter = mappingCanonicalRewriter;
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
-        this.missingDatatypeMappingExpander = missingDatatypeMappingExpander;
-        this.aBoxFactsMappingExpander = aBoxFactsMappingExpander;
+        this.mappingDatatypeFiller = mappingDatatypeFiller;
+        this.factConverter = inserter;
+        this.mappingMerger = mappingMerger;
         this.settings = settings;
         this.specificationFactory = specificationFactory;
     }
@@ -39,11 +41,12 @@ public class DefaultMappingTransformer implements MappingTransformer{
     @Override
     public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Ontology ontology, TBoxReasoner tBox,
                                        ExecutorRegistry executorRegistry) throws MappingException, OntologyException {
-        Mapping datatypedMapping = missingDatatypeMappingExpander.inferMissingDatatypes(mapping, tBox, ontology
+        Mapping datatypedMapping = mappingDatatypeFiller.inferMissingDatatypes(mapping, tBox, ontology
                 .getVocabulary(), dbMetadata, executorRegistry);
-        Mapping mappingExtendedWithFacts = aBoxFactsMappingExpander.insertFacts(datatypedMapping, ontology, dbMetadata,
-                executorRegistry, settings.isOntologyAnnotationQueryingEnabled());
-        Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(mappingExtendedWithFacts, dbMetadata);
+        Mapping factsAsMapping = factConverter.convert(ontology, executorRegistry, mapping.getMetadata(),
+                settings.isOntologyAnnotationQueryingEnabled());
+        Mapping mappingWithFacts = mappingMerger.merge(datatypedMapping, factsAsMapping);
+        Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(mappingWithFacts, dbMetadata);
         Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tBox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 

@@ -83,7 +83,13 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             throws DBMetadataExtractionException, MappingException {
 
 
-        optionalOntology.ifPresent(o -> ontologyComplianceValidator.validate(initialPPMapping, o));
+        optionalOntology.ifPresent(o -> ontologyComplianceValidator.validateMapping(
+                initialPPMapping,
+                o.getVocabulary(),
+                TBoxReasonerImpl.create(
+                        o,
+                        settings.isEquivalenceOptimizationEnabled()
+                )));
 
         RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
 

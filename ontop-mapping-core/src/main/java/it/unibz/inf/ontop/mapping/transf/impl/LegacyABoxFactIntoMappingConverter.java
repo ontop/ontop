@@ -2,14 +2,15 @@ package it.unibz.inf.ontop.mapping.transf.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.mapping.transf.ABoxFactsMappingExpander;
 import it.unibz.inf.ontop.mapping.Mapping;
+import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
+import it.unibz.inf.ontop.mapping.transf.ABoxFactIntoMappingConverter;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.sql.DBMetadataTestingTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,52 +20,53 @@ import java.util.List;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-public class LegacyABoxFactsMappingExpander implements ABoxFactsMappingExpander {
+public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingConverter {
 
     private final Mapping2DatalogConverter mapping2DatalogConverter;
     private final Datalog2QueryMappingConverter datalog2QueryMappingConverter;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LegacyABoxFactsMappingExpander.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LegacyABoxFactIntoMappingConverter.class);
 
     @Inject
-    public LegacyABoxFactsMappingExpander(Mapping2DatalogConverter mapping2DatalogConverter,
-                                          Datalog2QueryMappingConverter datalog2QueryMappingConverter) {
+    public LegacyABoxFactIntoMappingConverter(Mapping2DatalogConverter mapping2DatalogConverter,
+                                              Datalog2QueryMappingConverter datalog2QueryMappingConverter) {
         this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
     }
 
     @Override
-    public Mapping insertFacts(Mapping inputMapping, Ontology ontology, DBMetadata dbMetadata, ExecutorRegistry
-            executorRegistry, boolean isOntologyAnnotationQueryingEnabled) {
+    public Mapping convert(Ontology ontology, ExecutorRegistry executorRegistry, MappingMetadata mappingMetadata,
+                           boolean isOntologyAnnotationQueryingEnabled) {
 
         List<AnnotationAssertion> annotationAssertions = isOntologyAnnotationQueryingEnabled ?
                 ontology.getAnnotationAssertions() :
                 Collections.emptyList();
 
-        ImmutableList<CQIE> rules = mapping2DatalogConverter.convert(inputMapping)
-                .collect(ImmutableCollectors.toList());
+//        ImmutableList<CQIE> rules = mapping2DatalogConverter.convert(inputMapping)
+//                .collect(ImmutableCollectors.toList());
         // Adding ontology assertions (ABox) as rules (facts, head with no body).
-        ImmutableList<CQIE> expandedRules = addAssertionsAsFacts(
-                rules,
+        DBMetadata dummyDBMetadata = DBMetadataTestingTools.createDummyMetadata();
+        ImmutableList<CQIE> rules = convertAssertions(
                 ontology.getClassAssertions(),
                 ontology.getObjectPropertyAssertions(),
                 ontology.getDataPropertyAssertions(),
                 annotationAssertions,
-                inputMapping.getMetadata().getUriTemplateMatcher()
+                mappingMetadata.getUriTemplateMatcher()
         );
-        return datalog2QueryMappingConverter.convertMappingRules(expandedRules, dbMetadata, executorRegistry,
-                inputMapping.getMetadata());
+
+        return datalog2QueryMappingConverter.convertMappingRules(rules, dummyDBMetadata, executorRegistry, mappingMetadata);
     }
 
     /***
      * Adding ontology assertions (ABox) as rules (facts, head with no body).
      */
-    private ImmutableList<CQIE> addAssertionsAsFacts(ImmutableList<CQIE> mapping, Iterable<ClassAssertion> cas,
-                                                     Iterable<ObjectPropertyAssertion> pas,
-                                                     Iterable<DataPropertyAssertion> das, List<AnnotationAssertion> aas,
-                                                     UriTemplateMatcher uriTemplateMatcher) {
+    private ImmutableList<CQIE> convertAssertions(Iterable<ClassAssertion> cas,
+                                                  Iterable<ObjectPropertyAssertion> pas,
+                                                  Iterable<DataPropertyAssertion> das,
+                                                  List<AnnotationAssertion> aas,
+                                                  UriTemplateMatcher uriTemplateMatcher) {
 
-        List<CQIE> mutableMapping = new ArrayList<>(mapping);
+        List<CQIE> mutableMapping = new ArrayList<>();
 
         int count = 0;
         for (ClassAssertion ca : cas) {

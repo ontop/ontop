@@ -16,39 +16,27 @@ import java.io.Reader;
 import java.util.Optional;
 
 
-public class FakeMappingExtractor implements MappingExtractor<DBMetadata> {
+public class FakeMappingExtractor implements MappingExtractor {
 
     private static final String MESSAGE = "Using a FakeMappingExtractor! Please use a proper implementation instead";
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<TBoxReasoner> tBox, Optional<File> constraintFile,
-                                        ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException {
+    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping mapping, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology, @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile, ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintFile,
-                                        ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException {
+    public PreProcessedMapping loadPPMapping(File mappingFile) {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintFile,
-                                        ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException {
+    public PreProcessedMapping loadPPMapping(Reader mappingReader) {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping mapping, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintFile,
-                                        ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException {
+    public PreProcessedMapping loadPPMapping(Model mappingGraph) {
         throw new UnsupportedOperationException(MESSAGE);
     }
 }

@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
-import it.unibz.inf.ontop.mapping.transf.MissingDatatypeMappingExpander;
+import it.unibz.inf.ontop.mapping.transf.MappingDatatypeFiller;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
@@ -16,14 +16,22 @@ import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeC
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-public class LegacySQLMissingDatatypeMappingExpander implements MissingDatatypeMappingExpander{
+/**
+ * Legacy code to infer datatypes not declared in the targets of mapping assertions
+ * Currently infers some types from the ontology and/or the DB metadata (see comments of method inferMissingDataTypes
+ * for detailed behavior)
+ *
+ * TODO: rewrite in a Datalog independent fashion, and with the desired behavior (no datatype is inferred from the
+ * ontology)
+ */
+public class LegacySQLMappingDatatypeFiller implements MappingDatatypeFiller {
 
 
     private final Datalog2QueryMappingConverter datalog2QueryMappingConverter;
     private final Mapping2DatalogConverter mapping2DatalogConverter;
 
     @Inject
-    public LegacySQLMissingDatatypeMappingExpander(Datalog2QueryMappingConverter datalog2QueryMappingConverter, Mapping2DatalogConverter mapping2DatalogConverter) {
+    public LegacySQLMappingDatatypeFiller(Datalog2QueryMappingConverter datalog2QueryMappingConverter, Mapping2DatalogConverter mapping2DatalogConverter) {
         this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
         this.mapping2DatalogConverter = mapping2DatalogConverter;
 

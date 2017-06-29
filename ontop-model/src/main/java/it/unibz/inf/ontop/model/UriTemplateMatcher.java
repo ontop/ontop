@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.model;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.pivotalrepr.mapping.TargetAtom;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -33,136 +34,162 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class UriTemplateMatcher {
 
-	private UriTemplateMatcher() {
-	}
+    private UriTemplateMatcher() {
+    }
 
-	private final Map<Pattern, ImmutableFunctionalTerm> uriTemplateMatcher = new HashMap<>();
+    private final Map<Pattern, ImmutableFunctionalTerm> uriTemplateMatcher = new HashMap<>();
 
-	public static UriTemplateMatcher createFromTargetAtoms(Stream<TargetAtom> targetAtoms) {
-		return create(targetAtoms
-				.map(TargetAtom::getSubstitution)
-				// URI constructors can be found in the co-domain of the substitution
-				.flatMap(s -> s.getImmutableMap().values().stream())
-				.filter(t -> t instanceof ImmutableFunctionalTerm)
-				.map(t -> (ImmutableFunctionalTerm) t));
-	}
+    public static UriTemplateMatcher createFromTargetAtoms(Stream<TargetAtom> targetAtoms) {
+        return create(targetAtoms
+                .map(TargetAtom::getSubstitution)
+                // URI constructors can be found in the co-domain of the substitution
+                .flatMap(s -> s.getImmutableMap().values().stream())
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t));
+    }
 
-	/**
-	 * TODO: refactor using streaming.
-	 */
-	public static UriTemplateMatcher create(Stream<? extends ImmutableFunctionalTerm> targetAtomStream) {
-		Set<String> templateStrings = new HashSet<>();
-		
-		UriTemplateMatcher uriTemplateMatcher  = new UriTemplateMatcher();
+    /**
+     * TODO: refactor using streaming.
+     */
+    public static UriTemplateMatcher create(Stream<? extends ImmutableFunctionalTerm> targetAtomStream) {
+        Set<String> templateStrings = new HashSet<>();
 
-		ImmutableList<? extends ImmutableFunctionalTerm> targetAtoms = targetAtomStream.collect(ImmutableCollectors.toList());
+        UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
 
-		for (ImmutableFunctionalTerm fun : targetAtoms) {
+        ImmutableList<? extends ImmutableFunctionalTerm> targetAtoms = targetAtomStream.collect(ImmutableCollectors.toList());
 
-		 // Collecting URI templates and making pattern matchers for them.
-			if (!(fun.getFunctionSymbol() instanceof URITemplatePredicate)) {
-				continue;
-			}
-			/*
+        for (ImmutableFunctionalTerm fun : targetAtoms) {
+
+            // Collecting URI templates and making pattern matchers for them.
+            if (!(fun.getFunctionSymbol() instanceof URITemplatePredicate)) {
+                continue;
+            }
+            /*
 			 * This is a URI function, so it can generate pattern matchers
 			 * for the URIs. We have two cases, one where the arity is 1,
 			 * and there is a constant/variable. The second case is
 			 * where the first element is a string template of the URI, and
 			 * the rest of the terms are variables/constants
 			 */
-			if (fun.getTerms().size() == 1) {
+            if (fun.getTerms().size() == 1) {
 				/*
 				 * URI without template, we get it directly from the column
 				 * of the table, and the function is only f(x)
 				 */
-				if (templateStrings.contains("(.+)")) {
-					continue;
-				}
+                if (templateStrings.contains("(.+)")) {
+                    continue;
+                }
 
-				ImmutableFunctionalTerm templateFunction = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getVariable("x"));
-				Pattern matcher = Pattern.compile("(.+)");
-				uriTemplateMatcher.uriTemplateMatcher.put(matcher, templateFunction);
-				templateStrings.add("(.+)");
-			} else {
-				ValueConstant template = (ValueConstant) fun.getTerms().get(0);
-				String templateString = template.getValue();
-				templateString = templateString.replace("{}", "(.+)");
+                ImmutableFunctionalTerm templateFunction = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getVariable("x"));
+                Pattern matcher = Pattern.compile("(.+)");
+                uriTemplateMatcher.uriTemplateMatcher.put(matcher, templateFunction);
+                templateStrings.add("(.+)");
+            } else {
+                ValueConstant template = (ValueConstant) fun.getTerms().get(0);
+                String templateString = template.getValue();
+                templateString = templateString.replace("{}", "(.+)");
 
-				if (templateStrings.contains(templateString)) {
-					continue;
-				}
+                if (templateStrings.contains(templateString)) {
+                    continue;
+                }
 
-				Pattern matcher = Pattern.compile(templateString);
-				uriTemplateMatcher.uriTemplateMatcher.put(matcher, fun);
-				templateStrings.add(templateString);
+                Pattern matcher = Pattern.compile(templateString);
+                uriTemplateMatcher.uriTemplateMatcher.put(matcher, fun);
+                templateStrings.add(templateString);
 
-			}
-		}
-		return uriTemplateMatcher;
-	}
-	
-	
-	/***
-	 * We will try to match the URI to one of our patterns, if this happens, we
-	 * have a corresponding function, and the parameters for this function. The
-	 * parameters are the values for the groups of the pattern.
-	 */
-	public ImmutableFunctionalTerm generateURIFunction(String uriString) {
-		ImmutableFunctionalTerm functionURI = null;
+            }
+        }
+        return uriTemplateMatcher;
+    }
 
-		List<Pattern> patternsMatched = new LinkedList<>();
-		for (Pattern pattern : uriTemplateMatcher.keySet()) {
+    public static UriTemplateMatcher merge(Stream<UriTemplateMatcher> uriTemplateMatchers) {
 
-			Matcher matcher = pattern.matcher(uriString);
-			boolean match = matcher.matches();
-			if (!match) {
-				continue;
-			}
-			patternsMatched.add(pattern);
-		}
-		Comparator<Pattern> comparator = new Comparator<Pattern>() {
-		    public int compare(Pattern c1, Pattern c2) {
-		        return c2.pattern().length() - c1.pattern().length() ; // use your logic
-		    }
-		};
+        ImmutableMap<Pattern, Collection<ImmutableFunctionalTerm>> pattern2Terms = uriTemplateMatchers
+                .flatMap(m -> m.getMap().entrySet().stream())
+                .collect(ImmutableCollectors.toMultimap())
+                .asMap();
 
-		Collections.sort(patternsMatched, comparator); 
-		for (Pattern pattern : patternsMatched) {
-			ImmutableFunctionalTerm matchingFunction = uriTemplateMatcher.get(pattern);
-			ImmutableTerm baseParameter = matchingFunction.getTerm(0);
-			if (baseParameter instanceof Constant) {
+        ImmutableMap<Pattern, ImmutableFunctionalTerm> pattern2Term = pattern2Terms.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> e.getKey(),
+                        e -> flatten(e.getKey(), e.getValue())
+                ));
+        UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
+        uriTemplateMatcher.uriTemplateMatcher.putAll(pattern2Term);
+        return uriTemplateMatcher;
+    }
+
+    private static ImmutableFunctionalTerm flatten(Pattern pattern, Collection<ImmutableFunctionalTerm> collection) {
+        if (collection.size() == 1) {
+            return collection.iterator().next();
+        }
+        throw new IllegalArgumentException("Conflicting term for pattern" + pattern + ": " + collection);
+    }
+
+    /***
+     * We will try to match the URI to one of our patterns, if this happens, we
+     * have a corresponding function, and the parameters for this function. The
+     * parameters are the values for the groups of the pattern.
+     */
+    public ImmutableFunctionalTerm generateURIFunction(String uriString) {
+        ImmutableFunctionalTerm functionURI = null;
+
+        List<Pattern> patternsMatched = new LinkedList<>();
+        for (Pattern pattern : uriTemplateMatcher.keySet()) {
+
+            Matcher matcher = pattern.matcher(uriString);
+            boolean match = matcher.matches();
+            if (!match) {
+                continue;
+            }
+            patternsMatched.add(pattern);
+        }
+        Comparator<Pattern> comparator = new Comparator<Pattern>() {
+            public int compare(Pattern c1, Pattern c2) {
+                return c2.pattern().length() - c1.pattern().length(); // use your logic
+            }
+        };
+
+        Collections.sort(patternsMatched, comparator);
+        for (Pattern pattern : patternsMatched) {
+            ImmutableFunctionalTerm matchingFunction = uriTemplateMatcher.get(pattern);
+            ImmutableTerm baseParameter = matchingFunction.getTerm(0);
+            if (baseParameter instanceof Constant) {
 				/*
 				 * This is a general template function of the form
 				 * uri("http://....", var1, var2,...) <p> we need to match var1,
 				 * var2, etc with substrings from the subjectURI
 				 */
-				Matcher matcher = pattern.matcher(uriString);
-				if ( matcher.matches()) {
-					ImmutableList.Builder<ImmutableTerm> values = ImmutableList.builder();
-					values.add(baseParameter);
-					for (int i = 0; i < matcher.groupCount(); i++) {
-						String value = matcher.group(i + 1);
-						values.add(DATA_FACTORY.getConstantLiteral(value));
-					}
-					functionURI = DATA_FACTORY.getImmutableUriTemplate(values.build());
-				}
-			} 
-			else if (baseParameter instanceof Variable) {
+                Matcher matcher = pattern.matcher(uriString);
+                if (matcher.matches()) {
+                    ImmutableList.Builder<ImmutableTerm> values = ImmutableList.builder();
+                    values.add(baseParameter);
+                    for (int i = 0; i < matcher.groupCount(); i++) {
+                        String value = matcher.group(i + 1);
+                        values.add(DATA_FACTORY.getConstantLiteral(value));
+                    }
+                    functionURI = DATA_FACTORY.getImmutableUriTemplate(values.build());
+                }
+            } else if (baseParameter instanceof Variable) {
 				/*
 				 * This is a direct mapping to a column, uri(x)
 				 * we need to match x with the subjectURI
 				 */
-				functionURI = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getConstantLiteral(uriString));
-			}
-			break;
-		}
-		if (functionURI == null) {
+                functionURI = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getConstantLiteral(uriString));
+            }
+            break;
+        }
+        if (functionURI == null) {
 			/* If we cannot match against a template, we try to match against the most general template (which will
 			 * generate empty queries later in the query answering process
 			 */
-			functionURI = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getConstantLiteral(uriString));
-		}
-			
-		return functionURI;
-	}
+            functionURI = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getConstantLiteral(uriString));
+        }
+
+        return functionURI;
+    }
+
+    private ImmutableMap<Pattern, ImmutableFunctionalTerm> getMap() {
+        return ImmutableMap.copyOf(uriTemplateMatcher);
+    }
 }
