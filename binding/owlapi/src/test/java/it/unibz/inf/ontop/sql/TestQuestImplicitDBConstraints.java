@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
  */
 public class TestQuestImplicitDBConstraints {
 
-	private static final String RESOURCE_DIR = "../quest-sesame/src/test/resources/userconstraints/";
+	private static final String RESOURCE_DIR = "src/test/resources/userconstraints/";
 	static String uc_owlfile = RESOURCE_DIR + "uc.owl";
 	static String uc_obdafile = RESOURCE_DIR + "uc.obda";
 	static String uc_keyfile = RESOURCE_DIR + "keys.lst";
