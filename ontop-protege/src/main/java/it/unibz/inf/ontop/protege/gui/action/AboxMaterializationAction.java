@@ -70,6 +70,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 	private OWLWorkspace workspace;
 	private OWLModelManager modelManager;
 	private String lineSeparator;
+	private OBDAModelManager obdaModelManager;
 
 	private Logger log = LoggerFactory.getLogger(AboxMaterializationAction.class);
 	
@@ -78,6 +79,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		editorKit = (OWLEditorKit)getEditorKit();
 		workspace = editorKit.getWorkspace();
 		modelManager = editorKit.getOWLModelManager();
+		obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
 		lineSeparator = System.getProperty("line.separator");
 	}
 
@@ -205,8 +207,6 @@ public class AboxMaterializationAction extends ProtegeAction {
 						throw new Exception("Unknown format: " + format);
 				}
 
-				OBDAModelManager obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
-
 				OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
 
 				try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(configuration, DO_STREAM_RESULTS)) {
@@ -254,9 +254,6 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 		if (response == JOptionPane.YES_OPTION) {
 			try {
-
-
-				OBDAModelManager obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
 
 				OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
 

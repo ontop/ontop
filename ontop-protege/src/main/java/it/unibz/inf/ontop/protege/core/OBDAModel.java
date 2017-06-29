@@ -137,7 +137,7 @@ public class OBDAModel {
         return prefixManager;
     }
 
-    public ImmutableList<SQLPPTriplesMap> getMappings(URI sourceUri) {
+    public ImmutableList<SQLPPTriplesMap> getMapping(URI sourceUri) {
         if (sourceUri.equals(getSourceId()))
             return ImmutableList.copyOf(triplesMapMap.values());
         else
@@ -148,7 +148,7 @@ public class OBDAModel {
         return ImmutableList.of(source);
     }
 
-    public SQLPPTriplesMap getMapping(String mappingId) {
+    public SQLPPTriplesMap getTriplesMap(String mappingId) {
         return triplesMapMap.get(mappingId);
     }
 
@@ -238,7 +238,7 @@ public class OBDAModel {
 
         if (counter.get() > initialCount) {
             if (newTargetAtoms.isEmpty()) {
-                removeMapping(getSourceId(), formerTriplesMap.getId());
+                removeTriplesMap(getSourceId(), formerTriplesMap.getId());
                 return Optional.empty();
             }
             else {
@@ -308,7 +308,7 @@ public class OBDAModel {
 
 
     @Deprecated
-    public void addMapping(URI sourceID, SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent)
+    public void addTriplesMap(URI sourceID, SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent)
             throws DuplicateMappingException {
         String mapId = triplesMap.getId();
 
@@ -317,10 +317,10 @@ public class OBDAModel {
         triplesMapMap.put(mapId, triplesMap);
 
         if (!disableFiringMappingInsertedEvent)
-            fireMappingInserted(sourceID, mapId);
+            fireMappingInserted(sourceID);
     }
 
-    public void addMapping(SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent)
+    public void addTriplesMap(SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent)
             throws DuplicateMappingException {
         String mapId = triplesMap.getId();
 
@@ -329,17 +329,17 @@ public class OBDAModel {
         triplesMapMap.put(mapId, triplesMap);
 
         if (!disableFiringMappingInsertedEvent)
-            fireMappingInserted(source.getSourceID(), mapId);
+            fireMappingInserted(source.getSourceID());
     }
 
 
-    public void removeMapping(URI dataSourceURI, String mappingId) {
+    public void removeTriplesMap(URI dataSourceURI, String mappingId) {
         if (triplesMapMap.remove(mappingId) != null)
             fireMappingDeleted(dataSourceURI, mappingId);
     }
 
     public void updateMappingsSourceQuery(URI sourceURI, String triplesMapId, OBDASQLQuery sourceQuery) {
-        SQLPPTriplesMap formerTriplesMap = getMapping(triplesMapId);
+        SQLPPTriplesMap formerTriplesMap = getTriplesMap(triplesMapId);
 
         if (formerTriplesMap != null) {
             SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(triplesMapId, sourceQuery,
@@ -350,7 +350,7 @@ public class OBDAModel {
     }
 
     public void updateTargetQueryMapping(URI sourceID, String id, ImmutableList<ImmutableFunctionalTerm> targetQuery) {
-        SQLPPTriplesMap formerTriplesMap = getMapping(id);
+        SQLPPTriplesMap formerTriplesMap = getTriplesMap(id);
 
         if (formerTriplesMap != null) {
             SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(id, formerTriplesMap.getSourceQuery(),
@@ -361,7 +361,7 @@ public class OBDAModel {
     }
 
     public void updateMapping(URI dataSourceIRI, String formerMappingId, String newMappingId) {
-        SQLPPTriplesMap formerTriplesMap = getMapping(formerMappingId);
+        SQLPPTriplesMap formerTriplesMap = getTriplesMap(formerMappingId);
 
         if (formerTriplesMap != null) {
             SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(newMappingId, formerTriplesMap.getSourceQuery(),
@@ -396,7 +396,7 @@ public class OBDAModel {
     /**
      * Announces to the listeners that a mapping was inserted.
      */
-    private void fireMappingInserted(URI srcuri, String mapping_id) {
+    private void fireMappingInserted(URI srcuri) {
         for (OBDAMappingListener listener : mappingListeners) {
             listener.mappingInserted(srcuri);
         }
