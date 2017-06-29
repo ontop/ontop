@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
@@ -33,7 +34,7 @@ public class SameAsRewriter {
     }
 
     public DatalogProgram getSameAsRewriting(DatalogProgram pr) {
-        DatalogProgram result = DATA_FACTORY.getDatalogProgram(pr.getQueryModifiers());
+        DatalogProgram result = DATALOG_FACTORY.getDatalogProgram(pr.getQueryModifiers());
 
         for (CQIE q: pr.getRules()) {
             List<Function> body = new ArrayList<>(q.getBody().size());
@@ -41,7 +42,7 @@ public class SameAsRewriter {
                 Function ap = addSameAs(a, result, "sameAs" + (rules++));
                 body.add(ap);
             }
-            result.appendRule(DATA_FACTORY.getCQIE(q.getHead(), body));
+            result.appendRule(DATALOG_FACTORY.getCQIE(q.getHead(), body));
         }
         return result;
     }
@@ -89,7 +90,7 @@ public class SameAsRewriter {
     private CQIE createRule(DatalogProgram pr, String headName, List<Term> headParameters, Function... body) {
         Predicate pred = DATA_FACTORY.getPredicate(headName, headParameters.size());
         Function head = DATA_FACTORY.getFunction(pred, headParameters);
-        CQIE rule = DATA_FACTORY.getCQIE(head, body);
+        CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
         pr.appendRule(rule);
         return rule;
     }

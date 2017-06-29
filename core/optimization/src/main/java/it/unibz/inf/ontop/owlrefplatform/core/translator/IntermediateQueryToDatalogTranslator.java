@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertToMutableFunction;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
@@ -104,10 +105,10 @@ public class IntermediateQueryToDatalogTranslator {
 			MutableQueryModifiers mutableModifiers = new MutableQueryModifiersImpl(immutableQueryModifiers);
 			// TODO: support GROUP BY (distinct QueryNode)
 
-            dProgram = DATA_FACTORY.getDatalogProgram(mutableModifiers);
+            dProgram = DATALOG_FACTORY.getDatalogProgram(mutableModifiers);
 		}
         else {
-            dProgram = DATA_FACTORY.getDatalogProgram();
+            dProgram = DATALOG_FACTORY.getDatalogProgram();
         }
 
 		translate(query,  dProgram, root);
@@ -146,7 +147,7 @@ public class IntermediateQueryToDatalogTranslator {
 			List<Function> atoms = new LinkedList<>();
 
 			//Constructing the rule
-			CQIE newrule = DATA_FACTORY.getCQIE(convertToMutableFunction(substitutedHeadAtom), atoms);
+			CQIE newrule = DATALOG_FACTORY.getCQIE(convertToMutableFunction(substitutedHeadAtom), atoms);
 
 			pr.appendRule(newrule);
 
@@ -224,11 +225,11 @@ public class IntermediateQueryToDatalogTranslator {
 			if (filter.isPresent()){
 				ImmutableExpression filter2 = filter.get();
 				Expression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter2);
-				Function newLJAtom = DATA_FACTORY.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.of(mutFilter));
+				Function newLJAtom = DATALOG_FACTORY.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.of(mutFilter));
 				body.add(newLJAtom);
 				return body;
 			}else{
-				Function newLJAtom = DATA_FACTORY.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.empty());
+				Function newLJAtom = DATALOG_FACTORY.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.empty());
 				body.add(newLJAtom);
 				return body;
 			}
@@ -348,8 +349,8 @@ public class IntermediateQueryToDatalogTranslator {
 		}
 
 		return optionalCondition.isPresent()
-				? DATA_FACTORY.getSPARQLJoin(atoms.get(0), rightTerm, optionalCondition.get())
-				: DATA_FACTORY.getSPARQLJoin(atoms.get(0), rightTerm);
+				? DATALOG_FACTORY.getSPARQLJoin(atoms.get(0), rightTerm, optionalCondition.get())
+				: DATALOG_FACTORY.getSPARQLJoin(atoms.get(0), rightTerm);
 	}
 
 }

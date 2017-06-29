@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.term.Term;
 
 import java.util.ArrayList;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
@@ -37,7 +38,7 @@ public class FunctionFlattener {
         }
 
         MutableQueryModifiers newModifiers = program.getQueryModifiers().clone();
-        return DATA_FACTORY.getDatalogProgram(newModifiers, newRules);
+        return DATALOG_FACTORY.getDatalogProgram(newModifiers, newRules);
     }
 
     /**
@@ -45,7 +46,7 @@ public class FunctionFlattener {
      */
     public static CQIE flattenRule(CQIE rule) {
         CQIE newRule = rule.clone();
-        return DATA_FACTORY.getCQIE(newRule.getHead(), flattenTopJoinAndConjunctionAtoms(rule.getBody()));
+        return DATALOG_FACTORY.getCQIE(newRule.getHead(), flattenTopJoinAndConjunctionAtoms(rule.getBody()));
     }
 
 

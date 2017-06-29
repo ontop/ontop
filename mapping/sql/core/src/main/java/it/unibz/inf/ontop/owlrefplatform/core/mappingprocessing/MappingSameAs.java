@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class MappingSameAs {
@@ -25,7 +26,7 @@ public class MappingSameAs {
                     Function inversedHead = DATA_FACTORY.getFunction(head.getFunctionSymbol(),
                             head.getTerm(1),
                             head.getTerm(0));
-                    return DATA_FACTORY.getCQIE(inversedHead, new ArrayList<>(r.getBody()));
+                    return DATALOG_FACTORY.getCQIE(inversedHead, new ArrayList<>(r.getBody()));
                 });
 
         return Stream.concat(mappingRules.stream(), newRuleStream)

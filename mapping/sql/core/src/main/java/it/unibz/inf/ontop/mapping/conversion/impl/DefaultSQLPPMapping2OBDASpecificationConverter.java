@@ -46,6 +46,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -288,7 +289,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             Predicate p = ca.getConcept().getPredicate();
             Function head = DATA_FACTORY.getFunction(p,
                     uriTemplateMatcher.generateURIFunction(c.getURI()));
-            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.emptyList());
+            CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -304,7 +305,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
             Function head = DATA_FACTORY.getFunction(p,
                     uriTemplateMatcher.generateURIFunction(s.getURI()),
                     uriTemplateMatcher.generateURIFunction(o.getURI()));
-            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.emptyList());
+            CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -330,7 +331,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
                 head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(
                         DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(o, o.getType()));
             }
-            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.emptyList());
+            CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count ++;
@@ -369,7 +370,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
 
             }
-            CQIE rule = DATA_FACTORY.getCQIE(head, Collections.emptyList());
+            CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -501,7 +502,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 				 */
                 newhead = (Function) currenthead.clone();
             }
-            CQIE newmapping = DATA_FACTORY.getCQIE(newhead, mapping.getBody());
+            CQIE newmapping = DATALOG_FACTORY.getCQIE(newhead, mapping.getBody());
             newmappings.add(newmapping);
         }
         return newmappings;

@@ -60,6 +60,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
@@ -93,7 +94,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
 		this.uriTemplateMatcher = uriTemplateMatcher;
 		this.uriRef = iriDictionary.orElse(null);
 
-        this.program = DATA_FACTORY.getDatalogProgram();
+        this.program = DATALOG_FACTORY.getDatalogProgram();
     }
 
 	/**
@@ -224,7 +225,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
     }
 
     private void appendRule(Function head, List<Function> body) {
-        CQIE rule = DATA_FACTORY.getCQIE(head, body);
+        CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
         program.appendRule(rule);
     }
 
@@ -286,7 +287,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
                 return new TranslationResult(atoms, vars, true);
             }
             else {
-                Function body = DATA_FACTORY.getSPARQLJoin(wrapNonTriplePattern(a1),
+                Function body = DATALOG_FACTORY.getSPARQLJoin(wrapNonTriplePattern(a1),
                         wrapNonTriplePattern(a2));
 
                 return new TranslationResult(ImmutableList.of(body), vars, false);
@@ -298,7 +299,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
             TranslationResult a2 = translate(lj.getRightArg());
             ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
 
-            Function body = DATA_FACTORY.getSPARQLLeftJoin(wrapNonTriplePattern(a1),
+            Function body = DATALOG_FACTORY.getSPARQLLeftJoin(wrapNonTriplePattern(a1),
                     wrapNonTriplePattern(a2));
 
             ValueExpr expr = lj.getCondition();

@@ -41,6 +41,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class DatalogNormalizer {
@@ -127,7 +128,7 @@ public class DatalogNormalizer {
 		 * generated. It always merges from the left to the right.
 		 */
 		while (dataAtoms.size() > 2) {
-			Function joinAtom = DATA_FACTORY.getSPARQLJoin(dataAtoms.remove(0), dataAtoms.remove(0));
+			Function joinAtom = DATALOG_FACTORY.getSPARQLJoin(dataAtoms.remove(0), dataAtoms.remove(0));
 			joinAtom.getTerms().addAll(booleanAtoms);
 			booleanAtoms.clear();
 

@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import java.util.ArrayList;
 import java.util.List;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class VocabularyValidator {
@@ -47,7 +48,7 @@ public class VocabularyValidator {
 
 
 	public CQIE replaceEquivalences(CQIE query) {
-		return DATA_FACTORY.getCQIE(query.getHead(), replaceEquivalences(query.getBody()));
+		return DATALOG_FACTORY.getCQIE(query.getHead(), replaceEquivalences(query.getBody()));
 	}
 
 	protected <T extends Term> List<T> replaceEquivalences(List<T> body) {

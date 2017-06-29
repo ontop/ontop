@@ -39,6 +39,7 @@ import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import junit.framework.TestCase;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 
@@ -98,7 +99,7 @@ public class ThetaApplicationTest extends TestCase {
 		terms2.add(t10);
 		Function h = DATA_FACTORY.getFunction(head, terms2);
 
-		CQIE query = DATA_FACTORY.getCQIE(h, body);
+		CQIE query = DATALOG_FACTORY.getCQIE(h, body);
 
         SingletonSubstitution s1 = new SingletonSubstitution(t7, t6);
         SingletonSubstitution s2 = new SingletonSubstitution(t8, t9);

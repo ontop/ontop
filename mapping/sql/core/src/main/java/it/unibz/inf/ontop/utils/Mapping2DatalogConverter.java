@@ -38,6 +38,7 @@ import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 
 import com.google.common.collect.ImmutableMap;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class Mapping2DatalogConverter {
@@ -102,7 +103,7 @@ public class Mapping2DatalogConverter {
 
                 for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {
                     Function head = renameVariables(atom, lookupTable, idfac);
-                    CQIE rule = DATA_FACTORY.getCQIE(head, body);
+                    CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
                     datalogProgram.add(rule);
                 }
             }

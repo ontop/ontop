@@ -168,7 +168,7 @@ public class R2RMLManager {
 		String sourceQuery = r2rmlParser.getSQLQuery(tm).trim();
 		ImmutableList<ImmutableFunctionalTerm> body = getMappingTripleAtoms(tm);
 		//Function head = getHeadAtom(body);
-		//CQIE targetQuery = DATA_FACTORY.getCQIE(head, body);
+		//CQIE targetQuery = DATALOG_FACTORY.getCQIE(head, body);
 		// TODO: consider a R2RML-specific type of triples map
 		SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap("mapping-"+tm.hashCode(),
 				MAPPING_FACTORY.getSQLQuery(sourceQuery), body);
@@ -221,7 +221,7 @@ public class R2RMLManager {
 			}
 
 			//Function head = getHeadAtom(body);
-			//CQIE targetQuery = DATA_FACTORY.getCQIE(head, body);
+			//CQIE targetQuery = DATALOG_FACTORY.getCQIE(head, body);
 			
 			if (sourceQuery.isEmpty()) {
 				throw new Exception("Could not create source query for join in "+tm.toString());

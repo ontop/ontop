@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -73,7 +74,7 @@ public class CanonicalIRIRewriterTest {
         bodyM1.add(DATA_FACTORY.getFunctionIsNotNull(t1));
 
 
-        mappings.add(DATA_FACTORY.getCQIE(headM1,bodyM1));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM1,bodyM1));
 
         List<Function> bodyM2 = new LinkedList<>();
         bodyM2.add(tableT_can);
@@ -81,7 +82,7 @@ public class CanonicalIRIRewriterTest {
         bodyM2.add(DATA_FACTORY.getFunctionIsNotNull(t0));
         bodyM2.add(DATA_FACTORY.getFunctionIsNotNull(t1));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM2,bodyM2));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM2,bodyM2));
 
         List<Function> bodyM3 = new LinkedList<>();
         bodyM3.add(tableT_can);
@@ -89,7 +90,7 @@ public class CanonicalIRIRewriterTest {
         bodyM3.add(DATA_FACTORY.getFunctionIsNotNull(t0));
         bodyM3.add(DATA_FACTORY.getFunctionIsNotNull(t1));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM3,bodyM3));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM3,bodyM3));
 
 
 
@@ -146,7 +147,7 @@ public class CanonicalIRIRewriterTest {
         bodyM1.add(tableEPDS);
         bodyM1.add(DATA_FACTORY.getFunctionIsNotNull(t0));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM1,bodyM1));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM1,bodyM1));
 
         List<Function> bodyM2 = new LinkedList<>();
 
@@ -154,7 +155,7 @@ public class CanonicalIRIRewriterTest {
         bodyM2.add(tableNPD);
         bodyM2.add(DATA_FACTORY.getFunctionIsNotNull(t0));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM2,bodyM2));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM2,bodyM2));
 
         List<Function> bodyM3 = new LinkedList<>();
 
@@ -162,7 +163,7 @@ public class CanonicalIRIRewriterTest {
         bodyM3.add(tableOW);
         bodyM3.add(DATA_FACTORY.getFunctionIsNotNull(t0));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM3,bodyM3));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM3,bodyM3));
 
     }
 
@@ -183,7 +184,7 @@ public class CanonicalIRIRewriterTest {
         bodyM1.add(tableEPDS);
         bodyM1.add(DATA_FACTORY.getFunctionIsNotNull(t0));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM1,bodyM1));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM1,bodyM1));
 
         List<Function> bodyM2 = new LinkedList<>();
 
@@ -191,7 +192,7 @@ public class CanonicalIRIRewriterTest {
         bodyM2.add(tableNPD);
         bodyM2.add(DATA_FACTORY.getFunctionIsNotNull(t0));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM2,bodyM2));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM2,bodyM2));
 
         List<Function> bodyM3 = new LinkedList<>();
 
@@ -199,7 +200,7 @@ public class CanonicalIRIRewriterTest {
         bodyM3.add(tableOW);
         bodyM3.add(DATA_FACTORY.getFunctionIsNotNull(t0));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM3,bodyM3));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM3,bodyM3));
 
     }
 
@@ -220,7 +221,7 @@ public class CanonicalIRIRewriterTest {
         bodyM1.add(tableEPDS);
         bodyM1.add(DATA_FACTORY.getFunctionIsNotNull(t0));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM1,bodyM1));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM1,bodyM1));
 
         List<Function> bodyM2 = new LinkedList<>();
 
@@ -228,7 +229,7 @@ public class CanonicalIRIRewriterTest {
         bodyM2.add(tableNPD);
         bodyM2.add(DATA_FACTORY.getFunctionIsNotNull(t0));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM2,bodyM2));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM2,bodyM2));
 
         List<Function> bodyM3 = new LinkedList<>();
 
@@ -236,7 +237,7 @@ public class CanonicalIRIRewriterTest {
         bodyM3.add(tableOW);
         bodyM3.add(DATA_FACTORY.getFunctionIsNotNull(t0));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM3,bodyM3));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM3,bodyM3));
     }
 
     private void addObjectPropertiesDoubleURIMappings() {
@@ -266,7 +267,7 @@ public class CanonicalIRIRewriterTest {
         bodyM1.add(tableNPD);
         bodyM1.add(DATA_FACTORY.getFunctionIsNotNull(t3));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM1,bodyM1));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM1,bodyM1));
 
     }
 
@@ -287,7 +288,7 @@ public class CanonicalIRIRewriterTest {
         bodyM1.add(tableEPDS);
         bodyM1.add(DATA_FACTORY.getFunctionIsNotNull(t0));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM1,bodyM1));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM1,bodyM1));
 
         List<Function> bodyM2 = new LinkedList<>();
 
@@ -295,7 +296,7 @@ public class CanonicalIRIRewriterTest {
         bodyM2.add(tableNPD);
         bodyM2.add(DATA_FACTORY.getFunctionIsNotNull(t0));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM2,bodyM2));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM2,bodyM2));
 
         List<Function> bodyM3 = new LinkedList<>();
 
@@ -303,7 +304,7 @@ public class CanonicalIRIRewriterTest {
         bodyM3.add(tableOW);
         bodyM3.add(DATA_FACTORY.getFunctionIsNotNull(t0));
 
-        mappings.add(DATA_FACTORY.getCQIE(headM3,bodyM3));
+        mappings.add(DATALOG_FACTORY.getCQIE(headM3,bodyM3));
     }
 
 
@@ -340,7 +341,7 @@ public class CanonicalIRIRewriterTest {
         Function tableT1 = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms2));
         body.add(tableT1);
 
-        assertTrue(canonicalSameAsMappings.contains(DATA_FACTORY.getCQIE(head,body)));
+        assertTrue(canonicalSameAsMappings.contains(DATALOG_FACTORY.getCQIE(head,body)));
 
     }
 
@@ -378,7 +379,7 @@ public class CanonicalIRIRewriterTest {
         Function tableT1 = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms2));
         body.add(tableT1);
 
-        assertTrue(canonicalSameAsMappings.contains(DATA_FACTORY.getCQIE(head,body)));
+        assertTrue(canonicalSameAsMappings.contains(DATALOG_FACTORY.getCQIE(head,body)));
 
     }
 
@@ -417,7 +418,7 @@ public class CanonicalIRIRewriterTest {
         Function tableT1 = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms2));
         body.add(tableT1);
 
-        assertTrue(canonicalSameAsMappings.contains(DATA_FACTORY.getCQIE(head,body)));
+        assertTrue(canonicalSameAsMappings.contains(DATALOG_FACTORY.getCQIE(head,body)));
 
     }
 
@@ -456,7 +457,7 @@ public class CanonicalIRIRewriterTest {
         Function tableT1 = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms2));
         body.add(tableT1);
 
-        assertTrue(canonicalSameAsMappings.contains(DATA_FACTORY.getCQIE(head,body)));
+        assertTrue(canonicalSameAsMappings.contains(DATALOG_FACTORY.getCQIE(head,body)));
 
     }
 
@@ -506,7 +507,7 @@ public class CanonicalIRIRewriterTest {
         Function tableT2 = getFunction("PUBLIC.T2", new LinkedList<>(atomTerms));
         body.add(tableT2);
 
-        assertTrue(canonicalSameAsMappings.contains(DATA_FACTORY.getCQIE(head,body)));
+        assertTrue(canonicalSameAsMappings.contains(DATALOG_FACTORY.getCQIE(head,body)));
 
     }
 

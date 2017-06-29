@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
@@ -127,7 +128,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 		}
 
 		log.debug("Replacing equivalences...");
-		DatalogProgram newprogramEq = DATA_FACTORY.getDatalogProgram(program.getQueryModifiers());
+		DatalogProgram newprogramEq = DATALOG_FACTORY.getDatalogProgram(program.getQueryModifiers());
 		Predicate topLevelPredicate = null;
 		for (CQIE query : program.getRules()) {
 			// TODO: fix cloning
@@ -143,7 +144,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 
 		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
 		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
-		DatalogProgram newprogram = DATA_FACTORY.getDatalogProgram(program.getQueryModifiers(), p);
+		DatalogProgram newprogram = DATALOG_FACTORY.getDatalogProgram(program.getQueryModifiers(), p);
 
 		return newprogram;
 	}

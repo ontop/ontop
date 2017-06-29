@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 
@@ -71,7 +72,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		}
 		
 		
-		DatalogProgram dp = DATA_FACTORY.getDatalogProgram();
+		DatalogProgram dp = DATALOG_FACTORY.getDatalogProgram();
 		dp.appendRule(facts);
 		return dp;
 	}
@@ -92,7 +93,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 			errors.clear();
 		}
 
-		DatalogProgram dp = DATA_FACTORY.getDatalogProgram();
+		DatalogProgram dp = DATALOG_FACTORY.getDatalogProgram();
 		dp.appendRule(facts);
 		return dp;
 	}
@@ -138,7 +139,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 			getBody(node.getBody());
 			
 			
-			facts.add(DATA_FACTORY.getCQIE(head, body));
+			facts.add(DATALOG_FACTORY.getCQIE(head, body));
 			}
 		
 	}

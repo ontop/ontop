@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
@@ -103,7 +104,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
 				 */
                 newhead = (Function) currenthead.clone();
             }
-            CQIE newmapping = DATA_FACTORY.getCQIE(newhead, mapping.getBody());
+            CQIE newmapping = DATALOG_FACTORY.getCQIE(newhead, mapping.getBody());
             newmappings.add(newmapping);
         }
         return newmappings;

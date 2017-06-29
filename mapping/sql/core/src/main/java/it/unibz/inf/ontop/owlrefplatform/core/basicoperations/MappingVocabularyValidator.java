@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Collection;
 import java.util.List;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class MappingVocabularyValidator extends VocabularyValidator {
@@ -50,7 +51,7 @@ public class MappingVocabularyValidator extends VocabularyValidator {
 
         switch (newHeads.size()) {
             case 1:
-                return DATA_FACTORY.getCQIE(newHeads.get(0), mappingAssertion.getBody());
+                return DATALOG_FACTORY.getCQIE(newHeads.get(0), mappingAssertion.getBody());
             default:
                 throw new EquivalenceReplacingException("Only one head must be returned after replacing equivalences");
         }

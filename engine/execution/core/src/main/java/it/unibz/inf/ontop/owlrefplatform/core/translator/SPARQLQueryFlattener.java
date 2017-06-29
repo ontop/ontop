@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class SPARQLQueryFlattener {
@@ -264,7 +265,7 @@ public class SPARQLQueryFlattener {
 
         List<CQIE> result = new LinkedList<>();
         for (CQIE candidateRule : definitions) {
-            CQIE freshRule = DATA_FACTORY.getFreshCQIECopy(candidateRule);
+            CQIE freshRule = DATALOG_FACTORY.getFreshCQIECopy(candidateRule);
             // IMPORTANT: getMGU changes arguments
             Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), atom);
             if (mgu == null) {
@@ -339,7 +340,7 @@ public class SPARQLQueryFlattener {
 		
 		Function foldedJoinAtom = dataAtomsList.remove(0);
 		for (Function a : dataAtomsList)
-			foldedJoinAtom = DATA_FACTORY.getSPARQLJoin(foldedJoinAtom, a);
+			foldedJoinAtom = DATALOG_FACTORY.getSPARQLJoin(foldedJoinAtom, a);
 		
 		otherAtomsList.add(0, foldedJoinAtom);
 		

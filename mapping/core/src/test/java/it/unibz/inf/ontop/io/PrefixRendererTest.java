@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
 
 import junit.framework.TestCase;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.MAPPING_FACTORY;
 
@@ -41,7 +42,7 @@ public class PrefixRendererTest extends TestCase {
 	private CQIE rule1;
 
 	public void setUp() throws Exception {
-		query = DATA_FACTORY.getDatalogProgram();
+		query = DATALOG_FACTORY.getDatalogProgram();
 
 		LinkedList<Term> innerterms = new LinkedList<Term>();
 		innerterms.add(DATA_FACTORY.getVariable("id"));
@@ -57,7 +58,7 @@ public class PrefixRendererTest extends TestCase {
 		terms.add(DATA_FACTORY.getVariable("id"));
 		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("http://obda.org/predicates#q", 1), terms);
 
-		rule1 = DATA_FACTORY.getCQIE(head, Collections.singletonList(body));
+		rule1 = DATALOG_FACTORY.getCQIE(head, Collections.singletonList(body));
 		query.appendRule(rule1);
 	}
 

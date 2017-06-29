@@ -74,6 +74,7 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.*;
 import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.SPARQL_GROUP;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
@@ -371,7 +372,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 		}
 
 		MutableQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
-		datalogProgram = DATA_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
+		datalogProgram = DATALOG_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
 		log.debug("Normalized Datalog query: \n" + datalogProgram.toString());
 
 		return datalogProgram;

@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -105,7 +106,7 @@ public class CQCUtilitiesTest {
 		atomTerms2.add(y);
 		body.add(getFunction("S", atomTerms2));
 
-		initialquery1 = DATA_FACTORY.getCQIE(head, body);
+		initialquery1 = DATALOG_FACTORY.getCQIE(head, body);
 	}
 /*
  * ROMAN: commented out because there is no freeze anymore
@@ -150,7 +151,7 @@ public class CQCUtilitiesTest {
 
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"), DATA_FACTORY.getVariable("y"), DATA_FACTORY.getVariable("z")));
 
-		CQIE q1 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q1 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 2 - q(y,y) :- R(y,y)
 
@@ -160,7 +161,7 @@ public class CQCUtilitiesTest {
 
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"), DATA_FACTORY.getVariable("y"), DATA_FACTORY.getVariable("y")));
 
-		CQIE q2 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q2 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 3 - q(m,n) :- R(m,n)
 
@@ -169,7 +170,7 @@ public class CQCUtilitiesTest {
 
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"), DATA_FACTORY.getVariable("m"), DATA_FACTORY.getVariable("n")));
 
-		CQIE q3 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 4 - q(m,n) :- S(m,n) R(m,n)
 
@@ -181,7 +182,7 @@ public class CQCUtilitiesTest {
 
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"), DATA_FACTORY.getVariable("m"), DATA_FACTORY.getVariable("n")));
 
-		CQIE q4 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q4 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 5 - q() :- S(x,y)
 
@@ -189,7 +190,7 @@ public class CQCUtilitiesTest {
 		body = new LinkedList<Function>();
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("S"), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y")));
 
-		CQIE q5 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q5 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 6 - q() :- S(_,_))
 
@@ -197,7 +198,7 @@ public class CQCUtilitiesTest {
 		body = new LinkedList<Function>();
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("S"), DATA_FACTORY.getVariable("w1"), DATA_FACTORY.getVariable("w2")));
 
-		CQIE q6 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q6 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 7 - q(x,y) :- R(x,y), P(y,_)
 
@@ -208,7 +209,7 @@ public class CQCUtilitiesTest {
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("P"),
 				DATA_FACTORY.getVariable("y"), DATA_FACTORY.getVariable("w1")));
 
-		CQIE q7 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q7 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 8 - q(x,y) :- R(x,y), P(_,_)
 
@@ -219,7 +220,7 @@ public class CQCUtilitiesTest {
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("P"),
 				DATA_FACTORY.getVariable("w1"), DATA_FACTORY.getVariable("w2")));
 
-		CQIE q8 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q8 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 9 - q() :- R(x,m), R(x,y), S(m,n), S(y,z),T(n,o),T(z,x)
 
@@ -232,7 +233,7 @@ public class CQCUtilitiesTest {
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("T"), DATA_FACTORY.getVariable("n"), DATA_FACTORY.getVariable("o")));
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("T"), DATA_FACTORY.getVariable("z"), DATA_FACTORY.getVariable("x")));
 
-		CQIE q9 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q9 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 10 - q() :- R(i,j), S(j,k), T(k,i)
 
@@ -242,7 +243,7 @@ public class CQCUtilitiesTest {
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("S"), DATA_FACTORY.getVariable("j"), DATA_FACTORY.getVariable("k")));
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("T"), DATA_FACTORY.getVariable("k"), DATA_FACTORY.getVariable("i")));
 
-		CQIE q10 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q10 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Checking containment 5 in 6 and viceversa
 
@@ -300,7 +301,7 @@ public class CQCUtilitiesTest {
 
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x")));
 
-		CQIE q1 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q1 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 2 - q(x) :- R(x,y)
 
@@ -310,7 +311,7 @@ public class CQCUtilitiesTest {
 
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y")));
 
-		CQIE q2 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q2 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 3 - q(x) :- A(x)
 
@@ -320,7 +321,7 @@ public class CQCUtilitiesTest {
 
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x")));
 
-		CQIE q3 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
 		assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q1, q2));
 
@@ -352,7 +353,7 @@ public class CQCUtilitiesTest {
 
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x")));
 
-		CQIE q1 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q1 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 2 - q(x) :- R(x,y)
 
@@ -361,7 +362,7 @@ public class CQCUtilitiesTest {
 
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y")));
 
-		CQIE q2 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q2 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Query 3 - q(x) :- A(x)
 
@@ -370,7 +371,7 @@ public class CQCUtilitiesTest {
 
 		body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x")));
 
-		CQIE q3 = DATA_FACTORY.getCQIE(head, body);
+		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
 		LinkedList<CQIE> queries = new LinkedList<CQIE>();
 		queries.add(q1);
@@ -426,11 +427,11 @@ public class CQCUtilitiesTest {
 
 			Function head1 = getFunction("q", Collections.<Term>singletonList(DATA_FACTORY.getVariable("x")));
 			Function body1 = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x"));
-			CQIE query1 = DATA_FACTORY.getCQIE(head1, body1);
+			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", Collections.<Term>singletonList(DATA_FACTORY.getVariable("y")));
 			Function body2 = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("C"), DATA_FACTORY.getVariable("y"));
-			CQIE query2 = DATA_FACTORY.getCQIE(head2, body2);
+			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			
 			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
@@ -454,12 +455,12 @@ public class CQCUtilitiesTest {
 
 			Function head1 = getFunction("q", DATA_FACTORY.getVariable("x"));
 			Function body1 = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x"));
-			CQIE query1 = DATA_FACTORY.getCQIE(head1, body1);
+			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", DATA_FACTORY.getVariable("y"));
 			Function body2 = DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"),
 					DATA_FACTORY.getVariable("y"), DATA_FACTORY.getVariable("z"));
-			CQIE query2 = DATA_FACTORY.getCQIE(head2, body2);
+			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
@@ -482,12 +483,12 @@ public class CQCUtilitiesTest {
 
 			Function head1 = getFunction("q", DATA_FACTORY.getVariable("x"));
 			Function body1 = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x"));
-			CQIE query1 = DATA_FACTORY.getCQIE(head1, body1);
+			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", DATA_FACTORY.getVariable("y"));
 			Function body2 = DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"),
 					DATA_FACTORY.getVariable("z"), DATA_FACTORY.getVariable("y"));
-			CQIE query2 = DATA_FACTORY.getCQIE(head2, body2);
+			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 			
@@ -511,11 +512,11 @@ public class CQCUtilitiesTest {
 			Function head1 = getFunction("q", DATA_FACTORY.getVariable("x"));
 			Function body1 = DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"),
 					DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
-			CQIE query1 = DATA_FACTORY.getCQIE(head1, body1);
+			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", DATA_FACTORY.getVariable("z"));
 			Function body2 = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("z"));
-			CQIE query2 = DATA_FACTORY.getCQIE(head2, body2);
+			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
@@ -540,11 +541,11 @@ public class CQCUtilitiesTest {
 			Function head1 = getFunction("q", DATA_FACTORY.getVariable("y"));
 			Function body1 = DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"),
 					DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
-			CQIE query1 = DATA_FACTORY.getCQIE(head1, body1);
+			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", DATA_FACTORY.getVariable("z"));
 			Function body2 = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("z"));
-			CQIE query2 = DATA_FACTORY.getCQIE(head2, body2);
+			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
@@ -598,13 +599,13 @@ public class CQCUtilitiesTest {
 
         body.add(DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x")));
 
-        CQIE query1 = DATA_FACTORY.getCQIE(head, body);
+        CQIE query1 = DATALOG_FACTORY.getCQIE(head, body);
 
         // Query 2 q(x) :- (with empty body)
 
         head = getFunction("q", DATA_FACTORY.getVariable("x"));
         body = new LinkedList<Function>();
-        CQIE query2 = DATA_FACTORY.getCQIE(head, body);
+        CQIE query2 = DATALOG_FACTORY.getCQIE(head, body);
 
 		LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);

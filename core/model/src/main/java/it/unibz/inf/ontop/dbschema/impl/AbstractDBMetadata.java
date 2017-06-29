@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.term.Term;
 
 import java.util.*;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public abstract class AbstractDBMetadata implements DBMetadata {
@@ -64,7 +65,7 @@ public abstract class AbstractDBMetadata implements DBMetadata {
                 Function head = Relation2Predicate.getAtom(def2, terms2);
                 Function body = Relation2Predicate.getAtom(def, terms1);
 
-                CQIE rule = DATA_FACTORY.getCQIE(head, body);
+                CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
                 multimapBuilder.put(convertToAtomPredicate(body.getFunctionSymbol(), knownPredicateMap), rule);
                 if (printouts)
                     System.out.println("   FK_" + ++count + " " +  head + " :- " + body);

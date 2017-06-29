@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /***
@@ -75,7 +76,7 @@ public class TMappingRule {
 			this.filterAtoms = Collections.singletonList(filters);
 		
 		this.head = replaceConstants(head, filters);
-		this.stripped = DATA_FACTORY.getCQIE(this.head, databaseAtoms);
+		this.stripped = DATALOG_FACTORY.getCQIE(this.head, databaseAtoms);
 		this.cqc = cqc;
 	}
 
@@ -112,7 +113,7 @@ public class TMappingRule {
 
 		this.filterAtoms = filterAtoms;
 		
-		this.stripped = DATA_FACTORY.getCQIE(head, databaseAtoms);
+		this.stripped = DATALOG_FACTORY.getCQIE(head, databaseAtoms);
 		this.cqc = baseRule.cqc;
 	}
 	
@@ -125,7 +126,7 @@ public class TMappingRule {
 		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
 		this.head = (Function)head.clone();
 		
-		this.stripped = DATA_FACTORY.getCQIE(head, databaseAtoms);
+		this.stripped = DATALOG_FACTORY.getCQIE(head, databaseAtoms);
 		this.cqc = baseRule.cqc;
 	}
 	
@@ -172,7 +173,7 @@ public class TMappingRule {
 		else
 			combinedBody = databaseAtoms;
 		
-		CQIE cq = DATA_FACTORY.getCQIE(head, combinedBody);
+		CQIE cq = DATALOG_FACTORY.getCQIE(head, combinedBody);
 		EQNormalizer.enforceEqualities(cq);
 		return cq;
 	}

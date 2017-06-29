@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.impl;
+package it.unibz.inf.ontop.datalog.impl;
 
 /*
  * #%L
@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.model.predicate.Predicate;

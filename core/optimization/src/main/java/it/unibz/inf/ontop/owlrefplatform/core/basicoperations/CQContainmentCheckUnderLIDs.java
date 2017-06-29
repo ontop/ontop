@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
@@ -67,7 +68,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		for (Function fact : atoms) {
 			derivedAtoms.add(fact);
 			for (CQIE rule : dependencies.getRules(fact.getFunctionSymbol())) {
-				rule = DATA_FACTORY.getFreshCQIECopy(rule);
+				rule = DATALOG_FACTORY.getFreshCQIECopy(rule);
 				Function ruleBody = rule.getBody().get(0);
 				Substitution theta = UnifierUtilities.getMGU(ruleBody, fact);
 				if (theta != null && !theta.isEmpty()) {
@@ -199,7 +200,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		
 		collectVariables(groundTerms, query.getHead());
 		
-		CQIE db = DATA_FACTORY.getCQIE(query.getHead(), databaseAtoms);
+		CQIE db = DATALOG_FACTORY.getCQIE(query.getHead(), databaseAtoms);
 		
 		for (int i = 0; i < databaseAtoms.size(); i++) {
 			Function atomToBeRemoved = databaseAtoms.get(i);
@@ -228,7 +229,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			return false;
 		}
 
-		CQIE q0 = DATA_FACTORY.getCQIE(db.getHead(), atomsToLeave);
+		CQIE q0 = DATALOG_FACTORY.getCQIE(db.getHead(), atomsToLeave);
 		// if db is homomorphically embeddable into q0
 		if (computeHomomorphsim(q0, db) != null) {
 			oneAtomQs++;

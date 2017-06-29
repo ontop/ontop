@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.term.Term;
 
 import java.util.ArrayList;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
@@ -114,7 +115,7 @@ public class DatalogTools {
         Function firstAtom = dataOrCompositeAtoms.head();
         Function secondAtom = foldJoin(dataOrCompositeAtoms.tail());
 
-        return DATA_FACTORY.getSPARQLJoin(firstAtom, secondAtom, joiningCondition);
+        return DATALOG_FACTORY.getSPARQLJoin(firstAtom, secondAtom, joiningCondition);
     }
 
     /**
@@ -135,7 +136,7 @@ public class DatalogTools {
             return dataOrCompositeAtoms.tail().foldLeft(new F2<Function, Function, Function>() {
                 @Override
                 public Function f(Function firstAtom, Function secondAtom) {
-                    return DATA_FACTORY.getSPARQLJoin(firstAtom, secondAtom, TRUE_EQ);
+                    return DATALOG_FACTORY.getSPARQLJoin(firstAtom, secondAtom, TRUE_EQ);
                 }
             }, firstAtom);
         }

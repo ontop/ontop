@@ -50,6 +50,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 
@@ -155,7 +156,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		if (cc.hasNoFreeTerms()) {  
 			if (!cc.isDegenerate() || cc.getLoop() != null) 
 				for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), getFreshVariable())) {
-					outputRules.add(DATA_FACTORY.getCQIE(headAtom, a));
+					outputRules.add(DATALOG_FACTORY.getCQIE(headAtom, a));
 				}
 		}
 
@@ -226,10 +227,10 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 						Function twAtom = getHeadAtom(headURI, "_TW_" + (edgeDP.getRules().size() + 1), cc.getVariables());
 						mainbody.add(twAtom);				
 						for (List<Function> twfa : tw.getFormula())
-							edgeDP.appendRule(DATA_FACTORY.getCQIE(twAtom, twfa));
+							edgeDP.appendRule(DATALOG_FACTORY.getCQIE(twAtom, twfa));
 					}	
 					mainbody.addAll(cc.getNonDLAtoms());					
-					outputRules.add(DATA_FACTORY.getCQIE(headAtom, mainbody));
+					outputRules.add(DATALOG_FACTORY.getCQIE(headAtom, mainbody));
 				}
 			}
 			else {
@@ -250,18 +251,18 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 								
 								LinkedList<Function> edgeAtoms = new LinkedList<Function>(); 
 								edgeAtoms.addAll(edge.getAtoms());
-								edgeDP.appendRule(DATA_FACTORY.getCQIE(edgeAtom, edgeAtoms));
+								edgeDP.appendRule(DATALOG_FACTORY.getCQIE(edgeAtom, edgeAtoms));
 							}
 							
 							for (List<Function> twfa : tw.getFormula())
-								edgeDP.appendRule(DATA_FACTORY.getCQIE(edgeAtom, twfa));
+								edgeDP.appendRule(DATALOG_FACTORY.getCQIE(edgeAtom, twfa));
 						}
 					
 					if (edgeAtom == null) // no tree witnesses -- direct insertion into the main body
 						mainbody.addAll(edge.getAtoms());
 				}
 				mainbody.addAll(cc.getNonDLAtoms());
-				outputRules.add(DATA_FACTORY.getCQIE(headAtom, mainbody));
+				outputRules.add(DATALOG_FACTORY.getCQIE(headAtom, mainbody));
 			}
 		}
 		else {
@@ -272,7 +273,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			if (loop != null)
 				loopbody.addAll(loop.getAtoms());
 			loopbody.addAll(cc.getNonDLAtoms());
-			outputRules.add(DATA_FACTORY.getCQIE(headAtom, loopbody));
+			outputRules.add(DATALOG_FACTORY.getCQIE(headAtom, loopbody));
 		}
 		return outputRules;
 	}
@@ -286,7 +287,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		
 		List<CQIE> outputRules = new LinkedList<>();
 		DatalogProgram ccDP = null;
-		DatalogProgram edgeDP = DATA_FACTORY.getDatalogProgram();
+		DatalogProgram edgeDP = DATALOG_FACTORY.getDatalogProgram();
 
 		for (CQIE cqie : dp.getRules()) {
 			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(cqie);	
@@ -301,7 +302,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			}
 			else {
 				if (ccDP == null)
-					ccDP = DATA_FACTORY.getDatalogProgram();
+					ccDP = DATALOG_FACTORY.getDatalogProgram();
 				String cqieURI = cqieAtom.getFunctionSymbol().getName();
 				List<Function> ccBody = new ArrayList<Function>(ccs.size());
 				for (QueryConnectedComponent cc : ccs) {
@@ -313,7 +314,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 					ccDP.appendRule(list);
 					ccBody.add(ccAtom);
 				}
-				outputRules.add(DATA_FACTORY.getCQIE(cqieAtom, ccBody));
+				outputRules.add(DATALOG_FACTORY.getCQIE(cqieAtom, ccBody));
 			}
 		}
 		
@@ -322,7 +323,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			log.debug("EDGE DEFS\n{}", edgeDP);			
 			outputRules = DatalogQueryServices.plugInDefinitions(outputRules, edgeDP);
 			if (ccDP != null)
-				ccDP = DATA_FACTORY.getDatalogProgram(dp.getQueryModifiers(),
+				ccDP = DATALOG_FACTORY.getDatalogProgram(dp.getQueryModifiers(),
 						DatalogQueryServices.plugInDefinitions(ccDP.getRules(), edgeDP));
 			log.debug("INLINE EDGE PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
 		}
@@ -335,7 +336,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		if (outputRules.size() > 1) 
 			CQCUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
 		
-		DatalogProgram output = DATA_FACTORY.getDatalogProgram(dp.getQueryModifiers(), outputRules);
+		DatalogProgram output = DATALOG_FACTORY.getDatalogProgram(dp.getQueryModifiers(), outputRules);
 		for (CQIE cq : output.getRules())
 			CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
 

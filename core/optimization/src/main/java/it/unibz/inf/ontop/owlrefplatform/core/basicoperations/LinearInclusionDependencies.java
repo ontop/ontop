@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.predicate.AtomPredicate;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class LinearInclusionDependencies {
@@ -42,7 +43,7 @@ public class LinearInclusionDependencies {
 	 * @param body: atom
 	 */
 	public void addRule(Function head, Function body) {
-        CQIE rule = DATA_FACTORY.getCQIE(head, body);
+        CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
 		
         List<CQIE> list = rules.get(body.getFunctionSymbol());
         if (list == null) {

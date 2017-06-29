@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.term.*;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 
@@ -29,17 +30,17 @@ public class DatalogProgramSyntaxFactory {
 	}
 	
 	public static DatalogProgram program(Collection<CQIE> rules){
-		DatalogProgram datalogProgram = DATA_FACTORY.getDatalogProgram();
+		DatalogProgram datalogProgram = DATALOG_FACTORY.getDatalogProgram();
 		datalogProgram.appendRule(rules);
 		return datalogProgram;
 	}
 	
 	public static CQIE rule(Function head, Function... body){
-		return DATA_FACTORY.getCQIE(head, body);
+		return DATALOG_FACTORY.getCQIE(head, body);
 	}
 	
 	public static CQIE rule(Function head, List<Function> body){
-		return DATA_FACTORY.getCQIE(head, body);
+		return DATALOG_FACTORY.getCQIE(head, body);
 	}
 	
 	public static Predicate predicate(String uri, int arity){

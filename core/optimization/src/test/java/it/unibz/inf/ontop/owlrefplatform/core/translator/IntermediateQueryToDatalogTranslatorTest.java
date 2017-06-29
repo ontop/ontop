@@ -20,6 +20,7 @@ import java.util.List;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static org.junit.Assert.assertTrue;
 
 
@@ -97,12 +98,12 @@ public class IntermediateQueryToDatalogTranslatorTest {
 
         List<CQIE> cqies = new ArrayList<>();
 
-        cqies.add(DATA_FACTORY.getCQIE(ans1Atom, ansSQ1Atom));
-        cqies.add(DATA_FACTORY.getCQIE(ansSQ1Atom, p1Atom));
-        cqies.add(DATA_FACTORY.getCQIE(ansSQ1Atom, p2Atom));
+        cqies.add(DATALOG_FACTORY.getCQIE(ans1Atom, ansSQ1Atom));
+        cqies.add(DATALOG_FACTORY.getCQIE(ansSQ1Atom, p1Atom));
+        cqies.add(DATALOG_FACTORY.getCQIE(ansSQ1Atom, p2Atom));
 
 
-        DatalogProgram expectedDp = DATA_FACTORY.getDatalogProgram();
+        DatalogProgram expectedDp = DATALOG_FACTORY.getDatalogProgram();
         expectedDp.appendRule(cqies);
 
 
