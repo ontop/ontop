@@ -62,36 +62,15 @@
 	</prerequisites>
 
 	<modules>
-		<module>ontop-model</module>
-		<module>ontop-optimization</module>
-		<module>ontop-obda-core</module>
-		<module>ontop-mapping-core</module>
-		<module>ontop-sql-common</module>
-		<module>ontop-mapping-sql-core</module>
-		<module>ontop-mapping-native</module>
-		<module>ontop-mapping-sql-all</module>
-		<module>ontop-ontology-owlapi</module>
-		<module>ontop-mapping-owlapi</module>
-		<module>ontop-mapping-sql-owlapi</module>
-		<module>ontop-query-answering-core</module>
-		<module>ontop-query-answering-sql</module>
-		<module>ontop-system-core</module>
-		<module>ontop-system-owlapi</module>
-		<module>ontop-system-sql</module>
-		<module>ontop-system-sql-owlapi</module>
-		<module>obdalib-owlapi3</module>
-		<module>obdalib-r2rml</module>
-		<module>quest-owlapi3</module>
-		<module>ontop-semantic-index</module>
-		<module>distribution</module>
-        <module>rdf4j-webapps</module>
-        <module>quest-sparql-compliance</module>
-		<module>quest-sesame</module>
-		<module>ontop-rdf4j-sql</module>
-		<module>quest-rdb2rdf-compliance</module>
-		<module>ontop-protege</module>
-		<module>ontop-cli</module>
-		<module>ontop-docker-tests</module>
+		<module>binding</module>
+		<module>build</module>
+		<module>client</module>
+		<module>core</module>
+		<module>db</module>
+		<module>engine</module>
+        <module>mapping</module>
+        <module>ontology</module>
+		<module>test</module>
 	</modules>
 
 	<profiles>
