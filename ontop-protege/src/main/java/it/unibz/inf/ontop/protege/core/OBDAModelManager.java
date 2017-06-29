@@ -284,7 +284,7 @@ public class OBDAModelManager implements Disposable {
 					continue;
 				}
 
-				if (change instanceof RemoveAxiom && changes.get(idx + 1) instanceof AddAxiom) {
+ 				if (change instanceof RemoveAxiom && changes.get(idx + 1) instanceof AddAxiom) {
 
 					// Found the pattern of a renaming refactoring
 					RemoveAxiom remove = (RemoveAxiom) change;
@@ -675,7 +675,7 @@ public class OBDAModelManager implements Disposable {
 	 * Protege wont trigger a save action unless it detects that the OWLOntology
 	 * currently opened has suffered a change. The OBDA plugin requires that
 	 * protege triggers a save action also in the case when only the OBDA model
-	 * has suffered chagnes. To acomplish this, this method will "fake" an
+	 * has suffered changes. To accomplish this, this method will "fake" an
 	 * ontology change by inserting and removing a class into the OWLModel.
 	 * 
 	 */
@@ -698,6 +698,7 @@ public class OBDAModelManager implements Disposable {
 			owlmm.applyChange(addChange);
 			RemoveAxiom removeChange = new RemoveAxiom(ontology, axiom);
 			owlmm.applyChange(removeChange);
+//			owlmm.fireEvent(EventType.ACTIVE_ONTOLOGY_CHANGED);
 		} catch (Exception e) {
 			log.warn("Exception forcing an ontology change. Your OWL model might contain a new class that you need to remove manually: {}",
 					newClass.getIRI());

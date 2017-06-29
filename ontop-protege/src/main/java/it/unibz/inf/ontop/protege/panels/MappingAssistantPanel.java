@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.protege.panels;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLSettings;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
@@ -534,7 +533,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			}
 			// Create the mapping axiom
             SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), target);
-			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom, false);
+			obdaModel.addTriplesMap(mappingAxiom, false);
 			
 			// Clear the form afterwards
 			clearForm();

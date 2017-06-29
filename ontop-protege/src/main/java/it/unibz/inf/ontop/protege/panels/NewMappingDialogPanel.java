@@ -195,7 +195,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					if (mapping == null) {
 						// Case when we are creating a new mapping
 						OntopNativeSQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, body, targetQuery);
-						mapcon.addMapping(sourceID, newmapping, false);
+						mapcon.addTriplesMap(sourceID, newmapping, false);
 					} else {
 						// Case when we are updating an existing mapping
 						mapcon.updateMappingsSourceQuery(sourceID, newId, body);

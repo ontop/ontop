@@ -24,12 +24,11 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.SQLPPMapping;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
-import org.protege.editor.core.Disposable;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -118,7 +117,7 @@ public class R2RMLImportAction extends ProtegeAction {
 							if (mapping.getTargetAtoms().toString().contains("BNODE")) {
 								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 							} else {
-								obdaModelController.addMapping(sourceID, mapping, false);
+								obdaModelController.addTriplesMap(sourceID, mapping, false);
 							}
 						}
 						JOptionPane.showMessageDialog(workspace, "R2RML Import completed. " );
