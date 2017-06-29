@@ -16,6 +16,7 @@
     <modules>
         <module>workbench</module>
         <module>server</module>
+        <module>config-sql</module>
     </modules>
 
 </project>

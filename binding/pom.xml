@@ -16,7 +16,6 @@
     <modules>
         <module>owlapi</module>
         <module>rdf4j</module>
-        <module>rdf4j-sql</module>
     </modules>
 
 </project>
