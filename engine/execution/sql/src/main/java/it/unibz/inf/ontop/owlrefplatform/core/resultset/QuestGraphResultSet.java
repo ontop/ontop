@@ -24,8 +24,9 @@ import it.unibz.inf.ontop.answering.input.ConstructTemplate;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.AssertionFactory;
 import it.unibz.inf.ontop.ontology.InconsistentOntologyException;
@@ -39,7 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class QuestGraphResultSet implements GraphResultSet {
 

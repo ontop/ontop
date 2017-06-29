@@ -1,9 +1,15 @@
 package it.unibz.inf.ontop.injection;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 import java.util.Optional;
 

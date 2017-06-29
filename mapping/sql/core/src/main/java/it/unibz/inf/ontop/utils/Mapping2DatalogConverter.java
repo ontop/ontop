@@ -22,15 +22,12 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.sql.*;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Constant;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.sql.RDBMetadata;
+import it.unibz.inf.ontop.dbschema.RDBMetadata;
 
 import java.util.*;
 
@@ -41,7 +38,7 @@ import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 
 import com.google.common.collect.ImmutableMap;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class Mapping2DatalogConverter {
 
@@ -100,7 +97,7 @@ public class Mapping2DatalogConverter {
                     lookupTable = builder.build();
 
                     body = new ArrayList<>(1);
-                    body.add(DATA_FACTORY.getFunction(Relation2DatalogPredicate.createPredicateFromRelation(view), arguments));
+                    body.add(DATA_FACTORY.getFunction(Relation2Predicate.createPredicateFromRelation(view), arguments));
                 }
 
                 for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {

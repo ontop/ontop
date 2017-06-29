@@ -25,6 +25,8 @@ import it.unibz.inf.ontop.answering.input.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.slf4j.Logger;

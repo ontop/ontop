@@ -21,20 +21,28 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  */
 
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 
 import java.util.Arrays;
 import java.util.List;
 
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Before;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 @SuppressWarnings("deprecation")
 public class DatalogToSparqlTranslatorTest {
@@ -622,7 +630,7 @@ public class DatalogToSparqlTranslatorTest {
 		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, student, ans3);
 		CQIE rule2 = DATA_FACTORY.getCQIE(ans3, firstName, lastName);
 		
-		OBDAQueryModifiers modifiers = new MutableQueryModifiersImpl();
+		MutableQueryModifiers modifiers = new MutableQueryModifiersImpl();
 		modifiers.setDistinct();
 		modifiers.setLimit(100);
 		modifiers.setOffset(20);
@@ -647,7 +655,7 @@ public class DatalogToSparqlTranslatorTest {
 		return DATA_FACTORY.getFunction(rulePredicate, vars);
 	}
 
-	private DatalogProgram createDatalogProgram(OBDAQueryModifiers modifiers, CQIE... queryAndRules) {
+	private DatalogProgram createDatalogProgram(MutableQueryModifiers modifiers, CQIE... queryAndRules) {
 		List<CQIE> program = Arrays.asList(queryAndRules);
 		return DATA_FACTORY.getDatalogProgram(modifiers, program);
 	}

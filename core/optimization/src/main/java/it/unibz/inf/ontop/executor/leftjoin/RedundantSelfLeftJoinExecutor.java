@@ -3,23 +3,33 @@ package it.unibz.inf.ontop.executor.leftjoin;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricExecutor;
 import it.unibz.inf.ontop.executor.join.SelfJoinLikeExecutor;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.*;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.iq.node.DataNode;
+import it.unibz.inf.ontop.iq.node.EmptyNode;
+import it.unibz.inf.ontop.iq.node.LeftJoinNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.iq.proposal.*;
+import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
+import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.term.GroundTerm;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
 import java.util.*;
 
 import static it.unibz.inf.ontop.executor.leftjoin.RedundantSelfLeftJoinExecutor.Action.DO_NOTHING;
 import static it.unibz.inf.ontop.executor.leftjoin.RedundantSelfLeftJoinExecutor.Action.DROP_RIGHT;
 import static it.unibz.inf.ontop.executor.leftjoin.RedundantSelfLeftJoinExecutor.Action.UNIFY;
-import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
-import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 /**
  * TODO: explain

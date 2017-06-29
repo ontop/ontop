@@ -7,15 +7,19 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Stack;
 
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class SPARQLQueryFlattener {
 

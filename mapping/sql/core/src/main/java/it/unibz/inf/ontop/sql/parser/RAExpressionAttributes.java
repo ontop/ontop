@@ -3,10 +3,10 @@ package it.unibz.inf.ontop.sql.parser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.sql.QualifiedAttributeID;
-import it.unibz.inf.ontop.sql.QuotedID;
-import it.unibz.inf.ontop.sql.RelationID;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.sql.parser.exceptions.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 

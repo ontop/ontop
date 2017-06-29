@@ -27,12 +27,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDAQueryModifiers;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
 
 public class DatalogProgramImpl implements DatalogProgram {
 
@@ -42,7 +41,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	private Map<Predicate, List<CQIE>> predicateIndex = null;
 
-	private OBDAQueryModifiers modifiers;
+	private MutableQueryModifiers modifiers;
 
 	@Override
 	public DatalogProgram clone() {
@@ -127,7 +126,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 	}
 
 	@Override
-	public OBDAQueryModifiers getQueryModifiers() {
+	public MutableQueryModifiers getQueryModifiers() {
 		return modifiers;
 	}
 	

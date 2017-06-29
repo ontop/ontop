@@ -2,12 +2,16 @@ package it.unibz.inf.ontop.executor.truenode;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.TrueNodeRemovalProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.iq.node.NodeTransformationProposal;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.node.TrueNode;
+import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.iq.proposal.TrueNodeRemovalProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 
 import java.util.Optional;
 

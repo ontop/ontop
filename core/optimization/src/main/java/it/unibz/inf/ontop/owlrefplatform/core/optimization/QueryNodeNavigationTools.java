@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
 
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 
 import java.util.Optional;
 

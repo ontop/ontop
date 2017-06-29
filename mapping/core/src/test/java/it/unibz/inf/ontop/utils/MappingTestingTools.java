@@ -5,12 +5,12 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.mapping.MappingNormalizer;
-import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.impl.OntopModelSingletons;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.sql.DBMetadataTestingTools;
+import it.unibz.inf.ontop.model.OntopModelSingletons;
+import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
+import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
 
 public class MappingTestingTools {
 

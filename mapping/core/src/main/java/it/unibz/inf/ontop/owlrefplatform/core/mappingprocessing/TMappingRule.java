@@ -1,8 +1,14 @@
 package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.predicate.BuiltinPredicate;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQContainmentCheck;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /***
  * Splits a given {@link mapping} into builtin predicates ({@link conditions})

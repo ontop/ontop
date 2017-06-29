@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.exception;
 
-import it.unibz.inf.ontop.model.ImmutableExpression;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 
 public class NotFilterableNullVariableException extends QueryTransformationException {
 

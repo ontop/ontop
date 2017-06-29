@@ -8,9 +8,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import fj.data.TreeMap;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
 
-import it.unibz.inf.ontop.pivotalrepr.ImmutableQueryModifiers;
+import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
+import it.unibz.inf.ontop.model.term.GroundTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;

@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
  */
 
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.model.DatalogProgram;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;

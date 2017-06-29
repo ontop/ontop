@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
-import it.unibz.inf.ontop.model.UriTemplateMatcher;
+import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.InternalSparqlQuery;
 import org.junit.Test;

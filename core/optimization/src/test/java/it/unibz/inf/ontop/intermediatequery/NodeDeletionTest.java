@@ -1,15 +1,19 @@
 package it.unibz.inf.ontop.intermediatequery;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
-import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.*;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -22,7 +26,7 @@ public class NodeDeletionTest {
     public void testSimpleJoin() throws IntermediateQueryBuilderException, EmptyQueryException {
         Variable x = DATA_FACTORY.getVariable("x");
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(x));
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 DATA_FACTORY.getAtomPredicate("ans1", 1), x);
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
@@ -34,11 +38,11 @@ public class NodeDeletionTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(falseCondition);
         queryBuilder.addChild(rootNode, joinNode);
 
-        ExtensionalDataNode table1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(
+        ExtensionalDataNode table1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(
                 DATA_FACTORY.getAtomPredicate("table1", 1), x));
         queryBuilder.addChild(joinNode, table1);
 
-        ExtensionalDataNode table2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(
+        ExtensionalDataNode table2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(
                 DATA_FACTORY.getAtomPredicate("table2", 1), x));
         queryBuilder.addChild(joinNode, table2);
 
@@ -58,7 +62,7 @@ public class NodeDeletionTest {
         Variable y = DATA_FACTORY.getVariable("y");
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(x,y));
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 DATA_FACTORY.getAtomPredicate("ans1", 2), x, y);
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
@@ -71,16 +75,16 @@ public class NodeDeletionTest {
         queryBuilder.addChild(rootNode, ljNode);
 
         String table1Name = "table1";
-        ExtensionalDataNode table1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate(table1Name, 1), x));
+        ExtensionalDataNode table1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate(table1Name, 1), x));
         queryBuilder.addChild(ljNode, table1, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(falseCondition);
         queryBuilder.addChild(ljNode, joinNode, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
-        ExtensionalDataNode table2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table2", 2), x, y));
+        ExtensionalDataNode table2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table2", 2), x, y));
         queryBuilder.addChild(joinNode, table2);
 
-        ExtensionalDataNode table3 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table3", 2), x, y));
+        ExtensionalDataNode table3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table3", 2), x, y));
         queryBuilder.addChild(joinNode, table3);
 
         IntermediateQuery initialQuery = queryBuilder.build();
@@ -103,7 +107,7 @@ public class NodeDeletionTest {
         Variable x = DATA_FACTORY.getVariable("x");
         Variable y = DATA_FACTORY.getVariable("y");
 
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 DATA_FACTORY.getAtomPredicate("ans1", 2), x, y);
         ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
 
@@ -118,12 +122,12 @@ public class NodeDeletionTest {
         UnionNode topUnion = IQ_FACTORY.createUnionNode(projectedVariables);
         queryBuilder.addChild(rootNode, topUnion);
 
-        //DistinctVariableOnlyDataAtom subAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(DATA_FACTORY.getAtomPredicate("ansu1", 2), x, y);
+        //DistinctVariableOnlyDataAtom subAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(DATA_FACTORY.getAtomPredicate("ansu1", 2), x, y);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectedVariables);
         queryBuilder.addChild(topUnion, constructionNode1);
 
         String table1Name = "table1";
-        ExtensionalDataNode table1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate(table1Name, 2), x, y));
+        ExtensionalDataNode table1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate(table1Name, 2), x, y));
         queryBuilder.addChild(constructionNode1, table1);
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectedVariables);
@@ -132,10 +136,10 @@ public class NodeDeletionTest {
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(falseCondition);
         queryBuilder.addChild(constructionNode2, joinNode1);
 
-        ExtensionalDataNode table2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table2", 2), x, y));
+        ExtensionalDataNode table2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table2", 2), x, y));
         queryBuilder.addChild(joinNode1, table2);
 
-        ExtensionalDataNode table3 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table3", 2), x, y));
+        ExtensionalDataNode table3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table3", 2), x, y));
         queryBuilder.addChild(joinNode1, table3);
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(projectedVariables);
@@ -144,10 +148,10 @@ public class NodeDeletionTest {
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(falseCondition);
         queryBuilder.addChild(constructionNode3, joinNode2);
 
-        ExtensionalDataNode table4 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table4", 2), x, y));
+        ExtensionalDataNode table4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table4", 2), x, y));
         queryBuilder.addChild(joinNode2, table4);
 
-        ExtensionalDataNode table5 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table5", 2), x, y));
+        ExtensionalDataNode table5 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table5", 2), x, y));
         queryBuilder.addChild(joinNode2, table5);
 
         IntermediateQuery initialQuery = queryBuilder.build();
@@ -174,7 +178,7 @@ public class NodeDeletionTest {
         Variable x = DATA_FACTORY.getVariable("x");
         Variable y = DATA_FACTORY.getVariable("y");
 
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 DATA_FACTORY.getAtomPredicate("ans1", 2), x, y);
         ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectedVariables);
@@ -189,13 +193,13 @@ public class NodeDeletionTest {
         UnionNode topUnion = IQ_FACTORY.createUnionNode(projectedVariables);
         queryBuilder.addChild(rootNode, topUnion);
 
-        //DataAtom subAtom = DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("ansu1", 2), x, y);
+        //DataAtom subAtom = ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("ansu1", 2), x, y);
         
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectedVariables);
         queryBuilder.addChild(topUnion, constructionNode1);
 
         String table1Name = "table1";
-        ExtensionalDataNode table1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate(table1Name, 2), x, y));
+        ExtensionalDataNode table1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate(table1Name, 2), x, y));
         queryBuilder.addChild(constructionNode1, table1);
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectedVariables);
@@ -204,10 +208,10 @@ public class NodeDeletionTest {
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(falseCondition);
         queryBuilder.addChild(constructionNode2, joinNode1);
 
-        ExtensionalDataNode table2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table2", 2), x, y));
+        ExtensionalDataNode table2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table2", 2), x, y));
         queryBuilder.addChild(joinNode1, table2);
 
-        ExtensionalDataNode table3 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table3", 2), x, y));
+        ExtensionalDataNode table3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table3", 2), x, y));
         queryBuilder.addChild(joinNode1, table3);
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(projectedVariables);
@@ -216,10 +220,10 @@ public class NodeDeletionTest {
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(constructionNode3, joinNode2);
 
-        ExtensionalDataNode table4 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table4", 2), x, y));
+        ExtensionalDataNode table4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table4", 2), x, y));
         queryBuilder.addChild(joinNode2, table4);
 
-        ExtensionalDataNode table5 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table5", 2), x, y));
+        ExtensionalDataNode table5 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table5", 2), x, y));
         queryBuilder.addChild(joinNode2, table5);
 
         IntermediateQuery initialQuery = queryBuilder.build();
@@ -242,7 +246,7 @@ public class NodeDeletionTest {
         Variable y = DATA_FACTORY.getVariable("y");
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(x,y));
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 DATA_FACTORY.getAtomPredicate("ans1", 2), x, y);
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
@@ -257,13 +261,13 @@ public class NodeDeletionTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(falseCondition);
         queryBuilder.addChild(ljNode, joinNode, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
 
-        ExtensionalDataNode table2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table2", 2), x, y));
+        ExtensionalDataNode table2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table2", 2), x, y));
         queryBuilder.addChild(joinNode, table2);
 
-        ExtensionalDataNode table3 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table3", 2), x, y));
+        ExtensionalDataNode table3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table3", 2), x, y));
         queryBuilder.addChild(joinNode, table3);
 
-        ExtensionalDataNode table4 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table4", 1), x));
+        ExtensionalDataNode table4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(DATA_FACTORY.getAtomPredicate("table4", 1), x));
         queryBuilder.addChild(ljNode, table4, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
 

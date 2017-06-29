@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.spec.impl;
 
 
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.spec.MappingExtractor;
 
 public class MappingAndDBMetadataImpl implements MappingExtractor.MappingAndDBMetadata {

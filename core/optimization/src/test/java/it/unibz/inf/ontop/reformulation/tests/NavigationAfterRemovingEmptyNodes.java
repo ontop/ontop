@@ -2,17 +2,24 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.proposal.InnerJoinOptimizationProposal;
+import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.iq.proposal.RemoveEmptyNodeProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
+import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.*;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -63,7 +70,7 @@ public class NavigationAfterRemovingEmptyNodes {
     @Test
     public void testNextSiblingInitiallyFar() throws EmptyQueryException {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
         ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
@@ -103,7 +110,7 @@ public class NavigationAfterRemovingEmptyNodes {
     @Test
     public void testInsatisfiedJoinCondition() throws EmptyQueryException {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
         ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
@@ -143,8 +150,8 @@ public class NavigationAfterRemovingEmptyNodes {
         return DATA_FACTORY.getImmutableFunctionalTerm(URI2_PREDICATE, URI_TEMPLATE_STR_2, argument1, argument2);
     }
 
-    private static ExtensionalDataNode buildExtensionalDataNode(AtomPredicate predicate, VariableOrGroundTerm ... arguments) {
-        return IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(predicate, arguments));
+    private static ExtensionalDataNode buildExtensionalDataNode(AtomPredicate predicate, VariableOrGroundTerm... arguments) {
+        return IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(predicate, arguments));
     }
 
 }

@@ -4,17 +4,17 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.ImmutableExpression;
-import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.OperationPredicate;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.NextNodeAndQuery;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeException;
-import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PushDownBooleanExpressionProposalImpl;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.exception.IllegalTreeException;
+import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
+import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.iq.proposal.PushDownBooleanExpressionProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.PushDownBooleanExpressionProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap;
@@ -23,10 +23,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.ExpressionOperation.*;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getNextNodeAndQuery;
-import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 /**
  * Extensible through hooks

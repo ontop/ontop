@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 
 
 public class OBDASpecificationImpl implements OBDASpecification {

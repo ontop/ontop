@@ -3,25 +3,27 @@ package it.unibz.inf.ontop.executor.join;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.pivotalrepr.DataNode;
-import it.unibz.inf.ontop.pivotalrepr.InnerJoinNode;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.iq.node.DataNode;
+import it.unibz.inf.ontop.iq.node.InnerJoinNode;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.injection.OntopModelSettings.CardinalityPreservationMode.LOOSE;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Uses non-unique functional constraints to:
@@ -53,7 +55,7 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
         if (initialNodes.size() < 2)
             return Optional.empty();
 
-        RelationID relationId = Relation2DatalogPredicate.createRelationFromPredicateName(
+        RelationID relationId = Relation2Predicate.createRelationFromPredicateName(
                 dbMetadata.getQuotedIDFactory(), predicate);
         DatabaseRelationDefinition databaseRelation = dbMetadata.getDatabaseRelation(relationId);
 

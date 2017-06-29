@@ -4,16 +4,21 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.model.ImmutableExpression;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.EmptyNode;
+import it.unibz.inf.ontop.iq.node.InnerJoinNode;
+import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
+import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.iq.proposal.InnerJoinOptimizationProposal;
+import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.iq.proposal.RemoveEmptyNodeProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
+import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
 
 import java.util.Optional;
 
@@ -37,7 +42,7 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
      */
     @Override
     public NodeCentricOptimizationResults<InnerJoinNode> apply(InnerJoinOptimizationProposal proposal, IntermediateQuery query,
-                                              QueryTreeComponent treeComponent)
+                                                               QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         InnerJoinNode originalTopJoinNode = proposal.getFocusNode();

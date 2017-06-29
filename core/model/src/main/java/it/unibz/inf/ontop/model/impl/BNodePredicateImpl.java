@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.BNodePredicate;
+import it.unibz.inf.ontop.model.predicate.BNodePredicate;
 
 public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate {
 

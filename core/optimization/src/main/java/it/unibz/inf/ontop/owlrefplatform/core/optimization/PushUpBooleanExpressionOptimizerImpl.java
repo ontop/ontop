@@ -3,18 +3,20 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.ImmutableExpression;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.proposal.PushUpBooleanExpressionProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PushUpBooleanExpressionProposalImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.PushUpBooleanExpressionResults;
-import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.proposal.PushUpBooleanExpressionProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.PushUpBooleanExpressionProposalImpl;
+import it.unibz.inf.ontop.iq.proposal.PushUpBooleanExpressionResults;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 
 /**

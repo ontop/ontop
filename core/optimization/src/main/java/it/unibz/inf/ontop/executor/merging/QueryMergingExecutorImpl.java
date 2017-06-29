@@ -7,27 +7,35 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
-import it.unibz.inf.ontop.pivotalrepr.transform.QueryRenamer;
-import it.unibz.inf.ontop.pivotalrepr.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.pivotalrepr.transform.node.impl.IdentityQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.*;
+import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.iq.proposal.ProposalResults;
+import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
+import it.unibz.inf.ontop.iq.proposal.RemoveEmptyNodeProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.ProposalResultsImpl;
+import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
+import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.transform.node.impl.IdentityQueryNodeTransformer;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 @Singleton
 public class QueryMergingExecutorImpl implements QueryMergingExecutor {

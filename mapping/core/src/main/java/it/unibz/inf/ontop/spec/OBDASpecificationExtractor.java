@@ -3,9 +3,9 @@ package it.unibz.inf.ontop.spec;
 
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
-import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;

@@ -1,13 +1,19 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.pivotalrepr.impl.ImmutableQueryModifiersImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
-import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
+import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
+import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -17,9 +23,10 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.OptimizationTestingTools.DATA_FACTORY;
 import static it.unibz.inf.ontop.OptimizationTestingTools.IQ_FACTORY;
 import static it.unibz.inf.ontop.OptimizationTestingTools.createQueryBuilder;
-import static it.unibz.inf.ontop.model.ExpressionOperation.NEQ;
-import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
-import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.predicate.ExpressionOperation.NEQ;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static junit.framework.TestCase.assertTrue;
 
 /**
@@ -89,7 +96,7 @@ public class NonUniqueFunctionalConstraintTest {
                 .addDependent(col3T1)
                 .addDependent(col4T1)
                 .build());
-        TABLE1_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table1Def);
+        TABLE1_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1Def);
 
         /*
          * Table 2: non-composite unique constraint and regular field
@@ -99,7 +106,7 @@ public class NonUniqueFunctionalConstraintTest {
         Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
-        TABLE2_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table2Def);
+        TABLE2_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table2Def);
 
         /*
          * Table 3: PK + 2 independent non-unique functional constraints + 1 independent
@@ -121,7 +128,7 @@ public class NonUniqueFunctionalConstraintTest {
                 .addDeterminant(col4T3)
                 .addDependent(col5T3)
                 .build());
-        TABLE3_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table3Def);
+        TABLE3_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table3Def);
 
         /*
          * Table 4: PK + 2 non-unique functional constraints (one is nested) + 1 independent attribute
@@ -143,7 +150,7 @@ public class NonUniqueFunctionalConstraintTest {
                 .addDependent(col3T4)
                 .addDependent(col4T4)
                 .build());
-        TABLE4_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table4Def);
+        TABLE4_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table4Def);
 
         dbMetadata.freeze();
         METADATA = dbMetadata;
@@ -151,7 +158,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin1() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -162,11 +169,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, Y, F, G));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, Y, F, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -175,7 +182,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, C, D));
 
         expectedQueryBuilder.addChild(rootNode, dataNode3);
 
@@ -186,7 +193,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin2() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,
                 X, Y, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
@@ -198,11 +205,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, C));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, C));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, Y, F, G));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, Y, F, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -211,7 +218,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, Z, C));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, Z, C));
 
         expectedQueryBuilder.addChild(rootNode, dataNode3);
 
@@ -222,7 +229,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin3() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,
                 X, Y, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
@@ -234,11 +241,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, Z, B, C));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, Z, B, C));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, F, G));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, F, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -257,7 +264,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin4() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -268,11 +275,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, Y, X, F));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, Y, X, F));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -281,7 +288,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, X, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, X, D));
 
         expectedQueryBuilder.addChild(rootNode, dataNode3);
 
@@ -292,7 +299,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin5() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -303,11 +310,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -316,7 +323,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
 
         expectedQueryBuilder.addChild(rootNode, dataNode3);
 
@@ -327,7 +334,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin6() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -338,15 +345,15 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         ExtensionalDataNode dataNode3= IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, H, A, I, J, K));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, A, I, J, K));
         queryBuilder.addChild(joinNode, dataNode3);
 
         IntermediateQuery query = queryBuilder.build();
@@ -355,7 +362,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
 
         expectedQueryBuilder.addChild(rootNode, dataNode4);
 
@@ -366,7 +373,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin7() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -377,19 +384,19 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
         queryBuilder.addChild(joinNode, dataNode3);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, M, N, O));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, M, N, O));
         queryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery query = queryBuilder.build();
@@ -400,11 +407,11 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
         ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -414,7 +421,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin7_1() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -425,19 +432,19 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
         queryBuilder.addChild(joinNode, dataNode3);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, M, N, Z));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, M, N, Z));
         queryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery query = queryBuilder.build();
@@ -448,7 +455,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
         expectedQueryBuilder.addChild(joinNode, dataNode4);
@@ -460,7 +467,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin7_2() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -471,19 +478,19 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
         queryBuilder.addChild(joinNode, dataNode3);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, M, N, G));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, M, N, G));
         queryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery query = queryBuilder.build();
@@ -494,10 +501,10 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
         ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, B, Z, G));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, B, Z, G));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
         expectedQueryBuilder.addChild(joinNode, dataNode4);
 
@@ -508,7 +515,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin7_3() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -519,19 +526,19 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, TWO));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, TWO));
         queryBuilder.addChild(joinNode, dataNode2);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
         queryBuilder.addChild(joinNode, dataNode3);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, M, N, O));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, M, N, O));
         queryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery query = queryBuilder.build();
@@ -542,15 +549,15 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
         ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, B, Z, TWO));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, B, Z, TWO));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
 
         ExtensionalDataNode dataNode7 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
         expectedQueryBuilder.addChild(joinNode, dataNode7);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -561,7 +568,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin8() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_1, X);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_1, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -572,11 +579,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, B, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, E, X, F, G, H));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, X, F, G, H));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -585,7 +592,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, B, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, B, C, D));
 
         expectedQueryBuilder.addChild(rootNode, dataNode3);
 
@@ -596,7 +603,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin9() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -607,11 +614,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, B, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, E, X, Y, F, G));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, X, Y, F, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -620,7 +627,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, Y, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, Y, C, D));
 
         expectedQueryBuilder.addChild(rootNode, dataNode3);
 
@@ -634,7 +641,7 @@ public class NonUniqueFunctionalConstraintTest {
      */
     @Test
     public void testNonRedundantSelfJoin1() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -645,11 +652,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, F, G, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, F, G, Y));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -660,7 +667,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, B, C, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, B, C, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -670,7 +677,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testNonRedundantSelfJoin2() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -681,11 +688,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, A, Y, E, F));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, A, Y, E, F));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -696,7 +703,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, A, Y, C, F));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, A, Y, C, F));
         expectedQueryBuilder.addChild(joinNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -706,7 +713,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test(expected = EmptyQueryException.class)
     public void testRejectedJoin1() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -717,11 +724,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, ONE, B, C));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, ONE, B, C));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, TWO, E, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, TWO, E, Y));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -733,7 +740,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test(expected = EmptyQueryException.class)
     public void testRejectedJoin2() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -744,11 +751,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, TWO, F, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, TWO, F, Y));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -760,7 +767,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test(expected = EmptyQueryException.class)
     public void testRejectedJoin3() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -771,11 +778,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, B, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, B, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, TWO, F, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, TWO, F, Y));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -787,7 +794,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin1_T3() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -798,11 +805,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, B, C, D, E));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, B, C, D, E));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, F, A, Y, G, H, I));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, F, A, Y, G, H, I));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -811,7 +818,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, Y, C, D, E));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, Y, C, D, E));
 
         expectedQueryBuilder.addChild(rootNode, dataNode3);
 
@@ -822,7 +829,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin2_T3() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -833,19 +840,19 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, B, C, D, E));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, B, C, D, E));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, F, A, Y, G, H, I));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, F, A, Y, G, H, I));
         queryBuilder.addChild(joinNode, dataNode2);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, J, K, L, M, O, P));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, J, K, L, M, O, P));
         queryBuilder.addChild(joinNode, dataNode3);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, Q, R, S, M, T, U));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, Q, R, S, M, T, U));
         queryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery query = queryBuilder.build();
@@ -856,7 +863,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, Y, C, D, E));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, Y, C, D, E));
 
         expectedQueryBuilder.addChild(joinNode, dataNode5);
         expectedQueryBuilder.addChild(joinNode, dataNode3);
@@ -869,7 +876,7 @@ public class NonUniqueFunctionalConstraintTest {
     @Ignore("TODO: remove the redundant join")
     @Test
     public void testRedundantSelfJoin3_T3() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -880,11 +887,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, B, C, D, E));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, B, C, D, E));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, F, A, Y, C, H, I));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, F, A, Y, C, H, I));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -893,7 +900,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, Y, C, D, E));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, Y, C, D, E));
 
         expectedQueryBuilder.addChild(rootNode, dataNode3);
 
@@ -904,7 +911,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin1_T4() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -915,11 +922,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, E, A, Y, F, G));
+                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, E, A, Y, F, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -928,7 +935,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, Y, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, Y, C, D));
 
         expectedQueryBuilder.addChild(rootNode, dataNode3);
 
@@ -939,7 +946,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testRedundantSelfJoin2_T4() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -950,11 +957,11 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, E, A, B, Y, G));
+                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, E, A, B, Y, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -963,7 +970,7 @@ public class NonUniqueFunctionalConstraintTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, Y, D));
+                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, Y, D));
 
         expectedQueryBuilder.addChild(rootNode, dataNode3);
 
@@ -974,7 +981,7 @@ public class NonUniqueFunctionalConstraintTest {
 
     @Test
     public void testLJNonRedundantSelfJoin1() throws EmptyQueryException {
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 DATA_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
@@ -988,15 +995,15 @@ public class NonUniqueFunctionalConstraintTest {
         queryBuilder.addChild(leftJoinNode, joinNode, LEFT);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, A, D, E, F));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, C, A, D, E, F));
         queryBuilder.addChild(joinNode, dataNode2);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, F, H, I, J, K));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, F, H, I, J, K));
         queryBuilder.addChild(leftJoinNode, dataNode3, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
@@ -1008,7 +1015,7 @@ public class NonUniqueFunctionalConstraintTest {
         exceptedBuilder.addChild(joinNode, dataNode1);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, A, B, Z, F));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, C, A, B, Z, F));
         exceptedBuilder.addChild(joinNode, dataNode4);
 
         exceptedBuilder.addChild(leftJoinNode, dataNode3, RIGHT);

@@ -2,9 +2,9 @@ package it.unibz.inf.ontop.sql.parser;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.DBMetadata;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.sql.parser.exceptions.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Created by Roman Kontchakov on 25/01/2017.

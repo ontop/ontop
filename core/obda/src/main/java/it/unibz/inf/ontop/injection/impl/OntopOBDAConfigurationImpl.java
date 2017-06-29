@@ -4,9 +4,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopOBDAConfiguration;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
-import it.unibz.inf.ontop.model.DBMetadata;
 
-import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Supplier;

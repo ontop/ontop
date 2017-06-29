@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
-import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.datalog.CQIE;
 
 /**
  * Normalizer that "pulls out equalities".

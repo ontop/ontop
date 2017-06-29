@@ -20,13 +20,11 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Intersection;
-import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
-import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessSet.QueryConnectedComponentCache;
 
 import java.util.Collection;

@@ -2,14 +2,24 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.UnionNode;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static org.junit.Assert.assertTrue;
 
 
@@ -17,13 +27,13 @@ public class IntermediateQueryToDatalogTranslatorTest {
 
     private static Variable X = DATA_FACTORY.getVariable("x");
     private static AtomPredicate ANS1_IQ_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
-    private static DistinctVariableOnlyDataAtom ANS1_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+    private static DistinctVariableOnlyDataAtom ANS1_X_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_IQ_PREDICATE, ImmutableList.of(X));
     private static AtomPredicate P1_IQ_PREDICATE = DATA_FACTORY.getAtomPredicate("p1", 1);
     private static AtomPredicate P2_IQ_PREDICATE = DATA_FACTORY.getAtomPredicate("p2", 1);
-    private static DistinctVariableOnlyDataAtom P1_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+    private static DistinctVariableOnlyDataAtom P1_X_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             P1_IQ_PREDICATE, ImmutableList.of(X));
-    private static DistinctVariableOnlyDataAtom P2_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+    private static DistinctVariableOnlyDataAtom P2_X_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             P2_IQ_PREDICATE, ImmutableList.of(X));
 
     private static Predicate ANS1_DATALOG_PREDICATE;

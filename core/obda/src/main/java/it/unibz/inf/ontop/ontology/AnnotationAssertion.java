@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.ontology;
  */
 
 
-import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.ObjectConstant;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.ObjectConstant;
 
 /**
  * Represents AnnotationAssertion from the OWL 2 QL Specification

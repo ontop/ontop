@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
-import it.unibz.inf.ontop.pivotalrepr.proposal.*;
+import it.unibz.inf.ontop.iq.proposal.*;
 
 import java.util.Properties;
 import java.util.stream.Stream;

@@ -1,16 +1,21 @@
 package it.unibz.inf.ontop.executor.substitution;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackingResultsImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.EmptyNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.node.SubstitutionResults;
+import it.unibz.inf.ontop.iq.node.TrueNode;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.iq.proposal.NodeTracker;
+import it.unibz.inf.ontop.iq.proposal.NodeTrackingResults;
+import it.unibz.inf.ontop.iq.proposal.RemoveEmptyNodeProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.NodeTrackingResultsImpl;
+import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;

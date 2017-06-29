@@ -2,9 +2,6 @@ package it.unibz.inf.ontop.injection;
 
 
 import it.unibz.inf.ontop.injection.impl.OntopOBDAConfigurationImpl;
-import it.unibz.inf.ontop.model.DBMetadata;
-
-import javax.annotation.Nonnull;
 
 public interface OntopOBDAConfiguration extends OntopModelConfiguration {
 

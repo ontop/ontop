@@ -23,9 +23,9 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.base.Splitter;
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 
 import java.util.ArrayList;

@@ -1,6 +1,12 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 
 import java.util.List;
 
@@ -63,7 +69,7 @@ public class EQNormalizer {
     /**
      * We search for equalities in conjunctions. This recursive methods explore AND functions 
      * and removes EQ functions, substituting the values using the class
-     * {@link it.unibz.inf.ontop.owlrefplatform.core.basicoperations.Substitution#composeTerms(it.unibz.inf.ontop.model.Term, it.unibz.inf.ontop.model.Term)}
+     * {@link it.unibz.inf.ontop.owlrefplatform.core.basicoperations.Substitution#composeTerms(Term, Term)}
      * 
      * @param atom the atom that can contain equalities
      * @param mgu mapping between a variable and a term

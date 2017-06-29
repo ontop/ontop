@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.ObjectConstant;
+import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.ontology.ClassAssertion;
 import it.unibz.inf.ontop.ontology.OClass;
 

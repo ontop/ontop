@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.executor;
 
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationProposal;
+import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 
 /**
  * TODO: explain

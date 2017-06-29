@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.model.impl;
 
-import it.unibz.inf.ontop.model.BuiltinPredicate;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.AtomPredicate;
+import it.unibz.inf.ontop.model.predicate.BuiltinPredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
 
 /**
  * TODO: in the future, make it independent from PredicateImpl

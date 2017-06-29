@@ -5,11 +5,11 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.TrueNodesRemovalOptimizer;
-import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
-import it.unibz.inf.ontop.pivotalrepr.IntensionalDataNode;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 
 import java.util.Optional;

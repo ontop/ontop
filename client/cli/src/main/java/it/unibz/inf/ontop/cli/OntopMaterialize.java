@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.model.SQLPPMapping;
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -42,7 +42,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 @Command(name = "materialize",
         description = "Materialize the RDF graph exposed by the mapping and the OWL ontology")

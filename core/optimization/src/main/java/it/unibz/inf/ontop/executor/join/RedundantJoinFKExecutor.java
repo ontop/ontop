@@ -5,19 +5,27 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
+import it.unibz.inf.ontop.dbschema.Relation2Predicate;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.model.AtomPredicate;
-import it.unibz.inf.ontop.model.DBMetadata;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.NaiveVariableOccurrenceAnalyzerImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.DataNode;
+import it.unibz.inf.ontop.iq.node.FilterNode;
+import it.unibz.inf.ontop.iq.node.InnerJoinNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.NaiveVariableOccurrenceAnalyzerImpl;
+import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.iq.proposal.InnerJoinOptimizationProposal;
+import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -219,7 +227,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
 
     private Optional<DatabaseRelationDefinition> getDatabaseRelationByName(DBMetadata dbMetadata, AtomPredicate predicate) {
 
-        RelationID relationId = Relation2DatalogPredicate.createRelationFromPredicateName(dbMetadata.getQuotedIDFactory(),
+        RelationID relationId = Relation2Predicate.createRelationFromPredicateName(dbMetadata.getQuotedIDFactory(),
                 predicate);
 
         return Optional.ofNullable(dbMetadata.getRelation(relationId))

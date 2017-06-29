@@ -25,9 +25,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import it.unibz.inf.ontop.model.OrderCondition;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.sql.RelationID;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.dbschema.RelationID;
 
 public interface SQLDialectAdapter {
 	

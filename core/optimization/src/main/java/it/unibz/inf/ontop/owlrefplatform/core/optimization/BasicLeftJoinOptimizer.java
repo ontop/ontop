@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.LeftJoinNode;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.pivotalrepr.proposal.LeftJoinOptimizationProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.LeftJoinOptimizationProposalImpl;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.node.LeftJoinNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.proposal.LeftJoinOptimizationProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.LeftJoinOptimizationProposalImpl;
 
 import java.util.Optional;
 

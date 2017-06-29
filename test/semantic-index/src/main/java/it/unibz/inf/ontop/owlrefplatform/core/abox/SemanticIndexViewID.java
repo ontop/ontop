@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.abox;
 
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
 
 /*
  * #%L

@@ -22,11 +22,21 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.input.translation.RDF4JInputQueryTranslator;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.OperationPredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.UriTemplateMatcher;
+import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -50,8 +60,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 
 /***
@@ -225,7 +235,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
 
         if (node instanceof Slice) {   // SLICE algebra operation
             Slice slice = (Slice) node;
-            OBDAQueryModifiers modifiers = program.getQueryModifiers();
+            MutableQueryModifiers modifiers = program.getQueryModifiers();
             modifiers.setOffset(slice.getOffset());
             modifiers.setLimit(slice.getLimit());
             return translate(slice.getArg());
@@ -241,7 +251,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
         }
         else if (node instanceof Order) {   // ORDER algebra operation
             Order order = (Order) node;
-            OBDAQueryModifiers modifiers = program.getQueryModifiers();
+            MutableQueryModifiers modifiers = program.getQueryModifiers();
             for (OrderElem c : order.getElements()) {
                 ValueExpr expression = c.getExpr();
                 if (!(expression instanceof Var))

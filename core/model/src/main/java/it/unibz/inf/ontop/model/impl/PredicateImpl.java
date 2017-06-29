@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.predicate.Predicate;
 
 import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.CANONICAL_IRI;
 import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.SAME_AS;

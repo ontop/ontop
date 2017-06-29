@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.spec;
 
-import it.unibz.inf.ontop.model.DBMetadata;
-import it.unibz.inf.ontop.sql.QuotedIDFactory;
-import it.unibz.inf.ontop.sql.RelationID;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.RelationID;
 
 import java.util.Set;
 

@@ -21,6 +21,9 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  */
 
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.ObjectConstant;
+import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.owlapi.OWLAPIIndividualTranslator;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import org.semanticweb.owlapi.model.*;
@@ -95,10 +98,10 @@ public class QuestOWLResultSet implements AutoCloseable {
 	private OWLAPIIndividualTranslator translator = new OWLAPIIndividualTranslator();
 	
 	private OWLPropertyAssertionObject translate(Constant c) {
-		if (c instanceof ObjectConstant) 
+		if (c instanceof ObjectConstant)
 			return translator.translate((ObjectConstant)c);
 		else
-			return translator.translate((ValueConstant)c);			
+			return translator.translate((ValueConstant)c);
 	}
 
 	public OWLPropertyAssertionObject getOWLPropertyAssertionObject(int column) throws OWLException {

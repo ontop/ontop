@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.rdf4j;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.ObjectConstant;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.term.ObjectConstant;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.AssertionFactory;
@@ -45,8 +45,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 

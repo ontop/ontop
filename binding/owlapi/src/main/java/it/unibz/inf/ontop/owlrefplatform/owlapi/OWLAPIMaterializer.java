@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;

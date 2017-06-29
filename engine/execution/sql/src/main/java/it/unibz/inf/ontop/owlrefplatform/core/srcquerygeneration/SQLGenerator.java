@@ -25,15 +25,24 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLSettings;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.model.predicate.BNodePredicate;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
+import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.IncompatibleTermException;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
@@ -48,10 +57,9 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
 import it.unibz.inf.ontop.parser.EncodeForURI;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
-import it.unibz.inf.ontop.sql.*;
-import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
+import it.unibz.inf.ontop.datalog.DatalogDependencyGraphGenerator;
 import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
@@ -66,10 +74,10 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
+import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.*;
 import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.SPARQL_GROUP;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -362,7 +370,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
 		}
 
-		OBDAQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
+		MutableQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
 		datalogProgram = DATA_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
 		log.debug("Normalized Datalog query: \n" + datalogProgram.toString());
 
@@ -2279,7 +2287,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			}
 
 			Predicate predicate = atom.getFunctionSymbol();
-			RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
+			RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
 					predicate);
 			RelationDefinition def = metadata.getRelation(tableId);
 

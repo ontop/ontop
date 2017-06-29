@@ -22,13 +22,11 @@ package it.unibz.inf.ontop.utils;
 
 import java.util.Arrays;
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.term.Function;
 
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 import static org.junit.Assert.assertEquals;
 
 public class URITemplatesTest {

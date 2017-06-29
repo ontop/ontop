@@ -7,8 +7,8 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingCanonicalRewriter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.CanonicalIRIRewriter;
 
 import java.util.List;

@@ -1,7 +1,11 @@
 package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.GroundFunctionalTerm;
+import it.unibz.inf.ontop.model.term.GroundTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 
 
 import java.util.List;

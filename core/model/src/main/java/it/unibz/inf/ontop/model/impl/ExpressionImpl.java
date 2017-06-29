@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.model.impl;
 
-import it.unibz.inf.ontop.model.Expression;
-import it.unibz.inf.ontop.model.OperationPredicate;
-import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.term.Expression;
+import it.unibz.inf.ontop.model.predicate.OperationPredicate;
+import it.unibz.inf.ontop.model.term.Term;
 
 import java.util.ArrayList;
 import java.util.List;

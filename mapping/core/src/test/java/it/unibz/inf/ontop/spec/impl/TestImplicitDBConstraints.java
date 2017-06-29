@@ -2,10 +2,11 @@ package it.unibz.inf.ontop.spec.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.exception.ImplicitDBContraintException;
 import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintExtractor;
 import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintSet;
-import it.unibz.inf.ontop.sql.*;
 import org.junit.Before;
 import org.junit.Test;
 

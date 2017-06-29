@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
 
-import it.unibz.inf.ontop.model.OrderCondition;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
 
 import java.sql.Types;
 import java.util.List;

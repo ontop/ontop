@@ -20,18 +20,23 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import junit.framework.TestCase;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 //import com.hp.hpl.jena.iri.IRIFactory;
 

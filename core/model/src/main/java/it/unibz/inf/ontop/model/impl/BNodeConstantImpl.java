@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.BNode;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.term.BNode;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.stream.Stream;
 

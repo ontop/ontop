@@ -2,7 +2,8 @@ package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.*;
 
 import java.util.List;
 import java.util.stream.Stream;

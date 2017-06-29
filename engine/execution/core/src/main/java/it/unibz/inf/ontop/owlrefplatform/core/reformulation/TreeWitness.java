@@ -25,8 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Intersection;
 

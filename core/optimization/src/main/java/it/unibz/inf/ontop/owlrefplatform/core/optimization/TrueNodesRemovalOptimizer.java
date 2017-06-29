@@ -1,15 +1,17 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.proposal.TrueNodeRemovalProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.TrueNodeRemovalProposalImpl;
-import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.proposal.TrueNodeRemovalProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.TrueNodeRemovalProposalImpl;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 /**
  * Removes TrueNodes whenever possible.

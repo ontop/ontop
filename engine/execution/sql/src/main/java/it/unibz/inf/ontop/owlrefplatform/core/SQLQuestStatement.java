@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 import java.util.Optional;
 
 import it.unibz.inf.ontop.answering.input.*;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;

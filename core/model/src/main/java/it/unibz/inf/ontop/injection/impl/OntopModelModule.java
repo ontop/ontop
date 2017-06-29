@@ -6,15 +6,16 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
-import it.unibz.inf.ontop.model.DatatypeFactory;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.type.DatatypeFactory;
 import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.transform.FilterNullableVariableQueryTransformer;
-import it.unibz.inf.ontop.pivotalrepr.transform.QueryMerger;
-import it.unibz.inf.ontop.pivotalrepr.transform.QueryRenamer;
-import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.transform.FilterNullableVariableQueryTransformer;
+import it.unibz.inf.ontop.iq.transform.QueryMerger;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
+import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.*;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 
 public class OntopModelModule extends OntopAbstractModule {
 

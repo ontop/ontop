@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
-import it.unibz.inf.ontop.model.Substitution;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -64,7 +64,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities#getMGU(it.unibz.inf.ontop.model.Atom, it.unibz.inf.ontop.model.Atom)}
+	 * {@link UnifierUtilities#getMGU(it.unibz.inf.ontop.model.Atom, it.unibz.inf.ontop.model.Atom)}
 	 * .
 	 * 
 	 * @throws Exception

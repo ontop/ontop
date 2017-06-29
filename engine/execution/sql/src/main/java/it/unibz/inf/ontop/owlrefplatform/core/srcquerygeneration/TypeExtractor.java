@@ -1,13 +1,16 @@
 package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Expression;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.IncompatibleTermException;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
-import it.unibz.inf.ontop.sql.Attribute;
-import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
-import it.unibz.inf.ontop.sql.RelationDefinition;
-import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 
@@ -19,8 +22,8 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.LITERAL;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.LITERAL;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 
 
@@ -121,7 +124,7 @@ public class TypeExtractor {
 
             ImmutableList.Builder<TermType> defaultTypeBuilder = ImmutableList.builder();
 
-            RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), predicate);
+            RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), predicate);
             Optional<RelationDefinition> td = Optional.ofNullable(metadata.getRelation(tableId));
 
             IntStream.range(0, predicate.getArity())

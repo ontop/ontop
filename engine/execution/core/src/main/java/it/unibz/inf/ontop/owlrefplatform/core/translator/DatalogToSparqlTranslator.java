@@ -21,15 +21,23 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  */
 
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.URIConstant;
+import it.unibz.inf.ontop.model.term.Variable;
 
-import java.util.HashMap;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * This class provides the translation service from Datalog Program to SPARQL string.
@@ -42,7 +50,7 @@ public class DatalogToSparqlTranslator {
 
 	private PrefixManager prefixManager;
 
-	private OBDAQueryModifiers queryModifiers;
+	private MutableQueryModifiers queryModifiers;
 
 	/**
 	 * Creates the translator with a default prefix manager. The default prefix

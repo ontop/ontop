@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 
 /**
  * Pushes immutable boolean expressions down into the intermediate query tree if possible.

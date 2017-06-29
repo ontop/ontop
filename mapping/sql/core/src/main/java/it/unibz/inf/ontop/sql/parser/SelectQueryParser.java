@@ -3,11 +3,11 @@ package it.unibz.inf.ontop.sql.parser;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.DBMetadata;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.sql.parser.exceptions.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -235,7 +235,7 @@ public class SelectQueryParser {
                 attributes.put(attributeId, var);
             });
             // create an atom for a particular table
-            Function atom = Relation2DatalogPredicate.getAtom(relation, terms);
+            Function atom = Relation2Predicate.getAtom(relation, terms);
 
             // DEFAULT SCHEMA
             // TODO: to be improved

@@ -34,7 +34,7 @@ package it.unibz.inf.ontop.ontology;
 
 import java.util.Collection;
 
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
 
 /**
  * Represents DataPropertyExpression from the OWL 2 QL Specification

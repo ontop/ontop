@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.URIConstant;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.URIConstant;
+import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.stream.Stream;
 

@@ -1,18 +1,22 @@
 package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Rewrite the mappings to use the canonical iri

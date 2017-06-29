@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.io;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
 
 import java.util.List;
 

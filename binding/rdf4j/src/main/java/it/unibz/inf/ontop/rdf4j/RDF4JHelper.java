@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.rdf4j;
 
-import it.unibz.inf.ontop.model.BNode;
-import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.ObjectConstant;
-import it.unibz.inf.ontop.model.URIConstant;
-import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.term.BNode;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.ObjectConstant;
+import it.unibz.inf.ontop.model.term.URIConstant;
+import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.AnnotationAssertion;
 import it.unibz.inf.ontop.ontology.Assertion;
@@ -21,7 +21,7 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import java.util.Objects;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
 
 public class RDF4JHelper {
 

@@ -10,11 +10,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.predicate.BuiltinPredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionBuilder;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 
@@ -65,7 +75,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 					Function newFact = (Function)ruleHead.clone();
 					// unify to get fact is needed because the dependencies are not necessarily full
 					// (in other words, they may contain existentials in the head)
-					SubstitutionUtilities.applySubstitution(newFact, theta); 
+					SubstitutionUtilities.applySubstitution(newFact, theta);
 					derivedAtoms.add(newFact);
 				}
 			}
@@ -232,7 +242,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		Deque<Term> terms = new LinkedList<>(atom.getTerms());
 		while (!terms.isEmpty()) {
 			Term t = terms.pollFirst();
-			if (t instanceof Variable) 
+			if (t instanceof Variable)
 				vars.add(t);
 			else if (!(t instanceof Constant))
 				terms.addAll(((Function)t).getTerms());

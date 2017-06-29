@@ -2,11 +2,11 @@ package it.unibz.inf.ontop.owlrefplatform.core.benchmark;
 
 import java.util.List;
 
-import it.unibz.inf.ontop.model.BuiltinPredicate;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.predicate.BuiltinPredicate;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.predicate.Predicate;
 
 /**
  * 

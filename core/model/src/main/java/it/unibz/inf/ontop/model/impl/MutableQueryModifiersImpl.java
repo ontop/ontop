@@ -20,15 +20,15 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAQueryModifiers;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.OrderCondition;
-import it.unibz.inf.ontop.pivotalrepr.QueryModifiers;
+import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.iq.node.QueryModifiers;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
+public class MutableQueryModifiersImpl implements MutableQueryModifiers {
 	private boolean isDistinct;
 
 	private long limit;
@@ -50,8 +50,8 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 		limit = modifiers.getLimit();
 		offset = modifiers.getOffset();
 		orderConditions = new ArrayList<>(modifiers.getSortConditions());
-		if (modifiers instanceof OBDAQueryModifiers) {
-			groupConditions = new ArrayList<>(((OBDAQueryModifiers) modifiers).getGroupConditions());
+		if (modifiers instanceof MutableQueryModifiers) {
+			groupConditions = new ArrayList<>(((MutableQueryModifiers) modifiers).getGroupConditions());
 		}
 		else {
 			groupConditions = new ArrayList<>();
@@ -59,7 +59,7 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 	}
 
 	@Override
-	public OBDAQueryModifiers clone() {
+	public MutableQueryModifiers clone() {
 		MutableQueryModifiersImpl clone = new MutableQueryModifiersImpl();
 		clone.isDistinct = isDistinct;
 		clone.limit = limit;
@@ -72,7 +72,7 @@ public class MutableQueryModifiersImpl implements OBDAQueryModifiers {
 	}
 
 	@Override
-	public void copy(OBDAQueryModifiers other) {
+	public void copy(MutableQueryModifiers other) {
 		isDistinct = other.isDistinct();
 		limit = other.getLimit();
 		offset = other.getOffset();

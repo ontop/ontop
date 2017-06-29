@@ -1,15 +1,15 @@
 package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class MappingSameAs {
 

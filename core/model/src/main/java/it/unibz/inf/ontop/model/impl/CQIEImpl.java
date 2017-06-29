@@ -27,11 +27,16 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.ListenableFunction;
 
-import it.unibz.inf.ontop.utils.EventGeneratingLinkedList;
-import it.unibz.inf.ontop.utils.EventGeneratingList;
-import it.unibz.inf.ontop.utils.ListListener;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.datalog.impl.EventGeneratingLinkedList;
+import it.unibz.inf.ontop.datalog.EventGeneratingList;
+import it.unibz.inf.ontop.datalog.ListListener;
 
 /**
  * This is a rule implementation that keeps track of changes in the query by

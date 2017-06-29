@@ -36,13 +36,9 @@ import eu.optique.r2rml.api.model.Join;
 import eu.optique.r2rml.api.model.PredicateObjectMap;
 import eu.optique.r2rml.api.model.RefObjectMap;
 import eu.optique.r2rml.api.model.TriplesMap;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDALibConstants;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 import org.apache.commons.rdf.api.Graph;
@@ -67,7 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class R2RMLManager {
 
@@ -255,7 +251,7 @@ public class R2RMLManager {
 		}
 		int arity = vars.size();
 		List<Term> dvars = new ArrayList<Term>(vars);
-		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, arity), dvars);
+		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(Constants.QUERY_HEAD, arity), dvars);
 		return head;
 	}
 	

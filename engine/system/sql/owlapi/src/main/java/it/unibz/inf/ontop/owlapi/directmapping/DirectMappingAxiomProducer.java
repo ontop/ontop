@@ -22,11 +22,14 @@ package it.unibz.inf.ontop.owlapi.directmapping;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.parser.EncodeForURI;
-import it.unibz.inf.ontop.sql.*;
-import it.unibz.inf.ontop.sql.ForeignKeyConstraint.Component;
+import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
 import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 
 import java.util.*;
@@ -55,7 +58,7 @@ public class DirectMappingAxiomProducer {
 
 	public Map<String, ImmutableList<ImmutableFunctionalTerm>> getRefAxioms(DatabaseRelationDefinition table) {
 		Map<String, ImmutableList<ImmutableFunctionalTerm>> refAxioms = new HashMap<>();
-		for (ForeignKeyConstraint fk : table.getForeignKeys()) 
+		for (ForeignKeyConstraint fk : table.getForeignKeys())
 			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
 		
 		return refAxioms;
@@ -75,7 +78,7 @@ public class DirectMappingAxiomProducer {
     private String getRefSQL(ForeignKeyConstraint fk) {
 
 		Set<Object> columns = new LinkedHashSet<>(); // Set avoids duplicated and LinkedHashSet keeps the insertion order
-		for (Attribute attr : getIdentifyingAttributes(fk.getRelation())) 
+		for (Attribute attr : getIdentifyingAttributes(fk.getRelation()))
 			columns.add(getColumnNameWithAlias(attr));
 
 		List<String> conditions = new ArrayList<>(fk.getComponents().size());

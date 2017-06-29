@@ -20,10 +20,9 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.AlgebraOperatorPredicate;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.predicate.AlgebraOperatorPredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.ValueConstant;
 
 public class OBDAVocabulary {
 

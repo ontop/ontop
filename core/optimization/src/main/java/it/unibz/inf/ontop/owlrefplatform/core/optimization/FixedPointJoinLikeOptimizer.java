@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

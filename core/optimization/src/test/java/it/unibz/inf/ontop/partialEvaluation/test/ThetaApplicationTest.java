@@ -20,18 +20,26 @@ package it.unibz.inf.ontop.partialEvaluation.test;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import junit.framework.TestCase;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 
 public class ThetaApplicationTest extends TestCase {

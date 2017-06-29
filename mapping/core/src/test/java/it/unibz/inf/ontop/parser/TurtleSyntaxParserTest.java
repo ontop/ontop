@@ -27,14 +27,11 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 
 /**

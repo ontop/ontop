@@ -4,14 +4,14 @@ package it.unibz.inf.ontop;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
-import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.impl.OntopModelSingletons;
+import it.unibz.inf.ontop.model.OntopModelSingletons;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.InnerJoinOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.JoinLikeOptimizer;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.sql.DBMetadataTestingTools;
+import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
+import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
 
 public class OptimizationTestingTools {
 

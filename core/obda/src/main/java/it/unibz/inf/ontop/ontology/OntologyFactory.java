@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.ontology;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.ObjectConstant;
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.Constant;
+import it.unibz.inf.ontop.model.term.ObjectConstant;
+import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.Constant;
 
 /**
  * 

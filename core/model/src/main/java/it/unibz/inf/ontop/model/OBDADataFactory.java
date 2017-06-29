@@ -30,7 +30,24 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.predicate.OperationPredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.DistinctVariableDataAtom;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.atom.VariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DatatypeFactory;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 public interface OBDADataFactory extends Serializable {
 
@@ -43,15 +60,11 @@ public interface OBDADataFactory extends Serializable {
 	public CQIE getFreshCQIECopy(CQIE rule);
 
 
-	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, Variable... terms);
-
-	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> terms);
-
 	public DatalogProgram getDatalogProgram();
 	
-	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers);
+	public DatalogProgram getDatalogProgram(MutableQueryModifiers modifiers);
 
-	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules);
+	public DatalogProgram getDatalogProgram(MutableQueryModifiers modifiers, Collection<CQIE> rules);
 
 
 	public Function getTripleAtom(Term subject, Term predicate, Term object);
@@ -147,25 +160,6 @@ public interface OBDADataFactory extends Serializable {
 
 	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms);
 
-	/**
-	 * Beware: a DataAtom is immutable
-	 */
-	public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> terms);
-
-	/**
-	 * Beware: a DataAtom is immutable
-	 */
-	public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms);
-
-	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate,
-																ImmutableList<? extends VariableOrGroundTerm> arguments);
-	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate, VariableOrGroundTerm ... arguments);
-
-	public DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate,
-																 ImmutableList<Variable> arguments);
-
-	public DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate,
-																		Variable ... arguments);
 
 	public Expression getExpression(OperationPredicate functor, Term... arguments);
 

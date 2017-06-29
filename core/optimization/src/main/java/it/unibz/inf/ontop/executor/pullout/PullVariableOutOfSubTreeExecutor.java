@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.executor.pullout;
 
 import it.unibz.inf.ontop.executor.ProposalExecutor;
-import it.unibz.inf.ontop.pivotalrepr.JoinLikeNode;
-import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfSubTreeProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfSubTreeResults;
+import it.unibz.inf.ontop.iq.node.JoinLikeNode;
+import it.unibz.inf.ontop.iq.proposal.PullVariableOutOfSubTreeProposal;
+import it.unibz.inf.ontop.iq.proposal.PullVariableOutOfSubTreeResults;
 
 /**
  * TODO: explain

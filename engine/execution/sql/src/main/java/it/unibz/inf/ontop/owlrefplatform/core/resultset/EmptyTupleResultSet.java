@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.Constant;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.OBDAStatement;
 import it.unibz.inf.ontop.model.TupleResultSet;
 

@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringConfigurationImpl.DefaultOntopQueryAnsweringBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringSQLConfigurationImpl.DefaultOntopQueryAnsweringSQLBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringSQLConfigurationImpl.OntopQueryAnsweringSQLOptions;
-import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
+import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;

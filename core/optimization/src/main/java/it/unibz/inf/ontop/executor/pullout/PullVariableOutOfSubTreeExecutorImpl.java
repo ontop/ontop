@@ -1,22 +1,26 @@
 package it.unibz.inf.ontop.executor.pullout;
 
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.model.ImmutableExpression;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.JoinLikeNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.node.SubstitutionResults;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfSubTreeProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfSubTreeResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PullVariableOutOfSubTreeResultsImpl;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.iq.proposal.PullVariableOutOfSubTreeProposal;
+import it.unibz.inf.ontop.iq.proposal.PullVariableOutOfSubTreeResults;
+import it.unibz.inf.ontop.iq.proposal.impl.PullVariableOutOfSubTreeResultsImpl;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.executor.substitution.DescendingPropagationTools.propagateSubstitutionDown;
-import static it.unibz.inf.ontop.model.ExpressionOperation.EQ;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.predicate.ExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * TODO: explain

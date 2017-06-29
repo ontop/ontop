@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model.impl;
 
 
-import it.unibz.inf.ontop.model.LanguageTag;
+import it.unibz.inf.ontop.model.term.LanguageTag;
 import org.eclipse.rdf4j.model.util.language.LanguageTagSyntaxException;
 
 import java.util.Optional;

@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.VariableGenerator;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.HashSet;
 import java.util.Set;

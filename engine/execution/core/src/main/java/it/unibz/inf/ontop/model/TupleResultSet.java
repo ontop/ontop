@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.model;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
+import it.unibz.inf.ontop.model.term.Constant;
 
 import java.util.List;
 

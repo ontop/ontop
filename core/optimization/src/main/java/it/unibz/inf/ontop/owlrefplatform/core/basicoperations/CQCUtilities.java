@@ -20,7 +20,11 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
 import java.util.*;
 

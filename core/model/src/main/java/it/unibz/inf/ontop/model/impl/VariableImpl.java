@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.model.impl;
  */
 
 
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.stream.Stream;
 

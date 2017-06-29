@@ -4,14 +4,23 @@ package it.unibz.inf.ontop.mapping;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
-import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
-import it.unibz.inf.ontop.pivotalrepr.ExtensionalDataNode;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.junit.Test;
 
 import java.sql.Types;
@@ -21,7 +30,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static org.junit.Assert.fail;
 
@@ -61,38 +71,38 @@ public class MappingTest {
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p1"));
         table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         table1Def.addAttribute(idFactory.createAttributeID("col12"), Types.INTEGER, null, false);
-        P1_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table1Def);
+        P1_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1Def);
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p3"));
         table3Def.addAttribute(idFactory.createAttributeID("col31"), Types.INTEGER, null, false);
-        P3_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table3Def);
+        P3_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table3Def);
 
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p4"));
         table4Def.addAttribute(idFactory.createAttributeID("col41"), Types.INTEGER, null, false);
-        P4_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table4Def);
+        P4_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table4Def);
 
         DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p5"));
         table5Def.addAttribute(idFactory.createAttributeID("col51"), Types.INTEGER, null, false);
-        P5_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table5Def);
+        P5_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table5Def);
 
-        P1_ST_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(P1_PREDICATE, ImmutableList.of(S, T));
-        P2_ST_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(P1_PREDICATE, ImmutableList.of(S, T));
-        P3_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(P3_PREDICATE, ImmutableList.of(X));
-        P4_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(P4_PREDICATE, ImmutableList.of(X));
-        P5_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(P5_PREDICATE, ImmutableList.of(X));
+        P1_ST_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P1_PREDICATE, ImmutableList.of(S, T));
+        P2_ST_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P1_PREDICATE, ImmutableList.of(S, T));
+        P3_X_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P3_PREDICATE, ImmutableList.of(X));
+        P4_X_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P4_PREDICATE, ImmutableList.of(X));
+        P5_X_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P5_PREDICATE, ImmutableList.of(X));
 
 
         DatabaseRelationDefinition tableBrokerDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID("DB2INST1", "brokerworksfor"));
         tableBrokerDef.addAttribute(idFactory.createAttributeID("broker"), Types.INTEGER, null, false);
         tableBrokerDef.addAttribute(idFactory.createAttributeID("company"), Types.INTEGER, null, true);
         tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), Types.INTEGER, null, true);
-        BROKER_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(tableBrokerDef);
+        BROKER_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(tableBrokerDef);
 
         URI_PREDICATE =  new URITemplatePredicateImpl(2);
         ANS1_VAR1_PREDICATE = DATA_FACTORY.getAtomPredicate("http://example.org/Dealer", 1);
         URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/person/{}");
 
-        BROKER_3_ATOM = DATA_FACTORY.getDataAtom(BROKER_PREDICATE, ImmutableList.of(C,Y,C));
+        BROKER_3_ATOM = ATOM_FACTORY.getDataAtom(BROKER_PREDICATE, ImmutableList.of(C,Y,C));
 
         DB_METADATA = dbMetadata;
     }
@@ -169,7 +179,7 @@ public class MappingTest {
 
         ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(BROKER_3_ATOM);
 
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, F);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, F);
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         queryBuilder.init(projectionAtom, constructionNode);

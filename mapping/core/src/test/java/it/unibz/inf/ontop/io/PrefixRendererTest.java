@@ -23,15 +23,15 @@ package it.unibz.inf.ontop.io;
 import java.util.*;
 
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
 
 import junit.framework.TestCase;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.MAPPING_FACTORY;
 
 

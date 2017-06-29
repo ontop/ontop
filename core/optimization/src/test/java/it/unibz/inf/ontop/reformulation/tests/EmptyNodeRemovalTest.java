@@ -3,21 +3,29 @@ package it.unibz.inf.ontop.reformulation.tests;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.proposal.NodeTracker;
+import it.unibz.inf.ontop.iq.proposal.NodeTrackingResults;
+import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Test;
 
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
-import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-import static it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -30,14 +38,14 @@ public class EmptyNodeRemovalTest {
     private static Variable B = DATA_FACTORY.getVariable("b");
     private static Variable B1 = DATA_FACTORY.getVariable("b1");
     private static Variable C = DATA_FACTORY.getVariable("c");
-    private static DistinctVariableOnlyDataAtom PROJECTION_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+    private static DistinctVariableOnlyDataAtom PROJECTION_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_PREDICATE, ImmutableList.of(X, Y));
     private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
     private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
     private static AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 1);
-    private static ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
-    private static ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, A));
+    private static ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, A, B));
+    private static ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_2, A));
     private static final EmptyNode EMPTY_NODE_1 = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, C));
 
     /**
@@ -639,7 +647,7 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ, B, B1));
         queryBuilder.addChild(rootNode, lj1);
-        queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B1)), RIGHT);
+        queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, A, B1)), RIGHT);
 
         LeftJoinNode lj2 = IQ_FACTORY.createLeftJoinNode();
         queryBuilder.addChild(lj1, lj2, LEFT);
@@ -709,7 +717,7 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ, B, B1));
         queryBuilder.addChild(rootNode, lj1);
-        queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, B1, C)), RIGHT);
+        queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, B1, C)), RIGHT);
 
         LeftJoinNode lj2 = IQ_FACTORY.createLeftJoinNode();
         queryBuilder.addChild(lj1, lj2, LEFT);

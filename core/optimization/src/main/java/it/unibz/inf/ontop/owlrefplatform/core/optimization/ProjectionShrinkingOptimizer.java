@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 
 public interface ProjectionShrinkingOptimizer extends IntermediateQueryOptimizer {
     /**

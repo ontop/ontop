@@ -4,14 +4,25 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LocallyImmutableSubstitutionImpl;
+import it.unibz.inf.ontop.exception.ConversionException;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.DistinctVariableDataAtom;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.OperationPredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
+import it.unibz.inf.ontop.substitution.impl.LocallyImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
@@ -100,7 +111,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             argBuilder.add((VariableOrGroundTerm)subTerm);
 
         }
-        return DATA_FACTORY.getDataAtom(predicate, argBuilder.build());
+        return ATOM_FACTORY.getDataAtom(predicate, argBuilder.build());
     }
 
     @Override
@@ -116,7 +127,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
          * Checks if new data atom can be converted into a DistinctVariableDataAtom
          */
         if (newDataAtom.getArguments().size() == newDataAtom.getVariables().size()) {
-            return DATA_FACTORY.getDistinctVariableDataAtom(newDataAtom.getPredicate(),
+            return ATOM_FACTORY.getDistinctVariableDataAtom(newDataAtom.getPredicate(),
                     (ImmutableList<Variable>)newDataAtom.getArguments());
         }
         else {

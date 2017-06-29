@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
-import it.unibz.inf.ontop.model.DatalogProgram;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
 
 import java.util.List;
 

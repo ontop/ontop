@@ -2,9 +2,12 @@
 
 package it.unibz.inf.ontop.parser;
 
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.QueryUtils;
 import org.antlr.runtime.BitSet;
 import org.antlr.runtime.*;
@@ -13,8 +16,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 @SuppressWarnings("all")
 public class TurtleOBDAParser extends Parser {
@@ -385,7 +388,7 @@ public class TurtleOBDAParser extends Parser {
 	//		if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
 	//			return true;
 	//		}
-			if (pred instanceof Function && ((Function) pred).getTerm(0) instanceof Constant ) {
+			if (pred instanceof Function && ((Function) pred).getTerm(0) instanceof Constant) {
 				String c= ((Constant) ((Function) pred).getTerm(0)).getValue();
 				return c.equals(OBDAVocabulary.RDF_TYPE);
 			}	

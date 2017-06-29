@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 
@@ -29,7 +29,7 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
 
 public class DataTypeComboBox extends JComboBox {
 

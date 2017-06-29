@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.term.*;
 
 
 import java.util.Collection;

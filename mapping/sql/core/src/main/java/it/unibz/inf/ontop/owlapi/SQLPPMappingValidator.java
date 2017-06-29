@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;

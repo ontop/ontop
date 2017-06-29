@@ -21,11 +21,9 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.SQLPPTriplesMap;
-
-import java.util.List;
 
 /**
  * This filter receives a string like parameter in the constructor and returns

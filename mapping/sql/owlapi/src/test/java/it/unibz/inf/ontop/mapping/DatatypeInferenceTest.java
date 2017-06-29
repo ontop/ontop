@@ -3,7 +3,11 @@ package it.unibz.inf.ontop.mapping;
 import it.unibz.inf.ontop.TestConnectionManager;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.predicate.DatatypePredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.type.DatatypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -12,7 +16,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 

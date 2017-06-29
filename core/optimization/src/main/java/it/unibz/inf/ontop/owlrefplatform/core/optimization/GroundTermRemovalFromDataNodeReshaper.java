@@ -2,13 +2,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.pivotalrepr.DataNode;
-import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.pivotalrepr.proposal.GroundTermRemovalFromDataNodeProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.GroundTermRemovalFromDataNodeProposalImpl;
+import it.unibz.inf.ontop.iq.node.DataNode;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.proposal.GroundTermRemovalFromDataNodeProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.GroundTermRemovalFromDataNodeProposalImpl;
 
 /**
  * Collects all the data nodes that contains some ground terms

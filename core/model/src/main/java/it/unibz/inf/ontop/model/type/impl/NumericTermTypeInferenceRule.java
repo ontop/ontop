@@ -2,16 +2,16 @@ package it.unibz.inf.ontop.model.type.impl;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.TermType;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.IncompatibleTermException;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
-import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.NUMERIC_TYPES;
-import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER_TYPES;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.INTEGER;
+import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.NUMERIC_TYPES;
+import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.INTEGER_TYPES;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 
 public class NumericTermTypeInferenceRule extends UnifierTermTypeInferenceRule {

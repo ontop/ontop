@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.AlgebraOperatorPredicate;
+import it.unibz.inf.ontop.model.predicate.AlgebraOperatorPredicate;
 
 public class AlgebraOperatorPredicateImpl extends PredicateImpl implements AlgebraOperatorPredicate {
 

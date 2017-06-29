@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Substitution;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 public interface CQContainmentCheck {
 

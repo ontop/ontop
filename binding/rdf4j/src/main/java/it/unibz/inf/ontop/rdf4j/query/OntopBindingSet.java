@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.rdf4j.query;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.ObjectConstant;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.TupleResultSet;
-import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.rdf4j.RDF4JHelper;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.Binding;

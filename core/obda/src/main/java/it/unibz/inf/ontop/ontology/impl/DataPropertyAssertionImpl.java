@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.ObjectConstant;
-import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.term.ObjectConstant;
+import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 

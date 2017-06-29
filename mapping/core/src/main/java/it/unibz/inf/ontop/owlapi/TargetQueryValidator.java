@@ -21,9 +21,8 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import org.slf4j.Logger;
@@ -31,8 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 // TODO: move to a more appropriate package
 

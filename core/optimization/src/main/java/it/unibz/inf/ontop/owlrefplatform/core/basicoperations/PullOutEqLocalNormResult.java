@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
 import fj.data.List;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Var2VarSubstitution;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 
 /**
  * TODO: explain

@@ -1,6 +1,12 @@
 package it.unibz.inf.ontop.model.impl;
 
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.predicate.AlgebraOperatorPredicate;
+import it.unibz.inf.ontop.model.predicate.DatatypePredicate;
+import it.unibz.inf.ontop.model.predicate.OperationPredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.HashSet;
 import java.util.List;

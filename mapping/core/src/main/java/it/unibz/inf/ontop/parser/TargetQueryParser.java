@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.parser;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 
 public interface TargetQueryParser {
 

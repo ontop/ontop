@@ -5,9 +5,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricCompositeExecutor;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricExecutor;
-import it.unibz.inf.ontop.pivotalrepr.LeftJoinNode;
-import it.unibz.inf.ontop.pivotalrepr.proposal.LeftJoinOptimizationProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.LeftJoinOptimizationProposalImpl;
+import it.unibz.inf.ontop.iq.node.LeftJoinNode;
+import it.unibz.inf.ontop.iq.proposal.LeftJoinOptimizationProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.LeftJoinOptimizationProposalImpl;
 
 import java.util.Optional;
 

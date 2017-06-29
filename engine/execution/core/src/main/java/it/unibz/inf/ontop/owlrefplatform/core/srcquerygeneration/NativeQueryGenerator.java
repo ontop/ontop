@@ -25,7 +25,7 @@ import java.io.Serializable;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 
 /**
  * Generates a source query in a given native query language.

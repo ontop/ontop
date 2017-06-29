@@ -5,7 +5,7 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringConfiguration;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
-import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
+import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
 import javax.annotation.Nonnull;

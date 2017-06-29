@@ -4,7 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.UriTemplateMatcher;
+import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 
 public class MappingMetadataImpl implements MappingMetadata {
 

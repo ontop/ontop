@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.spec.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintSet;
-import it.unibz.inf.ontop.sql.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

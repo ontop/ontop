@@ -23,20 +23,32 @@ package it.unibz.inf.ontop.model.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.OperationPredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DatatypeFactory;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.eclipse.rdf4j.model.ValueFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static it.unibz.inf.ontop.model.impl.DataAtomTools.areVariablesDistinct;
-import static it.unibz.inf.ontop.model.impl.DataAtomTools.isVariableOnly;
-
 public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	private static final long serialVersionUID = 1851116693137470887L;
+	private static final OBDADataFactory INSTANCE = new OBDADataFactoryImpl(DatatypeFactoryImpl.getInstance());
 
 	private static OBDADataFactory instance = null;
 	private static ValueFactory irifactory = null;
@@ -47,7 +59,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	private static int counter = 0;
 	private final DatatypeFactory datatypeFactory;
 
-	OBDADataFactoryImpl(DatatypeFactory datatypeFactory) {
+	public static OBDADataFactory getInstance() {
+		return INSTANCE;
+	}
+
+	private OBDADataFactoryImpl(DatatypeFactory datatypeFactory) {
 		// protected constructor prevents instantiation from other classes.
 		this.datatypeFactory = datatypeFactory;
 	}
@@ -276,71 +292,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
-		/**
-		 * NB: A GroundDataAtom is a DistinctVariableDataAtom
-		 */
-		if(areVariablesDistinct(arguments)) {
-			return getDistinctVariableDataAtom(predicate, arguments);
-		}
-		else if (isVariableOnly(arguments)) {
-			return new VariableOnlyDataAtomImpl(predicate, (ImmutableList<Variable>)(ImmutableList<?>)arguments);
-		}
-		else {
-			return new DataAtomImpl(predicate, arguments);
-		}
-	}
-
-	@Override
-	public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms) {
-		return getDataAtom(predicate, ImmutableList.copyOf(terms));
-	}
-
-	@Override
-	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate,
-																ImmutableList<? extends VariableOrGroundTerm> arguments) {
-		if (isVariableOnly(arguments)) {
-			return new DistinctVariableOnlyDataAtomImpl(predicate, (ImmutableList<Variable>)(ImmutableList<?>)arguments);
-		}
-		else if (GroundTermTools.areGroundTerms(arguments)) {
-			return new GroundDataAtomImpl(predicate, (ImmutableList<GroundTerm>)(ImmutableList<?>)arguments);
-		}
-		else {
-			return new NonGroundDistinctVariableDataAtomImpl(predicate, arguments);
-		}
-	}
-
-	@Override
-	public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate, VariableOrGroundTerm... arguments) {
-		return getDistinctVariableDataAtom(predicate, ImmutableList.copyOf(arguments));
-	}
-
-	@Override
-	public DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> arguments) {
-		return new DistinctVariableOnlyDataAtomImpl(predicate, arguments);
-	}
-
-	@Override
-	public DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate, Variable... arguments) {
-		return getDistinctVariableOnlyDataAtom(predicate, ImmutableList.copyOf(arguments));
-	}
-
-	@Override
-	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, Variable... arguments) {
-		return getVariableOnlyDataAtom(predicate, ImmutableList.copyOf(arguments));
-	}
-
-	@Override
-	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> arguments) {
-		if (areVariablesDistinct(arguments)) {
-			return new DistinctVariableOnlyDataAtomImpl(predicate, arguments);
-		}
-		else {
-			return new VariableOnlyDataAtomImpl(predicate, arguments);
-		}
-	}
-
-	@Override
 	public DatatypeFactory getDatatypeFactory() {
 		return datatypeFactory;
 	}
@@ -361,14 +312,14 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers) {
+	public DatalogProgram getDatalogProgram(MutableQueryModifiers modifiers) {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.getQueryModifiers().copy(modifiers);
 		return p;
 	}
 
 	@Override
-	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules) {
+	public DatalogProgram getDatalogProgram(MutableQueryModifiers modifiers, Collection<CQIE> rules) {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.appendRule(rules);
 		p.getQueryModifiers().copy(modifiers);

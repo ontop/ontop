@@ -1,7 +1,10 @@
 package it.unibz.inf.ontop.sql;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.sql.parser.RAExpression;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
@@ -12,7 +15,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

@@ -1,13 +1,17 @@
 package it.unibz.inf.ontop.model.impl;
 
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.LanguageTag;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.LITERAL;
-import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.LITERAL_LANG;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.LITERAL;
+import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.LITERAL_LANG;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * TODO: integrate into a factory

@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.ontology;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.ObjectConstant;
+import it.unibz.inf.ontop.model.term.ObjectConstant;
 
 /**
  * Represents ClassAssertion from OWL 2 QL Specification

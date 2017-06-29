@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.injection;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.impl.OntopModelConfigurationImpl;
-import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 
 import javax.annotation.Nonnull;
 import java.io.File;

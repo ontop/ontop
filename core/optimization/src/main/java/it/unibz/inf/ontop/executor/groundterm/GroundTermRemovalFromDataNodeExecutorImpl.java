@@ -6,19 +6,26 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.GroundTermRemovalFromDataNodeProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.iq.proposal.GroundTermRemovalFromDataNodeProposal;
+import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.iq.proposal.ProposalResults;
+import it.unibz.inf.ontop.iq.proposal.impl.ProposalResultsImpl;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.GroundTerm;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
 import java.util.Collection;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * TODO: explain
@@ -147,7 +154,7 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
     }
 
     protected DataNode generateDataNode(DataNode formerDataNode, ImmutableList<VariableOrGroundTerm> arguments) {
-        DataAtom dataAtom = DATA_FACTORY.getDataAtom(formerDataNode.getProjectionAtom().getPredicate(), arguments);
+        DataAtom dataAtom = ATOM_FACTORY.getDataAtom(formerDataNode.getProjectionAtom().getPredicate(), arguments);
         if (formerDataNode instanceof ExtensionalDataNode) {
             return iqFactory.createExtensionalDataNode(dataAtom);
         }

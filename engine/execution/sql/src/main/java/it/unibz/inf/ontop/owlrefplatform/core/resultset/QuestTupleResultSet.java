@@ -21,10 +21,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  */
 
 
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
@@ -36,7 +38,7 @@ import java.sql.ResultSet;
 import java.text.*;
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class QuestTupleResultSet implements TupleResultSet {
 
@@ -79,7 +81,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 	 * @param st
 	 */
 	public QuestTupleResultSet(ResultSet set, List<String> signature, OntopStatement st,
-							   DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) {
+                               DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) {
 		this.rs = set;
 		this.st = st;
 		this.iriDictionary = iriDictionary.orElse(null);

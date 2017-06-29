@@ -35,8 +35,11 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.SQLQueryImpl;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
-import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.URITemplates;
 
 
@@ -64,7 +67,7 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.search.EntitySearcher;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Transform OBDA mappings in R2rml mappings
@@ -273,7 +276,7 @@ public class OBDAMappingTransformer {
 							StringBuilder sb = new StringBuilder();
 							Predicate functionSymbol = ((Function) objectTerm).getFunctionSymbol();
 							
-							if (functionSymbol == ExpressionOperation.CONCAT) { //concat						
+							if (functionSymbol == ExpressionOperation.CONCAT) { //concat
 								List<Term> terms = ((Function)objectTerm).getTerms();
 								TargetQueryRenderer.getNestedConcats(sb, terms.get(0),terms.get(1));
 								obm = mfact.createObjectMap(mfact.createTemplate(sb.toString()));

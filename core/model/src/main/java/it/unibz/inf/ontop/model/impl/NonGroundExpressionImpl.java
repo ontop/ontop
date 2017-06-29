@@ -2,9 +2,13 @@ package it.unibz.inf.ontop.model.impl;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.predicate.OperationPredicate;
+import it.unibz.inf.ontop.model.term.Expression;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonGroundFunctionalTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 
-import static it.unibz.inf.ontop.model.ExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.predicate.ExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.impl.GroundTermTools.checkNonGroundTermConstraint;
 
 public class NonGroundExpressionImpl extends ImmutableExpressionImpl implements NonGroundFunctionalTerm {

@@ -20,10 +20,16 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.utils.EventGeneratingLinkedList;
-import it.unibz.inf.ontop.utils.EventGeneratingList;
-import it.unibz.inf.ontop.utils.ListListener;
+import it.unibz.inf.ontop.datalog.ListenableFunction;
+import it.unibz.inf.ontop.model.predicate.AlgebraOperatorPredicate;
+import it.unibz.inf.ontop.model.predicate.DatatypePredicate;
+import it.unibz.inf.ontop.model.predicate.OperationPredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.datalog.impl.EventGeneratingLinkedList;
+import it.unibz.inf.ontop.datalog.EventGeneratingList;
 
 import java.util.ArrayList;
 import java.util.Collections;

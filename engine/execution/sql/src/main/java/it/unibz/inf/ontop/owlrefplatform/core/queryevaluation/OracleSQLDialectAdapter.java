@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OrderCondition;
-import it.unibz.inf.ontop.sql.RelationID;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.dbschema.RelationID;
 
 import java.sql.Types;
 import java.util.Collection;

@@ -20,21 +20,22 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
-import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
+import it.unibz.inf.ontop.model.predicate.BNodePredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.ontology.DataPropertyRangeExpression;
 import it.unibz.inf.ontop.ontology.DataRangeExpression;
 import it.unibz.inf.ontop.ontology.Datatype;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.sql.Attribute;
-import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
-import it.unibz.inf.ontop.sql.RelationDefinition;
-import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class MappingDataTypeRepair {
 
@@ -293,7 +294,7 @@ public class MappingDataTypeRepair {
 		//                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!
 		IndexedPosititon ip = list.get(0);
 
-		RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom.getFunctionSymbol());
+		RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom.getFunctionSymbol());
 		RelationDefinition td = metadata.getRelation(tableId);
 		Attribute attribute = td.getAttribute(ip.pos);
 

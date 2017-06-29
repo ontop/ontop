@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.ontology;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
 
 /**
  * Represents AnnotationProperty from the OWL 2 Specification

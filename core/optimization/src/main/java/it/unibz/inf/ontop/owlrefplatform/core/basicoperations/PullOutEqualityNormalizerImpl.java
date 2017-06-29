@@ -4,16 +4,22 @@ import fj.*;
 import fj.data.List;
 import fj.data.Set;
 import fj.data.TreeMap;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.impl.DatalogTools;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.Var2VarSubstitutionImpl;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.impl.DatalogTools.*;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.datalog.impl.DatalogTools.*;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Default implementation of PullOutEqualityNormalizer. Is Left-Join aware.

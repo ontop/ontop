@@ -22,13 +22,16 @@ package it.unibz.inf.ontop.renderer;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
 
 /**
  * A utility class to render a Target Query object into its representational

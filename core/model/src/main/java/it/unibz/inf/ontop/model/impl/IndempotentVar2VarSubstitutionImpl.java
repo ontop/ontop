@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model.impl;
 
-import it.unibz.inf.ontop.model.IndempotentVar2VarSubstitution;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.substitution.IndempotentVar2VarSubstitution;
+import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.HashSet;
 import java.util.Map;

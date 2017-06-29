@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.model.impl;
 
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.model.DatatypeFactory;
-import it.unibz.inf.ontop.model.DatatypePredicate;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.DatatypeFactory;
+import it.unibz.inf.ontop.model.predicate.DatatypePredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
@@ -16,6 +16,12 @@ import java.util.*;
 
 @Singleton
 public class DatatypeFactoryImpl implements DatatypeFactory {
+
+	private static final DatatypeFactory INSTANCE = new DatatypeFactoryImpl();
+
+	public static DatatypeFactory getInstance() {
+		return INSTANCE;
+	}
 
 	
 	// special case of literals with the specified language
@@ -37,7 +43,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	private final Map<COL_TYPE, DatatypePredicate> mapCOLTYPEtoPredicate = new HashMap<>();
 	private final List<Predicate> predicateList = new LinkedList<>();
 
-	DatatypeFactoryImpl() {
+	private DatatypeFactoryImpl() {
 		RDFS_LITERAL = registerType(RDFS.LITERAL, COL_TYPE.LITERAL); // 3 "http://www.w3.org/2000/01/rdf-schema#Literal"
 		XSD_INTEGER = registerType(XMLSchema.INTEGER, COL_TYPE.INTEGER);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
 		XSD_DECIMAL = registerType(XMLSchema.DECIMAL, COL_TYPE.DECIMAL);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
@@ -143,6 +149,4 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		//	return getBNodeTemplatePredicate(1);
 	}
 
-	
-		
 }

@@ -20,7 +20,11 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.predicate.BuiltinPredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.DataSomeValuesFrom;
@@ -31,6 +35,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +49,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class TMappingProcessor {
 
@@ -237,7 +243,7 @@ public class TMappingProcessor {
 	 * @param dag
 	 * @param full
 	 */
-	private static void getObjectTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
+	private static void getObjectTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex,
 			Map<Predicate, List<TMappingRule>> originalMappings,
 			EquivalencesDAG<ObjectPropertyExpression> dag, 
 			boolean full, TMappingExclusionConfig excludeFromTMappings) {

@@ -23,17 +23,26 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertToMutableFunction;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /***
  * Translate a intermediate queries expression into a Datalog program that has the
@@ -92,7 +101,7 @@ public class IntermediateQueryToDatalogTranslator {
 			QueryModifiers immutableQueryModifiers = optionalModifiers.get();
 
 			// Mutable modifiers (used by the Datalog)
-			OBDAQueryModifiers mutableModifiers = new MutableQueryModifiersImpl(immutableQueryModifiers);
+			MutableQueryModifiers mutableModifiers = new MutableQueryModifiersImpl(immutableQueryModifiers);
 			// TODO: support GROUP BY (distinct QueryNode)
 
             dProgram = DATA_FACTORY.getDatalogProgram(mutableModifiers);
@@ -270,7 +279,7 @@ public class IntermediateQueryToDatalogTranslator {
 			//DataAtom projectionAtom = generateProjectionAtom(ImmutableSet.of());
 			//heads.add(new RuleHead(new ImmutableSubstitutionImpl<>(ImmutableMap.of()), projectionAtom,Optional.empty()));
 			//return body;
-			body.add(DATA_FACTORY.getDistinctVariableOnlyDataAtom(DATA_FACTORY.getAtomPredicate("dummy", 0), ImmutableList.of()));
+			body.add(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(DATA_FACTORY.getAtomPredicate("dummy", 0), ImmutableList.of()));
 			return body;
 
 		} else {
@@ -319,7 +328,7 @@ public class IntermediateQueryToDatalogTranslator {
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
 		AtomPredicate newPredicate = DATA_FACTORY.getAtomPredicate("ansSQ" + ++subQueryCounter, projectedVariables.size());
-		return DATA_FACTORY.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
+		return ATOM_FACTORY.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}
 
 	private static Function getSPARQLJoin(List<Function> atoms, Optional<Function> optionalCondition) {

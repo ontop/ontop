@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.DatatypePredicate;
+import it.unibz.inf.ontop.model.predicate.DatatypePredicate;
 
 //import com.hp.hpl.jena.iri.IRI;
 

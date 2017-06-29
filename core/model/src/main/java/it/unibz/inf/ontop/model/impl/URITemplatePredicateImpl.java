@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.URITemplatePredicate;
+import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
 
 public class URITemplatePredicateImpl extends PredicateImpl implements URITemplatePredicate {
 

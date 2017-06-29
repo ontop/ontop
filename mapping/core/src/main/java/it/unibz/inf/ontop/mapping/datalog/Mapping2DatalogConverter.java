@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.mapping.datalog;
 
 
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.datalog.CQIE;
 
 import java.util.stream.Stream;
 

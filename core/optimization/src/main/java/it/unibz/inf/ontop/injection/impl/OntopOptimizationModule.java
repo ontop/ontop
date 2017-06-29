@@ -19,8 +19,8 @@ import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.InnerJoinOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.JoinLikeOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.LeftJoinOptimizer;
-import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
-import it.unibz.inf.ontop.pivotalrepr.tools.QueryUnionSplitter;
+import it.unibz.inf.ontop.iq.datalog.DatalogProgram2QueryConverter;
+import it.unibz.inf.ontop.iq.tools.QueryUnionSplitter;
 
 public class OntopOptimizationModule extends OntopAbstractModule {
 

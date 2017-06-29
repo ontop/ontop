@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.utils;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.NoDatasourceSelectedException;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.utils.ConnectionTools;
 
@@ -151,7 +151,7 @@ public class VirtualABoxStatistics {
 	}
 
 	private int getTuplesCount(OBDASQLQuery query, OBDADataSource source)
-			throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
+			throws ClassNotFoundException, SQLException {
 		Statement st = null;
 		ResultSet rs = null;
 		int count = -1;

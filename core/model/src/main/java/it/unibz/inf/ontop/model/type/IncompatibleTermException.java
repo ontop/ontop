@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.model.type;
 
-import it.unibz.inf.ontop.model.Expression;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.TermType;
+import it.unibz.inf.ontop.model.term.Expression;
+import it.unibz.inf.ontop.model.term.Term;
 
 /**
  *

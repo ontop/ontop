@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.reformulation.owlapi;
 
-import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.owlapi.swrl.SWRLAPITranslator;
 import junit.framework.TestCase;
 import org.junit.Test;

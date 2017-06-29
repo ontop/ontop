@@ -2,13 +2,19 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
 import fj.F;
 import fj.data.List;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
 
 import java.util.ArrayList;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Flattens JOINs and AND atoms that are found at the top of a Datalog body.
@@ -30,7 +36,7 @@ public class FunctionFlattener {
             newRules.add(flattenRule(rule));
         }
 
-        OBDAQueryModifiers newModifiers = program.getQueryModifiers().clone();
+        MutableQueryModifiers newModifiers = program.getQueryModifiers().clone();
         return DATA_FACTORY.getDatalogProgram(newModifiers, newRules);
     }
 
