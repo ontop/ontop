@@ -217,7 +217,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-system-sql</artifactId>
+            <artifactId>ontop-system-sql-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
