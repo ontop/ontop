@@ -20,29 +20,23 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import it.unibz.inf.ontop.utils.BootstrapGenerator;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.List;
 
 public class BootstrapAction extends ProtegeAction {
 
@@ -53,7 +47,7 @@ public class BootstrapAction extends ProtegeAction {
 	private OWLModelManager owlManager;
 	private OBDAModelManager modelManager;
 	private String baseUri = "";
-	private OWLOntology currentOnto;
+
 	private OBDAModel currentModel;
 	private OBDADataSource currentSource;
 
@@ -76,37 +70,31 @@ public class BootstrapAction extends ProtegeAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		currentOnto = owlManager.getActiveOntology();
+
 		currentModel = modelManager.getActiveOBDAModel();
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
-		JLabel dsource = new JLabel("Choose a datasource to bootstrap: ");
-		dsource.setAlignmentX(Component.LEFT_ALIGNMENT);
-		panel.add(dsource);
-		List<String> options = new ArrayList<String>();
-		for (OBDADataSource source : currentModel.getSources())
-			options.add(source.getSourceID().toString());
-		JComboBox combo = new JComboBox(options.toArray());
-		combo.setAlignmentX(Component.LEFT_ALIGNMENT);
-		panel.add(combo);
-		Dimension minsize = new Dimension(10, 10);
-		panel.add(new Box.Filler(minsize, minsize, minsize));
 		JLabel ouri = new JLabel(
 				"Base URI - the prefix to be used for all generated classes and properties: ");
 		ouri.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(ouri);
+		Dimension minsize1 = new Dimension(10, 10);
+		panel.add(new Box.Filler(minsize1, minsize1, minsize1));
 		JTextField base_uri = new JTextField();
 		base_uri.setText(currentModel.getMutablePrefixManager().getDefaultPrefix()
 				.replace("#", "/"));
 		base_uri.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(base_uri);
+		Dimension minsize2 = new Dimension(20, 20);
+		panel.add(new Box.Filler(minsize2, minsize2, minsize2));
 		int res = JOptionPane.showOptionDialog(workspace, panel,
 				"Bootstrapping", JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.QUESTION_MESSAGE, null, null, null);
+
 		if (res == JOptionPane.OK_OPTION) {
-			int index = combo.getSelectedIndex();
-			currentSource = currentModel.getSources().get(index);
+
+			currentSource = currentModel.getDatasource();
 			if (currentSource != null) {
 				this.baseUri = base_uri.getText().trim();
 				if (baseUri.contains("#")) {
@@ -124,8 +112,7 @@ public class BootstrapAction extends ProtegeAction {
 								BootstrapperThread t = new BootstrapperThread();
 								monitor.addProgressListener(t);
 								monitor.start();
-								t.run(baseUri, currentOnto, currentModel,
-										currentSource);
+								t.run(baseUri);
 								monitor.stop();
 								JOptionPane.showMessageDialog(workspace,
 										"Task is completed.", "Done",
@@ -148,33 +135,17 @@ public class BootstrapAction extends ProtegeAction {
 
 		@Override
 		public void actionCanceled() throws Exception {
-			throw new Exception("Cancelling boostrapping is not implemented.");
+
 		}
 
-		public void run(String baseUri, OWLOntology currentOnto,
-                        OBDAModel currentModel, OBDADataSource currentSource)
+		public void run(String baseUri)
 				throws Exception {
 
-			String url = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-			String username = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-			String password = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-			String driver = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+			OBDAModelManager obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
 
-			// TODO: Retrieve the effective properties (not just the default ones).
-			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-					.jdbcUrl(url)
-					.jdbcUser(username)
-					.jdbcPassword(password)
-					.jdbcDriver(driver)
-					.ppMapping(currentModel.generatePPMapping())
-					.ontology(currentOnto)
-					.build();
+			new BootstrapGenerator(obdaModelManager, baseUri, owlManager);
 
-			// Side-effect on the ontology object
-			DirectMappingEngine.BootstrappingResults results = DirectMappingEngine.bootstrap(configuration, baseUri);
-			for (SQLPPTriplesMap triplesMap: results.getPPMapping().getTripleMaps()) {
-				currentModel.addMapping(triplesMap, false);
-			}
+
 		}
 
 		@Override

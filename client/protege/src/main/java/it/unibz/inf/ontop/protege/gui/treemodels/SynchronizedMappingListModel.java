@@ -83,7 +83,7 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 		if (focusedSource == null)
 			return 0;
 
-		List<SQLPPTriplesMap> mappings = obdaModel.getMappings(focusedSource);
+		List<SQLPPTriplesMap> mappings = obdaModel.getMapping(focusedSource);
 		int filteredCount = 0;
 		for (SQLPPTriplesMap mapping : mappings) {
 			boolean passedAllFilters = true;
@@ -98,7 +98,7 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 
 	@Override
 	public Object getElementAt(int index) {
-		List<SQLPPTriplesMap> mappings = obdaModel.getMappings(focusedSource);
+		List<SQLPPTriplesMap> mappings = obdaModel.getMapping(focusedSource);
 		int filteredCount = -1;
 		for (SQLPPTriplesMap mapping : mappings) {
 			boolean passedAllFilters = true;
