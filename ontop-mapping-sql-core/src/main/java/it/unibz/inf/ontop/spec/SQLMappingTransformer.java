@@ -92,9 +92,7 @@ public class SQLMappingTransformer implements MappingTransformer {
     public ImmutableList<CQIE> inferMissingDataTypesAndValidate(ImmutableList<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,
                                                                 ImmutableOntologyVocabulary vocabulary, DBMetadata metadata) throws MappingException {
 
-        VocabularyValidator vocabularyValidator = new VocabularyValidator(tBoxReasoner, vocabulary);
-
-        MappingDataTypeCompletion typeRepair = new MappingDataTypeCompletion(metadata, tBoxReasoner, vocabularyValidator);
+        MappingDataTypeCompletion typeRepair = new MappingDataTypeCompletion(metadata);
         // TODO: create a new program (with fresh rules), instead of modifying each rule ?
         unfoldingProgram.forEach(r -> typeRepair.insertDataTyping(r));
         return unfoldingProgram;

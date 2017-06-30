@@ -159,7 +159,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         ImmutableOntologyVocabulary vocabulary = ontology.getVocabulary();
 
         // Adding data typing on the mapping axioms.
-        ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypes(initialMappingRules, tBox, vocabulary, dbMetadata);
+        ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypes(initialMappingRules, dbMetadata);
 
         ImmutableList<CQIE> mappingRulesWithFacts = insertFacts(fullyTypedRules, ontology, mappingMetadata.getUriTemplateMatcher());
 
@@ -391,15 +391,12 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     /***
      * Infers missing data types.
      */
-    public ImmutableList<CQIE> inferMissingDataTypes(ImmutableList<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,
-                                                     ImmutableOntologyVocabulary vocabulary, DBMetadata metadata)
+    public ImmutableList<CQIE> inferMissingDataTypes(ImmutableList<CQIE> unfoldingProgram, DBMetadata metadata)
             throws MappingException {
 
-        VocabularyValidator vocabularyValidator = new VocabularyValidator(tBoxReasoner, vocabulary);
-
-        MappingDataTypeCompletion typeRepair = new MappingDataTypeCompletion(metadata, tBoxReasoner, vocabularyValidator);
+        MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(metadata);
         for (CQIE rule : unfoldingProgram) {
-            typeRepair.insertDataTyping(rule);
+            typeCompletion.insertDataTyping(rule);
         }
 
         return unfoldingProgram;

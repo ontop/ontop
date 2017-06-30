@@ -44,8 +44,6 @@ public class LegacySQLMappingDatatypeFiller implements MappingDatatypeFiller {
         // Adding data typing on the mapping axioms.
         ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypes(
                 mapping2DatalogConverter.convert(mapping).collect(ImmutableCollectors.toList()),
-                tBox,
-                vocabulary,
                 dbMetadata
         );
         return datalog2QueryMappingConverter.convertMappingRules(fullyTypedRules, dbMetadata, executorRegistry,
@@ -56,16 +54,7 @@ public class LegacySQLMappingDatatypeFiller implements MappingDatatypeFiller {
      * Infers missing data types.
      * For each rule, the behavior is the following:
      * .get the type from the rule head
-     * .if present[
-     *      .if the type is boolean and the DB is DB2[
-     *          retrieve the the type from the metadata instead
-     * ]
-     * .if absent[
-     *     .get the type from the ontology
-     *     .if absent or (present and boolean and the DB is DB2) [
-     *          retrieve the type from the metadata
-     *     ]
-     * ]
+     * .if absent, retrieve the type from the metadata
      *
      * The behavior of type retrieval is the following for each rule
      * . Build a "termOccurrenceIndex", which is a map from variables to body atoms + position.
@@ -82,14 +71,11 @@ public class LegacySQLMappingDatatypeFiller implements MappingDatatypeFiller {
      *  .rule body atoms are extensional
      *  .the corresponding column types are compatible (e.g the types for column 1 of A and column 1 of B)
      */
-    public ImmutableList<CQIE> inferMissingDataTypes(ImmutableList<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,
-                                                     ImmutableOntologyVocabulary vocabulary, DBMetadata metadata) throws MappingException {
+    public ImmutableList<CQIE> inferMissingDataTypes(ImmutableList<CQIE> unfoldingProgram, DBMetadata metadata) throws MappingException {
 
-        VocabularyValidator vocabularyValidator = new VocabularyValidator(tBoxReasoner, vocabulary);
-
-        MappingDataTypeCompletion typeRepair = new MappingDataTypeCompletion(metadata, tBoxReasoner, vocabularyValidator);
+        MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(metadata);
         // TODO: create a new program (with fresh rules), instead of modifying each rule ?
-        unfoldingProgram.forEach(r -> typeRepair.insertDataTyping(r));
+        unfoldingProgram.forEach(r -> typeCompletion.insertDataTyping(r));
         return unfoldingProgram;
     }
 }

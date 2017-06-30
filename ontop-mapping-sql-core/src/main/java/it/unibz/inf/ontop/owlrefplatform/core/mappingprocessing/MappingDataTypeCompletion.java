@@ -25,12 +25,6 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.ontology.DataPropertyRangeExpression;
-import it.unibz.inf.ontop.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.ontology.Datatype;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.sql.Attribute;
 import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
 import it.unibz.inf.ontop.sql.RelationDefinition;
@@ -49,101 +43,30 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 public class MappingDataTypeCompletion {
 
 	private final DBMetadata metadata;
-	private final boolean isDB2;
-	private final Map<Predicate, Datatype> dataTypesMap;
-	private final VocabularyValidator qvv;
 
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeCompletion.class);
     private final JdbcTypeMapper jdbcTypeMapper;
 
     /**
-     * Constructs a new mapping data type resolution. The object requires an
-     * ontology for obtaining the user defined data-type.
-     * 
-     * If no datatype is defined than we use
-     * database metadata for obtaining the table column definition as the
+     * Constructs a new mapping data type resolution.
+     * If no datatype is defined, then we use database metadata for obtaining the table column definition as the
      * default data-type.
-     * 
+     *
      * @param metadata The database metadata.
      */
-    public MappingDataTypeCompletion(DBMetadata metadata, TBoxReasoner reasoner, VocabularyValidator qvv)
+    public MappingDataTypeCompletion(DBMetadata metadata)
             throws PredicateRedefinitionException {
         this.metadata = metadata;
-        String databaseName = metadata.getDbmsProductName();
-        String databaseDriver = metadata.getDriverName();
-        this.isDB2 = (databaseName!= null && databaseName.contains("DB2"))
-        			|| (databaseDriver != null && databaseDriver.contains("IBM"));
-
-        this.qvv = qvv;
         /**
          * TODO: retrieve from Guice
          */
         this.jdbcTypeMapper =  JdbcTypeMapper.getInstance();
-        dataTypesMap = getDataTypeFromOntology(reasoner);
     }
 
     /**
-     * Private method that gets the datatypes already present in the ontology and stores them in a map
-     * It will be used later in insertDataTyping
-     */
-    private static Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner)
-            throws PredicateRedefinitionException {
-
-    	final Map<Predicate, Datatype> dataTypesMap = new HashMap<>();
-
-        // Traverse the graph searching for dataProperty
-		for (Equivalences<DataRangeExpression> nodes : reasoner.getDataRangeDAG()) {
-			DataRangeExpression node = nodes.getRepresentative();
-
-			for (Equivalences<DataRangeExpression> descendants : reasoner.getDataRangeDAG().getSub(nodes)) {
-				DataRangeExpression descendant = descendants.getRepresentative();
-				if (descendant != node)
-					onDataRangeInclusion(dataTypesMap, descendant, node);
-			}
-			for (DataRangeExpression equivalent : nodes) {
-				if (equivalent != node) {
-					onDataRangeInclusion(dataTypesMap, node, equivalent);
-					onDataRangeInclusion(dataTypesMap, equivalent, node);
-				}
-			}
-		}
-		return dataTypesMap;
-    }
-
-    private static void onDataRangeInclusion(Map<Predicate, Datatype> dataTypesMap, DataRangeExpression sub, DataRangeExpression sup)
-            throws PredicateRedefinitionException {
-        //if sup is a datatype property  we store it in the map
-        //it means that sub is of datatype sup
-    	if (sup instanceof Datatype) {
-    		Datatype supDataType = (Datatype)sup;
-    		Predicate key;
-    		if (sub instanceof Datatype) {
-    			// datatype inclusion
-    			key = ((Datatype)sub).getPredicate();
-    		}
-    		else if (sub instanceof DataPropertyRangeExpression) {
-    			// range
-    			key = ((DataPropertyRangeExpression)sub).getProperty().getPredicate();
-    		}
-    		else
-    			return;
-
-			if (dataTypesMap.containsKey(key))
-                throw new PredicateRedefinitionException("Predicate " + key + " with " + dataTypesMap.get(key)
-                        + " is redefined as " + supDataType + " in the ontology");
-			dataTypesMap.put(key, supDataType);
-    	}
-    }
-
-    /**
-     * This method wraps the variable that holds data property values with a
-     * data type predicate. It will replace the variable with a new function
-     * symbol and update the rule atom. However, if the users already defined
-     * the data-type in the mapping, this method simply accepts the function
-     * symbol.
-     *
-     * @param rule
-     *            The set of mapping axioms.
+     * This method wraps the variable that holds data property values with a data type predicate.
+     * It will replace the variable with a new function symbol and update the rule atom.
+     * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
      */
 
     public void insertDataTyping(CQIE rule) throws MappingException {
@@ -151,7 +74,6 @@ public class MappingDataTypeCompletion {
         Predicate predicate = atom.getFunctionSymbol();
         if (predicate.getArity() == 2) { // we check both for data and object property
             Term term = atom.getTerm(1); // the second argument only
-
     		Map<String, List<IndexedPosititon>> termOccurenceIndex = createIndex(rule.getBody());
             insertDataTyping(term, atom, 1, termOccurenceIndex);
         }
@@ -176,65 +98,64 @@ public class MappingDataTypeCompletion {
 
             else if (function.isOperation()) {
 
-            	Function normal = qvv.getNormal(atom);
-                Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
+//            	Function normal = qvv.getNormal(atom);
+//                Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
 
                 //Check if a datatype was already assigned in the ontology
-                if (dataType != null) {
-                    //assign the datatype of the ontology
-                    if (!isBooleanDB2(dataType.getPredicate())) {
-                        Predicate replacement = dataType.getPredicate();
-                        Term newTerm = DATA_FACTORY.getFunction(replacement, function);
-                        atom.setTerm(position, newTerm);
-                    }
-                }
-                else {
+//                if (dataType != null) {
+//                    //assign the datatype of the ontology
+//                    if (!isBooleanDB2(dataType.getPredicate())) {
+//                        Predicate replacement = dataType.getPredicate();
+//                        Term newTerm = DATA_FACTORY.getFunction(replacement, function);
+//                        atom.setTerm(position, newTerm);
+//                    }
+//                }
+//                else {
                     for (int i = 0; i < function.getArity(); i++)
                         insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
-                }
+//                }
             }
             else if (function.isDataTypeFunction()) {
-
-                Function normal = qvv.getNormal(atom);
-                Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
-
-                //if a datatype was already assigned in the ontology
-                if (dataType != null && isBooleanDB2(dataType.getPredicate())) {
-
-                        Variable variable = (Variable) normal.getTerm(1);
-
-                        //No Boolean datatype in DB2 database, the value in the database is used
-                        Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
-                        Term newTerm = DATA_FACTORY.getTypedTerm(variable, type);
-                        log.warn("Datatype for the value " +variable + " of the property "+ predicate+ " has been inferred from the database");
-                        atom.setTerm(position, newTerm);
-                    }
+//
+//                Function normal = qvv.getNormal(atom);
+////                Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
+//
+//                //if a datatype was already assigned in the ontology
+//                if (dataType != null && isBooleanDB2(dataType.getPredicate())) {
+//
+//                        Variable variable = (Variable) normal.getTerm(1);
+//
+//                        //No Boolean datatype in DB2 database, the value in the database is used
+//                        Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
+//                        Term newTerm = DATA_FACTORY.getTypedTerm(variable, type);
+//                        log.warn("Datatype for the value " +variable + " of the property "+ predicate+ " has been inferred from the database");
+//                        atom.setTerm(position, newTerm);
+//                    }
                 }
            else
-               throw new UnknownDatatypeException("Unknown data type predicate: " + functionSymbol.getName());
+               throw new UnknownDatatypeException("Unexpected function: " + functionSymbol.getName());
         }
         else if (term instanceof Variable) {
 
             //check in the ontology if we have already information about the datatype
 
-            Function normal = qvv.getNormal(atom);
-            Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
+//            Function normal = qvv.getNormal(atom);
+//            Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
 
-            // If the term has no data-type predicate then by default the
-            // predicate is created following the database metadata of
+            // The predicate is created following the database metadata of
             // column type.
             Variable variable = (Variable) term;
 
             Term newTerm;
-            if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
-                Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
-                newTerm = DATA_FACTORY.getTypedTerm(variable, type);
-                log.warn("Datatype for the value " +variable + " of the property "+ predicate+ " has been inferred from the database");
-            }
-            else {
-                Predicate replacement = dataType.getPredicate();
-                newTerm = DATA_FACTORY.getFunction(replacement, variable);
-            }
+//            if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
+            Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
+            newTerm = DATA_FACTORY.getTypedTerm(variable, type);
+            log.warn("Datatype for the value " +variable + " of the property "+ predicate+ " has been inferred from the database");
+//            }
+//            else {
+//                Predicate replacement = dataType.getPredicate();
+//                newTerm = DATA_FACTORY.getFunction(replacement, variable);
+//            }
 
             atom.setTerm(position, newTerm);
         }
@@ -244,22 +165,6 @@ public class MappingDataTypeCompletion {
         }
     }
 
-    /**
-     * Private method, since DB2 does not support boolean value, we use the database metadata value
-     * @param dataType
-     * @return boolean to check if the database is DB2 and we assign  a boolean value
-     */
-    private boolean isBooleanDB2(Predicate dataType){
-
-        if (isDB2){
-            if (DATA_FACTORY.getDatatypeFactory().isBoolean(dataType)) {
-                log.warn("Boolean dataType do not exist in DB2 database, the value in the database metadata is used instead.");
-                return true;
-            }
-        }
-        return false;
-    }
-    
     /**
      * returns COL_TYPE for one of the datatype ids
      * @param termOccurenceIndex
