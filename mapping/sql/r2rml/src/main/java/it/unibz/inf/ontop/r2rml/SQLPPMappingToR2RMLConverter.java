@@ -25,7 +25,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
+import eu.optique.r2rml.api.binding.jena.JenaR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.term.Function;
@@ -33,12 +33,17 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.jena.JenaGraph;
+import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.commons.rdf.rdf4j.RDF4JGraph;
+import org.apache.jena.graph.Graph;
+import org.apache.jena.riot.RDFDataMgr;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Collection;
@@ -151,11 +156,15 @@ public class SQLPPMappingToR2RMLConverter {
      */
     public void write(OutputStream os) throws Exception {
         try {
-            RDF4JR2RMLMappingManager mm = RDF4JR2RMLMappingManager.getInstance();
+            JenaR2RMLMappingManager mm = JenaR2RMLMappingManager.getInstance();
             Collection<TriplesMap> coll = getTripleMaps();
-            final RDF4JGraph rdf4JGraph = mm.exportMappings(coll);
 
-            Rio.write(rdf4JGraph.asModel().get() , os, RDFFormat.TURTLE);
+            final JenaGraph jenaGraph = mm.exportMappings(coll);
+            final Graph graph = new JenaRDF().asJenaGraph(jenaGraph);
+
+            // use Jena to output pretty turtle syntax
+            RDFDataMgr.write(os, graph, org.apache.jena.riot.RDFFormat.TURTLE_PRETTY) ;
+
             os.close();
         } catch (Exception e) {
             e.printStackTrace();
