@@ -12,8 +12,7 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.NodeTransformationProposal;
 import it.unibz.inf.ontop.iq.node.SubstitutionResults;
 import it.unibz.inf.ontop.iq.node.TrueNode;
-
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 /**
  *
@@ -44,7 +43,7 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
                 .stream()
                 .filter(Variable.class::isInstance)
                 .map(Variable.class::cast)
-                .collect(toImmutableSet());
+                .collect(ImmutableCollectors.toSet());
 
 //        ImmutableSet.Builder<Variable> variableBuilder = ImmutableSet.builder();
 //        for (VariableOrGroundTerm term : atom.getArguments()) {
