@@ -24,6 +24,9 @@ public class IQSyntacticEquivalenceChecker {
 
     public static boolean areEquivalent(IntermediateQuery query1, IntermediateQuery query2) {
 
+        if (!query1.getProjectionAtom().equals(query2.getProjectionAtom()))
+            return false;
+
         Queue<NodePair> pairsToVisit = new LinkedList<>();
         pairsToVisit.add(new NodePair(query1.getRootConstructionNode(), query2.getRootConstructionNode()));
 
