@@ -71,15 +71,18 @@ public class R2RMLExportAction extends ProtegeAction {
                 JOptionPane.showMessageDialog(workspace, "The data source is missing. Create one in ontop Mappings. ");
             }
             else {
-                URI sourceID = obdaModel.getSources().get(0).getSourceID();
-
-		// Get the path of the file of the active OWL model
-		OWLOntology activeOntology = modelManager.getActiveOntology();
+                // Get the path of the file of the active OWL model
+                OWLOntology activeOntology = modelManager.getActiveOntology();
                 IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
-		File ontologyDir = new File(documentIRI.toURI().getPath());
 
-		final JFileChooser fc = new JFileChooser(ontologyDir);
-                fc.setSelectedFile(new File(sourceID + "-mappings.ttl"));
+                File ontologyDir = new File(documentIRI.toURI().getPath());
+
+                final JFileChooser fc = new JFileChooser(ontologyDir);
+                final String shortForm = documentIRI.getShortForm();
+                String ontologyName = shortForm.substring(0, shortForm.lastIndexOf("."));
+                fc.setSelectedFile(new File(ontologyName + "-mapping.ttl"));
+                //fc.setSelectedFile(new File(sourceID + "-mapping.ttl"));
+
                 int approve = fc.showSaveDialog(workspace);
 
                 if(approve == JFileChooser.APPROVE_OPTION) {
