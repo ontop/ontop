@@ -29,7 +29,7 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
 
         bindFromPreferences(SQLPPMappingFactory.class);
         bindFromPreferences(SQLMappingParser.class);
-        bindFromPreferences(SQLPPMapping2OBDASpecificationConverter.class);
+//        bindFromPreferences(SQLPPMapping2OBDASpecificationConverter.class);
         //bindFromPreferences(MappingVocabularyFixer.class);
         bindFromPreferences(PreProcessedImplicitRelationalDBConstraintExtractor.class);
         bindFromPreferences(MappingExtractor.class);

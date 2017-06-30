@@ -43,7 +43,7 @@ public class DefaultMappingTransformer implements MappingTransformer{
                                        ExecutorRegistry executorRegistry) throws MappingException, OntologyException {
         Mapping datatypedMapping = mappingDatatypeFiller.inferMissingDatatypes(mapping, tBox, ontology
                 .getVocabulary(), dbMetadata, executorRegistry);
-        Mapping factsAsMapping = factConverter.convert(ontology, executorRegistry, mapping.getMetadata(),
+        Mapping factsAsMapping = factConverter.convert(ontology, executorRegistry,
                 settings.isOntologyAnnotationQueryingEnabled());
         Mapping mappingWithFacts = mappingMerger.merge(datatypedMapping, factsAsMapping);
         Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(mappingWithFacts, dbMetadata);

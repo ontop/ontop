@@ -9,6 +9,5 @@ import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 
 public interface ABoxFactIntoMappingConverter {
 
-    Mapping convert(Ontology ontology, ExecutorRegistry executorRegistry, MappingMetadata mappingMetadata,
-                    boolean isOntologyAnnotationQueryingEnabled);
+    Mapping convert(Ontology ontology, ExecutorRegistry executorRegistry, boolean isOntologyAnnotationQueryingEnabled);
 }

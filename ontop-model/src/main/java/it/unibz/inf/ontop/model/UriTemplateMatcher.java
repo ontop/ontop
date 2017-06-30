@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.pivotalrepr.mapping.TargetAtom;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -120,7 +121,7 @@ public class UriTemplateMatcher {
     }
 
     private static ImmutableFunctionalTerm flatten(Pattern pattern, Collection<ImmutableFunctionalTerm> collection) {
-        if (collection.size() == 1) {
+        if (ImmutableSet.copyOf(collection).size() == 1) {
             return collection.iterator().next();
         }
         throw new IllegalArgumentException("Conflicting term for pattern" + pattern + ": " + collection);

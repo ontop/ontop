@@ -74,7 +74,7 @@ public class MappingMergerImpl implements MappingMerger {
     }
 
     private String flattenURIList(String prefix, Collection<String> uris) {
-        if (uris.size() == 1) {
+        if (ImmutableSet.copyOf(uris).size() == 1) {
             return uris.iterator().next();
         }
         throw new MappingMergingException("Conflicting URIs for prefix " + prefix + ": " + uris);
