@@ -79,7 +79,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                 executorRegistry
         );
 
-        //Bootstrap the ontology from the mapping if it does not already exist
+        //Bootstrap the ontology from the mapping if it does not already exist,
         Ontology ontology = optionalOntology
                 .orElseGet(() -> bootstrapOntology(mappingAndDBMetadata.getMapping()));
         TBoxReasoner tBox = optionalInputTBox

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.mapping.transf.*;
+import it.unibz.inf.ontop.mapping.trans.*;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.mapping.pp.validation.PPMappingOntologyComplianceValidator;
@@ -24,7 +24,6 @@ public class OntopMappingModule extends OntopAbstractModule {
     protected void configure() {
         bindTMappingExclusionConfig();
         bind(OntopMappingSettings.class).toInstance(configuration.getSettings());
-        bindFromPreferences(MappingTransformer.class);
         bindFromPreferences(MappingNormalizer.class);
         bindFromPreferences(MappingSaturator.class);
         bindFromPreferences(MappingCanonicalRewriter.class);
@@ -34,6 +33,7 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromPreferences(ABoxFactIntoMappingConverter.class);
         bindFromPreferences(MappingDatatypeFiller.class);
         bindFromPreferences(MappingMerger.class);
+        bindFromPreferences(MappingTransformer.class);
     }
 
     private void bindTMappingExclusionConfig() {

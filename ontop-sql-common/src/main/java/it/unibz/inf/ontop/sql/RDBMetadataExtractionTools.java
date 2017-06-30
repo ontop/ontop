@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.sql;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +112,7 @@ public class RDBMetadataExtractionTools {
 	}
 	
 	public static RDBMetadata createDummyMetadata(String driver_class) {
-		return new RDBMetadata(driver_class, null, null, "", new QuotedIDFactoryStandardSQL("\""));
+		return new RDBMetadata(driver_class, null, null, "", new QuotedIDFactoryStandardSQL("\""), JdbcTypeMapper.getInstance());
 	}
 	
 	
@@ -163,7 +164,7 @@ public class RDBMetadataExtractionTools {
 		}
 		
 		RDBMetadata metadata = new RDBMetadata(md.getDriverName(), md.getDriverVersion(),
-							productName, md.getDatabaseProductVersion(), idfac);
+							productName, md.getDatabaseProductVersion(), idfac, JdbcTypeMapper.getInstance());
 		
 		return metadata;	
 	}

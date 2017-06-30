@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.mapping.transf;
+package it.unibz.inf.ontop.mapping.trans;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.mapping.Mapping;

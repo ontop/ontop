@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.mapping.transf.impl;
+package it.unibz.inf.ontop.mapping.trans.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -6,11 +6,10 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
-import it.unibz.inf.ontop.mapping.transf.MappingDatatypeFiller;
+import it.unibz.inf.ontop.mapping.trans.MappingDatatypeFiller;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeCompletion;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
@@ -24,19 +23,18 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
  * TODO: rewrite in a Datalog independent fashion, and with the desired behavior (no datatype is inferred from the
  * ontology)
  */
-public class LegacySQLMappingDatatypeFiller implements MappingDatatypeFiller {
+public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
 
 
     private final Datalog2QueryMappingConverter datalog2QueryMappingConverter;
     private final Mapping2DatalogConverter mapping2DatalogConverter;
 
     @Inject
-    public LegacySQLMappingDatatypeFiller(Datalog2QueryMappingConverter datalog2QueryMappingConverter, Mapping2DatalogConverter mapping2DatalogConverter) {
+    private LegacyMappingDatatypeFiller(Datalog2QueryMappingConverter datalog2QueryMappingConverter,
+                                        Mapping2DatalogConverter mapping2DatalogConverter) {
         this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
         this.mapping2DatalogConverter = mapping2DatalogConverter;
-
     }
-
 
     @Override
     public Mapping inferMissingDatatypes(Mapping mapping, TBoxReasoner tBox, ImmutableOntologyVocabulary

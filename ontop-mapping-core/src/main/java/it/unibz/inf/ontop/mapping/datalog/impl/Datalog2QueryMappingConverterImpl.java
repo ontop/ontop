@@ -64,8 +64,8 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .collect(ImmutableCollectors.toMap(
                         q -> q.getProjectionAtom().getPredicate(),
                         q -> q));
-        return specificationFactory.createMapping(mappingMetadata, mappingMap, executorRegistry);
 
+        return specificationFactory.createMapping(mappingMetadata, mappingMap, executorRegistry);
     }
 
     private static Stream<Predicate> extractPredicates(Function atom) {

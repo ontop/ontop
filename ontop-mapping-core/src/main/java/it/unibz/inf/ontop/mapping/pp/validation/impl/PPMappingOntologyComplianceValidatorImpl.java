@@ -80,12 +80,10 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
     private boolean validateTriple(PreProcessedTriplesMap triplesMap, ImmutableFunctionalTerm targetTriple, ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox)
             throws MappingOntologyMismatchException {
         String predicateName = targetTriple.getFunctionSymbol().getName();
-        Optional<Mismatch> mismatch = lookForMismatch(
-                predicateName,
-                ontologySignature,
-                tBox,
-                getPredicateType(targetTriple)
-        );
+        Optional<PredicateType> predicateType = getPredicateType(targetTriple);
+        Optional<Mismatch> mismatch = predicateType.isPresent()?
+                lookForMismatch(predicateName, ontologySignature, tBox, predicateType.get()):
+                Optional.empty();
 
         if (mismatch.isPresent()) {
             throw new MappingOntologyMismatchException(
@@ -98,25 +96,26 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
         return true;
     }
 
-    private PredicateType getPredicateType(ImmutableFunctionalTerm targetTriple) {
+    private Optional<PredicateType> getPredicateType(ImmutableFunctionalTerm targetTriple) {
 
         Predicate predicate = targetTriple.getFunctionSymbol();
         if (predicate.isClass()) {
-            return CLASS;
+            return Optional.of(CLASS);
         }
         if (predicate.isDataProperty()) {
-            return DATATYPE_PROPERTY;
+            return Optional.of(DATATYPE_PROPERTY);
         }
         if (predicate.isObjectProperty()) {
-            return OBJECT_PROPERTY;
+            return Optional.of(OBJECT_PROPERTY);
         }
         if (predicate.isAnnotationProperty()) {
-            return ANNOTATION_PROPERTY;
+            return Optional.of(ANNOTATION_PROPERTY);
         }
         if (predicate.isTriplePredicate()) {
-            return TRIPLE_PREDICATE;
+            return Optional.of(TRIPLE_PREDICATE);
         }
-        throw new IllegalArgumentException("Unexpected type for predicate: " + predicate + " in target triple " + targetTriple);
+        return Optional.empty();
+//        throw new IllegalArgumentException("Unexpected type for predicate: " + predicate + " in target triple " + targetTriple);
     }
 
     private Optional<Mismatch> lookForMismatch(String predicateName, ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox, PredicateType typeInMapping) {

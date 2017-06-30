@@ -31,9 +31,9 @@ import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 
 
 public class SQLPPMappingImpl implements SQLPPMapping {
-	private final MappingMetadata mappingMetadata;
 
-	private final ImmutableList<SQLPPTriplesMap> mappings;
+	private final MappingMetadata mappingMetadata;
+	private final ImmutableList<SQLPPTriplesMap> triplesMaps;
     private final ImmutableMap<String, SQLPPTriplesMap> mappingIndexById;
 
     /**
@@ -43,9 +43,9 @@ public class SQLPPMappingImpl implements SQLPPMapping {
                             MappingMetadata mappingMetadata) throws DuplicateMappingException {
 
         checkDuplicates(newMappings);
-        this.mappings = newMappings;
+        this.triplesMaps = newMappings;
         this.mappingMetadata = mappingMetadata;
-        this.mappingIndexById = indexMappingsById(mappings);
+        this.mappingIndexById = indexMappingsById(triplesMaps);
     }
 
     /**
@@ -59,7 +59,7 @@ public class SQLPPMappingImpl implements SQLPPMapping {
         int duplicateCount = mappings.size() - mappingSet.size();
 
         /**
-         * If there are some mappings, finds them
+         * If there are some triplesMaps, finds them
          */
         if (duplicateCount > 0) {
             Set<String> duplicateIds = new HashSet<>();
@@ -100,7 +100,7 @@ public class SQLPPMappingImpl implements SQLPPMapping {
     @Override
     public SQLPPMapping clone() {
         try {
-            return new SQLPPMappingImpl(mappings, mappingMetadata);
+            return new SQLPPMappingImpl(triplesMaps, mappingMetadata);
         } catch (DuplicateMappingException e) {
             throw new RuntimeException("Unexpected error (inconsistent cloning): " + e.getMessage());
         }
@@ -118,6 +118,6 @@ public class SQLPPMappingImpl implements SQLPPMapping {
 
 	@Override
 	public ImmutableList<SQLPPTriplesMap> getTripleMaps() {
-        return mappings;
+        return triplesMaps;
 	}
 }

@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
@@ -29,23 +30,18 @@ import it.unibz.inf.ontop.sql.Attribute;
 import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
 import it.unibz.inf.ontop.sql.RelationDefinition;
 import it.unibz.inf.ontop.sql.RelationID;
-import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class MappingDataTypeCompletion {
 
-	private final DBMetadata metadata;
+    private final DBMetadata metadata;
 
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeCompletion.class);
-    private final JdbcTypeMapper jdbcTypeMapper;
 
     /**
      * Constructs a new mapping data type resolution.
@@ -57,10 +53,6 @@ public class MappingDataTypeCompletion {
     public MappingDataTypeCompletion(DBMetadata metadata)
             throws PredicateRedefinitionException {
         this.metadata = metadata;
-        /**
-         * TODO: retrieve from Guice
-         */
-        this.jdbcTypeMapper =  JdbcTypeMapper.getInstance();
     }
 
     /**
@@ -74,10 +66,10 @@ public class MappingDataTypeCompletion {
         Predicate predicate = atom.getFunctionSymbol();
         if (predicate.getArity() == 2) { // we check both for data and object property
             Term term = atom.getTerm(1); // the second argument only
-    		Map<String, List<IndexedPosititon>> termOccurenceIndex = createIndex(rule.getBody());
+            Map<String, List<IndexedPosititon>> termOccurenceIndex = createIndex(rule.getBody());
             insertDataTyping(term, atom, 1, termOccurenceIndex);
         }
-	}
+    }
 
     private void insertDataTyping(Term term, Function atom, int position, Map<String, List<IndexedPosititon>> termOccurenceIndex)
             throws MappingException {
@@ -111,11 +103,10 @@ public class MappingDataTypeCompletion {
 //                    }
 //                }
 //                else {
-                    for (int i = 0; i < function.getArity(); i++)
-                        insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
+                for (int i = 0; i < function.getArity(); i++)
+                    insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
 //                }
-            }
-            else if (function.isDataTypeFunction()) {
+            } else if (function.isDataTypeFunction()) {
 //
 //                Function normal = qvv.getNormal(atom);
 ////                Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
@@ -131,11 +122,9 @@ public class MappingDataTypeCompletion {
 //                        log.warn("Datatype for the value " +variable + " of the property "+ predicate+ " has been inferred from the database");
 //                        atom.setTerm(position, newTerm);
 //                    }
-                }
-           else
-               throw new UnknownDatatypeException("Unexpected function: " + functionSymbol.getName());
-        }
-        else if (term instanceof Variable) {
+            } else
+                throw new UnknownDatatypeException("Unexpected function: " + functionSymbol.getName());
+        } else if (term instanceof Variable) {
 
             //check in the ontology if we have already information about the datatype
 
@@ -150,7 +139,7 @@ public class MappingDataTypeCompletion {
 //            if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
             Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
             newTerm = DATA_FACTORY.getTypedTerm(variable, type);
-            log.warn("Datatype for the value " +variable + " of the property "+ predicate+ " has been inferred from the database");
+            log.warn("Datatype for the value " + variable + " of the property " + predicate + " has been inferred from the database");
 //            }
 //            else {
 //                Predicate replacement = dataType.getPredicate();
@@ -158,8 +147,7 @@ public class MappingDataTypeCompletion {
 //            }
 
             atom.setTerm(position, newTerm);
-        }
-        else if (term instanceof ValueConstant) {
+        } else if (term instanceof ValueConstant) {
             Term newTerm = DATA_FACTORY.getTypedTerm(term, Predicate.COL_TYPE.LITERAL);
             atom.setTerm(position, newTerm);
         }
@@ -167,68 +155,69 @@ public class MappingDataTypeCompletion {
 
     /**
      * returns COL_TYPE for one of the datatype ids
+     *
      * @param termOccurenceIndex
      * @param variable
      * @return
      */
 
-	private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosititon>> termOccurenceIndex, Variable variable)
+    private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosititon>> termOccurenceIndex, Variable variable)
             throws InvalidMappingException {
 
 
-		List<IndexedPosititon> list = termOccurenceIndex.get(variable.getName());
-		if (list == null)
-			throw new InvalidMappingException("Unknown term in head");
+        List<IndexedPosititon> list = termOccurenceIndex.get(variable.getName());
+        if (list == null)
+            throw new InvalidMappingException("Unknown term in head");
 
-		// ROMAN (10 Oct 2015): this assumes the first occurrence is a database relation!
-		//                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!
-		IndexedPosititon ip = list.get(0);
+        // ROMAN (10 Oct 2015): this assumes the first occurrence is a database relation!
+        //                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!
+        IndexedPosititon ip = list.get(0);
 
-		RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom.getFunctionSymbol());
-		RelationDefinition td = metadata.getRelation(tableId);
-		Attribute attribute = td.getAttribute(ip.pos);
+        RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom.getFunctionSymbol());
+        RelationDefinition td = metadata.getRelation(tableId);
+        Attribute attribute = td.getAttribute(ip.pos);
 
-		Predicate.COL_TYPE type =  jdbcTypeMapper.getPredicate(attribute.getType());
-		return type;
-	}
+        Optional<Predicate.COL_TYPE> type = metadata.getColType(attribute);
+        if (!type.isPresent()) {
+            throw new DBMetadataExtractionException("The type should be present");
+        }
+        return type.get();
+    }
 
-	private static class IndexedPosititon {
-		final Function atom;
-		final int pos;
+    private static class IndexedPosititon {
+        final Function atom;
+        final int pos;
 
-		IndexedPosititon(Function atom, int pos) {
-			this.atom = atom;
-			this.pos = pos;
-		}
-	}
+        IndexedPosititon(Function atom, int pos) {
+            this.atom = atom;
+            this.pos = pos;
+        }
+    }
 
-	private static Map<String, List<IndexedPosititon>> createIndex(List<Function> body) {
-		Map<String, List<IndexedPosititon>> termOccurenceIndex = new HashMap<>();
-		for (Function a : body) {
-			List<Term> terms = a.getTerms();
-			int i = 1; // position index
-			for (Term t : terms) {
-				if (t instanceof Variable) {
-					Variable var = (Variable) t;
-					List<IndexedPosititon> aux = termOccurenceIndex.get(var.getName());
-					if (aux == null)
-						aux = new LinkedList<>();
-					aux.add(new IndexedPosititon(a, i));
-					termOccurenceIndex.put(var.getName(), aux);
-					i++; // increase the position index for the next variable
-				}
-				else if (t instanceof FunctionalTermImpl) {
-					// NO-OP
-				}
-				else if (t instanceof ValueConstant) {
-					// NO-OP
-				}
-				else if (t instanceof URIConstant) {
-					// NO-OP
-				}
-			}
-		}
-		return termOccurenceIndex;
-	}
+    private static Map<String, List<IndexedPosititon>> createIndex(List<Function> body) {
+        Map<String, List<IndexedPosititon>> termOccurenceIndex = new HashMap<>();
+        for (Function a : body) {
+            List<Term> terms = a.getTerms();
+            int i = 1; // position index
+            for (Term t : terms) {
+                if (t instanceof Variable) {
+                    Variable var = (Variable) t;
+                    List<IndexedPosititon> aux = termOccurenceIndex.get(var.getName());
+                    if (aux == null)
+                        aux = new LinkedList<>();
+                    aux.add(new IndexedPosititon(a, i));
+                    termOccurenceIndex.put(var.getName(), aux);
+                    i++; // increase the position index for the next variable
+                } else if (t instanceof FunctionalTermImpl) {
+                    // NO-OP
+                } else if (t instanceof ValueConstant) {
+                    // NO-OP
+                } else if (t instanceof URIConstant) {
+                    // NO-OP
+                }
+            }
+        }
+        return termOccurenceIndex;
+    }
 }
 

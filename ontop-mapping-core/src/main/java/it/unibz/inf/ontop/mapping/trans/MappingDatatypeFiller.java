@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.mapping.transf;
+package it.unibz.inf.ontop.mapping.trans;
 
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.model.DBMetadata;
