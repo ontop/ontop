@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.mapping.trans.impl;
+package it.unibz.inf.ontop.spec.trans.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.mapping.trans.MappingNormalizer;
+import it.unibz.inf.ontop.spec.trans.MappingNormalizer;
 import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;

@@ -1,15 +1,16 @@
-package it.unibz.inf.ontop.mapping.trans.impl;
+package it.unibz.inf.ontop.spec.trans.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.mapping.trans.MappingCanonicalRewriter;
+import it.unibz.inf.ontop.spec.trans.MappingCanonicalRewriter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.CanonicalIRIRewriter;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,8 +31,7 @@ public class LegacyMappingCanonicalRewriter implements MappingCanonicalRewriter 
 
     @Override
     public Mapping rewrite(Mapping mapping, DBMetadata dbMetadata) {
-        List<CQIE> inputMappingRules = mapping2DatalogConverter.convert(mapping)
-                .collect(Collectors.toList());
+        ImmutableList<CQIE> inputMappingRules = mapping2DatalogConverter.convert(mapping).collect(ImmutableCollectors.toList());
 
         List<CQIE> canonicalRules = new CanonicalIRIRewriter().buildCanonicalIRIMappings(inputMappingRules);
 

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec;
+package it.unibz.inf.ontop.spec.trans;
 
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OntologyException;
@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 
 import java.util.Optional;
 

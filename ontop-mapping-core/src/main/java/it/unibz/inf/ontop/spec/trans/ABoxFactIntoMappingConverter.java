@@ -1,9 +1,6 @@
-package it.unibz.inf.ontop.mapping.trans;
+package it.unibz.inf.ontop.spec.trans;
 
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.DBMetadata;
-import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 

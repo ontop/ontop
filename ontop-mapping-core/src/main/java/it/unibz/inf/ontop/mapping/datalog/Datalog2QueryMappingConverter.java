@@ -8,9 +8,11 @@ import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 public interface Datalog2QueryMappingConverter {
 
-    Mapping convertMappingRules(ImmutableList<CQIE> mappingRules,
-                                DBMetadata dbMetadata,
+    Mapping convertMappingRules(ImmutableList<CQIE> mappingRules, DBMetadata dbMetadata,
                                 ExecutorRegistry executorRegistry, MappingMetadata mappingMetadata);
 }

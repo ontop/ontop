@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -36,10 +37,8 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
         this.specificationFactory = specificationFactory;
     }
 
-
     @Override
-    public Mapping convertMappingRules(ImmutableList<CQIE> mappingRules,
-                                       DBMetadata dbMetadata,
+    public Mapping convertMappingRules(ImmutableList<CQIE> mappingRules, DBMetadata dbMetadata,
                                        ExecutorRegistry executorRegistry, MappingMetadata mappingMetadata) {
 
         ImmutableMultimap<Predicate, CQIE> ruleIndex = mappingRules.stream()

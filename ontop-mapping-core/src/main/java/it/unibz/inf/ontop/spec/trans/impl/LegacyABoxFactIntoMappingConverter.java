@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.mapping.trans.impl;
+package it.unibz.inf.ontop.spec.trans.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
-import it.unibz.inf.ontop.mapping.trans.ABoxFactIntoMappingConverter;
+import it.unibz.inf.ontop.spec.trans.ABoxFactIntoMappingConverter;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;

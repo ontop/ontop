@@ -1,27 +1,29 @@
-package it.unibz.inf.ontop.mapping.trans.impl;
+package it.unibz.inf.ontop.spec.trans.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.mapping.trans.MappingSaturator;
+import it.unibz.inf.ontop.spec.impl.LegacyIsNotNullDatalogMappingFiller;
+import it.unibz.inf.ontop.spec.trans.MappingSaturator;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.DBMetadata;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingProcessor;
+import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
+import it.unibz.inf.ontop.sql.RelationID;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
@@ -50,11 +52,14 @@ public class LegacyMappingSaturator implements MappingSaturator {
         LinearInclusionDependencies foreignKeyRules = new LinearInclusionDependencies(dbMetadata.generateFKRules());
         CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
 
-        List<CQIE> inputMappingRules = mapping2DatalogConverter.convert(mapping)
-                .collect(Collectors.toList());
+        ImmutableList<CQIE> initialMappingRules = mapping2DatalogConverter.convert(mapping)
+                .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
+                .collect(ImmutableCollectors.toList());
 
-        List<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(inputMappingRules, saturatedTBox, true,
-                foreignKeyCQC, tMappingExclusionConfig);
+        ImmutableList<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(initialMappingRules, saturatedTBox, true,
+                foreignKeyCQC, tMappingExclusionConfig).stream()
+                .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
+                .collect(ImmutableCollectors.toList());
 
         List<CQIE> allMappingRules = new ArrayList<>(saturatedMappingRules);
         allMappingRules.addAll(generateTripleMappings(saturatedMappingRules));

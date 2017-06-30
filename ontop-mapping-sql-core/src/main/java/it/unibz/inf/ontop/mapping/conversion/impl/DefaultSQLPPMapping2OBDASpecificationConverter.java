@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.mapping.trans.MappingNormalizer;
+import it.unibz.inf.ontop.spec.trans.MappingNormalizer;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
@@ -211,13 +211,13 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
          *
          * Historical note: it was (wrongly) done BEFORE the saturation
          */
-        addNOTNULLToMappings(canonicalMapping, dbMetadata);
+        addNOTNULLToMapping(canonicalMapping, dbMetadata);
 
         // Apply TMappings
         List<CQIE> saturatedMapping = applyTMappings(canonicalMapping, tBox, true, dbMetadata);
 
         // A second time is needed before the optimization applied after mapping saturation is NOT NULL-AWARE...
-        addNOTNULLToMappings(saturatedMapping, dbMetadata);
+        addNOTNULLToMapping(saturatedMapping, dbMetadata);
 
         if(LOGGER.isDebugEnabled()) {
             String finalMappings = Joiner.on("\n").join(saturatedMapping);
@@ -407,7 +407,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      * of all mappings to preserve SQL-RDF semantics
      *
      */
-    private static void addNOTNULLToMappings(List<CQIE> unfoldingProgram, DBMetadata metadata) {
+    private static void addNOTNULLToMapping(List<CQIE> unfoldingProgram, DBMetadata metadata) {
 
         for (CQIE mapping : unfoldingProgram) {
             Set<Variable> headvars = new HashSet<>();

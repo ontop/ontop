@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.mapping.trans.MappingNormalizer;
+import it.unibz.inf.ontop.spec.trans.MappingNormalizer;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.model.*;
@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.*;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.spec.trans.MappingTransformer;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
@@ -60,10 +61,9 @@ public class SQLMappingTransformer implements MappingTransformer {
         ImmutableOntologyVocabulary vocabulary = ontology.getVocabulary();
 
         // Adding data typing on the mapping axioms.
-        ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypesAndValidate(
-                mapping2DatalogConverter.convert(mapping).collect(ImmutableCollectors.toList()),
-                tBox,
-                vocabulary,
+        ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypes(
+                mapping2DatalogConverter.convert(mapping)
+                        .collect(ImmutableCollectors.toList()),
                 dbMetadata
         );
 
@@ -82,15 +82,8 @@ public class SQLMappingTransformer implements MappingTransformer {
 
     /***
      * Infers missing data types.
-     *
-     * Then, validates that the use of properties in the mapping is compliant with the ontology and the standard vocabularies
-     *  (e.g., owl:sameAs, obda:canonicalIRI)
-     *
-     * TODO: split these two different concerns (validation could reuse some logic of the MappingVocabularyFixer)
-     *
      */
-    public ImmutableList<CQIE> inferMissingDataTypesAndValidate(ImmutableList<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,
-                                                                ImmutableOntologyVocabulary vocabulary, DBMetadata metadata) throws MappingException {
+    public ImmutableList<CQIE> inferMissingDataTypes(ImmutableList<CQIE> unfoldingProgram, DBMetadata metadata) throws MappingException {
 
         MappingDataTypeCompletion typeRepair = new MappingDataTypeCompletion(metadata);
         // TODO: create a new program (with fresh rules), instead of modifying each rule ?

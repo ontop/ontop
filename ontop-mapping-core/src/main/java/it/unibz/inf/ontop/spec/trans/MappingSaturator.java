@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.mapping.trans;
+package it.unibz.inf.ontop.spec.trans;
 
 
 import it.unibz.inf.ontop.mapping.Mapping;

@@ -60,7 +60,6 @@ public class MappingDataTypeCompletion {
      * It will replace the variable with a new function symbol and update the rule atom.
      * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
      */
-
     public void insertDataTyping(CQIE rule) throws MappingException {
         Function atom = rule.getHead();
         Predicate predicate = atom.getFunctionSymbol();

@@ -20,8 +20,10 @@ import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.spec.impl.LegacyIsNotNullDatalogMappingFiller;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
 import it.unibz.inf.ontop.sql.RDBMetadata;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.SQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
 import org.eclipse.rdf4j.model.Model;
@@ -36,6 +38,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
@@ -132,9 +136,12 @@ public class SQLMappingExtractor implements MappingExtractor {
         // TODO: isolate the DBMetadata expansion, move the DBMetada creation and expansion to the OBDASpecificationExtractor, and return a simple Mapping instance (instead of MappingAndDBMetadata )
         ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(expandedMappingAxioms, dbMetadata);
         dbMetadata.freeze();
+        ImmutableList<CQIE> rulesWithNotNull = initialMappingRules.stream()
+                .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
+                .collect(ImmutableCollectors.toList());
 
         Mapping mapping = datalog2QueryMappingConverter.convertMappingRules(
-                initialMappingRules,
+                rulesWithNotNull,
                 dbMetadata,
                 executorRegistry,
                 ppMapping.getMetadata()

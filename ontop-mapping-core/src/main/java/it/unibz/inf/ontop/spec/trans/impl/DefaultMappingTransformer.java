@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.impl;
+package it.unibz.inf.ontop.spec.trans.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MappingException;
@@ -6,12 +6,12 @@ import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.*;
-import it.unibz.inf.ontop.mapping.trans.*;
+import it.unibz.inf.ontop.spec.trans.*;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.spec.MappingTransformer;
+import it.unibz.inf.ontop.spec.trans.MappingTransformer;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
 public class DefaultMappingTransformer implements MappingTransformer{

@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.pivotalrepr.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.MappingExtractor;
-import it.unibz.inf.ontop.spec.MappingTransformer;
+import it.unibz.inf.ontop.spec.trans.MappingTransformer;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import org.eclipse.rdf4j.model.Model;
@@ -79,7 +79,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                 executorRegistry
         );
 
-        //Bootstrap the ontology from the mapping if it does not already exist,
+        //Bootstrap the ontology from the mapping if it does not already exist
         Ontology ontology = optionalOntology
                 .orElseGet(() -> bootstrapOntology(mappingAndDBMetadata.getMapping()));
         TBoxReasoner tBox = optionalInputTBox
