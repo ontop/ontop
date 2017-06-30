@@ -8,11 +8,8 @@ import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.Reader;
 import java.util.Optional;
 
 public interface MappingExtractor {
@@ -25,23 +22,12 @@ public interface MappingExtractor {
         DBMetadata getDBMetadata();
     }
 
-    MappingAndDBMetadata extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
-                                 ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException;
-
-    MappingAndDBMetadata extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
-                                 ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException;
-
-    MappingAndDBMetadata extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
-                                 ExecutorRegistry executorRegistry)
+    MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
+                                 @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException;
 
     MappingAndDBMetadata extract(@Nonnull PreProcessedMapping mapping, @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
+                                 @Nonnull Optional<Ontology> ontology, @Nonnull OBDASpecInput constraintFile,
                                  ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException;
 
