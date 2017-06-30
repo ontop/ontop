@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.model.SQLMappingParser;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
+import it.unibz.inf.ontop.spec.MappingExtractor;
 import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintExtractor;
 
 public class OntopMappingSQLModule extends OntopAbstractModule {
@@ -31,6 +32,7 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
         bindFromPreferences(SQLPPMapping2OBDASpecificationConverter.class);
         //bindFromPreferences(MappingVocabularyFixer.class);
         bindFromPreferences(PreProcessedImplicitRelationalDBConstraintExtractor.class);
+        bindFromPreferences(MappingExtractor.class);
 
         Module nativeQLFactoryModule = buildFactory(
                 ImmutableList.of(RDBMetadataExtractor.class),

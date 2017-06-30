@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
@@ -54,13 +55,12 @@ public class SQLMappingExtractor implements MappingExtractor {
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, PPMappingOntologyComplianceValidator ontologyComplianceValidator,
-                                RDBMetadataExtractor dbMetadataExtractor,
-                                OntopMappingSQLSettings settings,
+                                NativeQueryLanguageComponentFactory nativeQLFactory, OntopMappingSQLSettings settings,
                                 Datalog2QueryMappingConverter datalog2QueryMappingConverter) {
 
         this.mappingParser = mappingParser;
         this.ontologyComplianceValidator = ontologyComplianceValidator;
-        this.dbMetadataExtractor = dbMetadataExtractor;
+        this.dbMetadataExtractor = nativeQLFactory.create();
         this.settings = settings;
         this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
     }
