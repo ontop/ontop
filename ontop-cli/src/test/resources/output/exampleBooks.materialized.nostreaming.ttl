@@ -1,0 +1,839 @@
+@prefix : <http://meraka/moss/exampleBooks.owl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://meraka/moss/exampleBooks.owl> .
+
+<http://meraka/moss/exampleBooks.owl> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://meraka/moss/exampleBooks.owl#editedBy
+:editedBy rdf:type owl:ObjectProperty ,
+                   owl:FunctionalProperty ;
+          rdfs:domain :Edition ;
+          rdfs:range :Editor .
+
+
+###  http://meraka/moss/exampleBooks.owl#hasEdition
+:hasEdition rdf:type owl:ObjectProperty ;
+            rdfs:domain :Book ;
+            rdfs:range :Edition .
+
+
+###  http://meraka/moss/exampleBooks.owl#writtenBy
+:writtenBy rdf:type owl:ObjectProperty ;
+           rdfs:domain :Book ;
+           rdfs:range :Author .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://meraka/moss/exampleBooks.owl#dateOfFirstPublication
+:dateOfFirstPublication rdf:type owl:DatatypeProperty ,
+                                 owl:FunctionalProperty ;
+                        rdfs:domain :Edition ;
+                        rdfs:range xsd:dateTime .
+
+
+###  http://meraka/moss/exampleBooks.owl#dateOfPublication
+:dateOfPublication rdf:type owl:DatatypeProperty ,
+                            owl:FunctionalProperty ;
+                   rdfs:domain :Edition ;
+                   rdfs:range xsd:dateTime .
+
+
+###  http://meraka/moss/exampleBooks.owl#editionNumber
+:editionNumber rdf:type owl:DatatypeProperty ,
+                        owl:FunctionalProperty ;
+               rdfs:domain :Edition ;
+               rdfs:range xsd:integer .
+
+
+###  http://meraka/moss/exampleBooks.owl#genre
+:genre rdf:type owl:DatatypeProperty ;
+       rdfs:domain :Book ;
+       rdfs:range xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#name
+:name rdf:type owl:DatatypeProperty ,
+               owl:FunctionalProperty ;
+      rdfs:range xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#title
+:title rdf:type owl:DatatypeProperty ,
+                owl:FunctionalProperty ;
+       rdfs:domain :Book ;
+       rdfs:range xsd:string .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://meraka/moss/exampleBooks.owl#AudioBook
+:AudioBook rdf:type owl:Class ;
+           rdfs:subClassOf :Book ;
+           owl:disjointWith :E-Book ,
+                            :PrintedBook .
+
+
+###  http://meraka/moss/exampleBooks.owl#Author
+:Author rdf:type owl:Class ;
+        rdfs:subClassOf [ rdf:type owl:Restriction ;
+                          owl:onProperty :name ;
+                          owl:minCardinality "1"^^xsd:nonNegativeInteger
+                        ] .
+
+
+###  http://meraka/moss/exampleBooks.owl#Book
+:Book rdf:type owl:Class ;
+      rdfs:subClassOf [ rdf:type owl:Restriction ;
+                        owl:onProperty :writtenBy ;
+                        owl:minCardinality "1"^^xsd:nonNegativeInteger
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :genre ;
+                        owl:minCardinality "1"^^xsd:nonNegativeInteger
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :title ;
+                        owl:minCardinality "1"^^xsd:nonNegativeInteger
+                      ] .
+
+
+###  http://meraka/moss/exampleBooks.owl#E-Book
+:E-Book rdf:type owl:Class ;
+        rdfs:subClassOf :Book .
+
+
+###  http://meraka/moss/exampleBooks.owl#EconomicEdition
+:EconomicEdition rdf:type owl:Class ;
+                 rdfs:subClassOf :Edition ;
+                 owl:disjointWith :SpecialEdition .
+
+
+###  http://meraka/moss/exampleBooks.owl#Edition
+:Edition rdf:type owl:Class ;
+         rdfs:subClassOf [ rdf:type owl:Restriction ;
+                           owl:onProperty :editedBy ;
+                           owl:minCardinality "1"^^xsd:nonNegativeInteger
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :dateOfFirstPublication ;
+                           owl:minCardinality "1"^^xsd:nonNegativeInteger
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :dateOfPublication ;
+                           owl:minCardinality "1"^^xsd:nonNegativeInteger
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :editionNumber ;
+                           owl:minCardinality "1"^^xsd:nonNegativeInteger
+                         ] .
+
+
+###  http://meraka/moss/exampleBooks.owl#Editor
+:Editor rdf:type owl:Class ;
+        rdfs:subClassOf [ rdf:type owl:Restriction ;
+                          owl:onProperty :name ;
+                          owl:minCardinality "1"^^xsd:nonNegativeInteger
+                        ] .
+
+
+###  http://meraka/moss/exampleBooks.owl#EmergingWriter
+:EmergingWriter rdf:type owl:Class ;
+                rdfs:subClassOf :Author .
+
+
+###  http://meraka/moss/exampleBooks.owl#IneditedBook
+:IneditedBook rdf:type owl:Class ;
+              rdfs:subClassOf :Book ;
+              owl:disjointWith [ rdf:type owl:Restriction ;
+                                 owl:onProperty :hasEdition ;
+                                 owl:minCardinality "1"^^xsd:nonNegativeInteger
+                               ] .
+
+
+###  http://meraka/moss/exampleBooks.owl#PrintedBook
+:PrintedBook rdf:type owl:Class ;
+             rdfs:subClassOf :Book .
+
+
+###  http://meraka/moss/exampleBooks.owl#SpecialEdition
+:SpecialEdition rdf:type owl:Class ;
+                rdfs:subClassOf :Edition .
+
+
+###  http://www.w3.org/2002/07/owl#Thing
+owl:Thing rdf:type owl:Class .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://meraka/moss/exampleBooks.owl#author/101/
+:author/101/ rdf:type owl:NamedIndividual ,
+                      :Author ;
+             :name "Jeff Havens"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/102/
+:author/102/ rdf:type owl:NamedIndividual ,
+                      :Author ;
+             :name "Kate Pearce"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/123/
+:author/123/ rdf:type owl:NamedIndividual ,
+                      :Author ;
+             :name "L.C. Higgs"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/127/
+:author/127/ rdf:type owl:NamedIndividual ,
+                      :Author ;
+             :name "Melissa Mayhue"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/134/
+:author/134/ rdf:type owl:NamedIndividual ,
+                      :Author ;
+             :name "Mike Green"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/145/
+:author/145/ rdf:type owl:NamedIndividual ,
+                      :Author ;
+             :name "S. C. Carr"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/156/
+:author/156/ rdf:type owl:NamedIndividual ,
+                      :Author ;
+             :name "Shirley Tallman"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/167/
+:author/167/ rdf:type owl:NamedIndividual ,
+                      :Author ;
+             :name "Stacy Choen"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/178/
+:author/178/ rdf:type owl:NamedIndividual ,
+                      :Author ;
+             :name "Susan Lyons"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/189/
+:author/189/ rdf:type owl:NamedIndividual ,
+                      :Author ;
+             :name "Tim Davys"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/23/
+:author/23/ rdf:type owl:NamedIndividual ,
+                     :Author ;
+            :name "AJ Scudiere"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/234/
+:author/234/ rdf:type owl:NamedIndividual ,
+                      :Author ;
+             :name "Tracy Richardson"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/245/
+:author/245/ rdf:type owl:NamedIndividual ,
+                      :Author ;
+             :name "William Boyd"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/25/
+:author/25/ rdf:type owl:NamedIndividual ,
+                     :Author ;
+            :name "Anne Rainey"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/267/
+:author/267/ rdf:type owl:NamedIndividual ,
+                      :Author ,
+                      :EmergingWriter ;
+             :name "Peter Griffin"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/27/
+:author/27/ rdf:type owl:NamedIndividual ,
+                     :Author ;
+            :name "Barbara Delinsky"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/278/
+:author/278/ rdf:type owl:NamedIndividual ,
+                      :Author ,
+                      :EmergingWriter ;
+             :name "Homer Simpson"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/289/
+:author/289/ rdf:type owl:NamedIndividual ,
+                      :Author ,
+                      :EmergingWriter ;
+             :name "Jon Stewart"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/34/
+:author/34/ rdf:type owl:NamedIndividual ,
+                     :Author ;
+            :name "Chas Wienke"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/43/
+:author/43/ rdf:type owl:NamedIndividual ,
+                     :Author ;
+            :name "D.C. Ford"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/45/
+:author/45/ rdf:type owl:NamedIndividual ,
+                     :Author ;
+            :name "D. E. Knobbe"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/47/
+:author/47/ rdf:type owl:NamedIndividual ,
+                     :Author ;
+            :name "David Cogswell"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/76/
+:author/76/ rdf:type owl:NamedIndividual ,
+                     :Author ;
+            :name "Douglas Clegg"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/78/
+:author/78/ rdf:type owl:NamedIndividual ,
+                     :Author ;
+            :name "Iris Johanesen"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#author/98/
+:author/98/ rdf:type owl:NamedIndividual ,
+                     :Author ;
+            :name "Jan Groft"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/1/
+:book/1/ rdf:type owl:NamedIndividual ,
+                  :Book ;
+         :hasEdition :edition/12/ ;
+         :writtenBy :author/189/ ,
+                    :author/23/ ;
+         :title "Resonance"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/10/
+:book/10/ rdf:type owl:NamedIndividual ,
+                   :Book ;
+          :hasEdition :edition/65/ ,
+                      :edition/98/ ;
+          :writtenBy :author/123/ ;
+          :genre "Historical"^^xsd:string ,
+                 "Novels"^^xsd:string ;
+          :title "Here Burns My Candle"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/11/
+:book/11/ rdf:type owl:NamedIndividual ,
+                   :Book ;
+          :hasEdition :edition/67/ ;
+          :writtenBy :author/101/ ,
+                     :author/145/ ,
+                     :author/43/ ;
+          :genre "Self Help"^^xsd:string ;
+          :title "How to get fired"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/12/
+:book/12/ rdf:type owl:NamedIndividual ,
+                   :Book ;
+          :hasEdition :edition/76/ ;
+          :genre "Fantasy"^^xsd:string ,
+                 "Fiction"^^xsd:string ,
+                 "Horror"^^xsd:string ,
+                 "Humor"^^xsd:string ;
+          :title "The Twelve Little Hitlers"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/13/
+:book/13/ rdf:type owl:NamedIndividual ,
+                   :Book ;
+          :genre "Fantasy"^^xsd:string ,
+                 "Horror"^^xsd:string ;
+          :title "The story of Eight the sparrow"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/14/
+:book/14/ rdf:type owl:NamedIndividual ,
+                   :Book ;
+          :genre "Cultural"^^xsd:string ,
+                 "Music"^^xsd:string ;
+          :title "The social impact of Christina Oats songs"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/15/
+:book/15/ rdf:type owl:NamedIndividual ,
+                   :Book ;
+          :hasEdition :edition/78/ ;
+          :genre "Science"^^xsd:string ;
+          :title "Engineering analysis of Mazzinga"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/16/
+:book/16/ rdf:type owl:NamedIndividual ,
+                   :AudioBook ,
+                   :Book ;
+          :hasEdition :edition/82/ ;
+          :writtenBy :author/245/ ;
+          :genre "Mystery"^^xsd:string ;
+          :title "Ordinary Thunderstorms"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/17/
+:book/17/ rdf:type owl:NamedIndividual ,
+                   :AudioBook ,
+                   :Book ;
+          :hasEdition :edition/73/ ;
+          :writtenBy :author/127/ ;
+          :genre "Romance"^^xsd:string ;
+          :title "A Highlander's Homecoming"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/18/
+:book/18/ rdf:type owl:NamedIndividual ,
+                   :AudioBook ,
+                   :Book ;
+          :hasEdition :edition/74/ ;
+          :writtenBy :author/234/ ;
+          :genre "Children"^^xsd:string ;
+          :title "Indian Summer"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/19/
+:book/19/ rdf:type owl:NamedIndividual ,
+                   :AudioBook ,
+                   :Book ;
+          :hasEdition :edition/99/ ;
+          :writtenBy :author/76/ ;
+          :genre "Horror"^^xsd:string ;
+          :title "A Dark Circus"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/2/
+:book/2/ rdf:type owl:NamedIndividual ,
+                  :Book ;
+         :hasEdition :edition/21/ ,
+                     :edition/89/ ;
+         :writtenBy :author/123/ ,
+                    :author/98/ ;
+         :title "As we Grieve"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/20/
+:book/20/ rdf:type owl:NamedIndividual ,
+                   :AudioBook ,
+                   :Book ;
+          :hasEdition :edition/39/ ;
+          :writtenBy :author/78/ ;
+          :genre "Horror"^^xsd:string ;
+          :title "City of Stars"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/21/
+:book/21/ rdf:type owl:NamedIndividual ,
+                   :Book ;
+          :hasEdition :edition/40/ ;
+          :writtenBy :author/27/ ;
+          :genre "Romance"^^xsd:string ;
+          :title "Not My Daughter"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/22/
+:book/22/ rdf:type owl:NamedIndividual ,
+                   :Book ;
+          :hasEdition :edition/50/ ;
+          :writtenBy :author/167/ ;
+          :genre "Fiction"^^xsd:string ;
+          :title "The Last Train From Paris"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/23/
+:book/23/ rdf:type owl:NamedIndividual ,
+                   :Book ;
+          :hasEdition :edition/70/ ;
+          :writtenBy :author/34/ ;
+          :genre "History"^^xsd:string ;
+          :title "Our Boomer Years"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/24/
+:book/24/ rdf:type owl:NamedIndividual ,
+                   :Book ;
+          :hasEdition :edition/10/ ;
+          :writtenBy :author/134/ ;
+          :genre "Fiction"^^xsd:string ;
+          :title "Path of Thunder"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/3/
+:book/3/ rdf:type owl:NamedIndividual ,
+                  :Book ;
+         :hasEdition :edition/23/ ;
+         :writtenBy :author/45/ ;
+         :genre "Fiction"^^xsd:string ;
+         :title "Runaway Storm"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/4/
+:book/4/ rdf:type owl:NamedIndividual ,
+                  :Book ;
+         :hasEdition :edition/32/ ;
+         :writtenBy :author/76/ ;
+         :genre "Horror"^^xsd:string ;
+         :title "Neverland"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/5/
+:book/5/ rdf:type owl:NamedIndividual ,
+                  :Book ;
+         :hasEdition :edition/34/ ,
+                     :edition/90/ ;
+         :writtenBy :author/78/ ;
+         :genre "Mystery"^^xsd:string ;
+         :title "Eight Days to Live"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/6/
+:book/6/ rdf:type owl:NamedIndividual ,
+                  :Book ;
+         :hasEdition :edition/43/ ,
+                     :edition/91/ ,
+                     :edition/92/ ;
+         :writtenBy :author/156/ ;
+         :genre "Mystery"^^xsd:string ;
+         :title "Scandal on Rincon Hill"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/7/
+:book/7/ rdf:type owl:NamedIndividual ,
+                  :Book ;
+         :hasEdition :edition/45/ ,
+                     :edition/87/ ;
+         :writtenBy :author/189/ ;
+         :genre "Fantasy"^^xsd:string ;
+         :title "Amberville"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/8/
+:book/8/ rdf:type owl:NamedIndividual ,
+                  :Book ;
+         :hasEdition :edition/54/ ;
+         :writtenBy :author/102/ ,
+                    :author/178/ ,
+                    :author/25/ ;
+         :genre "Romance"^^xsd:string ;
+         :title "Some Like it Rough"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#book/9/
+:book/9/ rdf:type owl:NamedIndividual ,
+                  :Book ;
+         :hasEdition :edition/56/ ;
+         :writtenBy :author/47/ ;
+         :genre "Biographies"^^xsd:string ,
+                "History"^^xsd:string ,
+                "Politics"^^xsd:string ;
+         :title "Zinn for Beginners"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/10/
+:edition/10/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2000-09-23" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/12/
+:edition/12/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2010-02-18" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/21/
+:edition/21/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2000-02-12" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/23/
+:edition/23/ rdf:type owl:NamedIndividual ,
+                      :Edition ,
+                      :SpecialEdition ;
+             :dateOfPublication "2004-01-02" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/32/
+:edition/32/ rdf:type owl:NamedIndividual ,
+                      :Edition ,
+                      :SpecialEdition ;
+             :dateOfPublication "2009-12-04" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/34/
+:edition/34/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2000-07-06" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/39/
+:edition/39/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2007-02-03" ;
+             :editionNumber 2 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/40/
+:edition/40/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2005-03-01" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/43/
+:edition/43/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2001-05-14" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/45/
+:edition/45/ rdf:type owl:NamedIndividual ,
+                      :Edition ,
+                      :SpecialEdition ;
+             :dateOfPublication "2005-05-05" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/50/
+:edition/50/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2001-12-03" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/54/
+:edition/54/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2008-09-11" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/56/
+:edition/56/ rdf:type owl:NamedIndividual ,
+                      :Edition ,
+                      :SpecialEdition ;
+             :dateOfPublication "2005-02-07" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/65/
+:edition/65/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2007-05-09" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/67/
+:edition/67/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2004-11-03" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/70/
+:edition/70/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2009-03-11" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/73/
+:edition/73/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2002-04-01" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/74/
+:edition/74/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2003-11-03" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/76/
+:edition/76/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2003-12-06" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/78/
+:edition/78/ rdf:type owl:NamedIndividual ,
+                      :Edition ,
+                      :SpecialEdition ;
+             :dateOfPublication "2004-05-03" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/82/
+:edition/82/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2000-11-09" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/87/
+:edition/87/ rdf:type owl:NamedIndividual ,
+                      :Edition ,
+                      :SpecialEdition ;
+             :dateOfPublication "2007-05-09" ;
+             :editionNumber 2 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/89/
+:edition/89/ rdf:type owl:NamedIndividual ,
+                      :Edition ,
+                      :SpecialEdition ;
+             :dateOfPublication "2010-05-01" ;
+             :editionNumber 2 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/90/
+:edition/90/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2006-05-09" ;
+             :editionNumber 2 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/91/
+:edition/91/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2009-04-18" ;
+             :editionNumber 3 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/92/
+:edition/92/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2003-01-12" ;
+             :editionNumber 2 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/98/
+:edition/98/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2010-02-01" ;
+             :editionNumber 2 .
+
+
+###  http://meraka/moss/exampleBooks.owl#edition/99/
+:edition/99/ rdf:type owl:NamedIndividual ,
+                      :Edition ;
+             :dateOfPublication "2006-04-01" ;
+             :editionNumber 1 .
+
+
+###  http://meraka/moss/exampleBooks.owl#editor/12/
+:editor/12/ rdf:type owl:NamedIndividual ,
+                     :Editor ;
+            :name "Paul Golden"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#editor/21/
+:editor/21/ rdf:type owl:NamedIndividual ,
+                     :Editor ;
+            :name "Pat Red"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#editor/23/
+:editor/23/ rdf:type owl:NamedIndividual ,
+                     :Editor ;
+            :name "Simon Frost"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#editor/32/
+:editor/32/ rdf:type owl:NamedIndividual ,
+                     :Editor ;
+            :name "Melody Albert"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#editor/34/
+:editor/34/ rdf:type owl:NamedIndividual ,
+                     :Editor ;
+            :name "Valerio Nin"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#editor/45/
+:editor/45/ rdf:type owl:NamedIndividual ,
+                     :Editor ;
+            :name "Victoria Rolls"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#editor/54/
+:editor/54/ rdf:type owl:NamedIndividual ,
+                     :Editor ;
+            :name "Karl Forman"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#editor/65/
+:editor/65/ rdf:type owl:NamedIndividual ,
+                     :Editor ;
+            :name "Fill Luckett"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#editor/76/
+:editor/76/ rdf:type owl:NamedIndividual ,
+                     :Editor ;
+            :name "Eric Jonnes"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#editor/87/
+:editor/87/ rdf:type owl:NamedIndividual ,
+                     :Editor ;
+            :name "Bill Sugar"^^xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#editor/98/
+:editor/98/ rdf:type owl:NamedIndividual ,
+                     :Editor ;
+            :name "Bill Green"^^xsd:string .
+
+
+###  Generated by the OWL API (version 4.2.5) https://github.com/owlcs/owlapi
