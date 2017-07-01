@@ -239,7 +239,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U7 ?z. }";
 
         String val = runTests(p);
-        assertEquals("\"value1touri 1\"^^xsd:string", val);
+        assertEquals("\"value1touri 1\"", val);
     }
 
     @Test

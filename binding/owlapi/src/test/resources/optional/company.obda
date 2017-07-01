@@ -8,7 +8,7 @@ target		:{NAME} a :Company .
 source		SELECT NAME FROM COMPANY
 
 mappingId	MAPPING-department
-target		:{ID} :depName :{NAME} . 
+target		:{ID} :depName {NAME} .
 source		SELECT ID, NAME, C_NAME FROM DEPARTMENT
 
 mappingId	MAPID-151400736f854d41996fcb4988fe36a2

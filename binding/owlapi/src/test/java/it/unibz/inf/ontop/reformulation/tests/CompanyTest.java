@@ -20,11 +20,13 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObject;
 
 import java.io.BufferedReader;
@@ -125,7 +127,8 @@ public class CompanyTest  {
 				+ "{  ?v ?w  ?x } ";
 
 		String query = "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT * WHERE"
-				+ "{ :A a :Company .  OPTIONAL  {  ?x :companyName :A .  ?x :depName :HR .  OPTIONAL{?z :depId ?x }}}";
+				+ "{ :A a :Company .  OPTIONAL  {  ?x :companyName :A .  ?x :depName \"HR\" .  OPTIONAL{?z :depId ?x " +
+				"}}}";
 
 		try {
 		
@@ -161,7 +164,8 @@ public class CompanyTest  {
 		OntopOWLStatement st = conn.createStatement();
 
 		String query = "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT ?y?z WHERE"
-				+ "{ ?c a :Company . Filter (?c=:A) OPTIONAL  {  ?x :companyName ?c .  ?x :depName ?y .  FILTER (?y = :HR) OPTIONAL{?z :depId ?x }}}";
+				+ "{ ?c a :Company . Filter (?c=:A) OPTIONAL  {  ?x :companyName ?c .  ?x :depName ?y .  FILTER (?y =" +
+				" \"HR\") OPTIONAL{?z :depId ?x }}}";
 
 
 		try {
@@ -171,10 +175,10 @@ public class CompanyTest  {
 			QuestOWLResultSet rs2 = st.executeTuple(query);
 
 			assertTrue(rs2.nextRow());
-			OWLObject ind1 = rs2.getOWLIndividual("y");
+			OWLLiteral ind1 = rs2.getOWLLiteral("y");
 			OWLObject ind2 = rs2.getOWLIndividual("z");
 
-			assertEquals("<http://it.unibz.krdb/obda/test/company#HR>", ind1.toString());
+			assertEquals("HR", ind1.getLiteral());
 			assertEquals("<http://it.unibz.krdb/obda/test/company#mark>", ind2.toString());
 
 
@@ -192,7 +196,6 @@ public class CompanyTest  {
 			reasoner.dispose();
 		}
 	}
-
 
 	@Test
 	public void testViEqSig() throws Exception {

@@ -25,16 +25,18 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingException;
-import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.predicate.BNodePredicate;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
@@ -57,100 +59,78 @@ public class MappingDataTypeCompletion {
         this.metadata = metadata;
     }
 
-    /**
-     * This method wraps the variable that holds data property values with a data type predicate.
-     * It will replace the variable with a new function symbol and update the rule atom.
-     * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
-     */
     public void insertDataTyping(CQIE rule) throws MappingException {
         Function atom = rule.getHead();
         Predicate predicate = atom.getFunctionSymbol();
         if (predicate.getArity() == 2) { // we check both for data and object property
             Term term = atom.getTerm(1); // the second argument only
             Map<String, List<IndexedPosititon>> termOccurenceIndex = createIndex(rule.getBody());
-            insertDataTyping(term, atom, 1, termOccurenceIndex);
+            // Infer variable datatypes
+            insertVariableDataTyping(term, atom, 1, termOccurenceIndex);
+            // Infer operation datatypes from variable datatypes
+            insertOperationDatatyping(term, atom, 1);
         }
     }
 
-    private void insertDataTyping(Term term, Function atom, int position, Map<String, List<IndexedPosititon>> termOccurenceIndex)
+    /**
+     * This method wraps the variable that holds data property values with a data type predicate.
+     * It will replace the variable with a new function symbol and update the rule atom.
+     * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
+     */
+    private void insertVariableDataTyping(Term term, Function atom, int position, Map<String, List<IndexedPosititon>> termOccurenceIndex)
             throws MappingException {
         Predicate predicate = atom.getFunctionSymbol();
 
         if (term instanceof Function) {
             Function function = (Function) term;
             Predicate functionSymbol = function.getFunctionSymbol();
-
-            if (functionSymbol instanceof URITemplatePredicate || functionSymbol instanceof BNodePredicate) {
-                // NO-OP for object properties
+            if (function.isDataTypeFunction() || functionSymbol instanceof URITemplatePredicate || functionSymbol
+                    instanceof BNodePredicate) {
+                // NO-OP for already assigned datatypes, or object properties, or bnodes
             }
-
-            /** If it is a concat or replace function, can have a datatype assigned to its alias (function with datatype predicate)
-             *  or if no information about the datatype is assigned we will assign the value from the ontology
-             if present or the information from the database will be used.
-             */
-
             else if (function.isOperation()) {
-
-//            	Function normal = qvv.getNormal(atom);
-//                Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
-
-                //Check if a datatype was already assigned in the ontology
-//                if (dataType != null) {
-//                    //assign the datatype of the ontology
-//                    if (!isBooleanDB2(dataType.getPredicate())) {
-//                        Predicate replacement = dataType.getPredicate();
-//                        Term newTerm = DATA_FACTORY.getFunction(replacement, function);
-//                        atom.setTerm(position, newTerm);
-//                    }
-//                }
-//                else {
-                for (int i = 0; i < function.getArity(); i++)
-                    insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
-//                }
-            } else if (function.isDataTypeFunction()) {
-//
-//                Function normal = qvv.getNormal(atom);
-////                Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
-//
-//                //if a datatype was already assigned in the ontology
-//                if (dataType != null && isBooleanDB2(dataType.getPredicate())) {
-//
-//                        Variable variable = (Variable) normal.getTerm(1);
-//
-//                        //No Boolean datatype in DB2 database, the value in the database is used
-//                        Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
-//                        Term newTerm = DATA_FACTORY.getTypedTerm(variable, type);
-//                        log.warn("Datatype for the value " +variable + " of the property "+ predicate+ " has been inferred from the database");
-//                        atom.setTerm(position, newTerm);
-//                    }
-            } else
-                throw new UnknownDatatypeException("Unexpected function: " + functionSymbol.getName());
+                for (int i = 0; i < function.getArity(); i++) {
+                    insertVariableDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
+                }
+            } else {
+                throw new IllegalArgumentException("Unsupported subtype of: " + Function.class.getSimpleName());
+            }
         } else if (term instanceof Variable) {
-
-            //check in the ontology if we have already information about the datatype
-
-//            Function normal = qvv.getNormal(atom);
-//            Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
-
-            // The predicate is created following the database metadata of
-            // column type.
             Variable variable = (Variable) term;
-
             Term newTerm;
-//            if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
             Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
             newTerm = DATA_FACTORY.getTypedTerm(variable, type);
             log.warn("Datatype for the value " + variable + " of the property " + predicate + " has been inferred from the database");
-//            }
-//            else {
-//                Predicate replacement = dataType.getPredicate();
-//                newTerm = DATA_FACTORY.getFunction(replacement, variable);
-//            }
-
             atom.setTerm(position, newTerm);
         } else if (term instanceof ValueConstant) {
             Term newTerm = DATA_FACTORY.getTypedTerm(term, Predicate.COL_TYPE.LITERAL);
             atom.setTerm(position, newTerm);
+        } else {
+            throw new IllegalArgumentException("Unsupported subtype of: " + Term.class.getSimpleName());
+        }
+    }
+
+    private void insertOperationDatatyping(Term term, Function atom, int position) {
+
+        if (term instanceof Function) {
+            Function castTerm = (Function) term;
+            if (castTerm.isOperation()) {
+                IntStream.range(0, castTerm.getArity())
+                        .forEach(i -> insertOperationDatatyping(
+                                castTerm.getTerm(i),
+                                castTerm,
+                                i
+                        ));
+                System.out.println(castTerm);
+                Optional<TermType> s = TermTypeInferenceTools.inferType(castTerm);
+                TermTypeInferenceTools.inferType(castTerm).ifPresent(t -> atom.setTerm(
+                        position,
+                        DATA_FACTORY.getTypedTerm(
+                                term,
+                                t.getColType()
+                        )));
+                System.out.println(atom);
+            }
         }
     }
 
@@ -161,7 +141,6 @@ public class MappingDataTypeCompletion {
      * @param variable
      * @return
      */
-
     private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosititon>> termOccurenceIndex, Variable variable)
             throws InvalidMappingException {
 

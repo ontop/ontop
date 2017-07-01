@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.spec.trans.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
@@ -14,11 +13,6 @@ import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeCompletion;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Legacy code to infer datatypes not declared in the targets of mapping assertions.
@@ -52,6 +46,8 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
      *  . then take the first occurrence each variable (e.g. take <A(x, y), 2> for variable y),
      *  and assign to the variable the corresponding column type in the DB
      *  (e.g. for y, the type of column 1 of table A).
+     *  . then inductively infer the types of functions (e.g. concat, ...) from the variable types
+     *
      *
      *  Assumptions:
      *  .rule body atoms are extensional
