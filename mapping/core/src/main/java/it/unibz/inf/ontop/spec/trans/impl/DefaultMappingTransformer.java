@@ -44,7 +44,7 @@ public class DefaultMappingTransformer implements MappingTransformer{
         Mapping datatypedMapping = mappingDatatypeFiller.inferMissingDatatypes(mapping, tBox, ontology
                 .getVocabulary(), dbMetadata, executorRegistry);
         Mapping factsAsMapping = factConverter.convert(ontology, executorRegistry,
-                settings.isOntologyAnnotationQueryingEnabled());
+                settings.isOntologyAnnotationQueryingEnabled(), datatypedMapping.getMetadata().getUriTemplateMatcher());
         Mapping mappingWithFacts = mappingMerger.merge(datatypedMapping, factsAsMapping);
         Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(mappingWithFacts, dbMetadata);
         Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tBox);

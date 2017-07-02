@@ -10,14 +10,12 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
-import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.spec.trans.ABoxFactIntoMappingConverter;
-import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.slf4j.Logger;
@@ -26,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
@@ -34,23 +31,20 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingConverter {
 
-    private final Mapping2DatalogConverter mapping2DatalogConverter;
     private final Datalog2QueryMappingConverter datalog2QueryMappingConverter;
     private final SpecificationFactory mappingFactory;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyABoxFactIntoMappingConverter.class);
 
     @Inject
-    public LegacyABoxFactIntoMappingConverter(Mapping2DatalogConverter mapping2DatalogConverter,
-                                              Datalog2QueryMappingConverter datalog2QueryMappingConverter,
+    public LegacyABoxFactIntoMappingConverter(Datalog2QueryMappingConverter datalog2QueryMappingConverter,
                                               SpecificationFactory mappingFactory) {
-        this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
         this.mappingFactory = mappingFactory;
     }
 
     @Override
-    public Mapping convert(Ontology ontology, ExecutorRegistry executorRegistry, boolean isOntologyAnnotationQueryingEnabled) {
+    public Mapping convert(Ontology ontology, ExecutorRegistry executorRegistry, boolean isOntologyAnnotationQueryingEnabled, UriTemplateMatcher uriTemplateMatcher) {
 
         List<AnnotationAssertion> annotationAssertions = isOntologyAnnotationQueryingEnabled ?
                 ontology.getAnnotationAssertions() :
@@ -59,7 +53,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         DBMetadata dummyDBMetadata = DBMetadataTestingTools.createDummyMetadata();
 
         // Mutable !!
-        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(Stream.empty());
+//        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(Stream.empty());
 
         ImmutableList<CQIE> rules = convertAssertions(
                 ontology.getClassAssertions(),
