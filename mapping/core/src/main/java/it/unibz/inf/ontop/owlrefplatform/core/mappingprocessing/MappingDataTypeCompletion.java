@@ -51,6 +51,7 @@ public class MappingDataTypeCompletion {
      * Constructs a new mapping data type resolution.
      * If no datatype is defined, then we use database metadata for obtaining the table column definition as the
      * default data-type.
+     * //TODO: rewrite in a Datalog-free fashion
      *
      * @param metadata The database metadata.
      */
@@ -103,33 +104,51 @@ public class MappingDataTypeCompletion {
             log.warn("Datatype for the value " + variable + " of the property " + predicate + " has been inferred from the database");
             atom.setTerm(position, newTerm);
         } else if (term instanceof ValueConstant) {
-            Term newTerm = DATA_FACTORY.getTypedTerm(term, Predicate.COL_TYPE.LITERAL);
+            Term newTerm = DATA_FACTORY.getTypedTerm(term, ((ValueConstant) term).getType());
             atom.setTerm(position, newTerm);
         } else {
             throw new IllegalArgumentException("Unsupported subtype of: " + Term.class.getSimpleName());
         }
     }
 
+    /**
+     * Infers inductively the datatypes of (evaluated) operations, from their operands.
+     * After execution, only the outermost operation is assigned a type.
+     */
     private void insertOperationDatatyping(Term term, Function atom, int position) {
 
         if (term instanceof Function) {
             Function castTerm = (Function) term;
             if (castTerm.isOperation()) {
-                IntStream.range(0, castTerm.getArity())
-                        .forEach(i -> insertOperationDatatyping(
-                                castTerm.getTerm(i),
-                                castTerm,
-                                i
-                        ));
-                System.out.println(castTerm);
-                Optional<TermType> s = TermTypeInferenceTools.inferType(castTerm);
-                TermTypeInferenceTools.inferType(castTerm).ifPresent(t -> atom.setTerm(
-                        position,
-                        DATA_FACTORY.getTypedTerm(
-                                term,
-                                t.getColType()
-                        )));
-                System.out.println(atom);
+                Optional<TermType> inferredType = TermTypeInferenceTools.inferType(castTerm);
+                if(inferredType.isPresent()){
+                    // delete explicit datatypes of the operands
+                    deleteExplicitTypes(term, atom, position);
+                    // insert the datatype of the evaluated operation
+                    atom.setTerm(
+                            position,
+                            DATA_FACTORY.getTypedTerm(
+                                    term,
+                                    inferredType.get().getColType()
+                            ));
+                }else {
+                    throw new IllegalStateException("A type should be inferred for operation " + castTerm);
+                }
+            }
+        }
+    }
+
+    private void deleteExplicitTypes(Term term, Function atom, int position) {
+        if(term instanceof Function){
+            Function castTerm = (Function) term;
+            IntStream.range(0, castTerm.getArity())
+                    .forEach(i -> deleteExplicitTypes(
+                            castTerm.getTerm(i),
+                            castTerm,
+                            i
+                    ));
+            if(castTerm.isDataTypeFunction()){
+                atom.setTerm(position, castTerm.getTerm(0));
             }
         }
     }

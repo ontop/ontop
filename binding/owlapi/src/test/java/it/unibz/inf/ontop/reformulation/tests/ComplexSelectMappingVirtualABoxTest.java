@@ -202,7 +202,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z. }";
 
         String val = runTests();
-        assertEquals("\"NO value1\"", val);
+        assertEquals("\"NO value1\"^^xsd:string", val);
 	}
 
     @Test
@@ -211,7 +211,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z; :U3 ?w. }";
 
         String val = runTests();
-        assertEquals("\"NO value1\"", val);
+        assertEquals("\"NO value1\"^^xsd:string", val);
 	}
 
     @Test
@@ -229,7 +229,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U6 ?z. }";
 
         String val = runTests();
-        assertEquals("\"value1test\"", val);
+        assertEquals("\"value1test\"^^xsd:string", val);
     }
 
     @Test
@@ -239,7 +239,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U7 ?z. }";
 
         String val = runTests(p);
-        assertEquals("\"value1touri 1\"", val);
+        assertEquals("\"value1touri 1\"^^xsd:string", val);
     }
 
     @Test
@@ -248,7 +248,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U8 ?z. }";
 
         String val = runTests();
-        assertEquals("\"value1test\"", val);
+        assertEquals("\"value1test\"^^xsd:string", val);
     }
 
     @Test

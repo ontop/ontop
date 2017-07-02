@@ -46,8 +46,8 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
      *  . then take the first occurrence each variable (e.g. take <A(x, y), 2> for variable y),
      *  and assign to the variable the corresponding column type in the DB
      *  (e.g. for y, the type of column 1 of table A).
-     *  . then inductively infer the types of functions (e.g. concat, ...) from the variable types
-     *
+     *  . then inductively infer the types of functions (e.g. concat, ...) from the variable types.
+     *  Only the outermost expression is assigned a type.
      *
      *  Assumptions:
      *  .rule body atoms are extensional
