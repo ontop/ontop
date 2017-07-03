@@ -14,6 +14,6 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
  */
 public interface MappingTransformer {
 
-    OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Ontology ontology, TBoxReasoner tBox, ExecutorRegistry executorRegistry)
+    OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Ontology ontology, TBoxReasoner tBox)
             throws MappingException, OntologyException;
 }

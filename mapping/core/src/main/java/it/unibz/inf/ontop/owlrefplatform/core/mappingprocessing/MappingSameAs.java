@@ -17,8 +17,8 @@ public class MappingSameAs {
     /**
      * add the inverse of the same as present in the mapping
      */
-    public static ImmutableList<CQIE> addSameAsInverse(ImmutableList<CQIE> mappingRules) {
-        Stream<CQIE> newRuleStream = mappingRules.stream()
+    public static ImmutableList<CQIE> addSameAsInverse(Stream<CQIE> mappingRules) {
+        Stream<CQIE> newRuleStream = mappingRules
                 // the targets are already split. We have only one target atom
                 .filter(r -> r.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.SAME_AS))
                 .map(r -> {
@@ -29,7 +29,11 @@ public class MappingSameAs {
                     return DATALOG_FACTORY.getCQIE(inversedHead, new ArrayList<>(r.getBody()));
                 });
 
-        return Stream.concat(mappingRules.stream(), newRuleStream)
+        return Stream.concat(mappingRules, newRuleStream)
                 .collect(ImmutableCollectors.toList());
+    }
+
+    public static ImmutableList<CQIE> addSameAsInverse(ImmutableList<CQIE> mappingRules) {
+        return addSameAsInverse(mappingRules.stream());
     }
 }

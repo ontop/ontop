@@ -5,8 +5,7 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-public interface MappingDatatypeFiller {
+public interface MappingEquivalenceFreeRewriter {
 
-    Mapping inferMissingDatatypes(Mapping mapping, TBoxReasoner tBox, ImmutableOntologyVocabulary
-            vocabulary, DBMetadata dbMetadata);
+    Mapping rewrite(Mapping mapping, TBoxReasoner tBox, ImmutableOntologyVocabulary vocabulary, DBMetadata dbMetadata);
 }

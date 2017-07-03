@@ -1,23 +1,24 @@
-package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
+package it.unibz.inf.ontop.owlrefplatform.core.bascioperations;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
-public class MappingVocabularyValidator extends VocabularyValidator {
+public class LegacyMappingVocabularyValidator extends VocabularyValidator {
 
-    public MappingVocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
+    public LegacyMappingVocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
         super(reasoner, voc);
     }
 
@@ -40,10 +41,14 @@ public class MappingVocabularyValidator extends VocabularyValidator {
      * The same is done for classes.
      *
      */
-    public ImmutableList<CQIE> replaceEquivalences(Collection<CQIE> mappingAssertions) {
-        return mappingAssertions.stream()
+    public ImmutableList<CQIE> replaceEquivalences(Stream<CQIE> mappingAssertions) {
+        return mappingAssertions
                 .map(this::transformMappingAssertion)
                 .collect(ImmutableCollectors.toList());
+    }
+
+    public ImmutableList<CQIE> replaceEquivalences(Collection<CQIE> mappingAssertions) {
+        return replaceEquivalences(mappingAssertions.stream());
     }
 
     private CQIE transformMappingAssertion(CQIE mappingAssertion) {

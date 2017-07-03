@@ -89,8 +89,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                 mappingAndDBMetadata.getMapping(),
                 mappingAndDBMetadata.getDBMetadata(),
                 ontology,
-                tBox,
-                executorRegistry
+                tBox
         );
     }
 

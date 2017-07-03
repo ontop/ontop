@@ -36,6 +36,7 @@ import java.util.List;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
+//TODO: rename, and possibly split
 public class VocabularyValidator {
 
 	private final TBoxReasoner reasoner;
@@ -52,7 +53,7 @@ public class VocabularyValidator {
 	}
 
 	protected <T extends Term> List<T> replaceEquivalences(List<T> body) {
-		List<T> result = new ArrayList<T>(body.size());
+		List<T> result = new ArrayList<>(body.size());
 
 		// Get the predicates in the target query.
 		for (Term t : body) {
@@ -68,7 +69,7 @@ public class VocabularyValidator {
 					nt = DATA_FACTORY.getFunction(atom.getFunctionSymbol(), replaceEquivalences(atom.getTerms()));
 				}
 				else {
-					nt = (T)getNormal(atom);
+					nt = getNormal(atom);
 				}
 			}
 			else

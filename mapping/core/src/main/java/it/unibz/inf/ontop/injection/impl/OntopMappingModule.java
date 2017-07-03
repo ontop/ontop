@@ -34,6 +34,8 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromPreferences(MappingMerger.class);
         bindFromPreferences(MappingTransformer.class);
         bindFromPreferences(PPMappingOntologyComplianceValidator.class);
+        bindFromPreferences(MappingSameAsRewriter.class);
+        bindFromPreferences(MappingEquivalenceFreeRewriter.class);
     }
 
     private void bindTMappingExclusionConfig() {

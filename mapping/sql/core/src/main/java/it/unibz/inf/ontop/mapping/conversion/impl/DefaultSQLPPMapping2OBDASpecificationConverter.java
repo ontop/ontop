@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
+import it.unibz.inf.ontop.owlrefplatform.core.bascioperations.LegacyMappingVocabularyValidator;
 import it.unibz.inf.ontop.pp.validation.PPMappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.trans.MappingNormalizer;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
@@ -59,7 +60,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     private final OntopMappingSQLSettings settings;
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final TMappingExclusionConfig tMappingExclusionConfig;
-    private final Datalog2QueryMappingConverter mappingConverter;
+    private final Datalog2QueryMappingConverter datalog2MappingConverter;
     private final SpecificationFactory specificationFactory;
     private final MappingNormalizer mappingNormalizer;
     private final PPMappingOntologyComplianceValidator ontologyComplianceValidator;
@@ -68,14 +69,14 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     private DefaultSQLPPMapping2OBDASpecificationConverter(OntopMappingSQLSettings settings,
                                                            NativeQueryLanguageComponentFactory nativeQLFactory,
                                                            TMappingExclusionConfig tMappingExclusionConfig,
-                                                           Datalog2QueryMappingConverter mappingConverter,
+                                                           Datalog2QueryMappingConverter datalog2MappingConverter,
                                                            SpecificationFactory specificationFactory,
                                                            MappingNormalizer mappingNormalizer,
                                                            PPMappingOntologyComplianceValidator ontologyComplianceValidator) {
         this.settings = settings;
         this.dbMetadataExtractor = nativeQLFactory.create();
         this.tMappingExclusionConfig = tMappingExclusionConfig;
-        this.mappingConverter = mappingConverter;
+        this.datalog2MappingConverter = datalog2MappingConverter;
         this.specificationFactory = specificationFactory;
         this.mappingNormalizer = mappingNormalizer;
         this.ontologyComplianceValidator = ontologyComplianceValidator;
@@ -170,7 +171,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, vocabulary, dbMetadata);
 
-        Mapping saturatedMapping = mappingConverter.convertMappingRules(saturatedMappingRules, dbMetadata,
+        Mapping saturatedMapping = datalog2MappingConverter.convertMappingRules(saturatedMappingRules, dbMetadata,
                 executorRegistry, mappingMetadata);
 
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
@@ -243,7 +244,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     private ImmutableList<CQIE> replaceEquivalences(ImmutableList<CQIE> mappingRules,
                                                     TBoxReasoner tBox, ImmutableOntologyVocabulary vocabulary) {
         if (settings.isEquivalenceOptimizationEnabled()) {
-            MappingVocabularyValidator vocabularyValidator = new MappingVocabularyValidator(tBox, vocabulary);
+            LegacyMappingVocabularyValidator vocabularyValidator = new LegacyMappingVocabularyValidator(tBox, vocabulary);
             return vocabularyValidator.replaceEquivalences(mappingRules);
         }
         else

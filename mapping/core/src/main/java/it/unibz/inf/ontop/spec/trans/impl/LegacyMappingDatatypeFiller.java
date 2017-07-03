@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
@@ -22,13 +21,13 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
 
 
-    private final Datalog2QueryMappingConverter datalog2QueryMappingConverter;
+    private final Datalog2QueryMappingConverter datalog2MappingConverter;
     private final Mapping2DatalogConverter mapping2DatalogConverter;
 
     @Inject
-    private LegacyMappingDatatypeFiller(Datalog2QueryMappingConverter datalog2QueryMappingConverter,
+    private LegacyMappingDatatypeFiller(Datalog2QueryMappingConverter datalog2MappingConverter,
                                         Mapping2DatalogConverter mapping2DatalogConverter) {
-        this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
+        this.datalog2MappingConverter = datalog2MappingConverter;
         this.mapping2DatalogConverter = mapping2DatalogConverter;
     }
 
@@ -55,14 +54,13 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
      */
     @Override
     public Mapping inferMissingDatatypes(Mapping mapping, TBoxReasoner tBox, ImmutableOntologyVocabulary
-            vocabulary, DBMetadata dbMetadata, ExecutorRegistry executorRegistry) {
+            vocabulary, DBMetadata dbMetadata) {
         MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata);
         ImmutableList<CQIE> rules = mapping2DatalogConverter.convert(mapping)
                 .collect(ImmutableCollectors.toList());
         //CQIEs are mutable
-        rules.forEach(r -> typeCompletion.insertDataTyping(r));
-        return datalog2QueryMappingConverter.convertMappingRules(ImmutableList.copyOf(rules), dbMetadata,
-                executorRegistry,
-                mapping.getMetadata());
+        rules.forEach(typeCompletion::insertDataTyping);
+        return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(rules), dbMetadata,
+                mapping.getExecutorRegistry(), mapping.getMetadata());
     }
 }
