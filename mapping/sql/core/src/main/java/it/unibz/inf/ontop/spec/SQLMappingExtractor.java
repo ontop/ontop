@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.SQLMappingParser;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -29,8 +29,8 @@ import it.unibz.inf.ontop.pp.validation.PPMappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.impl.LegacyIsNotNullDatalogMappingFiller;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.SQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
+import it.unibz.inf.ontop.utils.SQLPPMapping2DatalogConverter;
 import org.eclipse.rdf4j.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +43,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
