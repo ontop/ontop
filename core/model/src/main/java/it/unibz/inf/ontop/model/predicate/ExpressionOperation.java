@@ -159,7 +159,12 @@ public enum ExpressionOperation implements OperationPredicate {
 	public COL_TYPE getType(int column) {
 		return argTypes.get(column).orElse(null);
 	}
-	
+
+	@Override
+	public COL_TYPE[] getTypes() {
+		return (COL_TYPE[]) argTypes.toArray();
+	}
+
 	@Override
 	public boolean isClass() {
 		return false;

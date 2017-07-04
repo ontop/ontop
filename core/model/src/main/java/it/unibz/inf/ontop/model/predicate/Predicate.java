@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.model.predicate;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -139,6 +140,7 @@ public interface Predicate {
 	 */
     COL_TYPE getType(int column);
 
+	COL_TYPE[] getTypes();
 
 	boolean isClass();
 
