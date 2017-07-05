@@ -1,4 +1,4 @@
 package it.unibz.inf.ontop.temporal.iq.node;
 
-public interface BinaryOperatorNode extends TemporalOperatorWithRange {
+public interface BinaryTemporalOperatorNode extends TemporalOperatorWithRange {
 }

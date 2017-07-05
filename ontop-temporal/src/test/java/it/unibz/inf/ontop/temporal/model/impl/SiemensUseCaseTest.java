@@ -4,29 +4,37 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OntopEngineFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.temporal.model.*;
 import junit.framework.TestCase;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class SiemensUseCaseTest extends TestCase {
 
-    private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-    private final SpecificationFactory specificationFactory;
+    //private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
+    //private final SpecificationFactory specificationFactory;
     private Connection connection;
 
     private RDBMetadata md;
@@ -34,24 +42,24 @@ public class SiemensUseCaseTest extends TestCase {
 
     public SiemensUseCaseTest() {
 
-        OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
-                .enableTestMode()
-                .build();
-
-        Injector injector = defaultConfiguration.getInjector();
-        specificationFactory = injector.getInstance(SpecificationFactory.class);
-
-        try {
-            connection = DriverManager.getConnection("jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp", "postgres", "postgres");
-            md = RDBMetadataExtractionTools.createMetadata(connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        // Prefix manager
-        Map<String, String> prefixes = new HashMap<>();
-        prefixes.put(":", "http://www.siemens.com/university#");
-        pm = specificationFactory.createPrefixManager(ImmutableMap.copyOf(prefixes));
+//        OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
+//                .enableTestMode()
+//                .build();
+//
+//        Injector injector = defaultConfiguration.getInjector();
+//        specificationFactory = injector.getInstance(SpecificationFactory.class);
+//
+//        try {
+//            connection = DriverManager.getConnection("jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp", "postgres", "postgres");
+//            md = RDBMetadataExtractionTools.createMetadata(connection);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//
+//        // Prefix manager
+//        Map<String, String> prefixes = new HashMap<>();
+//        prefixes.put(":", "http://www.siemens.com/university#");
+//        pm = specificationFactory.createPrefixManager(ImmutableMap.copyOf(prefixes));
 
 
     }
@@ -136,5 +144,28 @@ public class SiemensUseCaseTest extends TestCase {
 
 
     }
+
+//    @Test
+//    public void testTMappings() throws Exception {
+//
+//        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
+//        String username = "postgres";
+//        String password = "postgres";
+//
+//        Properties pref = new Properties();
+//
+//        QuestOWLFactory factory = new QuestOWLFactory();
+//        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+//                .nativeOntopMappingFile("src/test/resources/siemens.obda")
+//                .ontologyFile("src/test/resources/siemens.owl")
+//                .properties(pref)
+//                .jdbcUrl(url)
+//                .jdbcUser(username)
+//                .jdbcPassword(password)
+//                .enableExistentialReasoning(true)
+//                .enableTestMode()
+//                .build();
+//        QuestOWL reasoner = factory.createReasoner(config);
+//    }
 
 }

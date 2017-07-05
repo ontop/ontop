@@ -14,16 +14,19 @@ public class TemporalMappingFactoryImpl implements TemporalMappingFactory {
 
     @Override
     public TemporalMappingTarget createTarget(Function objectAtom, Variable beginInclusive, Variable endInclusive, Variable begin, Variable end) {
-        return new TemporalMappingTargetImpl(objectAtom, beginInclusive, endInclusive, begin, end);
+        //return new TemporalMappingTargetImpl(objectAtom, beginInclusive, endInclusive, begin, end);
+        return null;
     }
 
     @Override
     public TemporalMappingAxiom createMappingAxiom(String sourceSQL, List<TemporalMappingTarget> targets) {
-        return new TemporalMappingAxiomImpl(sourceSQL, targets);
+        //return new TemporalMappingAxiomImpl(sourceSQL, targets);
+        return null;
     }
 
     @Override
     public TemporalMappingAxiom createMappingAxiom(String sourceSQL, TemporalMappingTarget... targets) {
-        return new TemporalMappingAxiomImpl(sourceSQL, Arrays.asList(targets));
+        //return new TemporalMappingAxiomImpl(sourceSQL, Arrays.asList(targets));
+        return null;
     }
 }

@@ -1,0 +1,14 @@
+[PrefixDeclaration]
+:		http://siemens.com/temporal/ns#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	urn:Map-rotorSpeed
+target		:RotationSpeedSensor/{sensor_id} :rotorSpeed {value}^^xsd:double.
+interval    [{ts_begin}^^xsd:datetime, {ts_end}^^xsd:datetime)
+source		SELECT sensor_id, value, timestamp AS ts_begin, LEAD(timestamp; 1) OVER W AS ts_end FROM tb measurement WINDOW W AS (PARTITION BY sensor id ORDER BY timestamp)
+]]
