@@ -31,7 +31,6 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
     }
 
     private Stream<CQIE> convertMappingQuery(IntermediateQuery mappingQuery) {
-
         ImmutableList<CQIE> rules = unionSplitter.splitUnion(mappingQuery)
                 .flatMap(q -> IntermediateQueryToDatalogTranslator.translate(q).getRules().stream())
                 .collect(ImmutableCollectors.toList());

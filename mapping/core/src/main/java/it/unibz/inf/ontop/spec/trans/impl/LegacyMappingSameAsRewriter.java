@@ -10,8 +10,7 @@ import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
 import it.unibz.inf.ontop.spec.trans.MappingSameAsRewriter;
-
-import java.util.stream.Stream;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 public class LegacyMappingSameAsRewriter implements MappingSameAsRewriter{
 
@@ -30,7 +29,8 @@ public class LegacyMappingSameAsRewriter implements MappingSameAsRewriter{
     @Override
     public Mapping rewrite(Mapping mapping, DBMetadata dbMetadata) {
         if(enabled){
-            Stream<CQIE> rules = mapping2DatalogConverter.convert(mapping);
+            ImmutableList<CQIE> rules = mapping2DatalogConverter.convert(mapping)
+                    .collect(ImmutableCollectors.toList());
             ImmutableList<CQIE> updatedRules = MappingSameAs.addSameAsInverse(rules);
             return datalog2MappingConverter.convertMappingRules(updatedRules, dbMetadata, mapping.getExecutorRegistry(),
                     mapping.getMetadata());

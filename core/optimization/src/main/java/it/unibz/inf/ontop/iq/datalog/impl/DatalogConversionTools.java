@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
@@ -93,6 +94,9 @@ public class DatalogConversionTools {
              * Non-ground functional term
              */
             else {
+                ImmutableTerm immutableTerm = convertIntoImmutableTerm(term);
+                variableGenerator.registerAdditionalVariables(immutableTerm.getVariableStream()
+                        .collect(ImmutableCollectors.toSet()));
                 Variable newVariable = variableGenerator.generateNewVariable();
                 newArgument = newVariable;
                 allBindingBuilder.put(newVariable, convertIntoImmutableTerm(term));

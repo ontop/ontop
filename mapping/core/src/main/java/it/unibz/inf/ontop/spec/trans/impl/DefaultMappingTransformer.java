@@ -6,13 +6,11 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.mapping.*;
-import it.unibz.inf.ontop.spec.trans.*;
+import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.spec.trans.MappingTransformer;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.spec.trans.*;
 
 public class DefaultMappingTransformer implements MappingTransformer{
 

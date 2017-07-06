@@ -83,10 +83,9 @@ public class SQLMappingExtractor implements MappingExtractor {
         }
 
         SQLPPMapping castPPMapping = castPPMapping(ppMapping);
-        Optional<RDBMetadata> catDBMetadata = castDBMetadata(dbMetadata);
 
         ontology.ifPresent(o -> ontologyComplianceValidator.validateMapping(castPPMapping, o.getVocabulary(), tBox.get()));
-        return convertPPMapping(castPPMapping, catDBMetadata, constraintsFile, executorRegistry);
+        return convertPPMapping(castPPMapping, castDBMetadata(dbMetadata), constraintsFile, executorRegistry);
     }
 
     private SQLPPMapping castPPMapping(PreProcessedMapping ppMapping) {
