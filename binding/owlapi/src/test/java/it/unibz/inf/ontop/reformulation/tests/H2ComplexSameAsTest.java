@@ -45,7 +45,6 @@ import static org.junit.Assert.assertTrue;
 /***
  * Test same as using h2 simple database on wellbores
  */
-@Ignore
 public class H2ComplexSameAsTest {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
