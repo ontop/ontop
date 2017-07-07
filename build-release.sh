@@ -113,6 +113,8 @@ echo ""
 
 mvn install -DskipTests -q || exit 1
 
+echo "[INFO] Compilation completed"
+
 VERSION=$(cat ${BUILD_ROOT}/engine/system/core/target/classes/version.properties | sed 's/version=\(.*\)/\1/')
 
 #
@@ -180,6 +182,8 @@ cp ${ONTOP_DEP_HOME}/README-ontop.TXT ${JETTY_FOLDER}
 
 zip -rq ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/ || exit 1
 
+echo "[INFO] Built ontop-jetty-bundle-${VERSION}.zip"
+
 rm -fr ${JETTY_FOLDER}
 cd ${BUILD_ROOT}/build/distribution
 
@@ -200,6 +204,8 @@ mkdir -p ${TOMCAT_FILENAME}/webapps
 cp ${BUILD_ROOT}/build/distribution/ontop-webapps/*.war ${TOMCAT_FILENAME}/webapps
 
 zip ontop-tomcat-bundle-${VERSION}.zip ${TOMCAT_FILENAME}/webapps/* || exit 1
+
+echo "[INFO] Built ontop-tomcat-bundle-${VERSION}.zip"
 
 rm -fr ${TOMCAT_FILENAME}
 cd ${BUILD_ROOT}/build/distribution

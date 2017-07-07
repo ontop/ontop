@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -31,6 +32,7 @@ import org.eclipse.rdf4j.repository.config.AbstractRepositoryImplConfig;
 import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
 
 import java.io.File;
+import java.util.Properties;
 
 import static org.eclipse.rdf4j.model.util.Models.objectLiteral;
 import static org.eclipse.rdf4j.repository.config.RepositoryConfigSchema.REPOSITORYID;
@@ -46,22 +48,25 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
 
     /** <tt>http://inf.unibz.it/krdb/obda/quest#obdaFile</tt> */
     public final static IRI OBDAFILE;
+
+    public final static IRI PROPERTIESFILE;
     
     public final static IRI EXISTENTIAL;
     
     static {
-        ValueFactory factory = ValueFactoryImpl.getInstance();
+        SimpleValueFactory factory = SimpleValueFactory.getInstance();
         //NAME = factory.createIRI(NAMESPACE, "repo_name");
         //REPO_ID = factory.createIRI("http://www.openrdf.org/config/repository#repositoryID");
-        OWLFILE = factory.createIRI(NAMESPACE, "owlfile");
-        OBDAFILE = factory.createIRI(NAMESPACE, "obdafile");
+        OWLFILE = factory.createIRI(NAMESPACE, "owlFile");
+        OBDAFILE = factory.createIRI(NAMESPACE, "obdaFile");
+        PROPERTIESFILE =  factory.createIRI(NAMESPACE, "propertiesFile");
         EXISTENTIAL = factory.createIRI(NAMESPACE, "existential");
     }
 
     private String name;
     private File owlFile;
     private File obdaFile;
-    private boolean existential;
+    private File propertiesFile;
 
     /**
      * The repository has to be built by this class
@@ -133,6 +138,22 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                 throw new RepositoryConfigException(String.format("The mapping file %s is not accessible!",
                         obdaFile.getAbsolutePath()));
             }
+
+            /*
+             * Properties file
+             */
+
+            if (propertiesFile == null) {
+                throw new RepositoryConfigException(String.format("No properties file specified for repository creation "));
+            }
+            if (!propertiesFile.exists()) {
+                throw new RepositoryConfigException(String.format("The properties file %s does not exist!",
+                        propertiesFile.getAbsolutePath()));
+            }
+            if (!propertiesFile.canRead()) {
+                throw new RepositoryConfigException(String.format("The properties file %s is not accessible!",
+                        propertiesFile.getAbsolutePath()));
+            }
         }
         /*
          * Sometimes thrown when there is no access right to the files.
@@ -169,15 +190,24 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
 
         try {
             /*
-             * Creates the repository
+             * Creates the repository according to the Quest type.
              */
-            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    // TODO: consider also r2rml
-                    .nativeOntopMappingFile(obdaFile)
+            OntopSQLOWLAPIConfiguration.Builder configurationBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder();
+
+
+            if (!obdaFile.getName().endsWith(".obda")){
+                //probably an r2rml file
+                configurationBuilder.r2rmlMappingFile(obdaFile);
+            }
+            else {
+                configurationBuilder.nativeOntopMappingFile(obdaFile);
+            }
+
+            configurationBuilder
                     .ontologyFile(owlFile)
-                    .enableExistentialReasoning(existential)
-                    .build();
-            repository = new OntopVirtualRepository(configuration);
+                    .propertyFile(propertiesFile);
+
+            repository = new OntopVirtualRepository(configurationBuilder.build());
 
         }
         /*
@@ -207,8 +237,9 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
         if (obdaFile != null) {
             graph.add(implNode, OBDAFILE, vf.createLiteral(obdaFile.getAbsolutePath()));
         }
-
-        graph.add(implNode, EXISTENTIAL, vf.createLiteral(existential));
+        if (propertiesFile != null) {
+            graph.add(implNode, PROPERTIESFILE, vf.createLiteral(propertiesFile.getAbsolutePath()));
+        }
       
         return implNode;
     }
@@ -231,8 +262,8 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             objectLiteral(graph.filter(implNode, OBDAFILE, null))
                     .ifPresent(lit -> this.obdaFile = new File(lit.getLabel()));
 
-            objectLiteral(graph.filter(implNode, EXISTENTIAL, null))
-                    .ifPresent(lit -> this.existential = lit.booleanValue());
+            objectLiteral(graph.filter(implNode, PROPERTIESFILE, null))
+                    .ifPresent(lit -> this.propertiesFile = new File(lit.getLabel()));
 
         } catch (Exception e) {
             throw new RepositoryConfigException(e.getMessage(), e);
