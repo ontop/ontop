@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.mapping.datalog.impl;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.CQIE;
@@ -18,6 +18,8 @@ import java.util.stream.Stream;
 public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
 
     private final QueryUnionSplitter unionSplitter;
+    // For the translation of subqueries: prevents conflicts in generated predicate names
+    private int ruleCounter;
 
     @Inject
     private Mapping2DatalogConverterImpl(QueryUnionSplitter unionSplitter) {
@@ -31,12 +33,12 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
     }
 
     private Stream<CQIE> convertMappingQuery(IntermediateQuery mappingQuery) {
-        ImmutableList<CQIE> rules = unionSplitter.splitUnion(mappingQuery)
-                .flatMap(q -> IntermediateQueryToDatalogTranslator.translate(q).getRules().stream())
-                .collect(ImmutableCollectors.toList());
+        ImmutableSet<CQIE> rules = unionSplitter.splitUnion(mappingQuery)
+                .flatMap(q -> IntermediateQueryToDatalogTranslator.translate(q, ruleCounter).getRules().stream())
+                .collect(ImmutableCollectors.toSet());
         //CQIEs are mutable
         rules.forEach(r -> DatalogNormalizer.unfoldJoinTrees(r));
+        ruleCounter+=rules.size();
         return rules.stream();
     }
-
 }

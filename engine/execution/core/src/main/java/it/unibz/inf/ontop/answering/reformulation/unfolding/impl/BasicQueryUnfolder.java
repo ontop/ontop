@@ -34,10 +34,10 @@ public class BasicQueryUnfolder implements QueryUnfolder {
 
             IntensionalDataNode intensionalNode = optionalCurrentIntensionalNode.get();
 
-            Optional<IntermediateQuery> optionalMapping = mapping.getDefinition(
+            Optional<IntermediateQuery> optionalMappingAssertion = mapping.getDefinition(
                     intensionalNode.getProjectionAtom().getPredicate());
 
-            QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalNode, optionalMapping);
+            QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalNode, optionalMappingAssertion);
             query.applyProposal(queryMerging);
 
             /**

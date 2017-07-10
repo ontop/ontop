@@ -109,21 +109,20 @@ public class MappingSameAsPredicateExtractor {
                     SameAsIRIsExtractor extractor = new SameAsIRIsExtractor(definition);
                     Optional<ImmutableSet<ImmutableTerm>> predicatesIRIs = extractor.getIRIs();
 
-                    if(predicatesIRIs.isPresent()){
+                    if(predicatesIRIs.isPresent()) {
                         ImmutableSet<ImmutableTerm> predicatesIRIsSet = predicatesIRIs.get();
 
-                        if (!Sets.intersection(sameAsSet, predicatesIRIsSet).isEmpty()){
-                            if(extractor.isObjectProperty()){
+                        if (!Sets.intersection(sameAsSet, predicatesIRIsSet).isEmpty()) {
+                            if (extractor.isObjectProperty()) {
                                 objectPropertiesMapped.add(predicate);
-                            }
-                            else{
+                            } else {
                                 dataPropertiesAndClassesMapped.add(predicate);
                             }
 
                         }
-
-                    } else
-                        throw new IllegalArgumentException("property is not built properly");
+                    }
+//                    } else
+//                        throw new IllegalArgumentException("property is not built properly");
 
 
             }
