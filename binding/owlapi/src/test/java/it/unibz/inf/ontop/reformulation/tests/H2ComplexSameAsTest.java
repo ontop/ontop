@@ -196,6 +196,7 @@ public class H2ComplexSameAsTest {
 
 	}
 
+	@Ignore
     @Test
     public void testSameAs3() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
