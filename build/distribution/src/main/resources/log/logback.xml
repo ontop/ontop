@@ -15,7 +15,7 @@
 		</encoder>
 	</appender>
 
-	<!-- Configure the logging level bellow. For more information use WARN, 
+	<!-- Configure the logging level below. For more information use WARN,
 		INFO or DEBUG instead of ERROR -->
 
 	<root level="DEBUG">
