@@ -1,0 +1,9 @@
+[PrefixDeclaration]
+:		http://it.unibz.inf/obda/test/simple#
+quest:	http://obda.org/quest#
+
+[MappingDeclaration] @collection [[
+mappingId	M:0
+target	    :{id} a :A ; :U {alias} ; :V {alias} .
+source	    SELECT "id", "name" as alias, "val" as alias FROM "table1"
+]]

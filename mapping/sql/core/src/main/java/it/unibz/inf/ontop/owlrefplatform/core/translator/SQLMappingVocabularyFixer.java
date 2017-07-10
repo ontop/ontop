@@ -1,0 +1,428 @@
+package it.unibz.inf.ontop.owlrefplatform.core.translator;
+
+/*
+ * #%L
+ * ontop-reformulation-core
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import java.util.*;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.*;
+
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.predicate.BNodePredicate;
+import it.unibz.inf.ontop.model.predicate.DatatypePredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.ontology.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+
+/***
+ * This is a hack class that helps fix and OBDA model in which the mappings
+ * include predicates that have not been properly typed.
+ *
+ * Makes the distinction between classes, object, data and annotation properties.
+ *
+ * For annotation properties, decides if it should be treated as an object or a data property.
+ *
+ * 
+ * @author mariano
+ */
+@Deprecated
+public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
+
+    private static final Logger log = LoggerFactory.getLogger(SQLMappingVocabularyFixer.class);
+
+
+    @Inject
+    private SQLMappingVocabularyFixer() {
+    }
+
+
+    @Override
+	public ImmutableList<SQLPPTriplesMap> fixMappingAxioms(ImmutableList<SQLPPTriplesMap> mappingAxioms,
+                                                           ImmutableOntologyVocabulary vocabulary) {
+        log.debug("Fixing OBDA Model");
+        return ImmutableList.copyOf(fixMappingPredicates(mappingAxioms, vocabulary));
+    }
+
+	/***
+	 * Makes sure that the mappings given are correctly typed w.r.t. the given
+	 * vocabulary.
+	 * 
+	 * @param originalMappings
+	 * @param vocabulary
+	 * @return
+	 */
+	private static ImmutableList<SQLPPTriplesMap> fixMappingPredicates(Collection<SQLPPTriplesMap> originalMappings,
+                                                                       ImmutableOntologyVocabulary vocabulary) {
+		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
+
+        Map<String, Predicate> urimap = new HashMap<>();
+        for (OClass p : vocabulary.getClasses())
+            urimap.put(p.getName(), p.getPredicate());
+
+        for (ObjectPropertyExpression p : vocabulary.getObjectProperties())
+            urimap.put(p.getName(), p.getPredicate());
+
+        for (DataPropertyExpression p : vocabulary.getDataProperties())
+            urimap.put(p.getName(), p.getPredicate());
+
+        for (AnnotationProperty p : vocabulary.getAnnotationProperties())
+            urimap.put(p.getName(), p.getPredicate());
+
+
+        Collection<SQLPPTriplesMap> result = new ArrayList<>();
+        for (SQLPPTriplesMap mapping : originalMappings) {
+            ImmutableList<ImmutableFunctionalTerm> targetQuery = mapping.getTargetAtoms();
+            ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
+
+            for (ImmutableFunctionalTerm atom : targetQuery) {
+                Predicate predTarget = atom.getFunctionSymbol();
+
+				/* Fixing terms */
+                ImmutableList<? extends ImmutableTerm> arguments = atom.getArguments();
+
+                ImmutableFunctionalTerm newatom = null;
+
+                Predicate predicate = urimap.get(predTarget.getName());
+                if (predicate == null) {
+                    if (!predTarget.isTriplePredicate()) {
+
+
+                        String predName = predTarget.getName();
+                        if(predName.equals(OBDAVocabulary.SAME_AS) || predName.equals(OBDAVocabulary.CANONICAL_IRI)) {
+
+                            // In case of sameAs property we know we are working with 2 uris, and we need an object property
+                            newatom = fixSameAsPredicate (mapping, predName, arguments);
+
+                        }
+                        else
+                        {
+                            log.warn("WARNING: Mapping references an unknown class/property: " + predTarget.getName());
+
+						/*
+                         * All this part is to handle the case where the predicate or the class is defined
+						 * by the mapping but not present in the ontology.
+						 */
+                            newatom = fixUndeclaredPredicate(mapping, predName, arguments);
+                        }
+                    } else {
+
+                        newatom = fixTripleAtom(mapping, arguments);
+                    }
+                } else {
+
+                    newatom = fixOntologyPredicate(mapping, predTarget, arguments, predicate);
+                }
+
+                bodyBuilder.add(newatom);
+            } //end for
+
+            result.add(new OntopNativeSQLPPTriplesMap(mapping.getId(), mapping.getSourceQuery(), bodyBuilder.build()));
+        }
+//		log.debug("Repair done. Returning {} mappings", result.size());
+		return ImmutableList.copyOf(result);
+    }
+
+    private static ImmutableFunctionalTerm fixSameAsPredicate(SQLPPTriplesMap mapping, String sameAsPredName,
+                                                              List<? extends ImmutableTerm> arguments) {
+
+        ImmutableFunctionalTerm fixedTarget;
+        if (arguments.size() == 2) {
+            ImmutableTerm t0 = arguments.get(0);
+            ImmutableTerm t1 = arguments.get(1);
+            if (t0 instanceof ImmutableFunctionalTerm && t1 instanceof ImmutableFunctionalTerm) {
+
+
+
+                ImmutableFunctionalTerm ft0 = (ImmutableFunctionalTerm) t0;
+                ImmutableFunctionalTerm ft1 = (ImmutableFunctionalTerm) t1;
+
+                boolean t0uri = (ft0.getFunctionSymbol() instanceof URITemplatePredicate);
+                boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);
+
+                if (t0uri && t1uri) {
+                    Predicate pred = DATA_FACTORY.getObjectPropertyPredicate(sameAsPredName);
+                    fixedTarget = DATA_FACTORY.getImmutableFunctionalTerm(pred, t0, t1);
+
+                } else {
+                    String message = String.format("" +
+                            "Error with property <%s> used in the mapping\n" +
+                            "   %s \n" +
+                            "The reason is: \n" +
+                            "owl:sameAs should be used between two IRIs, use  `<{val}>` to build an IRI for the object {%s} .. ", sameAsPredName, mapping, t1);
+
+                    throw new IllegalArgumentException(message);
+                }
+
+            } else {
+                String message = String.format("" +
+                        "Error with property <%s> used in the mapping\n" +
+                        "%s \n" +
+                        "The reason is: \n" +
+                        "the subject {%s} or the object {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", sameAsPredName, mapping, t0, t1);
+
+                throw new IllegalArgumentException(message);
+            }
+        } else {
+
+            throw new IllegalArgumentException("ERROR: Predicate has an incorrect arity: " + sameAsPredName);
+        }
+        return fixedTarget;
+    }
+
+    private static ImmutableFunctionalTerm fixTripleAtom(SQLPPTriplesMap mapping, List<? extends ImmutableTerm> arguments) {
+        ImmutableFunctionalTerm newatom;
+        Term t0 = arguments.get(0);
+        if ((t0 instanceof Function) && ((Function) t0).getFunctionSymbol() instanceof URITemplatePredicate) {
+
+                newatom = DATA_FACTORY.getImmutableTripleAtom(arguments.get(0), arguments.get(1), arguments.get(2));
+
+        } else {
+            String message = String.format("" +
+                    "Error with triple atom\n" +
+                    "   %s \n" +
+                    "The reason is: \n" +
+                    "the subject {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template ", mapping, t0);
+
+            throw new IllegalArgumentException(message);
+        }
+        return newatom;
+    }
+
+    private static ImmutableFunctionalTerm fixOntologyPredicate(SQLPPTriplesMap mapping, Predicate predTarget,
+                                                                List<? extends ImmutableTerm> arguments, Predicate predicate) {
+        ImmutableFunctionalTerm newatom;
+        if (arguments.size() == 1) {
+            Term t0 = arguments.get(0);
+            if ((t0 instanceof Function) && (
+                    (((Function)t0).getFunctionSymbol() instanceof URITemplatePredicate)
+                    || (((Function)t0).getFunctionSymbol() instanceof BNodePredicate))) {
+                newatom = DATA_FACTORY.getImmutableFunctionalTerm(predicate, arguments.get(0));
+            } else {
+                String message = String.format("" +
+                        "Error with class <%s> used in the mapping\n" +
+                        "%s \n" +
+                        "The reason is: \n" +
+                        "the subject {%s} in the mapping is not an iri. Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", predicate, mapping, t0);
+                throw new IllegalArgumentException(message);
+            }
+
+        } else if (arguments.size() == 2) {
+
+            Term t0 = arguments.get(0);
+            if ((t0 instanceof Function) && ((((Function) t0).getFunctionSymbol() instanceof URITemplatePredicate)
+                    || (((Function) t0).getFunctionSymbol() instanceof BNodePredicate))) {
+
+                //object property
+                if (predicate.isObjectProperty()) {
+
+                    Term t1 = arguments.get(1);
+                    if ((t1 instanceof Function) && (
+                            (((Function) t1).getFunctionSymbol() instanceof URITemplatePredicate)
+                            || (((Function) t1).getFunctionSymbol() instanceof BNodePredicate) )) {
+                        newatom = DATA_FACTORY.getImmutableFunctionalTerm(predicate, arguments.get(0), arguments.get(1));
+
+                    } else {
+
+                        String message = String.format("" +
+                                "Error with property <%s> used in the mapping\n" +
+                                "   %s \n" +
+                                "The reason is: \n" +
+                                "the object {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template ", predicate, mapping, t1);
+
+                        throw new IllegalArgumentException(message);
+                    }
+
+                } else {
+                    //data property
+                    if (predicate.isDataProperty()) {
+
+
+                        newatom = DATA_FACTORY.getImmutableFunctionalTerm(predicate, arguments.get(0), arguments.get(1));
+
+                    } else { //case of annotation property
+
+                        //we understood from the mappings that the annotation property can be treated as object property
+                        if (predTarget.isObjectProperty()) {
+
+                            Term t1 = arguments.get(1);
+                            if ((t1 instanceof Function) && ((Function) t1).getFunctionSymbol() instanceof URITemplatePredicate) {
+                                newatom = DATA_FACTORY.getImmutableFunctionalTerm(predTarget, arguments.get(0), arguments.get(1));
+
+                            } else {
+
+                                String message = String.format("" +
+                                        "Error with property <%s> used in the mapping\n" +
+                                        "   %s \n" +
+                                        "The reason is: \n" +
+                                        "the object {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template ", predicate, mapping, t1);
+
+                                throw new IllegalArgumentException(message);
+                            }
+
+                            //we understood from the mappings that the annotation property can be treated as data property
+                        } else if (predTarget.isDataProperty()) {
+
+                            newatom = DATA_FACTORY.getImmutableFunctionalTerm(predTarget, arguments.get(0), arguments.get(1));
+
+                        } else { //annotation property not clear, is treated as a data property
+
+                            Predicate pred = DATA_FACTORY.getDataPropertyPredicate(predTarget.getName());
+                            newatom = DATA_FACTORY.getImmutableFunctionalTerm(pred, arguments.get(0), arguments.get(1));
+
+                        }
+                    }
+
+                }
+            } else {
+                String message = String.format("" +
+                        "Error with property <%s> used in the mapping\n" +
+                        "%s \n" +
+                        "The reason is: \n" +
+                        "the subject {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", predicate, mapping, t0);
+
+                throw new IllegalArgumentException(message);
+            }
+        } else {
+            throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + predTarget.getName());
+        }
+        return newatom;
+    }
+
+    private static ImmutableFunctionalTerm fixUndeclaredPredicate(SQLPPTriplesMap mapping, String undeclaredPredName,
+                                                                  List<? extends ImmutableTerm> arguments) {
+        ImmutableFunctionalTerm fixedTarget;
+        if (arguments.size() == 1) {
+            Term t0 = arguments.get(0);
+            if ((t0 instanceof Function) && ((Function)t0).getFunctionSymbol() instanceof URITemplatePredicate) {
+                Predicate pred = DATA_FACTORY.getClassPredicate(undeclaredPredName);
+                fixedTarget = DATA_FACTORY.getImmutableFunctionalTerm(pred, arguments.get(0));
+            } else {
+                String message = String.format("" +
+                        "Error with class <%s> used in the mapping\n" +
+                        "%s \n" +
+                        "The reason is: \n" +
+                        "the subject {%s} in the mapping is not an iri. Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", undeclaredPredName, mapping, t0);
+                throw new IllegalArgumentException(message);
+            }
+        } else if (arguments.size() == 2) {
+            ImmutableTerm t0 = arguments.get(0);
+            ImmutableTerm t1 = arguments.get(1);
+            if (t0 instanceof Function) {
+
+                if ((t1 instanceof Function)) {
+
+                    Function ft0 = (Function) t0;
+                    Function ft1 = (Function) t1;
+
+                    boolean t0uri = (ft0.getFunctionSymbol() instanceof URITemplatePredicate);
+                    boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);
+
+                    if (t0uri && t1uri) {
+                        Predicate pred = DATA_FACTORY.getObjectPropertyPredicate(undeclaredPredName);
+                        fixedTarget = DATA_FACTORY.getImmutableFunctionalTerm(pred, t0, t1);
+                    } else {
+                        Predicate pred = DATA_FACTORY.getDataPropertyPredicate(undeclaredPredName);
+                        fixedTarget = DATA_FACTORY.getImmutableFunctionalTerm(pred, t0, t1);
+                    }
+                } else {
+                    //cases we cannot recognize
+
+                    String message = String.format("" +
+                            "Error with property <%s> used in the mapping\n" +
+                            "   %s \n" +
+                            "The reason is: \n" +
+                            "1. the property is not declared in the ontology; and \n" +
+                            "2. the object {%s} in the mapping is untyped. Solution: use `{val}^^xsd:string` for literal and `<{val}>` for IRI. ", undeclaredPredName, mapping, t1);
+
+                    throw new IllegalArgumentException(message);
+                }
+            } else {
+                String message = String.format("" +
+                        "Error with property <%s> used in the mapping\n" +
+                        "%s \n" +
+                        "The reason is: \n" +
+                        "the subject {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", undeclaredPredName, mapping, t0);
+
+                throw new IllegalArgumentException(message);
+            }
+        } else {
+            System.err.println("ERROR: Predicate has an incorrect arity: " + undeclaredPredName);
+            throw new IllegalArgumentException("ERROR: Predicate has an incorrect arity: " + undeclaredPredName);
+        }
+        return fixedTarget;
+    }
+
+
+
+    /***
+     * Fix functions that represent URI templates. Currently,the only fix
+     * necessary is replacing the old-style template function with the new one,
+     * that uses a string template and placeholders.
+     *
+     * @param term
+     * @return
+     */
+    private static Term fixTerm(Term term) {
+        if (term instanceof Function) {
+            Function fterm = (Function) term;
+            Predicate predicate = fterm.getFunctionSymbol();
+            if (predicate instanceof DatatypePredicate) {
+                // no fix necessary
+                return term;
+            }
+            if (predicate instanceof URITemplatePredicate) {
+                // no fix necessary
+                return term;
+            }
+            // We have a function that is not a built-in, hence its an old-style uri
+            // template function(parm1,parm2,...)
+            StringBuilder newTemplate = new StringBuilder();
+            newTemplate.append(predicate.getName().toString());
+            for (int i = 0; i < fterm.getArity(); i++) {
+                newTemplate.append("-{}");
+            }
+
+            LinkedList<Term> newTerms = new LinkedList<>();
+            newTerms.add(DATA_FACTORY.getConstantLiteral(newTemplate.toString()));
+            newTerms.addAll(fterm.getTerms());
+
+            return DATA_FACTORY.getUriTemplate(newTerms);
+        }
+        return term;
+    }
+
+}

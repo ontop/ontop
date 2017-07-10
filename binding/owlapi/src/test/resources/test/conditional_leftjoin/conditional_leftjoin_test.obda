@@ -1,0 +1,15 @@
+[PrefixDeclaration]
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+:			http://www.semanticweb.org/ontologies/2016/10/untitled-ontology-2#
+xml:		http://www.w3.org/XML/1998/namespace
+quest:		http://obda.org/quest#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-e601171745c0418c936b64d4abc06923
+target		:{restaurantName} :hasAddress :{address} . 
+source		SELECT restaurantName, address FROM restaurants;
+]]

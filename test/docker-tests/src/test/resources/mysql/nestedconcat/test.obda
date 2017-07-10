@@ -1,0 +1,10 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/meme/ontologies/2015/3/test#
+
+
+[MappingDeclaration] @collection [[
+mappingId	test
+target		:period{CVE_PER} a :Period ; :yStart {AINICIO} ; :yEnd {ATERMINO} . 
+source		SELECT  AINICIO || '-' || ATERMINO AS CVE_PER, AINICIO, ATERMINO FROM RHPROFSNI
+]]
+

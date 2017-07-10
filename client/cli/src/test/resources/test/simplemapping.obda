@@ -1,0 +1,13 @@
+[PrefixDeclaration]
+:		http://it.unibz.inf/obda/test/simple#
+
+[MappingDeclaration] @collection [[
+mappingId	mapping-A
+target		:{id} a :A . 
+source		SELECT id FROM TABLE1 WHERE id < 5
+
+mappingId	mapping-B
+target		:{id} a :B .
+source		SELECT id FROM TABLE1 WHERE id = 7
+]]
+

@@ -1,0 +1,9 @@
+[PrefixDeclaration]
+:		http://it.unibz.inf/obda/test/simple#
+quest:	http://obda.org/quest#
+
+[MappingDeclaration] @collection [[
+mappingId	M:0
+target	    :{table1.id} a :A ; :P :{table2.sid} .
+source	    SELECT "table1"."id", "table2"."sid" FROM "table1", "table2"
+]]

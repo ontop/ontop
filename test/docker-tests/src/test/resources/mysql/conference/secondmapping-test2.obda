@@ -1,0 +1,11 @@
+[PrefixDeclaration]
+:		http://myproject.org/odbs#
+
+
+[MappingDeclaration] @collection [[
+mappingId	event
+target		:trace{n} :TcontainsE :event{e} .
+source		 select distinct 'submit the paper' as `n`, concat("paper", Submission.`paper` ) as `e` from Submission
+
+]]
+
