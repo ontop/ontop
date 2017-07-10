@@ -102,8 +102,6 @@ public class MappingSameAsPredicateExtractor {
                     .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
                             "(-> inconsistent)"));
 
-
-
             if (!(predicate.getName().equals(OBDAVocabulary.SAME_AS) )) {
 
                     SameAsIRIsExtractor extractor = new SameAsIRIsExtractor(definition);
@@ -121,15 +119,9 @@ public class MappingSameAsPredicateExtractor {
 
                         }
                     }
-//                    } else
-//                        throw new IllegalArgumentException("property is not built properly");
-
-
-            }
-
-
+            } else
+                throw new IllegalArgumentException("property is not built properly");
         }
-
     }
 
 

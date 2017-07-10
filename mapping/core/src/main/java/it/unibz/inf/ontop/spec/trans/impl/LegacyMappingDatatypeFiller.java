@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
@@ -54,12 +56,14 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
      */
     @Override
     public Mapping inferMissingDatatypes(Mapping mapping, TBoxReasoner tBox, ImmutableOntologyVocabulary
-            vocabulary, DBMetadata dbMetadata) {
+            vocabulary, DBMetadata dbMetadata) throws DBMetadataExtractionException, InvalidMappingException {
         MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata);
         ImmutableList<CQIE> rules = mapping2DatalogConverter.convert(mapping)
                 .collect(ImmutableCollectors.toList());
         //CQIEs are mutable
-        rules.forEach(typeCompletion::insertDataTyping);
+        for(CQIE rule : rules){
+            typeCompletion.insertDataTyping(rule);
+        }
         return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(rules), dbMetadata,
                 mapping.getExecutorRegistry(), mapping.getMetadata());
     }

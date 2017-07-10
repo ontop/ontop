@@ -88,14 +88,16 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
                                      ExecutorRegistry executorRegistry)
             throws DBMetadataExtractionException, MappingException {
 
-
-        optionalOntology.ifPresent(o -> ontologyComplianceValidator.validateMapping(
-                initialPPMapping,
-                o.getVocabulary(),
-                TBoxReasonerImpl.create(
-                        o,
-                        settings.isEquivalenceOptimizationEnabled()
-                )));
+        if(optionalOntology.isPresent()){
+            Ontology ontology = optionalOntology.get();
+            ontologyComplianceValidator.validateMapping(
+                    initialPPMapping,
+                    ontology.getVocabulary(),
+                    TBoxReasonerImpl.create(
+                            ontology,
+                            settings.isEquivalenceOptimizationEnabled()
+                    ));
+        }
 
         RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
 
@@ -153,7 +155,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     private OBDASpecification transformMapping(ImmutableList<CQIE> initialMappingRules,
                                                RDBMetadata dbMetadata, Optional<Ontology> optionalOntology,
                                                MappingMetadata mappingMetadata,
-                                               ExecutorRegistry executorRegistry) throws MappingException {
+                                               ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
 
         Ontology ontology = optionalOntology
                 //  extract ontology from the mapping if it does not exist
@@ -398,7 +400,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      * Infers missing data types.
      */
     public ImmutableList<CQIE> inferMissingDataTypes(ImmutableList<CQIE> unfoldingProgram, DBMetadata metadata)
-            throws MappingException {
+            throws MappingException, DBMetadataExtractionException {
 
         MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(metadata);
         for (CQIE rule : unfoldingProgram) {

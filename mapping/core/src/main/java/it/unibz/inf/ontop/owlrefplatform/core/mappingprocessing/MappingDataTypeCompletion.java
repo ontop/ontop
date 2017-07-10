@@ -55,12 +55,11 @@ public class MappingDataTypeCompletion {
      *
      * @param metadata The database metadata.
      */
-    public MappingDataTypeCompletion(DBMetadata metadata)
-            throws PredicateRedefinitionException {
+    public MappingDataTypeCompletion(DBMetadata metadata) {
         this.metadata = metadata;
     }
 
-    public void insertDataTyping(CQIE rule) throws MappingException {
+    public void insertDataTyping(CQIE rule) throws DBMetadataExtractionException, InvalidMappingException {
         Function atom = rule.getHead();
         Predicate predicate = atom.getFunctionSymbol();
         if (predicate.getArity() == 2) { // we check both for data and object property
@@ -79,14 +78,15 @@ public class MappingDataTypeCompletion {
      * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
      */
     private void insertVariableDataTyping(Term term, Function atom, int position, Map<String, List<IndexedPosititon>> termOccurenceIndex)
-            throws MappingException {
+            throws DBMetadataExtractionException, InvalidMappingException {
         Predicate predicate = atom.getFunctionSymbol();
 
         if (term instanceof Function) {
             Function function = (Function) term;
             Predicate functionSymbol = function.getFunctionSymbol();
-            if (function.isDataTypeFunction() || functionSymbol instanceof URITemplatePredicate || functionSymbol
-                    instanceof BNodePredicate) {
+            if (function.isDataTypeFunction() ||
+                    (functionSymbol instanceof URITemplatePredicate)
+                    || (functionSymbol instanceof BNodePredicate)) {
                 // NO-OP for already assigned datatypes, or object properties, or bnodes
             }
             else if (function.isOperation()) {
@@ -161,7 +161,7 @@ public class MappingDataTypeCompletion {
      * @return
      */
     private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosititon>> termOccurenceIndex, Variable variable)
-            throws InvalidMappingException {
+            throws InvalidMappingException, DBMetadataExtractionException {
 
 
         List<IndexedPosititon> list = termOccurenceIndex.get(variable.getName());

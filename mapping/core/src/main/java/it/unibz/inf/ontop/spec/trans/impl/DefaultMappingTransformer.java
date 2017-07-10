@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.trans.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
@@ -41,7 +42,7 @@ public class DefaultMappingTransformer implements MappingTransformer{
     }
 
     @Override
-    public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Ontology ontology, TBoxReasoner tBox) throws MappingException, OntologyException {
+    public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Ontology ontology, TBoxReasoner tBox) throws MappingException, DBMetadataExtractionException {
         Mapping datatypedMapping = mappingDatatypeFiller.inferMissingDatatypes(mapping, tBox, ontology.getVocabulary(),
                 dbMetadata);
         Mapping factsAsMapping = factConverter.convert(ontology, datatypedMapping.getExecutorRegistry(),

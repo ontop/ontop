@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.pp.validation.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.model.predicate.Predicate;
@@ -51,7 +52,9 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
         ANNOTATION_PROPERTY,
         DATATYPE_PROPERTY,
         TRIPLE_PREDICATE
-    };
+    }
+
+    ;
 
     private final ImmutableMap<PredicateType, String> PredicateTypeToErrorMessageSubstring =
             ImmutableMap.<PredicateType, String>builder()
@@ -62,27 +65,29 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
                     .build();
 
 
-
     @Override
     public boolean validateMapping(PreProcessedMapping preProcessedMapping, ImmutableOntologyVocabulary signature,
                                    TBoxReasoner tBox)
             throws MappingOntologyMismatchException {
-        ImmutableMap<Predicate, Datatype> predicate2DatatypeMap = computePredicateToDataTypeMap(tBox);
-        return preProcessedMapping.getTripleMaps().stream()
-                .allMatch(t -> validateTriplesMap((PreProcessedTriplesMap) t, signature, tBox));
+        for (PreProcessedTriplesMap triplesMap : (ImmutableList<PreProcessedTriplesMap>) preProcessedMapping.getTripleMaps()) {
+            validateTriplesMap(triplesMap, signature, tBox);
+        }
+        return true;
     }
 
-    private boolean validateTriplesMap(PreProcessedTriplesMap triplesMap, ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox) {
-        return triplesMap.getTargetAtoms().stream()
-                .allMatch(f -> validateTriple(triplesMap, f, ontologySignature, tBox));
+    private boolean validateTriplesMap(PreProcessedTriplesMap triplesMap, ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox) throws MappingOntologyMismatchException {
+        for (ImmutableFunctionalTerm targetAtom : triplesMap.getTargetAtoms()) {
+            validateTriple(triplesMap, targetAtom, ontologySignature, tBox);
+        }
+        return true;
     }
 
     private boolean validateTriple(PreProcessedTriplesMap triplesMap, ImmutableFunctionalTerm targetTriple, ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox)
             throws MappingOntologyMismatchException {
         String predicateName = targetTriple.getFunctionSymbol().getName();
         Optional<PredicateType> predicateType = getPredicateType(targetTriple);
-        Optional<Mismatch> mismatch = predicateType.isPresent()?
-                lookForMismatch(predicateName, ontologySignature, tBox, predicateType.get()):
+        Optional<Mismatch> mismatch = predicateType.isPresent() ?
+                lookForMismatch(predicateName, ontologySignature, tBox, predicateType.get()) :
                 Optional.empty();
 
         if (mismatch.isPresent()) {

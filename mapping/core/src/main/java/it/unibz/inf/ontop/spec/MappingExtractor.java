@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.spec;
 
 
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
@@ -46,10 +45,10 @@ public interface MappingExtractor {
                                  @Nonnull Optional<File> constraintsFile, ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException;
 
-    PreProcessedMapping loadPPMapping(File mappingFile);
+    PreProcessedMapping loadPPMapping(File mappingFile) throws DuplicateMappingException, MappingIOException, InvalidMappingException;
 
-    PreProcessedMapping loadPPMapping(Reader mappingReader);
+    PreProcessedMapping loadPPMapping(Reader mappingReader) throws DuplicateMappingException, MappingIOException, InvalidMappingException;
 
-    PreProcessedMapping loadPPMapping(Model mappingGraph);
+    PreProcessedMapping loadPPMapping(Model mappingGraph) throws DuplicateMappingException, InvalidMappingException;
 
 }

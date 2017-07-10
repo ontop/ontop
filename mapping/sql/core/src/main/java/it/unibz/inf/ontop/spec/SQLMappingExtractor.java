@@ -5,9 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.exception.MappingException;
-import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
+import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -83,8 +81,9 @@ public class SQLMappingExtractor implements MappingExtractor {
         }
 
         SQLPPMapping castPPMapping = castPPMapping(ppMapping);
-
-        ontology.ifPresent(o -> ontologyComplianceValidator.validateMapping(castPPMapping, o.getVocabulary(), tBox.get()));
+        if(ontology.isPresent()){
+            ontologyComplianceValidator.validateMapping(castPPMapping, ontology.get().getVocabulary(), tBox.get());
+        }
         return convertPPMapping(castPPMapping, castDBMetadata(dbMetadata), constraintsFile, executorRegistry);
     }
 
@@ -109,22 +108,22 @@ public class SQLMappingExtractor implements MappingExtractor {
     }
 
     @Override
-    public PreProcessedMapping loadPPMapping(File mappingFile) {
+    public PreProcessedMapping loadPPMapping(File mappingFile) throws DuplicateMappingException, MappingIOException, InvalidMappingException {
         return mappingParser.parse(mappingFile);
     }
 
     @Override
-    public PreProcessedMapping loadPPMapping(Reader mappingReader) {
+    public PreProcessedMapping loadPPMapping(Reader mappingReader) throws DuplicateMappingException, MappingIOException, InvalidMappingException {
         return mappingParser.parse(mappingReader);
     }
 
     @Override
-    public PreProcessedMapping loadPPMapping(Model mappingGraph) {
+    public PreProcessedMapping loadPPMapping(Model mappingGraph) throws DuplicateMappingException, InvalidMappingException {
         return mappingParser.parse(mappingGraph);
     }
 
     private MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
-                                                  Optional<File> constraintFile, ExecutorRegistry executorRegistry) {
+                                                  Optional<File> constraintFile, ExecutorRegistry executorRegistry) throws MetaMappingExpansionException, DBMetadataExtractionException {
 
 
         RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, constraintFile);

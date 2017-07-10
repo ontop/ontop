@@ -1,8 +1,11 @@
 package it.unibz.inf.ontop.spec.impl;
 
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
+import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
@@ -67,7 +70,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                 executorRegistry );
     }
 
-    private OBDASpecification convert(PreProcessedMapping ppMapping, Optional<DBMetadata> optionalDBMetadata, Optional<Ontology> optionalOntology, Optional<File> constraintFile, ExecutorRegistry executorRegistry) {
+    private OBDASpecification convert(PreProcessedMapping ppMapping, Optional<DBMetadata> optionalDBMetadata, Optional<Ontology> optionalOntology, Optional<File> constraintFile, ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException, OntologyException {
         Optional<TBoxReasoner> optionalInputTBox = loadInputTBox(optionalOntology);
 
         MappingExtractor.MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(

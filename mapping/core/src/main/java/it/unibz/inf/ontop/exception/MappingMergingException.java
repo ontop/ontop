@@ -1,12 +1,12 @@
 package it.unibz.inf.ontop.exception;
 
-public class MappingMergingException extends MappingException {
+public class MappingMergingException extends OntopInternalBugException {
 
     public MappingMergingException(String message) {
         super(message);
     }
 
     public MappingMergingException(Exception e) {
-        super(e);
+        super(e.getMessage());
     }
 }
