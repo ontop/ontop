@@ -16,11 +16,6 @@ public interface DBConnector {
     void close() throws OntopConnectionException;
 
     /**
-     * Gets a direct OntopConnection.
-     */
-    OntopConnection getNonPoolConnection() throws OntopConnectionException;
-
-    /**
      * Gets a OntopConnection usually coming from a connection pool.
      */
     OntopConnection getConnection() throws OntopConnectionException;

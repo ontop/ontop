@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -165,30 +164,22 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	}
 
 	/**
-	 * This thread handles the cancelling of a request. 
-	 * To speed up the process for the user, this thread is given the old connection, statement and latch,
-	 * while these are replaced in the containing class
-	 * @author Dag Hovland
+	 * This thread handles the cancelling of a request.
+	 * @author Dag Hovland (originally)
 	 *
 	 */
 	private class Canceller extends Thread{
 		private CountDownLatch old_latch;
-		private OntopOWLConnection old_conn;
-		private OntopOWLStatement old_stmt;
 
 		Canceller() throws OntopConnectionException {
 			super();
 			this.old_latch = latch;
-			this.old_stmt = statement;
-			this.old_conn = reasoner.replaceConnection();
 		}
 
 
 		public void run(){
 			try {
-				this.old_stmt.cancel();
-				this.old_stmt.close();
-				this.old_conn.close();
+				statement.cancel();
 				this.old_latch.countDown();
 			} catch (Exception e) {
 				this.old_latch.countDown();

@@ -153,53 +153,11 @@ public class JDBCConnector implements DBConnector {
     }
 
     public synchronized Connection getSQLPoolConnection() throws OntopConnectionException {
-        Connection conn = null;
         try {
-            conn = tomcatPool.getConnection();
+            return tomcatPool.getConnection();
         } catch (SQLException e) {
             throw new OntopConnectionException(e);
         }
-        return conn;
-    }
-
-    /***
-     * Establishes a new connection to the data source. This is a normal JDBC
-     * connection. Used only internally to get metadata at the moment.
-     *
-     * TODO: update comment
-     *
-     */
-    protected Connection getSQLConnection() throws OntopConnectionException {
-        Connection conn;
-
-        // if (driver.contains("mysql")) {
-        // url = url + "?relaxAutoCommit=true";
-        // }
-        try {
-            Optional<String> optionalDriver = settings.getJdbcDriver();
-            if (optionalDriver.isPresent()) {
-                Class.forName(optionalDriver.get());
-            }
-        } catch (ClassNotFoundException e1) {
-            log.debug(e1.getMessage());
-        }
-        try {
-            conn = DriverManager.getConnection(settings.getJdbcUrl(),
-                    settings.getJdbcUser(), settings.getJdbcPassword());
-        } catch (SQLException e) {
-            throw new OntopConnectionException(e);
-        } catch (Exception e) {
-            throw new OntopConnectionException(e);
-        }
-        return conn;
-    }
-
-    // get a real (non pool) connection - used for protege plugin
-    @Override
-    public OntopConnection getNonPoolConnection() throws OntopConnectionException {
-
-        return new QuestConnection(this, queryReformulator, getSQLConnection(), iriDictionary,
-                dbMetadata, inputQueryFactory, settings);
     }
 
     /***

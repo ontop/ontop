@@ -227,8 +227,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		
 		// Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 
-		//conn = questInstance.getConnection();
-		conn = queryEngine.getNonPoolConnection();
+		conn = queryEngine.getConnection();
 		owlconn = new QuestOWLConnection(conn, inputQueryFactory);
 
 		questready = true;
@@ -281,18 +280,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	public OntopOWLConnection getConnection() {
 		return owlconn;
-	}
-
-	/**
-	 * Replaces the owl connection with a new one
-	 * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
-	 * @return The old connection: The caller must close this connection
-	 */
-	public OntopOWLConnection replaceConnection() throws OntopConnectionException {
-		OntopOWLConnection oldconn = this.owlconn;
-		conn = queryEngine.getNonPoolConnection();
-		owlconn = new QuestOWLConnection(conn, inputQueryFactory);
-		return oldconn;
 	}
 	
 	@Nonnull

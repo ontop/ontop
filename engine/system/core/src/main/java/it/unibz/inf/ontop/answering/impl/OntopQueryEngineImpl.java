@@ -37,11 +37,6 @@ public class OntopQueryEngineImpl implements OntopQueryEngine {
     }
 
     @Override
-    public OntopConnection getNonPoolConnection() throws OntopConnectionException {
-        return dbConnector.getNonPoolConnection();
-    }
-
-    @Override
     public OntopConnection getConnection() throws OntopConnectionException {
         return dbConnector.getConnection();
     }

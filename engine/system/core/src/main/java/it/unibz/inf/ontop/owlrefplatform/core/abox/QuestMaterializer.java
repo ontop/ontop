@@ -219,7 +219,7 @@ public class QuestMaterializer {
 
 		public VirtualTripleIterator(OntopQueryEngine queryEngine, Iterator<Predicate> vocabIter) {
 			try{
-				this.queryEngine = queryEngine.getNonPoolConnection();
+				this.queryEngine = queryEngine.getConnection();
 
 				if (doStreamResults) {
 					// Autocommit must be OFF (needed for autocommit)
