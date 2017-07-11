@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 
 import java.util.Collection;
+import java.util.Map;
 
 public class MappingMergerImpl implements MappingMerger {
 
@@ -96,18 +97,32 @@ public class MappingMergerImpl implements MappingMerger {
 
         return atomPredicate2IQs.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> e.getKey(),
-                        e -> queryMerger.mergeDefinitions(e.getValue())
-                                .orElseThrow(() -> new MappingMergingException("The query should be present"))
+                        Map.Entry::getKey,
+                        e -> mergeDefinitions(e.getValue())
                 ));
+    }
+
+    /**
+     * Due to a Java compiler bug (hiding .orElseThrow() in a sub-method does the trick)
+     */
+    private IntermediateQuery mergeDefinitions(Collection<IntermediateQuery> queries) {
+        return queryMerger.mergeDefinitions(queries)
+                .orElseThrow(() -> new MappingMergingException("The query should be present"));
     }
 
     private ImmutableMap<AtomPredicate, IntermediateQuery> getMappingMap(Mapping mapping) {
         return mapping.getPredicates().stream()
                 .collect(ImmutableCollectors.toMap(
                         p -> p,
-                        p -> mapping.getDefinition(p)
-                                .orElseThrow(() -> new MappingMergingException("This atom predicate should have a definition"))
+                        p -> getDefinition(mapping, p)
                 ));
+    }
+
+    /**
+     * Due to a Java compiler bug (hiding .orElseThrow() in a sub-method does the trick)
+     */
+    private static IntermediateQuery getDefinition(Mapping mapping, AtomPredicate predicate) {
+        return mapping.getDefinition(predicate)
+                .orElseThrow(() -> new MappingMergingException("This atom predicate should have a definition"));
     }
 }
