@@ -1,6 +1,7 @@
-package it.unibz.inf.ontop.executor.union;
+package it.unibz.inf.ontop.executor.union.impl;
 
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;

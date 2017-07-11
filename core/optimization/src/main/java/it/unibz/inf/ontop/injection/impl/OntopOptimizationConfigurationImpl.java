@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutor;
+import it.unibz.inf.ontop.executor.union.FlattenUnionExecutor;
 import it.unibz.inf.ontop.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
@@ -81,6 +82,7 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         internalExecutorMapBuilder.put(LeftJoinOptimizationProposal.class, LeftJoinExecutor.class);
         internalExecutorMapBuilder.put(ProjectionShrinkingProposal.class, ProjectionShrinkingExecutor.class);
         internalExecutorMapBuilder.put(TrueNodeRemovalProposal.class, TrueNodeRemovalExecutor.class);
+        internalExecutorMapBuilder.put(FlattenUnionProposal.class, FlattenUnionExecutor.class);
         return internalExecutorMapBuilder.build();
     }
 

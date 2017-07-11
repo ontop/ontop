@@ -7,17 +7,15 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.proposal.ProjectionShrinkingProposal;
 
 public class ProjectionShrinkingProposalImpl implements ProjectionShrinkingProposal {
-    private IntermediateQuery query;
-    private ExplicitVariableProjectionNode focusNode;
-    private ImmutableSet<Variable> retainedVariables;
 
-    public ProjectionShrinkingProposalImpl(IntermediateQuery query, ExplicitVariableProjectionNode focusNode,
+    private final ExplicitVariableProjectionNode focusNode;
+    private final ImmutableSet<Variable> retainedVariables;
+
+    public ProjectionShrinkingProposalImpl(ExplicitVariableProjectionNode focusNode,
                                            ImmutableSet<Variable> retainedVariables) {
-        this.query = query;
         this.focusNode = focusNode;
         this.retainedVariables = retainedVariables;
     }
-
 
     @Override
     public ExplicitVariableProjectionNode getFocusNode() {

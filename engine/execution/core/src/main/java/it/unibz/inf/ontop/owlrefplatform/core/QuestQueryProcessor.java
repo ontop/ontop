@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * TODO: rename it OntopQueryReformulatorImpl ?
@@ -207,8 +206,8 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
-				ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizerImpl();
-				intermediateQuery = projectionShrinkingOptimizer.optimize(intermediateQuery);
+				;
+				intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
 
 				log.debug("After projection shrinking: \n" + intermediateQuery.toString());
 
