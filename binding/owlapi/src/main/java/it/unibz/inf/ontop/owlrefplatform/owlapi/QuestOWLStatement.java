@@ -151,7 +151,7 @@ public class QuestOWLStatement implements OntopOWLStatement {
 	}
 
 	private List<OWLAxiom> executeGraph(GraphSPARQLQuery query)
-			throws OntopQueryEvaluationException, OntopConnectionException, OntopReformulationException,
+			throws OntopQueryEvaluationException, OntopConnectionException, OntopTranslationException,
 			OntopResultConversionException {
 
 		GraphResultSet resultSet = st.execute(query);
@@ -246,7 +246,7 @@ public class QuestOWLStatement implements OntopOWLStatement {
 	public ExecutableQuery getExecutableQuery(String query) throws OntopOWLException {
 		try {
 			return st.getExecutableQuery(parseQueryString(query));
-		} catch (OntopReformulationException e) {
+		} catch (OntopTranslationException e) {
 			throw new OntopOWLException(e);
 		}
 	}

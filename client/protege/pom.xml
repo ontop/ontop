@@ -202,12 +202,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-query-answering-core</artifactId>
+            <artifactId>ontop-translation-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-query-answering-sql</artifactId>
+            <artifactId>ontop-translation-sql</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

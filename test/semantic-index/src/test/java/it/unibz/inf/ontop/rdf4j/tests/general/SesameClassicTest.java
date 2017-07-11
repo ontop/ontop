@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
+import it.unibz.inf.ontop.injection.OntopTranslationSettings;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.eclipse.rdf4j.model.*;
@@ -57,7 +57,7 @@ public class SesameClassicTest {
 		String owlfile = "src/test/resources/onto2.owl";
 
 		Properties p = new Properties();
-		p.put(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING, false);
+		p.put(OntopTranslationSettings.EXISTENTIAL_REASONING, false);
 
 		dataset = new SimpleDataset();
 		File dataFile = new File(owlfile);

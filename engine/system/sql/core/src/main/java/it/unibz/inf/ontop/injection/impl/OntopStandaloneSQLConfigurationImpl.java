@@ -6,9 +6,10 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
-import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringConfigurationImpl.DefaultOntopQueryAnsweringBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringSQLConfigurationImpl.DefaultOntopQueryAnsweringSQLBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringSQLConfigurationImpl.OntopQueryAnsweringSQLOptions;
+import it.unibz.inf.ontop.injection.impl.OntopSystemSQLConfigurationImpl.OntopSystemSQLOptions;
+import it.unibz.inf.ontop.injection.impl.OntopTranslationConfigurationImpl.DefaultOntopTranslationBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopTranslationSQLConfigurationImpl.DefaultOntopTranslationSQLBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopTranslationSQLConfigurationImpl.OntopTranslationSQLOptions;
 import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -22,12 +23,12 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
         implements OntopStandaloneSQLConfiguration {
 
     private final OntopStandaloneSQLSettings settings;
-    private final OntopQueryAnsweringConfigurationImpl qaConfiguration;
+    private final OntopSystemSQLConfigurationImpl systemConfiguration;
 
     OntopStandaloneSQLConfigurationImpl(OntopStandaloneSQLSettings settings, OntopStandaloneSQLOptions options) {
         super(settings, options.mappingOptions);
         this.settings = settings;
-        qaConfiguration = new OntopQueryAnsweringSQLConfigurationImpl(settings, options.qaOptions);
+        systemConfiguration = new OntopSystemSQLConfigurationImpl(settings, options.systemOptions);
     }
 
     @Override
@@ -37,14 +38,14 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
 
     @Override
     public Optional<IRIDictionary> getIRIDictionary() {
-        return qaConfiguration.getIRIDictionary();
+        return systemConfiguration.getIRIDictionary();
     }
 
     @Override
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(
                 super.buildGuiceModules(),
-                qaConfiguration.buildGuiceModules());
+                systemConfiguration.buildGuiceModules());
     }
 
     /**
@@ -55,18 +56,18 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
     generateOptimizationConfigurationMap() {
         return Stream.concat(
                     super.generateOptimizationConfigurationMap().entrySet().stream(),
-                    qaConfiguration.generateOptimizationConfigurationMap().entrySet().stream())
+                    systemConfiguration.generateOptimizationConfigurationMap().entrySet().stream())
                 .distinct()
                 .collect(ImmutableCollectors.toMap());
     }
 
 
     static class OntopStandaloneSQLOptions {
-        final OntopQueryAnsweringSQLOptions qaOptions;
+        final OntopSystemSQLOptions systemOptions;
         final OntopMappingSQLAllOptions mappingOptions;
 
-        OntopStandaloneSQLOptions(OntopQueryAnsweringSQLOptions qaOptions, OntopMappingSQLAllOptions mappingOptions) {
-            this.qaOptions = qaOptions;
+        OntopStandaloneSQLOptions(OntopSystemSQLOptions systemOptions, OntopMappingSQLAllOptions mappingOptions) {
+            this.systemOptions = systemOptions;
             this.mappingOptions = mappingOptions;
         }
     }
@@ -74,50 +75,55 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
 
 
     static abstract class OntopStandaloneSQLBuilderMixin<B extends OntopStandaloneSQLConfiguration.Builder<B>>
-            extends OntopMappingSQLAllConfigurationImpl.OntopMappingSQLAllBuilderMixin<B>
+            extends OntopMappingSQLAllBuilderMixin<B>
             implements OntopStandaloneSQLConfiguration.Builder<B> {
 
-        private final DefaultOntopQueryAnsweringSQLBuilderFragment<B> sqlQAFragmentBuilder;
-        private final DefaultOntopQueryAnsweringBuilderFragment<B> qaFragmentBuilder;
+        private final DefaultOntopTranslationSQLBuilderFragment<B> sqlTranslationFragmentBuilder;
+        private final DefaultOntopTranslationBuilderFragment<B> translationFragmentBuilder;
 
         OntopStandaloneSQLBuilderMixin() {
             B builder = (B) this;
-            this.sqlQAFragmentBuilder = new DefaultOntopQueryAnsweringSQLBuilderFragment<>(builder);
-            this.qaFragmentBuilder = new DefaultOntopQueryAnsweringBuilderFragment<>(builder);
+            this.sqlTranslationFragmentBuilder = new DefaultOntopTranslationSQLBuilderFragment<>(builder);
+            this.translationFragmentBuilder = new DefaultOntopTranslationBuilderFragment<>(builder);
         }
 
         @Override
         public B enableIRISafeEncoding(boolean enable) {
-            return qaFragmentBuilder.enableIRISafeEncoding(enable);
+            return translationFragmentBuilder.enableIRISafeEncoding(enable);
         }
 
         @Override
         public B enableExistentialReasoning(boolean enable) {
-            return qaFragmentBuilder.enableExistentialReasoning(enable);
+            return translationFragmentBuilder.enableExistentialReasoning(enable);
         }
 
         @Override
         public B iriDictionary(@Nonnull IRIDictionary iriDictionary) {
-            return qaFragmentBuilder.iriDictionary(iriDictionary);
+            return translationFragmentBuilder.iriDictionary(iriDictionary);
         }
 
         @Override
         protected Properties generateProperties() {
             Properties p = super.generateProperties();
-            p.putAll(sqlQAFragmentBuilder.generateProperties());
-            p.putAll(qaFragmentBuilder.generateProperties());
+            p.putAll(sqlTranslationFragmentBuilder.generateProperties());
+            p.putAll(translationFragmentBuilder.generateProperties());
             return p;
         }
 
         final OntopStandaloneSQLOptions generateStandaloneSQLOptions() {
             OntopMappingSQLAllOptions sqlMappingOptions = generateMappingSQLAllOptions();
-            OntopQueryAnsweringConfigurationImpl.OntopQueryAnsweringOptions qaOptions = this.qaFragmentBuilder.generateQAOptions(
-                    sqlMappingOptions.mappingSQLOptions.mappingOptions.obdaOptions,
-                    sqlMappingOptions.mappingSQLOptions.mappingOptions.optimizationOptions);
+            OntopTranslationConfigurationImpl.OntopTranslationOptions translationOptions =
+                    this.translationFragmentBuilder.generateTranslationOptions(
+                        sqlMappingOptions.mappingSQLOptions.mappingOptions.obdaOptions,
+                        sqlMappingOptions.mappingSQLOptions.mappingOptions.optimizationOptions);
 
-            return new OntopStandaloneSQLOptions(
-                    sqlQAFragmentBuilder.generateQASQLOptions(qaOptions, sqlMappingOptions.mappingSQLOptions.sqlOptions),
-                    sqlMappingOptions);
+            OntopTranslationSQLOptions sqlTranslationOptions = sqlTranslationFragmentBuilder.generateSQLTranslationOptions(
+                    translationOptions,
+                    sqlMappingOptions.mappingSQLOptions.sqlOptions);
+
+            OntopSystemSQLOptions systemSQLOptions = new OntopSystemSQLOptions(sqlTranslationOptions);
+
+            return new OntopStandaloneSQLOptions(systemSQLOptions, sqlMappingOptions);
         }
 
     }

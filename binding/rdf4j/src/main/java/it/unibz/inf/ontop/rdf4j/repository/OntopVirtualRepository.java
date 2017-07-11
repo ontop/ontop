@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
 
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
-import it.unibz.inf.ontop.injection.OntopEngineFactory;
+import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 
@@ -85,7 +85,7 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 		initialized = true;
 		try {
 			OBDASpecification obdaSpecification = configuration.loadSpecification();
-			OntopEngineFactory factory = configuration.getInjector().getInstance(OntopEngineFactory.class);
+			OntopSystemFactory factory = configuration.getInjector().getInstance(OntopSystemFactory.class);
 
 			queryEngine = factory.create(obdaSpecification, configuration.getExecutorRegistry());
 			queryEngine.connect();

@@ -20,19 +20,16 @@ package it.unibz.inf.ontop.rdf4j.repository;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 import org.eclipse.rdf4j.repository.config.AbstractRepositoryImplConfig;
 import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
 
 import java.io.File;
-import java.util.Properties;
 
 import static org.eclipse.rdf4j.model.util.Models.objectLiteral;
 import static org.eclipse.rdf4j.repository.config.RepositoryConfigSchema.REPOSITORYID;
