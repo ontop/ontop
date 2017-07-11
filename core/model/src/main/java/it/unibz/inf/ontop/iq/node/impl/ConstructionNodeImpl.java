@@ -8,16 +8,16 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.predicate.BNodePredicate;
 import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
 import it.unibz.inf.ontop.model.predicate.Predicate;
@@ -36,8 +36,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.iq.node.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
@@ -391,6 +391,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .map(n -> (ConstructionNode) n)
                 .filter(n -> n.getVariables().equals(projectedVariables))
                 .filter(n -> n.getSubstitution().equals(substitution))
+                .filter(n -> n.getOptionalModifiers().equals(optionalModifiers))
                 .isPresent();
     }
 

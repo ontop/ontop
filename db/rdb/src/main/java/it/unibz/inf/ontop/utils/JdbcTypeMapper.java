@@ -52,7 +52,7 @@ public class JdbcTypeMapper {
 		sqlToQuest.put(Types.TINYINT, COL_TYPE.INTEGER);
 		sqlToQuest.put(Types.NUMERIC, COL_TYPE.DECIMAL);
 		sqlToQuest.put(Types.DECIMAL, COL_TYPE.DECIMAL);
-		sqlToQuest.put(Types.FLOAT, COL_TYPE.DOUBLE); // R: why not FLOAT?
+		sqlToQuest.put(Types.FLOAT, COL_TYPE.DOUBLE); // conversion to float to follow r2rml Natural Mapping of SQL Values
 		sqlToQuest.put(Types.DOUBLE, COL_TYPE.DOUBLE);
 		sqlToQuest.put(Types.REAL, COL_TYPE.DOUBLE);
 		sqlToQuest.put(Types.DATE, COL_TYPE.DATE);

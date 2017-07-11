@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>execution</module>
+        <module>translation</module>
         <module>system</module>
     </modules>
 

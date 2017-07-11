@@ -12,8 +12,7 @@
      rep:repositoryImpl [
       rep:repositoryType "obda:OntopRepository" ;
       obda:quest_type "ontop-virtual" ;
-	  obda:owlfile "{%owlfile%}";
-      obda:obdafile "{%obdafile%}";
-	  obda:existential "{%Existential reasoning|false|true%}"^^xsd:boolean;
-	  obda:rewriting "{%Rewriting technique|TreeWitness%}";
+	  obda:owlFile "{%owlFile%}";
+      obda:obdaFile "{%obdaFile%}";
+	  obda:propertiesFile "{%propertiesFile%}";
    ].
