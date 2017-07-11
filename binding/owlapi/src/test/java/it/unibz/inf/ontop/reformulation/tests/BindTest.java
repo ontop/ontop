@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopTranslationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
@@ -469,8 +470,8 @@ public class BindTest {
 
     //CAST function not supported
     //The builtin function http://www.w3.org/2001/XMLSchema#string is not supported yet!
-    @Test
-    public void testBindWithCast() throws Exception {
+    @Test(expected = OntopTranslationException.class)
+    public void testBindWithCast() throws Throwable {
 
 		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -483,12 +484,9 @@ public class BindTest {
                 + "}";
 
         try {
-            OWLObject price = runTests(queryBind);
-
+            runTests(queryBind);
         } catch (OntopOWLException e) {
-
-            assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException", e.getCause().getClass().getName());
-
+            throw e.getCause();
         }
 
     }

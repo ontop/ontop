@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
+import it.unibz.inf.ontop.injection.OntopTranslationSettings;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.eclipse.rdf4j.model.Value;
@@ -59,7 +59,7 @@ public class QuestSesameInMemoryExample {
 		 */
 
 		Properties p = new Properties();
-		p.put(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING, false);
+		p.put(OntopTranslationSettings.EXISTENTIAL_REASONING, false);
 
 		/*
 		 * Add RDF data to the repository
