@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.answering.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.injection.OntopEngineFactory;
+import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.model.GraphResultSet;
 import it.unibz.inf.ontop.model.predicate.Predicate;
@@ -88,7 +88,7 @@ public class QuestMaterializer {
 		this.selectedVocabulary = selectedVocabulary;
 
 		Injector injector = configuration.getInjector();
-		OntopEngineFactory engineFactory = injector.getInstance(OntopEngineFactory.class);
+		OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
 
 		this.queryEngine = engineFactory.create(configuration.loadSpecification(),
 				configuration.getExecutorRegistry());
@@ -101,7 +101,7 @@ public class QuestMaterializer {
 		this.doStreamResults = doStreamResults;
 
 		Injector injector = configuration.getInjector();
-		OntopEngineFactory engineFactory = injector.getInstance(OntopEngineFactory.class);
+		OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
 
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
 

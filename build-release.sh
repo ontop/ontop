@@ -53,7 +53,7 @@ echo ""
 BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # location for the build dependencies home
-ONTOP_DEP_HOME=${BUILD_ROOT}/ontop-build-dependencies
+ONTOP_DEP_HOME=${BUILD_ROOT}/build/dependencies
 
 
 if [ -d "${ONTOP_DEP_HOME}" ] && [ -f "${ONTOP_DEP_HOME}/.git" ]
@@ -64,7 +64,7 @@ then
   echo "-----------------------------------------"
   echo ""
 else
-  echo "ERROR: git submodule 'ontop-build-dependencies' is missing or uninitiated!"
+  echo "ERROR: git submodule 'ontop-build/dependencies' is missing or uninitiated!"
   echo "Please run 'git submodule init && git submodule update'"
   exit 1
 fi
@@ -83,11 +83,11 @@ TOMCAT_FILENAME=apache-tomcat-8.5.9
 
 # folder names of the output
 PROTEGE_DIST=ontop-protege
-QUEST_JETTY_DIST=ontop-jetty
+ONTOP_JETTY_DIST=ontop-jetty
 ONTOP_TOMCAT_DIST=ontop-tomcat
 ONTOP_DIST=ontop-dist
 
-# jar name of the pretege plugin
+# jar name of the protege plugin
 PROTEGE_PLUGIN_NAME=it.unibz.inf.ontop.protege
 
 #
@@ -113,7 +113,9 @@ echo ""
 
 mvn install -DskipTests -q || exit 1
 
-VERSION=$(cat ${BUILD_ROOT}/obdalib-core/target/classes/version.properties | sed 's/version=\(.*\)/\1/')
+echo "[INFO] Compilation completed"
+
+VERSION=$(cat ${BUILD_ROOT}/engine/system/core/target/classes/version.properties | sed 's/version=\(.*\)/\1/')
 
 #
 echo ""
@@ -122,18 +124,17 @@ echo " Building Protege distribution package   "
 echo "-----------------------------------------"
 echo ""
 
-rm -fr ${BUILD_ROOT}/ontop-protege/dist
-cd ${BUILD_ROOT}/ontop-protege/
+cd ${BUILD_ROOT}/client/protege/
 mvn bundle:bundle -DskipTests  || exit 1
 
-rm -fr ${BUILD_ROOT}/distribution/${PROTEGE_DIST}
-mkdir ${BUILD_ROOT}/distribution/${PROTEGE_DIST}
+rm -fr ${BUILD_ROOT}/build/distribution/${PROTEGE_DIST}
+mkdir -p ${BUILD_ROOT}/build/distribution/${PROTEGE_DIST}
 cp target/${PROTEGE_PLUGIN_NAME}-${VERSION}.jar \
-  ${BUILD_ROOT}/distribution/${PROTEGE_DIST}/${PROTEGE_PLUGIN_NAME}-${VERSION}.jar
+  ${BUILD_ROOT}/build/distribution/${PROTEGE_DIST}/${PROTEGE_PLUGIN_NAME}-${VERSION}.jar
 
-cp ${ONTOP_DEP_HOME}/${PROTEGE_COPY_FILENAME}.zip ${BUILD_ROOT}/distribution/${PROTEGE_DIST}/  || exit 1
+cp ${ONTOP_DEP_HOME}/${PROTEGE_COPY_FILENAME}.zip ${BUILD_ROOT}/build/distribution/${PROTEGE_DIST}/  || exit 1
 
-cd ${BUILD_ROOT}/distribution/${PROTEGE_DIST}/
+cd ${BUILD_ROOT}/build/distribution/${PROTEGE_DIST}/
 
 mkdir -p ${PROTEGE_MAIN_FOLDER_NAME}/plugins
 cp ${PROTEGE_PLUGIN_NAME}-${VERSION}.jar ${PROTEGE_MAIN_FOLDER_NAME}/plugins/
@@ -141,7 +142,7 @@ zip ${PROTEGE_COPY_FILENAME}.zip ${PROTEGE_MAIN_FOLDER_NAME}/plugins/*
 mv ${PROTEGE_COPY_FILENAME}.zip ontop-protege-bundle-${VERSION}.zip
 
 rm -fr ${PROTEGE_MAIN_FOLDER_NAME}
-cd ${BUILD_ROOT}/distribution
+cd ${BUILD_ROOT}/build/distribution
 
 # Packing the rdf4j distribution
 #
@@ -151,14 +152,14 @@ echo " Building RDF4J distribution package    "
 echo "-----------------------------------------"
 echo ""
 
-mkdir -p ${BUILD_ROOT}/distribution/ontop-webapps
+mkdir -p ${BUILD_ROOT}/build/distribution/ontop-webapps
 
-cp ${BUILD_ROOT}/rdf4j-webapps/rdf4j-server/target/rdf4j-server.war ${BUILD_ROOT}/distribution/ontop-webapps
-cp ${BUILD_ROOT}/rdf4j-webapps/rdf4j-workbench/target/rdf4j-workbench.war ${BUILD_ROOT}/distribution/ontop-webapps
+cp ${BUILD_ROOT}/client/rdf4j-webapps/server/target/rdf4j-server.war ${BUILD_ROOT}/build/distribution/ontop-webapps
+cp ${BUILD_ROOT}/client/rdf4j-webapps/workbench/target/rdf4j-workbench.war ${BUILD_ROOT}/build/distribution/ontop-webapps
 
-cd ${BUILD_ROOT}/distribution/ontop-webapps
+cd ${BUILD_ROOT}/build/distribution/ontop-webapps
 zip -r ontop-webapps-${VERSION}.zip *.war
-cd ${BUILD_ROOT}/distribution
+cd ${BUILD_ROOT}/build/distribution
 
 # Packaging the rdf4j jetty distribution
 #
@@ -169,21 +170,22 @@ echo "-----------------------------------------"
 echo ""
 
 rm -fr ${ONTOP_JETTY_DIST}
-mkdir ${ONTOP_JETTY_DIST}
+mkdir -p ${ONTOP_JETTY_DIST}
 cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${ONTOP_JETTY_DIST}/ontop-jetty-bundle-${VERSION}.zip || exit 1
 
 JETTY_FOLDER=${JETTY_INNER_FOLDERNAME}
 cd ${ONTOP_JETTY_DIST}
 mkdir -p ${JETTY_INNER_FOLDERNAME}/ontop-base/webapps
-cp ${BUILD_ROOT}/distribution/ontop-webapps/*.war ${JETTY_FOLDER}/ontop-base/webapps
+cp ${BUILD_ROOT}/build/distribution/ontop-webapps/*.war ${JETTY_FOLDER}/ontop-base/webapps
 cp ${ONTOP_DEP_HOME}/start.ini ${JETTY_FOLDER}/ontop-base
 cp ${ONTOP_DEP_HOME}/README-ontop.TXT ${JETTY_FOLDER}
 
-zip -r ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/ontop-base/ || exit 1
-zip ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/README-ontop.TXT || exit 1
+zip -rq ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/ || exit 1
+
+echo "[INFO] Built ontop-jetty-bundle-${VERSION}.zip"
 
 rm -fr ${JETTY_FOLDER}
-cd ${BUILD_ROOT}/distribution
+cd ${BUILD_ROOT}/build/distribution
 
 # Packaging the tomcat distribution
 #
@@ -194,17 +196,19 @@ echo "-----------------------------------------"
 echo ""
 
 rm -fr ${ONTOP_TOMCAT_DIST}
-mkdir ${ONTOP_TOMCAT_DIST}
+mkdir -p ${ONTOP_TOMCAT_DIST}
 cp ${ONTOP_DEP_HOME}/${TOMCAT_FILENAME}.zip ${ONTOP_TOMCAT_DIST}/ontop-tomcat-bundle-${VERSION}.zip || exit 1
 
 cd ${ONTOP_TOMCAT_DIST}
 mkdir -p ${TOMCAT_FILENAME}/webapps
-cp ${BUILD_ROOT}/distribution/ontop-webapps/*.war ${TOMCAT_FILENAME}/webapps
+cp ${BUILD_ROOT}/build/distribution/ontop-webapps/*.war ${TOMCAT_FILENAME}/webapps
 
 zip ontop-tomcat-bundle-${VERSION}.zip ${TOMCAT_FILENAME}/webapps/* || exit 1
 
+echo "[INFO] Built ontop-tomcat-bundle-${VERSION}.zip"
+
 rm -fr ${TOMCAT_FILENAME}
-cd ${BUILD_ROOT}/distribution
+cd ${BUILD_ROOT}/build/distribution
 
 # Packaging the cli distribution
 #
@@ -216,7 +220,7 @@ echo ""
 
 mvn assembly:assembly
 rm -fr ${ONTOP_DIST}
-mkdir ${ONTOP_DIST}
+mkdir -p ${ONTOP_DIST}
 echo "[INFO] Copying files..."
 cp target/ontop-distribution-${VERSION}.zip ${ONTOP_DIST}
 

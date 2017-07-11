@@ -25,7 +25,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
+import eu.optique.r2rml.api.binding.jena.JenaR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
@@ -33,9 +33,11 @@ import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.apache.commons.rdf.rdf4j.RDF4JGraph;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.Rio;
+import org.apache.commons.rdf.jena.JenaGraph;
+import org.apache.commons.rdf.jena.JenaRDF;
+import org.apache.jena.graph.Graph;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.shared.PrefixMapping;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
@@ -52,114 +54,126 @@ import java.util.stream.Collectors;
 
 public class SQLPPMappingToR2RMLConverter {
 
-	private List<SQLPPTriplesMap> ppMappingAxioms;
-	private PrefixManager prefixmng;
-	private OWLOntology ontology;
+    private List<SQLPPTriplesMap> ppMappingAxioms;
+    private PrefixManager prefixmng;
+    private OWLOntology ontology;
 
-    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, OWLOntology ontology)
-	{
-		this.ppMappingAxioms = ppMapping.getTripleMaps();
-		this.prefixmng = ppMapping.getMetadata().getPrefixManager();
-		this.ontology = ontology;
-	}
+    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, OWLOntology ontology) {
+        this.ppMappingAxioms = ppMapping.getTripleMaps();
+        this.prefixmng = ppMapping.getMetadata().getPrefixManager();
+        this.ontology = ontology;
+    }
 
-	public Collection <TriplesMap> getTripleMaps() {
-		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
-		transformer.setOntology(ontology);
-		return  splitMappingAxioms(this.ppMappingAxioms).stream()
-				.map(a -> transformer.getTriplesMap(a, prefixmng))
-				.collect(Collectors.toList());
-	}
+    public Collection<TriplesMap> getTripleMaps() {
+        OBDAMappingTransformer transformer = new OBDAMappingTransformer();
+        transformer.setOntology(ontology);
+        return splitMappingAxioms(this.ppMappingAxioms).stream()
+                .map(a -> transformer.getTriplesMap(a, prefixmng))
+                .collect(Collectors.toList());
+    }
 
-	private ImmutableSet<SQLPPTriplesMap> splitMappingAxioms(List<SQLPPTriplesMap> mappingAxioms) {
-		/*
+    private ImmutableSet<SQLPPTriplesMap> splitMappingAxioms(List<SQLPPTriplesMap> mappingAxioms) {
+        /*
 		 * Delimiter string d used for assigning ids to split mapping axioms.
 		 * If a mapping axiom with id j is split into multiple ones,
 		 * each of then will have "j"+"d"+int as an identifier
 		 */
-		String delimiterSubstring = getSplitMappingAxiomIdDelimiterSubstring(mappingAxioms);
-		return mappingAxioms.stream()
-				.flatMap(m -> splitMappingAxiom(m, delimiterSubstring).stream())
-				.collect(ImmutableCollectors.toSet());
-	}
+        String delimiterSubstring = getSplitMappingAxiomIdDelimiterSubstring(mappingAxioms);
+        return mappingAxioms.stream()
+                .flatMap(m -> splitMappingAxiom(m, delimiterSubstring).stream())
+                .collect(ImmutableCollectors.toSet());
+    }
 
-	private String getSplitMappingAxiomIdDelimiterSubstring(List<SQLPPTriplesMap> mappingAxioms) {
-		String delimiterSubstring = "";
-		boolean matched;
-		do {
-			delimiterSubstring += "_";
-			Pattern pattern = Pattern.compile(delimiterSubstring + "(\\d)*$");
-			matched = mappingAxioms.stream()
-					.anyMatch(a -> pattern.matcher(a.getId()).matches());
-		} while(matched);
-		return delimiterSubstring;
-	}
+    private String getSplitMappingAxiomIdDelimiterSubstring(List<SQLPPTriplesMap> mappingAxioms) {
+        String delimiterSubstring = "";
+        boolean matched;
+        do {
+            delimiterSubstring += "_";
+            Pattern pattern = Pattern.compile(delimiterSubstring + "(\\d)*$");
+            matched = mappingAxioms.stream()
+                    .anyMatch(a -> pattern.matcher(a.getId()).matches());
+        } while (matched);
+        return delimiterSubstring;
+    }
 
-	private ImmutableList<SQLPPTriplesMap> splitMappingAxiom(SQLPPTriplesMap mappingAxiom, String delimiterSubstring) {
-		Multimap<ImmutableFunctionalTerm, ImmutableFunctionalTerm> subjectTermToTargetTriples = ArrayListMultimap.create();
-		for(ImmutableFunctionalTerm targetTriple : mappingAxiom.getTargetAtoms()){
-			ImmutableFunctionalTerm subjectTerm = getFirstFunctionalTerm(targetTriple)
-						.orElseThrow( () -> new IllegalStateException("Invalid OBDA mapping"));
-			subjectTermToTargetTriples.put(subjectTerm, targetTriple);
-		}
-		// If the partition per target triple subject is non trivial
-		if(subjectTermToTargetTriples.size() > 1){
-			// Create ids for the new mapping axioms
-			Map<Function, String> subjectTermToMappingIndex = new HashMap<>();
-			int i = 1;
-			for (Function subjectTerm : subjectTermToTargetTriples.keySet()){
-				subjectTermToMappingIndex.put(subjectTerm, mappingAxiom.getId()+delimiterSubstring+i);
-				i++;
-			}
-			// Generate one mapping axiom per subject
-			return subjectTermToTargetTriples.asMap().entrySet().stream()
-					.map(e -> mappingAxiom.extractPPMappingAssertions(
-							subjectTermToMappingIndex.get(e.getKey()),
-							ImmutableList.copyOf(e.getValue())))
-					.collect(ImmutableCollectors.toList());
-		}
-		return ImmutableList.of(mappingAxiom);
-	}
+    private ImmutableList<SQLPPTriplesMap> splitMappingAxiom(SQLPPTriplesMap mappingAxiom, String delimiterSubstring) {
+        Multimap<ImmutableFunctionalTerm, ImmutableFunctionalTerm> subjectTermToTargetTriples = ArrayListMultimap.create();
+        for (ImmutableFunctionalTerm targetTriple : mappingAxiom.getTargetAtoms()) {
+            ImmutableFunctionalTerm subjectTerm = getFirstFunctionalTerm(targetTriple)
+                    .orElseThrow(() -> new IllegalStateException("Invalid OBDA mapping"));
+            subjectTermToTargetTriples.put(subjectTerm, targetTriple);
+        }
+        // If the partition per target triple subject is non trivial
+        if (subjectTermToTargetTriples.size() > 1) {
+            // Create ids for the new mapping axioms
+            Map<Function, String> subjectTermToMappingIndex = new HashMap<>();
+            int i = 1;
+            for (Function subjectTerm : subjectTermToTargetTriples.keySet()) {
+                subjectTermToMappingIndex.put(subjectTerm, mappingAxiom.getId() + delimiterSubstring + i);
+                i++;
+            }
+            // Generate one mapping axiom per subject
+            return subjectTermToTargetTriples.asMap().entrySet().stream()
+                    .map(e -> mappingAxiom.extractPPMappingAssertions(
+                            subjectTermToMappingIndex.get(e.getKey()),
+                            ImmutableList.copyOf(e.getValue())))
+                    .collect(ImmutableCollectors.toList());
+        }
+        return ImmutableList.of(mappingAxiom);
+    }
 
-	private Optional<ImmutableFunctionalTerm> getFirstFunctionalTerm (ImmutableFunctionalTerm inputFunction) {
-		return inputFunction.getArguments().stream()
-				.findFirst()
-				.filter(t -> t instanceof ImmutableFunctionalTerm)
-				.map(t -> (ImmutableFunctionalTerm) t);
-	}
+    private Optional<ImmutableFunctionalTerm> getFirstFunctionalTerm(ImmutableFunctionalTerm inputFunction) {
+        return inputFunction.getArguments().stream()
+                .findFirst()
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t);
+    }
 
-
-	/**
-	 * the method to write the R2RML mappings
-	 * from an rdf Model to a file
-	 * @param file the ttl file to write to
-	 */
-	public void write(File file) throws Exception {
-		try {
-            FileOutputStream fos = new FileOutputStream(file);
-			write(fos);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
-	}
 
     /**
      * the method to write the R2RML mappings
      * from an rdf Model to a file
+     *
+     * @param file the ttl file to write to
+     */
+    public void write(File file) throws Exception {
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            write(fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    /**
+     * the method to write the R2RML mappings
+     * from an rdf Model to a file
+     *
      * @param os the output target
      */
     public void write(OutputStream os) throws Exception {
         try {
-            RDF4JR2RMLMappingManager mm = RDF4JR2RMLMappingManager.getInstance();
-            Collection<TriplesMap> coll = getTripleMaps();
-            final RDF4JGraph rdf4JGraph = mm.exportMappings(coll);
+            JenaR2RMLMappingManager mm = JenaR2RMLMappingManager.getInstance();
+            Collection<TriplesMap> tripleMaps = getTripleMaps();
 
-            Rio.write(rdf4JGraph.asModel().get() , os, RDFFormat.TURTLE);
+            final JenaGraph jenaGraph = mm.exportMappings(tripleMaps);
+            final Graph graph = new JenaRDF().asJenaGraph(jenaGraph);
+
+            final PrefixMapping jenaPrefixMapping = graph.getPrefixMapping();
+            prefixmng.getPrefixMap()
+                    .forEach((s, s1) ->
+                            jenaPrefixMapping.setNsPrefix(
+                                    s.substring(0, s.length()-1) // remove the last ":" from the prefix
+                                    , s1));
+            jenaPrefixMapping.setNsPrefix("rr", "http://www.w3.org/ns/r2rml#");
+
+            // use Jena to output pretty turtle syntax
+            RDFDataMgr.write(os, graph, org.apache.jena.riot.RDFFormat.TURTLE_PRETTY);
             os.close();
         } catch (Exception e) {
             e.printStackTrace();
-			throw e;
-		}
-	}
+            throw e;
+        }
+    }
 }

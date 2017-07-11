@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.answering.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
-import it.unibz.inf.ontop.injection.OntopEngineFactory;
+import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.BooleanResultSet;
 import it.unibz.inf.ontop.ontology.*;
@@ -111,7 +111,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	/* Used to enable use of same as in mappings. */
 
-	private final OntopEngineFactory engineFactory;
+	private final OntopSystemFactory engineFactory;
 	private OntopQueryEngine queryEngine;
 	private final InputQueryFactory inputQueryFactory;
 	
@@ -142,7 +142,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		executorRegistry = ontopConfiguration.getExecutorRegistry();
 
 		Injector injector = ontopConfiguration.getInjector();
-		this.engineFactory = injector.getInstance(OntopEngineFactory.class);
+		this.engineFactory = injector.getInstance(OntopSystemFactory.class);
 
 		try {
 			obdaSpecification = ontopConfiguration.loadSpecification();
