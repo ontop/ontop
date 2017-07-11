@@ -6,11 +6,10 @@
 	<variable name="ontop-owlfile.label">OWL ontology file</variable>
 
 	<variable name="ontop-owlfilecommentvirt.label">Provide the full path to the Ontop Owl file</variable>
-	<variable name="ontop-obdafile.label">Ontop Mapping file</variable>
-	<variable name="ontop-obdafilecomment.label">Provide the full path to the Ontop Mapping file</variable>
-	<variable name="ontop-reasoning.label">Reasoning configurations</variable>
+	<variable name="ontop-obdafile.label">Mapping file</variable>
+	<variable name="ontop-obdafilecomment.label">Provide the full path to the Mapping file (e.g. .obda, .ttl)</variable>
 	<variable name="ontop-properties.label">Ontop properties file</variable>
-	<variable name="ontop-propertiesfilecomment.label">Provide the full path to the Ontop properties file</variable>
+	<variable name="ontop-propertiesfilecomment.label">Provide the full path to the Ontop properties file (e.g. storing connection credentials) </variable>
 
 	<!--<variable name="ontop-existential.label">Existential reasoning (tree-witness rewriting)</variable>-->
 	<!--<variable name="ontop-rewriting.label">Rewriting technique</variable>-->

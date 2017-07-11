@@ -77,12 +77,7 @@
 							<!--<a href="https://github.com/ontop/ontop/wiki/ObdalibMappings">OntopObda</a>.-->
 						</td>
 					</tr>
-					<tr>
-						<th>
-							<xsl:value-of select="$ontop-reasoning.label" />
-						</th>
-						<td></td>
-					</tr>
+
 					<tr>
 						<th>
 							<xsl:value-of select="$ontop-properties.label" />
