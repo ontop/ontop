@@ -1,63 +1,63 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLSettings;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
+import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 
 import java.util.Properties;
 
 
 public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsImpl implements OntopStandaloneSQLSettings {
 
-    private final OntopQueryAnsweringSQLSettings qaSettings;
+    private final OntopSystemSQLSettings systemSettings;
 
     OntopStandaloneSQLSettingsImpl(Properties userProperties, boolean isR2rml) {
         super(loadProperties(userProperties), isR2rml);
-        qaSettings = new OntopQueryAnsweringSQLSettingsImpl(copyProperties());
+        systemSettings = new OntopSystemSQLSettingsImpl(copyProperties());
     }
 
     private static Properties loadProperties(Properties userProperties) {
-        Properties properties = new OntopQueryAnsweringSQLSettingsImpl(userProperties).copyProperties();
+        Properties properties = new OntopSystemSQLSettingsImpl(userProperties).copyProperties();
         properties.putAll(userProperties);
         return properties;
     }
 
     @Override
     public boolean isExistentialReasoningEnabled() {
-        return qaSettings.isExistentialReasoningEnabled();
+        return systemSettings.isExistentialReasoningEnabled();
     }
 
     @Override
     public boolean isDistinctPostProcessingEnabled() {
-        return qaSettings.isDistinctPostProcessingEnabled();
+        return getRequiredBoolean(DISTINCT_RESULTSET);
     }
 
     @Override
     public boolean isIRISafeEncodingEnabled() {
-        return qaSettings.isIRISafeEncodingEnabled();
+        return systemSettings.isIRISafeEncodingEnabled();
     }
 
     @Override
     public boolean isKeepAliveEnabled() {
-        return qaSettings.isKeepAliveEnabled();
+        return systemSettings.isKeepAliveEnabled();
     }
 
     @Override
     public boolean isRemoveAbandonedEnabled() {
-        return qaSettings.isRemoveAbandonedEnabled();
+        return systemSettings.isRemoveAbandonedEnabled();
     }
 
     @Override
     public int getAbandonedTimeout() {
-        return qaSettings.getAbandonedTimeout();
+        return systemSettings.getAbandonedTimeout();
     }
 
     @Override
     public int getConnectionPoolInitialSize() {
-        return qaSettings.getConnectionPoolInitialSize();
+        return systemSettings.getConnectionPoolInitialSize();
     }
 
     @Override
     public int getConnectionPoolMaxSize() {
-        return qaSettings.getConnectionPoolMaxSize();
+        return systemSettings.getConnectionPoolMaxSize();
     }
 }

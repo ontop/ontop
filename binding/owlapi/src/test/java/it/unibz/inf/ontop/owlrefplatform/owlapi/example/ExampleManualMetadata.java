@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.input.InputQueryFactory;
-import it.unibz.inf.ontop.injection.OntopEngineFactory;
+import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
@@ -40,7 +40,7 @@ private void setup()  throws Exception {
 			.enableTestMode()
 			.build();
 	Injector injector = configuration.getInjector();
-	OntopEngineFactory engineFactory = injector.getInstance(OntopEngineFactory.class);
+	OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
 
 	queryEngine = engineFactory.create(configuration.loadSpecification(),
 			configuration.getExecutorRegistry());

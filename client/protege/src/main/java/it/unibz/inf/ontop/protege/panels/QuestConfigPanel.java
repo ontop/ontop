@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
-import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
+import it.unibz.inf.ontop.injection.OntopTranslationSettings;
 import it.unibz.inf.ontop.protege.core.DisposableProperties;
 
 import java.awt.*;
@@ -46,7 +46,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
 
     private void setSelections(final DisposableProperties preference) {
 
-        boolean bChecked = preference.getBoolean(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING);
+        boolean bChecked = preference.getBoolean(OntopTranslationSettings.EXISTENTIAL_REASONING);
         chkRewrite.setSelected(bChecked);
         
         bChecked = preference.getBoolean(OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS);
@@ -176,7 +176,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void chkRewriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkRewriteActionPerformed
-        preference.put(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING, String.valueOf(chkRewrite.isSelected()));
+        preference.put(OntopTranslationSettings.EXISTENTIAL_REASONING, String.valueOf(chkRewrite.isSelected()));
 
     }//GEN-LAST:event_chkRewriteActionPerformed
 
