@@ -112,7 +112,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
             // Loads it only once
             SQLPPMapping ppMapping = configuration.loadProvidedPPMapping();
-            OntopSQLOWLAPIConfiguration materializationConfig = createAndInitConfigurationBuilder()
+            OntopSQLOWLAPIConfiguration materializationConfig = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .propertyFile(propertiesFile)
                     // To avoid parsing it again and again
                     .ppMapping(ppMapping)

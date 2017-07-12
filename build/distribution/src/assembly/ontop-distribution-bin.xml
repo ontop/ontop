@@ -14,14 +14,14 @@
 
 	<fileSets>
 		<fileSet>
-			<directory>${project.basedir}/../licenses</directory>
+			<directory>${project.basedir}/../../licenses</directory>
 			<outputDirectory>/copyright</outputDirectory>
 			<includes>
 				<include>*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../build/distribution/src/main/resources/log
+			<directory>${project.basedir}/../../build/distribution/src/main/resources/log
 			</directory>
 			<outputDirectory>/log</outputDirectory>
 			<includes>
@@ -30,7 +30,7 @@
 		</fileSet>
 
         <fileSet>
-            <directory>${project.basedir}/../client/cli/src/main/resources/
+            <directory>${project.basedir}/../../client/cli/src/main/resources/
             </directory>
             <outputDirectory>/</outputDirectory>
             <includes>
@@ -49,7 +49,7 @@
 		</fileSet>
 	-->
 		<fileSet>
-			<directory>${project.basedir}/../engine/owlapi/src/main/resources/
+			<directory>${project.basedir}/../../engine/owlapi/src/main/resources/
 			</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
