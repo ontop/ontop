@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.proposal.ConstructionNodeRemovalProposal;
-import it.unibz.inf.ontop.iq.proposal.impl.ConstructionNodeRemovalproposalImpl;
+import it.unibz.inf.ontop.iq.proposal.impl.ConstructionNodeRemovalProposalImpl;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -26,23 +26,29 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
  * <p>
  * The algorithm searches the query q depth-first.
  * <p>
- * When a chain c_1, .., c_n of Construction nodes is encountered,
+ * When a ConstructionNode is c_1 encountered,
+ * find the highest value i such that:
+ * .c_1, .., c_n is a chain composed of ConstructionNodes only,
  * with c1 as root,
- * c2 as child as child of c_2,
- * etc.,
- * selects the highest value i such that:
+ * c2 as child of c_1,
+ * c3 child of c_2,
+ * etc., and
  * .c_2, .., c_i do not carry query modifiers, and
  * .for each 0 < j < i,
  * c_j or c_{j+1} has a trivial (identity) substitution,
  * or a substitution of variables names only.
  * <p>
- * Then proceeds as follows:
- * .Let proj(c1) be the variables projected out by c1
- * .Compute the appropriate composition s of the substitutions of all nodes
- * .Restrict s to proj(c1), yielding s'
- * .Create the construction node c' with substitution s' and projected variables proj(c1)
- * .In q, replace the subtree rooted in c1 by the subtree rooted in c',
- * and such that the child subtree of c' is the child subtree of cn.
+ * Note that n = 1 may hold.
+ * <p>
+ * Then proceed as follows:
+ * .Let t be the subtree rooted in the child of c_n
+ * .Compute the appropriate composition s of the substitutions of all c_i
+ * .If s is trivial (identity),
+ * and if c1 is not the root node,
+ * replace in q the subtree rooted in c1 by t
+ * .Otherwise create the construction node c' with substitution s,
+ * and replace in q the subtree rooted in c1 by the subtree rooted in c',
+ * such that the child subtree of c' is t.
  * <p>
  * TODO: make it more robust (handle complex substitutions, modifiers) ?
  */
@@ -85,24 +91,30 @@ public class ConstructionNodeRemovalOptimizer extends NodeCentricDepthFirstOptim
             }
         }
 
-        /* Non-mergeable, or substitution composition is not supported */
+        /** Non-mergeable, or substitution composition is not supported **/
 
-        if (currentParentNode.equals(constructionNodeChainRoot)) {
+        boolean deleteConstructionNodeChain = substitution.getImmutableMap().isEmpty() &&
+                isCandidateForMerging(constructionNodeChainRoot) &&
+                !constructionNodeChainRoot.equals(query.getRootConstructionNode());
+
+        /* special case of a non-deletable unary chain */
+        if (currentParentNode.equals(constructionNodeChainRoot) && !deleteConstructionNodeChain) {
             return Optional.empty();
         }
         return Optional.of(
-                new ConstructionNodeRemovalproposalImpl(
+                new ConstructionNodeRemovalProposalImpl(
                         constructionNodeChainRoot,
                         substitution,
-                        currentChildNode
+                        currentChildNode,
+                        deleteConstructionNodeChain
                 ));
     }
 
     private boolean isCandidateForMerging(QueryNode currentChildNode) {
-        if(currentChildNode instanceof ConstructionNode){
-            Optional<ImmutableQueryModifiers> optionalModifiers = ((ConstructionNode)currentChildNode)
+        if (currentChildNode instanceof ConstructionNode) {
+            Optional<ImmutableQueryModifiers> optionalModifiers = ((ConstructionNode) currentChildNode)
                     .getOptionalModifiers();
-            if(optionalModifiers.isPresent()){
+            if (optionalModifiers.isPresent()) {
                 ImmutableQueryModifiers modifiers = optionalModifiers.get();
                 return !modifiers.hasLimit() &&
                         !modifiers.hasOffset() &&

@@ -8,5 +8,7 @@ public interface ConstructionNodeRemovalProposal extends SimpleNodeCentricOptimi
 
     ImmutableSubstitution getSubstitution();
 
+    boolean deleteConstructionNodeChain();
+
     QueryNode getChildSubtreeRoot();
 }
