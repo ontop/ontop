@@ -40,29 +40,32 @@ public class BootstrapGenerator {
 
 
     private final JDBCConnectionManager connManager;
-    private final OntopSQLOWLAPIConfiguration settings;
+    private final OntopSQLOWLAPIConfiguration configuration;
     private final OBDAModel activeOBDAModel;
     private final OWLModelManager owlManager;
     private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
+    private final MappingVocabularyExtractor vocabularyExtractor;
     private int currentMappingIndex = 1;
 
     public BootstrapGenerator(OBDAModelManager obdaModelManager, String baseUri, OWLModelManager owlManager) throws DuplicateMappingException, InvalidMappingException, MappingIOException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
 
         connManager = JDBCConnectionManager.getJDBCConnectionManager();
         this.owlManager =  owlManager;
-        settings = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
+        configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
         activeOBDAModel = obdaModelManager.getActiveOBDAModel();
+        vocabularyExtractor = configuration.getInjector().getInstance(MappingVocabularyExtractor.class);
 
         bootstrapMappingAndOntologyProtege(baseUri);
     }
 
-    private void bootstrapMappingAndOntologyProtege(String baseUri) throws DuplicateMappingException, MappingIOException, InvalidMappingException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
+    private void bootstrapMappingAndOntologyProtege(String baseUri) throws DuplicateMappingException, MappingIOException,
+            InvalidMappingException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
 
 
         List<SQLPPTriplesMap> sqlppTriplesMaps = bootstrapMapping(activeOBDAModel.generatePPMapping(), baseUri);
 
 
-        ImmutableOntologyVocabulary newVocabulary = MappingVocabularyExtractor.extractVocabulary(
+        ImmutableOntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
                 sqlppTriplesMaps.stream()
                         .flatMap(ax -> ax.getTargetAtoms().stream()));
 
@@ -81,7 +84,7 @@ public class BootstrapGenerator {
 
         Connection conn = null;
         try {
-            conn = connManager.getConnection(settings.getSettings());
+            conn = connManager.getConnection(configuration.getSettings());
         } catch (SQLException e) {
             throw new RuntimeException("JDBC connection are missing, have you setup Ontop Mapping properties?" +
                     " Message: " + e.getMessage());

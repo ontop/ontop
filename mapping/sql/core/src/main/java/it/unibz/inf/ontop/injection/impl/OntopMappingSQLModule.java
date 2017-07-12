@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.model.SQLMappingParser;
-import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.MappingExtractor;
 import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintExtractor;
@@ -29,7 +28,6 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
 
         bindFromPreferences(SQLPPMappingFactory.class);
         bindFromPreferences(SQLMappingParser.class);
-//        bindFromPreferences(SQLPPMapping2OBDASpecificationConverter.class);
         //bindFromPreferences(MappingVocabularyFixer.class);
         bindFromPreferences(PreProcessedImplicitRelationalDBConstraintExtractor.class);
         bindFromPreferences(MappingExtractor.class);

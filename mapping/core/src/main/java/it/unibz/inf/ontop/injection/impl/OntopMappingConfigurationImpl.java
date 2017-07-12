@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.Defa
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
+import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -100,17 +101,21 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
         Optional<Ontology> optionalOntology = ontologySupplier.get();
-        Optional<File> optionalConstraintFile = constraintFileSupplier.get();
-
         Optional<DBMetadata> optionalMetadata = options.dbMetadata;
 
         /*
          * Pre-processed mapping
          */
         Optional<PreProcessedMapping> optionalPPMapping = ppMappingSupplier.get();
+
+        OBDASpecInput.Builder specInputBuilder = OBDASpecInput.defaultBuilder();
+        constraintFileSupplier.get()
+                .ifPresent(specInputBuilder::addConstraintFile);
+
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();
-            return extractor.extract(ppMapping, optionalMetadata, optionalOntology, optionalConstraintFile,
+
+            return extractor.extract(specInputBuilder.build(), ppMapping, optionalMetadata, optionalOntology,
                     getExecutorRegistry());
         }
 
@@ -119,8 +124,9 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
          */
         Optional<File> optionalMappingFile = mappingFileSupplier.get();
         if (optionalMappingFile.isPresent()) {
-            File mappingFile = optionalMappingFile.get();
-            return extractor.extract(mappingFile, optionalMetadata, optionalOntology, optionalConstraintFile,
+            specInputBuilder.addMappingFile(optionalMappingFile.get());
+
+            return extractor.extract(specInputBuilder.build(), optionalMetadata, optionalOntology,
                     getExecutorRegistry());
         }
 
@@ -129,9 +135,10 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
          */
         Optional<Reader> optionalMappingReader = mappingReaderSupplier.get();
         if (optionalMappingReader.isPresent()) {
-            Reader mappingReader = optionalMappingReader.get();
-            return extractor.extract(mappingReader, optionalMetadata, optionalOntology,
-                    optionalConstraintFile, getExecutorRegistry());
+            specInputBuilder.addMappingReader(optionalMappingReader.get());
+
+            return extractor.extract(specInputBuilder.build(), optionalMetadata, optionalOntology,
+                    getExecutorRegistry());
         }
 
         /*
@@ -139,9 +146,10 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
          */
         Optional<Model> optionalMappingGraph = mappingGraphSupplier.get();
         if (optionalMappingGraph.isPresent()) {
-            Model mappingGraph = optionalMappingGraph.get();
-            return extractor.extract(mappingGraph, optionalMetadata, optionalOntology,
-                    optionalConstraintFile, getExecutorRegistry());
+            specInputBuilder.addMappingGraph(optionalMappingGraph.get());
+
+            return extractor.extract(specInputBuilder.build(), optionalMetadata, optionalOntology,
+                    getExecutorRegistry());
         }
 
         throw new MissingInputMappingException();

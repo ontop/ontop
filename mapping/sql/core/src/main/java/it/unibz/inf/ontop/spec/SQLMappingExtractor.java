@@ -71,21 +71,53 @@ public class SQLMappingExtractor implements MappingExtractor {
     }
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<Ontology> ontology, @Nonnull Optional<TBoxReasoner> tBox,
-                                        @Nonnull Optional<File> constraintsFile, ExecutorRegistry executorRegistry)
+    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
+                                        @Nonnull Optional<Ontology> ontology, Optional<TBoxReasoner> saturatedTBox,
+                                        ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
 
-        if(ontology.isPresent() != tBox.isPresent()){
+        SQLPPMapping ppMapping = extractPPMapping(specInput);
+
+        return extract(ppMapping, specInput, dbMetadata, ontology, saturatedTBox, executorRegistry);
+    }
+
+    private SQLPPMapping extractPPMapping(OBDASpecInput specInput)
+            throws DuplicateMappingException, MappingIOException, InvalidMappingException {
+
+        Optional<File> optionalMappingFile = specInput.getMappingFile();
+        if (optionalMappingFile.isPresent())
+            return mappingParser.parse(optionalMappingFile.get());
+
+        Optional<Reader> optionalMappingReader = specInput.getMappingReader();
+        if (optionalMappingReader.isPresent())
+            return mappingParser.parse(optionalMappingReader.get());
+
+        Optional<Model> optionalMappingGraph = specInput.getMappingGraph();
+        if (optionalMappingGraph.isPresent())
+            return mappingParser.parse(optionalMappingGraph.get());
+
+        throw new IllegalArgumentException("Bad internal configuration: no mapping input provided in the OBDASpecInput!\n" +
+                " Should have been detected earlier (in case of an user mistake)");
+    }
+
+    @Override
+    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull OBDASpecInput specInput,
+                                        @Nonnull Optional<DBMetadata> dbMetadata,
+                                        @Nonnull Optional<Ontology> ontology, Optional<TBoxReasoner> saturatedTBox,
+                                        ExecutorRegistry executorRegistry)
+            throws MappingException, DBMetadataExtractionException {
+
+        if(ontology.isPresent() != saturatedTBox.isPresent()){
             throw new IllegalArgumentException("the Ontology and TBoxReasoner must be both present, or none");
         }
 
         SQLPPMapping castPPMapping = castPPMapping(ppMapping);
         if(ontology.isPresent()){
-            ontologyComplianceValidator.validateMapping(castPPMapping, ontology.get().getVocabulary(), tBox.get());
+            ontologyComplianceValidator.validateMapping(castPPMapping, ontology.get().getVocabulary(), saturatedTBox.get());
         }
-        return convertPPMapping(castPPMapping, castDBMetadata(dbMetadata), constraintsFile, executorRegistry);
+        return convertPPMapping(castPPMapping, castDBMetadata(dbMetadata), specInput, executorRegistry);
     }
+
 
     private SQLPPMapping castPPMapping(PreProcessedMapping ppMapping) {
         if(ppMapping instanceof SQLPPMapping){
@@ -107,26 +139,12 @@ public class SQLMappingExtractor implements MappingExtractor {
         return Optional.empty();
     }
 
-    @Override
-    public PreProcessedMapping loadPPMapping(File mappingFile) throws DuplicateMappingException, MappingIOException, InvalidMappingException {
-        return mappingParser.parse(mappingFile);
-    }
-
-    @Override
-    public PreProcessedMapping loadPPMapping(Reader mappingReader) throws DuplicateMappingException, MappingIOException, InvalidMappingException {
-        return mappingParser.parse(mappingReader);
-    }
-
-    @Override
-    public PreProcessedMapping loadPPMapping(Model mappingGraph) throws DuplicateMappingException, InvalidMappingException {
-        return mappingParser.parse(mappingGraph);
-    }
-
     private MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
-                                                  Optional<File> constraintFile, ExecutorRegistry executorRegistry) throws MetaMappingExpansionException, DBMetadataExtractionException {
+                                                  OBDASpecInput specInput, ExecutorRegistry executorRegistry)
+            throws MetaMappingExpansionException, DBMetadataExtractionException {
 
 
-        RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, constraintFile);
+        RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
         ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
                 ppMapping.getTripleMaps(),
                 settings,
@@ -157,13 +175,14 @@ public class SQLMappingExtractor implements MappingExtractor {
     // TODO: Move to the OBDASpecificationExtractor (after isolating the DBMetadata expansion in convertMappingAxioms())
     // simple Mapping instance (instead of MappingAndDBMetadata )
     private RDBMetadata extractDBMetadata(final SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
-                                          Optional<File> constraintFile)
+                                          OBDASpecInput specInput)
             throws DBMetadataExtractionException, MetaMappingExpansionException {
 
         try (Connection localConnection = createConnection()) {
             return optionalDBMetadata.isPresent()
-                    ? dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata.get(), constraintFile)
-                    : dbMetadataExtractor.extract(ppMapping, localConnection, constraintFile);
+                    ? dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata.get(),
+                            specInput.getConstraintFile())
+                    : dbMetadataExtractor.extract(ppMapping, localConnection, specInput.getConstraintFile());
         }
         /*
          * Problem while creating the connection

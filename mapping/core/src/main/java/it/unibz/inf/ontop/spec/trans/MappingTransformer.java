@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
 /**
@@ -15,6 +16,7 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
  */
 public interface MappingTransformer {
 
-    OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Ontology ontology, TBoxReasoner tBox)
+    OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata,
+                                Ontology ontology, TBoxReasoner tBox)
             throws MappingException, OntologyException, DBMetadataExtractionException;
 }

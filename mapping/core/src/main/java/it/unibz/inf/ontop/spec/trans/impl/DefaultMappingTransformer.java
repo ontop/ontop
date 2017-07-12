@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.trans.*;
 
@@ -28,7 +29,16 @@ public class DefaultMappingTransformer implements MappingTransformer{
     private final SpecificationFactory specificationFactory;
 
     @Inject
-    public DefaultMappingTransformer(MappingCanonicalRewriter mappingCanonicalRewriter, MappingNormalizer mappingNormalizer, MappingSaturator mappingSaturator, MappingDatatypeFiller mappingDatatypeFiller, ABoxFactIntoMappingConverter inserter, MappingMerger mappingMerger, OntopMappingSettings settings, MappingSameAsRewriter sameAsRewriter, MappingEquivalenceFreeRewriter eqFreeRewriter, SpecificationFactory specificationFactory) {
+    private DefaultMappingTransformer(MappingCanonicalRewriter mappingCanonicalRewriter,
+                                     MappingNormalizer mappingNormalizer,
+                                     MappingSaturator mappingSaturator,
+                                     MappingDatatypeFiller mappingDatatypeFiller,
+                                     ABoxFactIntoMappingConverter inserter,
+                                     MappingMerger mappingMerger,
+                                     OntopMappingSettings settings,
+                                     MappingSameAsRewriter sameAsRewriter,
+                                     MappingEquivalenceFreeRewriter eqFreeRewriter,
+                                     SpecificationFactory specificationFactory) {
         this.mappingCanonicalRewriter = mappingCanonicalRewriter;
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
@@ -42,7 +52,9 @@ public class DefaultMappingTransformer implements MappingTransformer{
     }
 
     @Override
-    public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Ontology ontology, TBoxReasoner tBox) throws MappingException, DBMetadataExtractionException {
+    public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata, Ontology ontology,
+                                       TBoxReasoner tBox)
+            throws MappingException, DBMetadataExtractionException {
         Mapping datatypedMapping = mappingDatatypeFiller.inferMissingDatatypes(mapping, tBox, ontology.getVocabulary(),
                 dbMetadata);
         Mapping factsAsMapping = factConverter.convert(ontology, datatypedMapping.getExecutorRegistry(),

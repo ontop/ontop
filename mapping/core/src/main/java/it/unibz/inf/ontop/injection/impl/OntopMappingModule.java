@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
 import it.unibz.inf.ontop.pp.validation.PPMappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.trans.*;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
@@ -29,6 +30,7 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromPreferences(MappingCanonicalRewriter.class);
         bindFromPreferences(Datalog2QueryMappingConverter.class);
         bindFromPreferences(Mapping2DatalogConverter.class);
+        bindFromPreferences(MappingVocabularyExtractor.class);
         bindFromPreferences(ABoxFactIntoMappingConverter.class);
         bindFromPreferences(MappingDatatypeFiller.class);
         bindFromPreferences(MappingMerger.class);

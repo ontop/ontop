@@ -61,6 +61,8 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
  */
 public class DirectMappingEngine {
 
+	private final MappingVocabularyExtractor vocabularyExtractor;
+
 	public static class BootstrappingResults {
 		private final SQLPPMapping ppMapping;
 		private final OWLOntology ontology;
@@ -101,7 +103,9 @@ public class DirectMappingEngine {
 
 	@Inject
 	private DirectMappingEngine(OntopSQLCoreSettings settings, SpecificationFactory specificationFactory,
-                                SQLPPMappingFactory ppMappingFactory) {
+                                SQLPPMappingFactory ppMappingFactory,
+								MappingVocabularyExtractor vocabularyExtractor) {
+		this.vocabularyExtractor = vocabularyExtractor;
 		connManager = JDBCConnectionManager.getJDBCConnectionManager();
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
@@ -121,7 +125,7 @@ public class DirectMappingEngine {
 				? extractPPMapping(inputPPMapping.get())
 				: extractPPMapping();
 
-		ImmutableOntologyVocabulary newVocabulary = MappingVocabularyExtractor.extractVocabulary(
+		ImmutableOntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
 				newPPMapping.getTripleMaps().stream()
 						.flatMap(ax -> ax.getTargetAtoms().stream()));
 

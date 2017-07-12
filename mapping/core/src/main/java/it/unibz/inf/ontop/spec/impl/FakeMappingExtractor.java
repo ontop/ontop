@@ -8,11 +8,9 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.MappingExtractor;
-import org.eclipse.rdf4j.model.Model;
+import it.unibz.inf.ontop.spec.OBDASpecInput;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.Reader;
 import java.util.Optional;
 
 
@@ -21,22 +19,17 @@ public class FakeMappingExtractor implements MappingExtractor {
     private static final String MESSAGE = "Using a FakeMappingExtractor! Please use a proper implementation instead";
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping mapping, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology, @Nonnull Optional<TBoxReasoner> tBox, @Nonnull Optional<File> constraintsFile, ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
+    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
+                                        @Nonnull Optional<Ontology> ontology, @Nonnull Optional<TBoxReasoner> saturatedTBox,
+                                        @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
-    public PreProcessedMapping loadPPMapping(File mappingFile) {
-        throw new UnsupportedOperationException(MESSAGE);
-    }
-
-    @Override
-    public PreProcessedMapping loadPPMapping(Reader mappingReader) {
-        throw new UnsupportedOperationException(MESSAGE);
-    }
-
-    @Override
-    public PreProcessedMapping loadPPMapping(Model mappingGraph) {
+    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull OBDASpecInput specInput,
+                                        @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology,
+                                        @Nonnull Optional<TBoxReasoner> saturatedTBox, @Nonnull ExecutorRegistry executorRegistry)
+            throws MappingException, DBMetadataExtractionException {
         throw new UnsupportedOperationException(MESSAGE);
     }
 }
