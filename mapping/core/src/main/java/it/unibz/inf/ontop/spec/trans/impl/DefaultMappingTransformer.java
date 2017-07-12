@@ -55,11 +55,9 @@ public class DefaultMappingTransformer implements MappingTransformer{
     public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata, Ontology ontology,
                                        TBoxReasoner tBox)
             throws MappingException, DBMetadataExtractionException {
-        Mapping datatypedMapping = mappingDatatypeFiller.inferMissingDatatypes(mapping, tBox, ontology.getVocabulary(),
-                dbMetadata);
-        Mapping factsAsMapping = factConverter.convert(ontology, datatypedMapping.getExecutorRegistry(),
-                settings.isOntologyAnnotationQueryingEnabled(), datatypedMapping.getMetadata().getUriTemplateMatcher());
-        Mapping mappingWithFacts = mappingMerger.merge(datatypedMapping, factsAsMapping);
+        Mapping factsAsMapping = factConverter.convert(ontology, mapping.getExecutorRegistry(),
+                settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
+        Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
         Mapping eqFreeMapping = eqFreeRewriter.rewrite(mappingWithFacts, tBox, ontology.getVocabulary(), dbMetadata);
         Mapping sameAsOptimizedMapping = sameAsRewriter.rewrite(eqFreeMapping, dbMetadata);
         Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.mapping;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
 
 /**
@@ -24,5 +25,11 @@ public interface MappingWithProvenance {
     /**
      * Conversion -> Provenance info is lost in this new data structure
      */
-    Mapping toMapping();
+    Mapping toRegularMapping();
+
+    MappingWithProvenance newMappingWithProvenance(ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> provenanceMap);
+
+    ExecutorRegistry getExecutorRegistry();
+
+    MappingMetadata getMetadata();
 }

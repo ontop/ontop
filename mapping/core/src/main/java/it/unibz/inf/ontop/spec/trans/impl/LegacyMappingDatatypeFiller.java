@@ -1,14 +1,17 @@
 package it.unibz.inf.ontop.spec.trans.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.mapping.Mapping;
+import it.unibz.inf.ontop.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
+import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
 import it.unibz.inf.ontop.spec.trans.MappingDatatypeFiller;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -55,16 +58,15 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
      *  .the corresponding column types are compatible (e.g the types for column 1 of A and column 1 of B)
      */
     @Override
-    public Mapping inferMissingDatatypes(Mapping mapping, TBoxReasoner tBox, ImmutableOntologyVocabulary
-            vocabulary, DBMetadata dbMetadata) throws DBMetadataExtractionException, InvalidMappingException {
+    public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping, DBMetadata dbMetadata) {
         MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata);
-        ImmutableList<CQIE> rules = mapping2DatalogConverter.convert(mapping)
-                .collect(ImmutableCollectors.toList());
+        ImmutableMap<CQIE, PPTriplesMapProvenance> ruleMap = mapping2DatalogConverter.convert(mapping);
+
         //CQIEs are mutable
-        for(CQIE rule : rules){
+        for(CQIE rule : ruleMap.keySet()){
             typeCompletion.insertDataTyping(rule);
         }
-        return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(rules), dbMetadata,
+        return datalog2MappingConverter.convertMappingRules(ruleMap, dbMetadata,
                 mapping.getExecutorRegistry(), mapping.getMetadata());
     }
 }

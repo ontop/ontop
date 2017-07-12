@@ -8,23 +8,26 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
+import it.unibz.inf.ontop.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.predicate.AlgebraOperatorPredicate;
 import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.OperationPredicate;
 import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.datalog.impl.DatalogRule2QueryConverter.convertDatalogRule;
 
 /**
  * Convert mapping assertions from Datalog to IntermediateQuery
@@ -35,12 +38,18 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
     private final DatalogProgram2QueryConverter converter;
     private final SpecificationFactory specificationFactory;
+    private final IntermediateQueryFactory iqFactory;
+    private final ProvenanceMappingFactory provMappingFactory;
 
     @Inject
     private Datalog2QueryMappingConverterImpl(DatalogProgram2QueryConverter converter,
-                                              SpecificationFactory specificationFactory) {
+                                              SpecificationFactory specificationFactory,
+                                              IntermediateQueryFactory iqFactory,
+                                              ProvenanceMappingFactory provMappingFactory) {
         this.converter = converter;
         this.specificationFactory = specificationFactory;
+        this.iqFactory = iqFactory;
+        this.provMappingFactory = provMappingFactory;
     }
 
     @Override
@@ -71,5 +80,24 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                         q -> q));
 
         return specificationFactory.createMapping(mappingMetadata, mappingMap, executorRegistry);
+    }
+
+    @Override
+    public MappingWithProvenance convertMappingRules(ImmutableMap<CQIE, PPTriplesMapProvenance> datalogMap,
+                                                     DBMetadata dbMetadata, ExecutorRegistry executorRegistry,
+                                                     MappingMetadata mappingMetadata) {
+        ImmutableSet<Predicate> extensionalPredicates = datalogMap.keySet().stream()
+                .flatMap(r -> r.getBody().stream())
+                .flatMap(Datalog2QueryTools::extractPredicates)
+                .collect(ImmutableCollectors.toSet());
+
+
+        ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> iqMap = datalogMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> convertDatalogRule(dbMetadata, e.getKey(), extensionalPredicates, Optional.empty(),
+                                iqFactory, executorRegistry),
+                        Map.Entry::getValue));
+
+        return provMappingFactory.create(iqMap, mappingMetadata, executorRegistry);
     }
 }

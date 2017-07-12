@@ -5,17 +5,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.mapping.SQLPPMappingConverter;
-import it.unibz.inf.ontop.mapping.datalog.impl.Datalog2QueryTools;
+import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
@@ -28,9 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Optional;
 
-import static it.unibz.inf.ontop.iq.datalog.impl.DatalogRule2QueryConverter.convertDatalogRule;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 
@@ -40,14 +33,11 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacySQLPPMappingConverter.class);
-    private final IntermediateQueryFactory iqFactory;
-    private final ProvenanceMappingFactory mappingFactory;
+    private final Datalog2QueryMappingConverter mappingConverter;
 
     @Inject
-    private LegacySQLPPMappingConverter(IntermediateQueryFactory iqFactory,
-                                        ProvenanceMappingFactory mappingFactory) {
-        this.iqFactory = iqFactory;
-        this.mappingFactory = mappingFactory;
+    private LegacySQLPPMappingConverter(Datalog2QueryMappingConverter mappingConverter) {
+        this.mappingConverter = mappingConverter;
     }
 
     @Override
@@ -55,7 +45,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                                          ExecutorRegistry executorRegistry) {
         ImmutableMap<CQIE, PPTriplesMapProvenance> datalogMap = convertIntoDatalog(ppMapping, dbMetadata);
 
-        return convertIntoMappingWithProvenance(datalogMap, ppMapping.getMetadata(), dbMetadata, executorRegistry);
+        return mappingConverter.convertMappingRules(datalogMap, dbMetadata, executorRegistry, ppMapping.getMetadata());
     }
 
     /**
@@ -112,23 +102,5 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
         // Normalizing equalities
         for (CQIE cq: unfoldingProgram)
             EQNormalizer.enforceEqualities(cq);
-    }
-
-    private MappingWithProvenance convertIntoMappingWithProvenance(ImmutableMap<CQIE, PPTriplesMapProvenance> datalogMap,
-                                                                   MappingMetadata mappingMetadata, DBMetadata dbMetadata,
-                                                                   ExecutorRegistry executorRegistry) {
-        ImmutableSet<Predicate> extensionalPredicates = datalogMap.keySet().stream()
-                .flatMap(r -> r.getBody().stream())
-                .flatMap(Datalog2QueryTools::extractPredicates)
-                .collect(ImmutableCollectors.toSet());
-
-
-        ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> iqMap = datalogMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> convertDatalogRule(dbMetadata, e.getKey(), extensionalPredicates, Optional.empty(),
-                                iqFactory, executorRegistry),
-                        Map.Entry::getValue));
-
-        return mappingFactory.create(iqMap, mappingMetadata, executorRegistry);
     }
 }

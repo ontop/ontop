@@ -56,7 +56,7 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     }
 
     @Override
-    public Mapping toMapping() {
+    public Mapping toRegularMapping() {
         ImmutableMultimap<AtomPredicate, IntermediateQuery> assertionMultimap = getMappingAssertions().stream()
                 .collect(ImmutableCollectors.toMultimap(
                         q -> q.getProjectionAtom().getPredicate(),
@@ -73,4 +73,21 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
         return specFactory.createMapping(mappingMetadata, definitionMap, executorRegistry);
 
     }
+
+    @Override
+    public MappingWithProvenance newMappingWithProvenance(
+            ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> newProvenanceMap) {
+        return new MappingWithProvenanceImpl(newProvenanceMap, mappingMetadata, executorRegistry, specFactory, queryMerger);
+    }
+
+    @Override
+    public ExecutorRegistry getExecutorRegistry() {
+        return executorRegistry;
+    }
+
+    @Override
+    public MappingMetadata getMetadata() {
+        return mappingMetadata;
+    }
+
 }

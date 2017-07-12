@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.pp.validation.PPMappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
+import it.unibz.inf.ontop.spec.trans.MappingDatatypeFiller;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
 import org.eclipse.rdf4j.model.Model;
 
@@ -39,16 +40,18 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final SQLPPMappingConverter ppMappingConverter;
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final OntopMappingSQLSettings settings;
+    private final MappingDatatypeFiller mappingDatatypeFiller;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, PPMappingOntologyComplianceValidator ontologyComplianceValidator,
-                                SQLPPMappingConverter ppMappingConverter,
+                                SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
                                 NativeQueryLanguageComponentFactory nativeQLFactory, OntopMappingSQLSettings settings) {
 
         this.mappingParser = mappingParser;
         this.ontologyComplianceValidator = ontologyComplianceValidator;
         this.ppMappingConverter = ppMappingConverter;
         this.dbMetadataExtractor = nativeQLFactory.create();
+        this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.settings = settings;
     }
 
@@ -97,7 +100,8 @@ public class SQLMappingExtractor implements MappingExtractor {
         if(ontology.isPresent()){
             ontologyComplianceValidator.validateMapping(castPPMapping, ontology.get().getVocabulary(), saturatedTBox.get());
         }
-        return convertPPMapping(castPPMapping, castDBMetadata(dbMetadata), specInput, executorRegistry);
+        return convertPPMapping(castPPMapping, castDBMetadata(dbMetadata), specInput, ontology, saturatedTBox,
+                executorRegistry);
     }
 
     /**
@@ -107,7 +111,9 @@ public class SQLMappingExtractor implements MappingExtractor {
      *
      */
     private MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
-                                                  OBDASpecInput specInput, ExecutorRegistry executorRegistry)
+                                                  OBDASpecInput specInput, Optional<Ontology> optionalOntology,
+                                                  Optional<TBoxReasoner> optionalSaturatedTBox,
+                                                  ExecutorRegistry executorRegistry)
             throws MetaMappingExpansionException, DBMetadataExtractionException {
 
 
@@ -115,12 +121,14 @@ public class SQLMappingExtractor implements MappingExtractor {
         SQLPPMapping expandedPPMapping = expandPPMapping(ppMapping, settings, dbMetadata);
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)
-        MappingWithProvenance mappingWithProvenance = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
+        MappingWithProvenance provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
         dbMetadata.freeze();
+
+        MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
 
         // TODO: fill data types and validate
 
-        return new MappingAndDBMetadataImpl(mappingWithProvenance.toMapping(), dbMetadata);
+        return new MappingAndDBMetadataImpl(filledProvMapping.toRegularMapping(), dbMetadata);
     }
 
     private SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
