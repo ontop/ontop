@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.spec.MappingTransformer;
+import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
 import java.util.Optional;
@@ -44,7 +45,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
     }
 
     @Override
-    public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata,
+    public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata,
                                        Optional<Ontology> optionalOntology) throws MappingException, OntologyException {
 
         Ontology ontology = optionalOntology
