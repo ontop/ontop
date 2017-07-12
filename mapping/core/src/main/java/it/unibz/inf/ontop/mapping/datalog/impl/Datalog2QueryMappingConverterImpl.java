@@ -55,7 +55,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
         ImmutableSet<Predicate> extensionalPredicates = ruleIndex.values().stream()
                 .flatMap(r -> r.getBody().stream())
-                .flatMap(Datalog2QueryMappingConverterImpl::extractPredicates)
+                .flatMap(Datalog2QueryTools::extractPredicates)
                 .filter(p -> !ruleIndex.containsKey(p))
                 .collect(ImmutableCollectors.toSet());
 
@@ -72,20 +72,4 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
         return specificationFactory.createMapping(mappingMetadata, mappingMap, executorRegistry);
     }
-
-    private static Stream<Predicate> extractPredicates(Function atom) {
-        Predicate currentpred = atom.getFunctionSymbol();
-        if (currentpred instanceof OperationPredicate)
-            return Stream.of();
-        else if (currentpred instanceof AlgebraOperatorPredicate) {
-            return atom.getTerms().stream()
-                    .filter(t -> t instanceof Function)
-                    // Recursive
-                    .flatMap(t -> extractPredicates((Function) t));
-        } else {
-            return Stream.of(currentpred);
-        }
-    }
-
-
 }

@@ -22,4 +22,9 @@ public class OntopNativeSQLPPTriplesMapProvenance implements PPTriplesMapProvena
         info += "\nsource query: " + triplesMap.getSourceQuery();
         return info;
     }
+
+    @Override
+    public String toString() {
+        return getProvenanceInfo();
+    }
 }

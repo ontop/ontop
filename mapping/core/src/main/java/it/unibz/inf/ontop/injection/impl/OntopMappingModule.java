@@ -1,8 +1,12 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import com.google.common.collect.ImmutableList;
+import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
+import it.unibz.inf.ontop.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
 import it.unibz.inf.ontop.pp.validation.PPMappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.trans.*;
@@ -38,6 +42,11 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromPreferences(PPMappingOntologyComplianceValidator.class);
         bindFromPreferences(MappingSameAsRewriter.class);
         bindFromPreferences(MappingEquivalenceFreeRewriter.class);
+
+        Module factoryModule = buildFactory(ImmutableList.of(MappingWithProvenance.class),
+                ProvenanceMappingFactory.class);
+        install(factoryModule);
+
     }
 
     private void bindTMappingExclusionConfig() {
