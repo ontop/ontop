@@ -3,14 +3,12 @@ package it.unibz.inf.ontop.cli;
 
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
-import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import org.semanticweb.owlapi.formats.N3DocumentFormat;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
 import org.semanticweb.owlapi.model.*;
 
-import java.util.Properties;
 import java.util.Set;
 
 public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRelatedCommand {
@@ -21,7 +19,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
     public boolean disableReasoning = false;
 
     @Option(type = OptionType.COMMAND, name = {"-o", "--output"},
-            title = "output", description = "output file (default) or directory (for --separate-files)")
+            title = "output", description = "output file (default) or directory (only for --separate-files)")
     //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     protected String outputFile;
 
