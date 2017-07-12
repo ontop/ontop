@@ -9,11 +9,11 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
+import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.ConstructionNodeRemovalOptimizer;
@@ -24,13 +24,13 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.assertTrue;
 
 public class ConstructionNodeRemovalOptimizerTest {
 
     private final static AtomPredicate TABLE1_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 2);
     private final static AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("table2", 2);
+    private final static AtomPredicate TABLE3_PREDICATE = DATA_FACTORY.getAtomPredicate("table3", 2);
     private final static AtomPredicate ANS1_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
     private final static AtomPredicate ANS2_PREDICATE = DATA_FACTORY.getAtomPredicate("ans2", 2);
     private final static Variable X = DATA_FACTORY.getVariable("X");
@@ -50,7 +50,6 @@ public class ConstructionNodeRemovalOptimizerTest {
     private Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
     private Constant URI_TEMPLATE_STR_2_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
-
 
 
     @Test
@@ -691,6 +690,229 @@ public class ConstructionNodeRemovalOptimizerTest {
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
     }
 
+    @Test
+    public void removeConstructionNodeTest15() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X1);
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
+                projectionAtom1.getVariables()
+        );
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
+                ImmutableSet.of(X1)
+        );
+        UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X1));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
+                (TABLE1_PREDICATE, X1, X2));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
+                (TABLE2_PREDICATE, X1, X2));
+
+        queryBuilder1.init(projectionAtom1, constructionNode1);
+        queryBuilder1.addChild(constructionNode1, unionNode1);
+        queryBuilder1.addChild(unionNode1, dataNode1);
+        queryBuilder1.addChild(unionNode1, constructionNode2);
+        queryBuilder1.addChild(constructionNode2, dataNode2);
+
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" + query1);
+
+        ConstructionNodeRemovalOptimizer constructionNodeRemovalOptimizer = new ConstructionNodeRemovalOptimizer();
+        IntermediateQuery optimizedQuery = constructionNodeRemovalOptimizer.optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+
+        queryBuilder2.init(projectionAtom1, constructionNode1);
+        queryBuilder2.addChild(constructionNode1, unionNode1);
+        queryBuilder2.addChild(unionNode1, dataNode1);
+        queryBuilder2.addChild(unionNode1, dataNode2);
+
+        IntermediateQuery query2 = queryBuilder2.build();
+        System.out.println("\nExpected: \n" + query2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
+
+    @Test
+    public void removeConstructionNodeTest16() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X1);
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
+                projectionAtom1.getVariables()
+        );
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
+                ImmutableSet.of(X1),
+                DATA_FACTORY.getSubstitution(X1, Y1)
+        );
+        UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X1));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
+                (TABLE1_PREDICATE, X1, X2));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
+                (TABLE2_PREDICATE, Y1, Y2));
+
+        queryBuilder1.init(projectionAtom1, constructionNode1);
+        queryBuilder1.addChild(constructionNode1, unionNode1);
+        queryBuilder1.addChild(unionNode1, dataNode1);
+        queryBuilder1.addChild(unionNode1, constructionNode2);
+        queryBuilder1.addChild(constructionNode2, dataNode2);
+
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" + query1);
+
+        IntermediateQuery snapshot = query1.createSnapshot();
+
+        ConstructionNodeRemovalOptimizer constructionNodeRemovalOptimizer = new ConstructionNodeRemovalOptimizer();
+        IntermediateQuery optimizedQuery = constructionNodeRemovalOptimizer.optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+
+        System.out.println("\nExpected: \n" + snapshot);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, snapshot));
+    }
+
+    @Test
+    public void removeConstructionNodeTest17() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X1);
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
+                projectionAtom1.getVariables()
+        );
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
+                ImmutableSet.of(X1)
+        );
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
+                ImmutableSet.of(X1)
+        );
+        UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X1));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
+                (TABLE1_PREDICATE, X1, X2));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
+                (TABLE2_PREDICATE, X1, X2));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
+                (TABLE3_PREDICATE, X1, X2));
+
+        queryBuilder1.init(projectionAtom1, constructionNode1);
+        queryBuilder1.addChild(constructionNode1, unionNode1);
+        queryBuilder1.addChild(unionNode1, dataNode1);
+        queryBuilder1.addChild(unionNode1, constructionNode2);
+        queryBuilder1.addChild(unionNode1, constructionNode3);
+        queryBuilder1.addChild(constructionNode2, dataNode2);
+        queryBuilder1.addChild(constructionNode3, dataNode3);
+
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" + query1);
+
+        ConstructionNodeRemovalOptimizer constructionNodeRemovalOptimizer = new ConstructionNodeRemovalOptimizer();
+        IntermediateQuery optimizedQuery = constructionNodeRemovalOptimizer.optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+
+        queryBuilder2.init(projectionAtom1, constructionNode1);
+        queryBuilder2.addChild(constructionNode1, unionNode1);
+        queryBuilder2.addChild(unionNode1, dataNode1);
+        queryBuilder2.addChild(unionNode1, dataNode2);
+        queryBuilder2.addChild(unionNode1, dataNode3);
+
+        IntermediateQuery query2 = queryBuilder2.build();
+        System.out.println("\nExpected: \n" + query2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
+
+
+    @Test
+    public void removeConstructionNodeTest18() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE,
+                X, Y);
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
+
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
+                ImmutableSet.of(X, Y),
+                DATA_FACTORY.getSubstitution(X, X1, Y, Y1)
+        );
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
+                (TABLE1_PREDICATE, X1, Y1));
+
+        queryBuilder1.init(projectionAtom1, constructionNode1);
+        queryBuilder1.addChild(constructionNode1, constructionNode2);
+        queryBuilder1.addChild(constructionNode2, dataNode1);
+
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" + query1);
+
+        ConstructionNodeRemovalOptimizer constructionNodeRemovalOptimizer = new ConstructionNodeRemovalOptimizer();
+        IntermediateQuery optimizedQuery = constructionNodeRemovalOptimizer.optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+
+        queryBuilder2.init(projectionAtom1, constructionNode2);
+        queryBuilder2.addChild(constructionNode2, dataNode1);
+
+        IntermediateQuery query2 = queryBuilder2.build();
+        System.out.println("\nExpected: \n" + query2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
+
+    @Test
+    public void removeConstructionNodeTest19() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE,
+                X, Y);
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
+                projectionAtom1.getVariables(),
+                DATA_FACTORY.getSubstitution(X, X1, Y, Y1)
+        );
+
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
+                ImmutableSet.of(X1, Y1)
+        );
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
+                (TABLE1_PREDICATE, X1, Y1));
+
+        queryBuilder1.init(projectionAtom1, constructionNode1);
+        queryBuilder1.addChild(constructionNode1, constructionNode2);
+        queryBuilder1.addChild(constructionNode2, dataNode1);
+
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" + query1);
+
+        ConstructionNodeRemovalOptimizer constructionNodeRemovalOptimizer = new ConstructionNodeRemovalOptimizer();
+        IntermediateQuery optimizedQuery = constructionNodeRemovalOptimizer.optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+
+        queryBuilder2.init(projectionAtom1, constructionNode1);
+        queryBuilder2.addChild(constructionNode1, dataNode1);
+
+        IntermediateQuery query2 = queryBuilder2.build();
+        System.out.println("\nExpected: \n" + query2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
         return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }
@@ -701,17 +923,5 @@ public class ConstructionNodeRemovalOptimizerTest {
 
     private ImmutableFunctionalTerm generateCompositeURI2(ImmutableTerm argument1, ImmutableTerm argument2) {
         return DATA_FACTORY.getImmutableFunctionalTerm(URI_2PREDICATE, URI_TEMPLATE_STR_2_2, argument1, argument2);
-    }
-
-    private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(
-                DATA_FACTORY.getDatatypeFactory().getTypePredicate(INTEGER),
-                argument);
-    }
-
-    private ImmutableFunctionalTerm generateString(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(
-                DATA_FACTORY.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.STRING),
-                argument);
     }
 }

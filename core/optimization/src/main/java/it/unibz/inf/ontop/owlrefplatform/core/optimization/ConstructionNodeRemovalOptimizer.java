@@ -101,6 +101,7 @@ public class ConstructionNodeRemovalOptimizer extends NodeCentricDepthFirstOptim
         if (currentParentNode.equals(constructionNodeChainRoot) && !deleteConstructionNodeChain) {
             return Optional.empty();
         }
+
         return Optional.of(
                 new ConstructionNodeRemovalProposalImpl(
                         constructionNodeChainRoot,
@@ -138,7 +139,6 @@ public class ConstructionNodeRemovalOptimizer extends NodeCentricDepthFirstOptim
                             parentSubstitution
                     ));
         }
-
         Optional<ImmutableMultimap<Variable, Variable>> inverseVar2VarMultimap = getInverseVar2VarMultiMap(
                 parentSubstitution.getImmutableMap());
         if (inverseVar2VarMultimap.isPresent()) {
@@ -172,6 +172,9 @@ public class ConstructionNodeRemovalOptimizer extends NodeCentricDepthFirstOptim
                                                            ImmutableSubstitution targetSubstitution) {
 
         ImmutableMap<Variable, ImmutableTerm> targetSubstitutionMap = targetSubstitution.getImmutableMap();
+        if(targetSubstitutionMap.isEmpty()){
+            return appliedSubstitution;
+        }
         return DATA_FACTORY.getSubstitution(
                 targetSubstitutionMap.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
