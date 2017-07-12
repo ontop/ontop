@@ -95,7 +95,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 		this.queryExecError = false;
 		OBDAProgressMonitor monitor = null;
 		try {
-			monitor = new OBDAProgressMonitor(this.msg);
+			monitor = new OBDAProgressMonitor(this.msg, getEditorKit().getWorkspace());
 			monitor.start();
 			latch = new CountDownLatch(1);
 			OWLEditorKit kit = this.getEditorKit();

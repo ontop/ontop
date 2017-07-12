@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.panels.OBDAModelStatisticsPanel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
@@ -61,7 +61,7 @@ public class ABoxStatisticsAction extends ProtegeAction {
 		JDialog dialog = new JDialog();
 		dialog.setModal(true);
 		dialog.setSize(520, 400);
-		dialog.setLocationRelativeTo(null);
+		dialog.setLocationRelativeTo(getWorkspace());
 		dialog.setTitle("OBDA Model Statistics");
 
 		OBDAModelStatisticsPanel pnlStatistics = new OBDAModelStatisticsPanel();
@@ -70,7 +70,7 @@ public class ABoxStatisticsAction extends ProtegeAction {
 			public void run() {
 
 
-				OBDAProgressMonitor monitor = new OBDAProgressMonitor("Create statistics...");
+				OBDAProgressMonitor monitor = new OBDAProgressMonitor("Create statistics...", getWorkspace());
 				monitor.addProgressListener(pnlStatistics);
 				monitor.start();
 				// refresh the statistics every time users click the menu.

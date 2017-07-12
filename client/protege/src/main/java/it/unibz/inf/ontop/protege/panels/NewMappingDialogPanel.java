@@ -448,7 +448,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		// Cleaning the existing table and releasing resources
 		releaseResultset();
 
-		OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...");
+		OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...", this);
 		CountDownLatch latch = new CountDownLatch(1);
 		ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
 		progMonitor.addProgressListener(action);
@@ -522,7 +522,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 						latch.countDown();
 					} catch (Exception e) {
 						latch.countDown();
-						DialogUtils.showQuickErrorDialog(null, e);
+						DialogUtils.showQuickErrorDialog(getRootPane(), e);
 						errorShown = true;
 					}
 				}
