@@ -1,40 +1,39 @@
 package it.unibz.inf.ontop.executor.construction.impl;
 
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.executor.construction.ConstructionNodeRemovalExecutor;
+import it.unibz.inf.ontop.executor.construction.ConstructionNodeCleaningExecutor;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.proposal.ConstructionNodeRemovalProposal;
+import it.unibz.inf.ontop.iq.proposal.ConstructionNodeCleaningProposal;
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 import java.util.Optional;
 
-public class ConstructionNodeRemovalExecutorImpl implements ConstructionNodeRemovalExecutor {
+public class ConstructionNodeCleaningExecutorImpl implements ConstructionNodeCleaningExecutor {
 
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private ConstructionNodeRemovalExecutorImpl(IntermediateQueryFactory iqFactory) {
+    private ConstructionNodeCleaningExecutorImpl(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
     }
 
     @Override
-    public NodeCentricOptimizationResults<ConstructionNode> apply(ConstructionNodeRemovalProposal proposal, IntermediateQuery query, QueryTreeComponent treeComponent) throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+    public NodeCentricOptimizationResults<ConstructionNode> apply(ConstructionNodeCleaningProposal proposal, IntermediateQuery query, QueryTreeComponent treeComponent) throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         ConstructionNode focusNode = proposal.getFocusNode();
         QueryNode childSubtreeRoot = proposal.getChildSubtreeRoot();
-        ImmutableSubstitution substitution = proposal.getSubstitution();
         if(proposal.deleteConstructionNodeChain()){
             return deleteConstructionNodeChain(query, treeComponent, focusNode, childSubtreeRoot);
         }
-        return flattenConstructionNodeChain(query, treeComponent, focusNode, childSubtreeRoot, substitution);
+        return flattenConstructionNodeChain(query, treeComponent, focusNode, childSubtreeRoot, proposal.getCombinedModifiers());
     }
 
     private NodeCentricOptimizationResults<ConstructionNode> deleteConstructionNodeChain(IntermediateQuery query, QueryTreeComponent treeComponent, ConstructionNode focusNode, QueryNode childSubtreeRoot) {
@@ -49,11 +48,12 @@ public class ConstructionNodeRemovalExecutorImpl implements ConstructionNodeRemo
                                                                                           QueryTreeComponent treeComponent,
                                                                                           ConstructionNode focusNode,
                                                                                           QueryNode childSubtreeRoot,
-                                                                                          ImmutableSubstitution substitution) {
+                                                                                          Optional<ImmutableQueryModifiers> modifiers) {
         IntermediateQuery snapshot = query.createSnapshot();
         ConstructionNode replacingNode = iqFactory.createConstructionNode(
                 focusNode.getVariables(),
-                substitution
+                focusNode.getSubstitution(),
+                modifiers
         );
 
         treeComponent.replaceSubTree(focusNode, replacingNode);
