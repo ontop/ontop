@@ -1,10 +1,11 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import java.util.Optional;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.iq.node.QueryModifiers;
+
+import java.util.Optional;
 
 public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
 
@@ -84,6 +85,18 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+
+        if (obj == null || !(obj instanceof ImmutableQueryModifiersImpl)) {
+            return false;
+        }
+        ImmutableQueryModifiersImpl name2 = (ImmutableQueryModifiersImpl) obj;
+        return this.limit == name2.limit && this.offset ==  name2.offset && this.isDistinct == name2.isDistinct && this.sortConditions.equals(name2.sortConditions);
     }
 
     private boolean hasModifiers() {

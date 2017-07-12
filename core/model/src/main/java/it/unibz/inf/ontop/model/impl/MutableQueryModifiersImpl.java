@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.model.impl;
  */
 
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.iq.node.QueryModifiers;
+import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -186,8 +186,26 @@ public class MutableQueryModifiersImpl implements MutableQueryModifiers {
 		}
 
 		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+
+			if (obj == null || !(obj instanceof OrderConditionImpl)) {
+				return false;
+			}
+			OrderConditionImpl name2 = (OrderConditionImpl) obj;
+			return this.var.equals(name2.var) && this.direction == name2.direction;
+		}
+
+		@Override
 		public OrderCondition newVariable(Variable newVariable) {
 			return new OrderConditionImpl(newVariable, direction);
+
+
 		}
+
+
+
+
 	}
 }

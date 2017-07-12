@@ -30,9 +30,21 @@ public class PreferencesPanel extends OWLPreferencesPanel {
     public void initialise() throws Exception {
         BundleContext context = Activator.getInstance().getContext();
         jdbcRegistryTracker = new ServiceTracker(context, JdbcRegistry.class.getName(), null);
-        setLayout(new BorderLayout());
-        add(createList(), BorderLayout.CENTER);
-        add(createButtons(), BorderLayout.SOUTH);
+        setPreferredSize(new java.awt.Dimension(620, 300));
+        setLayout(new GridBagLayout());
+        GridBagConstraints listConstraints = new GridBagConstraints();
+        listConstraints.fill = GridBagConstraints.BOTH;
+        listConstraints.gridx = 0;
+        listConstraints.gridy = 0;
+        listConstraints.gridwidth = 3;
+        listConstraints.gridheight = 3;
+        listConstraints.weightx=1;
+        listConstraints.weighty=1;
+        GridBagConstraints buttonsConstraints = new GridBagConstraints();
+        buttonsConstraints.gridx = 0;
+        buttonsConstraints.gridy = 4;
+        add(createList(), listConstraints);
+        add(createButtons(), buttonsConstraints);
     }
 
     @Override

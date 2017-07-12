@@ -13,7 +13,7 @@ import java.util.List;
 public abstract class OntopAbstractModule extends AbstractModule {
 
     /**
-     * Interface not found in the properties or impossibility to load the
+     * Interface not found in the settings or impossibility to load the
      * declared implementation class.
      */
     public class UnknownClassException extends RuntimeException {
@@ -22,16 +22,16 @@ public abstract class OntopAbstractModule extends AbstractModule {
         }
     }
 
-    private final OntopModelSettings properties;
+    private final OntopModelSettings settings;
 
-    protected OntopAbstractModule(OntopModelSettings configuration) {
-        this.properties = configuration;
+    protected OntopAbstractModule(OntopModelSettings settings) {
+        this.settings = settings;
     }
 
     public Class getImplementation(String interfaceClassName) throws UnknownClassException {
-        String implementationClassName = properties.getProperty(interfaceClassName)
+        String implementationClassName = settings.getProperty(interfaceClassName)
                 .orElseThrow(() -> new UnknownClassException(String.format(
-                        "No entry for the interface %s in the properties.",
+                        "No entry for the interface %s in the settings.",
                         interfaceClassName)));
 
         try {
@@ -61,11 +61,11 @@ public abstract class OntopAbstractModule extends AbstractModule {
      * TO be called by sub-classes, inside the configure() method.
      */
     protected void configureCoreConfiguration() {
-        bind(OntopModelSettings.class).toInstance(properties);
+        bind(OntopModelSettings.class).toInstance(settings);
     }
 
-    protected OntopModelSettings getProperties() {
-        return properties;
+    protected OntopModelSettings getSettings() {
+        return settings;
     }
 
     /**

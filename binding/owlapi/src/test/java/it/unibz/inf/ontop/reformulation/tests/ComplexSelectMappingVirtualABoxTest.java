@@ -43,7 +43,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings.SQL_GENERATE_REPLACE;
+import static it.unibz.inf.ontop.injection.OntopTranslationSettings.SQL_GENERATE_REPLACE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

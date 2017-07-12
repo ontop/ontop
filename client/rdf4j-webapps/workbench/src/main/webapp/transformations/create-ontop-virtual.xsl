@@ -56,8 +56,8 @@
 							<xsl:value-of select="$ontop-owlfile.label" />
 						</th>
 						<td>
-							<input type="text" id="owlfile"
-								name="owlfile" size="48" value="" />
+							<input type="text" id="owlFile"
+								name="owlFile" size="48" value="" />
                         </td>
 						<td>
 							<xsl:value-of select="$ontop-owlfilecommentvirt.label" />
@@ -69,29 +69,25 @@
 							<xsl:value-of select="$ontop-obdafile.label" />
 						</th>
 						<td>
-							<input type="text" id="obdafile"
-								name="obdafile" size="48" value="" />
+							<input type="text" id="obdaFile"
+								name="obdaFile" size="48" value="" />
 						</td>
 						<td>
 							<xsl:value-of select="$ontop-obdafilecomment.label" />
 							<!--<a href="https://github.com/ontop/ontop/wiki/ObdalibMappings">OntopObda</a>.-->
 						</td>
 					</tr>
+
 					<tr>
 						<th>
-							<xsl:value-of select="$ontop-reasoning.label" />
-						</th>
-						<td></td>
-					</tr>
-					<tr>
-						<th>
-							<xsl:value-of select="$ontop-existential.label" />
+							<xsl:value-of select="$ontop-properties.label" />
 						</th>
 						<td>
-							<input type="checkbox" id="existential"
-								name="Existential reasoning" size="48" value="true" title="{$ontop-exist.label}"/>
+							<input type="text" id="propertiesFile"
+								name="propertiesFile" size="48" value=""/>
 						</td>
 						<td>
+							<xsl:value-of select="$ontop-propertiesfilecomment.label" />
 						</td>
 					</tr>
 					<tr>

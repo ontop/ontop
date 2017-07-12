@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-query-answering-core</artifactId>
+            <artifactId>ontop-translation-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
