@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
+import it.unibz.inf.ontop.executor.construction.ConstructionNodeRemovalExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownBooleanExpressionExecutor;
 import it.unibz.inf.ontop.executor.expression.PushUpBooleanExpressionExecutor;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
@@ -83,6 +84,7 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         internalExecutorMapBuilder.put(ProjectionShrinkingProposal.class, ProjectionShrinkingExecutor.class);
         internalExecutorMapBuilder.put(TrueNodeRemovalProposal.class, TrueNodeRemovalExecutor.class);
         internalExecutorMapBuilder.put(FlattenUnionProposal.class, FlattenUnionExecutor.class);
+        internalExecutorMapBuilder.put(ConstructionNodeRemovalProposal.class, ConstructionNodeRemovalExecutor.class);
         return internalExecutorMapBuilder.build();
     }
 

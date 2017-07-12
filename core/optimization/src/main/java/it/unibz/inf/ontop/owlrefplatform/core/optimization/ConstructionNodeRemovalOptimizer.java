@@ -2,10 +2,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.inject.Inject;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.proposal.ConstructionNodeRemovalProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.ConstructionNodeRemovalproposalImpl;
@@ -32,7 +31,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
  * c2 as child as child of c_2,
  * etc.,
  * selects the highest value i such that:
- * .c_1, .., c_i do not carry query modifiers, and
+ * .c_2, .., c_i do not carry query modifiers, and
  * .for each 0 < j < i,
  * c_j or c_{j+1} has a trivial (identity) substitution,
  * or a substitution of variables names only.
@@ -49,12 +48,9 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
  */
 public class ConstructionNodeRemovalOptimizer extends NodeCentricDepthFirstOptimizer<ConstructionNodeRemovalProposal> {
 
-    private final IntermediateQueryFactory iqFactory;
 
-    @Inject
-    private ConstructionNodeRemovalOptimizer(IntermediateQueryFactory iqFactory) {
+    public ConstructionNodeRemovalOptimizer() {
         super(false);
-        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -72,7 +68,7 @@ public class ConstructionNodeRemovalOptimizer extends NodeCentricDepthFirstOptim
                                                                    ConstructionNode currentParentNode,
                                                                    QueryNode currentChildNode) {
 
-        if (areCandidateForMerging(currentParentNode, currentChildNode)) {
+        if (isCandidateForMerging(currentChildNode)) {
             ConstructionNode castChild = (ConstructionNode) currentChildNode;
             Optional<ImmutableSubstitution> substitutionComposition = composeSubstitutions(
                     substitution,
@@ -97,19 +93,25 @@ public class ConstructionNodeRemovalOptimizer extends NodeCentricDepthFirstOptim
         return Optional.of(
                 new ConstructionNodeRemovalproposalImpl(
                         constructionNodeChainRoot,
-                        iqFactory.createConstructionNode(
-                                constructionNodeChainRoot.getVariables(),
-                                substitution
-                        ),
+                        substitution,
                         currentChildNode
                 ));
     }
 
-    private boolean areCandidateForMerging(ConstructionNode currentParentNode, QueryNode currentChildNode) {
-        return (currentChildNode instanceof ConstructionNode &&
-                !currentParentNode.getOptionalModifiers().isPresent() &&
-                !((ConstructionNode) currentChildNode).getOptionalModifiers().isPresent()
-        );
+    private boolean isCandidateForMerging(QueryNode currentChildNode) {
+        if(currentChildNode instanceof ConstructionNode){
+            Optional<ImmutableQueryModifiers> optionalModifiers = ((ConstructionNode)currentChildNode)
+                    .getOptionalModifiers();
+            if(optionalModifiers.isPresent()){
+                ImmutableQueryModifiers modifiers = optionalModifiers.get();
+                return !modifiers.hasLimit() &&
+                        !modifiers.hasOffset() &&
+                        !modifiers.hasOrder() &&
+                        !modifiers.isDistinct();
+            }
+            return true;
+        }
+        return false;
     }
 
 

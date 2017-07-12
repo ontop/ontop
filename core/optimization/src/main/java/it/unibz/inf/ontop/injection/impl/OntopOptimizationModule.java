@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import it.unibz.inf.ontop.executor.construction.ConstructionNodeRemovalExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownBooleanExpressionExecutor;
 import it.unibz.inf.ontop.executor.expression.PushUpBooleanExpressionExecutor;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
@@ -53,6 +54,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromPreferences(ProjectionShrinkingExecutor.class);
         bindFromPreferences(TrueNodeRemovalExecutor.class);
         bindFromPreferences(FlattenUnionExecutor.class);
+        bindFromPreferences(ConstructionNodeRemovalExecutor.class);
         bindFromPreferences(DatalogProgram2QueryConverter.class);
         bindFromPreferences(QueryUnionSplitter.class);
         bindFromPreferences(InnerJoinOptimizer.class);
