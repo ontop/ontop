@@ -34,15 +34,15 @@ public class DialogUtils {
 		showQuickErrorDialog(parent, e, "An Error Has Ocurred");
 	}
 
-	public static void open(URI uri) {
+	public static void open(URI uri, Component component) {
 		if (Desktop.isDesktopSupported()) {
 			try {
 				Desktop.getDesktop().browse(uri);
 			} catch (IOException e) {
-				DialogUtils.showQuickErrorDialog(null, e);
+				DialogUtils.showQuickErrorDialog(component, e);
 			}
 		} else {
-			JOptionPane.showMessageDialog(null, "URL links are not supported in this Desktop", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(component, "URL links are not supported in this Desktop", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 

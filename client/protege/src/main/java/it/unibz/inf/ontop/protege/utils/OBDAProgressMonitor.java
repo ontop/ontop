@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.utils;
  */
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Vector;
 
 public class OBDAProgressMonitor {
@@ -31,15 +32,18 @@ public class OBDAProgressMonitor {
 	private boolean bFinish = false;
 	
 	private String msg = null;
+	private final Component workspace;
 
 	private Vector<OBDAProgressListener> listeners = new Vector<OBDAProgressListener>();
 	
-	public OBDAProgressMonitor(String msg) {
+	public OBDAProgressMonitor(String msg, Component workspace) {
 		this.msg = msg;
+		this.workspace = workspace;
 	}
 	
 	public void start() {	
 		Runnable action = new Runnable() {
+
 			@Override
 			public void run() {
 				if (bFinish) {
@@ -50,7 +54,7 @@ public class OBDAProgressMonitor {
 				parent.setContentPane(panel);
 				parent.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 				parent.setSize(280, 140);
-				parent.setLocationRelativeTo(null);
+				parent.setLocationRelativeTo(workspace);
 				parent.setVisible(true);
 			}
 		};

@@ -69,7 +69,7 @@ public class MaterializeAction implements OBDAProgressListener {
 			}
 			catch (Exception e) {
 				log.error(e.getMessage(), e);
-				JOptionPane.showMessageDialog(null, "ERROR: could not materialize Abox.");
+				JOptionPane.showMessageDialog(cont, "ERROR: could not materialize Abox.");
 				this.errorShown = true;
 				return;
 			}
