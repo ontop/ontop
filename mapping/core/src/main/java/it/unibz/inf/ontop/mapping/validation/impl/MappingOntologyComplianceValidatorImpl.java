@@ -7,8 +7,11 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.predicate.AtomPredicate;
 import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -52,17 +55,17 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     /**
      * TODO: refactor:
      *    - Only rely on the predicate name, not on its other methods
-     *      --> Check according to the building expression of the "object/literal"
+     *      --> Check according to the building expression of the triple object
      *    - Check the datatypes
      */
     private boolean validateAssertion(IntermediateQuery mappingAssertion, PPTriplesMapProvenance provenance,
                                       ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox)
             throws MappingOntologyMismatchException {
 
-        AtomPredicate predicate = mappingAssertion.getProjectionAtom().getPredicate();
+        String predicateIRI = extractPredicateIRI(mappingAssertion);
 
-        PredicateType predicateType = getPredicateType(predicate);
-        Optional<Mismatch> mismatch = lookForMismatch(predicate.getName(), ontologySignature, tBox, predicateType);
+        TermType tripleObjectType = extractTripleObjectType(mappingAssertion);
+        Optional<Mismatch> mismatch = lookForMismatch(predicateIRI, tripleObjectType, ontologySignature, tBox);
 
         if (mismatch.isPresent()) {
             throw new MappingOntologyMismatchException(
@@ -75,77 +78,56 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         return true;
     }
 
-    private PredicateType getPredicateType(AtomPredicate predicate) {
-        if (predicate.isClass()) {
-            return CLASS;
-        }
-        if (predicate.isDataProperty()) {
-            return DATATYPE_PROPERTY;
-        }
-        if (predicate.isObjectProperty()) {
-            return OBJECT_PROPERTY;
-        }
-        if (predicate.isAnnotationProperty()) {
-            return ANNOTATION_PROPERTY;
-        }
-        if (predicate.isTriplePredicate()) {
-            return TRIPLE_PREDICATE;
-        }
-        else {
-            throw new UnexpectedMappingAtomPredicate(predicate);
+    private String extractPredicateIRI(IntermediateQuery mappingAssertion) {
+        AtomPredicate projectionAtomPredicate = mappingAssertion.getProjectionAtom().getPredicate();
+        if (projectionAtomPredicate.equals(PredicateImpl.QUEST_TRIPLE_PRED))
+            throw new RuntimeException("TODO: extract the RDF predicate from a triple atom");
+        else
+            return projectionAtomPredicate.getName();
+    }
+
+    private TermType extractTripleObjectType(IntermediateQuery mappingAssertion) throws TripleObjectTypeInferenceException {
+        throw new RuntimeException("TODO: implement");
+    }
+
+    private Optional<Mismatch> lookForMismatch(String predicateIRI, TermType tripleObjectType,
+                                               ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox) {
+
+        switch (tripleObjectType.getColType()) {
+            case UNSUPPORTED:
+            case NULL:
+                throw new UndeterminedTripleObjectType(predicateIRI, tripleObjectType);
+            // Object-like property
+            case OBJECT:
+            case BNODE:
+                return checkObjectOrAnnotationProperty(predicateIRI, ontologySignature, tBox);
+            // Data-like property
+            default:
+                return checkDataOrAnnotationProperty(tripleObjectType, predicateIRI, ontologySignature, tBox);
         }
     }
 
-    private Optional<Mismatch> lookForMismatch(String predicateName, ImmutableOntologyVocabulary ontologySignature,
-                                               TBoxReasoner tBox, PredicateType typeInMapping) {
-
-        if (typeInMapping == TRIPLE_PREDICATE) {
+    /**
+     * TODO: what about bootstrapped ontology from the mapping when an annotation property is both
+     * used as a object-like and data-like property?
+     */
+    private Optional<Mismatch> checkObjectOrAnnotationProperty(String predicateIRI,
+                                                               ImmutableOntologyVocabulary ontologySignature,
+                                                               TBoxReasoner tBox) {
+        /*
+         * Annotation properties are CURRENTLY assumed to be EITHER used as object or data property
+         * TODO: should we only consider the Tbox?
+         */
+        if (ontologySignature.containsDataProperty(predicateIRI))
+            throw new RuntimeException("TODO: create a mismatch or throw an exception");
+        else
             return Optional.empty();
-        }
+    }
 
-        if (typeInMapping != DATATYPE_PROPERTY &&
-                typeInMapping != ANNOTATION_PROPERTY &&
-                ontologySignature.containsDataProperty(predicateName)) {
-            return Optional.of(
-                    new Mismatch(
-                            predicateName,
-                            typeInMapping,
-                            DATATYPE_PROPERTY
-                    ));
-        }
-        if (typeInMapping != OBJECT_PROPERTY &&
-                typeInMapping != ANNOTATION_PROPERTY &&
-                ontologySignature.containsObjectProperty(predicateName)) {
-            return Optional.of(
-                    new Mismatch(
-                            predicateName,
-                            typeInMapping,
-                            OBJECT_PROPERTY
-                    ));
-        }
-        if (typeInMapping != CLASS &&
-                ontologySignature.containsClass(predicateName)) {
-            return Optional.of(
-                    new Mismatch(
-                            predicateName,
-                            typeInMapping,
-                            CLASS
-                    ));
-        }
-        if (typeInMapping != ANNOTATION_PROPERTY &&
-                typeInMapping != DATATYPE_PROPERTY &&
-                typeInMapping != OBJECT_PROPERTY &&
-                ontologySignature.containsAnnotationProperty(predicateName)) {
-            return Optional.of(
-                    new Mismatch(
-                            predicateName,
-                            typeInMapping,
-                            ANNOTATION_PROPERTY
-                    ));
-        }
-
-
-        return Optional.empty();
+    private Optional<Mismatch> checkDataOrAnnotationProperty(TermType tripleObjectType, String predicateIRI,
+                                                             ImmutableOntologyVocabulary ontologySignature,
+                                                             TBoxReasoner tBox) {
+        throw new RuntimeException("TODO: implement it");
     }
 
     private String generateMisMatchMessage(DataAtom targetAtom, PPTriplesMapProvenance provenance, Mismatch mismatch) {
@@ -233,13 +215,14 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         return Optional.empty();
     }
 
+    @Deprecated
     private class Mismatch {
 
         private final String predicateName;
-        private final PredicateType typeInMapping;
-        private final PredicateType typeInOntology;
+        private final Predicate.COL_TYPE typeInMapping;
+        private final Predicate.COL_TYPE typeInOntology;
 
-        private Mismatch(String predicateName, PredicateType typeInMapping, PredicateType typeInOntology) {
+        private Mismatch(String predicateName, Predicate.COL_TYPE typeInMapping, Predicate.COL_TYPE typeInOntology) {
             this.predicateName = predicateName;
             this.typeInMapping = typeInMapping;
             this.typeInOntology = typeInOntology;
@@ -249,15 +232,16 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             return predicateName;
         }
 
-        private PredicateType getTypeInMapping() {
+        private Predicate.COL_TYPE getTypeInMapping() {
             return typeInMapping;
         }
 
-        private PredicateType getTypeInOntology() {
+        private Predicate.COL_TYPE getTypeInOntology() {
             return typeInOntology;
         }
     }
 
+    @Deprecated
     enum PredicateType {
         CLASS,
         OBJECT_PROPERTY,
@@ -266,9 +250,15 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         TRIPLE_PREDICATE
     }
 
-    private static class UnexpectedMappingAtomPredicate extends OntopInternalBugException {
-        UnexpectedMappingAtomPredicate(AtomPredicate predicate) {
-            super("Cannot categorize this unexpected predicate: " + predicate);
+    private static class TripleObjectTypeInferenceException extends OntopInternalBugException {
+        TripleObjectTypeInferenceException(IntermediateQuery mappingAssertion, Variable tripleObjectVariable) {
+            super("Internal bug: cannot infer the type of " + tripleObjectVariable + " in: \n" + mappingAssertion);
+        }
+    }
+
+    private static class UndeterminedTripleObjectType extends OntopInternalBugException {
+        UndeterminedTripleObjectType(String predicateName, TermType tripleObjectType) {
+            super("Internal bug: undetermined type (" + tripleObjectType.getColType() + ") for " + predicateName);
         }
     }
 }
