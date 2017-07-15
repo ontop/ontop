@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.pp.PreProcessedMapping;
-import it.unibz.inf.ontop.pp.validation.PPMappingOntologyComplianceValidator;
+import it.unibz.inf.ontop.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
 import it.unibz.inf.ontop.spec.trans.MappingDatatypeFiller;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
@@ -35,15 +35,17 @@ import java.util.Optional;
 
 public class SQLMappingExtractor implements MappingExtractor {
 
+    private static final String ONTOLOGY_SATURATED_TBOX_ERROR_MSG = "the Ontology and TBoxReasoner must be both present, or none";
+
     private final SQLMappingParser mappingParser;
-    private final PPMappingOntologyComplianceValidator ontologyComplianceValidator;
+    private final MappingOntologyComplianceValidator ontologyComplianceValidator;
     private final SQLPPMappingConverter ppMappingConverter;
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final OntopMappingSQLSettings settings;
     private final MappingDatatypeFiller mappingDatatypeFiller;
 
     @Inject
-    private SQLMappingExtractor(SQLMappingParser mappingParser, PPMappingOntologyComplianceValidator ontologyComplianceValidator,
+    private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
                                 NativeQueryLanguageComponentFactory nativeQLFactory, OntopMappingSQLSettings settings) {
 
@@ -93,14 +95,9 @@ public class SQLMappingExtractor implements MappingExtractor {
             throws MappingException, DBMetadataExtractionException {
 
         if(ontology.isPresent() != saturatedTBox.isPresent()){
-            throw new IllegalArgumentException("the Ontology and TBoxReasoner must be both present, or none");
+            throw new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG);
         }
-
-        SQLPPMapping castPPMapping = castPPMapping(ppMapping);
-        if(ontology.isPresent()){
-            ontologyComplianceValidator.validateMapping(castPPMapping, ontology.get().getVocabulary(), saturatedTBox.get());
-        }
-        return convertPPMapping(castPPMapping, castDBMetadata(dbMetadata), specInput, ontology, saturatedTBox,
+        return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, ontology, saturatedTBox,
                 executorRegistry);
     }
 
@@ -114,7 +111,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                                   OBDASpecInput specInput, Optional<Ontology> optionalOntology,
                                                   Optional<TBoxReasoner> optionalSaturatedTBox,
                                                   ExecutorRegistry executorRegistry)
-            throws MetaMappingExpansionException, DBMetadataExtractionException {
+            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException {
 
 
         RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
@@ -126,7 +123,7 @@ public class SQLMappingExtractor implements MappingExtractor {
 
         MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
 
-        // TODO: fill data types and validate
+        validateMapping(optionalOntology, optionalSaturatedTBox, filledProvMapping);
 
         return new MappingAndDBMetadataImpl(filledProvMapping.toRegularMapping(), dbMetadata);
     }
@@ -163,6 +160,21 @@ public class SQLMappingExtractor implements MappingExtractor {
          */
         catch (SQLException e) {
             throw new DBMetadataExtractionException(e.getMessage());
+        }
+    }
+
+    /**
+     * Validation:
+     *    - Mismatch between the ontology and the mapping
+     */
+    private void validateMapping(Optional<Ontology> optionalOntology, Optional<TBoxReasoner> optionalSaturatedTBox,
+                                 MappingWithProvenance filledProvMapping) throws MappingOntologyMismatchException {
+        if (optionalOntology.isPresent()) {
+            Ontology ontology = optionalOntology.get();
+            TBoxReasoner saturatedTBox = optionalSaturatedTBox
+                    .orElseThrow(() -> new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG));
+
+            ontologyComplianceValidator.validate(filledProvMapping, ontology.getVocabulary(), saturatedTBox);
         }
     }
 

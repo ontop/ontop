@@ -1,60 +1,32 @@
-package it.unibz.inf.ontop.pp.validation.impl;
+package it.unibz.inf.ontop.mapping.validation.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.mapping.MappingWithProvenance;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
 import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.pp.PreProcessedMapping;
-import it.unibz.inf.ontop.pp.PreProcessedTriplesMap;
-import it.unibz.inf.ontop.pp.validation.PPMappingOntologyComplianceValidator;
+import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
+import it.unibz.inf.ontop.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
-import static it.unibz.inf.ontop.pp.validation.impl.PPMappingOntologyComplianceValidatorImpl.PredicateType.*;
+import static it.unibz.inf.ontop.mapping.validation.impl.MappingOntologyComplianceValidatorImpl.PredicateType.*;
 
+public class MappingOntologyComplianceValidatorImpl implements MappingOntologyComplianceValidator {
 
-public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntologyComplianceValidator {
-
-    private class Mismatch {
-
-        private final String predicateName;
-        private final PredicateType typeInMapping;
-        private final PredicateType typeInOntology;
-
-        private Mismatch(String predicateName, PredicateType typeInMapping, PredicateType typeInOntology) {
-            this.predicateName = predicateName;
-            this.typeInMapping = typeInMapping;
-            this.typeInOntology = typeInOntology;
-        }
-
-        private String getPredicateName() {
-            return predicateName;
-        }
-
-        private PredicateType getTypeInMapping() {
-            return typeInMapping;
-        }
-
-        private PredicateType getTypeInOntology() {
-            return typeInOntology;
-        }
+    @Inject
+    private MappingOntologyComplianceValidatorImpl() {
     }
-
-    public enum PredicateType {
-        CLASS,
-        OBJECT_PROPERTY,
-        ANNOTATION_PROPERTY,
-        DATATYPE_PROPERTY,
-        TRIPLE_PREDICATE
-    }
-
-    ;
 
     private final ImmutableMap<PredicateType, String> PredicateTypeToErrorMessageSubstring =
             ImmutableMap.<PredicateType, String>builder()
@@ -66,64 +38,66 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
 
 
     @Override
-    public boolean validateMapping(PreProcessedMapping preProcessedMapping, ImmutableOntologyVocabulary signature,
-                                   TBoxReasoner tBox)
+    public boolean validate(MappingWithProvenance mapping, ImmutableOntologyVocabulary signature,
+                            TBoxReasoner tBox)
             throws MappingOntologyMismatchException {
-        for (PreProcessedTriplesMap triplesMap : (ImmutableList<PreProcessedTriplesMap>) preProcessedMapping.getTripleMaps()) {
-            validateTriplesMap(triplesMap, signature, tBox);
+
+
+        for (Map.Entry<IntermediateQuery, PPTriplesMapProvenance> entry : mapping.getProvenanceMap().entrySet()) {
+            validateAssertion(entry.getKey(), entry.getValue(), signature, tBox);
         }
         return true;
     }
 
-    private boolean validateTriplesMap(PreProcessedTriplesMap triplesMap, ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox) throws MappingOntologyMismatchException {
-        for (ImmutableFunctionalTerm targetAtom : triplesMap.getTargetAtoms()) {
-            validateTriple(triplesMap, targetAtom, ontologySignature, tBox);
-        }
-        return true;
-    }
-
-    private boolean validateTriple(PreProcessedTriplesMap triplesMap, ImmutableFunctionalTerm targetTriple, ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox)
+    /**
+     * TODO: refactor:
+     *    - Only rely on the predicate name, not on its other methods
+     *      --> Check according to the building expression of the "object/literal"
+     *    - Check the datatypes
+     */
+    private boolean validateAssertion(IntermediateQuery mappingAssertion, PPTriplesMapProvenance provenance,
+                                      ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox)
             throws MappingOntologyMismatchException {
-        String predicateName = targetTriple.getFunctionSymbol().getName();
-        Optional<PredicateType> predicateType = getPredicateType(targetTriple);
-        Optional<Mismatch> mismatch = predicateType.isPresent() ?
-                lookForMismatch(predicateName, ontologySignature, tBox, predicateType.get()) :
-                Optional.empty();
+
+        AtomPredicate predicate = mappingAssertion.getProjectionAtom().getPredicate();
+
+        PredicateType predicateType = getPredicateType(predicate);
+        Optional<Mismatch> mismatch = lookForMismatch(predicate.getName(), ontologySignature, tBox, predicateType);
 
         if (mismatch.isPresent()) {
             throw new MappingOntologyMismatchException(
                     generateMisMatchMessage(
-                            targetTriple,
-                            triplesMap,
+                            mappingAssertion.getProjectionAtom(),
+                            provenance,
                             mismatch.get()
                     ));
         }
         return true;
     }
 
-    private Optional<PredicateType> getPredicateType(ImmutableFunctionalTerm targetTriple) {
-
-        Predicate predicate = targetTriple.getFunctionSymbol();
+    private PredicateType getPredicateType(AtomPredicate predicate) {
         if (predicate.isClass()) {
-            return Optional.of(CLASS);
+            return CLASS;
         }
         if (predicate.isDataProperty()) {
-            return Optional.of(DATATYPE_PROPERTY);
+            return DATATYPE_PROPERTY;
         }
         if (predicate.isObjectProperty()) {
-            return Optional.of(OBJECT_PROPERTY);
+            return OBJECT_PROPERTY;
         }
         if (predicate.isAnnotationProperty()) {
-            return Optional.of(ANNOTATION_PROPERTY);
+            return ANNOTATION_PROPERTY;
         }
         if (predicate.isTriplePredicate()) {
-            return Optional.of(TRIPLE_PREDICATE);
+            return TRIPLE_PREDICATE;
         }
-        return Optional.empty();
-//        throw new IllegalArgumentException("Unexpected type for predicate: " + predicate + " in target triple " + targetTriple);
+        else {
+            throw new UnexpectedMappingAtomPredicate(predicate);
+        }
     }
 
-    private Optional<Mismatch> lookForMismatch(String predicateName, ImmutableOntologyVocabulary ontologySignature, TBoxReasoner tBox, PredicateType typeInMapping) {
+    private Optional<Mismatch> lookForMismatch(String predicateName, ImmutableOntologyVocabulary ontologySignature,
+                                               TBoxReasoner tBox, PredicateType typeInMapping) {
 
         if (typeInMapping == TRIPLE_PREDICATE) {
             return Optional.empty();
@@ -174,7 +148,7 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
         return Optional.empty();
     }
 
-    private String generateMisMatchMessage(ImmutableFunctionalTerm targetTriple, PreProcessedTriplesMap triplesMap, Mismatch mismatch) {
+    private String generateMisMatchMessage(DataAtom targetAtom, PPTriplesMapProvenance provenance, Mismatch mismatch) {
 
         return mismatch.getPredicateName() +
                 " is used both as " +
@@ -182,9 +156,9 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
                 " in the ontology, and as " +
                 PredicateTypeToErrorMessageSubstring.get(mismatch.getTypeInMapping()) +
                 " in target atom " +
-                targetTriple +
+                targetAtom +
                 " of the triplesMap: \n[\n" +
-                triplesMap.getProvenance(targetTriple).getProvenanceInfo() +
+                provenance.getProvenanceInfo() +
                 "\n]";
     }
 
@@ -217,12 +191,12 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
     private ImmutableMap<Predicate, Datatype> getDescendentNodesPartialMap(TBoxReasoner reasoner, DataRangeExpression node, Equivalences<DataRangeExpression> nodeSet) {
         if (node instanceof Datatype) {
             return reasoner.getDataRangeDAG().getSub(nodeSet).stream()
-                    .map(s -> s.getRepresentative())
+                    .map(Equivalences::getRepresentative)
                     .filter(d -> d != node)
-                    .map(d -> getPredicate(d))
-                    .filter(d -> d.isPresent())
+                    .map(this::getPredicate)
+                    .filter(Optional::isPresent)
                     .collect(ImmutableCollectors.toMap(
-                            d -> d.get(),
+                            Optional::get,
                             d -> (Datatype) node
                     ));
         }
@@ -257,5 +231,44 @@ public class PPMappingOntologyComplianceValidatorImpl implements PPMappingOntolo
             return Optional.of(((DataPropertyRangeExpression) expression).getProperty().getPredicate());
         }
         return Optional.empty();
+    }
+
+    private class Mismatch {
+
+        private final String predicateName;
+        private final PredicateType typeInMapping;
+        private final PredicateType typeInOntology;
+
+        private Mismatch(String predicateName, PredicateType typeInMapping, PredicateType typeInOntology) {
+            this.predicateName = predicateName;
+            this.typeInMapping = typeInMapping;
+            this.typeInOntology = typeInOntology;
+        }
+
+        private String getPredicateName() {
+            return predicateName;
+        }
+
+        private PredicateType getTypeInMapping() {
+            return typeInMapping;
+        }
+
+        private PredicateType getTypeInOntology() {
+            return typeInOntology;
+        }
+    }
+
+    enum PredicateType {
+        CLASS,
+        OBJECT_PROPERTY,
+        ANNOTATION_PROPERTY,
+        DATATYPE_PROPERTY,
+        TRIPLE_PREDICATE
+    }
+
+    private static class UnexpectedMappingAtomPredicate extends OntopInternalBugException {
+        UnexpectedMappingAtomPredicate(AtomPredicate predicate) {
+            super("Cannot categorize this unexpected predicate: " + predicate);
+        }
     }
 }
