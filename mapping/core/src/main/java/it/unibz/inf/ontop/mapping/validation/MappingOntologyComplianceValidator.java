@@ -7,6 +7,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 public interface MappingOntologyComplianceValidator {
 
-    boolean validate(MappingWithProvenance preProcessedMapping, ImmutableOntologyVocabulary signature, TBoxReasoner tBox)
+    void validate(MappingWithProvenance preProcessedMapping, ImmutableOntologyVocabulary signature, TBoxReasoner tBox)
             throws MappingOntologyMismatchException;
 }
