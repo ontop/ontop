@@ -63,7 +63,7 @@ public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<Cons
                     castNode,
                     modifiers,
                     castNode,
-                    query.getFirstChild(castNode).get()
+                    query.getFirstChild(castNode)
             );
         }
         return Optional.empty();
@@ -73,10 +73,10 @@ public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<Cons
                                                                     ConstructionNode constructionNodeChainRoot,
                                                                     ImmutableQueryModifiers modifiers,
                                                                     ConstructionNode currentParentNode,
-                                                                    QueryNode currentChildNode) {
+                                                                    Optional<QueryNode> currentChildNode) {
 
-        if (currentChildNode instanceof ConstructionNode) {
-            ConstructionNode castChild = (ConstructionNode) currentChildNode;
+        if (currentChildNode.isPresent() && currentChildNode.get() instanceof ConstructionNode) {
+            ConstructionNode castChild = (ConstructionNode) currentChildNode.get();
             if (castChild.getSubstitution().isEmpty()) {
                 Optional<ImmutableQueryModifiers> combinedModifiers = combineModifiers(
                         modifiers,
@@ -88,7 +88,7 @@ public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<Cons
                             constructionNodeChainRoot,
                             combinedModifiers.get(),
                             castChild,
-                            query.getFirstChild(castChild).get()
+                            query.getFirstChild(castChild)
                     );
                 }
             }
@@ -109,7 +109,9 @@ public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<Cons
                         modifiers.isIdle() ?
                                 Optional.empty() :
                                 Optional.of(modifiers),
-                        currentChildNode,
+                        currentChildNode.isPresent() ?
+                                currentChildNode.get() :
+                                currentParentNode,
                         deleteConstructionNodeChain
                 ));
     }

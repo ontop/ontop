@@ -20,7 +20,6 @@ public class DefaultMappingTransformer implements MappingTransformer{
     private final MappingCanonicalRewriter mappingCanonicalRewriter;
     private final MappingNormalizer mappingNormalizer;
     private final MappingSaturator mappingSaturator;
-    private final MappingDatatypeFiller mappingDatatypeFiller;
     private final ABoxFactIntoMappingConverter factConverter;
     private final MappingMerger mappingMerger;
     private final OntopMappingSettings settings;
@@ -32,7 +31,6 @@ public class DefaultMappingTransformer implements MappingTransformer{
     private DefaultMappingTransformer(MappingCanonicalRewriter mappingCanonicalRewriter,
                                      MappingNormalizer mappingNormalizer,
                                      MappingSaturator mappingSaturator,
-                                     MappingDatatypeFiller mappingDatatypeFiller,
                                      ABoxFactIntoMappingConverter inserter,
                                      MappingMerger mappingMerger,
                                      OntopMappingSettings settings,
@@ -42,7 +40,6 @@ public class DefaultMappingTransformer implements MappingTransformer{
         this.mappingCanonicalRewriter = mappingCanonicalRewriter;
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
-        this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.factConverter = inserter;
         this.mappingMerger = mappingMerger;
         this.settings = settings;

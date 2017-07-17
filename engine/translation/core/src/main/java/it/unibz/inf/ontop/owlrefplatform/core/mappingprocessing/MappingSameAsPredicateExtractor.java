@@ -53,8 +53,8 @@ public class MappingSameAsPredicateExtractor {
 
         this.mapping = mapping;
 
-        dataPropertiesAndClassesMapped = new HashSet<Predicate>();
-        objectPropertiesMapped = new HashSet<Predicate>();
+        dataPropertiesAndClassesMapped = new HashSet<>();
+        objectPropertiesMapped = new HashSet<>();
 
         retrieveSameAsMappingsURIs();
 
