@@ -206,8 +206,8 @@ public class QuestQueryProcessor implements QueryTranslator {
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
-				ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizerImpl();
-				intermediateQuery = projectionShrinkingOptimizer.optimize(intermediateQuery);
+				;
+				intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
 
 				log.debug("After projection shrinking: \n" + intermediateQuery.toString());
 

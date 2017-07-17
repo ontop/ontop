@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import it.unibz.inf.ontop.executor.construction.ConstructionNodeCleaningExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownBooleanExpressionExecutor;
 import it.unibz.inf.ontop.executor.expression.PushUpBooleanExpressionExecutor;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
@@ -12,6 +13,7 @@ import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutor;
+import it.unibz.inf.ontop.executor.union.FlattenUnionExecutor;
 import it.unibz.inf.ontop.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
@@ -51,6 +53,8 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromPreferences(LeftJoinExecutor.class);
         bindFromPreferences(ProjectionShrinkingExecutor.class);
         bindFromPreferences(TrueNodeRemovalExecutor.class);
+        bindFromPreferences(FlattenUnionExecutor.class);
+        bindFromPreferences(ConstructionNodeCleaningExecutor.class);
         bindFromPreferences(DatalogProgram2QueryConverter.class);
         bindFromPreferences(QueryUnionSplitter.class);
         bindFromPreferences(InnerJoinOptimizer.class);
