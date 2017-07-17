@@ -90,10 +90,12 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     }
 
     /**
-     * For a mapping assertion, the building expression of the triple object variable is assumed
-     * to be present in the ROOT construction node.
+     * For a mapping assertion using an RDF property (not rdf:type) the building expression of the triple object
+     * variable is assumed to be present in the ROOT construction node.
      *
      * Note that this assumption does not hold for intermediate query in general.
+     *
+     * Return nothing if the property is rdf:type (class instance assertion)
      *
      */
     private Optional<TermType> extractTripleObjectType(IntermediateQuery mappingAssertion)
