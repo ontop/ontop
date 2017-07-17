@@ -43,7 +43,6 @@ public class DatatypeInferenceTest {
         TEST_MANAGER.close();
     }
 
-    @Ignore("TODO: support it")
     @Test(expected = MappingOntologyMismatchException.class)
     public void testMappingOntologyConflict() throws OBDASpecificationException {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_invalid_datatype.obda");

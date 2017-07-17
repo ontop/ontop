@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.mapping.validation.impl;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
@@ -61,7 +63,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                          TBoxReasoner saturatedTBox)
             throws MappingOntologyMismatchException {
 
-        ImmutableMap<String, Datatype> datatypeMap = computeDataTypeMap(saturatedTBox);
+        ImmutableMultimap<String, Datatype> datatypeMap = computeDataTypeMap(saturatedTBox);
 
         for (Map.Entry<IntermediateQuery, PPTriplesMapProvenance> entry : mapping.getProvenanceMap().entrySet()) {
             validateAssertion(entry.getKey(), entry.getValue(), declaredVocabulary, datatypeMap);
@@ -70,7 +72,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
     private void validateAssertion(IntermediateQuery mappingAssertion, PPTriplesMapProvenance provenance,
                                    ImmutableOntologyVocabulary vocabulary,
-                                   ImmutableMap<String, Datatype> datatypeMap)
+                                   ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
         String predicateIRI = extractPredicateIRI(mappingAssertion);
@@ -171,7 +173,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     private void checkTripleObject(String predicateIRI, Optional<TermType> optionalTripleObjectType,
                                    PPTriplesMapProvenance provenance,
                                    ImmutableOntologyVocabulary declaredVocabulary,
-                                   ImmutableMap<String, Datatype> datatypeMap)
+                                   ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
         if (optionalTripleObjectType.isPresent()) {
@@ -218,7 +220,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     private void checkDataOrAnnotationProperty(TermType tripleObjectType, String predicateIRI,
                                                PPTriplesMapProvenance provenance,
                                                ImmutableOntologyVocabulary declaredVocabulary,
-                                               ImmutableMap<String, Datatype> datatypeMap)
+                                               ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
         /*
          * Cannot be an object property
@@ -234,12 +236,9 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                     CLASS_STR, DATA_PROPERTY_STR));
 
         /*
-         * Checks the datatype
+         * Checks the datatypes
          */
-        Optional<Datatype> optionalDeclaredDatatype = Optional.ofNullable(datatypeMap.get(predicateIRI));
-
-        if (optionalDeclaredDatatype.isPresent()) {
-            Datatype declaredDatatype = optionalDeclaredDatatype.get();
+        for (Datatype declaredDatatype : datatypeMap.get(predicateIRI)) {
 
             // TODO: throw a better exception
             COL_TYPE internalType = DATATYPE_FACTORY.getInternalType((DatatypePredicate) declaredDatatype.getPredicate())
@@ -304,11 +303,11 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      * it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair#getDataTypeFromOntology
      * from Ontop v 1.18.1
      */
-    private ImmutableMap<String, Datatype> computeDataTypeMap(TBoxReasoner reasoner) {
+    private ImmutableMultimap<String, Datatype> computeDataTypeMap(TBoxReasoner reasoner) {
         // TODO: switch to guava > 2.1, and replace by Streams.stream(iterable)
         return StreamSupport.stream(reasoner.getDataRangeDAG().spliterator(), false)
                 .flatMap(n -> getPartialPredicateToDatatypeMap(n, reasoner).entrySet().stream())
-                .collect(ImmutableCollectors.toMap(
+                .collect(ImmutableCollectors.toMultimap(
                         e -> e.getKey().getName(),
                         Map.Entry::getValue));
     }
@@ -316,12 +315,11 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
     private ImmutableMap<Predicate, Datatype> getPartialPredicateToDatatypeMap(Equivalences<DataRangeExpression> nodeSet,
                                                                                TBoxReasoner reasoner) {
-
         DataRangeExpression node = nodeSet.getRepresentative();
 
         return ImmutableMap.<Predicate, Datatype>builder()
-                .putAll(getEquivalentNodesPartialMap(node, nodeSet))
                 .putAll(getDescendentNodesPartialMap(reasoner, node, nodeSet))
+                .putAll(getEquivalentNodesPartialMap(node, nodeSet))
                 .build();
     }
 
