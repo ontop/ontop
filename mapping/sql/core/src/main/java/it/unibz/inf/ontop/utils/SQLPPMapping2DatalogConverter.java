@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
 import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 
 import java.util.*;
@@ -37,6 +37,8 @@ import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
@@ -44,12 +46,19 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class SQLPPMapping2DatalogConverter {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SQLPPMapping2DatalogConverter.class);
+
     /**
      * returns a Datalog representation of the mappings
      */
-    public static ImmutableList<CQIE> constructDatalogProgram(Collection<SQLPPTriplesMap> mappingAxioms, DBMetadata metadata0) {
+    public static ImmutableList<CQIE> constructDatalogProgram(Collection<SQLPPTriplesMap> triplesMaps,
+                                                              DBMetadata metadata) {
+        return ImmutableList.copyOf(convert(triplesMaps, metadata).keySet());
+    }
 
-        ImmutableList.Builder<CQIE> datalogProgram = ImmutableList.builder();
+    public static ImmutableMap<CQIE, PPTriplesMapProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
+                                                                     DBMetadata metadata0) {
+        Map<CQIE, PPTriplesMapProvenance> mutableMap = new HashMap<>();
 
         RDBMetadata metadata = (RDBMetadata)metadata0;
 
@@ -57,7 +66,7 @@ public class SQLPPMapping2DatalogConverter {
 
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 
-        for (SQLPPTriplesMap mappingAxiom : mappingAxioms) {
+        for (SQLPPTriplesMap mappingAxiom : triplesMaps) {
             try {
                 OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
 
@@ -103,9 +112,16 @@ public class SQLPPMapping2DatalogConverter {
                 }
 
                 for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {
+                    PPTriplesMapProvenance provenance = mappingAxiom.getProvenance(atom);
                     Function head = renameVariables(atom, lookupTable, idfac);
                     CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
-                    datalogProgram.add(rule);
+
+                    if (mutableMap.containsKey(rule)) {
+                        LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + mutableMap.get(rule));
+                    }
+                    else {
+                        mutableMap.put(rule, provenance);
+                    }
                 }
             }
             catch (Exception e) { // in particular, InvalidSelectQueryException
@@ -121,7 +137,7 @@ public class SQLPPMapping2DatalogConverter {
                             "Please correct the issues to continue.\n\n" +
                             Joiner.on("\n\n").join(errorMessages));
 
-        return datalogProgram.build();
+        return ImmutableMap.copyOf(mutableMap);
     }
 
 

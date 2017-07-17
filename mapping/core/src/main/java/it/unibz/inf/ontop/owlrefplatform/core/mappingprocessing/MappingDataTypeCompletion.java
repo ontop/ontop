@@ -22,9 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.predicate.BNodePredicate;
 import it.unibz.inf.ontop.model.predicate.Predicate;
@@ -59,12 +57,12 @@ public class MappingDataTypeCompletion {
         this.metadata = metadata;
     }
 
-    public void insertDataTyping(CQIE rule) throws DBMetadataExtractionException, InvalidMappingException {
+    public void insertDataTyping(CQIE rule) {
         Function atom = rule.getHead();
         Predicate predicate = atom.getFunctionSymbol();
         if (predicate.getArity() == 2) { // we check both for data and object property
             Term term = atom.getTerm(1); // the second argument only
-            Map<String, List<IndexedPosititon>> termOccurenceIndex = createIndex(rule.getBody());
+            Map<String, List<IndexedPosition>> termOccurenceIndex = createIndex(rule.getBody());
             // Infer variable datatypes
             insertVariableDataTyping(term, atom, 1, termOccurenceIndex);
             // Infer operation datatypes from variable datatypes
@@ -77,8 +75,8 @@ public class MappingDataTypeCompletion {
      * It will replace the variable with a new function symbol and update the rule atom.
      * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
      */
-    private void insertVariableDataTyping(Term term, Function atom, int position, Map<String, List<IndexedPosititon>> termOccurenceIndex)
-            throws DBMetadataExtractionException, InvalidMappingException {
+    private void insertVariableDataTyping(Term term, Function atom, int position,
+                                          Map<String, List<IndexedPosition>> termOccurenceIndex) {
         Predicate predicate = atom.getFunctionSymbol();
 
         if (term instanceof Function) {
@@ -160,52 +158,49 @@ public class MappingDataTypeCompletion {
      * @param variable
      * @return
      */
-    private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosititon>> termOccurenceIndex, Variable variable)
-            throws InvalidMappingException, DBMetadataExtractionException {
+    private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) {
 
 
-        List<IndexedPosititon> list = termOccurenceIndex.get(variable.getName());
+        List<IndexedPosition> list = termOccurenceIndex.get(variable.getName());
         if (list == null)
-            throw new InvalidMappingException("Unknown term in head");
+            throw new UnboundTargetVariableException(variable);
 
         // ROMAN (10 Oct 2015): this assumes the first occurrence is a database relation!
         //                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!
-        IndexedPosititon ip = list.get(0);
+        IndexedPosition ip = list.get(0);
 
         RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom
                 .getFunctionSymbol());
         RelationDefinition td = metadata.getRelation(tableId);
         Attribute attribute = td.getAttribute(ip.pos);
 
-        Optional<Predicate.COL_TYPE> type = metadata.getColType(attribute);
-        if (!type.isPresent()) {
-            throw new DBMetadataExtractionException("The type should be present");
-        }
-        return type.get();
+        return metadata.getColType(attribute)
+                // Default datatype : XSD_STRING
+                .orElse(Predicate.COL_TYPE.STRING);
     }
 
-    private static class IndexedPosititon {
+    private static class IndexedPosition {
         final Function atom;
         final int pos;
 
-        IndexedPosititon(Function atom, int pos) {
+        IndexedPosition(Function atom, int pos) {
             this.atom = atom;
             this.pos = pos;
         }
     }
 
-    private static Map<String, List<IndexedPosititon>> createIndex(List<Function> body) {
-        Map<String, List<IndexedPosititon>> termOccurenceIndex = new HashMap<>();
+    private static Map<String, List<IndexedPosition>> createIndex(List<Function> body) {
+        Map<String, List<IndexedPosition>> termOccurenceIndex = new HashMap<>();
         for (Function a : body) {
             List<Term> terms = a.getTerms();
             int i = 1; // position index
             for (Term t : terms) {
                 if (t instanceof Variable) {
                     Variable var = (Variable) t;
-                    List<IndexedPosititon> aux = termOccurenceIndex.get(var.getName());
+                    List<IndexedPosition> aux = termOccurenceIndex.get(var.getName());
                     if (aux == null)
                         aux = new LinkedList<>();
-                    aux.add(new IndexedPosititon(a, i));
+                    aux.add(new IndexedPosition(a, i));
                     termOccurenceIndex.put(var.getName(), aux);
                     i++; // increase the position index for the next variable
                 } else if (t instanceof FunctionalTermImpl) {
@@ -219,5 +214,16 @@ public class MappingDataTypeCompletion {
         }
         return termOccurenceIndex;
     }
+
+    /**
+     * Should have been detected earlier!
+     */
+    private static class UnboundTargetVariableException extends OntopInternalBugException {
+
+        protected UnboundTargetVariableException(Variable variable) {
+            super("Unknown variable in the head of a mapping:" + variable + ". Should have been detected earlier !");
+        }
+    }
+
 }
 

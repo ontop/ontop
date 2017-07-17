@@ -9,5 +9,5 @@ import java.util.Optional;
 @FunctionalInterface
 public interface OntologySupplier {
 
-    public Optional<Ontology> get() throws OntologyException;
+    Optional<Ontology> get() throws OntologyException;
 }
