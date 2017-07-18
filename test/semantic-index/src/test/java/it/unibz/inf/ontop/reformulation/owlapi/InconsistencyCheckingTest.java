@@ -20,38 +20,18 @@ package it.unibz.inf.ontop.reformulation.owlapi;
  * #L%
  */
 
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ClassAssertion;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DataProperty;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Declaration;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DisjointClasses;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DisjointObjectProperties;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DisjointDataProperties;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ObjectProperty;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.NamedIndividual;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ObjectPropertyAssertion;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DataPropertyAssertion;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.FunctionalDataProperty;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.FunctionalObjectProperty;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Literal;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Ontology;
-
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 
 import java.util.Properties;
+
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
 
 public class InconsistencyCheckingTest extends TestCase{
 
@@ -99,7 +79,7 @@ public class InconsistencyCheckingTest extends TestCase{
 	public void testInitialConsistency() throws Exception {
 		//initially the ontology is consistent
 		startReasoner();
-		assertTrue(reasoner.isQuestConsistent());
+		assertTrue(reasoner.isConsistent());
 	}
 	
 	@Test
@@ -112,7 +92,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isQuestConsistent();
+		boolean consistent = reasoner.isConsistent();
 		assertFalse(consistent);
 
 	} 
@@ -127,7 +107,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isQuestConsistent();
+		boolean consistent = reasoner.isConsistent();
 		assertFalse(consistent);
 
 	} 
@@ -142,7 +122,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isQuestConsistent();
+		boolean consistent = reasoner.isConsistent();
 		assertFalse(consistent);
 
 	} 
@@ -157,7 +137,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isQuestConsistent();
+		boolean consistent = reasoner.isConsistent();
 		assertFalse(consistent);
 
 	} 
@@ -172,7 +152,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isQuestConsistent();
+		boolean consistent = reasoner.isConsistent();
 		assertFalse(consistent);
 
 	} 

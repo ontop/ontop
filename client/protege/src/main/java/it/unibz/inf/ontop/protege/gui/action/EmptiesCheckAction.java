@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.panels.EmptiesCheckPanel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
@@ -61,9 +61,9 @@ public class EmptiesCheckAction extends ProtegeAction {
 		OWLReasoner reasoner = owlManager.getOWLReasonerManager().getCurrentReasoner();
 
 
-		if (reasoner instanceof QuestOWL) {
+		if (reasoner instanceof OntopProtegeReasoner) {
 			try {
-				check = ((QuestOWL) reasoner).getEmptyEntitiesChecker();
+				check = ((OntopProtegeReasoner) reasoner).getEmptyEntitiesChecker();
 
 				JDialog dialog = new JDialog();
 				dialog.setModal(true);
