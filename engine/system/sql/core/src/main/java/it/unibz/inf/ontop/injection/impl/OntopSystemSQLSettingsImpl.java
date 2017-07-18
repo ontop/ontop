@@ -44,8 +44,8 @@ public class OntopSystemSQLSettingsImpl extends OntopTranslationSQLSettingsImpl 
     }
 
     @Override
-    public int getAbandonedTimeout() {
-        return getRequiredInteger(ABANDONED_TIMEOUT);
+    public int getConnectionTimeout() {
+        return getRequiredInteger(CONNECTION_TIMEOUT);
     }
 
     @Override

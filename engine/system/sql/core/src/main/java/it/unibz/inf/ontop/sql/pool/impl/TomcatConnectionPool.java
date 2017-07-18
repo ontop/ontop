@@ -46,17 +46,18 @@ public class TomcatConnectionPool implements JDBCConnectionPool {
         }
 
         boolean removeAbandoned = settings.isRemoveAbandonedEnabled();
-        int abandonedTimeout = settings.getAbandonedTimeout();
+        int abandonedTimeout = settings.getConnectionTimeout();
         int startPoolSize = settings.getConnectionPoolInitialSize();
         int maxPoolSize = settings.getConnectionPoolMaxSize();
+        int timeout = settings.getConnectionTimeout();
 
         poolProperties.setTestOnReturn(false);
         poolProperties.setMaxActive(maxPoolSize);
         poolProperties.setMaxIdle(maxPoolSize);
         poolProperties.setInitialSize(startPoolSize);
-        poolProperties.setMaxWait(30000);
+        poolProperties.setMaxWait(timeout);
         poolProperties.setRemoveAbandonedTimeout(abandonedTimeout);
-        poolProperties.setMinEvictableIdleTimeMillis(30000);
+        poolProperties.setMinEvictableIdleTimeMillis(timeout);
         poolProperties.setLogAbandoned(false);
         poolProperties.setRemoveAbandoned(removeAbandoned);
         poolProperties.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"

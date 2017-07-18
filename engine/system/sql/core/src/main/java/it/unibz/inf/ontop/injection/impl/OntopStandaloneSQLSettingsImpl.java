@@ -47,8 +47,8 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
-    public int getAbandonedTimeout() {
-        return systemSettings.getAbandonedTimeout();
+    public int getConnectionTimeout() {
+        return systemSettings.getConnectionTimeout();
     }
 
     @Override
