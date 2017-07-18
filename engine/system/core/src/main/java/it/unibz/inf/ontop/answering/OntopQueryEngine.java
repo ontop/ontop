@@ -6,11 +6,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 
 public interface OntopQueryEngine extends AutoCloseable {
 
-    /**
-     * Initialization method
-     */
-    boolean connect() throws OntopConnectionException;
-
     void close() throws OntopConnectionException;
 
     /**

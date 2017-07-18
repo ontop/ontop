@@ -223,7 +223,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		// pm.reasonerTaskBusy();
 
 		queryEngine = engineFactory.create(obdaSpecification, executorRegistry);
-		queryEngine.connect();
 		
 		// Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 

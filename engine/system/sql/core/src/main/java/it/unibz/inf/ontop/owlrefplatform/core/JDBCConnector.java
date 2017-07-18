@@ -28,9 +28,6 @@ public class JDBCConnector implements DBConnector {
     private final OntopSystemSQLSettings settings;
     private final Optional<IRIDictionary> iriDictionary;
 
-    /* The active connection used to get metadata from the DBMS */
-    private transient Connection localConnection;
-
     private final Logger log = LoggerFactory.getLogger(JDBCConnector.class);
     private PoolProperties poolProperties;
     private DataSource tomcatPool;
@@ -64,38 +61,6 @@ public class JDBCConnector implements DBConnector {
         this.iriDictionary = Optional.ofNullable(iriDictionary);
 
         setupConnectionPool();
-    }
-
-    /***
-     * Starts the local connection that Quest maintains to the DBMS. This
-     * connection belongs only to Quest and is used to get information from the
-     * DBMS. At the moment this connection is mainly used during initialization,
-     * to get metadata about the DBMS or to create repositories in classic mode.
-     *
-     * @return
-     * @throws SQLException
-     */
-    public boolean connect() throws OntopConnectionException {
-        try {
-            if (localConnection != null && !localConnection.isClosed()) {
-                return true;
-            }
-
-//            try {
-//                Class.forName(settings.getJdbcDriver());
-//            } catch (ClassNotFoundException e1) {
-//                // Does nothing because the SQLException handles this problem also.
-//            }
-            localConnection = DriverManager.getConnection(settings.getJdbcUrl(),
-                    settings.getJdbcUser(), settings.getJdbcPassword());
-
-            if (localConnection != null) {
-                return true;
-            }
-            return false;
-        } catch (SQLException e) {
-            throw new OntopConnectionException(e);
-        }
     }
 
     private void setupConnectionPool() {
@@ -143,12 +108,6 @@ public class JDBCConnector implements DBConnector {
 
     @Override
     public void close() {
-        try {
-            if (localConnection != null)
-                localConnection.close();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
         tomcatPool.close();
     }
 

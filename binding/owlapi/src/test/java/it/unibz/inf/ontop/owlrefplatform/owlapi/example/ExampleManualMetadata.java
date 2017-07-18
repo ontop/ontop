@@ -44,7 +44,6 @@ private void setup()  throws Exception {
 
 	queryEngine = engineFactory.create(configuration.loadSpecification(),
 			configuration.getExecutorRegistry());
-	queryEngine.connect();
 	
 	/*
 	 * Prepare the data connection for querying.

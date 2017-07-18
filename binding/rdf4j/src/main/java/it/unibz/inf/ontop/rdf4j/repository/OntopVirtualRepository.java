@@ -88,7 +88,6 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 			OntopSystemFactory factory = configuration.getInjector().getInstance(OntopSystemFactory.class);
 
 			queryEngine = factory.create(obdaSpecification, configuration.getExecutorRegistry());
-			queryEngine.connect();
 		}
 		catch (Exception e){
 			throw new RepositoryException(e);

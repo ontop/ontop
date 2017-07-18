@@ -27,11 +27,6 @@ public class OntopQueryEngineImpl implements OntopQueryEngine {
     }
 
     @Override
-    public boolean connect() throws OntopConnectionException {
-        return dbConnector.connect();
-    }
-
-    @Override
     public void close() throws OntopConnectionException {
         dbConnector.close();
     }
