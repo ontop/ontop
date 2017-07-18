@@ -57,4 +57,9 @@ public class OntopSystemSQLSettingsImpl extends OntopTranslationSQLSettingsImpl 
     public int getConnectionPoolMaxSize() {
         return getRequiredInteger(MAX_POOL_SIZE);
     }
+
+    @Override
+    public boolean isPermanentDBConnectionEnabled() {
+        return systemSettings.isPermanentDBConnectionEnabled();
+    }
 }

@@ -11,6 +11,8 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
  */
 public interface DBConnector extends AutoCloseable {
 
+    boolean connect() throws OntopConnectionException;
+
     void close() throws OntopConnectionException;
 
     /**

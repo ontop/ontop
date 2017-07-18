@@ -60,4 +60,9 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     public int getConnectionPoolMaxSize() {
         return systemSettings.getConnectionPoolMaxSize();
     }
+
+    @Override
+    public boolean isPermanentDBConnectionEnabled() {
+        return systemSettings.isPermanentDBConnectionEnabled();
+    }
 }

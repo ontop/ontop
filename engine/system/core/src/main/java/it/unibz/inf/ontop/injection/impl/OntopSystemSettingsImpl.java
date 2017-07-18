@@ -22,4 +22,9 @@ public class OntopSystemSettingsImpl extends OntopTranslationSettingsImpl implem
     static Properties loadDefaultSystemProperties() {
         return loadDefaultPropertiesFromFile(OntopOBDASettings.class, DEFAULT_FILE);
     }
+
+    @Override
+    public boolean isPermanentDBConnectionEnabled() {
+        return getRequiredBoolean(PERMANENT_DB_CONNECTION);
+    }
 }

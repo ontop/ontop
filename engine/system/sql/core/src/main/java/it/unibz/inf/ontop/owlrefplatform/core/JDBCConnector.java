@@ -28,6 +28,9 @@ public class JDBCConnector implements DBConnector {
     private final OntopSystemSQLSettings settings;
     private final Optional<IRIDictionary> iriDictionary;
 
+    /* The active connection used for keeping in-memory DBs alive */
+    private transient Connection localConnection;
+
     private final Logger log = LoggerFactory.getLogger(JDBCConnector.class);
     private PoolProperties poolProperties;
     private DataSource tomcatPool;
@@ -61,6 +64,29 @@ public class JDBCConnector implements DBConnector {
         this.iriDictionary = Optional.ofNullable(iriDictionary);
 
         setupConnectionPool();
+    }
+
+    /**
+     * Keeps a permanent connection to the DB (if enabled in the settings).
+     *
+     * Needed by some in-memory DBs (such as H2).
+     *
+     */
+    public boolean connect() throws OntopConnectionException {
+        try {
+            if (localConnection != null && !localConnection.isClosed()) {
+                return true;
+            }
+            if (settings.isPermanentDBConnectionEnabled()) {
+                localConnection = DriverManager.getConnection(settings.getJdbcUrl(),
+                        settings.getJdbcUser(), settings.getJdbcPassword());
+                return localConnection != null;
+            }
+        } catch (SQLException e) {
+            throw new OntopConnectionException(e);
+        }
+
+        return true;
     }
 
     private void setupConnectionPool() {
@@ -108,6 +134,12 @@ public class JDBCConnector implements DBConnector {
 
     @Override
     public void close() {
+        try {
+            if (localConnection != null)
+                localConnection.close();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
         tomcatPool.close();
     }
 
