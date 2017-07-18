@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.input.InputQuery;
@@ -19,7 +18,6 @@ import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAsPredicateExtractor;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
@@ -57,12 +55,11 @@ public class QuestQueryProcessor implements QueryTranslator {
 	private final QueryCache queryCache;
 
 	private final QueryUnfolder queryUnfolder;
-	
+	private final Optional<SameAsRewriter> sameAsRewriter;
+
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final ExecutorRegistry executorRegistry;
 	private final DatalogProgram2QueryConverter datalogConverter;
-	private final ImmutableSet<Predicate> dataPropertiesAndClassesMapped;
-	private final ImmutableSet<Predicate> objectPropertiesMapped;
 	private final OntopTranslationSettings settings;
 	private final UriTemplateMatcher uriTemplateMatcher;
 	private final DBMetadata dbMetadata;
@@ -99,15 +96,18 @@ public class QuestQueryProcessor implements QueryTranslator {
 		this.executorRegistry = executorRegistry;
 		this.datalogConverter = datalogConverter;
 		this.uriTemplateMatcher = saturatedMapping.getMetadata().getUriTemplateMatcher();
+		this.sameAsRewriter = settings.isSameAsInMappingsEnabled()?
+				Optional.of(new SameAsRewriter(saturatedMapping)):
+				Optional.empty();
 
-		if (settings.isSameAsInMappingsEnabled()) {
-			MappingSameAsPredicateExtractor msa = new MappingSameAsPredicateExtractor(saturatedMapping);
-			dataPropertiesAndClassesMapped = msa.getDataPropertiesAndClassesWithSameAs();
-			objectPropertiesMapped = msa.getObjectPropertiesWithSameAs();
-		} else {
-			dataPropertiesAndClassesMapped = ImmutableSet.of();
-			objectPropertiesMapped = ImmutableSet.of();
-		}
+//		if (settings.isSameAsInMappingsEnabled()) {
+//			MappingSameAsPredicateExtractor msa = new MappingSameAsPredicateExtractor(saturatedMapping);
+//			dataPropertiesAndClassesMapped = msa.getDataPropertiesAndClassesWithSameAs();
+//			objectPropertiesMapped = msa.getObjectPropertiesWithSameAs();
+//		} else {
+//			dataPropertiesAndClassesMapped = ImmutableSet.of();
+//			objectPropertiesMapped = ImmutableSet.of();
+//		}
 	}
 	
 	private DatalogProgram translateAndPreProcess(InputQuery inputQuery) throws OntopUnsupportedInputQueryException {
@@ -120,10 +120,9 @@ public class QuestQueryProcessor implements QueryTranslator {
 		DatalogProgram program = translation.getProgram();
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-		if (settings.isSameAsInMappingsEnabled()) {
-			SameAsRewriter sameAs = new SameAsRewriter(dataPropertiesAndClassesMapped, objectPropertiesMapped);
-			program = sameAs.getSameAsRewriting(program);
-			//System.out.println("SAMEAS" + program);
+		if(sameAsRewriter.isPresent()){
+			program = sameAsRewriter.get().getSameAsRewriting(program);
+			System.out.println("Datalog program after SameAs rewriting \n" + program);
 		}
 
 		log.debug("Replacing equivalences...");

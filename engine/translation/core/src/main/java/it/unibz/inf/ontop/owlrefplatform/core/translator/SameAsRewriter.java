@@ -2,11 +2,13 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAsPredicateExtractor;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,22 +20,23 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Extracted by Roman Kontchakov on 30/06/2016.
+ *
+ * Only applies to unary and binary atoms (no support yet for atoms of the form triple(s, p, o))
  */
 public class SameAsRewriter {
 
-    private final Set<Predicate> dataPropertiesAndClassesSameAs;
-    private final Set<Predicate> objectPropertiesSameAs;
+    private final MappingSameAsPredicateExtractor extractor;
     private int bnode; //count for bnode created in sameAsmap
     private int rules;
 
-    public SameAsRewriter(Set<Predicate> dataPropertiesAndClassesSameAs, Set<Predicate> objectPropertiesSameAs ) {
-        this.dataPropertiesAndClassesSameAs = dataPropertiesAndClassesSameAs;
-        this.objectPropertiesSameAs = objectPropertiesSameAs;
+    public SameAsRewriter(Mapping saturatedMapping) {
+        this.extractor = new MappingSameAsPredicateExtractor(saturatedMapping);
         bnode = 0;
         rules = 0;
     }
 
     public DatalogProgram getSameAsRewriting(DatalogProgram pr) {
+
         DatalogProgram result = DATALOG_FACTORY.getDatalogProgram(pr.getQueryModifiers());
 
         for (CQIE q: pr.getRules()) {
@@ -47,24 +50,23 @@ public class SameAsRewriter {
         return result;
     }
 
-    public Function addSameAs(Function atom, DatalogProgram pr, String newHeadName) {
+    private Function addSameAs(Function atom, DatalogProgram pr, String newHeadName) {
 
         //case of class and data properties need as join only on the left
-        if (dataPropertiesAndClassesSameAs.contains(atom.getFunctionSymbol()) ){
+        if (extractor.isSubjectOnlySameAsRewritingTarget(atom.getFunctionSymbol()) ){
             Function rightAtomUnion = createJoinWithSameAsOnLeft(atom, pr, newHeadName + "1");
             //create union between the first statement and join
             //between hasProperty(x,y) and owl:sameAs(x, anon-x) hasProperty (anon-x, y)
-
             return createUnion(atom, rightAtomUnion, pr, newHeadName);
         }
+
         //case of object properties need as join only on the left and on the right
-        else if (objectPropertiesSameAs.contains(atom.getFunctionSymbol())){
+        if (extractor.isTwoArgumentsSameAsRewritingTarget(atom.getFunctionSymbol())){
             //create union between the first join on the left and join on the right
             Function union2 = createUnionObject(atom, pr, newHeadName + "1");
             //create union between the first statement  and the union
             return createUnion(atom, union2, pr, newHeadName);
         }
-
         return atom;
     }
 

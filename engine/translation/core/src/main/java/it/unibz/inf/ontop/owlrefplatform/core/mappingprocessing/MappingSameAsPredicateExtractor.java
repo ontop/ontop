@@ -20,118 +20,144 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.UnionFriendlyBindingExtractor;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
+import it.unibz.inf.ontop.mapping.Mapping;
+import it.unibz.inf.ontop.model.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+
+/**
+ * Partially refactored, in order to support some unconventional mapping assertions.
+ * <p>
+ * TODO: Make it more robust: support ternary predicates
+ */
 public class MappingSameAsPredicateExtractor {
 
     private final Mapping mapping;
-    private Set<ImmutableTerm> sameAsSet;
+    private final ImmutableSet<ImmutableTerm> sameAsMappingIRIs;
+    private Set<Predicate> subjectOnlySameAsRewritingTargets;
+    private Set<Predicate> twoArgumentsSameAsRewritingTargets;
+    private final AtomPredicate sameAsAtomPredicate = DATA_FACTORY.getAtomPredicate(DATA_FACTORY.getOWLSameAsPredicate());
 
-    private Set<Predicate> dataPropertiesAndClassesMapped;
-
-    private Set<Predicate> objectPropertiesMapped;
-
-    private final UnionFriendlyBindingExtractor extractor = new UnionFriendlyBindingExtractor();
-
-    /**
-     * Constructs a mapping containing the URI of owl:sameAs
-     */
     public MappingSameAsPredicateExtractor(Mapping mapping) throws IllegalArgumentException {
-
 
         this.mapping = mapping;
 
-        dataPropertiesAndClassesMapped = new HashSet<>();
-        objectPropertiesMapped = new HashSet<>();
+        subjectOnlySameAsRewritingTargets = new HashSet<>();
+        twoArgumentsSameAsRewritingTargets = new HashSet<>();
 
-        retrieveSameAsMappingsURIs();
+        sameAsMappingIRIs = retrieveSameAsMappingsURIs();
 
         retrievePredicatesWithSameAs();
+    }
+
+
+    public boolean isSubjectOnlySameAsRewritingTarget(Predicate pred) {
+        return subjectOnlySameAsRewritingTargets.contains(pred);
+    }
+
+    public boolean isTwoArgumentsSameAsRewritingTarget(Predicate pred) {
+        return twoArgumentsSameAsRewritingTargets.contains(pred);
     }
 
     /**
      * method that gets the uris from the mappings of same as and store it in a map
      */
-    private void retrieveSameAsMappingsURIs() {
+    private ImmutableSet<ImmutableTerm> retrieveSameAsMappingsURIs() {
 
-
-        for (AtomPredicate predicate : mapping.getPredicates()) {
-
-            if (predicate.getName().equals(OBDAVocabulary.SAME_AS)) { // we check for owl same as
-
-                IntermediateQuery definition = mapping.getDefinition(predicate)
-                        .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
-                                "(-> inconsistent)"));
-
-
-                SameAsIRIsExtractor extractor = new SameAsIRIsExtractor(definition);
-                Optional<ImmutableSet<ImmutableTerm>> sameAsIRIs = extractor.getIRIs();
-                if (sameAsIRIs.isPresent()) {
-                    sameAsSet = sameAsIRIs.get();
-
-                } else
-                    throw new IllegalArgumentException("owl:samesAs is not built properly");
-
-            }
-
-        }
-
+        Optional<IntermediateQuery> definition = mapping.getDefinition(sameAsAtomPredicate);
+        return definition.isPresent() ?
+                getIRIs(definition.get()) :
+                ImmutableSet.of();
     }
 
-    /*
-    Get class data and object predicate that could refer to a same as
+    private ImmutableSet<ImmutableTerm> getIRIs(IntermediateQuery definition) {
+        return getIRIs(definition.getRootConstructionNode(), definition)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    /**
+     * Recursive
+     */
+    private Stream<ImmutableTerm> getIRIs(QueryNode currentNode, IntermediateQuery query) {
+        return Stream.concat(
+                query.getChildren(currentNode).stream()
+                        .flatMap(n -> getIRIs(
+                                n,
+                                query
+                        )),
+                extractIRIs(currentNode)
+        );
+    }
+
+    /**
+     * Extract the IRIs from a construction node, searching through its bindings and getting only the IRI
+     */
+    private Stream<ImmutableTerm> extractIRIs(QueryNode currentNode) {
+
+        if (currentNode instanceof ConstructionNode) {
+            ConstructionNode constructionNode = (ConstructionNode) currentNode;
+            ImmutableCollection<ImmutableTerm> localBindings = constructionNode.getSubstitution()
+                    .getImmutableMap().values();
+
+            return localBindings.stream().map(v -> ((ImmutableFunctionalTerm) v).getTerm(0))
+                    //filter out the variables
+                    .filter(v -> v instanceof ValueConstant);
+        }
+        return Stream.of();
+    }
+
+
+    /**
+     * Get class data and object predicate that could refer to a same as
      */
     private void retrievePredicatesWithSameAs() {
 
+        mapping.getPredicates().stream()
+                .filter(p -> !(p.equals(sameAsAtomPredicate)) &&
+                        !p.getName().equals(PredicateImpl.QUEST_TRIPLE_PRED.getName()))
+                .forEach(p -> categorizePredicate(p));
+    }
 
-        for (AtomPredicate predicate : mapping.getPredicates()) {
+    private void categorizePredicate(AtomPredicate pred) {
 
-            IntermediateQuery definition = mapping.getDefinition(predicate)
-                    .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
-                            "(-> inconsistent)"));
+        IntermediateQuery definition = mapping.getDefinition(pred)
+                .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
+                        "(-> inconsistent)"));
+        if (getIRIs(definition).stream().anyMatch(i -> sameAsMappingIRIs.contains(i))) {
+            ImmutableSet<Variable> projectedVariables = definition.getProjectionAtom().getVariables();
 
-            if (!(predicate.getName().equals(OBDAVocabulary.SAME_AS))) {
-
-                SameAsIRIsExtractor extractor = new SameAsIRIsExtractor(definition);
-                Optional<ImmutableSet<ImmutableTerm>> predicatesIRIs = extractor.getIRIs();
-
-                if (predicatesIRIs.isPresent()) {
-                    ImmutableSet<ImmutableTerm> predicatesIRIsSet = predicatesIRIs.get();
-
-                    if (!Sets.intersection(sameAsSet, predicatesIRIsSet).isEmpty()) {
-                        if (extractor.isObjectProperty()) {
-                            objectPropertiesMapped.add(predicate);
-                        } else {
-                            dataPropertiesAndClassesMapped.add(predicate);
-                        }
-                    }
-                } else
-                    throw new IllegalArgumentException("property is not built properly");
+                    /* If all projected variables may return URIs */
+            if (projectedVariables.stream()
+                    .allMatch(v -> isURIValued(v, definition))) {
+                twoArgumentsSameAsRewritingTargets.add(pred);
             }
+                    /* Otherwise, the subject only may return a URI */
+            subjectOnlySameAsRewritingTargets.add(pred);
         }
     }
 
-
-    public ImmutableSet<Predicate> getDataPropertiesAndClassesWithSameAs() {
-
-        return ImmutableSet.copyOf(dataPropertiesAndClassesMapped);
-    }
-
-    public ImmutableSet<Predicate> getObjectPropertiesWithSameAs() {
-
-        return ImmutableSet.copyOf(objectPropertiesMapped);
+    private boolean isURIValued(Variable variable, IntermediateQuery definition) {
+        return VariableDefinitionExtractor.extract(variable, definition).stream()
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .anyMatch(t -> ((ImmutableFunctionalTerm)t).isDataFunction());
     }
 }
 

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -20,7 +21,7 @@ Consider only simple mappings. The IRIs are retrieved from the bindings of the r
 or from the children construction nodes of a union
 */
 
-public class SameAsIRIsExtractor   {
+public class SameAsIRIsExtractor {
 
 
     private IntermediateQuery definition;
@@ -49,31 +50,43 @@ public class SameAsIRIsExtractor   {
 
     /*
     Returns a set with the IRIs extracted from the mapping definition
-
      */
-    public Optional<ImmutableSet<ImmutableTerm>> getIRIs() {
+    public ImmutableSet<ImmutableTerm> getIRIs() {
+        return getIRIs(definition.getRootConstructionNode(), definition)
+                .collect(ImmutableCollectors.toSet());
+    }
+//        ConstructionNode rootConstructionNode = definition.getRootConstructionNode();
+//        if (rootConstructionNode.getSubstitution().isEmpty()) {
+//            Optional<QueryNode> firstChild = definition.getFirstChild(rootConstructionNode);
+//            if (firstChild.isPresent()) {
+//                QueryNode node = firstChild.get();
+//                if (node instanceof UnionNode) {
+//                    //get iris in the union
+//                    return Optional.of(extractIRIsFromUnionNode(definition, (UnionNode) node));
+//                }
+//            }
+//
+//            return Optional.empty();
+//        } else {
+//            return Optional.of(extractIRIs(rootConstructionNode)
+//                    .collect(ImmutableCollectors.toSet()));
+//        }
+//
+//
+//    }
 
-        ConstructionNode rootConstructionNode = definition.getRootConstructionNode();
-        if(rootConstructionNode.getSubstitution().isEmpty())
-        {
-            Optional<QueryNode> firstChild = definition.getFirstChild(rootConstructionNode);
-            if (firstChild.isPresent()){
-                QueryNode node =firstChild.get();
-                if (node instanceof UnionNode){
-                    //get iris in the union
-                    return Optional.of(extractIRIsFromUnionNode(definition, (UnionNode) node));
-                }
-            }
-
-            return Optional.empty();
-        }
-        else{
-            return Optional.of(extractIRIs(rootConstructionNode)
-                    .collect(ImmutableCollectors.toSet()));
-        }
-
-
-
+    /**
+     * Recursive
+     */
+    private Stream<ImmutableTerm> getIRIs(QueryNode currentNode, IntermediateQuery query) {
+        return Stream.concat(
+                query.getChildren(currentNode).stream()
+                        .flatMap(n -> getIRIs(
+                                n,
+                                query
+                        )),
+                extractIRIs(currentNode)
+        );
     }
 
     /**
@@ -81,7 +94,7 @@ public class SameAsIRIsExtractor   {
      */
     private Stream<ImmutableTerm> extractIRIs(QueryNode currentNode) {
 
-        if(currentNode instanceof ConstructionNode) {
+        if (currentNode instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) currentNode;
             ImmutableCollection<ImmutableTerm> localBindings = constructionNode.getSubstitution()
                     .getImmutableMap().values();
@@ -92,8 +105,7 @@ public class SameAsIRIsExtractor   {
             return localBindings.stream().map(v -> ((ImmutableFunctionalTerm) v).getTerm(0))
                     //filter out the variables
                     .filter(v -> v instanceof ValueConstant);
-        }
-        else {
+        } else {
             throw new IllegalStateException("Construction node is missing ");
         }
     }
@@ -103,11 +115,9 @@ public class SameAsIRIsExtractor   {
     Return true when the property is an object property (IRI in subject and object part)
      */
 
-    public boolean isObjectProperty(){
+    public boolean isObjectProperty() {
         return isObjectProperty;
     }
-
-
 
 
 }
