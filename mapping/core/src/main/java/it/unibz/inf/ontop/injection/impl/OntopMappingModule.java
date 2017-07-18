@@ -40,7 +40,7 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromPreferences(MappingMerger.class);
         bindFromPreferences(MappingTransformer.class);
         bindFromPreferences(MappingOntologyComplianceValidator.class);
-        bindFromPreferences(MappingSameAsRewriter.class);
+        bindFromPreferences(MappingSameAsInverseRewriter.class);
         bindFromPreferences(MappingEquivalenceFreeRewriter.class);
 
         Module factoryModule = buildFactory(ImmutableList.of(MappingWithProvenance.class),

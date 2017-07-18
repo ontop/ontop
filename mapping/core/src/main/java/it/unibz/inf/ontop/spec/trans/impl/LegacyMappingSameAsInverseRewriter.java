@@ -9,18 +9,18 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
-import it.unibz.inf.ontop.spec.trans.MappingSameAsRewriter;
+import it.unibz.inf.ontop.spec.trans.MappingSameAsInverseRewriter;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-public class LegacyMappingSameAsRewriter implements MappingSameAsRewriter{
+public class LegacyMappingSameAsInverseRewriter implements MappingSameAsInverseRewriter {
 
     private final boolean enabled;
     private final Mapping2DatalogConverter mapping2DatalogConverter;
     private final Datalog2QueryMappingConverter datalog2MappingConverter;
 
     @Inject
-    private LegacyMappingSameAsRewriter(OntopMappingSettings settings, Mapping2DatalogConverter mapping2DatalogConverter,
-                                  Datalog2QueryMappingConverter datalog2MappingConverter) {
+    private LegacyMappingSameAsInverseRewriter(OntopMappingSettings settings, Mapping2DatalogConverter mapping2DatalogConverter,
+                                               Datalog2QueryMappingConverter datalog2MappingConverter) {
         this.enabled = settings.isSameAsInMappingsEnabled();
         this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.datalog2MappingConverter = datalog2MappingConverter;

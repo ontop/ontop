@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.MappingException;
-import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
@@ -23,7 +22,7 @@ public class DefaultMappingTransformer implements MappingTransformer{
     private final ABoxFactIntoMappingConverter factConverter;
     private final MappingMerger mappingMerger;
     private final OntopMappingSettings settings;
-    private final MappingSameAsRewriter sameAsRewriter;
+    private final MappingSameAsInverseRewriter sameAsInverseRewriter;
     private final MappingEquivalenceFreeRewriter eqFreeRewriter;
     private final SpecificationFactory specificationFactory;
 
@@ -34,7 +33,7 @@ public class DefaultMappingTransformer implements MappingTransformer{
                                      ABoxFactIntoMappingConverter inserter,
                                      MappingMerger mappingMerger,
                                      OntopMappingSettings settings,
-                                     MappingSameAsRewriter sameAsRewriter,
+                                     MappingSameAsInverseRewriter sameAsInverseRewriter,
                                      MappingEquivalenceFreeRewriter eqFreeRewriter,
                                      SpecificationFactory specificationFactory) {
         this.mappingCanonicalRewriter = mappingCanonicalRewriter;
@@ -43,7 +42,7 @@ public class DefaultMappingTransformer implements MappingTransformer{
         this.factConverter = inserter;
         this.mappingMerger = mappingMerger;
         this.settings = settings;
-        this.sameAsRewriter = sameAsRewriter;
+        this.sameAsInverseRewriter = sameAsInverseRewriter;
         this.eqFreeRewriter = eqFreeRewriter;
         this.specificationFactory = specificationFactory;
     }
@@ -56,7 +55,7 @@ public class DefaultMappingTransformer implements MappingTransformer{
                 settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
         Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
         Mapping eqFreeMapping = eqFreeRewriter.rewrite(mappingWithFacts, tBox, ontology.getVocabulary(), dbMetadata);
-        Mapping sameAsOptimizedMapping = sameAsRewriter.rewrite(eqFreeMapping, dbMetadata);
+        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(eqFreeMapping, dbMetadata);
         Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
         Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tBox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
