@@ -46,7 +46,7 @@ public class DisposableProperties extends Properties implements Disposable {
 
 	@Override
     public void dispose() {
-		// Do nothing.
+
 	}
 
 	public List<String> getReformulationPlatformPreferencesKeys(){

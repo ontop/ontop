@@ -496,6 +496,9 @@ public class OBDAModelManager implements Disposable {
 			loadVocabularyAndDefaultPrefix(obdaModel, mmgr.getOntologies(), ontology);
 
 			configurationManager.clearImplicitDBConstraintFile();
+			DisposableProperties settings = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
+			configurationManager.resetProperties(settings);
+
 
 			ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 			if (factory instanceof OntopReasonerInfo) {
@@ -555,9 +558,11 @@ public class OBDAModelManager implements Disposable {
 						}
 						// Load the OBDA model
 						obdaModel.parseMapping(mappingReader, configurationManager.snapshotProperties());
+
 					} catch (Exception ex) {
 						throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
 					}
+
 					try {
 						// Load the saved queries
 						QueryIOManager queryIO = new QueryIOManager(queryController);
@@ -578,6 +583,8 @@ public class OBDAModelManager implements Disposable {
 				log.error(e.getMessage());
 			} finally {
 				loadingData = false; // flag off
+				fireActiveOBDAModelChange();
+
 			}
 		}
 

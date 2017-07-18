@@ -87,7 +87,6 @@ public class QueryPainter {
 	private Vector<ColorTask> tasks = new Vector<ColorTask>();
 
 	private List<ValidatorListener> validatorListeners = new LinkedList<QueryPainter.ValidatorListener>();
-	private TurtleOBDASyntaxParser textParser;
 
 	public QueryPainter(OBDAModel apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
 		this.apic = apic;
@@ -95,7 +94,7 @@ public class QueryPainter {
 		this.validator = validator;
 		this.doc = parent.getStyledDocument();
 		this.parent = parent;
-		this.textParser = new TurtleOBDASyntaxParser(apic.getMutablePrefixManager().getPrefixMap());
+
 
 		prepareStyles();
 		prepareTextPane();
@@ -127,7 +126,7 @@ public class QueryPainter {
 		validatorListeners.remove(listener);
 	}
 
-	private void fireValidationOcurred() {
+	private void fireValidationOccurred() {
 		for (ValidatorListener listener : validatorListeners) {
 			listener.validated(!invalid);
 		}
@@ -172,6 +171,7 @@ public class QueryPainter {
 			throw new Exception(msg);
 		}
 
+		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(apic.getMutablePrefixManager().getPrefixMap());
 		ImmutableList<ImmutableFunctionalTerm> query = textParser.parse(text);
 
 		if (query == null) {
@@ -203,7 +203,7 @@ public class QueryPainter {
 			invalid = true;
 			setError(e);
 		} finally {
-			fireValidationOcurred();
+			fireValidationOccurred();
 		}
 	}
 
@@ -361,7 +361,7 @@ public class QueryPainter {
 		PrefixManager man = apic.getMutablePrefixManager();
 
 		String input = doc.getText(0, doc.getLength());
-		ImmutableList<ImmutableFunctionalTerm> current_query = parse(input);
+		ImmutableList<ImmutableFunctionalTerm> current_query = parse(input, man);
 
 		if (current_query == null) {
             JOptionPane.showMessageDialog(null, "An error occured while parsing the mappings. For more info, see the logs.");
@@ -444,8 +444,9 @@ public class QueryPainter {
 		tasks.clear();
 	}
 
-	private ImmutableList<ImmutableFunctionalTerm> parse(String query) {
+	private ImmutableList<ImmutableFunctionalTerm> parse(String query, PrefixManager man) {
 		try {
+			TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(man.getPrefixMap());
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
 			parsingException = e;
