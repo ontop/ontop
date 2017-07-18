@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
@@ -33,7 +32,7 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 
 
 	private OntopConfigurationManager configurationGenerator;
-	private final OntopOWLFactory factory = new OntopOWLFactory();
+	private final OntopProtegeOWLFactory factory = new OntopProtegeOWLFactory();
 
 	@Override
 	public BufferingMode getRecommendedBuffering() {
@@ -48,7 +47,7 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 	@Override
     public OWLReasonerConfiguration getConfiguration(ReasonerProgressMonitor monitor) {
 		OWLOntology activeOntology = getOWLModelManager().getActiveOntology();
-		return new QuestOWLConfiguration(configurationGenerator.buildOntopSQLOWLAPIConfiguration(activeOntology), monitor);
+		return new OntopProtegeOWLConfiguration(configurationGenerator.buildOntopSQLOWLAPIConfiguration(activeOntology), monitor, configurationGenerator);
     }
 
 	public void setConfigurationGenerator(OntopConfigurationManager configurationGenerator) {

@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -57,9 +57,9 @@ public class InconsistencyCheckAction extends ProtegeAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		OWLReasoner reasoner = modelManager.getOWLReasonerManager().getCurrentReasoner();
-		if (reasoner instanceof QuestOWL) {
+		if (reasoner instanceof OntopProtegeReasoner) {
 			try {
-				QuestOWL questReasoner = (QuestOWL) reasoner;
+				OntopProtegeReasoner questReasoner = (OntopProtegeReasoner) reasoner;
 				boolean isConsistent = questReasoner.isQuestConsistent();
 				log.debug("Checking for inconsistency returned: "+isConsistent);
 				if (isConsistent) {
