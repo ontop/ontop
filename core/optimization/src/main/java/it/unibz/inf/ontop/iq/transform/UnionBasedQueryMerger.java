@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface QueryMerger {
+public interface UnionBasedQueryMerger {
 
     Optional<IntermediateQuery> mergeDefinitions(Collection<IntermediateQuery> predicateDefinitions);
 

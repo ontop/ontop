@@ -8,7 +8,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.iq.transform.QueryMerger;
+import it.unibz.inf.ontop.iq.transform.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingWithProvenance;
@@ -24,14 +24,14 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     private final MappingMetadata mappingMetadata;
     private final ExecutorRegistry executorRegistry;
     private final SpecificationFactory specFactory;
-    private final QueryMerger queryMerger;
+    private final UnionBasedQueryMerger queryMerger;
 
     @AssistedInject
     private MappingWithProvenanceImpl(@Assisted ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> provenanceMap,
                                       @Assisted MappingMetadata mappingMetadata,
                                       @Assisted ExecutorRegistry executorRegistry,
                                       SpecificationFactory specFactory,
-                                      QueryMerger queryMerger) {
+                                      UnionBasedQueryMerger queryMerger) {
         this.provenanceMap = provenanceMap;
         this.mappingMetadata = mappingMetadata;
         this.executorRegistry = executorRegistry;

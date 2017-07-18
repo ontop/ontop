@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.transform.QueryMerger;
+import it.unibz.inf.ontop.iq.transform.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.predicate.AtomPredicate;
@@ -22,10 +22,10 @@ import java.util.Map;
 public class MappingMergerImpl implements MappingMerger {
 
     private final SpecificationFactory specificationFactory;
-    private final QueryMerger queryMerger;
+    private final UnionBasedQueryMerger queryMerger;
 
     @Inject
-    private MappingMergerImpl(SpecificationFactory specificationFactory, QueryMerger queryMerger) {
+    private MappingMergerImpl(SpecificationFactory specificationFactory, UnionBasedQueryMerger queryMerger) {
         this.specificationFactory = specificationFactory;
         this.queryMerger = queryMerger;
     }

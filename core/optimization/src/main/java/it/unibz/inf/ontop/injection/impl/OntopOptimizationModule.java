@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
+import it.unibz.inf.ontop.iq.transform.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.InnerJoinOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.JoinLikeOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.LeftJoinOptimizer;
@@ -48,6 +49,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromPreferences(PullVariableOutOfDataNodeExecutor.class);
         bindFromPreferences(PullVariableOutOfSubTreeExecutor.class);
         bindFromPreferences(RemoveEmptyNodesExecutor.class);
+        bindFromPreferences(UnionBasedQueryMerger.class);
         bindFromPreferences(QueryMergingExecutor.class);
         bindFromPreferences(UnionLiftExecutor.class);
         bindFromPreferences(LeftJoinExecutor.class);

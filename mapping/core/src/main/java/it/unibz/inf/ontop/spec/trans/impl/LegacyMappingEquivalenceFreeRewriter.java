@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.bascioperations.LegacyMappingVocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.spec.trans.MappingEquivalenceFreeRewriter;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.stream.Stream;
 
@@ -32,7 +33,10 @@ public class LegacyMappingEquivalenceFreeRewriter implements MappingEquivalenceF
     @Override
     public Mapping rewrite(Mapping mapping, TBoxReasoner tBox, ImmutableOntologyVocabulary vocabulary, DBMetadata dbMetadata) {
         if (enabled) {
-            Stream<CQIE> rules = mapping2DatalogConverter.convert(mapping);
+
+            ImmutableList<CQIE> rules = mapping2DatalogConverter.convert(mapping).collect(ImmutableCollectors.toList());
+//            Stream<CQIE> rules = mapping2DatalogConverter.convert(mapping);
+
             ImmutableList<CQIE> updatedRules = new LegacyMappingVocabularyValidator(tBox, vocabulary)
                     .replaceEquivalences(rules);
             return datalog2MappingConverter.convertMappingRules(updatedRules, dbMetadata, mapping.getExecutorRegistry(),

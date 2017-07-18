@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.type.DatatypeFactory;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.FilterNullableVariableQueryTransformer;
-import it.unibz.inf.ontop.iq.transform.QueryMerger;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 
@@ -33,7 +32,6 @@ public class OntopModelModule extends OntopAbstractModule {
 
         bindFromPreferences(IntermediateQueryValidator.class);
         bindFromPreferences(TermNullabilityEvaluator.class);
-        bindFromPreferences(QueryMerger.class);
         bindFromPreferences(FilterNullableVariableQueryTransformer.class);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(

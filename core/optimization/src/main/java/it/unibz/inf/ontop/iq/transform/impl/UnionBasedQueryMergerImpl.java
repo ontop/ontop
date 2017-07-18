@@ -6,18 +6,22 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.ConstructionNodeCleaner;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.FlattenUnionOptimizer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.model.impl.NeutralSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
-import it.unibz.inf.ontop.iq.transform.QueryMerger;
+import it.unibz.inf.ontop.iq.transform.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -28,13 +32,20 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 @Singleton
-public class QueryMergerImpl implements QueryMerger {
+public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
     private final IntermediateQueryFactory iqFactory;
+    private final FixedPointBindingLiftOptimizer bindingLifter;
+    private final ConstructionNodeCleaner constructionNodeCleaner;
+    private final FlattenUnionOptimizer unionFlattener;
 
     @Inject
-    private QueryMergerImpl(IntermediateQueryFactory iqFactory) {
+    private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, FixedPointBindingLiftOptimizer bindingLifter,
+                                      ConstructionNodeCleaner constructionNodeCleaner, FlattenUnionOptimizer unionFlattener) {
         this.iqFactory = iqFactory;
+        this.bindingLifter = bindingLifter;
+        this.constructionNodeCleaner = constructionNodeCleaner;
+        this.unionFlattener = unionFlattener;
     }
 
     @Override
@@ -107,7 +118,8 @@ public class QueryMergerImpl implements QueryMerger {
                     appendDefinition(queryBuilder, unionNode, def, renamingSubstitution);
                 });
 
-        return Optional.of(queryBuilder.build());
+
+        return Optional.of(normalizeIQ(queryBuilder.build()));
     }
 
     /**
@@ -187,6 +199,20 @@ public class QueryMergerImpl implements QueryMerger {
                     .collect(ImmutableCollectors.toMap());
 
             return Optional.of(DATA_FACTORY.getInjectiveVar2VarSubstitution(newMap));
+        }
+    }
+
+    /**
+     * Lift substitutions and query modifiers, and get rid of resulting idle construction nodes.
+     * Then flatten nested unions.
+     */
+    private IntermediateQuery normalizeIQ(IntermediateQuery query) {
+        try {
+            IntermediateQuery queryAfterBindingLift = bindingLifter.optimize(query);
+            IntermediateQuery queryAfterCNodeCleaning = constructionNodeCleaner.optimize(queryAfterBindingLift);
+            return unionFlattener.optimize(queryAfterCNodeCleaning);
+        }catch (EmptyQueryException e){
+            throw new IllegalStateException("The query should not be emptied by applying this normalization");
         }
     }
 }

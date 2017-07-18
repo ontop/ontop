@@ -69,7 +69,7 @@ public class MappingSameAsPredicateExtractor {
 
         for (AtomPredicate predicate : mapping.getPredicates()) {
 
-            if (predicate.getName().equals(OBDAVocabulary.SAME_AS) ) { // we check for owl same as
+            if (predicate.getName().equals(OBDAVocabulary.SAME_AS)) { // we check for owl same as
 
                 IntermediateQuery definition = mapping.getDefinition(predicate)
                         .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
@@ -78,8 +78,8 @@ public class MappingSameAsPredicateExtractor {
 
                 SameAsIRIsExtractor extractor = new SameAsIRIsExtractor(definition);
                 Optional<ImmutableSet<ImmutableTerm>> sameAsIRIs = extractor.getIRIs();
-                if(sameAsIRIs.isPresent()){
-                   sameAsSet = sameAsIRIs.get();
+                if (sameAsIRIs.isPresent()) {
+                    sameAsSet = sameAsIRIs.get();
 
                 } else
                     throw new IllegalArgumentException("owl:samesAs is not built properly");
@@ -102,25 +102,24 @@ public class MappingSameAsPredicateExtractor {
                     .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
                             "(-> inconsistent)"));
 
-            if (!(predicate.getName().equals(OBDAVocabulary.SAME_AS) )) {
+            if (!(predicate.getName().equals(OBDAVocabulary.SAME_AS))) {
 
-                    SameAsIRIsExtractor extractor = new SameAsIRIsExtractor(definition);
-                    Optional<ImmutableSet<ImmutableTerm>> predicatesIRIs = extractor.getIRIs();
+                SameAsIRIsExtractor extractor = new SameAsIRIsExtractor(definition);
+                Optional<ImmutableSet<ImmutableTerm>> predicatesIRIs = extractor.getIRIs();
 
-                    if(predicatesIRIs.isPresent()) {
-                        ImmutableSet<ImmutableTerm> predicatesIRIsSet = predicatesIRIs.get();
+                if (predicatesIRIs.isPresent()) {
+                    ImmutableSet<ImmutableTerm> predicatesIRIsSet = predicatesIRIs.get();
 
-                        if (!Sets.intersection(sameAsSet, predicatesIRIsSet).isEmpty()) {
-                            if (extractor.isObjectProperty()) {
-                                objectPropertiesMapped.add(predicate);
-                            } else {
-                                dataPropertiesAndClassesMapped.add(predicate);
-                            }
-
+                    if (!Sets.intersection(sameAsSet, predicatesIRIsSet).isEmpty()) {
+                        if (extractor.isObjectProperty()) {
+                            objectPropertiesMapped.add(predicate);
+                        } else {
+                            dataPropertiesAndClassesMapped.add(predicate);
                         }
                     }
-            } else
-                throw new IllegalArgumentException("property is not built properly");
+                } else
+                    throw new IllegalArgumentException("property is not built properly");
+            }
         }
     }
 
