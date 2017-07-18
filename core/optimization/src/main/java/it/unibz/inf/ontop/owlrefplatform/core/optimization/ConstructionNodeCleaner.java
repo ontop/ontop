@@ -2,12 +2,15 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.iq.proposal.ConstructionNodeCleaningProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.ConstructionNodeCleaningProposalImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -40,9 +43,17 @@ import java.util.Optional;
  */
 public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<ConstructionNodeCleaningProposal> {
 
+    private static final Logger log = LoggerFactory.getLogger(ConstructionNodeCleaner.class);
 
     public ConstructionNodeCleaner() {
         super(false);
+    }
+
+    @Override
+    public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+        IntermediateQuery optimizedQuery = super.optimize(query);
+        log.debug("New query after construction node cleaning: \n" + optimizedQuery.toString());
+        return optimizedQuery;
     }
 
     @Override

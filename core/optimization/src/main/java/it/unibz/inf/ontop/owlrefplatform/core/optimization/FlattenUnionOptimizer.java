@@ -2,11 +2,14 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.proposal.FlattenUnionProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.FlattenUnionProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -32,9 +35,17 @@ import java.util.stream.Stream;
  */
 public class FlattenUnionOptimizer extends NodeCentricDepthFirstOptimizer<FlattenUnionProposal> {
 
+    private static final Logger log = LoggerFactory.getLogger(FlattenUnionOptimizer.class);
 
     public FlattenUnionOptimizer() {
         super(false);
+    }
+
+    @Override
+    public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+        IntermediateQuery optimizedQuery = super.optimize(query);
+        log.debug("New query after union flattening: \n" + optimizedQuery.toString());
+        return optimizedQuery;
     }
 
     @Override
