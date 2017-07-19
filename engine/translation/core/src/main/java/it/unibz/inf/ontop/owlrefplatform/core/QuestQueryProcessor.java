@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.datalog.DatalogProgramRenderer;
 
 import java.util.*;
 
+import it.unibz.inf.ontop.owlrefplatform.core.translator.impl.SameAsRewriterImpl;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.answering.reformulation.QueryTranslator;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
@@ -54,8 +55,9 @@ public class QuestQueryProcessor implements QueryTranslator {
 	private final NativeQueryGenerator datasourceQueryGenerator;
 	private final QueryCache queryCache;
 
+	private final OntopTranslationSettings settings;
 	private final QueryUnfolder queryUnfolder;
-	private final Optional<SameAsRewriter> sameAsRewriter;
+	private final SameAsRewriterImpl sameAsRewriter;
 
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final ExecutorRegistry executorRegistry;
@@ -63,6 +65,7 @@ public class QuestQueryProcessor implements QueryTranslator {
 	private final UriTemplateMatcher uriTemplateMatcher;
 	private final DBMetadata dbMetadata;
 	private final JoinLikeOptimizer joinLikeOptimizer;
+	private final OBDASpecification obdaSpecification;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -72,13 +75,17 @@ public class QuestQueryProcessor implements QueryTranslator {
 								OntopTranslationSettings settings,
 								DatalogProgram2QueryConverter datalogConverter,
 								TranslationFactory translationFactory,
-								QueryRewriter rewriter,
+								QueryRewriter queryRewriter,
+								SameAsRewriterImpl sameAsRewriter,
 								JoinLikeOptimizer joinLikeOptimizer) {
+		this.settings = settings;
+		this.obdaSpecification = obdaSpecification;
 		this.joinLikeOptimizer = joinLikeOptimizer;
+		this.sameAsRewriter = sameAsRewriter;
 		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = LinearInclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
-		this.rewriter = rewriter;
+		this.rewriter = queryRewriter;
 		this.rewriter.setTBox(saturatedTBox, obdaSpecification.getVocabulary(), sigma);
 
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
@@ -94,9 +101,6 @@ public class QuestQueryProcessor implements QueryTranslator {
 		this.executorRegistry = executorRegistry;
 		this.datalogConverter = datalogConverter;
 		this.uriTemplateMatcher = saturatedMapping.getMetadata().getUriTemplateMatcher();
-		this.sameAsRewriter = settings.isSameAsInMappingsEnabled()?
-				Optional.of(new SameAsRewriter(saturatedMapping)):
-				Optional.empty();
 	}
 	
 	private DatalogProgram translateAndPreProcess(InputQuery inputQuery) throws OntopUnsupportedInputQueryException {
@@ -109,8 +113,8 @@ public class QuestQueryProcessor implements QueryTranslator {
 		DatalogProgram program = translation.getProgram();
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-		if(sameAsRewriter.isPresent()){
-			program = sameAsRewriter.get().getSameAsRewriting(program);
+		if(settings.isSameAsInMappingsEnabled()){
+			program = sameAsRewriter.getSameAsRewriting(program, obdaSpecification.getSaturatedMapping());
 			log.debug("Datalog program after SameAs rewriting \n" + program);
 		}
 

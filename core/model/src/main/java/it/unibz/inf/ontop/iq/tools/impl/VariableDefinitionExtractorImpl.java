@@ -33,6 +33,7 @@ public class VariableDefinitionExtractorImpl implements VariableDefinitionExtrac
      * E.g. if [x/+(x1,x2)] and [x2/x3] are found in that order in a branch,
      * then [x/+(x1,x2)] is returned.
      */
+    @Override
     public ImmutableSet<ImmutableTerm> extract(Variable variable, QueryNode node, IntermediateQuery query) {
         if (query.contains(node)) {
             if (query.getVariables(node).contains(variable)) {
@@ -44,6 +45,7 @@ public class VariableDefinitionExtractorImpl implements VariableDefinitionExtrac
         throw new IllegalArgumentException("The node should be in the query");
     }
 
+    @Override
     public ImmutableSet<ImmutableTerm> extract(Variable variable, IntermediateQuery query) {
         return extract(variable, query.getRootConstructionNode(), query);
     }

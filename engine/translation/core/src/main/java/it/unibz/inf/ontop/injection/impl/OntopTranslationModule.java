@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopTranslationConfiguration;
 import it.unibz.inf.ontop.injection.OntopTranslationSettings;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAsPredicateExtractor;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.SameAsRewriter;
 
 import java.util.Optional;
 
@@ -27,6 +29,8 @@ public class OntopTranslationModule extends OntopAbstractModule {
         bind(OntopTranslationSettings.class).toInstance(configuration.getSettings());
         bindFromPreferences(RDF4JInputQueryFactory.class);
         bindFromPreferences(InputQueryFactory.class);
+        bindFromPreferences(SameAsRewriter.class);
+        bindFromPreferences(MappingSameAsPredicateExtractor.class);
 
         Optional<IRIDictionary> iriDictionary = configuration.getIRIDictionary();
         if (iriDictionary.isPresent()) {
