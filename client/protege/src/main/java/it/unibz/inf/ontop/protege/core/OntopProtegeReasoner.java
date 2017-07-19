@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.protege.core;
 
-import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -34,14 +33,6 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
         return reasoner.getStatement();
     }
 
-    /**
-     * Replaces the owl connection with a new one
-     * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
-     * @return The old connection: The caller must close this connection
-     */
-    public OntopOWLConnection replaceConnection() throws OntopConnectionException {
-        return reasoner.replaceConnection();
-    }
 
     @Nonnull
     @Override
