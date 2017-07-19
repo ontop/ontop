@@ -48,20 +48,20 @@ public class QuestOWLExample_OntowisTests {
 
 	interface ParamConst{
 		// Postgres
-		public static final String POSTGRESInt = "src/main/resources/example/postgres-NoViews-joins-int.obda";
-		public static final String POSTGRESStr = "src/main/resources/example/postgres-NoViews-joins-str.obda";
-		public static final String POSTGRESIntView = "src/main/resources/example/postgres-Views-joins-int.obda";
-		public static final String POSTGRESStrView = "src/main/resources/example/postgres-Views-joins-str.obda";
+		public static final String POSTGRESInt = "src/test/resources/benchmark/example/postgres-NoViews-joins-int.obda";
+		public static final String POSTGRESStr = "src/test/resources/benchmark/example/postgres-NoViews-joins-str.obda";
+		public static final String POSTGRESIntView = "src/test/resources/benchmark/example/postgres-Views-joins-int.obda";
+		public static final String POSTGRESStrView = "src/test/resources/benchmark/example/postgres-Views-joins-str.obda";
 		
 		// MySQL
-		public static final String MYSQLInt = "src/main/resources/example/mysql-NoViews-joins-int.obda";
-		public static final String MYSQLStr = "src/main/resources/example/mysql-NoViews-joins-str.obda";
-		public static final String MYSQLIntView = "src/main/resources/example/mysql-Views-joins-int.obda";
-		public static final String MYSQLStrView = "src/main/resources/example/mysql-Views-joins-str.obda";
+		public static final String MYSQLInt = "src/test/resources/benchmark/example/mysql-NoViews-joins-int.obda";
+		public static final String MYSQLStr = "src/test/resources/benchmark/example/mysql-NoViews-joins-str.obda";
+		public static final String MYSQLIntView = "src/test/resources/benchmark/example/mysql-Views-joins-int.obda";
+		public static final String MYSQLStrView = "src/test/resources/benchmark/example/mysql-Views-joins-str.obda";
 		
 		// DB2
-		public static final String DB2Int = "src/main/resources/example/db2-NoViews-joins-int.obda";
-		public static final String DB2IntView = "src/main/resources/example/db2-Views-joins-int.obda";
+		public static final String DB2Int = "src/test/resources/benchmark/example/db2-NoViews-joins-int.obda";
+		public static final String DB2IntView = "src/test/resources/benchmark/example/db2-Views-joins-int.obda";
 		
 	}
 	
@@ -80,8 +80,8 @@ public class QuestOWLExample_OntowisTests {
 	final DBType dbType;
 	boolean mKeys = false;
 
-	final String owlfile = "src/main/resources/example/ontowis-5joins-int.owl";
-	final String usrConstrinFile = "src/main/resources/example/funcCons.txt";
+	final String owlfile = "src/test/resources/benchmark/example/ontowis-5joins-int.owl";
+	final String usrConstrinFile = "src/test/resources/benchmark/example/funcCons.txt";
 
 
 	// Internal Modifiable State
@@ -94,7 +94,7 @@ public class QuestOWLExample_OntowisTests {
 	}
 
 	// Exclude from T-Mappings
-	//final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
+	//final String tMappingsConfFile = "src/test/resources/benchmark/example/tMappingsConf.conf";
 
 	public void runQuery(String obdaFile) throws Exception {
 
@@ -168,8 +168,8 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * Generate File !
 		 */
-		PrintWriter writer = new PrintWriter("src/main/resources/example/table.txt", "UTF-8");
-		PrintWriter writerG = new PrintWriter("src/main/resources/example/graph.txt", "UTF-8");
+		PrintWriter writer = new PrintWriter("src/test/resources/benchmark/example/table.txt", "UTF-8");
+		PrintWriter writerG = new PrintWriter("src/test/resources/benchmark/example/graph.txt", "UTF-8");
 
 		int sizeQueriesArray = Constants.NUM_FILTERS * Constants.NUM_SQL_JOINS;
 		int nF = Constants.NUM_FILTERS;

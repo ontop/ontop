@@ -41,11 +41,5 @@ public interface NativeQueryGenerator extends Serializable {
 	ExecutableQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature)
 			throws OntopTranslationException;
 
-    /**
-     * If the generator is immutable, the generator
-     * can return itself instead of a clone.
-     */
-    NativeQueryGenerator cloneIfNecessary();
-
 	ExecutableQuery generateEmptyQuery(ImmutableList<String> signature);
 }

@@ -38,7 +38,7 @@ public class ABoxSesameMaterializerExample {
 	 * Use the sample database using H2 from
 	 * https://babbage.inf.unibz.it/trac/obdapublic/wiki/InstallingTutorialDatabases
 	 */
-	private static final String inputFile = "src/test/resources/mysql/example/exampleBooks.obda";
+	private static final String inputFile = "/mysql/example/exampleBooks.obda";
 	private static final String PROPERTY_FILE = "/mysql/example/exampleBooks.properties";
 	private static final String outputFile = "src/test/resources/mysql/example/exampleBooks.n3";
 
@@ -49,11 +49,11 @@ public class ABoxSesameMaterializerExample {
 	
 	public void generateTriples() throws Exception {
 
-		String propertyFileName =  this.getClass().getResource(PROPERTY_FILE).toString();
+		Class<? extends ABoxSesameMaterializerExample> klass = getClass();
 
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(inputFile)
-				.propertyFile(propertyFileName)
+				.nativeOntopMappingFile(klass.getResource(inputFile).getPath())
+				.propertyFile(klass.getResource(PROPERTY_FILE).getPath())
 				.enableTestMode()
 				.build();
 

@@ -28,30 +28,30 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
     interface ParamConst{
-        public static final String MYSQL_OBDA_FILE  = "src/main/resources/example/disableReasoning/mysql_obdalin3.obda";
-        public static final String MYSQL_PROPERTY_FILE  = "src/main/resources/example/disableReasoning/mysql_obdalin3.properties";
+        public static final String MYSQL_OBDA_FILE  = "/benchmark/example/disableReasoning/mysql_obdalin3.obda";
+        public static final String MYSQL_PROPERTY_FILE  = "/benchmark/example/disableReasoning/mysql_obdalin3.properties";
 
-        public static final String POSTGRES_OBDA_FILE = "src/main/resources/example/disableReasoning/pgsql_obdalin3.obda";
-        public static final String POSTGRES_PROPERTY_FILE = "src/main/resources/example/disableReasoning/pgsql_obdalin3.properties";
+        public static final String POSTGRES_OBDA_FILE = "/benchmark/example/disableReasoning/pgsql_obdalin3.obda";
+        public static final String POSTGRES_PROPERTY_FILE = "/benchmark/example/disableReasoning/pgsql_obdalin3.properties";
 
-        public static final String DB2_OBDA_FILE = "src/main/resources/example/disableReasoning/db2_obdalin3.obda";
-        public static final String DB2_PROPERTY_FILE = "src/main/resources/example/disableReasoning/db2_obdalin3.properties";
+        public static final String DB2_OBDA_FILE = "/benchmark/example/disableReasoning/db2_obdalin3.obda";
+        public static final String DB2_PROPERTY_FILE = "/benchmark/example/disableReasoning/db2_obdalin3.properties";
 
-        public static final String MYSQL_SMALL_OBDA_FILE  = "src/main/resources/example/disableReasoning/mysql_vulcan.obda";
-        public static final String MYSQL_SMALL_PROPERTY_FILE  = "src/main/resources/example/disableReasoning/mysql_vulcan.properties";
+        public static final String MYSQL_SMALL_OBDA_FILE  = "/benchmark/example/disableReasoning/mysql_vulcan.obda";
+        public static final String MYSQL_SMALL_PROPERTY_FILE  = "/benchmark/example/disableReasoning/mysql_vulcan.properties";
 
-        public static final String POSTGRES_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/pgsql_obdalin3.obda";
-        public static final String POSTGRES_SMALL_PROPERTY_FILE = "src/main/resources/example/disableReasoning/pgsql_obdalin3.properties";
+        public static final String POSTGRES_SMALL_OBDA_FILE = "/benchmark/example/disableReasoning/pgsql_obdalin3.obda";
+        public static final String POSTGRES_SMALL_PROPERTY_FILE = "/benchmark/example/disableReasoning/pgsql_obdalin3.properties";
 
-        //public static final String DB2_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.obda";
-        //public static final String DB2_SMALL_PROPERTY_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.properties";
+        //public static final String DB2_SMALL_OBDA_FILE = "src/test/resources/benchmark/example/disableReasoning/ontowis-hierarchy-db2.obda";
+        //public static final String DB2_SMALL_PROPERTY_FILE = "src/test/resources/benchmark/example/disableReasoning/ontowis-hierarchy-db2.properties";
 
 
         static final String[] tMappingConfFiles = {
-                "src/main/resources/example/disableReasoning/ontowis-hierarchy-tm_1.conf",
-                "src/main/resources/example/disableReasoning/ontowis-hierarchy-tm_2.conf",
-                "src/main/resources/example/disableReasoning/ontowis-hierarchy-tm_3.conf",
-                "src/main/resources/example/disableReasoning/ontowis-hierarchy-tm_4.conf"
+                "/benchmark/example/disableReasoning/ontowis-hierarchy-tm_1.conf",
+                "/benchmark/example/disableReasoning/ontowis-hierarchy-tm_2.conf",
+                "/benchmark/example/disableReasoning/ontowis-hierarchy-tm_3.conf",
+                "/benchmark/example/disableReasoning/ontowis-hierarchy-tm_4.conf"
         };
     }
 
@@ -307,8 +307,8 @@ public class QuestOWLExample_ReasoningDisabled {
 		 * Generate File !
 		 */
         //String tableFileName = "table.txt";
-        PrintWriter writer = new PrintWriter("src/main/resources/example/disableReasoning/" + tableFileName, "UTF-8");
-        PrintWriter writerG = new PrintWriter("src/main/resources/example/disableReasoning/graph.txt", "UTF-8");
+        PrintWriter writer = new PrintWriter("src/test/resources/benchmark/example/disableReasoning/" + tableFileName, "UTF-8");
+        PrintWriter writerG = new PrintWriter("src/test/resources/benchmark/example/disableReasoning/graph.txt", "UTF-8");
 
         //writer.write(String.format("%s\n", "# group 1"));
         int j = 0;
@@ -369,14 +369,14 @@ public class QuestOWLExample_ReasoningDisabled {
 
 //		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 
-        TMappingExclusionConfig tMapConfig = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
+        TMappingExclusionConfig tMapConfig = TMappingExclusionConfig.parseFile(getClass().getResource(Settings.tMappingConfFile).getPath());
 
 
         QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(new File(Settings.obdaFile))
-                .ontologyFile(owlfile)
-                .propertyFile(Settings.propertyFile)
+                .nativeOntopMappingFile(new File(getClass().getResource(Settings.obdaFile).getPath()))
+                .ontologyFile(getClass().getResource(owlfile).getPath())
+                .propertyFile(getClass().getResource(Settings.propertyFile).getPath())
                 .tMappingExclusionConfig(tMapConfig)
                 .enableIRISafeEncoding(false)
                 .build();
@@ -406,9 +406,9 @@ public class QuestOWLExample_ReasoningDisabled {
      * Please use the pre-bundled H2 server from the above link
      *
      */
-    final String owlfile = "src/main/resources/example/disableReasoning/ontowis-hierarchy.owl";
-    //final String obdaFile = "src/main/resources/example/ontowis-5joins-int-view.obda";
-    //final String obdaFile;// = "src/main/resources/example/ontowis-5joins-int-view.obda";
+    final String owlfile = "/benchmark/example/disableReasoning/ontowis-hierarchy.owl";
+    //final String obdaFile = "src/test/resources/benchmark/example/ontowis-5joins-int-view.obda";
+    //final String obdaFile;// = "src/test/resources/benchmark/example/ontowis-5joins-int-view.obda";
 
     //private final DbType dbType;
 
