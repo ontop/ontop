@@ -14,9 +14,6 @@ public class SAPHANATest extends AbstractVirtualModeTest {
         super(owlfile, obdafile, propertyfile);
     }
 
-//    final String owlfile = "src/test/resources/example/exampleBooks.owl";
-//    final String obdafile = "src/test/resources/example/exampleBooks.obda";
-
     public void testSAP() throws Exception {
             /* 
             * Get the book information that is stored in the database 
