@@ -251,13 +251,15 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
                 throw new MappingOntologyMismatchException(
                         predicateIRI +
-                                " is declared with the datatype " +
+                                " is declared with datatype " +
                                 declaredDatatype.getPredicate().getName() +
-                                " in the ontology, but is used with the datatype " +
+                                " in the ontology, but has datatype " +
                                 DATATYPE_FACTORY.getTypePredicate(tripleObjectType.getColType()).getName() +
-                                " in the triplesMap: \n[\n" +
+                                " according to the following triplesMap (either declared in the triplesMap, or " +
+                                "inferred from its source):\n[\n" +
                                 provenance.getProvenanceInfo() +
-                                "\n]");
+                                "\n]\n"
+                );
             }
         }
     }
