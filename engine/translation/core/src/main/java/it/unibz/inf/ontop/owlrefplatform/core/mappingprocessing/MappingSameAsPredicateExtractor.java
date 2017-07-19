@@ -145,19 +145,21 @@ public class MappingSameAsPredicateExtractor {
             ImmutableSet<Variable> projectedVariables = definition.getProjectionAtom().getVariables();
 
                     /* If all projected variables may return URIs */
-            if (projectedVariables.stream()
-                    .allMatch(v -> isURIValued(v, definition))) {
+            if (projectedVariables.size() == 2 &&
+                    projectedVariables.stream()
+                            .allMatch(v -> isURIValued(v, definition))) {
                 twoArgumentsSameAsRewritingTargets.add(pred);
-            }
+            } else {
                     /* Otherwise, the subject only may return a URI */
-            subjectOnlySameAsRewritingTargets.add(pred);
+                subjectOnlySameAsRewritingTargets.add(pred);
+            }
         }
     }
 
     private boolean isURIValued(Variable variable, IntermediateQuery definition) {
         return new VariableDefinitionExtractorImpl().extract(variable, definition).stream()
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
-                .anyMatch(t -> ((ImmutableFunctionalTerm)t).isDataFunction());
+                .anyMatch(t -> ((ImmutableFunctionalTerm) t).isDataFunction());
     }
 }
 

@@ -97,15 +97,6 @@ public class QuestQueryProcessor implements QueryTranslator {
 		this.sameAsRewriter = settings.isSameAsInMappingsEnabled()?
 				Optional.of(new SameAsRewriter(saturatedMapping)):
 				Optional.empty();
-
-//		if (settings.isSameAsInMappingsEnabled()) {
-//			MappingSameAsPredicateExtractor msa = new MappingSameAsPredicateExtractor(saturatedMapping);
-//			dataPropertiesAndClassesMapped = msa.getDataPropertiesAndClassesWithSameAs();
-//			objectPropertiesMapped = msa.getObjectPropertiesWithSameAs();
-//		} else {
-//			dataPropertiesAndClassesMapped = ImmutableSet.of();
-//			objectPropertiesMapped = ImmutableSet.of();
-//		}
 	}
 	
 	private DatalogProgram translateAndPreProcess(InputQuery inputQuery) throws OntopUnsupportedInputQueryException {
@@ -120,7 +111,7 @@ public class QuestQueryProcessor implements QueryTranslator {
 
 		if(sameAsRewriter.isPresent()){
 			program = sameAsRewriter.get().getSameAsRewriting(program);
-			System.out.println("Datalog program after SameAs rewriting \n" + program);
+			log.debug("Datalog program after SameAs rewriting \n" + program);
 		}
 
 		log.debug("Replacing equivalences...");
