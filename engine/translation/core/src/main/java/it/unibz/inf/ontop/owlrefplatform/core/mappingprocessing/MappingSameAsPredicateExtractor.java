@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
+import it.unibz.inf.ontop.iq.tools.impl.VariableDefinitionExtractorImpl;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.model.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.predicate.AtomPredicate;
@@ -155,7 +155,7 @@ public class MappingSameAsPredicateExtractor {
     }
 
     private boolean isURIValued(Variable variable, IntermediateQuery definition) {
-        return VariableDefinitionExtractor.extract(variable, definition).stream()
+        return new VariableDefinitionExtractorImpl().extract(variable, definition).stream()
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .anyMatch(t -> ((ImmutableFunctionalTerm)t).isDataFunction());
     }

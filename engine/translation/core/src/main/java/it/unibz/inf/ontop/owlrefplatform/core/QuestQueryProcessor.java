@@ -60,7 +60,6 @@ public class QuestQueryProcessor implements QueryTranslator {
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final ExecutorRegistry executorRegistry;
 	private final DatalogProgram2QueryConverter datalogConverter;
-	private final OntopTranslationSettings settings;
 	private final UriTemplateMatcher uriTemplateMatcher;
 	private final DBMetadata dbMetadata;
 	private final JoinLikeOptimizer joinLikeOptimizer;
@@ -92,7 +91,6 @@ public class QuestQueryProcessor implements QueryTranslator {
 		this.dbMetadata = obdaSpecification.getDBMetadata();
 		this.datasourceQueryGenerator = translationFactory.create(dbMetadata);
 		this.queryCache = queryCache;
-		this.settings = settings;
 		this.executorRegistry = executorRegistry;
 		this.datalogConverter = datalogConverter;
 		this.uriTemplateMatcher = saturatedMapping.getMetadata().getUriTemplateMatcher();
