@@ -23,6 +23,10 @@ package it.unibz.inf.ontop.docker;
 import org.eclipse.rdf4j.common.io.IOUtil;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.dawg.DAWGTestResultSetUtil;
+import org.eclipse.rdf4j.query.resultio.BooleanQueryResultParserRegistry;
+import org.eclipse.rdf4j.query.resultio.QueryResultFormat;
+import org.eclipse.rdf4j.query.resultio.QueryResultIO;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.ParserConfig;
@@ -194,22 +198,37 @@ public abstract class QuestParallelScenario {
             LOGGER.debug(String.format("Thread: %s", testName));
 
             try {
-                ResultSetInfo expectedResult = readResultSetInfo();
                 RepositoryConnection con = dataRep.getConnection();
-
+                // Non-final
+                Optional<ResultSetInfo> expectedTupleResult = Optional.empty();
                 try {
                     String queryString = readQueryString();
                     Query query = con.prepareQuery(QueryLanguage.SPARQL, queryString, queryFileURL);
                     if (query instanceof TupleQuery) {
+                        ResultSetInfo expectedResult = readResultSetInfo();
+                        expectedTupleResult = Optional.of(expectedResult);
                         TupleQueryResult queryResult = ((TupleQuery) query).evaluate();
                         //TODO:  Should we do a more sophisticated verification?
                         compareResultSize(testName, queryResult, expectedResult);
-                    } else {
+                    }
+                    else if (query instanceof BooleanQuery) {
+                        boolean queryResult = ((BooleanQuery) query).evaluate();
+                        boolean expectedResult = readExpectedBooleanQueryResult();
+                        if (expectedResult != queryResult) {
+                            throw new Exception("Expected: " + expectedResult + ", result: " + queryResult);
+                        }
+                    }
+                    else {
                         throw new RuntimeException("Unexpected query type: " + query.getClass());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    compareThrownException(testName, e, expectedResult); // compare the thrown exception class
+                    if (expectedTupleResult.isPresent()) {
+                        compareThrownException(testName, e, expectedTupleResult.get()); // compare the thrown exception class
+                    }
+                    else {
+                        throw e;
+                    }
                 } finally {
                     con.close();
                 }
@@ -292,6 +311,25 @@ public abstract class QuestParallelScenario {
         private ResultSetInfo readResultSetInfo() throws Exception {
             Set<Statement> resultGraph = readGraphResultSetInfo();
             return ResultSetInfoTupleUtil.toResuleSetInfo(resultGraph);
+        }
+
+        private boolean readExpectedBooleanQueryResult() throws Exception {
+            Optional<QueryResultFormat> bqrFormat = BooleanQueryResultParserRegistry.getInstance()
+                    .getFileFormatForFileName(resultFileURL);
+
+            if (bqrFormat.isPresent()) {
+                InputStream in = new URL(resultFileURL).openStream();
+                try {
+                    return QueryResultIO.parseBoolean(in, bqrFormat.get());
+                }
+                finally {
+                    in.close();
+                }
+            }
+            else {
+                Set<Statement> resultGraph = readGraphResultSetInfo();
+                return DAWGTestResultSetUtil.toBooleanQueryResult(resultGraph);
+            }
         }
 
         private Set<Statement> readGraphResultSetInfo() throws Exception {
