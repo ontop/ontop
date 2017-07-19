@@ -326,7 +326,7 @@
 
     <owl:DatatypeProperty rdf:about="http://www.owl-ontologies.com/Ontology1207768242.owl#marketShares">
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Company"/>
-        <rdfs:range rdf:resource="&xsd;integer"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
     </owl:DatatypeProperty>
 
 

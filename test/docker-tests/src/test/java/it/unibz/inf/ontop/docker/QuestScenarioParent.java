@@ -149,7 +149,6 @@ public abstract class QuestScenarioParent extends TestCase {
 			{
 				compareThrownException(e, expectedTupleResult.get()); // compare the thrown exception class
 			}
-
 		}
 		finally {
 			con.close();

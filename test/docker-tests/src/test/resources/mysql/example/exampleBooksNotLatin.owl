@@ -76,7 +76,7 @@
     <owl:DatatypeProperty rdf:about="http://meraka/moss/exampleBooks.owl#dateOfFirstPublication">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:domain rdf:resource="http://meraka/moss/exampleBooks.owl#Édition"/>
-        <rdfs:range rdf:resource="&xsd;dateTime"/>
+        <rdfs:range rdf:resource="&xsd;date"/>
     </owl:DatatypeProperty>
     
 
@@ -86,7 +86,7 @@
     <owl:DatatypeProperty rdf:about="http://meraka/moss/exampleBooks.owl#dateOfPublication">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:domain rdf:resource="http://meraka/moss/exampleBooks.owl#Édition"/>
-        <rdfs:range rdf:resource="&xsd;dateTime"/>
+        <rdfs:range rdf:resource="&xsd;date"/>
     </owl:DatatypeProperty>
     
 

@@ -19,7 +19,7 @@ target		iLogOntology:customer/{CustomerID} iLogOntology:requests iLogOntology:re
 source		select ID, CustomerID, requestDate from requestforwork
 
 mappingId	ITU
-target		iLogOntology:itu/{ID} a iLogOntology:ITU ; iLogOntology:hasITUID {ID} ; iLogOntology:hasBeenLate {beenLate} .
+target		iLogOntology:itu/{ID} a iLogOntology:ITU ; iLogOntology:hasITUID {ID} ; iLogOntology:hasBeenLate {beenLate}^^xsd:int .
 source		SELECT ID, beenLate FROM itu
 
 mappingId	RequestForWorkcontainsITU
@@ -71,7 +71,7 @@ target		iLogOntology:route/{ID} a iLogOntology:Route ; iLogOntology:hasRouteName
 source		SELECT ID, routeName FROM route
 
 mappingId	Train
-target		iLogOntology:train/{ID} a iLogOntology:Train ; iLogOntology:hasCapacity {capacity} ; iLogOntology:hasTrainNumber {trainNumber} .
+target		iLogOntology:train/{ID} a iLogOntology:Train ; iLogOntology:hasCapacity {capacity} ; iLogOntology:hasTrainNumber {trainNumber}^^xsd:string .
 source		SELECT ID, capacity, trainNumber FROM train
 
 mappingId	TrainRoute
