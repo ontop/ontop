@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
@@ -77,12 +78,12 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     }
 
     @Override
-    public OBDASpecification convert(final SQLPPMapping initialPPMapping, Optional<DBMetadata> optionalDBMetadata,
-                                     Optional<Ontology> optionalOntology, Optional<File> constraintFile,
-                                     ExecutorRegistry executorRegistry)
+    public OBDASpecification convert(OBDASpecInput specInput, final SQLPPMapping initialPPMapping,
+                                     Optional<DBMetadata> optionalDBMetadata,
+                                     Optional<Ontology> optionalOntology, ExecutorRegistry executorRegistry)
             throws DBMetadataExtractionException, MappingException {
 
-        RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, constraintFile);
+        RDBMetadata dbMetadata = extractDBMetadata(initialPPMapping, optionalDBMetadata, specInput.getConstraintFile());
 
         ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
                 initialPPMapping.getTripleMaps(), settings, dbMetadata);

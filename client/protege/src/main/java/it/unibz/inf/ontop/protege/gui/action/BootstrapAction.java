@@ -108,7 +108,7 @@ public class BootstrapAction extends ProtegeAction {
 						public void run() {
 							try {
 								OBDAProgressMonitor monitor = new OBDAProgressMonitor(
-										"Bootstrapping ontology and mappings...");
+										"Bootstrapping ontology and mappings...", workspace);
 								BootstrapperThread t = new BootstrapperThread();
 								monitor.addProgressListener(t);
 								monitor.start();
@@ -120,7 +120,7 @@ public class BootstrapAction extends ProtegeAction {
 							} catch (Exception e) {
 								log.error(e.getMessage(), e);
 								JOptionPane
-										.showMessageDialog(null,
+										.showMessageDialog(workspace,
 												"Error occured during bootstrapping data source.");
 							}
 						}

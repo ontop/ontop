@@ -29,12 +29,12 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
+import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.BooleanResultSet;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
@@ -79,7 +79,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	//
 	// //////////////////////////////////////////////////////////////////////////////////////
 
-	/* The merge and tranlsation of all loaded ontologies */
+	/* The merge and translation of all loaded ontologies */
 	// TODO: see if still relevant
 	private Ontology translatedOntologyMerge;
 
@@ -390,17 +390,17 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	}
 
 	@Override
-    public boolean isConsistent() {
-		return true;
+    public boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
+		try {
+			return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
+		} catch (OWLException e) {
+			throw new ReasonerInterruptedException(e);
+		}
 	}
 	
 	//info to return which axiom was inconsistent during the check
 	public Object getInconsistentAxiom() {
 		return inconsistent;
-	}
-	
-	public boolean isQuestConsistent() throws ReasonerInterruptedException, TimeOutException, OWLException {
-		return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
 	}
 	
 	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException, OWLException {

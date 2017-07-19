@@ -13,6 +13,6 @@ import java.util.Optional;
  */
 public interface MappingTransformer {
 
-    OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Optional<Ontology> optionalOntology)
+    OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata, Optional<Ontology> optionalOntology)
             throws MappingException, OntologyException;
 }

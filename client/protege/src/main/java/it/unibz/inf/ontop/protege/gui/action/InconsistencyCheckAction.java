@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -57,25 +57,25 @@ public class InconsistencyCheckAction extends ProtegeAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		OWLReasoner reasoner = modelManager.getOWLReasonerManager().getCurrentReasoner();
-		if (reasoner instanceof QuestOWL) {
+		if (reasoner instanceof OntopProtegeReasoner) {
 			try {
-				QuestOWL questReasoner = (QuestOWL) reasoner;
+				OntopProtegeReasoner questReasoner = (OntopProtegeReasoner) reasoner;
 				boolean isConsistent = questReasoner.isQuestConsistent();
 				log.debug("Checking for inconsistency returned: "+isConsistent);
 				if (isConsistent) {
-					JOptionPane.showMessageDialog(null, "Your ontology is consistent! Great job!");
+					JOptionPane.showMessageDialog(getWorkspace(), "Your ontology is consistent! Great job!");
 				} else {
-					JOptionPane.showMessageDialog(null, "Your ontology is not consistent. The axiom creating inconsistency is: \n"
+					JOptionPane.showMessageDialog(getWorkspace(), "Your ontology is not consistent. The axiom creating inconsistency is: \n"
 							+questReasoner.getInconsistentAxiom().toString());
 				}
 				
 			}catch(Exception ex){
-				JOptionPane.showMessageDialog(null, "An error occured. For more info, see the logs.");
+				JOptionPane.showMessageDialog(getWorkspace(), "An error occured. For more info, see the logs.");
 				log.error("Error during inconsistency checking. \n"+ex.getMessage()+"\n"+ex.getLocalizedMessage());
 			}
 		}
 		else {
-			JOptionPane.showMessageDialog(null, "You have to start ontop reasoner for this feature.");
+			JOptionPane.showMessageDialog(getWorkspace(), "You have to start ontop reasoner for this feature.");
 		}
 	}
 

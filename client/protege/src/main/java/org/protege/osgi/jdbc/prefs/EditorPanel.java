@@ -1,10 +1,10 @@
 package org.protege.osgi.jdbc.prefs;
 
-import org.protege.osgi.jdbc.RegistryException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.osgi.jdbc.JdbcRegistry;
+import org.protege.osgi.jdbc.RegistryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,7 @@ public class EditorPanel extends JDialog {
     
     private JLabel status = new JLabel();
     private JTextField nameField;
-    private JTextField classField;
+    private JComboBox<String> classField;
     private JTextField fileField;
     private JButton fileButton;
     
@@ -53,7 +53,7 @@ public class EditorPanel extends JDialog {
                        File file)  {
         this(jdbcRegistryTracker);
         nameField.setText(description);
-        classField.setText(className);
+        classField.setSelectedItem(className);
         fileField.setText(file.getAbsolutePath());
     }
     
@@ -69,7 +69,10 @@ public class EditorPanel extends JDialog {
         centerPane.add(nameField = new JTextField());
         
         centerPane.add(new JLabel("Class Name:"));
-        centerPane.add(classField = new JTextField());
+        classField = new JComboBox<>();
+        classField.setEditable(true);
+        classField.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "select or type the JDBC Driver's class...", "org.postgresql.Driver", "com.mysql.jdbc.Driver", "org.h2.Driver", "com.ibm.db2.jcc.DB2Driver", "oracle.jdbc.driver.OracleDriver", "com.microsoft.sqlserver.jdbc.SQLServerDriver" }));
+        centerPane.add(classField);
         
         centerPane.add(new JLabel("Driver File (jar):"));
         fileField = new JTextField();
@@ -99,7 +102,7 @@ public class EditorPanel extends JDialog {
         panel.setLayout(new FlowLayout());
         JButton ok = new JButton("Ok");
         ok.addActionListener(e -> {
-            String className = classField.getText();
+            String className = (String) classField.getSelectedItem();
             File f  = new File(fileField.getText());
             try {
                 jdbcRegistryTracker.open();

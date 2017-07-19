@@ -84,6 +84,16 @@ public class OntopMaterializeTest {
         Ontop.main(argv);
     }
 
+    @Test
+    public void testOntopMaterializeSeparatefiles (){
+        String[] argv = {"materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+                "-t", "src/test/resources/books/exampleBooks.owl",
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-f", "turtle", "-o", "src/test/resources/output/",  "--separate-files",
+        };
+        Ontop.main(argv);
+    }
+
 
 
 }

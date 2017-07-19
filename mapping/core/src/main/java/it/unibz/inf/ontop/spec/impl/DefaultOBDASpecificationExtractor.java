@@ -7,11 +7,8 @@ import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.spec.MappingExtractor;
+import it.unibz.inf.ontop.spec.*;
 import it.unibz.inf.ontop.spec.MappingExtractor.MappingAndDBMetadata;
-import it.unibz.inf.ontop.spec.MappingTransformer;
-import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
@@ -32,49 +29,23 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
         this.mappingTransformer = mappingTransformer;
     }
 
-
     @Override
-    public OBDASpecification extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
-                                     ExecutorRegistry executorRegistry)
+    public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
+                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
-
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(mappingFile, dbMetadata, ontology,
-                constraintFile, executorRegistry);
-        return mappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(),
-                ontology);
+        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata, ontology,
+                executorRegistry);
+        return mappingTransformer.transform(specInput, mappingAndDBMetadata.getMapping(),
+                mappingAndDBMetadata.getDBMetadata(), ontology);
     }
 
     @Override
-    public OBDASpecification extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
-                                     ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException {
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(mappingReader, dbMetadata, ontology,
-                constraintFile, executorRegistry);
-        return mappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(),
-                ontology);
-    }
-
-    @Override
-    public OBDASpecification extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
-                                     ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException {
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(mappingGraph, dbMetadata, ontology,
-                constraintFile, executorRegistry);
-        return mappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(),
-                ontology);
-    }
-
-    @Override
-    public OBDASpecification extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology, @Nonnull Optional<File> constraintFile,
-                                     ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException {
+    public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull PreProcessedMapping ppMapping,
+                                     @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology,
+                                     ExecutorRegistry executorRegistry) throws OBDASpecificationException {
         MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, dbMetadata, ontology,
-                constraintFile, executorRegistry);
-        return mappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(),
-                ontology);
+                specInput, executorRegistry);
+        return mappingTransformer.transform(specInput, mappingAndDBMetadata.getMapping(),
+                mappingAndDBMetadata.getDBMetadata(), ontology);
     }
 }

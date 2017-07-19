@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLEmptyEntitiesChecker;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -103,7 +103,7 @@ public class EmptiesCheckPanel extends javax.swing.JPanel   implements OBDAProgr
 			errorShown = true;
 			log.error("If OutOfMemoryError try increasing java heap size. ");
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
+			JOptionPane.showMessageDialog(this, "An error occurred. For more info, see the logs.");
 		}
 
 	}
