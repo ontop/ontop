@@ -44,7 +44,7 @@ public class FlattenUnionOptimizer extends NodeCentricDepthFirstOptimizer<Flatte
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
         IntermediateQuery optimizedQuery = super.optimize(query);
-        log.debug("New query after union flattening: \n" + optimizedQuery.toString());
+        log.trace("New query after union flattening: \n" + optimizedQuery.toString());
         return optimizedQuery;
     }
 

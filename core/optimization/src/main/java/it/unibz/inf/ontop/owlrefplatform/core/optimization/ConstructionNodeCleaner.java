@@ -52,7 +52,7 @@ public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<Cons
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
         IntermediateQuery optimizedQuery = super.optimize(query);
-        log.debug("New query after construction node cleaning: \n" + optimizedQuery.toString());
+        log.trace("New query after construction node cleaning: \n" + optimizedQuery.toString());
         return optimizedQuery;
     }
 

@@ -195,6 +195,7 @@ public class QuestQueryProcessor implements QueryTranslator {
 				//lift bindings and union when it is possible
 				IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 				intermediateQuery = substitutionOptimizer.optimize(intermediateQuery);
+				log.debug("New query after substitution lift optimization: \n" + intermediateQuery.toString());
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 

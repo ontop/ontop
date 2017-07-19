@@ -24,7 +24,7 @@ public class FixedPointBindingLiftOptimizer implements BindingLiftOptimizer {
 
             TopDownBindingLiftOptimizer substLiftOptimizer = new TopDownBindingLiftOptimizer();
             query = substLiftOptimizer.optimize(query);
-            log.debug("New query after substitution lift optimization: \n" + query.toString());
+            log.trace("New query after substitution lift optimization: \n" + query.toString());
             countVersion++;
 
             if(countVersion == LOOPS){
