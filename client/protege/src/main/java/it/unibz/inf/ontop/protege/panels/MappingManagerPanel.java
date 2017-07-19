@@ -773,6 +773,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		model.setFocusedSource(newSource.getSourceID());
 		
 		mappingList.revalidate();
+
 	}
 
 

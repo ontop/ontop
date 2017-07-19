@@ -29,6 +29,8 @@ import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -41,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.net.URI;
 
 public class R2RMLImportAction extends ProtegeAction {
 
@@ -95,44 +96,87 @@ public class R2RMLImportAction extends ProtegeAction {
 				}
 				if (file != null) {
 
-					/**
-					 * Uses the predefined data source for creating the OBDAModel.
-					 */
-					OBDADataSource dataSource = obdaModelController.getSources().get(0);
 
-					OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
-							.properties(DataSource2PropertiesConvertor.convert(dataSource))
-							.r2rmlMappingFile(file)
-							.build();
-
-					URI sourceID = dataSource.getSourceID();
-
-					try {
-						SQLPPMapping parsedModel = configuration.loadProvidedPPMapping();
-
-						/**
-						 * TODO: improve this inefficient method (batch processing, not one by one)
-						 */
-						for (SQLPPTriplesMap mapping : parsedModel.getTripleMaps()) {
-							if (mapping.getTargetAtoms().toString().contains("BNODE")) {
-								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
-							} else {
-								obdaModelController.addTriplesMap(sourceID, mapping, false);
+					File finalFile = file;
+					Thread th = new Thread("Bootstrapper Action Thread"){
+						@Override
+						public void run() {
+							try {
+								OBDAProgressMonitor monitor = new OBDAProgressMonitor(
+										"Bootstrapping ontology and mappings...", workspace);
+								R2RMLImportThread t = new R2RMLImportThread();
+								monitor.addProgressListener(t);
+								monitor.start();
+								t.run(finalFile);
+								monitor.stop();
+								JOptionPane.showMessageDialog(workspace,
+										"R2RML Import completed.", "Done",
+										JOptionPane.INFORMATION_MESSAGE);
+							}catch (Exception e) {
+								JOptionPane.showMessageDialog(workspace, "An error occurred. For more info, see the logs.");
+								log.error("Error during R2RML import. \n", e.getMessage());
+								e.printStackTrace();
 							}
 						}
-						JOptionPane.showMessageDialog(workspace, "R2RML Import completed. " );
-					} catch (DuplicateMappingException dm) {
-						JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
-						throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
-					} catch (Exception e) {
-						JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
-						log.error("Error during R2RML import. \n");
-						e.printStackTrace();
-					}
+					};
+					th.start();
+
 
 				}
 
 			}
 		}
+	}
+
+	private class R2RMLImportThread implements OBDAProgressListener {
+
+		@Override
+		public void actionCanceled() throws Exception {
+
+		}
+
+		public void run(File file)
+				throws Exception {
+
+			/**
+			 * Uses the predefined data source for creating the OBDAModel.
+			 */
+			OBDADataSource dataSource = obdaModelController.getSources().get(0);
+
+			OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
+					.properties(DataSource2PropertiesConvertor.convert(dataSource))
+					.r2rmlMappingFile(file)
+					.build();
+
+
+			SQLPPMapping parsedModel = configuration.loadProvidedPPMapping();
+
+			try{
+			/**
+			 * TODO: improve this inefficient method (batch processing, not one by one)
+			 */
+			for (SQLPPTriplesMap mapping : parsedModel.getTripleMaps()) {
+				if (mapping.getTargetAtoms().toString().contains("BNODE")) {
+					JOptionPane.showMessageDialog(getWorkspace(), "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
+				} else {
+					obdaModelController.addTriplesMap(mapping, false);
+				}
+			}
+			} catch (DuplicateMappingException dm) {
+				JOptionPane.showMessageDialog(getWorkspace(), "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
+				throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
+			}
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return false;
+		}
+
+		@Override
+		public boolean isErrorShown() {
+			return false;
+		}
+
 	}
 }

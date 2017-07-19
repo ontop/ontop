@@ -70,6 +70,18 @@ public class OntopConfigurationManager {
         loadDataSource(obdaModel, settings);
     }
 
+    void resetProperties(DisposableProperties settings){
+        this.settings.clear();
+        this.settings.putAll(settings);
+
+        OBDADataSource dataSource = obdaModel.getDatasource();
+        dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, "");
+        dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, "");
+        dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, "");
+        dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, "");
+
+    }
+
     /**
      * Loads the properties in the global settings and in data source.
      */

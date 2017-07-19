@@ -217,7 +217,7 @@ public class SaveQueryPanel extends JPanel {
 		}
 		final int index = queryController.getElementPosition(id);
 		if (index != -1) {
-			JOptionPane.showMessageDialog(null, "The query or group ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "The query or group ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
@@ -234,7 +234,7 @@ public class SaveQueryPanel extends JPanel {
 				queryController.addQuery(query, id, group);
 			} catch (Exception e) {
 
-                OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                OptionPaneUtils.showPrettyMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 
 				return;
 			}

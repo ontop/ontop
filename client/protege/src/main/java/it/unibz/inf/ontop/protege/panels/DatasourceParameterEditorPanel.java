@@ -375,7 +375,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdHelpActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdHelpActionPerformed
-        DialogUtils.open(URI.create("https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC"));
+        DialogUtils.open(URI.create("https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC"), this);
     }// GEN-LAST:event_cmdHelpActionPerformed
 
     private void txtJdbcDriverActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtJdbcDriverActionPerformed

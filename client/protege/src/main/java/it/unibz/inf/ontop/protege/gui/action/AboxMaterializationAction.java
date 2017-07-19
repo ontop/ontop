@@ -237,7 +237,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances. ");
+			JOptionPane.showMessageDialog(workspace, "ERROR: could not materialize data instances. ");
 		}
 
 	}
@@ -265,7 +265,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 				Thread th = new Thread("MaterializeDataInstances Thread") {
 					public void run() {
                     try {
-                        OBDAProgressMonitor monitor = new OBDAProgressMonitor("Materializing data instances...");
+                        OBDAProgressMonitor monitor = new OBDAProgressMonitor("Materializing data instances...", workspace);
                         CountDownLatch latch = new CountDownLatch(1);
                         action.setCountdownLatch(latch);
                         monitor.addProgressListener(action);
@@ -276,7 +276,7 @@ public class AboxMaterializationAction extends ProtegeAction {
                     }
                     catch (InterruptedException e) {
                         log.error(e.getMessage(), e);
-                        JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances.");
+                        JOptionPane.showMessageDialog(workspace, "ERROR: could not materialize data instances.");
                     }
                 }
 				};

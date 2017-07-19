@@ -290,7 +290,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		resultTablePanel.setOBDASaveQueryToFileAction(fileLocation -> {
             OBDAProgressMonitor monitor = null;
             try {
-                monitor = new OBDAProgressMonitor("Writing output files...");
+                monitor = new OBDAProgressMonitor("Writing output files...", getOWLWorkspace());
                 monitor.start();
                 CountDownLatch latch = new CountDownLatch(1);
                 List<String[]> data = tableModel.getTabularData();

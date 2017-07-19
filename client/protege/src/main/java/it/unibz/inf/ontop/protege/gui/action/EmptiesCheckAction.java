@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.panels.EmptiesCheckPanel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
@@ -61,9 +61,9 @@ public class EmptiesCheckAction extends ProtegeAction {
 		OWLReasoner reasoner = owlManager.getOWLReasonerManager().getCurrentReasoner();
 
 
-		if (reasoner instanceof QuestOWL) {
+		if (reasoner instanceof OntopProtegeReasoner) {
 			try {
-				check = ((QuestOWL) reasoner).getEmptyEntitiesChecker();
+				check = ((OntopProtegeReasoner) reasoner).getEmptyEntitiesChecker();
 
 				JDialog dialog = new JDialog();
 				dialog.setModal(true);
@@ -75,7 +75,7 @@ public class EmptiesCheckAction extends ProtegeAction {
 				Thread th = new Thread("EmptyEntitiesCheck Thread") {
 					public void run() {
 
-						OBDAProgressMonitor monitor = new OBDAProgressMonitor("Finding empty entities...");
+						OBDAProgressMonitor monitor = new OBDAProgressMonitor("Finding empty entities...", getWorkspace());
 						monitor.addProgressListener(emptiesPanel);
 						monitor.start();
 						emptiesPanel.initContent(check);
@@ -100,11 +100,11 @@ public class EmptiesCheckAction extends ProtegeAction {
 
 
 			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
+				JOptionPane.showMessageDialog(getWorkspace(), "An error occurred. For more info, see the logs.");
 			}
 
 		} else {
-			JOptionPane.showMessageDialog(null, "You have to start ontop reasoner for this feature.");
+			JOptionPane.showMessageDialog(getWorkspace(), "You have to start ontop reasoner for this feature.");
 		}
 
 	}

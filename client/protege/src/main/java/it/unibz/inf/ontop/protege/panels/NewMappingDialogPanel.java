@@ -24,9 +24,11 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.model.SQLMappingFactory;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
@@ -189,7 +191,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					URI sourceID = dataSource.getSourceID();
 					System.out.println(sourceID.toString()+" \n");
 
-					OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source);
+					OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source.trim());
 					System.out.println(body.toString()+" \n");
 
 					String newId = txtMappingID.getText().trim();
@@ -197,7 +199,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					if (mapping == null) {
 						// Case when we are creating a new mapping
 						OntopNativeSQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, body, targetQuery);
-						mapcon.addTriplesMap(sourceID, newmapping, false);
+						mapcon.addTriplesMap(newmapping, false);
 					} else {
 						// Case when we are updating an existing mapping
 						mapcon.updateMappingsSourceQuery(sourceID, newId, body);
@@ -446,7 +448,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		// Cleaning the existing table and releasing resources
 		releaseResultset();
 
-		OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...");
+		OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...", this);
 		CountDownLatch latch = new CountDownLatch(1);
 		ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
 		progMonitor.addProgressListener(action);
@@ -520,7 +522,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 						latch.countDown();
 					} catch (Exception e) {
 						latch.countDown();
-						DialogUtils.showQuickErrorDialog(null, e);
+						DialogUtils.showQuickErrorDialog(getRootPane(), e);
 						errorShown = true;
 					}
 				}

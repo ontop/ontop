@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
@@ -56,7 +56,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	private String queryString = null;
 	private boolean isCanceled = false;
 	private boolean actionStarted = false;
-	private QuestOWL reasoner;
+	private OntopProtegeReasoner reasoner;
 	private Component rootView;  // Davide> DAG's hack protegeQueryTabFreezeBug
 
 	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Ontop in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
@@ -95,13 +95,13 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 		this.queryExecError = false;
 		OBDAProgressMonitor monitor = null;
 		try {
-			monitor = new OBDAProgressMonitor(this.msg);
+			monitor = new OBDAProgressMonitor(this.msg, getEditorKit().getWorkspace());
 			monitor.start();
 			latch = new CountDownLatch(1);
 			OWLEditorKit kit = this.getEditorKit();
 			OWLReasoner r = kit.getModelManager().getOWLReasonerManager().getCurrentReasoner();
-			if (r instanceof QuestOWL) {
-				this.reasoner = (QuestOWL) r;
+			if (r instanceof OntopProtegeReasoner) {
+				this.reasoner = (OntopProtegeReasoner) r;
 				monitor.addProgressListener(this);
 				long startTime = System.currentTimeMillis();
 				runAction();
@@ -111,7 +111,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 					this.time = System.currentTimeMillis() - startTime;
 					handleResult(result);
 				}
-			} else /* reasoner not QuestOWL */ {
+			} else /* reasoner not OntopProtegeReasoner */ {
 				JOptionPane.showMessageDialog(
 						rootView,
 						QUEST_START_MESSAGE);

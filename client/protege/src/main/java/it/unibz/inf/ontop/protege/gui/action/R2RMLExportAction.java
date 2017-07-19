@@ -20,9 +20,11 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import it.unibz.inf.ontop.r2rml.SQLPPMappingToR2RMLConverter;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
@@ -36,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.net.URI;
 
 public class R2RMLExportAction extends ProtegeAction {
 
@@ -86,19 +87,68 @@ public class R2RMLExportAction extends ProtegeAction {
                 int approve = fc.showSaveDialog(workspace);
 
                 if(approve == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
 
-					SQLPPMappingToR2RMLConverter writer = new SQLPPMappingToR2RMLConverter(obdaModel.generatePPMapping(),
-							modelManager.getActiveOntology());
-                    writer.write(file);
-                    JOptionPane.showMessageDialog(workspace, "R2RML Export completed.");
+
+                    final File file = fc.getSelectedFile();
+
+                    Thread th = new Thread("Bootstrapper Action Thread"){
+                        @Override
+                        public void run() {
+                            try {
+                                OBDAProgressMonitor monitor = new OBDAProgressMonitor(
+                                        "Bootstrapping ontology and mappings...", workspace);
+                                R2RMLExportThread t = new R2RMLExportThread();
+                                monitor.addProgressListener(t);
+                                monitor.start();
+                                t.run(file);
+                                monitor.stop();
+                                JOptionPane.showMessageDialog(workspace,
+                                        "R2RML Export completed.", "Done",
+                                        JOptionPane.INFORMATION_MESSAGE);
+                            } catch (Exception e) {
+                                JOptionPane.showMessageDialog(workspace, "An error occurred. For more info, see the logs.");
+                                log.error("Error during R2RML export. \n", e.getMessage());
+                                e.printStackTrace();
+                            }
+                        }
+                    };
+                    th.start();
+
+
                 }
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
+            JOptionPane.showMessageDialog(getWorkspace(), "An error occurred. For more info, see the logs.");
             log.error("Error during R2RML export. \n");
             ex.printStackTrace();
         }
 
 	}
+
+    private class R2RMLExportThread implements OBDAProgressListener {
+
+        @Override
+        public void actionCanceled() throws Exception {
+
+        }
+
+        public void run(File file)
+                throws Exception {
+
+            SQLPPMappingToR2RMLConverter writer = new SQLPPMappingToR2RMLConverter(obdaModel.generatePPMapping(),
+                    modelManager.getActiveOntology());
+            writer.write(file);
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
+        public boolean isErrorShown() {
+            return false;
+        }
+
+    }
 }

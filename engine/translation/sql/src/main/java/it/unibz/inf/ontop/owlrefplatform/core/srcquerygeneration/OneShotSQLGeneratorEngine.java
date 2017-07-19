@@ -23,8 +23,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
@@ -43,7 +41,6 @@ import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.IncompatibleTermException;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
@@ -91,7 +88,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
  * @author mrezk, mariano, guohui
  *
  */
-public class SQLGenerator implements NativeQueryGenerator {
+public class OneShotSQLGeneratorEngine {
 
 	private static final long serialVersionUID = 7477161929752147045L;
 
@@ -138,13 +135,12 @@ public class SQLGenerator implements NativeQueryGenerator {
 	private final ImmutableMap<ExpressionOperation, String> operations;
 
 	private static final org.slf4j.Logger log = LoggerFactory
-			.getLogger(SQLGenerator.class);
+			.getLogger(OneShotSQLGeneratorEngine.class);
 	private final JdbcTypeMapper jdbcTypeMapper;
 
-	@AssistedInject
-	private SQLGenerator(@Assisted DBMetadata metadata,
-						 @Nullable IRIDictionary iriDictionary, OntopTranslationSQLSettings settings,
-						 JdbcTypeMapper jdbcTypeMapper) {
+	OneShotSQLGeneratorEngine(DBMetadata metadata,
+                              IRIDictionary iriDictionary, OntopTranslationSQLSettings settings,
+                              JdbcTypeMapper jdbcTypeMapper) {
 
 		String driverURI = settings.getJdbcDriver()
 				.orElseGet(() -> {
@@ -189,12 +185,13 @@ public class SQLGenerator implements NativeQueryGenerator {
 	/**
 	 * For clone purposes only
 	 */
-	private SQLGenerator(RDBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
-						 String replace1, String replace2, boolean distinctResultSet,
-						 IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper) {
+	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
+                                      String replace1, String replace2, boolean distinctResultSet,
+                                      IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
+                                      ImmutableMap<ExpressionOperation, String> operations) {
 		this.metadata = metadata;
 		this.sqladapter = sqlAdapter;
-		this.operations = buildOperations(sqlAdapter);
+		this.operations = operations;
 		this.generatingREPLACE = generatingReplace;
 		this.replace1 = replace1;
 		this.replace2 = replace2;
@@ -254,15 +251,10 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 *
 	 * @return A cloned object without any query-dependent value
 	 */
-	public NativeQueryGenerator cloneIfNecessary() {
-		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE,
-				replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper);
-	}
-
 	@Override
-	public ExecutableQuery generateEmptyQuery(ImmutableList<String> signatureContainer) {
-		// Empty string query
-		return new SQLExecutableQuery(signatureContainer);
+	public OneShotSQLGeneratorEngine clone() {
+		return new OneShotSQLGeneratorEngine(metadata, sqladapter, generatingREPLACE,
+				replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper, operations);
 	}
 
 	/**
@@ -272,7 +264,6 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 * {@link #generateQuery}
 	 *
 	 */
-	@Override
 	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
 			throws OntopTranslationException {
 

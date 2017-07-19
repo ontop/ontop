@@ -26,9 +26,10 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.SQLMappingFactory;
+import it.unibz.inf.ontop.model.SQLPPTriplesMap;
+import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.predicate.Predicate;
@@ -423,13 +424,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private void cmdExecuteActionPerformed(java.awt.event.ActionEvent evt) {
 		if (selectedSource == null) {
-			DialogUtils.showQuickErrorDialog(null, new Exception("Data source has not been defined."));
+			DialogUtils.showQuickErrorDialog(this, new Exception("Data source has not been defined."));
 		}
 		else {
 			String sqlString = txtQueryEditor.getText();
 			if (sqlString.isEmpty()) {
 
-				JOptionPane.showMessageDialog(null, "SQL query cannot be blank", "Warning", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(this, "SQL query cannot be blank", "Warning", JOptionPane.WARNING_MESSAGE);
 			}
 			else
 			{
@@ -749,7 +750,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private void executeQuery() {
 		try {
 			releaseResultset();
-			OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...");
+			OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...", this);
 			CountDownLatch latch = new CountDownLatch(1);
 			ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
 			progMonitor.addProgressListener(action);
@@ -763,7 +764,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				tblQueryResult.setModel(model);
 			}
 		} catch (Exception e) {
-			DialogUtils.showQuickErrorDialog(null, e);
+			DialogUtils.showQuickErrorDialog(this, e);
 		}
 	}
 
