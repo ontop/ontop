@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
  */
 
 import it.unibz.inf.ontop.injection.OntopTranslationSettings;
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -77,7 +77,7 @@ public class SesameClassicTest {
 		dataset.addDefaultGraph(valueFactory.createIRI(file2.toURI().toString()));
 
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, p)) {
-			repo = new OntopVirtualRepository(loader.getConfiguration());
+			repo = OntopRepository.defaultRepository(loader.getConfiguration());
 				/*
 		 		* Repository must be always initialized first
 				 */

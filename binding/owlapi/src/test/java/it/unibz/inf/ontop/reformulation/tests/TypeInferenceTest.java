@@ -109,7 +109,7 @@ public class TypeInferenceTest {
 
     private void checkReturnedValues(String query, ImmutableSet<String> expectedValues) throws Exception {
 
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(OBDA_FILE)
                 .ontologyFile(ONTOLOGY_FILE)
@@ -118,7 +118,7 @@ public class TypeInferenceTest {
                 .jdbcPassword(PASSWORD)
                 .enableTestMode()
                 .build();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.rdf4j.repository;
+package it.unibz.inf.ontop.rdf4j.repository.impl;
 
 /*
  * #%L
@@ -22,11 +22,10 @@ package it.unibz.inf.ontop.rdf4j.repository;
 
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
-import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 
-import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -36,14 +35,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
-public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repository, AutoCloseable {
+public class OntopVirtualRepository implements OntopRepository {
 
 	private boolean initialized = false;
 	private static final Logger logger = LoggerFactory.getLogger(OntopVirtualRepository.class);
-	private Map<String, String> namespaces;
 
 	// Temporary (dropped after initialization)
 	@Nullable
@@ -53,7 +49,6 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	private final RDF4JInputQueryFactory inputQueryFactory;
 
 	public OntopVirtualRepository(OntopSystemConfiguration configuration) {
-		this.namespaces = new HashMap<>();
 		this.configuration = configuration;
 		inputQueryFactory = configuration.getInjector().getInstance(RDF4JInputQueryFactory.class);
 	}
@@ -65,6 +60,7 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	 *  of thread-safeness)
 	 *
 	 */
+	@Override
 	public RepositoryConnection getConnection() throws RepositoryException {
 		try {
 			return new OntopRepositoryConnection(this, getOntopConnection(), inputQueryFactory);
@@ -84,10 +80,8 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	public void initialize() throws RepositoryException{
 		initialized = true;
 		try {
-			OBDASpecification obdaSpecification = configuration.loadSpecification();
-			OntopSystemFactory factory = configuration.getInjector().getInstance(OntopSystemFactory.class);
 
-			queryEngine = factory.create(obdaSpecification, configuration.getExecutorRegistry());
+			queryEngine = configuration.loadQueryEngine();
 			queryEngine.connect();
 		}
 		catch (Exception e){
@@ -149,30 +143,5 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	@Override
 	public void close() throws RepositoryException {
 		this.shutDown();
-	}
-
-	void setNamespace(String key, String value)
-	{
-		namespaces.put(key, value);
-	}
-
-	String getNamespace(String key)
-	{
-		return namespaces.get(key);
-	}
-
-	Map<String, String> getNamespaces()
-	{
-		return namespaces;
-	}
-
-	void setNamespaces(Map<String, String> nsp)
-	{
-		this.namespaces = nsp;
-	}
-
-	void removeNamespace(String key)
-	{
-		namespaces.remove(key);
 	}
 }

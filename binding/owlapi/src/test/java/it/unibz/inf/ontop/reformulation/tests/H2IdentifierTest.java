@@ -49,7 +49,7 @@ public class H2IdentifierTest {
 	static final String obdaFile = "src/test/resources/identifiers/identifiers-h2.obda";
 	static final String propertyFile = "src/test/resources/identifiers/identifiers-h2.properties";
 
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private OntopOWLConnection conn;
 	Connection sqlConnection;
 
@@ -81,7 +81,7 @@ public class H2IdentifierTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();

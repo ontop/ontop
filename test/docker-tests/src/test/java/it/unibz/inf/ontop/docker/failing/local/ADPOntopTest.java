@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.semanticweb.owlapi.model.OWLObject;
 
-import java.io.File;
 import java.io.FileReader;
 
 /**
@@ -30,14 +29,14 @@ public class ADPOntopTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlFileName)
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 		/*
 		 * Prepare the data connection for querying.

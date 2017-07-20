@@ -58,7 +58,7 @@ public class SameAsOntowisTest {
 
 
     // Internal Modifiable State
-    QuestOWL reasoner ;
+    OntopOWLReasoner reasoner ;
 
     public SameAsOntowisTest(String obdaFile){
         this.obdaFile = obdaFile;
@@ -273,7 +273,7 @@ public class SameAsOntowisTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 //        factory.setOBDAController(obdaModel);
 //        factory.setPreferenceHolder(preference);
 
@@ -286,7 +286,7 @@ public class SameAsOntowisTest {
 
 
 
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
         this.reasoner = reasoner;
 		/*

@@ -35,7 +35,7 @@ public class CanonicalIRIUniversityTest {
     final String obdaFile = "src/test/resources/canonicalIRI/university/univ-ontology.obda";
     final String sparqlFile = "src/test/resources/canonicalIRI/university/univ-ontology.q";
 
-    private QuestOWL reasoner;
+    private OntopOWLReasoner reasoner;
     private OntopOWLConnection conn;
     Connection sqlConnection;
 
@@ -65,7 +65,7 @@ public class CanonicalIRIUniversityTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
         reasoner = factory.createReasoner(config);
         conn = reasoner.getConnection();

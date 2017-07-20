@@ -30,8 +30,7 @@ import java.sql.Statement;
 import java.util.Properties;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLFactory;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
@@ -109,7 +108,7 @@ public class MappingAnalyzerTest extends TestCase {
 		p.setProperty(OPTIMIZE_EQUIVALENCES, "true");
 		
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)

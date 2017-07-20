@@ -10,13 +10,15 @@ import org.semanticweb.owlapi.util.Version;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.loadOntologies;
+
 /**
- * Wrapper around QuestOwl Reasoner to use inside Protege
+ * Wrapper around OntopOWLReasoner to use inside Protege
  */
 public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseable {
 
-    private QuestOWL reasoner;
-    private final QuestOWLFactory factory = new QuestOWLFactory();
+    private OntopOWLReasoner reasoner;
+    private final OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
     private final OntopConfigurationManager configurationManager;
     private OntopOWLConnection owlConnection;
 
@@ -26,8 +28,6 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
 
         reasoner = factory.createReasoner(rootOntology, configuration);
         this.configurationManager = configuration.getOntopConfigurationManager();
-
-
     }
 
     public OntopOWLStatement getStatement() throws OWLException {
@@ -316,7 +316,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
      * @throws Exception
      */
     public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() throws Exception {
-        return new QuestOWLEmptyEntitiesChecker(reasoner.getOntopOntology(), owlConnection);
+        return new QuestOWLEmptyEntitiesChecker(loadOntologies(getRootOntology()), owlConnection);
     }
 
     /**

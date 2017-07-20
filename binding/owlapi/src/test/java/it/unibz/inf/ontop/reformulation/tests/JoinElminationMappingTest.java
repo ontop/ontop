@@ -100,8 +100,8 @@ public class JoinElminationMappingTest extends TestCase {
 					.enableTestMode()
 					.build();
 
-		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestOWL reasoner = factory.createReasoner(configuration);
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
 		reasoner.flush();
 
 		// Now we are ready for querying

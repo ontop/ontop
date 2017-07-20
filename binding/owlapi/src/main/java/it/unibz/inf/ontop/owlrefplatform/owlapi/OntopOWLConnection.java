@@ -24,7 +24,7 @@ import org.semanticweb.owlapi.model.OWLException;
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  *
  * @see OntopOWLStatement
- * @see QuestOWL
+ * @see OntopOWLReasoner
  * @see OntopStatement
  */
 public interface OntopOWLConnection extends AutoCloseable {

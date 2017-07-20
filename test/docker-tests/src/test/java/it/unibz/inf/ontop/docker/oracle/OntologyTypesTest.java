@@ -59,7 +59,7 @@ public class OntologyTypesTest {
 	private void runTests(boolean isR2rml, String query, int numberResults) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.propertyFile(propertyFileName)
 				.enableTestMode()
@@ -71,7 +71,7 @@ public class OntologyTypesTest {
 		else
 			configBuilder.nativeOntopMappingFile(obdaFileName);
 
-		QuestOWL reasoner = factory.createReasoner(configBuilder.build());
+		OntopOWLReasoner reasoner = factory.createReasoner(configBuilder.build());
 
 		// Now we are ready for querying
 		OntopOWLConnection conn = reasoner.getConnection();
@@ -232,14 +232,14 @@ public class OntologyTypesTest {
 	public void failedMapping()  throws Exception  {
 		try {
 			// Creating a new instance of the reasoner
-			QuestOWLFactory factory = new QuestOWLFactory();
+			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 			OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.nativeOntopMappingFile(obdaErroredFileName)
 					.ontologyFile(owlFileName)
 					.enableTestMode()
 					.propertyFile(propertyFileName)
 					.build();
-			QuestOWL reasoner = factory.createReasoner(config);
+			OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 
 		} catch (Exception e) {

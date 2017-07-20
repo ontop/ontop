@@ -99,7 +99,7 @@ public class TMappingDisablingTest extends TestCase {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -107,7 +107,7 @@ public class TMappingDisablingTest extends TestCase {
 				.enableTestMode()
 				.build();
 		
-		QuestOWL reasoner = factory.createReasoner(configuration);
+		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
 		
 		/*
 		 * Prepare the data connection for querying.
@@ -142,7 +142,7 @@ public class TMappingDisablingTest extends TestCase {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -150,7 +150,7 @@ public class TMappingDisablingTest extends TestCase {
 				.tMappingExclusionConfig(TMappingExclusionConfig.parseFile(tMappingsConfFile))
 				.enableTestMode()
 				.build();
-		QuestOWL reasoner = factory.createReasoner(configuration);
+		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
 		
 		/*
 		 * Prepare the data connection for querying.

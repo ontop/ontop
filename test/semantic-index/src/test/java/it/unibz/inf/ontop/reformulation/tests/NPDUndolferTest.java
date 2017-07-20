@@ -220,9 +220,9 @@ public class NPDUndolferTest extends TestCase {
 	 */
 	
 	private String getNPDUnfolding(String query, Properties p) throws Exception {
-        QuestOWLFactory fac = new QuestOWLFactory();
+        OntopOWLFactory fac = OntopOWLFactory.defaultFactory();
         try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p);
-             QuestOWL quest = fac.createReasoner(loader.getConfiguration());
+             OntopOWLReasoner quest = fac.createReasoner(loader.getConfiguration());
              OntopOWLConnection qconn = quest.getConnection();
              OntopOWLStatement st = qconn.createStatement()) {
 
@@ -246,10 +246,10 @@ public class NPDUndolferTest extends TestCase {
         p.put(OntopTranslationSettings.EXISTENTIAL_REASONING, true);
 
 
-        QuestOWLFactory fac = new QuestOWLFactory();
+        OntopOWLFactory fac = OntopOWLFactory.defaultFactory();
         String rewriting;
         try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p);
-             QuestOWL quest = fac.createReasoner(loader.getConfiguration());
+             OntopOWLReasoner quest = fac.createReasoner(loader.getConfiguration());
              OntopOWLConnection qconn = quest.getConnection();
              OntopOWLStatement st = qconn.createStatement()) {
 

@@ -8,16 +8,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
-import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.eclipse.rdf4j.query.Query;
-import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
@@ -81,7 +78,7 @@ public class TestSesameTimeout {
 				.enableTestMode()
 				.build();
 
-		OntopVirtualRepository repo = new OntopVirtualRepository(configuration);
+		OntopRepository repo = OntopRepository.defaultRepository(configuration);
 		repo.initialize();
 		/*
 		 * Prepare the data connection for querying.

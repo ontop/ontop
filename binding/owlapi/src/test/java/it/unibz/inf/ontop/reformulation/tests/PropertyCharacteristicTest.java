@@ -41,7 +41,7 @@ public class PropertyCharacteristicTest extends TestCase {
 	
 	private OntopOWLConnection conn = null;
 	private OntopOWLStatement stmt = null;
-	private QuestOWL reasoner = null;
+	private OntopOWLReasoner reasoner = null;
 	
 	private Connection jdbcconn = null;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -123,7 +123,7 @@ public class PropertyCharacteristicTest extends TestCase {
 	}
 	
 	private void setupReasoner(File owlFile, File obdaFile) throws Exception {
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)

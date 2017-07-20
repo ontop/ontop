@@ -55,7 +55,7 @@ import java.util.Set;
  * The OBDAOWLReformulationPlatform implements the OWL reasoner interface and is
  * the implementation of the reasoning method in the reformulation project.
  */
-public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
+public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	StructuralReasoner structuralReasoner;
 
@@ -261,6 +261,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 * The caller is in charge of closing the connection after usage.
 	 *    (the reasoner is not responsible of connections)
 	 */
+	@Override
 	public OntopOWLConnection getConnection() throws ReasonerInternalException {
 		if (!questready) {
 			OWLReasonerRuntimeException owlReasonerRuntimeException = new ReasonerInternalException(
@@ -397,6 +398,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	}
 	
 	//info to return which axiom was inconsistent during the check
+	@Override
 	public Object getInconsistentAxiom() {
 		return inconsistent;
 	}

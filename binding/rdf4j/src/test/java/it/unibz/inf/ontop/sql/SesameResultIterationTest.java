@@ -10,7 +10,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
 import org.junit.Before;
@@ -92,7 +92,7 @@ public class SesameResultIterationTest {
                 .enableTestMode()
                 .build();
 
-        OntopVirtualRepository repo = new OntopVirtualRepository(configuration);
+        OntopRepository repo = OntopRepository.defaultRepository(configuration);
         repo.initialize();
         /*
 		 * Prepare the data connection for querying.

@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
@@ -85,7 +85,7 @@ public class TestSesameBindings {
                 .enableTestMode()
                 .build();
 
-        OntopVirtualRepository repo = new OntopVirtualRepository(config);
+        OntopRepository repo = OntopRepository.defaultRepository(config);
         repo.initialize();
         /*
          * Prepare the data connection for querying.

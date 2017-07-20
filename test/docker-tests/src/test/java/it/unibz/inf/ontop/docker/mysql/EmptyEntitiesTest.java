@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -67,7 +66,7 @@ public class EmptyEntitiesTest {
 	private Set<ClassExpression> emptyBasicConcepts = new HashSet<ClassExpression>();
 	private Set<Description> emptyProperties = new HashSet<Description>();
 
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private Ontology onto;
 
 	@Before
@@ -79,7 +78,7 @@ public class EmptyEntitiesTest {
 
 		// Creating a new instance of the reasoner
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.enableFullMetadataExtraction(false)
 				.ontologyFile(owlFileName)

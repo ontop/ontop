@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.protege.core;
 
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import it.unibz.inf.ontop.protege.utils.OptionPaneUtils;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
@@ -32,7 +31,7 @@ public class OntopProtegeOWLFactory implements OWLReasonerFactory {
 	}
 
 	@SuppressWarnings("unused")
-	private final Logger log = LoggerFactory.getLogger(QuestOWLFactory.class);
+	private final Logger log = LoggerFactory.getLogger(OntopProtegeOWLFactory.class);
 
 	@Nonnull
 	@Override

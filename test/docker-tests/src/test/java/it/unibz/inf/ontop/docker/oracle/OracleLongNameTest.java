@@ -21,16 +21,7 @@ package it.unibz.inf.ontop.docker.oracle;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
-import org.junit.After;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLException;
-
-import java.io.File;
 
 /***
  * Oracle long name.

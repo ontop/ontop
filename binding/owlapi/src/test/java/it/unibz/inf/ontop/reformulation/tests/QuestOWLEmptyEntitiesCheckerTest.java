@@ -73,7 +73,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	private List<Predicate> emptyConcepts = new ArrayList<Predicate>();
 	private List<Predicate> emptyRoles = new ArrayList<Predicate>();
 
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 
 	@Before
 	public void setUp() throws Exception {
@@ -104,7 +104,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		onto =  OWLAPITranslatorUtility.translate(ontology);
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontology(ontology)

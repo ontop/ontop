@@ -53,7 +53,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 	final String owlfile = "src/test/resources/sameAs/wellbores-same-as-can.owl";
 	final String obdafile = "src/test/resources/sameAs/wellbores-same-as-can.obda";
 
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private Connection sqlConnection;
 
 	private static final String JDBC_URL =  "jdbc:h2:mem:wellboresNoDuplicates";
@@ -80,7 +80,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 				.build();
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying

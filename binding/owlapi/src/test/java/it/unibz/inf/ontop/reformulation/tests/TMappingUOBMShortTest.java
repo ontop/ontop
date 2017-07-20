@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLReasoner;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -30,7 +30,7 @@ public class TMappingUOBMShortTest {
 		Properties pref = new Properties();
 		//pref.put(QuestCoreSettings.PRINT_KEYS, QuestConstants.TRUE);
 
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile("src/test/resources/tmapping-uobm/univ-bench-dl.obda")
 				.ontologyFile("src/test/resources/tmapping-uobm/univ-bench-dl.owl")
@@ -41,7 +41,7 @@ public class TMappingUOBMShortTest {
 				.enableExistentialReasoning(true)
 				.enableTestMode()
 				.build();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 	}
 	
 	private static void execute(Connection conn, String filename) throws IOException, SQLException {		

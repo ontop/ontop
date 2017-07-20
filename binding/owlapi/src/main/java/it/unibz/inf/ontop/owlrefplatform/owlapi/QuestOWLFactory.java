@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * <p>
  * Implementation of an OWLReasonerFactory that can create instances of Ontop.
  */
-public class QuestOWLFactory implements OWLReasonerFactory {
+public class QuestOWLFactory implements OntopOWLFactory {
 
     @SuppressWarnings("unused")
     private final Logger log = LoggerFactory.getLogger(QuestOWLFactory.class);
@@ -53,7 +53,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 
     @Nonnull
     @Override
-    public QuestOWL createNonBufferingReasoner(@Nonnull OWLOntology ontology) {
+    public OntopOWLReasoner createNonBufferingReasoner(@Nonnull OWLOntology ontology) {
         throw new UnsupportedOperationException("Quest is a buffering reasoner");
     }
 
@@ -67,20 +67,21 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 
     @Nonnull
     @Override
-    public QuestOWL createNonBufferingReasoner(@Nonnull OWLOntology ontology, @Nonnull OWLReasonerConfiguration config)
+    public OntopOWLReasoner createNonBufferingReasoner(@Nonnull OWLOntology ontology, @Nonnull OWLReasonerConfiguration config)
             throws IllegalConfigurationException {
         throw new UnsupportedOperationException("Quest is a buffering reasoner");
     }
 
     @Nonnull
     @Override
-    public QuestOWL createReasoner(@Nonnull OWLOntology ontology, @Nonnull OWLReasonerConfiguration config) throws IllegalConfigurationException {
+    public OntopOWLReasoner createReasoner(@Nonnull OWLOntology ontology, @Nonnull OWLReasonerConfiguration config) throws IllegalConfigurationException {
         checkArgument(config instanceof QuestOWLConfiguration, "config %s is not an instance of QuestOWLConfiguration", config);
         return new QuestOWL(ontology, (QuestOWLConfiguration)config);
     }
 
+    @Override
     @Nonnull
-    public QuestOWL createReasoner(@Nonnull OntopSystemOWLAPIConfiguration config)
+    public OntopOWLReasoner createReasoner(@Nonnull OntopSystemOWLAPIConfiguration config)
             throws IllegalConfigurationException, OWLOntologyCreationException {
 
         QuestOWLConfiguration owlConfiguration = new QuestOWLConfiguration(config);

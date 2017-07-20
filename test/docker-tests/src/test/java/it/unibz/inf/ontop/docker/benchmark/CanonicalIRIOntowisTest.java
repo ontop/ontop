@@ -66,7 +66,7 @@ public class CanonicalIRIOntowisTest {
 
 
     // Internal Modifiable State
-    QuestOWL reasoner ;
+    OntopOWLReasoner reasoner ;
 
     public CanonicalIRIOntowisTest(String obdaFile, String propertyFile){
         this.obdaFile = obdaFile;
@@ -516,10 +516,10 @@ public class CanonicalIRIOntowisTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
 
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
         this.reasoner = reasoner;
 		/*

@@ -55,7 +55,7 @@ public class H2SameAsTest {
 
 	final String owlfile = "src/test/resources/sameAs/wellbores.owl";
 	final String obdafile = "src/test/resources/sameAs/wellbores.obda";
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private Connection sqlConnection;
 	private static final String JDBC_URL =  "jdbc:h2:mem:wellboresNoDuplicates";
 	private static final String JDBC_USER =  "sa";
@@ -102,7 +102,7 @@ public class H2SameAsTest {
 	private ArrayList runTests(String query, boolean sameAs) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)

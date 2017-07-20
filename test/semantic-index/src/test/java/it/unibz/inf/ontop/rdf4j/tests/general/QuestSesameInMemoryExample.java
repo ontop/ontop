@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
  */
 
 import it.unibz.inf.ontop.injection.OntopTranslationSettings;
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -73,7 +73,7 @@ public class QuestSesameInMemoryExample {
 		dataset.addDefaultGraph(valueFactory.createIRI(ontologyFile.toURI().toString()));
 
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, p)) {
-			repository = new OntopVirtualRepository(loader.getConfiguration());
+			repository = OntopRepository.defaultRepository(loader.getConfiguration());
 				/*
 		 		* Repository must be always initialized first
 				 */

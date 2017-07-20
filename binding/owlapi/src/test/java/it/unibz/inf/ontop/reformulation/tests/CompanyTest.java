@@ -55,7 +55,7 @@ public class CompanyTest  {
 	private static final String obdaFile = "src/test/resources/optional/company.obda";
 	private static final String propertyfile = "src/test/resources/optional/company.properties";
 
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private OntopOWLConnection conn;
 	Connection sqlConnection;
 
@@ -81,7 +81,7 @@ public class CompanyTest  {
 		/*m
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();

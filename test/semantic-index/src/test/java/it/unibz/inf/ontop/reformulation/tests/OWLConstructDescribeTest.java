@@ -38,7 +38,7 @@ import java.util.Properties;
  */
 public class OWLConstructDescribeTest{
 
-	QuestOWL reasoner = null;
+	OntopOWLReasoner reasoner = null;
 	OntopOWLConnection conn = null;
 	OntopOWLStatement st = null;
 	String owlFile = "src/test/resources/describeConstruct.owl";
@@ -46,7 +46,7 @@ public class OWLConstructDescribeTest{
 	@Before
 	public void setUp() throws Exception {
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlFile, new Properties())) {
-			QuestOWLFactory factory = new QuestOWLFactory();
+			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 			reasoner = factory.createReasoner(loader.getConfiguration());
 			conn = reasoner.getConnection();
 			st = conn.createStatement();
