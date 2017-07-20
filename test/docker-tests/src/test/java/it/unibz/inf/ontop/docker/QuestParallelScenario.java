@@ -20,28 +20,11 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
-import org.eclipse.rdf4j.common.io.IOUtil;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.query.*;
-import org.eclipse.rdf4j.query.dawg.DAWGTestResultSetUtil;
-import org.eclipse.rdf4j.query.resultio.BooleanQueryResultParserRegistry;
-import org.eclipse.rdf4j.query.resultio.QueryResultFormat;
-import org.eclipse.rdf4j.query.resultio.QueryResultIO;
+
 import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.rio.ParserConfig;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
-import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -194,169 +177,15 @@ public abstract class QuestParallelScenario {
 
         @Override
         public void run() {
-
             LOGGER.debug(String.format("Thread: %s", testName));
-
+            TestExecutor executor = new TestExecutor(testName, queryFileURL, resultFileURL, dataRep, LOGGER);
             try {
-                RepositoryConnection con = dataRep.getConnection();
-                // Non-final
-                Optional<ResultSetInfo> expectedTupleResult = Optional.empty();
-                try {
-                    String queryString = readQueryString();
-                    Query query = con.prepareQuery(QueryLanguage.SPARQL, queryString, queryFileURL);
-                    if (query instanceof TupleQuery) {
-                        ResultSetInfo expectedResult = readResultSetInfo();
-                        expectedTupleResult = Optional.of(expectedResult);
-                        TupleQueryResult queryResult = ((TupleQuery) query).evaluate();
-                        //TODO:  Should we do a more sophisticated verification?
-                        compareResultSize(testName, queryResult, expectedResult);
-                    }
-                    else if (query instanceof BooleanQuery) {
-                        boolean queryResult = ((BooleanQuery) query).evaluate();
-                        boolean expectedResult = readExpectedBooleanQueryResult();
-                        if (expectedResult != queryResult) {
-                            throw new Exception("Expected: " + expectedResult + ", result: " + queryResult);
-                        }
-                    }
-                    else {
-                        throw new RuntimeException("Unexpected query type: " + query.getClass());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    if (expectedTupleResult.isPresent()) {
-                        compareThrownException(testName, e, expectedTupleResult.get()); // compare the thrown exception class
-                    }
-                    else {
-                        throw e;
-                    }
-                } finally {
-                    con.close();
-                }
-            } catch(Exception e) {
-                throw new RuntimeException(e.getMessage());
+                executor.runTest();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
 
-        private void compareResultSize(String testName, TupleQueryResult queryResult, ResultSetInfo expectedResult) throws Exception {
-            int queryResultSize = countTuple(queryResult);
-            int expectedResultSize = (Integer) attributeValue(expectedResult, "counter");
-            if (queryResultSize != expectedResultSize) {
-                StringBuilder message = new StringBuilder(128);
-                message.append("\n============ ");
-                message.append(testName);
-                message.append(" =======================\n");
-                message.append("Expected result: ");
-                message.append(expectedResultSize);
-                message.append("\n");
-                message.append("Query result: ");
-                message.append(queryResultSize);
-                message.append("\n");
-                message.append("=====================================\n");
-
-                LOGGER.error(message.toString());
-                throw new Exception(message.toString());
-            }
-        }
-
-        private void compareThrownException(String testName, Exception ex, ResultSetInfo expectedResult) throws Exception {
-            String thrownException = ex.getClass().getName();
-            String expectedThrownException = (String) attributeValue(expectedResult, "thrownException");
-            if (!thrownException.equals(expectedThrownException)) {
-                StringBuilder message = new StringBuilder(128);
-                message.append("\n============ ");
-                message.append(testName);
-                message.append(" =======================\n");
-                message.append("Expected thrown exception: ");
-                message.append(expectedThrownException);
-                message.append("\n");
-                message.append("Thrown exception: ");
-                message.append(thrownException);
-                message.append("\n");
-                message.append("Message:" + ex.getMessage());
-                message.append("=====================================\n");
-
-                LOGGER.error(message.toString());
-                throw new Exception(message.toString());
-            }
-        }
-
-        private int countTuple(TupleQueryResult tuples) throws QueryEvaluationException {
-            if (tuples == null) {
-                return -1;
-            }
-            int counter = 0;
-            while (tuples.hasNext()) {
-                counter++;
-                BindingSet bs = tuples.next();
-                String msg = String.format("x: %s, y: %s\n", bs.getValue("x"), bs.getValue("y"));
-                LOGGER.debug(msg);
-            }
-            return counter;
-        }
-
-        private Object attributeValue(ResultSetInfo rsInfo, String attribute) throws QueryEvaluationException {
-            return rsInfo.get(attribute);
-        }
-
-
-        private String readQueryString() throws IOException {
-            InputStream stream = new URL(queryFileURL).openStream();
-            try {
-                return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
-            } finally {
-                stream.close();
-            }
-        }
-
-        private ResultSetInfo readResultSetInfo() throws Exception {
-            Set<Statement> resultGraph = readGraphResultSetInfo();
-            return ResultSetInfoTupleUtil.toResuleSetInfo(resultGraph);
-        }
-
-        private boolean readExpectedBooleanQueryResult() throws Exception {
-            Optional<QueryResultFormat> bqrFormat = BooleanQueryResultParserRegistry.getInstance()
-                    .getFileFormatForFileName(resultFileURL);
-
-            if (bqrFormat.isPresent()) {
-                InputStream in = new URL(resultFileURL).openStream();
-                try {
-                    return QueryResultIO.parseBoolean(in, bqrFormat.get());
-                }
-                finally {
-                    in.close();
-                }
-            }
-            else {
-                Set<Statement> resultGraph = readGraphResultSetInfo();
-                return DAWGTestResultSetUtil.toBooleanQueryResult(resultGraph);
-            }
-        }
-
-        private Set<Statement> readGraphResultSetInfo() throws Exception {
-            RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL).get();
-            if (rdfFormat != null) {
-                RDFParser parser = Rio.createParser(rdfFormat, dataRep.getValueFactory());
-                ParserConfig config = parser.getParserConfig();
-                // To emulate DatatypeHandling.IGNORE
-                config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
-                config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
-                config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
-                config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
-
-                Set<Statement> result = new LinkedHashSet<>();
-                parser.setRDFHandler(new StatementCollector(result));
-
-                InputStream in = new URL(resultFileURL).openStream();
-                try {
-                    parser.parse(in, resultFileURL);
-                } finally {
-                    in.close();
-                }
-                return result;
-            } else {
-                throw new RuntimeException("Unable to determine file type of results file");
-            }
-        }
     }
 
     public class QuestThread extends Thread {

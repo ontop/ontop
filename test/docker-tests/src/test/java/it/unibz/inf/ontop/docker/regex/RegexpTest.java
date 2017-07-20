@@ -98,7 +98,7 @@ public class RegexpTest extends TestCase {
 			java.sql.Statement s = sqlConnection.createStatement();
 
 			try {
-				String text = new Scanner( new File("src/main/resources/dump/stockexchange-create-h2.sql") ).useDelimiter("\\A").next();
+				String text = new Scanner( new File("src/test/resources/dump/stockexchange-create-h2.sql") ).useDelimiter("\\A").next();
 				s.execute(text);
 				//Server.startWebServer(sqlConnection);
 				

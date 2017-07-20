@@ -23,35 +23,17 @@ package it.unibz.inf.ontop.docker;
 
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.eclipse.rdf4j.common.io.IOUtil;
-import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.query.*;
-import org.eclipse.rdf4j.query.dawg.DAWGTestResultSetUtil;
-import org.eclipse.rdf4j.query.resultio.BooleanQueryResultParserRegistry;
-import org.eclipse.rdf4j.query.resultio.QueryResultFormat;
-import org.eclipse.rdf4j.query.resultio.QueryResultIO;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.rio.ParserConfig;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
-import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
 
 public abstract class QuestScenarioParent extends TestCase {
 	
@@ -120,198 +102,8 @@ public abstract class QuestScenarioParent extends TestCase {
 
 	@Override
 	protected void runTest() throws Exception {
-
-		RepositoryConnection con = dataRep.getConnection();
-		Optional<ResultSetInfo> expectedTupleResult = Optional.empty();
-		try {
-			String queryString = readQueryString();
-			Query query = con.prepareQuery(QueryLanguage.SPARQL, queryString, queryFileURL);
-
-			if (query instanceof TupleQuery) {
-				expectedTupleResult = Optional.of(readResultSetInfo());
-				TupleQueryResult queryResult = ((TupleQuery) query).evaluate();
-
-				compareResultSize(queryResult, expectedTupleResult.get());
-
-
-			} else if (query instanceof BooleanQuery) {
-				boolean queryResult = ((BooleanQuery) query).evaluate();
-				boolean expectedResult = readExpectedBooleanQueryResult();
-				assertEquals(expectedResult, queryResult);
-			} else {
-
-				throw new RuntimeException("Unexpected query type: " + query.getClass());
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			if(expectedTupleResult.isPresent())
-			{
-				compareThrownException(e, expectedTupleResult.get()); // compare the thrown exception class
-			}
-		}
-		finally {
-			con.close();
-		}
-	}
-
-	private void compareResultSize(TupleQueryResult queryResult, ResultSetInfo expectedResult) throws Exception {
-		int queryResultSize = countTuple(queryResult);
-		int expectedResultSize = (Integer) attributeValue(expectedResult, "counter");
-		if (queryResultSize != expectedResultSize) {
-			StringBuilder message = new StringBuilder(128);
-			message.append("\n============ ");
-			message.append(getName());
-			message.append(" =======================\n");
-			message.append("Expected result: ");
-			message.append(expectedResultSize);
-			message.append("\n");
-			message.append("Query result: ");
-			message.append(queryResultSize);
-			message.append("\n");		
-			message.append("=====================================\n");
-
-			logger.error(message.toString());
-			fail(message.toString());
-		}
-	}
-
-	private boolean readExpectedBooleanQueryResult()
-			throws Exception
-	{
-		Optional<QueryResultFormat> bqrFormat = BooleanQueryResultParserRegistry.getInstance().getFileFormatForFileName(resultFileURL);
-
-		if (bqrFormat.isPresent()) {
-			InputStream in = new URL(resultFileURL).openStream();
-			try {
-				return QueryResultIO.parseBoolean(in, bqrFormat.get());
-			}
-			finally {
-				in.close();
-			}
-		}
-		else {
-			Set<Statement> resultGraph = readExpectedGraphQueryResult();
-			return DAWGTestResultSetUtil.toBooleanQueryResult(resultGraph);
-		}
-	}
-
-	private Set<Statement> readExpectedGraphQueryResult()
-			throws Exception
-	{
-		Optional<RDFFormat> rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
-
-		if (rdfFormat.isPresent()) {
-			RDFParser parser = Rio.createParser(rdfFormat.get(), dataRep.getValueFactory());
-			ParserConfig config = parser.getParserConfig();
-			// To emulate DatatypeHandling.IGNORE
-			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
-			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
-			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
-			config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
-//			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
-//			parser.setPreserveBNodeIDs(true);
-
-			Set<Statement> result = new LinkedHashSet<Statement>();
-			parser.setRDFHandler(new StatementCollector(result));
-
-			InputStream in = new URL(resultFileURL).openStream();
-			try {
-				parser.parse(in, resultFileURL);
-			}
-			finally {
-				in.close();
-			}
-
-			return result;
-		}
-		else {
-			throw new RuntimeException("Unable to determine file type of results file");
-		}
-	}
-
-	private void compareThrownException(Exception ex, ResultSetInfo expectedResult) throws Exception {
-		String thrownException = ex.getClass().getName();
-		String expectedThrownException = (String) attributeValue(expectedResult, "thrownException");
-		if (!thrownException.equals(expectedThrownException)) {
-			StringBuilder message = new StringBuilder(128);
-			message.append("\n============ ");
-			message.append(getName());
-			message.append(" =======================\n");
-			message.append("Expected thrown exception: ");
-			message.append(expectedThrownException);
-			message.append("\n");
-			message.append("Thrown exception: ");
-			message.append(thrownException);
-			message.append("\n");
-			message.append("Message:" + ex.getMessage());
-			message.append("=====================================\n");
-
-			logger.error(message.toString());
-			fail(message.toString());
-		}
-	}
-	
-	private int countTuple(TupleQueryResult tuples) throws QueryEvaluationException {
-		if (tuples == null) {
-			return -1;
-		}
-		int counter = 0;
-		while (tuples.hasNext()) {
-			counter++;
-			BindingSet bs = tuples.next();
-			String msg = String.format("x: %s, y: %s\n", bs.getValue("x"), bs.getValue("y"));
-			logger.info(msg);
-		}
-		return counter;
-	}
-	
-	private Object attributeValue(ResultSetInfo rsInfo, String attribute) throws QueryEvaluationException {
-		return rsInfo.get(attribute);
-	}
-	
-	
-	private String readQueryString() throws IOException {
-		InputStream stream = new URL(queryFileURL).openStream();
-		try {
-			return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
-		} finally {
-			stream.close();
-		}
-	}
-	
-	private ResultSetInfo readResultSetInfo() throws Exception {
-		Set<Statement> resultGraph = readGraphResultSetInfo();
-		return ResultSetInfoTupleUtil.toResuleSetInfo(resultGraph);
-	}
-	
-	private Set<Statement> readGraphResultSetInfo() throws Exception {
-		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL).get();
-		if (rdfFormat != null) {
-			RDFParser parser = Rio.createParser(rdfFormat, dataRep.getValueFactory());
-			ParserConfig config = parser.getParserConfig();
-			// To emulate DatatypeHandling.IGNORE 
-			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
-			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
-			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
-			config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
-
-//			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
-//			parser.setPreserveBNodeIDs(true);
-
-			Set<Statement> result = new LinkedHashSet<Statement>();
-			parser.setRDFHandler(new StatementCollector(result));
-
-			InputStream in = new URL(resultFileURL).openStream();
-			try {
-				parser.parse(in, resultFileURL);
-			} finally {
-				in.close();
-			}
-			return result;
-		} else {
-			throw new RuntimeException("Unable to determine file type of results file");
-		}
+		TestExecutor executor = new TestExecutor(getName(), queryFileURL, resultFileURL, dataRep, logger);
+		executor.runTest();
 	}
 
 	public static TestSuite suite(String manifestFileURL, Factory factory) throws Exception {
