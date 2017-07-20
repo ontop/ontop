@@ -132,40 +132,43 @@ public class R2rmlCheckerTest {
 
 	@Test
 	public void testDescriptionsCheck() throws Exception {
-		
 
-		// Now we are ready for querying
-		log.debug("Comparing concepts");
-		for (OClass cl : onto.getVocabulary().getClasses()) {
-			String concept = cl.getName();
-					
-			int conceptOBDA = runSPARQLConceptsQuery("<" + concept + ">", reasonerOBDA.getConnection());
-			int conceptR2rml = runSPARQLConceptsQuery("<" + concept + ">", reasonerR2rml.getConnection());
+		try (OntopOWLConnection obdaConnection = reasonerOBDA.getConnection();
+			 OntopOWLConnection r2rmlConnection = reasonerR2rml.getConnection()) {
 
-			assertEquals(conceptOBDA, conceptR2rml);
+			// Now we are ready for querying
+			log.debug("Comparing concepts");
+			for (OClass cl : onto.getVocabulary().getClasses()) {
+				String concept = cl.getName();
+
+				int conceptOBDA = runSPARQLConceptsQuery("<" + concept + ">", obdaConnection);
+				int conceptR2rml = runSPARQLConceptsQuery("<" + concept + ">", r2rmlConnection);
+
+				assertEquals(conceptOBDA, conceptR2rml);
+			}
+
+			log.debug("Comparing object properties");
+			for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
+				String role = prop.getName();
+
+				log.debug("description " + role);
+				int roleOBDA = runSPARQLRolesQuery("<" + role + ">", obdaConnection);
+				int roleR2rml = runSPARQLRolesQuery("<" + role + ">", r2rmlConnection);
+
+				assertEquals(roleOBDA, roleR2rml);
+			}
+
+			log.debug("Comparing data properties");
+			for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
+				String role = prop.getName();
+
+				log.debug("description " + role);
+				int roleOBDA = runSPARQLRolesQuery("<" + role + ">", obdaConnection);
+				int roleR2rml = runSPARQLRolesQuery("<" + role + ">", r2rmlConnection);
+
+				assertEquals(roleOBDA, roleR2rml);
+			}
 		}
-
-		log.debug("Comparing object properties");
-        for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
-            String role = prop.getName();
-
-            log.debug("description " + role);
-            int roleOBDA = runSPARQLRolesQuery("<" + role + ">", reasonerOBDA.getConnection());
-            int roleR2rml = runSPARQLRolesQuery("<" + role + ">", reasonerR2rml.getConnection());
-
-            assertEquals(roleOBDA, roleR2rml);
-        }
-
-        log.debug("Comparing data properties");
-        for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
-            String role = prop.getName();
-
-            log.debug("description " + role);
-            int roleOBDA = runSPARQLRolesQuery("<" + role + ">", reasonerOBDA.getConnection());
-            int roleR2rml = runSPARQLRolesQuery("<" + role + ">", reasonerR2rml.getConnection());
-
-            assertEquals(roleOBDA, roleR2rml);
-        }
 	}
 
 	/**
