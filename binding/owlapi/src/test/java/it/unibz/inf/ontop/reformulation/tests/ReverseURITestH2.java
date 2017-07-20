@@ -51,7 +51,7 @@ public class ReverseURITestH2 {
 
 	final static String owlfile = "src/test/resources/reverseuri/reverse-uri-test.owl";
 	final static String obdafile = "src/test/resources/reverseuri/reverse-uri-test.obda";
-	private static QuestOWL reasoner;
+	private static OntopOWLReasoner reasoner;
 
 	private static Connection sqlConnection;
 
@@ -123,7 +123,7 @@ public class ReverseURITestH2 {
 			runner.runScript(in);
 
 		    // Creating a new instance of the reasoner
-	        QuestOWLFactory factory = new QuestOWLFactory();
+	        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 	        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.nativeOntopMappingFile(obdafile)
 					.ontologyFile(owlfile)

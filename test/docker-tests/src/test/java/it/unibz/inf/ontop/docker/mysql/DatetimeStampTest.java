@@ -30,7 +30,7 @@ public class DatetimeStampTest {
         String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFileName)
                 .propertyFile(propertyFileName)
@@ -43,7 +43,7 @@ public class DatetimeStampTest {
             configBuilder.nativeOntopMappingFile(obdaFileName);
         }
 
-        QuestOWL reasoner = factory.createReasoner(configBuilder.build());
+        OntopOWLReasoner reasoner = factory.createReasoner(configBuilder.build());
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();
         OntopOWLStatement st = conn.createStatement();

@@ -110,8 +110,8 @@ public class ComplexWhereMappingTest {
 
 	private void runTests(OntopSQLOWLAPIConfiguration config) throws Exception {
 
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
 		OntopOWLConnection conn = reasoner.getConnection();

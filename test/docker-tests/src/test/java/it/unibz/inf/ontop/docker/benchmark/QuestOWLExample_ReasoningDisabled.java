@@ -372,7 +372,7 @@ public class QuestOWLExample_ReasoningDisabled {
         TMappingExclusionConfig tMapConfig = TMappingExclusionConfig.parseFile(getClass().getResource(Settings.tMappingConfFile).getPath());
 
 
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(new File(getClass().getResource(Settings.obdaFile).getPath()))
                 .ontologyFile(getClass().getResource(owlfile).getPath())
@@ -389,7 +389,7 @@ public class QuestOWLExample_ReasoningDisabled {
         return conn;
     }
 
-    private QuestOWL reasoner;
+    private OntopOWLReasoner reasoner;
 
 
     public QuestOWLExample_ReasoningDisabled(DbType dbType, String obdaFile, String tMappingsConfFile, String propertyFile){

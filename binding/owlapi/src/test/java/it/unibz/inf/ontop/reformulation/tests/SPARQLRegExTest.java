@@ -54,7 +54,7 @@ public class SPARQLRegExTest {
 
 	final static String owlfile = "src/test/resources/regex/sparql-regex-test.owl";
 	final static String obdafile = "src/test/resources/regex/sparql-regex-test.obda";
-	private static QuestOWL reasoner;
+	private static OntopOWLReasoner reasoner;
 
 	private static Connection sqlConnection;
 
@@ -92,7 +92,7 @@ public class SPARQLRegExTest {
 
 			
 			// Creating a new instance of the reasoner
-			QuestOWLFactory factory = new QuestOWLFactory();
+			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 	        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.nativeOntopMappingFile(obdafile)
 					.ontologyFile(owlfile)

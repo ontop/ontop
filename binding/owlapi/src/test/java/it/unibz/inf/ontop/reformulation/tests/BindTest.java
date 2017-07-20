@@ -123,7 +123,7 @@ public class BindTest {
     private OWLObject runTests(String query) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(OBDA_FILE)
                 .ontologyFile(OWL_FILE)
@@ -131,7 +131,7 @@ public class BindTest {
                 .enableTestMode()
                 .build();
 
-		QuestOWL reasoner = factory.createReasoner(configuration);
+		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
 
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();
@@ -495,7 +495,7 @@ public class BindTest {
         private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
 			// Creating a new instance of the reasoner
-			QuestOWLFactory factory = new QuestOWLFactory();
+			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
             OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .nativeOntopMappingFile(OBDA_FILE)
                     .ontologyFile(OWL_FILE)
@@ -503,7 +503,7 @@ public class BindTest {
                     .enableTestMode()
                     .build();
 
-			QuestOWL reasoner = factory.createReasoner(configuration);
+			OntopOWLReasoner reasoner = factory.createReasoner(configuration);
 
 			// Now we are ready for querying
 			OntopOWLConnection conn = reasoner.getConnection();

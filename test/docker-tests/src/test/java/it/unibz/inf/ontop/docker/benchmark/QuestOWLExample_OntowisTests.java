@@ -85,7 +85,7 @@ public class QuestOWLExample_OntowisTests {
 
 
 	// Internal Modifiable State
-	QuestOWL reasoner ;
+	OntopOWLReasoner reasoner ;
 
 	public QuestOWLExample_OntowisTests(String obdaFile, DBType type, boolean mKeys){
 		this.obdaFile = obdaFile;
@@ -228,7 +228,7 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 //		factory.setOBDAController(obdaModel);
 //		factory.setPreferenceHolder(preference);
 
@@ -256,7 +256,7 @@ public class QuestOWLExample_OntowisTests {
 		//TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 		//factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-		QuestOWL reasoner = factory.createReasoner(config);
+		OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 		this.reasoner = reasoner;
 		/*

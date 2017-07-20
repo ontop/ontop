@@ -41,7 +41,7 @@ public class TestQuestImplicitDBConstraints {
 
 	private OntopOWLConnection conn;
 
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private Connection sqlConnection;
 
 	
@@ -93,7 +93,7 @@ public class TestQuestImplicitDBConstraints {
 	public void testNoSelfJoinElim() throws Exception {
 		this.prepareDB(uc_create);
 		//this.reasoner = factory.createReasoner(new SimpleConfiguration());
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
@@ -122,7 +122,7 @@ public class TestQuestImplicitDBConstraints {
 	public void testForeignKeysNoSelfJoinElim() throws Exception {
 		this.prepareDB(uc_create);
 		
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(uc_obdafile)
 				.ontologyFile(uc_owlfile)
@@ -155,7 +155,7 @@ public class TestQuestImplicitDBConstraints {
 		this.prepareDB(uc_create);
 
 
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
@@ -184,7 +184,7 @@ public class TestQuestImplicitDBConstraints {
 	public void testForeignKeysWithSelfJoinElim() throws Exception {
 		this.prepareDB(uc_create);
 
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
@@ -218,7 +218,7 @@ public class TestQuestImplicitDBConstraints {
 	public void testForeignKeysTablesNOUc() throws Exception {
 		this.prepareDB(fk_create);
 		
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(fk_owlfile)
 				.nativeOntopMappingFile(fk_obdafile)
@@ -255,7 +255,7 @@ public class TestQuestImplicitDBConstraints {
 	public void testForeignKeysTablesWithUC() throws Exception {
 		this.prepareDB(fk_create);
 
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(fk_owlfile)
 				.nativeOntopMappingFile(fk_obdafile)

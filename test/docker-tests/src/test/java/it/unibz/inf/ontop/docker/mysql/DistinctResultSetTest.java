@@ -16,7 +16,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -51,14 +50,14 @@ public class DistinctResultSetTest { //
 
 
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFileName)
                 .ontologyFile(owlFileName)
                 .propertyFile(propertyFileName)
 //                .enableTestMode()
                 .build();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();
         OntopOWLStatement st = conn.createStatement();

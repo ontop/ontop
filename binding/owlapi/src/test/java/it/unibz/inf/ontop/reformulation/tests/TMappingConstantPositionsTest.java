@@ -107,7 +107,7 @@ public class TMappingConstantPositionsTest extends TestCase {
 	private void runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -117,7 +117,7 @@ public class TMappingConstantPositionsTest extends TestCase {
 				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 		//System.out.println(reasoner.getQuestInstance().getUnfolder().getRules());
 		

@@ -23,7 +23,7 @@ public class H2ASKTest {
 	 static final String obdaFile =
 	 "src/test/resources/stockexchange/stockexchange-h2.obda";
 
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private OntopOWLConnection conn;
 	Connection sqlConnection;
 
@@ -59,7 +59,7 @@ public class H2ASKTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();

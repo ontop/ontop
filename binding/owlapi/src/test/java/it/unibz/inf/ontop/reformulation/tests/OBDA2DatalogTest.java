@@ -23,8 +23,8 @@ package it.unibz.inf.ontop.reformulation.tests;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLReasoner;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +97,7 @@ public class OBDA2DatalogTest extends TestCase {
 	private void runTests(String obdaFileName) throws Exception {
 		
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlfile)
@@ -107,7 +107,7 @@ public class OBDA2DatalogTest extends TestCase {
 				.enableTestMode()
 				.build();
 
-		QuestOWL reasoner = factory.createReasoner(configuration);
+		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
 		reasoner.close();
 	}
 

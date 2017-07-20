@@ -116,7 +116,7 @@ public class MetaMappingVirtualABoxTest {
 
 	private void runTests(Properties p) throws Exception {
 
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlfile)
@@ -130,7 +130,7 @@ public class MetaMappingVirtualABoxTest {
 
 		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
 		String query2 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :P_1 ?y }";
-        try (QuestOWL reasoner = factory.createReasoner(config);
+        try (OntopOWLReasoner reasoner = factory.createReasoner(config);
              // Now we are ready for querying
              OntopOWLConnection conn = reasoner.getConnection();
              OntopOWLStatement st = conn.createStatement();
@@ -147,7 +147,7 @@ public class MetaMappingVirtualABoxTest {
 
 		}
 
-        try (QuestOWL reasoner = factory.createReasoner(config);
+        try (OntopOWLReasoner reasoner = factory.createReasoner(config);
              // Now we are ready for querying
              OntopOWLConnection conn = reasoner.getConnection();
              OntopOWLStatement st = conn.createStatement();

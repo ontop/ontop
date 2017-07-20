@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLReasoner;
 import junit.framework.TestCase;
 
 import java.io.*;
@@ -42,14 +42,14 @@ public class MovieOntologyTest extends TestCase {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.propertyFile(propertyFile)
 				.enableTestMode()
 				.build();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 				
 		//for (Entry<URI, ArrayList<OBDAMappingAxiom>> m: obdaModel.getTripleMaps().entrySet()) {

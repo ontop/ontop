@@ -49,7 +49,7 @@ public class H2ConstantTest {
 
 	final String owlfile = "src/test/resources/constant/mappingConstants.owl";
 	final String obdafile = "src/test/resources/constant/mappingConstants.obda";
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private Connection sqlConnection;
 	private final String url = "jdbc:h2:mem:questjunitdb";
 	private final String username = "sa";
@@ -73,7 +73,7 @@ public class H2ConstantTest {
 			    s.close();
 
 
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)

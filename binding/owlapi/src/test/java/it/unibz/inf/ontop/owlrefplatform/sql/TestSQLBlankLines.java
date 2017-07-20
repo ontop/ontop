@@ -2,10 +2,7 @@ package it.unibz.inf.ontop.owlrefplatform.sql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +24,7 @@ import static org.junit.Assert.assertFalse;
 
 public class TestSQLBlankLines {
 	private OntopOWLConnection conn;
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 
 
 	final String owlfile = "src/test/resources/sqlgenerator/blanklines.owl";
@@ -75,7 +72,7 @@ public class TestSQLBlankLines {
 		// Loading the OWL file
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)
 				.nativeOntopMappingFile(obdafile)

@@ -26,7 +26,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 
 import java.io.File;
@@ -49,7 +48,7 @@ public class H2SimpleFilterAndValuesTest {
 	private static final String JDBC_USER =  "sa";
 	private static final String JDBC_PASSWORD =  "";
 
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private OntopOWLConnection conn;
 	Connection sqlConnection;
 
@@ -83,7 +82,7 @@ public class H2SimpleFilterAndValuesTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();

@@ -121,7 +121,7 @@ public class URITemplateMatcherTest {
 	private String runTestQuery(String query) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFile)
 				.ontologyFile(owlFile)
@@ -131,7 +131,7 @@ public class URITemplateMatcherTest {
 				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
-		QuestOWL reasoner = factory.createReasoner(config);
+		OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
 		OntopOWLConnection conn = reasoner.getConnection();

@@ -90,9 +90,9 @@ public class OntopQuery extends OntopReasoningCommandBase {
             configurationBuilder.nativeOntopMappingFile(mappingFile);
         }
 
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
-        try (QuestOWL reasoner = factory.createReasoner(configurationBuilder.build());
+        try (OntopOWLReasoner reasoner = factory.createReasoner(configurationBuilder.build());
              OntopOWLConnection conn = reasoner.getConnection();
              OntopOWLStatement st = conn.createStatement();
         ) {

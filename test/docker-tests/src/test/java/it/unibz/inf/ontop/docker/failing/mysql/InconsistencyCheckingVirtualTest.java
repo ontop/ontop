@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.docker.failing.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLReasoner;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -20,7 +20,7 @@ public class InconsistencyCheckingVirtualTest {
 	private String owlFile = "/mysql/example/BooksNoAxioms.owl";
 	private String obdaFile = "/mysql/example/exampleBooks.obda";
 	private String propertyFile = "/mysql/example/exampleBooks.properties";
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 	
@@ -66,7 +66,7 @@ public class InconsistencyCheckingVirtualTest {
 		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFileName)
 				.ontology(ontology)

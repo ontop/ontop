@@ -48,7 +48,7 @@ public class H2DatatypeTest {
 	private static final String JDBC_USER =  "sa";
 	private static final String JDBC_PASSWORD =  "";
 
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private OntopOWLConnection conn;
 	Connection sqlConnection;
 
@@ -82,7 +82,7 @@ public class H2DatatypeTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();

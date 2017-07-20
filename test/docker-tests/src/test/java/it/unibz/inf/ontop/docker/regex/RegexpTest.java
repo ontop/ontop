@@ -64,7 +64,7 @@ public class RegexpTest extends TestCase {
 	private String obdafile;
 	private String propertyfile;
 	
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private Connection sqlConnection;
 	private boolean isH2;
 	/**
@@ -129,7 +129,7 @@ public class RegexpTest extends TestCase {
 		final URL obdaFileUrl = QuestSPARQLRewriterTest.class.getResource(obdafile);
 		final URL propertyFileUrl = QuestSPARQLRewriterTest.class.getResource(propertyfile);
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileUrl.toString())
 				.propertyFile(propertyFileUrl.toString())

@@ -176,9 +176,9 @@ public class SemanticIndexLUBMHTest extends TestCase {
 
 		Properties p = new Properties();
 
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(completeOntology, p);
-            QuestOWL reasoner = factory.createReasoner(loader.getConfiguration());
+            OntopOWLReasoner reasoner = factory.createReasoner(loader.getConfiguration());
             OntopOWLConnection connection = reasoner.getConnection();
             OntopOWLStatement st = connection.createStatement()) {
 

@@ -12,7 +12,6 @@ import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +25,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     private final String obdaFileName;
     private final String propertyFileName;
 
-    protected QuestOWL reasoner;
+    protected OntopOWLReasoner reasoner;
     protected OntopOWLConnection conn;
 
     public AbstractVirtualModeTest(String owlFile, String obdaFile, String propertyFile) {
@@ -38,7 +37,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     @Override
     public void setUp() throws Exception {
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .enableFullMetadataExtraction(false)
                 .ontologyFile(owlFileName)

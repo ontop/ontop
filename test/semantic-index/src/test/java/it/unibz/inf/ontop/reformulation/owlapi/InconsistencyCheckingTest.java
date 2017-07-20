@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.reformulation.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
 import org.junit.Test;
@@ -35,7 +35,7 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
 
 public class InconsistencyCheckingTest extends TestCase{
 
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 	
@@ -70,8 +70,8 @@ public class InconsistencyCheckingTest extends TestCase{
 		Properties properties = new Properties();
 
 		try (OntopSemanticIndexLoader siLoader = OntopSemanticIndexLoader.loadOntologyIndividuals(ontology, properties)) {
-			QuestOWLFactory questOWLFactory = new QuestOWLFactory();
-			reasoner = questOWLFactory.createReasoner(siLoader.getConfiguration());
+			OntopOWLFactory ontopOWLFactory = OntopOWLFactory.defaultFactory();
+			reasoner = ontopOWLFactory.createReasoner(siLoader.getConfiguration());
 		}
 	}
 	

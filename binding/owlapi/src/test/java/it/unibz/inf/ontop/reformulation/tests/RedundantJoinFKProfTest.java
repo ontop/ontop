@@ -113,7 +113,7 @@ public class RedundantJoinFKProfTest {
 
     private String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
 
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(ODBA_FILE)
                 .ontologyFile(OWL_FILE)
@@ -122,7 +122,7 @@ public class RedundantJoinFKProfTest {
                 .jdbcPassword(PASSWORD)
                 .enableTestMode()
                 .build();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();
