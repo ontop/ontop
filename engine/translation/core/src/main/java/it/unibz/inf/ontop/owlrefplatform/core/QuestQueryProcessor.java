@@ -252,7 +252,6 @@ public class QuestQueryProcessor implements QueryTranslator {
 		 */
 		catch (Exception e) {
 			log.warn("Unexpected exception: " + e.getMessage(), e);
-			e.printStackTrace();
 			throw new OntopTranslationException(e);
 			//throw new OntopReformulationException("Error rewriting and unfolding into SQL\n" + e.getMessage());
 		}

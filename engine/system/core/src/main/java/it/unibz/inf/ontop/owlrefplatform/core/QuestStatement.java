@@ -131,7 +131,6 @@ public abstract class QuestStatement implements OntopStatement {
 				 * TODO: re-handle the timeout exception.
 				 */
 			} catch (Exception e) {
-				e.printStackTrace();
 				exception = e;
 				log.error(e.getMessage(), e);
 			} finally {
