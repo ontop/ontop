@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.answering.input.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.QueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.*;
@@ -39,7 +40,8 @@ public class OntopTranslationPostModule extends OntopAbstractModule {
         Module reformulationFactoryModule = buildFactory(
                 ImmutableList.of(
                         QueryUnfolder.class,
-                        NativeQueryGenerator.class),
+                        NativeQueryGenerator.class,
+                        InputQueryTranslator.class),
                 TranslationFactory.class);
         install(reformulationFactoryModule);
 

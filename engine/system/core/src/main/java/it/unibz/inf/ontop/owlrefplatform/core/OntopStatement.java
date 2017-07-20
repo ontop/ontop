@@ -15,7 +15,7 @@ public interface OntopStatement extends OBDAStatement {
 
     int getTupleCount(InputQuery inputQuery) throws OntopTranslationException, OntopQueryEvaluationException, OntopConnectionException;
 
-    String getRewritingRendering(InputQuery inputQuery) throws OntopTranslationException, OntopInvalidInputQueryException;
+    String getRewritingRendering(InputQuery inputQuery) throws OntopTranslationException;
 
     ExecutableQuery getExecutableQuery(InputQuery inputQuery) throws OntopTranslationException;
 }
