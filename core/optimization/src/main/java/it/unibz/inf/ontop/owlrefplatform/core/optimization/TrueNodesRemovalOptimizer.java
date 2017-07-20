@@ -19,14 +19,14 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
  * For each TrueNode n in the query,
  * let p be its parent node.
  * <p>
- * If p is neither a (left or inner) join node or a construction node without projected variable,
+ * If p is neither a (left or inner) join node or a construction node,
  * then no action is taken.
  * <p>
  * If p is a left join node,
  * and n is its left child,
  * then no action is taken either.
  * <p>
- * If p is a construction node without projected variable,
+ * If p is a construction,
  * then n is removed.
  * <p>
  * If p is an inner join node,
@@ -70,8 +70,8 @@ public class TrueNodesRemovalOptimizer extends NodeCentricDepthFirstOptimizer<Tr
                         query.getOptionalPosition(node)
                                 .orElseThrow(() -> new IllegalStateException("Children of a LJ must have positions"))
                                 == RIGHT) ||
-                (parentNode instanceof ConstructionNode &&
-                        (query.getRootConstructionNode() != parentNode));
+                (parentNode instanceof ConstructionNode);
+//                        && (query.getRootConstructionNode() != parentNode));
     }
 
     /**

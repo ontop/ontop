@@ -51,6 +51,7 @@ public class QuestQueryProcessor implements QueryTranslator {
 
 	private final QueryUnfolder queryUnfolder;
 	private final SameAsRewriter sameAsRewriter;
+	private final BindingLiftOptimizer bindingLiftOptimizer;
 
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final ExecutorRegistry executorRegistry;
@@ -64,11 +65,12 @@ public class QuestQueryProcessor implements QueryTranslator {
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								@Assisted ExecutorRegistry executorRegistry,
 								QueryCache queryCache,
-								OntopTranslationSettings settings,
+								BindingLiftOptimizer bindingLiftOptimizer, OntopTranslationSettings settings,
 								DatalogProgram2QueryConverter datalogConverter,
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
 								JoinLikeOptimizer joinLikeOptimizer) {
+		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
 		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
@@ -182,8 +184,7 @@ public class QuestQueryProcessor implements QueryTranslator {
 
 
 				//lift bindings and union when it is possible
-				IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
-				intermediateQuery = substitutionOptimizer.optimize(intermediateQuery);
+				intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
 				log.debug("New query after substitution lift optimization: \n" + intermediateQuery.toString());
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());

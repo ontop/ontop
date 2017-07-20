@@ -28,7 +28,6 @@ import static junit.framework.TestCase.assertTrue;
 
 public class ConstructionNodeCleanerTest {
 
-    private static final FixedPointBindingLiftOptimizer bindingLiftOptimizer = new FixedPointBindingLiftOptimizer();
     private static final ConstructionNodeCleaner constructionNodeCleaner = new ConstructionNodeCleaner();
 
     private final static AtomPredicate TABLE1_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 2);
@@ -77,7 +76,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        IntermediateQuery optimizedQuery = bindingLiftOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -119,7 +118,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        IntermediateQuery optimizedQuery = bindingLiftOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -169,7 +168,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        IntermediateQuery optimizedQuery = bindingLiftOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
@@ -216,7 +215,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        IntermediateQuery optimizedQuery = bindingLiftOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -265,7 +264,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        IntermediateQuery optimizedQuery = bindingLiftOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -327,7 +326,7 @@ public class ConstructionNodeCleanerTest {
         System.out.println("\nBefore optimization: \n" + query1);
 
 
-        IntermediateQuery optimizedQuery = bindingLiftOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
 
 
@@ -385,7 +384,7 @@ public class ConstructionNodeCleanerTest {
         System.out.println("\nBefore optimization: \n" + query1);
 
 
-        IntermediateQuery optimizedQuery = bindingLiftOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
 
 
@@ -442,7 +441,7 @@ public class ConstructionNodeCleanerTest {
         System.out.println("\nBefore optimization: \n" + query1);
 
 
-        IntermediateQuery optimizedQuery = bindingLiftOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
 
 
@@ -516,7 +515,7 @@ public class ConstructionNodeCleanerTest {
         System.out.println("\nBefore optimization: \n" + query1);
 
 
-        IntermediateQuery optimizedQuery = bindingLiftOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
@@ -571,7 +570,7 @@ public class ConstructionNodeCleanerTest {
         System.out.println("\nBefore optimization: \n" + query1);
 
 
-        IntermediateQuery optimizedQuery = bindingLiftOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
@@ -617,7 +616,7 @@ public class ConstructionNodeCleanerTest {
         System.out.println("\nBefore optimization: \n" + query1);
 
 
-        IntermediateQuery optimizedQuery = bindingLiftOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
@@ -673,7 +672,7 @@ public class ConstructionNodeCleanerTest {
         System.out.println("\nBefore optimization: \n" + query1);
 
 
-        IntermediateQuery optimizedQuery = bindingLiftOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 

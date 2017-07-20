@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OntopModelSingletons;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.InnerJoinOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.JoinLikeOptimizer;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
@@ -21,6 +22,7 @@ public class OptimizationTestingTools {
     public static final OBDADataFactory DATA_FACTORY = OntopModelSingletons.DATA_FACTORY;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
     public static final InnerJoinOptimizer INNER_JOIN_OPTIMIZER;
+    public static final BindingLiftOptimizer BINDING_LIFT_OPTIMIZER;
 
     static {
 
@@ -33,6 +35,7 @@ public class OptimizationTestingTools {
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         JOIN_LIKE_OPTIMIZER = injector.getInstance(JoinLikeOptimizer.class);
         INNER_JOIN_OPTIMIZER = injector.getInstance(InnerJoinOptimizer.class);
+        BINDING_LIFT_OPTIMIZER = injector.getInstance(BindingLiftOptimizer.class);
     }
 
     public static IntermediateQueryBuilder createQueryBuilder(DBMetadata metadata) {

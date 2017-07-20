@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.QueryUnionSplitter;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -26,9 +25,9 @@ public class QueryUnionSplitterImpl implements QueryUnionSplitter {
     private final BindingLiftOptimizer bindingLiftOptimizer;
 
     @Inject
-    private QueryUnionSplitterImpl() {
+    private QueryUnionSplitterImpl(BindingLiftOptimizer bindingLiftOptimizer) {
         // TODO: use dependency injection instead
-        bindingLiftOptimizer = new FixedPointBindingLiftOptimizer();
+        this.bindingLiftOptimizer = bindingLiftOptimizer;
     }
 
     @Override
