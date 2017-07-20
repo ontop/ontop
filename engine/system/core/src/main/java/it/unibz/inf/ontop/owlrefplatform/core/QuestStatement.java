@@ -131,7 +131,6 @@ public abstract class QuestStatement implements OntopStatement {
 				 * TODO: re-handle the timeout exception.
 				 */
 			} catch (Exception e) {
-				e.printStackTrace();
 				exception = e;
 				log.error(e.getMessage(), e);
 			} finally {
@@ -360,7 +359,7 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	@Override
-	public String getRewritingRendering(InputQuery query) throws OntopTranslationException, OntopInvalidInputQueryException {
+	public String getRewritingRendering(InputQuery query) throws OntopTranslationException {
 		return engine.getRewritingRendering(query);
 	}
 

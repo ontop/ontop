@@ -21,10 +21,10 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  */
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.answering.input.translation.RDF4JInputQueryTranslator;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
@@ -46,6 +46,7 @@ import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.algebra.ValueConstant;
 import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
@@ -55,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -71,7 +73,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
  * 
  * @author Roman Kontchakov
  */
-public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslator {
+public class SparqlAlgebraToDatalogTranslator {
 
 
     private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
@@ -87,12 +89,11 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
 	 * @param uriTemplateMatcher matches URIs to templates (comes from mappings)
 	 * @param iriDictionary maps URIs to their integer identifiers (used only in the Semantic Index mode)
      *
-     * TODO: use Guice and retrieve the IRIDictionary by injection (not assisted, nullable)
 	 */
-	public SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
-                                            @Nonnull Optional<IRIDictionary> iriDictionary) {
+	SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
+                                     @Nullable IRIDictionary iriDictionary) {
 		this.uriTemplateMatcher = uriTemplateMatcher;
-		this.uriRef = iriDictionary.orElse(null);
+		this.uriRef = iriDictionary;
 
         this.program = DATALOG_FACTORY.getDatalogProgram();
     }
@@ -107,11 +108,10 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
      *
      * TODO: return an IntermediateQuery instead!
 	 */
-	@Override
-	public InternalSparqlQuery translate(ParsedQuery pq) throws OntopUnsupportedInputQueryException {
+	public InternalSparqlQuery translate(ParsedQuery pq) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         if (predicateIdx != 0 || !program.getRules().isEmpty())
-            throw new RuntimeException("SparqlAlgebraToDatalogTranslator.translate can only be called once.");
+            throw new IllegalStateException("SparqlAlgebraToDatalogTranslator.translate can only be called once.");
 
 		TupleExpr te = pq.getTupleExpr();
 		log.debug("SPARQL algebra: \n{}", te);
@@ -162,20 +162,25 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
          */
         <T> TranslationResult extendWithBindings(Stream<T> bindings,
                                                  java.util.function.Function<? super T, Variable> varMapper,
-                                                 java.util.function.BiFunction<? super T, ImmutableSet<Variable>, Term> exprMapper) {
+                                                 BiFunctionWithUnsupportedException<? super T, ImmutableSet<Variable>, Term> exprMapper)
+                throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
             Set<Variable> vars = new HashSet<>(variables);
-            Stream<Function> eqAtoms = bindings.map(b -> {
+
+            List<Function> eqAtoms = new ArrayList<>();
+
+            // Functional-style replaced because of OntopUnsupportedInputQueryException
+            for(T b : bindings.collect(Collectors.toList())) {
                 Term expr = exprMapper.apply(b, ImmutableSet.copyOf(vars));
 
                 Variable v = varMapper.apply(b);
                 if (!vars.add(v))
                     throw new IllegalArgumentException("Duplicate binding for variable " + v);
 
-                return DATA_FACTORY.getFunctionEQ(v, expr);
-            });
+                eqAtoms.add(DATA_FACTORY.getFunctionEQ(v, expr));
+            }
 
-            return new TranslationResult(getAtomsExtended(eqAtoms), ImmutableSet.copyOf(vars), false);
+            return new TranslationResult(getAtomsExtended(eqAtoms.stream()), ImmutableSet.copyOf(vars), false);
         }
 
 
@@ -230,7 +235,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
     }
 
 
-    private TranslationResult translate(TupleExpr node) {
+    private TranslationResult translate(TupleExpr node) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         //System.out.println("node: \n" + node);
 
@@ -256,7 +261,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
             for (OrderElem c : order.getElements()) {
                 ValueExpr expression = c.getExpr();
                 if (!(expression instanceof Var))
-                    throw new IllegalArgumentException("Error translating ORDER BY. "
+                    throw new OntopUnsupportedInputQueryException("Error translating ORDER BY. "
                             + "The current implementation can only sort by variables. "
                             + "This query has a more complex expression '" + expression + "'");
 
@@ -383,13 +388,13 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
             BindingSetAssignment values = (BindingSetAssignment) node;
 
             TranslationResult empty = new TranslationResult(ImmutableList.of(), ImmutableSet.of(), false);
-            List<TranslationResult> bindings =
-                    StreamSupport.stream(values.getBindingSets().spliterator(), false)
-                            .map(bs -> empty.extendWithBindings(
-                                    StreamSupport.stream(bs.spliterator(), false),
-                                    be -> DATA_FACTORY.getVariable(be.getName()),
-                                    (be, vars) -> getTermForLiteralOrIri(be.getValue())))
-                            .collect(Collectors.toList());
+            List<TranslationResult> bindings = new ArrayList<>();
+            for (BindingSet bs :values.getBindingSets()) {
+                bindings.add(empty.extendWithBindings(
+                        StreamSupport.stream(bs.spliterator(), false),
+                        be -> DATA_FACTORY.getVariable(be.getName()),
+                        (be, vars) -> getTermForLiteralOrIri(be.getValue())));
+            }
 
             ImmutableSet<Variable> allVars = bindings.stream()
                     .flatMap(s -> s.variables.stream())
@@ -401,9 +406,9 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
             return res;
         }
         else if (node instanceof Group) {
-            throw new IllegalArgumentException("GROUP BY is not supported yet");
+            throw new OntopUnsupportedInputQueryException("GROUP BY is not supported yet");
         }
-        throw new IllegalArgumentException("Not supported: " + node);
+        throw new OntopUnsupportedInputQueryException("Not supported: " + node);
     }
 
     /**
@@ -414,7 +419,8 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
      * @return
      */
 
-    private Function getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables) {
+    private Function getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables)
+            throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
         Term term = getExpression(expr, variables);
         // Effective Boolean Value (EBV): wrap in isTrue function if it is not a (Boolean) expression
         if (term instanceof Function) {
@@ -425,7 +431,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
         return DATA_FACTORY.getFunctionIsTrue(term);
     }
 
-	private TranslationResult translateTriplePattern(StatementPattern triple) {
+	private TranslationResult translateTriplePattern(StatementPattern triple) throws OntopUnsupportedInputQueryException {
 
         // A triple pattern is member of the set (RDF-T + V) x (I + V) x (RDF-T + V)
         // VarOrTerm ::=  Var | GraphTerm
@@ -463,7 +469,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
 						atom = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate(o.stringValue()), sTerm);
 				}
 				else
-					throw new IllegalArgumentException("Unsupported query syntax");
+					throw new OntopUnsupportedInputQueryException("Unsupported query syntax");
 			}
 			else {
 				// term uri term . (where uri is either an object or a datatype property)
@@ -474,7 +480,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
 		}
 		else
 			// if predicate is a variable or literal
-			throw new RuntimeException("Unsupported query syntax");
+			throw new OntopUnsupportedInputQueryException("Unsupported query syntax");
 
         return new TranslationResult(ImmutableList.of(atom), variables.build(), true);
 	}
@@ -485,17 +491,17 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
         return var;
     }
 
-    private Term getTermForLiteralOrIri(Value v) {
+    private Term getTermForLiteralOrIri(Value v) throws OntopUnsupportedInputQueryException {
 
         if (v instanceof Literal)
             return getTermForLiteral((Literal) v);
         else if (v instanceof URI)
             return getTermForIri((URI)v, false);
 
-        throw new RuntimeException("The value " + v + " is not supported yet!");
+        throw new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!");
     }
 
-    private static Term getTermForLiteral(Literal literal) {
+    private static Term getTermForLiteral(Literal literal) throws OntopUnsupportedInputQueryException {
         IRI typeURI = literal.getDatatype();
         String value = literal.getLabel();
         Optional<String> lang = literal.getLanguage();
@@ -523,7 +529,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
 
             // check if the value is (lexically) correct for the specified datatype
             if (!XMLDatatypeUtil.isValidValue(value, typeURI))
-                throw new RuntimeException("Invalid lexical form for datatype. Found: " + value);
+                throw new OntopUnsupportedInputQueryException("Invalid lexical form for datatype. Found: " + value);
 
             Term constant = DATA_FACTORY.getConstantLiteral(value, type);
 
@@ -570,7 +576,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
      * @return term
      */
 
-	private Term getExpression(ValueExpr expr, ImmutableSet<Variable> variables) {
+	private Term getExpression(ValueExpr expr, ImmutableSet<Variable> variables) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         // PrimaryExpression ::= BrackettedExpression | BuiltInCall | iriOrFunction |
         //                          RDFLiteral | NumericLiteral | BooleanLiteral | Var
@@ -588,7 +594,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
             else if (v instanceof URI)
                 return getTermForIri((URI)v, true);
 
-            throw new RuntimeException("The value " + v + " is not supported yet!");
+            throw new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!");
         }
         else if (expr instanceof Bound) {
             // BOUND (Sec 17.4.1.1)
@@ -695,7 +701,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
             OperationPredicate p = XPathFunctions.get(f.getURI());
             if (p != null) {
                 if (arity != p.getArity())
-                    throw new UnsupportedOperationException(
+                    throw new OntopInvalidInputQueryException(
                             "Wrong number of arguments (found " + terms.size() + ", only " +
                                     p.getArity() + "supported) for SPARQL " + f.getURI() + "function");
 
@@ -709,7 +715,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
                 // string literal  CONCAT(string literal ltrl1 ... string literal ltrln)
                 case "http://www.w3.org/2005/xpath-functions#concat":
                     if (arity < 1)
-                        throw new UnsupportedOperationException("Wrong number of arguments (found " + terms.size() +
+                        throw new OntopInvalidInputQueryException("Wrong number of arguments (found " + terms.size() +
                                 ", at least 1) for SPARQL function CONCAT");
 
                     Term concat = terms.get(0);
@@ -728,7 +734,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
                     else if (arity == 4)
                         flags = terms.get(3);
                     else
-                        throw new UnsupportedOperationException("Wrong number of arguments (found "
+                        throw new OntopInvalidInputQueryException("Wrong number of arguments (found "
                                 + terms.size() + ", only 3 or 4 supported) for SPARQL function REPLACE");
 
                     return DATA_FACTORY.getFunction(ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
@@ -743,11 +749,11 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
                     else if (arity == 3)
                         return DATA_FACTORY.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
 
-                    throw new UnsupportedOperationException("Wrong number of arguments (found "
+                    throw new OntopInvalidInputQueryException("Wrong number of arguments (found "
                             + terms.size() + ", only 2 or 3 supported) for SPARQL function SUBSTRING");
 
                 default:
-                    throw new RuntimeException("Function " + f.getURI() + " is not supported yet!");
+                    throw new OntopUnsupportedInputQueryException("Function " + f.getURI() + " is not supported yet!");
             }
 		}
         // other subclasses
@@ -755,7 +761,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
         // If
         // BNodeGenerator
         // NAryValueOperator (ListMemberOperator and Coalesce)
-		throw new RuntimeException("The expression " + expr + " is not supported yet!");
+		throw new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!");
 	}
 
     // XPath 1.0 functions (XPath 1.1 has variants with more arguments)
@@ -821,4 +827,12 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
 			.put(MathExpr.MathOp.MULTIPLY, ExpressionOperation.MULTIPLY)
 			.put(MathExpr.MathOp.DIVIDE, ExpressionOperation.DIVIDE)
 			.build();
+
+
+	@FunctionalInterface
+	private interface BiFunctionWithUnsupportedException<T, U, R> {
+
+	    R apply(T v1, U v2) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException;
+
+    }
 }

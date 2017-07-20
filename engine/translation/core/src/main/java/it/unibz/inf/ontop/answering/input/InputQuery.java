@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.input;
 
 
 import it.unibz.inf.ontop.answering.input.translation.InputQueryTranslator;
+import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.model.OBDAResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.InternalSparqlQuery;
@@ -19,5 +20,5 @@ public interface InputQuery<R extends OBDAResultSet> {
     /**
      * TODO: return an IntermediateQuery instead!
      */
-    InternalSparqlQuery translate(InputQueryTranslator translator) throws OntopUnsupportedInputQueryException;
+    InternalSparqlQuery translate(InputQueryTranslator translator) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException;
 }
