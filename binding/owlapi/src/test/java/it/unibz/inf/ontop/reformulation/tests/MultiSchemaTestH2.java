@@ -51,7 +51,7 @@ public class MultiSchemaTestH2  {
     static final String obdaFile =
             "src/test/resources/multischema/multischemah2.obda";
 
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 	private OntopOWLConnection conn;
 	private String url = "jdbc:h2:mem:questrepository";
 	private String username =  "fish";
@@ -88,7 +88,7 @@ public class MultiSchemaTestH2  {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();

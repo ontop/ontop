@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import junit.framework.Test;
@@ -70,7 +70,7 @@ public class QuestMemorySPARQLQueryTest extends SPARQLQueryParent {
 	@Override
 	protected Repository newRepository() throws SemanticIndexException {
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, new Properties())) {
-			Repository repository = new OntopVirtualRepository(loader.getConfiguration());
+			Repository repository = OntopRepository.defaultRepository(loader.getConfiguration());
 			repository.initialize();
 			return repository;
 		}

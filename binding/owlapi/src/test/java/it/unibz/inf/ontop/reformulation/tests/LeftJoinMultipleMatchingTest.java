@@ -38,7 +38,7 @@ public class LeftJoinMultipleMatchingTest {
 
     private Connection sqlConnection;
     private OntopOWLConnection conn;
-    private QuestOWL reasoner;
+    private OntopOWLReasoner reasoner;
 
     String URL = "jdbc:h2:mem:raisjunit";
     String USER = "sa";
@@ -102,7 +102,7 @@ public class LeftJoinMultipleMatchingTest {
     private void runTests(String obdaFile) throws Exception {
 
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
                 .nativeOntopMappingFile(obdaFile)
@@ -172,7 +172,7 @@ public class LeftJoinMultipleMatchingTest {
     private int runTestQuery(String obdaFile, String query) throws Exception {
 
         // Creating a new instance of the reasoner
-    	QuestOWLFactory factory = new QuestOWLFactory();
+    	OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
                 .nativeOntopMappingFile(obdaFile)

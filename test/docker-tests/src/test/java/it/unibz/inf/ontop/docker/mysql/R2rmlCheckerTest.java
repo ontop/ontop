@@ -73,8 +73,8 @@ public class R2rmlCheckerTest {
 	private List<Predicate> emptyConceptsR2rml = new ArrayList<>();
 	private List<Predicate> emptyRolesR2rml = new ArrayList<Predicate>();
 
-	private QuestOWL reasonerOBDA;
-	private QuestOWL reasonerR2rml;
+	private OntopOWLReasoner reasonerOBDA;
+	private OntopOWLReasoner reasonerR2rml;
 
 	@Before
 	public void setUp() throws Exception {
@@ -343,7 +343,7 @@ public class R2rmlCheckerTest {
 	 */
 	private void loadR2rml() throws OWLOntologyCreationException {
 		log.info("Loading r2rml file");
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlFileName)
@@ -365,7 +365,7 @@ public class R2rmlCheckerTest {
 		log.info("Loading obda file");
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)

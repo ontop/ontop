@@ -30,13 +30,13 @@ public class InteractiveExample {
 //		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 //		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.enableTestMode()
 				.build();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 
 	/*

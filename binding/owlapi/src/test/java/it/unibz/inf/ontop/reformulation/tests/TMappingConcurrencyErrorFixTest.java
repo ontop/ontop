@@ -55,7 +55,7 @@ public class TMappingConcurrencyErrorFixTest{
 
 	final String owlFileName = "src/test/resources/test/tmapping/exampleTMapping.owl";
 	final String obdaFileName = "src/test/resources/test/tmapping/exampleTMapping.obda";
-	private QuestOWL reasoner;
+	private OntopOWLReasoner reasoner;
 
 	@Before
 	public void setUp() throws Exception {
@@ -84,7 +84,7 @@ public class TMappingConcurrencyErrorFixTest{
 		Properties p = new Properties();
 		p.put(OBTAIN_FULL_METADATA, false);
 		// Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlFileName)

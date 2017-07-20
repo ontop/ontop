@@ -23,7 +23,7 @@ public class MultipleSchemasTestH2 {
 
     final static String owlfile = "src/test/resources/multischema/multiple-schema-test.owl";
     final static String obdafile = "src/test/resources/multischema/multiple-schema-test.obda";
-    private static QuestOWL reasoner;
+    private static OntopOWLReasoner reasoner;
 
     private static Connection sqlConnection;
 
@@ -57,7 +57,7 @@ public class MultipleSchemasTestH2 {
             runner.runScript(in);
 
             // Creating a new instance of the reasoner
-            QuestOWLFactory factory = new QuestOWLFactory();
+            OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
             OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .nativeOntopMappingFile(obdafile)
                     .ontologyFile(owlfile)

@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.docker.mysql;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -42,7 +42,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
@@ -80,7 +79,7 @@ public class QuestSesameVirtualExample {
 				.enableTestMode()
 				.build();
 
-		Repository repo = new OntopVirtualRepository(configuration);
+		Repository repo = OntopRepository.defaultRepository(configuration);
 		
 
 		/*
@@ -173,7 +172,7 @@ public class QuestSesameVirtualExample {
 				.enableTestMode()
 				.build();
 		
-		Repository repo = new OntopVirtualRepository(configuration);
+		Repository repo = OntopRepository.defaultRepository(configuration);
 
 		System.out.println(myModel);
 		/*

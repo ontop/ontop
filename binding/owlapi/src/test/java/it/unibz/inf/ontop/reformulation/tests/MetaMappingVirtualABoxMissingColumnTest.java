@@ -29,7 +29,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
-import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,7 +120,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 
 	private void runTests() throws Exception {
 
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -132,7 +131,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 				.build();
        
 		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
-        try (QuestOWL reasoner = factory.createReasoner(config);
+        try (OntopOWLReasoner reasoner = factory.createReasoner(config);
              // Now we are ready for querying
              OntopOWLConnection conn = reasoner.getConnection();
              OntopOWLStatement st = conn.createStatement();

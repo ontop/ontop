@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.rdf4j.repository;
+package it.unibz.inf.ontop.rdf4j.repository.impl;
 
 /*
  * #%L
@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.rdf4j.query.OntopBooleanQuery;
 import it.unibz.inf.ontop.rdf4j.query.OntopGraphQuery;
 import it.unibz.inf.ontop.rdf4j.query.OntopTupleQuery;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
@@ -44,26 +45,27 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 
-public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.RepositoryConnection, AutoCloseable {
+public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.RepositoryConnection {
 
 	private static final String READ_ONLY_MESSAGE = "Ontop is a read-only system";
-	private OntopVirtualRepository repository;
+	private OntopRepository repository;
 	private OntopConnection ontopConnection;
 	private final RDF4JInputQueryFactory inputQueryFactory;
 	private boolean isOpen;
     private boolean isActive;
     private RDFParser rdfParser;
+	private Map<String, String> namespaces;
 
 	
-	OntopRepositoryConnection(OntopVirtualRepository rep, OntopConnection connection,
-							  RDF4JInputQueryFactory inputQueryFactory)
-	{
+	OntopRepositoryConnection(OntopRepository rep, OntopConnection connection,
+							  RDF4JInputQueryFactory inputQueryFactory) {
 		this.repository = rep;
 		this.ontopConnection = connection;
 		this.inputQueryFactory = inputQueryFactory;
 		this.isOpen = true;
 		this.isActive = false;
 		this.rdfParser = Rio.createParser(RDFFormat.RDFXML, this.repository.getValueFactory());
+		this.namespaces = new HashMap<>();
 	}
 
 	
@@ -197,7 +199,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 	@Override
     public String getNamespace(String prefix) throws RepositoryException {
 		//Gets the namespace that is associated with the specified prefix, if any. 
-		return repository.getNamespace(prefix);
+		return namespaces.get(prefix);
 	}
 
 	@Override
@@ -206,7 +208,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		//Gets all declared namespaces as a RepositoryResult of Namespace objects. 
 		//Each Namespace object consists of a prefix and a namespace name. 
 		Set<Namespace> namespSet = new HashSet<Namespace>();
-		Map<String, String> namesp = repository.getNamespaces();
+		Map<String, String> namesp = namespaces;
 		Set<String> keys = namesp.keySet();
 		for (String key : keys)
 		{
@@ -481,7 +483,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 	@Override
     public void removeNamespace(String key) throws RepositoryException {
 		//Removes a namespace declaration by removing the association between a prefix and a namespace name. 
-		repository.removeNamespace(key);
+		namespaces.remove(key);
 	}
 
 	@Override
@@ -541,7 +543,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
     public void setNamespace(String key, String value)
 			throws RepositoryException {
 		//Sets the prefix for a namespace. 
-		repository.setNamespace(key, value);
+		namespaces.put(key, value);
 		
 	}
 

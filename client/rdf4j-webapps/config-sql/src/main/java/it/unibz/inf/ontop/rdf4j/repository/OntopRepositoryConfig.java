@@ -70,7 +70,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
      * so as to fit the validation and repository instantiation
      * workflow of Sesame.
      */
-    private OntopVirtualRepository repository;
+    private OntopRepository repository;
 
     /**
      * Creates a new RepositoryConfigImpl.
@@ -172,7 +172,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
      *
      * However, the repository is only build once and then kept in cache.
      */
-    public OntopVirtualRepository buildRepository() throws RepositoryConfigException {
+    public OntopRepository buildRepository() throws RepositoryConfigException {
         /*
          * Cache (computed only once)
          */
@@ -204,7 +204,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                     .ontologyFile(owlFile)
                     .propertyFile(propertiesFile);
 
-            repository = new OntopVirtualRepository(configurationBuilder.build());
+            repository = OntopRepository.defaultRepository(configurationBuilder.build());
 
         }
         /*

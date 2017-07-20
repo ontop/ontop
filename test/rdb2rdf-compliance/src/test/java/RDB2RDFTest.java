@@ -41,7 +41,7 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.model.SQLPPMapping;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
@@ -272,7 +272,7 @@ public class RDB2RDFTest {
 		else {
 			configuration = bootstrapDMConfiguration();
 		}
-		OntopVirtualRepository repo = new OntopVirtualRepository(configuration);
+		OntopRepository repo = OntopRepository.defaultRepository(configuration);
 		repo.initialize();
 		return repo;
 	}

@@ -28,7 +28,7 @@ public class R2rmlJoinTest {
         String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFileName)
                 .propertyFile(propertyFileName)
@@ -42,7 +42,7 @@ public class R2rmlJoinTest {
             configBuilder.nativeOntopMappingFile(obdaFileName);
         }
 
-        QuestOWL reasoner = factory.createReasoner(configBuilder.build());
+        OntopOWLReasoner reasoner = factory.createReasoner(configBuilder.build());
 
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();

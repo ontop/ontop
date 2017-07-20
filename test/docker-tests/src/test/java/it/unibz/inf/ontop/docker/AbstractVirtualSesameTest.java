@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import junit.framework.TestCase;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
@@ -35,7 +35,7 @@ public abstract class AbstractVirtualSesameTest extends TestCase {
                     .enableTestMode()
                     .build();
 
-            repo = new OntopVirtualRepository(configuration);
+            repo = OntopRepository.defaultRepository(configuration);
 			/*
 			 * Repository must be always initialized first
 			 */

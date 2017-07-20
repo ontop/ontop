@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 
-import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import junit.framework.TestCase;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -24,7 +23,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -86,7 +84,7 @@ public class SesameTableWithSpaceTest extends TestCase {
 					.enableTestMode()
 					.build();
 
-			repo = new OntopVirtualRepository(configuration);
+			repo = OntopRepository.defaultRepository(configuration);
 			/*
 			 * Repository must be always initialized first
 			 */

@@ -126,7 +126,7 @@ public class MarriageTest {
 
     private void checkReturnedValues(String query, Set<String> expectedValues) throws Exception {
 
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(OBDA_FILE)
 				.ontologyFile(ONTOLOGY_FILE)
@@ -135,7 +135,7 @@ public class MarriageTest {
 				.jdbcPassword(JDBC_PASSWORD)
 				.enableTestMode()
 				.build();
-		QuestOWL reasoner = factory.createReasoner(config);
+		OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 
         // Now we are ready for querying

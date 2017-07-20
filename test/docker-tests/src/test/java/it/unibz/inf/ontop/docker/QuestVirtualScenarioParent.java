@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.docker;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.repository.Repository;
 
 public abstract class QuestVirtualScenarioParent extends QuestScenarioParent {
@@ -44,7 +44,7 @@ public abstract class QuestVirtualScenarioParent extends QuestScenarioParent {
 		}
 
 //		try {
-			OntopVirtualRepository repo = new OntopVirtualRepository(configBuilder.build());
+			OntopRepository repo = OntopRepository.defaultRepository(configBuilder.build());
 			repo.initialize();
 			return repo;
 //		} catch (Exception e) {

@@ -224,9 +224,9 @@ public class TreeWitnessRewriterH2Test{
 				.enableTestMode()
 				.build();
 
-		QuestOWL reasoner;
+		OntopOWLReasoner reasoner;
 		try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadVirtualAbox(obdaConfiguration, p)) {
-			QuestOWLFactory factory = new QuestOWLFactory();
+			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 			reasoner = factory.createReasoner(loader.getConfiguration());
 		}
 

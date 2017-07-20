@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.docker.mysql;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestDistinctTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
@@ -16,7 +16,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -51,14 +50,14 @@ public class DistinctResultSetTest { //
 
 
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFileName)
                 .ontologyFile(owlFileName)
                 .propertyFile(propertyFileName)
 //                .enableTestMode()
                 .build();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();
         OntopOWLStatement st = conn.createStatement();
@@ -96,7 +95,7 @@ public class DistinctResultSetTest { //
                     .enableTestMode()
                     .build();
 
-        repo = new OntopVirtualRepository(configuration);
+        repo = OntopRepository.defaultRepository(configuration);
 
         repo.initialize();
 

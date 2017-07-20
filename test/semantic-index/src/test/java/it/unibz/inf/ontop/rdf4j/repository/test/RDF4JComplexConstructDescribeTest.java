@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.rdf4j.repository.test;
  * #L%
  */
 
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -57,7 +57,7 @@ public class RDF4JComplexConstructDescribeTest {
 		dataset.addDefaultGraph(valueFactory.createIRI(dataFile.toURI().toString()));
 
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, new Properties())) {
-			REPOSITORY = new OntopVirtualRepository(loader.getConfiguration());
+			REPOSITORY = OntopRepository.defaultRepository(loader.getConfiguration());
 			REPOSITORY.initialize();
 		}
 	}

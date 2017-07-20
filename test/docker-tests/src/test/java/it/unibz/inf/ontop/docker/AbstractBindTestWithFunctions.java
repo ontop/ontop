@@ -64,14 +64,14 @@ public abstract class AbstractBindTestWithFunctions {
 
         // Creating a new instance of the reasoner
 
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
                 .propertyFile(propertiesfile)
                 .enableTestMode()
                 .build();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();
@@ -782,14 +782,14 @@ public abstract class AbstractBindTestWithFunctions {
 
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
-        QuestOWLFactory factory = new QuestOWLFactory();
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
                 .enableTestMode()
                 .propertyFile(propertiesfile)
                 .build();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 
         // Now we are ready for querying

@@ -116,7 +116,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 	private void runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -126,7 +126,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
-        QuestOWL reasoner = factory.createReasoner(config);
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
 		OntopOWLConnection conn = reasoner.getConnection();
