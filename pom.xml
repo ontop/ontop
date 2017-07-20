@@ -147,7 +147,7 @@
         <tomcat-jdbc.version>9.0.0.M1</tomcat-jdbc.version>
         <r2rml-api.version>0.6.0</r2rml-api.version>
         <jetty.version>9.4.6.v20170531</jetty.version>
-		<hikari-cp.version>2.6.2</hikari-cp.version>
+		<hikari-cp.version>2.6.3</hikari-cp.version>
     </properties>
 
 	<build>
