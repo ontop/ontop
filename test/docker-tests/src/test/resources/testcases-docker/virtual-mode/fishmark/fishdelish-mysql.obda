@@ -4,7 +4,7 @@
 
 [MappingDeclaration] @collection [[
 mappingId	Species
-target		:species/{Genus}/{Species} a :species ; :species_Genus {Genus} ; :species_SpecCode {SpecCode} ; :species_Species {Species} ; :species_SpeciesRefNo {SpeciesRefNo} ; :species_Author {Author} ; :species_FBname {FBname} ; :species_PicPreferredName {PicPreferredName} ; :species_AnaCat {AnaCat} ; :species_Comments {Comments} ; :species_Dangerous {Dangerous} ; :species_DemersPelag {DemersPelag} ; :species_GameFish {GameFish} ; :species_GameRef {GameRef} ; :species_UsedforAquaculture {usedForAquaculture} ; :species_Aquarium {Aquarium} . 
+target		:species/{Genus}/{Species} a :species ; :species_Genus {Genus} ; :species_SpecCode {SpecCode} ; :species_Species {Species} ; :species_SpeciesRefNo {SpeciesRefNo}^^xsd:int ; :species_Author {Author} ; :species_FBname {FBname} ; :species_PicPreferredName {PicPreferredName} ; :species_AnaCat {AnaCat} ; :species_Comments {Comments} ; :species_Dangerous {Dangerous} ; :species_DemersPelag {DemersPelag} ; :species_GameFish {GameFish} ; :species_GameRef {GameRef} ; :species_UsedforAquaculture {usedForAquaculture} ; :species_Aquarium {Aquarium} .
 source		select SpecCode, Genus, Species, SpeciesRefNo, Author, FBname, PicPreferredName, FamCode, AnaCat, Comments, Dangerous, DemersPelag, GameFish, GameRef, usedForAquaculture, Aquarium from species
 
 mappingId	Families
@@ -36,7 +36,7 @@ target		:picturesmain/{autoctr} a :picturesmain ; :picturesmain_PicName {PicName
 source		select PicName, AuthName, Entered, LifeStage, autoctr, SpecCode from picturesmain
 
 mappingId	References
-target		:refrens/{autoctr} a :refrens ; :refrens_RefNo {RefNo} ; :refrens_Year {Year} ; :refrens_Author {Author} . 
+target		:refrens/{autoctr} a :refrens ; :refrens_RefNo {RefNo}^^xsd:int ; :refrens_Year {Year} ; :refrens_Author {Author} .
 source		select autoctr, Author, RefNo, Year from refrens
 
 mappingId	mapping-picturesmain-species
