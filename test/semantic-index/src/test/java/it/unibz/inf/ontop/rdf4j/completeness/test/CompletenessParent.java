@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.rdf4j.completeness.test;
  * #L%
  */
 
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.eclipse.rdf4j.common.io.IOUtil;
 import org.eclipse.rdf4j.common.iteration.Iterations;
@@ -99,7 +99,7 @@ public abstract class CompletenessParent extends TestCase {
 		String ontologyPath = new URL(ontologyFile).getPath();
 
 		try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(ontologyPath, properties)) {
-			Repository repository = new OntopVirtualRepository(loader.getConfiguration());
+			Repository repository = OntopRepository.defaultRepository(loader.getConfiguration());
 			repository.initialize();
 			return repository;
 		}

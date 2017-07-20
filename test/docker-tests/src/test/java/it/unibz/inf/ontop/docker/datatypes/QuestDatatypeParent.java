@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.docker.datatypes;
 import it.unibz.inf.ontop.docker.ResultSetInfo;
 import it.unibz.inf.ontop.docker.ResultSetInfoTupleUtil;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.eclipse.rdf4j.common.io.IOUtil;
@@ -115,7 +115,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 		if ((parameterFileURL != null) && (!parameterFileURL.isEmpty()))
 				configBuilder.propertyFile(parameterFileURL);
 
-		OntopVirtualRepository repo = new OntopVirtualRepository(configBuilder.build());
+		OntopRepository repo = OntopRepository.defaultRepository(configBuilder.build());
 		repo.initialize();
 		return repo;
 	}
