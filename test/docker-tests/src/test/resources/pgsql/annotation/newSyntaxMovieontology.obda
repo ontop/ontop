@@ -53,7 +53,7 @@ target		imdb:title/{movie_id} dbpedia:gross {gross}^^xsd:string .
 source		select movie_id, info as gross from movie_info where movie_info.info_type_id = 107
 
 mappingId	Movie has Actor
-target		imdb:title/{movie_id} mo:hasMaleActor <{person_id}> .
+target		imdb:title/{movie_id} mo:hasMaleActor imdb:name/{person_id} .
 source		select movie_id, person_id from cast_info where role_id = 1
 
 mappingId	Movie has title and production year
