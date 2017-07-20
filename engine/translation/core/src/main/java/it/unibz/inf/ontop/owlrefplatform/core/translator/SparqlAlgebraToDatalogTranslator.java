@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  */
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.answering.input.translation.RDF4JInputQueryTranslator;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
@@ -57,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,7 +73,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
  * 
  * @author Roman Kontchakov
  */
-public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslator {
+public class SparqlAlgebraToDatalogTranslator {
 
 
     private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
@@ -89,12 +89,11 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
 	 * @param uriTemplateMatcher matches URIs to templates (comes from mappings)
 	 * @param iriDictionary maps URIs to their integer identifiers (used only in the Semantic Index mode)
      *
-     * TODO: use Guice and retrieve the IRIDictionary by injection (not assisted, nullable)
 	 */
-	public SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
-                                            @Nonnull Optional<IRIDictionary> iriDictionary) {
+	SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
+                                     @Nullable IRIDictionary iriDictionary) {
 		this.uriTemplateMatcher = uriTemplateMatcher;
-		this.uriRef = iriDictionary.orElse(null);
+		this.uriRef = iriDictionary;
 
         this.program = DATALOG_FACTORY.getDatalogProgram();
     }
@@ -109,7 +108,6 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
      *
      * TODO: return an IntermediateQuery instead!
 	 */
-	@Override
 	public InternalSparqlQuery translate(ParsedQuery pq) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         if (predicateIdx != 0 || !program.getRules().isEmpty())

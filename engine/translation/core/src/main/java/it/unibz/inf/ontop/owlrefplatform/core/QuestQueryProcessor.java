@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAsPredicateExtractor;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
@@ -36,11 +35,8 @@ import java.util.*;
 
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.answering.reformulation.QueryTranslator;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 
@@ -52,7 +48,6 @@ public class QuestQueryProcessor implements QueryTranslator {
 	private final QueryRewriter rewriter;
 	private final LinearInclusionDependencies sigma;
 	private final VocabularyValidator vocabularyValidator;
-	private final Optional<IRIDictionary> iriDictionary;
 	private final NativeQueryGenerator datasourceQueryGenerator;
 	private final QueryCache queryCache;
 
@@ -64,14 +59,13 @@ public class QuestQueryProcessor implements QueryTranslator {
 	private final ImmutableSet<Predicate> dataPropertiesAndClassesMapped;
 	private final ImmutableSet<Predicate> objectPropertiesMapped;
 	private final OntopTranslationSettings settings;
-	private final UriTemplateMatcher uriTemplateMatcher;
 	private final DBMetadata dbMetadata;
 	private final JoinLikeOptimizer joinLikeOptimizer;
+	private final InputQueryTranslator inputQueryTranslator;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								@Assisted ExecutorRegistry executorRegistry,
-								@Nullable IRIDictionary iriDictionary,
 								QueryCache queryCache,
 								OntopTranslationSettings settings,
 								DatalogProgram2QueryConverter datalogConverter,
@@ -91,14 +85,14 @@ public class QuestQueryProcessor implements QueryTranslator {
 
 		this.vocabularyValidator = new VocabularyValidator(obdaSpecification.getSaturatedTBox(),
 				obdaSpecification.getVocabulary());
-		this.iriDictionary = Optional.ofNullable(iriDictionary);
 		this.dbMetadata = obdaSpecification.getDBMetadata();
 		this.datasourceQueryGenerator = translationFactory.create(dbMetadata);
 		this.queryCache = queryCache;
 		this.settings = settings;
 		this.executorRegistry = executorRegistry;
 		this.datalogConverter = datalogConverter;
-		this.uriTemplateMatcher = saturatedMapping.getMetadata().getUriTemplateMatcher();
+		this.inputQueryTranslator = translationFactory.createInputQueryTranslator(
+				saturatedMapping.getMetadata().getUriTemplateMatcher());
 
 		if (settings.isSameAsInMappingsEnabled()) {
 			MappingSameAsPredicateExtractor msa = new MappingSameAsPredicateExtractor(saturatedMapping);
@@ -112,8 +106,7 @@ public class QuestQueryProcessor implements QueryTranslator {
 	
 	private DatalogProgram translateAndPreProcess(InputQuery inputQuery)
 			throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
-		InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary);
-		InternalSparqlQuery translation = inputQuery.translate(translator);
+		InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
 		return preProcess(translation);
 	}
 
@@ -164,8 +157,7 @@ public class QuestQueryProcessor implements QueryTranslator {
 			return cachedQuery;
 
 		try {
-			InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary);
-			InternalSparqlQuery translation = inputQuery.translate(translator);
+			InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
 			DatalogProgram newprogram = preProcess(translation);
 
 			for (CQIE q : newprogram.getRules()) 
