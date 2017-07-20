@@ -165,13 +165,13 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	}
 
 	/**
-	 * This thread handles the cancelling of a request. 
+	 * This thread handles the cancelling of a request.
 	 * To speed up the process for the user, this thread is given the old connection, statement and latch,
 	 * while these are replaced in the containing class
 	 * @author Dag Hovland
 	 *
 	 */
-	private class Canceller extends Thread{
+	private class Canceller extends Thread {
 		private CountDownLatch old_latch;
 		private OntopOWLConnection old_conn;
 		private OntopOWLStatement old_stmt;
@@ -195,7 +195,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 				DialogUtils.showQuickErrorDialog(rootView, e, "Error cancelling query.");
 			}
 		}
-	};
+	}
 	
 	public void actionCanceled() {
 		this.isCanceled = true;
@@ -217,11 +217,5 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	public boolean isErrorShown(){
 		return this.queryExecError;
-	}
-
-	public void closeConnection() throws OWLException {
-		if (statement != null) {
-			statement.close();
-		}
 	}
 }

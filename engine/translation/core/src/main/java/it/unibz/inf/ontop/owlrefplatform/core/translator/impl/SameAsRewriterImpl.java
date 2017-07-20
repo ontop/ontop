@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.core.translator.impl;
 
-import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.mapping.Mapping;
@@ -28,17 +29,20 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 public class SameAsRewriterImpl implements SameAsRewriter{
 
     private final MappingSameAsPredicateExtractor predicateExtractor;
+    private final Mapping saturatedMapping;
     private int bnode; //count for bnode created in sameAsmap
     private int rules;
 
-    @Inject
-    public SameAsRewriterImpl(MappingSameAsPredicateExtractor predicateExtractor) {
+    @AssistedInject
+    private SameAsRewriterImpl(@Assisted Mapping saturatedMapping, MappingSameAsPredicateExtractor predicateExtractor) {
         this.predicateExtractor = predicateExtractor;
+        this.saturatedMapping = saturatedMapping;
         bnode = 0;
         rules = 0;
     }
 
-    public DatalogProgram getSameAsRewriting(DatalogProgram pr, Mapping saturatedMapping) {
+    @Override
+    public DatalogProgram getSameAsRewriting(DatalogProgram pr) {
 
         MappingSameAsPredicateExtractor.Result targetPredicates = predicateExtractor.extract(saturatedMapping);
         DatalogProgram result = DATALOG_FACTORY.getDatalogProgram(pr.getQueryModifiers());

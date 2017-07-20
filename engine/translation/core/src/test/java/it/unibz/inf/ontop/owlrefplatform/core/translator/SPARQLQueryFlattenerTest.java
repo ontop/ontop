@@ -1,9 +1,8 @@
-package it.unibz.inf.ontop.reformulation.tests;
+package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
+import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.InternalSparqlQuery;
 import org.junit.Test;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryLanguage;
@@ -11,7 +10,6 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.QueryParser;
 import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 
@@ -21,7 +19,7 @@ import java.util.stream.Stream;
 public class SPARQLQueryFlattenerTest {
 
     @Test
-    public void testBind0() throws MalformedQueryException, OntopUnsupportedInputQueryException {
+    public void testBind0() throws MalformedQueryException, OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -35,14 +33,14 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(queryBind, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                UriTemplateMatcher.create(Stream.of()), Optional.empty());
+                UriTemplateMatcher.create(Stream.of()), null);
 
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
 
     @Test
-    public void testBind() throws MalformedQueryException, OntopUnsupportedInputQueryException {
+    public void testBind() throws MalformedQueryException, OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -58,14 +56,14 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(queryBind, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                UriTemplateMatcher.create(Stream.of()), Optional.empty());
+                UriTemplateMatcher.create(Stream.of()), null);
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
 
 
     @Test
-    public void testUnion() throws MalformedQueryException, OntopUnsupportedInputQueryException {
+    public void testUnion() throws MalformedQueryException, OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         String query6 = "PREFIX : <http://www.example.org/test#> "
                 + "PREFIX owl: <http://www.w3.org/2002/07/owl#> "
@@ -82,13 +80,13 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(query6, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                UriTemplateMatcher.create(Stream.of()), Optional.empty());
+                UriTemplateMatcher.create(Stream.of()), null);
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
 
     @Test
-    public void testUnionJoin() throws MalformedQueryException, OntopUnsupportedInputQueryException {
+    public void testUnionJoin() throws MalformedQueryException, OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         String query6 = "PREFIX : <http://www.example.org/test#> "
                 + "PREFIX owl: <http://www.w3.org/2002/07/owl#> "
@@ -101,7 +99,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(query6, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                UriTemplateMatcher.create(Stream.of()), Optional.empty());
+                UriTemplateMatcher.create(Stream.of()), null);
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }

@@ -14,7 +14,8 @@ public interface OntopStandaloneSQLConfiguration extends OntopSystemSQLConfigura
         return new OntopStandaloneSQLConfigurationImpl.BuilderImpl<>();
     }
 
-    interface Builder<B extends Builder<B>> extends OntopTranslationSQLConfiguration.Builder<B>,
+    interface Builder<B extends Builder<B>> extends OntopSystemConfiguration.Builder<B>,
+            OntopTranslationSQLConfiguration.Builder<B>,
             OntopMappingSQLAllConfiguration.Builder<B> {
 
         @Override

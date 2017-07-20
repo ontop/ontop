@@ -37,7 +37,6 @@ import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -46,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.List;
 
@@ -65,18 +65,17 @@ public class VirtualABoxMaterializerTest {
 	private static final Predicate hasschool = DATA_FACTORY.getObjectPropertyPredicate(PREFIX + "hasschool");
 	private static final Predicate school = DATA_FACTORY.getClassPredicate(PREFIX + "School");
 
+	private static final String driver = "org.h2.Driver";
+	private static String url = "jdbc:h2:mem:aboxdump";
+	private static String username = "sa";
+	private static String password = "";
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(VirtualABoxMaterializerTest.class);
 
     public VirtualABoxMaterializerTest() {
     }
 
 	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {
-		/* Setting the database */
-		String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:aboxdump";
-		String username = "sa";
-		String password = "";
-
 		return OntopStandaloneSQLConfiguration.defaultBuilder()
 				.jdbcUrl(url)
 				.jdbcUser(username)
@@ -100,7 +99,7 @@ public class VirtualABoxMaterializerTest {
 		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(configuration.getSettings());
+		Connection conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
 		FileReader reader = new FileReader("src/test/resources/mapping-test-db.sql");

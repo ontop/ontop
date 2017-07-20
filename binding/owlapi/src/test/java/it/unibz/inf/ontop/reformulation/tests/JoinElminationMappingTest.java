@@ -105,7 +105,8 @@ public class JoinElminationMappingTest extends TestCase {
 		reasoner.flush();
 
 		// Now we are ready for querying
-		OntopOWLStatement st = reasoner.getStatement();
+		OntopOWLConnection connection = reasoner.getConnection();
+		OntopOWLStatement st = connection.createStatement();
 
 		boolean fail = false;
 
@@ -122,6 +123,7 @@ public class JoinElminationMappingTest extends TestCase {
 		}
 		/* Closing resources */
 		st.close();
+		connection.close();
 		reasoner.dispose();
 
 		/* Comparing and printing results */

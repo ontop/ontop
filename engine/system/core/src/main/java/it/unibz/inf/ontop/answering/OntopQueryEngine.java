@@ -14,13 +14,6 @@ public interface OntopQueryEngine extends AutoCloseable {
     void close() throws OntopConnectionException;
 
     /**
-     * Gets a direct OntopConnection.
-     *
-     * TODO: should we keep it?
-     */
-    OntopConnection getNonPoolConnection() throws OntopConnectionException;
-
-    /**
      * Gets a OntopConnection usually coming from a connection pool.
      */
     OntopConnection getConnection() throws OntopConnectionException;

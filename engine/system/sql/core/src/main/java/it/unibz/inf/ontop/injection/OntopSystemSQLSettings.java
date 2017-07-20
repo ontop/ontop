@@ -9,7 +9,7 @@ public interface OntopSystemSQLSettings extends OntopSystemSettings, OntopTransl
 
     boolean isKeepAliveEnabled();
     boolean isRemoveAbandonedEnabled();
-    int getAbandonedTimeout();
+    int getConnectionTimeout();
     int getConnectionPoolInitialSize();
     int getConnectionPoolMaxSize();
 
@@ -20,6 +20,7 @@ public interface OntopSystemSQLSettings extends OntopSystemSettings, OntopTransl
     String MAX_POOL_SIZE = "jdbc.pool.maxSize";
     String INIT_POOL_SIZE = "jdbc.pool.initialSize";
     String REMOVE_ABANDONED = "jdbc.pool.removeAbandoned";
-    String ABANDONED_TIMEOUT = "jdbc.pool.abandonedTimeout";
+    // Connection timeout (in ms)
+    String CONNECTION_TIMEOUT = "jdbc.pool.connectionTimeout";
     String KEEP_ALIVE = "jdbc.pool.keepAlive";
 }

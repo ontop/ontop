@@ -29,7 +29,6 @@ public class OntopTranslationModule extends OntopAbstractModule {
         bind(OntopTranslationSettings.class).toInstance(configuration.getSettings());
         bindFromPreferences(RDF4JInputQueryFactory.class);
         bindFromPreferences(InputQueryFactory.class);
-        bindFromPreferences(SameAsRewriter.class);
         bindFromPreferences(MappingSameAsPredicateExtractor.class);
 
         Optional<IRIDictionary> iriDictionary = configuration.getIRIDictionary();

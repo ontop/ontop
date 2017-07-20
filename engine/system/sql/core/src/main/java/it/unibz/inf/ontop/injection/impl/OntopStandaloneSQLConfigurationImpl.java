@@ -80,11 +80,13 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
 
         private final DefaultOntopTranslationSQLBuilderFragment<B> sqlTranslationFragmentBuilder;
         private final DefaultOntopTranslationBuilderFragment<B> translationFragmentBuilder;
+        private final DefaultOntopSystemBuilderFragment<B> systemFragmentBuilder;
 
         OntopStandaloneSQLBuilderMixin() {
             B builder = (B) this;
             this.sqlTranslationFragmentBuilder = new DefaultOntopTranslationSQLBuilderFragment<>(builder);
             this.translationFragmentBuilder = new DefaultOntopTranslationBuilderFragment<>(builder);
+            this.systemFragmentBuilder = new DefaultOntopSystemBuilderFragment<>(builder);
         }
 
         @Override
@@ -103,8 +105,14 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
         }
 
         @Override
+        public B keepPermanentDBConnection(boolean keep) {
+            return systemFragmentBuilder.keepPermanentDBConnection(keep);
+        }
+
+        @Override
         protected Properties generateProperties() {
             Properties p = super.generateProperties();
+            p.putAll(systemFragmentBuilder.generateProperties());
             p.putAll(sqlTranslationFragmentBuilder.generateProperties());
             p.putAll(translationFragmentBuilder.generateProperties());
             return p;

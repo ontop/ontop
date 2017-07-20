@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
@@ -32,14 +31,10 @@ import it.unibz.inf.ontop.datalog.DatalogProgramRenderer;
 
 import java.util.*;
 
-import it.unibz.inf.ontop.owlrefplatform.core.translator.impl.SameAsRewriterImpl;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.answering.reformulation.QueryTranslator;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 
@@ -51,37 +46,31 @@ public class QuestQueryProcessor implements QueryTranslator {
 	private final QueryRewriter rewriter;
 	private final LinearInclusionDependencies sigma;
 	private final VocabularyValidator vocabularyValidator;
-	private final Optional<IRIDictionary> iriDictionary;
 	private final NativeQueryGenerator datasourceQueryGenerator;
 	private final QueryCache queryCache;
 
-	private final OntopTranslationSettings settings;
 	private final QueryUnfolder queryUnfolder;
-	private final SameAsRewriterImpl sameAsRewriter;
+	private final SameAsRewriter sameAsRewriter;
 
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final ExecutorRegistry executorRegistry;
 	private final DatalogProgram2QueryConverter datalogConverter;
-	private final UriTemplateMatcher uriTemplateMatcher;
+	private final OntopTranslationSettings settings;
 	private final DBMetadata dbMetadata;
 	private final JoinLikeOptimizer joinLikeOptimizer;
-	private final OBDASpecification obdaSpecification;
+	private final InputQueryTranslator inputQueryTranslator;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								@Assisted ExecutorRegistry executorRegistry,
-								@Nullable IRIDictionary iriDictionary,
 								QueryCache queryCache,
 								OntopTranslationSettings settings,
 								DatalogProgram2QueryConverter datalogConverter,
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
-								SameAsRewriterImpl sameAsRewriter,
 								JoinLikeOptimizer joinLikeOptimizer) {
 		this.settings = settings;
-		this.obdaSpecification = obdaSpecification;
 		this.joinLikeOptimizer = joinLikeOptimizer;
-		this.sameAsRewriter = sameAsRewriter;
 		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = LinearInclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
@@ -94,18 +83,19 @@ public class QuestQueryProcessor implements QueryTranslator {
 
 		this.vocabularyValidator = new VocabularyValidator(obdaSpecification.getSaturatedTBox(),
 				obdaSpecification.getVocabulary());
-		this.iriDictionary = Optional.ofNullable(iriDictionary);
 		this.dbMetadata = obdaSpecification.getDBMetadata();
 		this.datasourceQueryGenerator = translationFactory.create(dbMetadata);
+		this.inputQueryTranslator = translationFactory.createInputQueryTranslator(saturatedMapping.getMetadata()
+				.getUriTemplateMatcher());
+		this.sameAsRewriter = translationFactory.createSameAsRewriter(saturatedMapping);
 		this.queryCache = queryCache;
 		this.executorRegistry = executorRegistry;
 		this.datalogConverter = datalogConverter;
-		this.uriTemplateMatcher = saturatedMapping.getMetadata().getUriTemplateMatcher();
 	}
 	
-	private DatalogProgram translateAndPreProcess(InputQuery inputQuery) throws OntopUnsupportedInputQueryException {
-		InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary);
-		InternalSparqlQuery translation = inputQuery.translate(translator);
+	private DatalogProgram translateAndPreProcess(InputQuery inputQuery)
+			throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
+		InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
 		return preProcess(translation);
 	}
 
@@ -114,7 +104,7 @@ public class QuestQueryProcessor implements QueryTranslator {
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
 		if(settings.isSameAsInMappingsEnabled()){
-			program = sameAsRewriter.getSameAsRewriting(program, obdaSpecification.getSaturatedMapping());
+			program = sameAsRewriter.getSameAsRewriting(program);
 			log.debug("Datalog program after SameAs rewriting \n" + program);
 		}
 
@@ -155,8 +145,7 @@ public class QuestQueryProcessor implements QueryTranslator {
 			return cachedQuery;
 
 		try {
-			InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary);
-			InternalSparqlQuery translation = inputQuery.translate(translator);
+			InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
 			DatalogProgram newprogram = preProcess(translation);
 
 			for (CQIE q : newprogram.getRules()) 

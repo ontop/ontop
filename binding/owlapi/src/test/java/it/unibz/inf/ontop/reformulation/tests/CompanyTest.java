@@ -154,8 +154,6 @@ public class CompanyTest  {
 			} catch (Exception e) {
 				st.close();
 			}
-			conn.close();
-			reasoner.dispose();
 		}
 	}
 
@@ -187,21 +185,18 @@ public class CompanyTest  {
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
-			conn.close();
-			reasoner.dispose();
+			st.close();
 		}
 	}
 
 	@Test
 	public void testViEqSig() throws Exception {
-		runOptionalTest();
-		runOptionalFilterTest();
+		try {
+			runOptionalTest();
+			runOptionalFilterTest();
+		} finally {
+			conn.close();
+			reasoner.dispose();
+		}
 	}
-
-
 }

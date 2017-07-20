@@ -231,7 +231,8 @@ public class TreeWitnessRewriterH2Test{
 		}
 
 		// Now we are ready for querying
-		OntopOWLStatement st = reasoner.getStatement();
+		OntopOWLConnection owlConnection = reasoner.getConnection();
+		OntopOWLStatement st = owlConnection.createStatement();
 
 		List<Result> summaries = new LinkedList<TreeWitnessRewriterH2Test.Result>();
 
@@ -278,6 +279,7 @@ public class TreeWitnessRewriterH2Test{
 
 		/* Closing resources */
 		st.close();
+		owlConnection.close();
 		reasoner.dispose();
 
 		// /* Comparing and printing results */

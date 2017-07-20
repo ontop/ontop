@@ -200,8 +200,6 @@ public class ReverseURITestH2 {
 				st.close();
 				Assert.assertTrue(false);
 			}
-			conn.close();
-			reasoner.dispose();
 		}
 	}
 

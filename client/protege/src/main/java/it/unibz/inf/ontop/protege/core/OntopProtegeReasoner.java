@@ -18,7 +18,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     private QuestOWL reasoner;
     private final QuestOWLFactory factory = new QuestOWLFactory();
     private final OntopConfigurationManager configurationManager;
-
+    private OntopOWLConnection owlConnection;
 
 
     protected OntopProtegeReasoner(OWLOntology rootOntology, OntopProtegeOWLConfiguration configuration) throws IllegalConfigurationException {
@@ -31,17 +31,12 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     }
 
     public OntopOWLStatement getStatement() throws OWLException {
-        return reasoner.getStatement();
+        if (owlConnection == null)
+            owlConnection = reasoner.getConnection();
+
+        return owlConnection.createStatement();
     }
 
-    /**
-     * Replaces the owl connection with a new one
-     * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
-     * @return The old connection: The caller must close this connection
-     */
-    public OntopOWLConnection replaceConnection() throws OntopConnectionException {
-        return reasoner.replaceConnection();
-    }
 
     @Nonnull
     @Override
@@ -310,6 +305,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
 
     @Override
     public void close() throws Exception {
+        owlConnection.close();
         reasoner.close();
     }
 
@@ -320,6 +316,17 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
      * @throws Exception
      */
     public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() throws Exception {
-        return reasoner.getEmptyEntitiesChecker();
+        return new QuestOWLEmptyEntitiesChecker(reasoner.getOntopOntology(), owlConnection);
+    }
+
+    /**
+     * Replaces the owl connection with a new one
+     * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
+     * @return The old connection: The caller must close this connection
+     */
+    public OntopOWLConnection replaceConnection() throws OntopConnectionException {
+        OntopOWLConnection oldconn = this.owlConnection;
+        owlConnection = reasoner.getConnection();
+        return oldconn;
     }
 }

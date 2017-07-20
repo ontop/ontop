@@ -44,8 +44,8 @@ public class OntopSystemSQLSettingsImpl extends OntopTranslationSQLSettingsImpl 
     }
 
     @Override
-    public int getAbandonedTimeout() {
-        return getRequiredInteger(ABANDONED_TIMEOUT);
+    public int getConnectionTimeout() {
+        return getRequiredInteger(CONNECTION_TIMEOUT);
     }
 
     @Override
@@ -56,5 +56,10 @@ public class OntopSystemSQLSettingsImpl extends OntopTranslationSQLSettingsImpl 
     @Override
     public int getConnectionPoolMaxSize() {
         return getRequiredInteger(MAX_POOL_SIZE);
+    }
+
+    @Override
+    public boolean isPermanentDBConnectionEnabled() {
+        return systemSettings.isPermanentDBConnectionEnabled();
     }
 }
