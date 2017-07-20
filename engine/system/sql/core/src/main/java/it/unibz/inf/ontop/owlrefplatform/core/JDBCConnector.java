@@ -8,8 +8,7 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.QueryTranslator;
-import org.apache.tomcat.jdbc.pool.DataSource;
-import org.apache.tomcat.jdbc.pool.PoolProperties;
+import it.unibz.inf.ontop.sql.pool.JDBCConnectionPool;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,117 +27,51 @@ public class JDBCConnector implements DBConnector {
     private final OntopSystemSQLSettings settings;
     private final Optional<IRIDictionary> iriDictionary;
 
-    /* The active connection used to get metadata from the DBMS */
+    /* The active connection used for keeping in-memory DBs alive */
     private transient Connection localConnection;
 
     private final Logger log = LoggerFactory.getLogger(JDBCConnector.class);
-    private PoolProperties poolProperties;
-    private DataSource tomcatPool;
+    private final JDBCConnectionPool connectionPool;
 
-    // Tomcat pool default properties
-    // These can be changed in the properties file
-    private final int maxPoolSize;
-    private final int startPoolSize;
-    private final boolean removeAbandoned ;
-    private final boolean logAbandoned = false;
-    private final int abandonedTimeout;
     private final DBMetadata dbMetadata;
     private final InputQueryFactory inputQueryFactory;
-    private final boolean keepAlive;
 
     @AssistedInject
     private JDBCConnector(@Assisted QueryTranslator queryTranslator,
                           @Assisted DBMetadata dbMetadata,
                           @Nullable IRIDictionary iriDictionary,
+                          JDBCConnectionPool connectionPool,
                           InputQueryFactory inputQueryFactory,
                           OntopSystemSQLSettings settings) {
         this.queryReformulator = queryTranslator;
         this.dbMetadata = dbMetadata;
         this.inputQueryFactory = inputQueryFactory;
-        keepAlive = settings.isKeepAliveEnabled();
-        removeAbandoned = settings.isRemoveAbandonedEnabled();
-        abandonedTimeout = settings.getAbandonedTimeout();
-        startPoolSize = settings.getConnectionPoolInitialSize();
-        maxPoolSize = settings.getConnectionPoolMaxSize();
         this.settings = settings;
         this.iriDictionary = Optional.ofNullable(iriDictionary);
-
-        setupConnectionPool();
+        this.connectionPool = connectionPool;
     }
 
-    /***
-     * Starts the local connection that Quest maintains to the DBMS. This
-     * connection belongs only to Quest and is used to get information from the
-     * DBMS. At the moment this connection is mainly used during initialization,
-     * to get metadata about the DBMS or to create repositories in classic mode.
+    /**
+     * Keeps a permanent connection to the DB (if enabled in the settings).
      *
-     * @return
-     * @throws SQLException
+     * Needed by some in-memory DBs (such as H2).
+     *
      */
     public boolean connect() throws OntopConnectionException {
         try {
             if (localConnection != null && !localConnection.isClosed()) {
                 return true;
             }
-
-//            try {
-//                Class.forName(settings.getJdbcDriver());
-//            } catch (ClassNotFoundException e1) {
-//                // Does nothing because the SQLException handles this problem also.
-//            }
-            localConnection = DriverManager.getConnection(settings.getJdbcUrl(),
-                    settings.getJdbcUser(), settings.getJdbcPassword());
-
-            if (localConnection != null) {
-                return true;
+            if (settings.isPermanentDBConnectionEnabled()) {
+                localConnection = DriverManager.getConnection(settings.getJdbcUrl(),
+                        settings.getJdbcUser(), settings.getJdbcPassword());
+                return localConnection != null;
             }
-            return false;
         } catch (SQLException e) {
             throw new OntopConnectionException(e);
         }
-    }
 
-    private void setupConnectionPool() {
-        poolProperties = new PoolProperties();
-        poolProperties.setUrl(settings.getJdbcUrl());
-        settings.getJdbcDriver()
-                .ifPresent(d -> poolProperties.setDriverClassName(d));
-        poolProperties.setUsername(settings.getJdbcUser());
-        poolProperties.setPassword(settings.getJdbcPassword());
-        poolProperties.setJmxEnabled(true);
-
-        // TEST connection before using it
-        poolProperties.setTestOnBorrow(keepAlive);
-        if (keepAlive) {
-            // TODO: refactor this
-            String driver = settings.getJdbcDriver()
-                    .orElse("");
-            if (driver.contains("oracle"))
-                poolProperties.setValidationQuery("select 1 from dual");
-            else if (driver.contains("db2"))
-                poolProperties.setValidationQuery("select 1 from sysibm.sysdummy1");
-            else
-                poolProperties.setValidationQuery("select 1");
-        }
-
-        poolProperties.setTestOnReturn(false);
-        poolProperties.setMaxActive(maxPoolSize);
-        poolProperties.setMaxIdle(maxPoolSize);
-        poolProperties.setInitialSize(startPoolSize);
-        poolProperties.setMaxWait(30000);
-        poolProperties.setRemoveAbandonedTimeout(abandonedTimeout);
-        poolProperties.setMinEvictableIdleTimeMillis(30000);
-        poolProperties.setLogAbandoned(logAbandoned);
-        poolProperties.setRemoveAbandoned(removeAbandoned);
-        poolProperties.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
-                + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
-        tomcatPool = new DataSource();
-        tomcatPool.setPoolProperties(poolProperties);
-
-        log.debug("Connection Pool Properties:");
-        log.debug("Start size: " + startPoolSize);
-        log.debug("Max size: " + maxPoolSize);
-        log.debug("Remove abandoned connections: " + removeAbandoned);
+        return true;
     }
 
     @Override
@@ -149,57 +82,15 @@ public class JDBCConnector implements DBConnector {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-        tomcatPool.close();
+        connectionPool.close();
     }
 
     public synchronized Connection getSQLPoolConnection() throws OntopConnectionException {
-        Connection conn = null;
         try {
-            conn = tomcatPool.getConnection();
+            return connectionPool.getConnection();
         } catch (SQLException e) {
             throw new OntopConnectionException(e);
         }
-        return conn;
-    }
-
-    /***
-     * Establishes a new connection to the data source. This is a normal JDBC
-     * connection. Used only internally to get metadata at the moment.
-     *
-     * TODO: update comment
-     *
-     */
-    protected Connection getSQLConnection() throws OntopConnectionException {
-        Connection conn;
-
-        // if (driver.contains("mysql")) {
-        // url = url + "?relaxAutoCommit=true";
-        // }
-        try {
-            Optional<String> optionalDriver = settings.getJdbcDriver();
-            if (optionalDriver.isPresent()) {
-                Class.forName(optionalDriver.get());
-            }
-        } catch (ClassNotFoundException e1) {
-            log.debug(e1.getMessage());
-        }
-        try {
-            conn = DriverManager.getConnection(settings.getJdbcUrl(),
-                    settings.getJdbcUser(), settings.getJdbcPassword());
-        } catch (SQLException e) {
-            throw new OntopConnectionException(e);
-        } catch (Exception e) {
-            throw new OntopConnectionException(e);
-        }
-        return conn;
-    }
-
-    // get a real (non pool) connection - used for protege plugin
-    @Override
-    public OntopConnection getNonPoolConnection() throws OntopConnectionException {
-
-        return new QuestConnection(this, queryReformulator, getSQLConnection(), iriDictionary,
-                dbMetadata, inputQueryFactory, settings);
     }
 
     /***

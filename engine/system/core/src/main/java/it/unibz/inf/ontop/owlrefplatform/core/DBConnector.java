@@ -9,16 +9,11 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
  * Guice-enabled interface (see the QuestComponentFactory).
  *
  */
-public interface DBConnector {
+public interface DBConnector extends AutoCloseable {
 
     boolean connect() throws OntopConnectionException;
 
     void close() throws OntopConnectionException;
-
-    /**
-     * Gets a direct OntopConnection.
-     */
-    OntopConnection getNonPoolConnection() throws OntopConnectionException;
 
     /**
      * Gets a OntopConnection usually coming from a connection pool.

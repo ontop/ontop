@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.docker.service;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import junit.framework.TestCase;
@@ -133,8 +135,10 @@ public class QuestSPARQLRewriterTest extends TestCase {
 
 	private String getSPARQLRewriting(String sparqlInput) {
 		String sparqlOutput;
-		try {
-			sparqlOutput = reasoner.getStatement().getRewritingRendering(sparqlInput);
+		try (OntopOWLConnection connection = reasoner.getConnection();
+			 OntopOWLStatement statement = connection.createStatement()) {
+
+			sparqlOutput = statement.getRewritingRendering(sparqlInput);
 		} catch (OWLException e) {
 			sparqlOutput = "NULL";
 		}

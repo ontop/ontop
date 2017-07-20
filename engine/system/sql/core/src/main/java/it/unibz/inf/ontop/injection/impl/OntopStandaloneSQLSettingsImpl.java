@@ -47,8 +47,8 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
-    public int getAbandonedTimeout() {
-        return systemSettings.getAbandonedTimeout();
+    public int getConnectionTimeout() {
+        return systemSettings.getConnectionTimeout();
     }
 
     @Override
@@ -59,5 +59,10 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     @Override
     public int getConnectionPoolMaxSize() {
         return systemSettings.getConnectionPoolMaxSize();
+    }
+
+    @Override
+    public boolean isPermanentDBConnectionEnabled() {
+        return systemSettings.isPermanentDBConnectionEnabled();
     }
 }

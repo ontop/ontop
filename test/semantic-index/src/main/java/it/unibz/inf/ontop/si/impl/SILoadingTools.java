@@ -139,6 +139,7 @@ class SILoadingTools {
                 .jdbcPassword(DEFAULT_PASSWORD)
                 //TODO: remove it (required by Tomcat...)
                 .jdbcDriver("org.h2.Driver")
+                .keepPermanentDBConnection(true)
                 .iriDictionary(dataRepository.getUriMap());
 
         optionalTBox.ifPresent(builder::ontology);
