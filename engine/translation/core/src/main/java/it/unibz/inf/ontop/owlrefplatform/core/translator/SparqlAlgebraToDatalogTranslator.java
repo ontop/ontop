@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.answering.input.translation.RDF4JInputQueryTranslator;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
@@ -109,7 +110,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
      * TODO: return an IntermediateQuery instead!
 	 */
 	@Override
-	public InternalSparqlQuery translate(ParsedQuery pq) throws OntopUnsupportedInputQueryException {
+	public InternalSparqlQuery translate(ParsedQuery pq) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         if (predicateIdx != 0 || !program.getRules().isEmpty())
             throw new IllegalStateException("SparqlAlgebraToDatalogTranslator.translate can only be called once.");
@@ -164,7 +165,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
         <T> TranslationResult extendWithBindings(Stream<T> bindings,
                                                  java.util.function.Function<? super T, Variable> varMapper,
                                                  BiFunctionWithUnsupportedException<? super T, ImmutableSet<Variable>, Term> exprMapper)
-                throws OntopUnsupportedInputQueryException {
+                throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
             Set<Variable> vars = new HashSet<>(variables);
 
@@ -236,7 +237,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
     }
 
 
-    private TranslationResult translate(TupleExpr node) throws OntopUnsupportedInputQueryException {
+    private TranslationResult translate(TupleExpr node) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         //System.out.println("node: \n" + node);
 
@@ -420,7 +421,8 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
      * @return
      */
 
-    private Function getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables) throws OntopUnsupportedInputQueryException {
+    private Function getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables)
+            throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
         Term term = getExpression(expr, variables);
         // Effective Boolean Value (EBV): wrap in isTrue function if it is not a (Boolean) expression
         if (term instanceof Function) {
@@ -576,7 +578,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
      * @return term
      */
 
-	private Term getExpression(ValueExpr expr, ImmutableSet<Variable> variables) throws OntopUnsupportedInputQueryException {
+	private Term getExpression(ValueExpr expr, ImmutableSet<Variable> variables) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         // PrimaryExpression ::= BrackettedExpression | BuiltInCall | iriOrFunction |
         //                          RDFLiteral | NumericLiteral | BooleanLiteral | Var
@@ -701,7 +703,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
             OperationPredicate p = XPathFunctions.get(f.getURI());
             if (p != null) {
                 if (arity != p.getArity())
-                    throw new UnsupportedOperationException(
+                    throw new OntopInvalidInputQueryException(
                             "Wrong number of arguments (found " + terms.size() + ", only " +
                                     p.getArity() + "supported) for SPARQL " + f.getURI() + "function");
 
@@ -715,7 +717,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
                 // string literal  CONCAT(string literal ltrl1 ... string literal ltrln)
                 case "http://www.w3.org/2005/xpath-functions#concat":
                     if (arity < 1)
-                        throw new UnsupportedOperationException("Wrong number of arguments (found " + terms.size() +
+                        throw new OntopInvalidInputQueryException("Wrong number of arguments (found " + terms.size() +
                                 ", at least 1) for SPARQL function CONCAT");
 
                     Term concat = terms.get(0);
@@ -734,7 +736,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
                     else if (arity == 4)
                         flags = terms.get(3);
                     else
-                        throw new UnsupportedOperationException("Wrong number of arguments (found "
+                        throw new OntopInvalidInputQueryException("Wrong number of arguments (found "
                                 + terms.size() + ", only 3 or 4 supported) for SPARQL function REPLACE");
 
                     return DATA_FACTORY.getFunction(ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
@@ -749,7 +751,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
                     else if (arity == 3)
                         return DATA_FACTORY.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
 
-                    throw new UnsupportedOperationException("Wrong number of arguments (found "
+                    throw new OntopInvalidInputQueryException("Wrong number of arguments (found "
                             + terms.size() + ", only 2 or 3 supported) for SPARQL function SUBSTRING");
 
                 default:
@@ -832,7 +834,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
 	@FunctionalInterface
 	private interface BiFunctionWithUnsupportedException<T, U, R> {
 
-	    R apply(T v1, U v2) throws OntopUnsupportedInputQueryException;
+	    R apply(T v1, U v2) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException;
 
     }
 }

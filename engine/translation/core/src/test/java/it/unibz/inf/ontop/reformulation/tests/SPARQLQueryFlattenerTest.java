@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
+import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
@@ -21,7 +22,7 @@ import java.util.stream.Stream;
 public class SPARQLQueryFlattenerTest {
 
     @Test
-    public void testBind0() throws MalformedQueryException, OntopUnsupportedInputQueryException {
+    public void testBind0() throws MalformedQueryException, OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -42,7 +43,7 @@ public class SPARQLQueryFlattenerTest {
     }
 
     @Test
-    public void testBind() throws MalformedQueryException, OntopUnsupportedInputQueryException {
+    public void testBind() throws MalformedQueryException, OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -65,7 +66,7 @@ public class SPARQLQueryFlattenerTest {
 
 
     @Test
-    public void testUnion() throws MalformedQueryException, OntopUnsupportedInputQueryException {
+    public void testUnion() throws MalformedQueryException, OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         String query6 = "PREFIX : <http://www.example.org/test#> "
                 + "PREFIX owl: <http://www.w3.org/2002/07/owl#> "
@@ -88,7 +89,7 @@ public class SPARQLQueryFlattenerTest {
     }
 
     @Test
-    public void testUnionJoin() throws MalformedQueryException, OntopUnsupportedInputQueryException {
+    public void testUnionJoin() throws MalformedQueryException, OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         String query6 = "PREFIX : <http://www.example.org/test#> "
                 + "PREFIX owl: <http://www.w3.org/2002/07/owl#> "

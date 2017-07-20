@@ -359,7 +359,7 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	@Override
-	public String getRewritingRendering(InputQuery query) throws OntopTranslationException, OntopInvalidInputQueryException {
+	public String getRewritingRendering(InputQuery query) throws OntopTranslationException {
 		return engine.getRewritingRendering(query);
 	}
 

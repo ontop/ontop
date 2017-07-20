@@ -110,7 +110,8 @@ public class QuestQueryProcessor implements QueryTranslator {
 		}
 	}
 	
-	private DatalogProgram translateAndPreProcess(InputQuery inputQuery) throws OntopUnsupportedInputQueryException {
+	private DatalogProgram translateAndPreProcess(InputQuery inputQuery)
+			throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 		InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary);
 		InternalSparqlQuery translation = inputQuery.translate(translator);
 		return preProcess(translation);
