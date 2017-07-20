@@ -1,12 +1,16 @@
 package it.unibz.inf.ontop.docker;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
@@ -14,7 +18,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Common initialization for many tests
@@ -30,9 +36,9 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     protected OntopOWLConnection conn;
 
     public AbstractVirtualModeTest(String owlFile, String obdaFile, String propertyFile) {
-        this.owlFileName =  this.getClass().getResource(owlFile).toString();
-        this.obdaFileName =  this.getClass().getResource(obdaFile).toString();
-        this.propertyFileName =  this.getClass().getResource(propertyFile).toString();
+        this.owlFileName = this.getClass().getResource(owlFile).toString();
+        this.obdaFileName = this.getClass().getResource(obdaFile).toString();
+        this.propertyFileName = this.getClass().getResource(propertyFile).toString();
     }
 
     @Override
@@ -127,6 +133,35 @@ public abstract class AbstractVirtualModeTest extends TestCase {
             count++;
         }
         assertEquals(expectedCount, count);
+    }
+
+    protected boolean checkContainsTuplesSetSemantics(String query, ImmutableSet<ImmutableMap<String, String>> expectedTuples)
+            throws Exception {
+        HashSet<ImmutableMap<String, String>> mutableCopy = new HashSet<>(expectedTuples);
+        OntopOWLStatement st = conn.createStatement();
+        try {
+            QuestOWLResultSet rs = st.executeTuple(query);
+            while (rs.nextRow()) {
+                ImmutableMap<String, String> tuple = getTuple(rs);
+                if (mutableCopy.contains(tuple)) {
+                    mutableCopy.remove(tuple);
+                }
+            }
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            conn.close();
+            reasoner.dispose();
+        }
+        return mutableCopy.isEmpty();
+    }
+
+    protected ImmutableMap<String, String> getTuple(QuestOWLResultSet rs) throws OWLException {
+        ImmutableMap.Builder<String, String> tuple = ImmutableMap.builder();
+        for (String variable : rs.getSignature()) {
+            tuple.put(variable, rs.getOWLIndividual(variable).toString());
+        }
+        return tuple.build();
     }
 
     protected void checkReturnedUris(String query, List<String> expectedUris) throws Exception {
@@ -258,6 +293,6 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         log.info(sqlQuery);
         log.info("Query Execution Time:");
         log.info("=====================");
-        log.info((t2-t1) + "ms");
+        log.info((t2 - t1) + "ms");
     }
 }
