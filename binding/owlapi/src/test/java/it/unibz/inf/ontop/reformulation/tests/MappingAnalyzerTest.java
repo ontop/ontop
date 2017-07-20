@@ -121,10 +121,8 @@ public class MappingAnalyzerTest extends TestCase {
 				.enableTestMode()
 				.build();
 
-		QuestOWL reasoner = factory.createReasoner(configuration);
+		factory.createReasoner(configuration);
 
-		// Get ready for querying
-		reasoner.getStatement();
 	}
 
 	public void testMapping_1() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {

@@ -89,9 +89,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
-	private OntopConnection conn = null;
-	private OntopOWLConnection owlconn = null;
-
 
 	// //////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -128,7 +125,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		OntopSystemOWLAPIConfiguration ontopConfiguration = owlConfiguration.getOntopConfiguration();
 
-		/**
+		/*
 		 * Validates the preferences
 		 */
 		try {
@@ -195,18 +192,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		
 	}
 
-	public OntopOWLStatement getStatement() throws OWLException {
-		if (!questready) {
-			OWLReasonerRuntimeException owlReasonerRuntimeException = new ReasonerInternalException(
-					"Ontop was not initialized properly. This is generally indicates, " +
-							"connection problems or error during ontology or mapping pre-processing. " +
-							"\n\nOriginal error message:\n" + questException.getMessage()) ;
-				owlReasonerRuntimeException.setStackTrace(questException.getStackTrace());
-			throw owlReasonerRuntimeException;
-		}
-		return owlconn.createStatement();
-	}
-
 	private void prepareConnector() throws OntopConnectionException {
 
 		try {
@@ -227,9 +212,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		// Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 
-		conn = queryEngine.getConnection();
-		owlconn = new QuestOWLConnection(conn, inputQueryFactory);
-
 		questready = true;
 		log.debug("Ontop has completed the setup and it is ready for query answering!");
 	}
@@ -238,7 +220,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	public void dispose() {
 		super.dispose();
 		try {
-			conn.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
@@ -276,10 +257,27 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 //		log.debug("Ontology loaded: {}", mergeOntology);
 	}
 
+	/**
+	 * The caller is in charge of closing the connection after usage.
+	 *    (the reasoner is not responsible of connections)
+	 */
+	public OntopOWLConnection getConnection() throws ReasonerInternalException {
+		if (!questready) {
+			OWLReasonerRuntimeException owlReasonerRuntimeException = new ReasonerInternalException(
+					"Ontop was not initialized properly. This is generally indicates, " +
+							"connection problems or error during ontology or mapping pre-processing. " +
+							"\n\nOriginal error message:\n" + questException.getMessage()) ;
+			owlReasonerRuntimeException.setStackTrace(questException.getStackTrace());
+			throw owlReasonerRuntimeException;
+		}
 
-
-	public OntopOWLConnection getConnection() {
-		return owlconn;
+		try {
+			OntopConnection conn = queryEngine.getConnection();
+			return new QuestOWLConnection(conn, inputQueryFactory);
+		} catch (OntopConnectionException e) {
+			// TODO: find a better exception?
+			throw new ReasonerInternalException(e);
+		}
 	}
 	
 	@Nonnull
@@ -502,8 +500,9 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	}
 	
 	private boolean executeConsistencyQuery(String strQuery) throws OWLException {
-		try {
-			OntopStatement st = conn.createStatement();
+		try (OntopConnection connection = queryEngine.getConnection();
+			 OntopStatement st = connection.createStatement()) {
+
 			AskQuery query = inputQueryFactory.createAskQuery(strQuery);
 			BooleanResultSet trs = st.execute(query);
 			if (trs != null && trs.nextRow()) {
@@ -738,20 +737,16 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
         return structuralReasoner.getDifferentIndividuals(ind);
 	}
 
-	/**
-	 * Methods to get the empty concepts and roles in the ontology using the given mappings.
-	 * It generates SPARQL queries to check for entities.
-	 * @return QuestOWLEmptyEntitiesChecker class to get empty concepts and roles
-	 * @throws Exception
-	 */
-	public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() throws Exception {
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(translatedOntologyMerge, owlconn);
-		return empties;
-	}
-
     @Override
 	public void close() throws Exception {
 		dispose();
+	}
+
+	/**
+	 * Internal format
+	 */
+	public Ontology getOntopOntology() {
+		return translatedOntologyMerge;
 	}
 
 }

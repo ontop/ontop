@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -165,28 +166,36 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	/**
 	 * This thread handles the cancelling of a request.
-	 * @author Dag Hovland (originally)
+	 * To speed up the process for the user, this thread is given the old connection, statement and latch,
+	 * while these are replaced in the containing class
+	 * @author Dag Hovland
 	 *
 	 */
-	private class Canceller extends Thread{
+	private class Canceller extends Thread {
 		private CountDownLatch old_latch;
+		private OntopOWLConnection old_conn;
+		private OntopOWLStatement old_stmt;
 
 		Canceller() throws OntopConnectionException {
 			super();
 			this.old_latch = latch;
+			this.old_stmt = statement;
+			this.old_conn = reasoner.replaceConnection();
 		}
 
 
 		public void run(){
 			try {
-				statement.cancel();
+				this.old_stmt.cancel();
+				this.old_stmt.close();
+				this.old_conn.close();
 				this.old_latch.countDown();
 			} catch (Exception e) {
 				this.old_latch.countDown();
 				DialogUtils.showQuickErrorDialog(rootView, e, "Error cancelling query.");
 			}
 		}
-	};
+	}
 	
 	public void actionCanceled() {
 		this.isCanceled = true;
@@ -208,11 +217,5 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	public boolean isErrorShown(){
 		return this.queryExecError;
-	}
-
-	public void closeConnection() throws OWLException {
-		if (statement != null) {
-			statement.close();
-		}
 	}
 }
