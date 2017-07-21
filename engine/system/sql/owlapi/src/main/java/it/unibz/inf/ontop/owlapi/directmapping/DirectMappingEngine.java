@@ -28,8 +28,10 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.ontology.*;
@@ -58,6 +60,8 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
  *
  */
 public class DirectMappingEngine {
+
+	private final MappingVocabularyExtractor vocabularyExtractor;
 
 	public static class BootstrappingResults {
 		private final SQLPPMapping ppMapping;
@@ -97,11 +101,13 @@ public class DirectMappingEngine {
 	}
 
 	@Inject
-	private DirectMappingEngine(OntopSQLCoreSettings settings, SpecificationFactory specificationFactory,
+	private DirectMappingEngine(OntopSQLCoreSettings settings, MappingVocabularyExtractor vocabularyExtractor,
+								SpecificationFactory specificationFactory,
                                 SQLPPMappingFactory ppMappingFactory) {
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
+		this.vocabularyExtractor = vocabularyExtractor;
 	}
 
 	/**
@@ -117,7 +123,7 @@ public class DirectMappingEngine {
 				? extractPPMapping(inputPPMapping.get())
 				: extractPPMapping();
 
-		ImmutableOntologyVocabulary newVocabulary = MappingVocabularyExtractor.extractVocabulary(
+		ImmutableOntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
 				newPPMapping.getTripleMaps().stream()
 						.flatMap(ax -> ax.getTargetAtoms().stream()));
 

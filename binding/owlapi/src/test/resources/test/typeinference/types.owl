@@ -18,22 +18,19 @@
     <owl:Ontology rdf:about="http://example.org/types/voc"/>
     
 
-    <!-- 
+    <!--
     ///////////////////////////////////////////////////////////////////////////////////////
     //
-    // Data properties
+    // Object Properties
     //
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
-
     <!-- http://example.org/types/voc#hasCompanyLocation -->
 
-    <owl:DatatypeProperty rdf:about="http://example.org/types/voc#hasCompanyLocation">
+    <owl:ObjectProperty rdf:about="http://example.org/types/voc#hasCompanyLocation">
         <rdfs:domain rdf:resource="http://example.org/types/voc#Company"/>
-    </owl:DatatypeProperty>
-
-
+    </owl:ObjectProperty >
 
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////

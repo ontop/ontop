@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 
 import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.CANONICAL_IRI;
@@ -79,6 +80,14 @@ public class PredicateImpl implements Predicate {
 	public COL_TYPE getType(int column) {
 		if (types != null) {
 			return types[column];
+		}
+		return null;
+	}
+
+	@Override
+	public COL_TYPE[] getTypes() {
+		if (types != null) {
+			return types;
 		}
 		return null;
 	}

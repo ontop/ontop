@@ -19,7 +19,7 @@ import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.iq.transform.QueryMerger;
+import it.unibz.inf.ontop.iq.transform.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.datalog.DatalogDependencyGraphGenerator;
@@ -38,11 +38,11 @@ import static it.unibz.inf.ontop.iq.datalog.impl.DatalogRule2QueryConverter.conv
 public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryConverter {
 
     private final IntermediateQueryFactory iqFactory;
-    private final QueryMerger queryMerger;
+    private final UnionBasedQueryMerger queryMerger;
 
     @Inject
     private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory,
-                                              QueryMerger queryMerger) {
+                                              UnionBasedQueryMerger queryMerger) {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
     }

@@ -65,17 +65,20 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
 		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // 19 "http://www.w3.org/2001/XMLSchema#int"
 		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
-
-		// special case
-		// used in ExpressionEvaluator only(?) use proper method there? 
-		mapCOLTYPEtoPredicate.put(COL_TYPE.LITERAL_LANG, RDF_LANG_STRING);
+		registerType(RDF.LANGSTRING, COL_TYPE.LITERAL_LANG, RDF_LANG_STRING);
 	}
 
 	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE type) {
 		String sURI = uri.toString();
+		DatatypePredicate predicate = new DatatypePredicateImpl(sURI, type);
+		return registerType(uri, type, predicate);
+	}
+
+	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE type,
+										   DatatypePredicate predicate) {
+		String sURI = uri.toString();
 		mapURItoCOLTYPE.put(sURI, type);
 		mapCOLTYPEtoURI.put(type, uri);
-		DatatypePredicate predicate = new DatatypePredicateImpl(sURI, type);
 		mapCOLTYPEtoPredicate.put(type, predicate);
 		predicateList.add(predicate);
 		return predicate;
@@ -126,7 +129,12 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	public List<Predicate> getDatatypePredicates() {
 		return Collections.unmodifiableList(predicateList);
 	}
-	
+
+	@Override
+	public Optional<COL_TYPE> getInternalType(DatatypePredicate predicate) {
+		return Optional.ofNullable(mapURItoCOLTYPE.get(predicate.getName()));
+	}
+
 //	public final Predicate[] QUEST_DATATYPE_PREDICATES = new Predicate[] {
 //			RDFS_LITERAL, XSD_STRING, XSD_INTEGER, XSD_NEGATIVE_INTEGER,
  //   XSD_NON_NEGATIVE_INTEGER, XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER, XSD_INT,

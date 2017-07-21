@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.views;
  */
 
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlapi.OWLResultSetWriter;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;

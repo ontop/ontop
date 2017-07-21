@@ -56,7 +56,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
  */
 public class IntermediateQueryToDatalogTranslator {
 
-
+	private static final String SUBQUERY_PRED_PREFIX = "ansSQ";
 	private final IntermediateQueryFactory iqFactory;
 
 	private static class RuleHead {
@@ -83,12 +83,30 @@ public class IntermediateQueryToDatalogTranslator {
 		subQueryCounter = 0;
 	}
 
+	private IntermediateQueryToDatalogTranslator(IntermediateQueryFactory iqFactory, int subQueryCounter) {
+		this.iqFactory = iqFactory;
+		subQueryCounter = subQueryCounter;
+	}
+
 	/**
 	 * Translate an intermediate query tree into a Datalog program 
 	 * 
 	 */
 	public static DatalogProgram translate(IntermediateQuery query) {
 		IntermediateQueryToDatalogTranslator translator = new IntermediateQueryToDatalogTranslator(query.getFactory());
+		return translator.translateQuery(query);
+	}
+
+	/**
+	 * Translate an intermediate query tree into a Datalog program.
+	 *
+	 * Each (strict) subquery will be translated as a rule with head Pred(var_1, .., var_n),
+	 * where the string for Pred is of the form SUBQUERY_PRED_PREFIX + y,
+	 * with y > subqueryCounter.
+	 */
+	public static DatalogProgram translate(IntermediateQuery query, int subQueryCounter) {
+		IntermediateQueryToDatalogTranslator translator = new IntermediateQueryToDatalogTranslator(query.getFactory(),
+				subQueryCounter);
 		return translator.translateQuery(query);
 	}
 
@@ -328,7 +346,8 @@ public class IntermediateQueryToDatalogTranslator {
 	}
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
-		AtomPredicate newPredicate = DATA_FACTORY.getAtomPredicate("ansSQ" + ++subQueryCounter, projectedVariables.size());
+		AtomPredicate newPredicate = DATA_FACTORY.getAtomPredicate(SUBQUERY_PRED_PREFIX+ ++subQueryCounter,
+				projectedVariables.size());
 		return ATOM_FACTORY.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}
 

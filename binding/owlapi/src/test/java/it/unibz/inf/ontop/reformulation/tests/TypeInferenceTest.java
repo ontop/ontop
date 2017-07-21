@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
@@ -98,7 +99,7 @@ public class TypeInferenceTest {
                 "?x a :Asian_Company ; :hasCompanyLocation ?r .  "+
                 "}";
 
-        ImmutableList<String> expectedValues = ImmutableList.of(
+        ImmutableSet<String> expectedValues = ImmutableSet.of(
                 "<http://example.org/types/voc#Philippines>",
                 "<http://example.org/types/voc#China>"
 
@@ -106,7 +107,7 @@ public class TypeInferenceTest {
         checkReturnedValues(queryBind, expectedValues);
     }
 
-    private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
+    private void checkReturnedValues(String query, ImmutableSet<String> expectedValues) throws Exception {
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -124,13 +125,13 @@ public class TypeInferenceTest {
         OntopOWLStatement st = conn.createStatement();
 
         int i = 0;
-        List<String> returnedValues = new ArrayList<>();
+        ImmutableSet.Builder<String> returnedValueBuilder = ImmutableSet.builder();
         try {
             QuestOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.nextRow()) {
                 OWLObject ind1 = rs.getOWLObject("r");
                 log.debug(ind1.toString());
-                returnedValues.add(ind1.toString());
+                returnedValueBuilder.add(ind1.toString());
 
                 i++;
             }
@@ -140,6 +141,8 @@ public class TypeInferenceTest {
             conn.close();
             reasoner.dispose();
         }
+        ImmutableSet<String> returnedValues = returnedValueBuilder.build();
+
         assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
                 returnedValues.equals(expectedValues));
         assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);

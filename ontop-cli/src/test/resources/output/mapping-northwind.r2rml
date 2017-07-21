@@ -1,0 +1,100 @@
+<http://example.org/mapping-1308227722_1>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "SELECT * FROM NORTHWIND.EMPLOYEES"
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#string> ;
+                            <http://www.w3.org/ns/r2rml#template>
+                                    "{CITY}" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY>
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#string> ;
+                            <http://www.w3.org/ns/r2rml#template>
+                                    "{REGION}" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION>
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#string> ;
+                            <http://www.w3.org/ns/r2rml#template>
+                                    "{ADDRESS}" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS>
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#string> ;
+                            <http://www.w3.org/ns/r2rml#template>
+                                    "{COUNTRY}" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY>
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#language>
+                                    "en-us" ;
+                            <http://www.w3.org/ns/r2rml#template>
+                                    "adres : {ADDRESS} \\{city:\\} {CITY}{COUNTRY}something" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.w3.org/2000/01/rdf-schema#label>
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#string> ;
+                            <http://www.w3.org/ns/r2rml#template>
+                                    "{POSTALCODE}" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#SubjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                  <http://www.w3.org/ns/r2rml#class>
+                          <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "http://www.optique-project.eu/resource/employeesLocation/{EMPLOYEEID}" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#IRI>
+                ] .

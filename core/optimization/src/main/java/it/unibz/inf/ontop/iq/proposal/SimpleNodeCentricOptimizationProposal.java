@@ -7,4 +7,5 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
  */
 public interface SimpleNodeCentricOptimizationProposal<N extends QueryNode>
         extends NodeCentricOptimizationProposal<N, NodeCentricOptimizationResults<N>> {
+
 }

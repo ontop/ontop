@@ -9,7 +9,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [MappingDeclaration] @collection [[
 mappingId	mapping-addresses
-target		:address-{id} a :Address ; :addressID {id} ; :inStreet {street} ; :hasNumber {number} ; :inCity {city} ; :inState {state} ; :inCountry {country} . 
+target		:address-{id} a :Address ; :addressID {id} ; :inStreet {street} ; :hasNumber {number} ; :inCity {city} ; :inState {state} ; :inCountry {country} .
 source		select id, street, number, city, state, country from address
 
 mappingId	mapping-person
@@ -33,7 +33,7 @@ target		:company-{id} :hasAddress :address-{addressid} .
 source		select id, addressid from company
 
 mappingId	mapping-stocks
-target		:stock-{id} a :Stock ; :financialInstrumentID {id} ; :amountOfShares {numberofshares} ; :typeOfShares {sharetype} ; :stockDescription {description}@en-us . 
+target		:stock-{id} a :Stock ; :financialInstrumentID {id} ; :amountOfShares {numberofshares} ; :typeOfShares {sharetype} ; :stockDescription {description}@en-us .
 source		select id, numberofshares, sharetype, description from stockinformation
 
 mappingId	mapping-stockbooks

@@ -4,9 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.predicate.AtomPredicate;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.predicate.Predicate;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Common abstraction for all sorts of Database (relational, etc.)
@@ -71,6 +73,8 @@ public interface DBMetadata extends Serializable {
      * Retrieves the tables list form the metadata.
      */
     Collection<DatabaseRelationDefinition> getDatabaseRelations();
+
+    Optional<Predicate.COL_TYPE> getColType(Attribute attribute);
 
     /**
      * After calling this method, the DBMetadata cannot be modified

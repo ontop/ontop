@@ -225,7 +225,7 @@ target		npd:wellbore/{wlbNpdidWellbore}/test/mud/{wellbore_mud_id} npdv:mudWeigh
 source		SELECT wellbore_mud_id,wlbNpdidWellbore,wlbMudWeightAtMD FROM wellbore_mud
 
 mappingId	Mapping:00053:Literal:pipLine:pipName
-target		npd:pipeline/{pipNpdidPipe} npdv:name {pipName} .
+target		npd:pipeline/{pipNpdidPipe} npdv:name {pipName}^^xsd:string .
 source		SELECT pipNpdidPipe,pipName FROM pipLine
 
 mappingId	Mapping:00054:Literal:wellbore_casing_and_lot:dateSyncNPD
@@ -629,7 +629,7 @@ target		npd:wellbore/{wlbNpdidWellbore} npdv:wellboreEntryYear {wlbEntryYear}^^x
 source		SELECT wlbNpdidWellbore,wlbEntryYear FROM wellbore_shallow_all
 
 mappingId	Mapping:00155:Literal:wellbore_npdid_overview:wlbWellboreName
-target		npd:wellbore/{wlbNpdidWellbore} npdv:name {wlbWellboreName} .
+target		npd:wellbore/{wlbNpdidWellbore} npdv:name {wlbWellboreName}^^xsd:string .
 source		SELECT wlbNpdidWellbore,wlbWellboreName FROM wellbore_npdid_overview
 
 mappingId	Mapping:00156:Literal:wellbore_shallow_all:wlbDrillPermit
@@ -701,7 +701,7 @@ target		npd:wellbore/{wlbNpdidWellbore} npdv:isMultilateral "false"^^rdfs:Litera
 source		SELECT wlbNpdidWellbore FROM wellbore_development_all WHERE wlbMultilateral='NO'
 
 mappingId	Mapping:00173:Literal:wellbore_shallow_all:wlbWellboreName
-target		npd:wellbore/{wlbNpdidWellbore} npdv:name {wlbWellboreName} .
+target		npd:wellbore/{wlbNpdidWellbore} npdv:name {wlbWellboreName}^^xsd:string .
 source		SELECT wlbNpdidWellbore,wlbWellboreName FROM wellbore_shallow_all
 
 mappingId	Mapping:00174:Literal:field_production_yearly:prfPrdOilNetMillSm3
@@ -713,7 +713,7 @@ target		npd:wellbore/{wlbNpdidWellbore} npdv:wellboreNamePart4 {wlbNamePart4}^^x
 source		SELECT wlbNpdidWellbore,wlbNamePart4 FROM wellbore_shallow_all
 
 mappingId	Mapping:00176:Literal:facility_fixed:fclName
-target		npd:facility/{fclNpdidFacility} npdv:name {fclName} .
+target		npd:facility/{fclNpdidFacility} npdv:name {fclName}^^xsd:string .
 source		SELECT fclNpdidFacility,fclName FROM facility_fixed
 
 mappingId	Mapping:00177:Literal:wellbore_casing_and_lot:wlbHoleDiameter
@@ -733,7 +733,7 @@ target		npd:petreg/licence/{prlNpdidLicence}/licencee/{cmpNpdidCompany} npdv:dat
 source		SELECT prlNpdidLicence,cmpNpdidCompany,dateSyncNPD FROM licence_petreg_licence_licencee WHERE dateSyncNPD <> '9999-12-31'
 
 mappingId	Mapping:00181:Literal:bsns_arr_area:baaName
-target		npd:baa/{baaNpdidBsnsArrArea} npdv:name {baaName} .
+target		npd:baa/{baaNpdidBsnsArrArea} npdv:name {baaName}^^xsd:string .
 source		SELECT baaNpdidBsnsArrArea,baaName FROM bsns_arr_area
 
 mappingId	Mapping:00182:Literal:wellbore_development_all:wlbNsSec
@@ -757,7 +757,7 @@ target		npd:wellbore/{wlbNpdidWellbore}/test/drillstem/{wlbDstTestNumber} npdv:D
 source		SELECT wlbNpdidWellbore,wlbDstTestNumber,wlbDstChokeSize FROM wellbore_dst
 
 mappingId	Mapping:00187:Literal:wellbore_exploration_all:wlbWellboreName
-target		npd:wellbore/{wlbNpdidWellbore} npdv:name {wlbWellboreName} .
+target		npd:wellbore/{wlbNpdidWellbore} npdv:name {wlbWellboreName}^^xsd:string .
 source		SELECT wlbNpdidWellbore,wlbWellboreName FROM wellbore_exploration_all
 
 mappingId	Mapping:00188:Literal:wellbore_shallow_all:wlbEwCode
@@ -901,7 +901,7 @@ target		npd:survey/{seaSurveyName}/area npdv:lengthPlannedBoatKm {seaPlanBoatKm}
 source		SELECT seaArea_id,seaSurveyName,seaPlanBoatKm FROM seaArea
 
 mappingId	Mapping:00223:Literal:licence_task:wlbName
-target		npd:licence/{prlNpdidLicence}/task/{prlTaskID} npdv:name {wlbName} .
+target		npd:licence/{prlNpdidLicence}/task/{prlTaskID} npdv:name {wlbName}^^xsd:string .
 source		SELECT prlNpdidLicence,prlTaskID,wlbName FROM licence_task
 
 mappingId	Mapping:00224:Literal:licence_oper_hst:dateSyncNPD
@@ -937,7 +937,7 @@ target		npd:discovery/{dscNpdidDiscovery}/{dscReservesRC} npdv:dateResourceEstim
 source		SELECT dscNpdidDiscovery,dscReservesRC,dscDateOffResEstDisplay FROM discovery_reserves WHERE dscDateOffResEstDisplay <> '9999-12-31'
 
 mappingId	Mapping:00232:Literal:field:fldName
-target		npd:field/{fldNpdidField} npdv:name {fldName} .
+target		npd:field/{fldNpdidField} npdv:name {fldName}^^xsd:string .
 source		SELECT fldNpdidField,fldName FROM field
 
 mappingId	Mapping:00233:Literal:wellbore_exploration_all:wlbFactPageUrl
@@ -1697,7 +1697,7 @@ target		npd:wellbore/{wlbNpdidWellbore}/point npdv:minutesEW {wlbEwMin}^^xsd:int
 source		SELECT wlbNpdidWellbore,wlbEwMin FROM wellbore_coordinates
 
 mappingId	Mapping:00425:Literal:licence_task:prlTaskName
-target		npd:licence/{prlNpdidLicence}/task/{prlTaskID} npdv:name {prlTaskName} .
+target		npd:licence/{prlNpdidLicence}/task/{prlTaskID} npdv:name {prlTaskName}^^xsd:string .
 source		SELECT prlNpdidLicence,prlTaskID,prlTaskName FROM licence_task
 
 mappingId	Mapping:00426:Literal:prlAreaSplitByBlock:prlAreaPolyDateValidFrom
@@ -1729,7 +1729,7 @@ target		npd:wellbore/{wlbNpdidWellbore} npdv:wellboreSeismicLocation {wlbSeismic
 source		SELECT wlbNpdidWellbore,wlbSeismicLocation FROM wellbore_shallow_all
 
 mappingId	Mapping:00434:Literal:discovery:dscName
-target		npd:discovery/{dscNpdidDiscovery} npdv:name {dscName} .
+target		npd:discovery/{dscNpdidDiscovery} npdv:name {dscName}^^xsd:string .
 source		SELECT dscNpdidDiscovery,dscName FROM discovery
 
 mappingId	Mapping:00435:Literal:bsns_arr_area_transfer_hst:baaTransferDateValidFrom
@@ -1869,7 +1869,7 @@ target		npd:field/{fldNpdidField}/licensee/{cmpNpdidCompany}/history/{fldLicense
 source		SELECT fldNpdidField,cmpNpdidCompany,fldLicenseeFrom,fldLicenseeTo FROM field_licensee_hst WHERE fldLicenseeFrom <> '9999-12-31'
 
 mappingId	Mapping:00470:Literal:company:cmpLongName
-target		npd:company/{cmpNpdidCompany} npdv:name {cmpLongName} .
+target		npd:company/{cmpNpdidCompany} npdv:name {cmpLongName}^^xsd:string .
 source		SELECT cmpNpdidCompany,cmpLongName FROM company
 
 mappingId	Mapping:00471:Literal:wellbore_exploration_all:wlbKellyBushElevation
@@ -2241,7 +2241,7 @@ target		npd:survey/{seaName} npdv:isSamplingPerformed "false"^^rdfs:Literal .
 source		SELECT seaName FROM seis_acquisition WHERE seaSampling='Nei'
 
 mappingId	Mapping:00564:Literal:seis_acquisition:seaName
-target		npd:survey/{seaName} npdv:name {seaName} .
+target		npd:survey/{seaName} npdv:name {seaName}^^xsd:string .
 source		SELECT seaName FROM seis_acquisition
 
 mappingId	Mapping:00565:Literal:company_reserves:cmpRecoverableGas
@@ -2321,7 +2321,7 @@ target		npd:wellbore/{wlbNpdidWellbore}/test/casingleakoff/{wellbore_casing_and_
 source		SELECT wellbore_casing_and_lot_id,wlbNpdidWellbore,wlbCasingDateUpdated FROM wellbore_casing_and_lot WHERE wlbCasingDateUpdated <> '9999-12-31'
 
 mappingId	Mapping:00585:Literal:wellbore_development_all:wlbWellboreName
-target		npd:wellbore/{wlbNpdidWellbore} npdv:name {wlbWellboreName} .
+target		npd:wellbore/{wlbNpdidWellbore} npdv:name {wlbWellboreName}^^xsd:string .
 source		SELECT wlbNpdidWellbore,wlbWellboreName FROM wellbore_development_all
 
 mappingId	Mapping:00586:Literal:wellbore_exploration_all:wlbNamePart6
@@ -2433,7 +2433,7 @@ target		npd:wellbore/{wlbNpdidWellbore}/test/oilsample/{wellbore_oil_sample_id} 
 source		SELECT wellbore_oil_sample_id,wlbNpdidWellbore,wlbOilSampleFluidType FROM wellbore_oil_sample
 
 mappingId	Mapping:00613:Literal:tuf_petreg_licence:tufName
-target		npd:petreg/facility/{tufNpdidTuf} npdv:name {tufName} .
+target		npd:petreg/facility/{tufNpdidTuf} npdv:name {tufName}^^xsd:string .
 source		SELECT tufNpdidTuf,tufName FROM tuf_petreg_licence
 
 mappingId	Mapping:00614:Literal:bsns_arr_area_area_poly_hst:baaAreaPolyDateUpdated
@@ -2754,7 +2754,7 @@ target		npd:wellbore/{wlbNpdidWellbore} npdv:secondsEW {wlbEwSec}^^xsd:decimal .
 source		SELECT wlbNpdidWellbore,wlbEwSec FROM wellbore_development_all
 
 mappingId	Mapping:00697:Literal:licence:prlName
-target		npd:licence/{prlNpdidLicence} npdv:name {prlName} .
+target		npd:licence/{prlNpdidLicence} npdv:name {prlName}^^xsd:string .
 source		SELECT prlNpdidLicence,prlName FROM licence
 
 mappingId	Mapping:00698:Literal:wellbore_development_all:wlbEntryDate
@@ -2982,7 +2982,7 @@ target		npd:licence/{prlNpdidLicence}/transfer/{prlTransferDirection}/{cmpNpdidC
 source		SELECT prlNpdidLicence,prlTransferDirection,cmpNpdidCompany,prlTransferDateValidFrom FROM licence_transfer_hst WHERE prlTransferDateValidFrom <> '9999-12-31'
 
 mappingId	Mapping:00755:Literal:facility_moveable:fclName
-target		npd:facility/{fclNpdidFacility} npdv:name {fclName} .
+target		npd:facility/{fclNpdidFacility} npdv:name {fclName}^^xsd:string .
 source		SELECT fclNpdidFacility,fclName FROM facility_moveable
 
 mappingId	Mapping:00756:Literal:field_licensee_hst:dateSyncNPD
@@ -3050,7 +3050,7 @@ target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:dateSyncNPD {dateSyncNPD}^^
 source		SELECT wlbNamePart1,wlbNamePart2,dateSyncNPD FROM wellbore_shallow_all WHERE dateSyncNPD <> '9999-12-31'
 
 mappingId	Mapping:00772:Literal:Extra:ex6:wlbNamePart1
-target		npd:quadrant/{wlbNamePart1} npdv:name {wlbNamePart1} .
+target		npd:quadrant/{wlbNamePart1} npdv:name {wlbNamePart1}^^xsd:string .
 source		SELECT wlbNamePart1 FROM wellbore_exploration_all
 
 mappingId	Mapping:00773:Literal:Extra:ex12:dateSyncNPD
@@ -3058,7 +3058,7 @@ target		npd:facility/{tufNpdidTuf} npdv:dateSyncNPD {dateSyncNPD}^^xsd:dateTime 
 source		SELECT tufNpdidTuf,dateSyncNPD FROM tuf_operator_hst WHERE dateSyncNPD <> '9999-12-31'
 
 mappingId	Mapping:00774:Literal:Extra:ex12:tufName
-target		npd:facility/{tufNpdidTuf} npdv:name {tufName} .
+target		npd:facility/{tufNpdidTuf} npdv:name {tufName}^^xsd:string .
 source		SELECT tufNpdidTuf,tufName FROM tuf_operator_hst
 
 mappingId	Mapping:00775:Literal:Extra:ex9:dateSyncNPD
@@ -3090,7 +3090,7 @@ target		npd:stratum/{lsuNpdidLithoStrat} npdv:stratigraphicParent npd:stratum/{l
 source		SELECT lsuNpdidLithoStrat,lsuNpdidLithoStratParent FROM wellbore_formation_top
 
 mappingId	Mapping:00782:Literal:Extra:ex9:wlbNamePart2
-target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:name {wlbNamePart2} .
+target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:name {wlbNamePart2}^^xsd:string .
 source		SELECT wlbNamePart1,wlbNamePart2 FROM wellbore_exploration_all
 
 mappingId	Mapping:00783:Literal:Extra:ex9:wlbNamePart1
@@ -3098,7 +3098,7 @@ target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:quadrantLocation npd:quadra
 source		SELECT wlbNamePart1,wlbNamePart2 FROM wellbore_exploration_all
 
 mappingId	Mapping:00784:Literal:Extra:ex5:wlbNamePart1
-target		npd:quadrant/{wlbNamePart1} npdv:name {wlbNamePart1} .
+target		npd:quadrant/{wlbNamePart1} npdv:name {wlbNamePart1}^^xsd:string .
 source		SELECT wlbNamePart1 FROM wellbore_development_all
 
 mappingId	Mapping:00785:Literal:Extra:ex10:wlbNpdidWellbore
@@ -3130,7 +3130,7 @@ target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:containsWellbore npd:wellbo
 source		SELECT wlbNamePart1,wlbNamePart2,wlbNpdidWellbore FROM wellbore_exploration_all
 
 mappingId	Mapping:00793:Literal:Extra:ex3:lsuName
-target		npd:stratum/{lsuNpdidLithoStrat} npdv:name {lsuName} .
+target		npd:stratum/{lsuNpdidLithoStrat} npdv:name {lsuName}^^xsd:string .
 source		SELECT lsuNpdidLithoStrat,lsuName FROM wellbore_formation_top
 
 mappingId	Mapping:00794:Literal:Extra:ex12:tufNpdidTuf
@@ -3138,7 +3138,7 @@ target		npd:facility/{tufNpdidTuf} npdv:idNPD {tufNpdidTuf}^^xsd:integer .
 source		SELECT tufNpdidTuf FROM tuf_operator_hst
 
 mappingId	Mapping:00795:Literal:Extra:ex11:tufName
-target		npd:facility/{tufNpdidTuf} npdv:name {tufName} .
+target		npd:facility/{tufNpdidTuf} npdv:name {tufName}^^xsd:string .
 source		SELECT tufNpdidTuf,tufName FROM tuf_owner_hst
 
 mappingId	Mapping:00796:Literal:Extra:ex3:lsuWellboreUpdatedDate
@@ -3154,11 +3154,11 @@ target		npd:facility/{tufNpdidTuf} npdv:idNPD {tufNpdidTuf}^^xsd:integer .
 source		SELECT tufNpdidTuf FROM tuf_owner_hst
 
 mappingId	Mapping:00799:Literal:Extra:ex4:wlbWell
-target		npd:well/{wlbWell} npdv:name {wlbWell} .
+target		npd:well/{wlbWell} npdv:name {wlbWell}^^xsd:string .
 source		SELECT wlbWell FROM wellbore_npdid_overview
 
 mappingId	Mapping:00800:Literal:Extra:ex10:wlbNamePart2
-target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:name {wlbNamePart2} .
+target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:name {wlbNamePart2}^^xsd:string .
 source		SELECT wlbNamePart1,wlbNamePart2 FROM wellbore_shallow_all
 
 mappingId	Mapping:00801:Literal:Extra:ex13:wlbNumberOfCores
@@ -3166,7 +3166,7 @@ target		npd:wellbore/{wlbNpdidWellbore}/cores npdv:coresTotalNo {wlbNumberOfCore
 source		SELECT wlbNpdidWellbore,wlbNumberOfCores FROM wellbore_core
 
 mappingId	Mapping:00802:Literal:Extra:ex8:wlbNamePart2
-target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:name {wlbNamePart2} .
+target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:name {wlbNamePart2}^^xsd:string .
 source		SELECT wlbNamePart1,wlbNamePart2 FROM wellbore_development_all
 
 mappingId	Mapping:00803:Literal:Extra:ex8:dateSyncNPD

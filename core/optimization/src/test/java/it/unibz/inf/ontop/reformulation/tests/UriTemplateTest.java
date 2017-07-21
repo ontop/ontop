@@ -110,8 +110,7 @@ public class UriTemplateTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\n Expected query : \n" +  expectedQuery);
 
-        BindingLiftOptimizer optimizer = new FixedPointBindingLiftOptimizer();
-        IntermediateQuery optimizedQuery = optimizer.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(initialQuery);
 
         System.out.println("\n After optimization: \n" +  optimizedQuery);
     }

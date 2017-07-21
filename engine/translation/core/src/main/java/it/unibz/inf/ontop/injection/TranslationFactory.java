@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.SameAsRewriter;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 
 /**
@@ -17,4 +18,6 @@ public interface TranslationFactory {
     NativeQueryGenerator create(DBMetadata metadata);
 
     InputQueryTranslator createInputQueryTranslator(UriTemplateMatcher uriTemplateMatcher);
+
+    SameAsRewriter createSameAsRewriter(Mapping saturatedMapping);
 }

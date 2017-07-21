@@ -4,7 +4,7 @@
 
 [MappingDeclaration] @collection [[
 mappingId	film-filmcategory-category-language
-target		:film{idFilm} a :Film ; :idFilm {idFilm} ; :title {title} ; :genre {category} ; :languageFilm {language} ; :releaseDate {release_date} . 
+target		:film{idFilm} a :Film ; :idFilm {idFilm} ; :title {title} ; :genre {category} ; :languageFilm {language} ; :releaseDate {release_date}^^xsd:dateTime .
 source		SELECT a.film_id AS idFilm, a.title, c.name as category, d.name AS language, a.release_year AS release_date
 			FROM film AS a, film_category AS b, category AS c, language AS d
 			WHERE a.film_id = b.film_id AND 
@@ -33,13 +33,13 @@ source		SELECT staff_id AS idStaff, first_name AS firstName, last_name AS lastNa
 			FROM staff
 
 mappingId	hasAddress-customer
-target		:customer{idCustomer} :hasAddress :address{idAddress} . :address{idAddress} a :Address ; :street {address} ; :sector {sector} ; :postalCode {postalcode} . 
+target		:customer{idCustomer} :hasAddress :address{idAddress} . :address{idAddress} a :Address ; :street {address} ; :sector {sector} ; :postalCode {postalcode}^^xsd:int .
 source		SELECT a.address_id as idAddress, a.address as address, a.district as sector, a.postal_code as postalcode, c.customer_id as idCustomer
 			FROM address as a, customer as c
 			WHERE a.address_id = c.address_id
 
 mappingId	hasAddress-staff
-target		:staff{idStaff} :hasAddress :address{idAddress} . :address{idAddress} a :Address ; :street {address} ; :sector {sector} ; :postalCode {postalcode} . 
+target		:staff{idStaff} :hasAddress :address{idAddress} . :address{idAddress} a :Address ; :street {address} ; :sector {sector} ; :postalCode {postalcode}^^xsd:int .
 source		SELECT a.address_id as idAddress,a.address as address, a.district as sector, a.postal_code as postalcode, s.staff_id as idStaff
 			FROM address as a, staff as s
 			WHERE a.address_id = s.address_id
@@ -57,7 +57,7 @@ source		SELECT a.city_id as idCity, b.country_id as idCountry, b.country as coun
 			WHERE a.country_id = b.country_id            
 
 mappingId	storeLocatedIn
-target		:store{idStore} :storeLocatedIn :address{idAddress} . :address{idAddress} a :Address ; :street {address} ; :sector {sector} ; :postalCode {postalcode} . 
+target		:store{idStore} :storeLocatedIn :address{idAddress} . :address{idAddress} a :Address ; :street {address} ; :sector {sector} ; :postalCode {postalcode}^^xsd:int .
 source		SELECT  a.address_id as idAddress, a.address as address, a.district as sector, a.postal_code as postalcode, s.store_id as idStore
 			FROM store as s, address as a
 			WHERE s.address_id = a.address_id
@@ -90,7 +90,7 @@ source		SELECT r.rental_id as idRental, r.rental_date as dateRent, r.return_date
 			FROM rental as r
 
 mappingId	payment
-target		:payment{idPayment} a :Payment ; :idPayment {idPayment} ; :price {price} ; :dateOfPayment {datePayment} . 
+target		:payment{idPayment} a :Payment ; :idPayment {idPayment} ; :price {price}^^xsd:int ; :dateOfPayment {datePayment} .
 source		SELECT p.payment_id as idPayment, p.amount as price, p.payment_date as datePayment
 			FROM payment as p
 
@@ -119,25 +119,25 @@ source		SELECT b.store_id as idStore, a.staff_id as idStaff
 			         WHERE a.store_id = b.store_id
 
 mappingId	numberOfCopies
-target		:inventory{idInventory} :numberOfCopies {numberOfCopies} . 
+target		:inventory{idInventory} :numberOfCopies {numberOfCopies}^^xsd:int .
 source		SELECT inventory_id as idInventory, film_id as idFilm, store_id as idStore, count(*) as numberOfCopies
 			FROM inventory
 			GROUP BY film_id, store_id
 
 mappingId	phone-staff
-target		:staff{idStaff} :cellphone {phone} . 
+target		:staff{idStaff} :cellphone {phone}^^xsd:int .
 source		SELECT a.phone as phone, s.staff_id as idStaff
 			FROM address as a, staff as s
 			WHERE s.address_id = a.address_id
 
 mappingId	phone-customer
-target		:customer{idCustomer} :cellphone {phone} . 
+target		:customer{idCustomer} :cellphone {phone}^^xsd:int .
 source		SELECT a.phone as phone, c.customer_id as idCustomer
 			FROM address as a, customer as c
 			WHERE c.address_id = a.address_id
 
 mappingId	numberOfAvailability
-target		:inventory{idInventory} :numberOfAvailability {numberOfAvailability} . 
+target		:inventory{idInventory} :numberOfAvailability {numberOfAvailability}^^xsd:int .
 source		SELECT i.inventory_id as idInventory, i.film_id,i.store_id, i.numberOfCopies, u.numberOfUnavailability, (i.numberOfCopies - u.numberOfUnavailability) as numberOfAvailability FROM inv_numcopies as i left join inv_numofunavailable2 as u ON i.film_id = u.film_id and i.store_id = u.store_id
 
 mappingId	director

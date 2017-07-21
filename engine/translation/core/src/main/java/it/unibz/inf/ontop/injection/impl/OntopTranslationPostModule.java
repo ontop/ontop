@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.SameAsRewriter;
 
 /**
  * POST-module: to be loaded after that all the dependencies of concrete implementations have been defined
@@ -41,6 +42,7 @@ public class OntopTranslationPostModule extends OntopAbstractModule {
                 ImmutableList.of(
                         QueryUnfolder.class,
                         NativeQueryGenerator.class,
+                        SameAsRewriter.class,
                         InputQueryTranslator.class),
                 TranslationFactory.class);
         install(reformulationFactoryModule);

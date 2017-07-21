@@ -21,12 +21,16 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.utils.JdbcTypeMapper;
+
 import java.util.*;
 
 public class RDBMetadata extends BasicDBMetadata {
 
 	private static final long serialVersionUID = -806363154890865756L;
 	private int parserViewCounter;
+	private final JdbcTypeMapper jdbcTypeMapper;
 
 	/**
 	 * Constructs an initial metadata with some general information about the
@@ -35,16 +39,23 @@ public class RDBMetadata extends BasicDBMetadata {
 	 * DO NOT USE THIS CONSTRUCTOR -- USE MetadataExtractor METHODS INSTEAD
 	 */
 
-	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion, QuotedIDFactory idfac) {
+	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion, QuotedIDFactory idfac, JdbcTypeMapper jdbcTypeMapper) {
 		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac);
+		this.jdbcTypeMapper = jdbcTypeMapper;
+	}
+
+	@Override
+	public Optional<Predicate.COL_TYPE> getColType(Attribute attribute) {
+		return Optional.of(jdbcTypeMapper.getPredicate(attribute.getType()));
 	}
 
 	private RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                        QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
-                        Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
-                        int parserViewCounter) {
+						QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
+						Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
+						int parserViewCounter, JdbcTypeMapper jdbcTypeMapper) {
 		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac, tables, relations, listOfTables);
 		this.parserViewCounter = parserViewCounter;
+		this.jdbcTypeMapper = jdbcTypeMapper;
 	}
 	
 	/**
@@ -71,6 +82,6 @@ public class RDBMetadata extends BasicDBMetadata {
 	@Override
 	public RDBMetadata clone() {
 		return new RDBMetadata(getDriverName(), getDriverVersion(), getDbmsProductName(), getDbmsVersion(), getQuotedIDFactory(),
-				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()), parserViewCounter);
+				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()), parserViewCounter, jdbcTypeMapper);
 	}
 }

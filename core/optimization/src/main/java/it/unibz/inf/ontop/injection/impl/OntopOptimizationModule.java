@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import it.unibz.inf.ontop.executor.construction.ConstructionNodeCleaningExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownBooleanExpressionExecutor;
 import it.unibz.inf.ontop.executor.expression.PushUpBooleanExpressionExecutor;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
@@ -12,10 +13,13 @@ import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutor;
+import it.unibz.inf.ontop.executor.union.FlattenUnionExecutor;
 import it.unibz.inf.ontop.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
+import it.unibz.inf.ontop.iq.transform.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.InnerJoinOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.JoinLikeOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.LeftJoinOptimizer;
@@ -46,16 +50,20 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromPreferences(PullVariableOutOfDataNodeExecutor.class);
         bindFromPreferences(PullVariableOutOfSubTreeExecutor.class);
         bindFromPreferences(RemoveEmptyNodesExecutor.class);
+        bindFromPreferences(UnionBasedQueryMerger.class);
         bindFromPreferences(QueryMergingExecutor.class);
         bindFromPreferences(UnionLiftExecutor.class);
         bindFromPreferences(LeftJoinExecutor.class);
         bindFromPreferences(ProjectionShrinkingExecutor.class);
         bindFromPreferences(TrueNodeRemovalExecutor.class);
+        bindFromPreferences(FlattenUnionExecutor.class);
+        bindFromPreferences(ConstructionNodeCleaningExecutor.class);
         bindFromPreferences(DatalogProgram2QueryConverter.class);
         bindFromPreferences(QueryUnionSplitter.class);
         bindFromPreferences(InnerJoinOptimizer.class);
         bindFromPreferences(JoinLikeOptimizer.class);
         bindFromPreferences(LeftJoinOptimizer.class);
+        bindFromPreferences(BindingLiftOptimizer.class);
 
         // Releases the configuration (enables some GC)
         this.configuration = null;

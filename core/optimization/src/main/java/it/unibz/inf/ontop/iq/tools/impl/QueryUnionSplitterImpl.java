@@ -3,13 +3,13 @@ package it.unibz.inf.ontop.iq.tools.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
-import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.tools.QueryUnionSplitter;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.tools.QueryUnionSplitter;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -25,9 +25,9 @@ public class QueryUnionSplitterImpl implements QueryUnionSplitter {
     private final BindingLiftOptimizer bindingLiftOptimizer;
 
     @Inject
-    private QueryUnionSplitterImpl() {
+    private QueryUnionSplitterImpl(BindingLiftOptimizer bindingLiftOptimizer) {
         // TODO: use dependency injection instead
-        bindingLiftOptimizer = new FixedPointBindingLiftOptimizer();
+        this.bindingLiftOptimizer = bindingLiftOptimizer;
     }
 
     @Override

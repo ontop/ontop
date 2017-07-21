@@ -124,6 +124,11 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     }
 
     @Override
+    public Optional<Predicate.COL_TYPE> getColType(Attribute attribute) {
+        throw new RuntimeException("This method should not be called");
+    }
+
+    @Override
     public void freeze() {
         isStillMutable = false;
     }

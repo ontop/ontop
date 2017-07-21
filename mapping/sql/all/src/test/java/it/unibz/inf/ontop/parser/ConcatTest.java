@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.mapping.SQLMappingParser;
+import it.unibz.inf.ontop.model.SQLMappingParser;
 
 import java.io.File;
 

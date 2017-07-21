@@ -110,9 +110,7 @@ public class ExpressionEvaluatorTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
-        unOptimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+        unOptimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
 
         IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(unOptimizedQuery);
 
@@ -238,9 +236,7 @@ public class ExpressionEvaluatorTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
-        unOptimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+        unOptimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
 
         IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(unOptimizedQuery);
 
@@ -292,9 +288,7 @@ public class ExpressionEvaluatorTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
-        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -332,8 +326,7 @@ public class ExpressionEvaluatorTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
-        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 

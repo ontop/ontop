@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.input.InputQuery;
@@ -19,7 +18,6 @@ import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAsPredicateExtractor;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
@@ -52,12 +50,12 @@ public class QuestQueryProcessor implements QueryTranslator {
 	private final QueryCache queryCache;
 
 	private final QueryUnfolder queryUnfolder;
-	
+	private final SameAsRewriter sameAsRewriter;
+	private final BindingLiftOptimizer bindingLiftOptimizer;
+
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final ExecutorRegistry executorRegistry;
 	private final DatalogProgram2QueryConverter datalogConverter;
-	private final ImmutableSet<Predicate> dataPropertiesAndClassesMapped;
-	private final ImmutableSet<Predicate> objectPropertiesMapped;
 	private final OntopTranslationSettings settings;
 	private final DBMetadata dbMetadata;
 	private final JoinLikeOptimizer joinLikeOptimizer;
@@ -67,16 +65,18 @@ public class QuestQueryProcessor implements QueryTranslator {
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								@Assisted ExecutorRegistry executorRegistry,
 								QueryCache queryCache,
-								OntopTranslationSettings settings,
+								BindingLiftOptimizer bindingLiftOptimizer, OntopTranslationSettings settings,
 								DatalogProgram2QueryConverter datalogConverter,
 								TranslationFactory translationFactory,
-								QueryRewriter rewriter,
+								QueryRewriter queryRewriter,
 								JoinLikeOptimizer joinLikeOptimizer) {
+		this.bindingLiftOptimizer = bindingLiftOptimizer;
+		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
 		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = LinearInclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
-		this.rewriter = rewriter;
+		this.rewriter = queryRewriter;
 		this.rewriter.setTBox(saturatedTBox, obdaSpecification.getVocabulary(), sigma);
 
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
@@ -87,21 +87,12 @@ public class QuestQueryProcessor implements QueryTranslator {
 				obdaSpecification.getVocabulary());
 		this.dbMetadata = obdaSpecification.getDBMetadata();
 		this.datasourceQueryGenerator = translationFactory.create(dbMetadata);
+		this.inputQueryTranslator = translationFactory.createInputQueryTranslator(saturatedMapping.getMetadata()
+				.getUriTemplateMatcher());
+		this.sameAsRewriter = translationFactory.createSameAsRewriter(saturatedMapping);
 		this.queryCache = queryCache;
-		this.settings = settings;
 		this.executorRegistry = executorRegistry;
 		this.datalogConverter = datalogConverter;
-		this.inputQueryTranslator = translationFactory.createInputQueryTranslator(
-				saturatedMapping.getMetadata().getUriTemplateMatcher());
-
-		if (settings.isSameAsInMappingsEnabled()) {
-			MappingSameAsPredicateExtractor msa = new MappingSameAsPredicateExtractor(saturatedMapping);
-			dataPropertiesAndClassesMapped = msa.getDataPropertiesAndClassesWithSameAs();
-			objectPropertiesMapped = msa.getObjectPropertiesWithSameAs();
-		} else {
-			dataPropertiesAndClassesMapped = ImmutableSet.of();
-			objectPropertiesMapped = ImmutableSet.of();
-		}
 	}
 	
 	private DatalogProgram translateAndPreProcess(InputQuery inputQuery)
@@ -114,10 +105,9 @@ public class QuestQueryProcessor implements QueryTranslator {
 		DatalogProgram program = translation.getProgram();
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-		if (settings.isSameAsInMappingsEnabled()) {
-			SameAsRewriter sameAs = new SameAsRewriter(dataPropertiesAndClassesMapped, objectPropertiesMapped);
-			program = sameAs.getSameAsRewriting(program);
-			//System.out.println("SAMEAS" + program);
+		if(settings.isSameAsInMappingsEnabled()){
+			program = sameAsRewriter.getSameAsRewriting(program);
+			log.debug("Datalog program after SameAs rewriting \n" + program);
 		}
 
 		log.debug("Replacing equivalences...");
@@ -194,13 +184,13 @@ public class QuestQueryProcessor implements QueryTranslator {
 
 
 				//lift bindings and union when it is possible
-				IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
-				intermediateQuery = substitutionOptimizer.optimize(intermediateQuery);
+				intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
+				log.debug("New query after substitution lift optimization: \n" + intermediateQuery.toString());
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
-				ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizerImpl();
-				intermediateQuery = projectionShrinkingOptimizer.optimize(intermediateQuery);
+				;
+				intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
 
 				log.debug("After projection shrinking: \n" + intermediateQuery.toString());
 

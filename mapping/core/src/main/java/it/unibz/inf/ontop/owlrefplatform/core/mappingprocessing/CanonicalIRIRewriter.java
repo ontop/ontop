@@ -130,18 +130,18 @@ public class CanonicalIRIRewriter {
 
 
     //get the canonicalIRIs from the original mappings
-    private void analyzeCanonicalIRIMappings(List<CQIE> mappings) {
+    private void analyzeCanonicalIRIMappings(List<CQIE> rules) {
 
-        for (CQIE mapping : mappings) {
+        for (CQIE rule : rules) {
 
-            Function head = mapping.getHead();
+            Function head = rule.getHead();
 
             Predicate predicate = head.getFunctionSymbol();
 
             if (predicate.isCanonicalIRIProperty()) { // we check for ontop:is_canonical_iri
 
                 //rename all the variables to avoid conflicts while merging the mappings
-                Set<Variable> variables = mapping.getReferencedVariables();
+                Set<Variable> variables = rule.getReferencedVariables();
 
                 Function headURI = (Function) head.getTerm(0);
                 ValueConstant canonicalIRIName = (ValueConstant) headURI.getTerm(0);
@@ -164,7 +164,7 @@ public class CanonicalIRIRewriter {
 
                 //apply substitution for variables renaming
                 Substitution substitution = new SubstitutionImpl(map);
-                CQIE canonicalMapping = SubstitutionUtilities.applySubstitution(mapping, substitution, true);
+                CQIE canonicalMapping = SubstitutionUtilities.applySubstitution(rule, substitution, true);
 
                 //store the renamed mapping
                 uriMappingMap.put(objectURIName, canonicalMapping);

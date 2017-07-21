@@ -29,7 +29,7 @@ import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlapi.SQLPPMappingValidator;
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.model.SQLPPMapping;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

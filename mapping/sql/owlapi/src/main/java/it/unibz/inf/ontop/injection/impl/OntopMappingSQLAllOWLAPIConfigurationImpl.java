@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOWLAPIConfigurationImpl.OntopMappingOWLAPIOptions;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -23,6 +25,10 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
         mappingOWLConfiguration = new OntopMappingOWLAPIConfigurationImpl(settings, options.owlapiOptions);
     }
 
+    @Override
+    public OBDASpecification loadSpecification() throws OBDASpecificationException {
+        return loadSpecification(mappingOWLConfiguration::loadOntology);
+    }
     @Override
     public Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException {
         return mappingOWLConfiguration.loadInputOntology();

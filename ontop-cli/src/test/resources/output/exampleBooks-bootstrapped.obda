@@ -1,0 +1,69 @@
+[PrefixDeclaration]
+obda:		https://w3id.org/obda/vocabulary#
+xsd:		http://www.w3.org/2001/XMLSchema#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPPING-ID1
+target		<http://www.example.org/tb_affiliated_writers/wr_code={wr_code}> a <http://www.example.org/tb_affiliated_writers> ; <http://www.example.org/tb_affiliated_writers#wr_code> {wr_code}^^xsd:integer ; <http://www.example.org/tb_affiliated_writers#wr_name> {wr_name}^^rdfs:Literal . 
+source		SELECT * FROM "PUBLIC"."tb_affiliated_writers"
+
+mappingId	MAPPING-ID2
+target		<http://www.example.org/tb_authors/bk_code={bk_code};wr_id={wr_id}> a <http://www.example.org/tb_authors> ; <http://www.example.org/tb_authors#bk_code> {bk_code}^^xsd:integer ; <http://www.example.org/tb_authors#wr_id> {wr_id}^^xsd:integer . 
+source		SELECT * FROM "PUBLIC"."tb_authors"
+
+mappingId	MAPPING-ID3
+target		<http://www.example.org/tb_authors/bk_code={tb_authors_bk_code};wr_id={tb_authors_wr_id}> <http://www.example.org/tb_authors#ref-wr_id> <http://www.example.org/tb_affiliated_writers/wr_code={tb_affiliated_writers_wr_code}> . 
+source		SELECT "PUBLIC"."tb_authors"."bk_code" AS tb_authors_bk_code, "PUBLIC"."tb_authors"."wr_id" AS tb_authors_wr_id, "PUBLIC"."tb_affiliated_writers"."wr_code" AS tb_affiliated_writers_wr_code FROM "PUBLIC"."tb_authors", "PUBLIC"."tb_affiliated_writers" WHERE "PUBLIC"."tb_authors"."wr_id" = "PUBLIC"."tb_affiliated_writers"."wr_code"
+
+mappingId	MAPPING-ID4
+target		<http://www.example.org/tb_authors/bk_code={tb_authors_bk_code};wr_id={tb_authors_wr_id}> <http://www.example.org/tb_authors#ref-bk_code> <http://www.example.org/tb_books/bk_code={tb_books_bk_code}> . 
+source		SELECT "PUBLIC"."tb_authors"."bk_code" AS tb_authors_bk_code, "PUBLIC"."tb_authors"."wr_id" AS tb_authors_wr_id, "PUBLIC"."tb_books"."bk_code" AS tb_books_bk_code FROM "PUBLIC"."tb_authors", "PUBLIC"."tb_books" WHERE "PUBLIC"."tb_authors"."bk_code" = "PUBLIC"."tb_books"."bk_code"
+
+mappingId	MAPPING-ID5
+target		<http://www.example.org/tb_bk_gen/id_bk={id_bk};gen_name={gen_name}> a <http://www.example.org/tb_bk_gen> ; <http://www.example.org/tb_bk_gen#id_bk> {id_bk}^^xsd:integer ; <http://www.example.org/tb_bk_gen#gen_name> {gen_name}^^rdfs:Literal . 
+source		SELECT * FROM "PUBLIC"."tb_bk_gen"
+
+mappingId	MAPPING-ID6
+target		<http://www.example.org/tb_bk_gen/id_bk={tb_bk_gen_id_bk};gen_name={tb_bk_gen_gen_name}> <http://www.example.org/tb_bk_gen#ref-id_bk> <http://www.example.org/tb_books/bk_code={tb_books_bk_code}> . 
+source		SELECT "PUBLIC"."tb_bk_gen"."id_bk" AS tb_bk_gen_id_bk, "PUBLIC"."tb_bk_gen"."gen_name" AS tb_bk_gen_gen_name, "PUBLIC"."tb_books"."bk_code" AS tb_books_bk_code FROM "PUBLIC"."tb_bk_gen", "PUBLIC"."tb_books" WHERE "PUBLIC"."tb_bk_gen"."id_bk" = "PUBLIC"."tb_books"."bk_code"
+
+mappingId	MAPPING-ID7
+target		<http://www.example.org/tb_books/bk_code={bk_code}> a <http://www.example.org/tb_books> ; <http://www.example.org/tb_books#bk_code> {bk_code}^^xsd:integer ; <http://www.example.org/tb_books#bk_title> {bk_title}^^rdfs:Literal ; <http://www.example.org/tb_books#bk_type> {bk_type}^^rdfs:Literal . 
+source		SELECT * FROM "PUBLIC"."tb_books"
+
+mappingId	MAPPING-ID8
+target		<http://www.example.org/tb_edition/ed_code={ed_code}> a <http://www.example.org/tb_edition> ; <http://www.example.org/tb_edition#ed_code> {ed_code}^^xsd:integer ; <http://www.example.org/tb_edition#ed_type> {ed_type}^^rdfs:Literal ; <http://www.example.org/tb_edition#pub_date> {pub_date}^^xsd:date ; <http://www.example.org/tb_edition#n_edt> {n_edt}^^xsd:integer ; <http://www.example.org/tb_edition#editor> {editor}^^xsd:integer ; <http://www.example.org/tb_edition#bk_id> {bk_id}^^xsd:integer . 
+source		SELECT * FROM "PUBLIC"."tb_edition"
+
+mappingId	MAPPING-ID9
+target		<http://www.example.org/tb_edition/ed_code={tb_edition_ed_code}> <http://www.example.org/tb_edition#ref-editor> <http://www.example.org/tb_editor/ed_code={tb_editor_ed_code}> . 
+source		SELECT "PUBLIC"."tb_edition"."ed_code" AS tb_edition_ed_code, "PUBLIC"."tb_editor"."ed_code" AS tb_editor_ed_code FROM "PUBLIC"."tb_edition", "PUBLIC"."tb_editor" WHERE "PUBLIC"."tb_edition"."editor" = "PUBLIC"."tb_editor"."ed_code"
+
+mappingId	MAPPING-ID10
+target		<http://www.example.org/tb_edition/ed_code={tb_edition_ed_code}> <http://www.example.org/tb_edition#ref-bk_id> <http://www.example.org/tb_books/bk_code={tb_books_bk_code}> . 
+source		SELECT "PUBLIC"."tb_edition"."ed_code" AS tb_edition_ed_code, "PUBLIC"."tb_books"."bk_code" AS tb_books_bk_code FROM "PUBLIC"."tb_edition", "PUBLIC"."tb_books" WHERE "PUBLIC"."tb_edition"."bk_id" = "PUBLIC"."tb_books"."bk_code"
+
+mappingId	MAPPING-ID11
+target		<http://www.example.org/tb_editor/ed_code={ed_code}> a <http://www.example.org/tb_editor> ; <http://www.example.org/tb_editor#ed_code> {ed_code}^^xsd:integer ; <http://www.example.org/tb_editor#ed_name> {ed_name}^^rdfs:Literal . 
+source		SELECT * FROM "PUBLIC"."tb_editor"
+
+mappingId	MAPPING-ID12
+target		<http://www.example.org/tb_emerge_authors/bk_code={bk_code};wr_id={wr_id}> a <http://www.example.org/tb_emerge_authors> ; <http://www.example.org/tb_emerge_authors#bk_code> {bk_code}^^xsd:integer ; <http://www.example.org/tb_emerge_authors#wr_id> {wr_id}^^xsd:integer . 
+source		SELECT * FROM "PUBLIC"."tb_emerge_authors"
+
+mappingId	MAPPING-ID13
+target		<http://www.example.org/tb_emerge_authors/bk_code={tb_emerge_authors_bk_code};wr_id={tb_emerge_authors_wr_id}> <http://www.example.org/tb_emerge_authors#ref-wr_id> <http://www.example.org/tb_on_prob_wr/wr_code={tb_on_prob_wr_wr_code}> . 
+source		SELECT "PUBLIC"."tb_emerge_authors"."bk_code" AS tb_emerge_authors_bk_code, "PUBLIC"."tb_emerge_authors"."wr_id" AS tb_emerge_authors_wr_id, "PUBLIC"."tb_on_prob_wr"."wr_code" AS tb_on_prob_wr_wr_code FROM "PUBLIC"."tb_emerge_authors", "PUBLIC"."tb_on_prob_wr" WHERE "PUBLIC"."tb_emerge_authors"."wr_id" = "PUBLIC"."tb_on_prob_wr"."wr_code"
+
+mappingId	MAPPING-ID14
+target		<http://www.example.org/tb_emerge_authors/bk_code={tb_emerge_authors_bk_code};wr_id={tb_emerge_authors_wr_id}> <http://www.example.org/tb_emerge_authors#ref-bk_code> <http://www.example.org/tb_books/bk_code={tb_books_bk_code}> . 
+source		SELECT "PUBLIC"."tb_emerge_authors"."bk_code" AS tb_emerge_authors_bk_code, "PUBLIC"."tb_emerge_authors"."wr_id" AS tb_emerge_authors_wr_id, "PUBLIC"."tb_books"."bk_code" AS tb_books_bk_code FROM "PUBLIC"."tb_emerge_authors", "PUBLIC"."tb_books" WHERE "PUBLIC"."tb_emerge_authors"."bk_code" = "PUBLIC"."tb_books"."bk_code"
+
+mappingId	MAPPING-ID15
+target		<http://www.example.org/tb_on_prob_wr/wr_code={wr_code}> a <http://www.example.org/tb_on_prob_wr> ; <http://www.example.org/tb_on_prob_wr#wr_code> {wr_code}^^xsd:integer ; <http://www.example.org/tb_on_prob_wr#wr_name> {wr_name}^^rdfs:Literal . 
+source		SELECT * FROM "PUBLIC"."tb_on_prob_wr"
+]]
+

@@ -1,14 +1,14 @@
 package it.unibz.inf.ontop.docker.failing.postgres;
 
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 
 /**
  * Class to test that a URI with double prefix has not a prefix  wrongly removed
- *
- *
  */
-public class PrefixSourceTest extends AbstractVirtualModeTest{
+public class PrefixSourceTest extends AbstractVirtualModeTest {
 
     static final String owlfile = "/pgsql/imdb/movieontology.owl";
     static final String obdafile = "/pgsql/imdb/newPrefixMovieOntology.obda";
@@ -30,9 +30,13 @@ public class PrefixSourceTest extends AbstractVirtualModeTest{
 
                 "}";
 
-        assertEquals(runQueryAndReturnStringOfIndividualX(queryBind),
-                "<http://www.movieontology.org/2009/10/01/movieontology.owl#Japan>");
-            }
+        assertTrue(
+                checkContainsTuplesSetSemantics(
+                        queryBind,
+                        ImmutableSet.of(
+                                ImmutableMap.of("x", "<http://www.movieontology.org/2009/10/01/movieontology.owl#Japan>")
+                        )));
+    }
 
 
 }

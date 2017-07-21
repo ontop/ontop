@@ -143,6 +143,11 @@ public class MutableQueryModifiersImpl implements MutableQueryModifiers {
 	}
 
 	@Override
+	public boolean isIdle() {
+		return !(hasGroup() || hasOrder() || hasLimit() || hasOffset() || isDistinct());
+	}
+
+	@Override
 	public boolean hasOrder() {
 		return !orderConditions.isEmpty();
 	}

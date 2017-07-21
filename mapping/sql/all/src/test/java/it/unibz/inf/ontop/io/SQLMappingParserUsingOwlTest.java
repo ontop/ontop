@@ -31,12 +31,13 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
+import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
-import it.unibz.inf.ontop.mapping.SQLMappingParser;
+import it.unibz.inf.ontop.model.SQLMappingParser;
 
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 

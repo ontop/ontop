@@ -33,7 +33,7 @@
         <DataProperty IRI="#name"/>
     </Declaration>
     <Declaration>
-        <DataProperty IRI="#nick"/>
+        <ObjectProperty IRI="#nick"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#nick1"/>

@@ -9,7 +9,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [MappingDeclaration] @collection [[
 mappingId	mapping-addresses
-target		:address-{id} a :Address ; :addressID {id} ; :inStreet {street} ; :hasNumber {number} ; :inCity {city} ; :inState {state} ; :inCountry {country} .
+target		:address-{id} a :Address ; :addressID {id}^^xsd:integer ; :inStreet {street} ; :hasNumber {number}^^xsd:integer ; :inCity {city} ; :inState {state} ; :inCountry {country} .
 source		select id, street, number, city, state, country from address_new
 
 mappingId	mapping-person
@@ -25,7 +25,7 @@ target		:person-{id} a :Investor .
 source		select id from client_new
 
 mappingId	mapping-companies
-target		:company-{id} a :Company ; :companyName {name} ; :marketShares {marketshares} ; :netWorth {networth} .
+target		:company-{id} a :Company ; :companyName {name} ; :marketShares {marketshares}^^xsd:integer ; :netWorth {networth} .
 source		select id, name, marketshares, networth from company_new
 
 mappingId	mapping-company-addresses
@@ -33,7 +33,7 @@ target		:company-{id} :hasAddress :address-{addressid} .
 source		select id, addressid from company_new
 
 mappingId	mapping-stocks
-target		:stock-{id} a :Stock ; :financialInstrumentID {id} ; :amountOfShares {numberofshares} ; :typeOfShares {sharetype}^^xsd:boolean ; :stockDescription {description}@en-us .
+target		:stock-{id} a :Stock ; :financialInstrumentID {id}^^xsd:integer ; :amountOfShares {numberofshares}^^xsd:integer ; :typeOfShares {sharetype}^^xsd:boolean ; :stockDescription {description}@en-us .
 source		select id, numberofshares, sharetype, description from stockinformation_new
 
 mappingId	mapping-stockbooks
@@ -49,7 +49,7 @@ target		:person-{brokerid} :tradesOnBehalfOf :company-{companyid} .
 source		select brokerid, companyid from brokerworksfor_new
 
 mappingId	mapping-transactions
-target		:transaction-{id} a :Transaction ; :transactionID {id} ; :transactionDate {date} ; :amountOfTransaction {amount} .
+target		:transaction-{id} a :Transaction ; :transactionID {id}^^xsd:integer ; :transactionDate {date} ; :amountOfTransaction {amount} .
 source		select id, date, amount from transaction_new
 
 mappingId	mapping-transaction-roles-persons

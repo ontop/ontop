@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.type;
 
 import java.util.List;
+import java.util.Optional;
 
 import it.unibz.inf.ontop.model.predicate.DatatypePredicate;
 import it.unibz.inf.ontop.model.predicate.Predicate;
@@ -14,6 +15,8 @@ public interface DatatypeFactory {
 	public COL_TYPE getDatatype(String uri);
 	
 	public COL_TYPE getDatatype(IRI uri);
+
+	Optional<COL_TYPE> getInternalType(DatatypePredicate predicate);
 	
 	public IRI getDatatypeURI(COL_TYPE type);
 
@@ -28,8 +31,6 @@ public interface DatatypeFactory {
 	public boolean isLiteral(Predicate p);
 	
 	public boolean isString(Predicate p);
-
-	
 	
 	public List<Predicate> getDatatypePredicates();
 
