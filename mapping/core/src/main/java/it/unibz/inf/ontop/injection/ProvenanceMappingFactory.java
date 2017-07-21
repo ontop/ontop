@@ -6,10 +6,10 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
+import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 
 public interface ProvenanceMappingFactory {
 
-    MappingWithProvenance create(ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> provenanceMap,
+    MappingWithProvenance create(ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> provenanceMap,
                                  MappingMetadata mappingMetadata, ExecutorRegistry executorRegistry);
 }

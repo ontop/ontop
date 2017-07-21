@@ -13,21 +13,21 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
+import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
 public class MappingWithProvenanceImpl implements MappingWithProvenance {
 
-    private final ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> provenanceMap;
+    private final ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> provenanceMap;
     private final MappingMetadata mappingMetadata;
     private final ExecutorRegistry executorRegistry;
     private final SpecificationFactory specFactory;
     private final UnionBasedQueryMerger queryMerger;
 
     @AssistedInject
-    private MappingWithProvenanceImpl(@Assisted ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> provenanceMap,
+    private MappingWithProvenanceImpl(@Assisted ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> provenanceMap,
                                       @Assisted MappingMetadata mappingMetadata,
                                       @Assisted ExecutorRegistry executorRegistry,
                                       SpecificationFactory specFactory,
@@ -45,12 +45,12 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     }
 
     @Override
-    public ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> getProvenanceMap() {
+    public ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> getProvenanceMap() {
         return provenanceMap;
     }
 
     @Override
-    public PPTriplesMapProvenance getProvenance(IntermediateQuery mappingAssertion) {
+    public PPMappingAssertionProvenance getProvenance(IntermediateQuery mappingAssertion) {
         return Optional.ofNullable(provenanceMap.get(mappingAssertion))
                 .orElseThrow(() -> new IllegalArgumentException("This assertion is not part of the mapping"));
     }
@@ -76,7 +76,7 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
 
     @Override
     public MappingWithProvenance newMappingWithProvenance(
-            ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> newProvenanceMap) {
+            ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> newProvenanceMap) {
         return new MappingWithProvenanceImpl(newProvenanceMap, mappingMetadata, executorRegistry, specFactory, queryMerger);
     }
 

@@ -9,7 +9,7 @@ public class OntopNativeSQLPPTriplesMapProvenance implements PPTriplesMapProvena
 
     private final OntopNativeSQLPPTriplesMap triplesMap;
 
-    public OntopNativeSQLPPTriplesMapProvenance(OntopNativeSQLPPTriplesMap triplesMap) {
+    OntopNativeSQLPPTriplesMapProvenance(OntopNativeSQLPPTriplesMap triplesMap) {
         this.triplesMap = triplesMap;
     }
 

@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
 import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 
@@ -58,9 +59,9 @@ public class SQLPPMapping2DatalogConverter {
         return ImmutableList.copyOf(convert(triplesMaps, metadata).keySet());
     }
 
-    public static ImmutableMap<CQIE, PPTriplesMapProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
+    public static ImmutableMap<CQIE, PPMappingAssertionProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
                                                                      DBMetadata metadata0) throws InvalidMappingSourceQueriesException {
-        Map<CQIE, PPTriplesMapProvenance> mutableMap = new HashMap<>();
+        Map<CQIE, PPMappingAssertionProvenance> mutableMap = new HashMap<>();
 
         RDBMetadata metadata = (RDBMetadata)metadata0;
 
@@ -114,7 +115,7 @@ public class SQLPPMapping2DatalogConverter {
                 }
 
                 for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {
-                    PPTriplesMapProvenance provenance = mappingAxiom.getProvenance(atom);
+                    PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     Function head = renameVariables(atom, lookupTable, idfac);
                     CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -128,7 +129,8 @@ public class SQLPPMapping2DatalogConverter {
             }
             catch (InvalidSelectQueryException e) {
                 errorMessages.add("Error: " + e.getMessage()
-                        + " in the source query of triplesMap \n[" +  mappingAxiom.getTriplesMapLevelProvenanceInfo() + "]");
+                        + " in the source query of triplesMap \n["
+                        +  mappingAxiom.getTriplesMapProvenance().getProvenanceInfo() + "]");
             }
         }
 

@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
-import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
+import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.impl.LegacyIsNotNullDatalogMappingFiller;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.SQLPPMapping2DatalogConverter;
@@ -44,7 +44,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     @Override
     public MappingWithProvenance convert(SQLPPMapping ppMapping, DBMetadata dbMetadata,
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
-        ImmutableMap<CQIE, PPTriplesMapProvenance> datalogMap = convertIntoDatalog(ppMapping, dbMetadata);
+        ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap = convertIntoDatalog(ppMapping, dbMetadata);
 
         return mappingConverter.convertMappingRules(datalogMap, dbMetadata, executorRegistry, ppMapping.getMetadata());
     }
@@ -52,13 +52,13 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     /**
      * Assumption: one CQIE per mapping axiom (no nested union)
      */
-    private ImmutableMap<CQIE, PPTriplesMapProvenance> convertIntoDatalog(SQLPPMapping ppMapping, DBMetadata dbMetadata)
+    private ImmutableMap<CQIE, PPMappingAssertionProvenance> convertIntoDatalog(SQLPPMapping ppMapping, DBMetadata dbMetadata)
             throws InvalidMappingSourceQueriesException {
 
         /*
          * May also add views in the DBMetadata!
          */
-        ImmutableMap<CQIE, PPTriplesMapProvenance> datalogMap = SQLPPMapping2DatalogConverter.convert(
+        ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap = SQLPPMapping2DatalogConverter.convert(
                 ppMapping.getTripleMaps(), dbMetadata);
 
         LOGGER.debug("Original mapping size: {}", datalogMap.size());

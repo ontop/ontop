@@ -4,44 +4,43 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
 import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
+import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
 
 /**
  * When the input mapping document is in the native Ontop format
  */
 public class OntopNativeSQLPPTriplesMap extends AbstractSQLPPTriplesMap {
 
-    private final OntopNativeSQLPPTriplesMapProvenance provenance;
+    private final OntopNativeSQLPPTriplesMapProvenance triplesMapProvenance;
 
     public OntopNativeSQLPPTriplesMap(String id, OBDASQLQuery sqlQuery, ImmutableList<ImmutableFunctionalTerm> targetAtoms) {
         super(targetAtoms, sqlQuery, id);
-        this.provenance = createProvenance(this);
+        this.triplesMapProvenance = createProvenance(this);
     }
 
     public OntopNativeSQLPPTriplesMap(OBDASQLQuery sqlQuery, ImmutableList<ImmutableFunctionalTerm> targetAtoms) {
         super(targetAtoms, sqlQuery);
-        this.provenance = createProvenance(this);
+        this.triplesMapProvenance = createProvenance(this);
     }
 
-    /**
-     * TODO: create it (same object for all the target atoms)
-     */
     private static OntopNativeSQLPPTriplesMapProvenance createProvenance(OntopNativeSQLPPTriplesMap triplesMap) {
         return new OntopNativeSQLPPTriplesMapProvenance(triplesMap);
     }
 
     @Override
-    public OntopNativeSQLPPTriplesMapProvenance getProvenance(ImmutableFunctionalTerm targetAtom) {
-        return provenance;
+    public PPMappingAssertionProvenance getMappingAssertionProvenance(ImmutableFunctionalTerm targetAtom) {
+        return new OntopNativeSQLMappingAssertionProvenance(targetAtom, this);
     }
 
     @Override
-    public String getTriplesMapLevelProvenanceInfo() {
-        return provenance.getProvenanceInfo();
+    public PPTriplesMapProvenance getTriplesMapProvenance() {
+        return triplesMapProvenance;
     }
 
     @Override
     public String toString() {
-        return getTriplesMapLevelProvenanceInfo();
+        return triplesMapProvenance.getProvenanceInfo();
     }
 
     @Override

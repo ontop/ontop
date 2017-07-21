@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
-import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
+import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap;
@@ -37,7 +37,7 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
     }
 
     @Override
-    public ImmutableMap<CQIE, PPTriplesMapProvenance> convert(MappingWithProvenance mappingWithProvenance) {
+    public ImmutableMap<CQIE, PPMappingAssertionProvenance> convert(MappingWithProvenance mappingWithProvenance) {
         return mappingWithProvenance.getProvenanceMap().entrySet().stream()
                 .flatMap(e -> convertMappingQuery(e.getKey())
                         .map(r -> new AbstractMap.SimpleEntry<>(r, e.getValue())))
