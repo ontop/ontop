@@ -35,6 +35,16 @@ public class OntopNativeSQLPPTriplesMap extends AbstractSQLPPTriplesMap {
     }
 
     @Override
+    public String getTriplesMapLevelProvenanceInfo() {
+        return provenance.getProvenanceInfo();
+    }
+
+    @Override
+    public String toString() {
+        return getTriplesMapLevelProvenanceInfo();
+    }
+
+    @Override
     public SQLPPTriplesMap extractPPMappingAssertion(ImmutableFunctionalTerm atom) {
         return new OntopNativeSQLPPTriplesMap(getSourceQuery(), ImmutableList.of(atom));
     }

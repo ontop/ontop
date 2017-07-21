@@ -17,7 +17,7 @@ public class OntopNativeSQLPPTriplesMapProvenance implements PPTriplesMapProvena
     public String getProvenanceInfo() {
         String info = "id: " + triplesMap.getId();
         info += "\ntarget atoms: " + triplesMap.getTargetAtoms().stream()
-                .map(a -> a.toString())
+                .map(Object::toString)
                 .collect(Collectors.joining(", "));
         info += "\nsource query: " + triplesMap.getSourceQuery();
         return info;

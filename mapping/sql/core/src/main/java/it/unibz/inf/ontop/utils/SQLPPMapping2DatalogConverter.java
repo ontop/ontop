@@ -24,6 +24,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
@@ -34,6 +35,7 @@ import java.util.*;
 import it.unibz.inf.ontop.sql.parser.RAExpression;
 import it.unibz.inf.ontop.sql.parser.SelectQueryAttributeExtractor;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 
 import com.google.common.collect.ImmutableMap;
@@ -52,12 +54,12 @@ public class SQLPPMapping2DatalogConverter {
      * returns a Datalog representation of the mappings
      */
     public static ImmutableList<CQIE> constructDatalogProgram(Collection<SQLPPTriplesMap> triplesMaps,
-                                                              DBMetadata metadata) {
+                                                              DBMetadata metadata) throws InvalidMappingSourceQueriesException {
         return ImmutableList.copyOf(convert(triplesMaps, metadata).keySet());
     }
 
     public static ImmutableMap<CQIE, PPTriplesMapProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
-                                                                     DBMetadata metadata0) {
+                                                                     DBMetadata metadata0) throws InvalidMappingSourceQueriesException {
         Map<CQIE, PPTriplesMapProvenance> mutableMap = new HashMap<>();
 
         RDBMetadata metadata = (RDBMetadata)metadata0;
@@ -124,18 +126,14 @@ public class SQLPPMapping2DatalogConverter {
                     }
                 }
             }
-            catch (Exception e) { // in particular, InvalidSelectQueryException
-                errorMessages.add("Error in mapping with id: " + mappingAxiom.getId()
-                        + "\nDescription: " + e.getMessage()
-                        + "\nMapping: [" + mappingAxiom.toString() + "]");
+            catch (InvalidSelectQueryException e) {
+                errorMessages.add("Error: " + e.getMessage()
+                        + " in the source query of triplesMap \n[" +  mappingAxiom.getTriplesMapLevelProvenanceInfo() + "]");
             }
         }
 
         if (!errorMessages.isEmpty())
-            throw new IllegalArgumentException(
-                    "There were errors analyzing the following mappings. " +
-                            "Please correct the issues to continue.\n\n" +
-                            Joiner.on("\n\n").join(errorMessages));
+            throw new InvalidMappingSourceQueriesException(Joiner.on("\n\n").join(errorMessages));
 
         return ImmutableMap.copyOf(mutableMap);
     }

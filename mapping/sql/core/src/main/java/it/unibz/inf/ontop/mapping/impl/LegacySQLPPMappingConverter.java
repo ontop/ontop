@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.mapping.SQLPPMappingConverter;
@@ -42,7 +43,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
     @Override
     public MappingWithProvenance convert(SQLPPMapping ppMapping, DBMetadata dbMetadata,
-                                         ExecutorRegistry executorRegistry) {
+                                         ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
         ImmutableMap<CQIE, PPTriplesMapProvenance> datalogMap = convertIntoDatalog(ppMapping, dbMetadata);
 
         return mappingConverter.convertMappingRules(datalogMap, dbMetadata, executorRegistry, ppMapping.getMetadata());
@@ -51,7 +52,8 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     /**
      * Assumption: one CQIE per mapping axiom (no nested union)
      */
-    private ImmutableMap<CQIE, PPTriplesMapProvenance> convertIntoDatalog(SQLPPMapping ppMapping, DBMetadata dbMetadata) {
+    private ImmutableMap<CQIE, PPTriplesMapProvenance> convertIntoDatalog(SQLPPMapping ppMapping, DBMetadata dbMetadata)
+            throws InvalidMappingSourceQueriesException {
 
         /*
          * May also add views in the DBMetadata!
