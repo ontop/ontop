@@ -34,6 +34,11 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
     }
 
     @Override
+    public boolean isProvidedDBMetadataCompletionEnabled() {
+        return getRequiredBoolean(COMPLETE_PROVIDED_METADATA);
+    }
+
+    @Override
     public boolean isOntologyAnnotationQueryingEnabled() {
         return getRequiredBoolean(QUERY_ONTOLOGY_ANNOTATIONS);
     }

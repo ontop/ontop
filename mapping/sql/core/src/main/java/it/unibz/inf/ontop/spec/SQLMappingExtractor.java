@@ -152,8 +152,16 @@ public class SQLMappingExtractor implements MappingExtractor {
                                           OBDASpecInput specInput)
             throws DBMetadataExtractionException, MetaMappingExpansionException {
 
+        boolean isDBMetadataProvided = optionalDBMetadata.isPresent();
+
+        /*
+         * Metadata extraction can be disabled when DBMetadata is already provided
+         */
+        if (isDBMetadataProvided && (!settings.isProvidedDBMetadataCompletionEnabled()))
+            return optionalDBMetadata.get();
+
         try (Connection localConnection = createConnection()) {
-            return optionalDBMetadata.isPresent()
+            return isDBMetadataProvided
                     ? dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata.get(),
                             specInput.getConstraintFile())
                     : dbMetadataExtractor.extract(ppMapping, localConnection, specInput.getConstraintFile());
@@ -200,7 +208,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                 return Optional.of((RDBMetadata) md);
             }
             throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName()+" only supports instances of " +
-                    SQLPPMapping.class.getSimpleName());
+                    RDBMetadata.class.getSimpleName());
         }
         return Optional.empty();
     }
