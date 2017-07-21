@@ -129,7 +129,7 @@ public class SQLPPMapping2DatalogConverter {
             }
             catch (InvalidSelectQueryException e) {
                 errorMessages.add("Error: " + e.getMessage()
-                        + " in the source query of triplesMap \n["
+                        + " \nProblem location: source query of triplesMap \n["
                         +  mappingAxiom.getTriplesMapProvenance().getProvenanceInfo() + "]");
             }
         }

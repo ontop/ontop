@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLReasoner;
 import org.junit.Test;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 
 /**
  * Test mysql jdbc driver.
@@ -57,7 +58,7 @@ public class ConferenceMySQLTest  {
 
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = IllegalConfigurationException.class)
 	public void testWrongMappings() throws Exception {
         String query1 = "PREFIX : <http://myproject.org/odbs#> SELECT ?x ?y\n" +
                 "WHERE {\n" +

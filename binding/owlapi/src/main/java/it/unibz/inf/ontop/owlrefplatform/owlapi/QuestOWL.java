@@ -147,7 +147,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */
 		} catch (OBDASpecificationException e) {
-			throw new IllegalConfigurationException(e.getMessage(), owlConfiguration);
+			throw new IllegalConfigurationException(e, owlConfiguration);
 		}
 
 		this.inputQueryFactory = injector.getInstance(InputQueryFactory.class);
