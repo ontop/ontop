@@ -14,6 +14,7 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.parser.TokenMgrError;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
@@ -58,6 +59,9 @@ public class SelectQueryParser {
         }
         catch (UnsupportedSelectQueryRuntimeException e) {
             throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
+        }
+        catch (TokenMgrError e) {
+            throw new InvalidSelectQueryException("Cannot parse SQL: " + sql, e);
         }
     }
 
