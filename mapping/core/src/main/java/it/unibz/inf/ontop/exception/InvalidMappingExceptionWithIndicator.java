@@ -52,8 +52,7 @@ public class InvalidMappingExceptionWithIndicator extends InvalidMappingExceptio
         StringBuilder sb = new StringBuilder();
         if (!indicators.isEmpty()) {
             sb.append("\n");
-            sb.append("The plugin cannot load the OBDA model: (REASON: Invalid mappings)\n");
-            sb.append("Please fix the following mappings and reload the file.\n\n");
+            sb.append("The syntax of the mapping is invalid (and therefore cannot be processed). Problems: \n\n");
             for (Indicator indicator : indicators) {
                 int lineNumber = indicator.getLineNumber();
                 String mappingId = "";
@@ -93,7 +92,7 @@ public class InvalidMappingExceptionWithIndicator extends InvalidMappingExceptio
                         sb.append(String.format("MappingId = '%s'\n", mappingId));
                     }
                     String targetString = hints2[1];
-                    sb.append(String.format("Line %d: Cannot parse query: '%s'\n\n", lineNumber, targetString));
+                    sb.append(String.format("Line %d: Invalid target: '%s'\n\n", lineNumber, targetString));
                     break;
                 }
             }
