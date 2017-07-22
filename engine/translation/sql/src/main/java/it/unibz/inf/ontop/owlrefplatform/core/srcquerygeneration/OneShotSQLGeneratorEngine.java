@@ -265,7 +265,9 @@ public class OneShotSQLGeneratorEngine {
 	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
 			throws OntopTranslationException {
 
-		DatalogProgram queryProgram = convertAndPrepare(intermediateQuery);
+		IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
+
+		DatalogProgram queryProgram = IntermediateQueryToDatalogTranslator.translate(normalizedQuery);
 
 		normalizeProgram(queryProgram);
 
@@ -326,36 +328,19 @@ public class OneShotSQLGeneratorEngine {
 		}
 	}
 
-	/**
-	 * TODO: explain
-	 */
-	protected static DatalogProgram convertAndPrepare(IntermediateQuery intermediateQuery) {
-		GroundTermRemovalFromDataNodeReshaper groundTermNormalizer = new GroundTermRemovalFromDataNodeReshaper();
-		intermediateQuery = groundTermNormalizer.optimize(intermediateQuery);
-		log.debug("New query after removing ground terms: \n" + intermediateQuery.toString());
+	private IntermediateQuery normalizeIQ(IntermediateQuery intermediateQuery) {
 
-		PullOutVariableOptimizer pullOutVariableNormalizer = new PullOutVariableOptimizer();
-		intermediateQuery = pullOutVariableNormalizer.optimize(intermediateQuery);
-		log.debug("New query after pulling out equalities: \n" + intermediateQuery.toString());
+		IntermediateQuery groundTermFreeQuery = new GroundTermRemovalFromDataNodeReshaper()
+				.optimize(intermediateQuery);
+		log.debug("New query after removing ground terms: \n" + groundTermFreeQuery);
 
-		intermediateQuery = new PushUpBooleanExpressionOptimizerImpl().optimize(intermediateQuery);
-		log.debug("New query after pushing up boolean expressions: \n" + intermediateQuery.toString());
+		IntermediateQuery queryAfterPullOut = new PullOutVariableOptimizer().optimize(groundTermFreeQuery);
+		log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
 
-		DatalogProgram datalogProgram = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+		IntermediateQuery queryAfterPushUp = new PushUpBooleanExpressionOptimizerImpl().optimize(queryAfterPullOut);
+		log.debug("New query after pushing up boolean expressions: \n" +queryAfterPushUp);
 
-		log.debug("New Datalog query: \n" + datalogProgram.toString());
-
-		/**
-//		 * TODO: try to get rid of this flattener
-//		 */
-//		datalogProgram = FunctionFlattener.flattenDatalogProgram(datalogProgram);
-//		log.debug("New flattened Datalog query: \n" + datalogProgram.toString());
-
-		MutableQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
-		datalogProgram = DATALOG_FACTORY.getDatalogProgram(queryModifiers, datalogProgram.getRules());
-		log.debug("Normalized Datalog query: \n" + datalogProgram.toString());
-
-		return datalogProgram;
+		return queryAfterPushUp;
 	}
 
     private boolean hasSelectDistinctStatement(DatalogProgram query) {
@@ -617,7 +602,6 @@ public class OneShotSQLGeneratorEngine {
 
 		// log.debug("Before pushing equalities: \n{}", cq);
 
-		// TODO: Check this!!!
 //		 EQNormalizer.enforceEqualities(cq);
 
 		// log.debug("Before folding Joins: \n{}", cq);
@@ -631,7 +615,6 @@ public class OneShotSQLGeneratorEngine {
 
 		// log.debug("Before pulling out Left Join Conditions: \n{}", cq);
 
-		// ----- TODO check if we really need ---
 //		DatalogNormalizer.pullOutLeftJoinConditions(cq);
 
 		// log.debug("Before pulling up nested references: \n{}", cq);
