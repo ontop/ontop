@@ -346,25 +346,12 @@ public class OneShotSQLGeneratorEngine {
 		log.debug("New Datalog query: \n" + datalogProgram.toString());
 
 		/**
-		 * TODO: try to get rid of this flattener
-		 */
-		datalogProgram = FunctionFlattener.flattenDatalogProgram(datalogProgram);
-		log.debug("New flattened Datalog query: \n" + datalogProgram.toString());
-
-		/**
-		 * This code is only partially useful (for properly dealing with boolean expressions) anymore
-		 * TODO: get rid of it
-		 */
-//		log.debug("Datalog syntax normalizer (low-level)...");
-//		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
-
-//		List<CQIE> normalizedRules = new ArrayList<>();
-//		for (CQIE rule: datalogProgram.getRules()) {
-//			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
-//		}
+//		 * TODO: try to get rid of this flattener
+//		 */
+//		datalogProgram = FunctionFlattener.flattenDatalogProgram(datalogProgram);
+//		log.debug("New flattened Datalog query: \n" + datalogProgram.toString());
 
 		MutableQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
-//		datalogProgram = DATALOG_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
 		datalogProgram = DATALOG_FACTORY.getDatalogProgram(queryModifiers, datalogProgram.getRules());
 		log.debug("Normalized Datalog query: \n" + datalogProgram.toString());
 
