@@ -15,7 +15,7 @@ import java.sql.Types;
 
 public class BasicNativeMappingMistakeTest {
 
-    private static final RDBMetadata DB_METADATA;
+    protected static final RDBMetadata DB_METADATA;
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicNativeMappingMistakeTest.class);
 
     static {
