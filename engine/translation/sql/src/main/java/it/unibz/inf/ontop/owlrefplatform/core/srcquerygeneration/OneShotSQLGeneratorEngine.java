@@ -649,7 +649,7 @@ public class OneShotSQLGeneratorEngine {
 
 		// log.debug("Before pulling up nested references: \n{}", cq);
 
-		DatalogNormalizer.pullUpNestedReferences(cq);
+//		DatalogNormalizer.pullUpNestedReferences(cq);
 
 		// log.debug("Before adding trivial equalities: \n{}, cq);", cq);
 
