@@ -59,21 +59,21 @@ public class InvalidMappingExceptionWithIndicator extends InvalidMappingExceptio
                 
                 switch (indicator.getReason()) {
                 case MAPPING_ID_IS_BLANK:
-                    sb.append(String.format("Line %d: Invalid input: (mappingId = null)\n\n", lineNumber));
+                    sb.append(String.format("Line %d: Mapping ID is missing\n\n", lineNumber));
                     break;
                 case TARGET_QUERY_IS_BLANK:
                     mappingId = (String) indicator.getHint();
                     if (!mappingId.isEmpty()) {
                         sb.append(String.format("MappingId = '%s'\n", mappingId));
                     }
-                    sb.append(String.format("Line %d: Invalid input: (targetQuery = null)\n\n", lineNumber));
+                    sb.append(String.format("Line %d: Target is missing\n\n", lineNumber));
                     break;
                 case SOURCE_QUERY_IS_BLANK:
                     mappingId = (String) indicator.getHint();
                     if (!mappingId.isEmpty()) {
                         sb.append(String.format("MappingId = '%s'\n", mappingId));
                     }
-                    sb.append(String.format("Line %d: Invalid input: (sourceQuery = null)\n\n", lineNumber));
+                    sb.append(String.format("Line %d: Source query is missing\n\n", lineNumber));
                     break;
                 case UNKNOWN_PREDICATE_IN_TARGET_QUERY:
                     Object[] hints1 = (Object[]) indicator.getHint();
