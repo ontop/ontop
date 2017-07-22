@@ -43,12 +43,10 @@ import it.unibz.inf.ontop.model.type.IncompatibleTermException;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.FunctionFlattener;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PullOutVariableOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
@@ -109,7 +107,7 @@ public class OneShotSQLGeneratorEngine {
 
 
 	private static final String INDENT = "    ";
-	private static final Function TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+//	private static final Function TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
 
 	private final RDBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
@@ -340,6 +338,9 @@ public class OneShotSQLGeneratorEngine {
 		intermediateQuery = pullOutVariableNormalizer.optimize(intermediateQuery);
 		log.debug("New query after pulling out equalities: \n" + intermediateQuery.toString());
 
+		intermediateQuery = new PushUpBooleanExpressionOptimizerImpl().optimize(intermediateQuery);
+		log.debug("New query after pushing up boolean expressions: \n" + intermediateQuery.toString());
+
 		DatalogProgram datalogProgram = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
 
 		log.debug("New Datalog query: \n" + datalogProgram.toString());
@@ -354,16 +355,17 @@ public class OneShotSQLGeneratorEngine {
 		 * This code is only partially useful (for properly dealing with boolean expressions) anymore
 		 * TODO: get rid of it
 		 */
-		log.debug("Datalog syntax normalizer (low-level)...");
-		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
+//		log.debug("Datalog syntax normalizer (low-level)...");
+//		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
 
-		List<CQIE> normalizedRules = new ArrayList<>();
-		for (CQIE rule: datalogProgram.getRules()) {
-			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
-		}
+//		List<CQIE> normalizedRules = new ArrayList<>();
+//		for (CQIE rule: datalogProgram.getRules()) {
+//			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
+//		}
 
 		MutableQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
-		datalogProgram = DATALOG_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
+//		datalogProgram = DATALOG_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
+		datalogProgram = DATALOG_FACTORY.getDatalogProgram(queryModifiers, datalogProgram.getRules());
 		log.debug("Normalized Datalog query: \n" + datalogProgram.toString());
 
 		return datalogProgram;
@@ -629,13 +631,13 @@ public class OneShotSQLGeneratorEngine {
 		// log.debug("Before pushing equalities: \n{}", cq);
 
 		// TODO: Check this!!!
-		// EQNormalizer.enforceEqualities(cq);
+//		 EQNormalizer.enforceEqualities(cq);
 
 		// log.debug("Before folding Joins: \n{}", cq);
 
 		DatalogNormalizer.foldJoinTrees(cq);
 
-		// log.debug("Before pulling out equalities: \n{}", cq);
+//		 log.debug("Before pulling out equalities: \n{}", cq);
 
 		// we dont need this anymore, done before
 		// DatalogNormalizer.pullOutEqualities(cq);
@@ -643,7 +645,7 @@ public class OneShotSQLGeneratorEngine {
 		// log.debug("Before pulling out Left Join Conditions: \n{}", cq);
 
 		// ----- TODO check if we really need ---
-		// DatalogNormalizer.pullOutLeftJoinConditions(cq);
+//		DatalogNormalizer.pullOutLeftJoinConditions(cq);
 
 		// log.debug("Before pulling up nested references: \n{}", cq);
 
@@ -653,7 +655,7 @@ public class OneShotSQLGeneratorEngine {
 
 		DatalogNormalizer.addMinimalEqualityToLeftJoin(cq);
 
-		// log.debug("Normalized CQ: \n{}", cq);
+//		 log.debug("Normalized CQ: \n{}", cq);
 	}
 
 	/**
@@ -1063,13 +1065,14 @@ public class OneShotSQLGeneratorEngine {
 					isLeftJoin = true;
 				}
 
-				for (Term innerTerm : atom.getTerms()) {
-					Function innerTerm1 = (Function) innerTerm;
+				int i =0;
+				for (Term term : atom.getTerms()){
+					Function innerTerm1 = (Function) term;
 					if(innerTerm1.isAlgebraFunction()){
 						//nested joins we need to add parenthesis later
 						parenthesis = true;
 					}
-					else if(isLeftJoin && innerTerm1.equals(TRUE_EQ)){
+					else if(isLeftJoin && i == 1){
 						//in case of left join we  want to add the parenthesis
 						// only for the right tables
 						//we ignore nested joins from the left tables
@@ -1077,6 +1080,7 @@ public class OneShotSQLGeneratorEngine {
 						parenthesis = false;
 					}
 					innerTerms.add(innerTerm1);
+					i++;
 				}
 				String tableDefinitions =  getTableDefinitions(innerTerms,
 						index, false, isLeftJoin, parenthesis, indent + INDENT );

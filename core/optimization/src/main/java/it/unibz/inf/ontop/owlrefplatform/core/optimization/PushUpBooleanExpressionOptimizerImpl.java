@@ -50,8 +50,12 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpressionOptimizer {
 
     @Override
-    public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
-        return pushAboveUnions(pushUpFromSubtree(query.getRootConstructionNode(), query));
+    public IntermediateQuery optimize(IntermediateQuery query) {
+        try {
+            return pushAboveUnions(pushUpFromSubtree(query.getRootConstructionNode(), query));
+        }catch (EmptyQueryException e){
+            throw new IllegalStateException("This optimizer should not empty the query");
+        }
     }
 
     private IntermediateQuery pushUpFromSubtree(QueryNode subtreeRoot, IntermediateQuery query) throws EmptyQueryException {
