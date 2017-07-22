@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.r2rml;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
@@ -65,22 +66,26 @@ public class R2RMLMappingParser implements SQLMappingParser {
         return parse(r2rmlManager);
     }
 
-    private SQLPPMapping parse(R2RMLManager manager) throws DuplicateMappingException {
-        //TODO: make the R2RMLManager simpler.
-        ImmutableList<SQLPPTriplesMap> sourceMappings = manager.getMappings(manager.getModel());
+    private SQLPPMapping parse(R2RMLManager manager) throws DuplicateMappingException, InvalidMappingException {
+        try {
+            //TODO: make the R2RMLManager simpler.
+            ImmutableList<SQLPPTriplesMap> sourceMappings = manager.getMappings(manager.getModel());
 
-        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
-                sourceMappings.stream()
-                        .flatMap(ax -> ax.getTargetAtoms().stream())
-                        .flatMap(atom -> atom.getArguments().stream())
-                        .filter(t -> t instanceof ImmutableFunctionalTerm)
-                        .map(t -> (ImmutableFunctionalTerm) t));
+            UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
+                    sourceMappings.stream()
+                            .flatMap(ax -> ax.getTargetAtoms().stream())
+                            .flatMap(atom -> atom.getArguments().stream())
+                            .filter(t -> t instanceof ImmutableFunctionalTerm)
+                            .map(t -> (ImmutableFunctionalTerm) t));
 
-        //TODO: try to extract prefixes from the R2RML mappings
-        PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-        MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
+            //TODO: try to extract prefixes from the R2RML mappings
+            PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
+            MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
 
-        return ppMappingFactory.createSQLPreProcessedMapping(sourceMappings, mappingMetadata);
+            return ppMappingFactory.createSQLPreProcessedMapping(sourceMappings, mappingMetadata);
+        } catch (InvalidR2RMLMappingException e) {
+            throw new InvalidMappingException(e.getMessage());
+        }
     }
 
 
