@@ -5,8 +5,7 @@ import it.unibz.inf.ontop.datalog.DatalogProgramSyntaxFactory;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.datalog.DatalogProgramSyntaxFactory.*;
-
+import static it.unibz.inf.ontop.datalog.DatalogProgramSyntaxFactory.func;
 import static org.junit.Assert.assertEquals;
 
 public class DatalogProgramSyntaxFactoryTest {
@@ -14,11 +13,11 @@ public class DatalogProgramSyntaxFactoryTest {
 	@Test
 	public void test01() {
 
-		String r1 = "ans1(URI(\"http://www.example.org/test#{}\",t1_4),http://www.w3.org/2000/01/rdf-schema#Literal(t2_2),"
+		String r1 = "ans1(URI2(\"http://www.example.org/test#{}\",t1_4),http://www.w3.org/2000/01/rdf-schema#Literal(t2_2),"
 				+ "http://www.w3.org/2000/01/rdf-schema#Literal(t5_3),http://www.w3.org/2000/01/rdf-schema#Literal(t6_4)) "
 				+ ":- LeftJoin(ans4(pf1),ans5(namef2,nick1f3,nick2f4,p5),EQ(pf1,p5))";
 
-		String r2 = "ans4(URI(\"http://www.example.org/test#{}\",t1_1)) "
+		String r2 = "ans4(URI2(\"http://www.example.org/test#{}\",t1_1)) "
 				+ ":- people(t1_1,t2_1,t3_1,t4_1,t5_1,t6_1), IS_NOT_NULL(t1_1)";
 
 		Predicate ans1 = DatalogProgramSyntaxFactory.predicate("ans1", 4);
