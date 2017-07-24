@@ -24,17 +24,16 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.ontology.Assertion;
 
-import java.util.List;
-
 public interface GraphResultSet extends OBDAResultSet {
 
-    boolean hasNext() throws OntopConnectionException;
+    boolean hasNext() throws OntopConnectionException, OntopResultConversionException;
 
-    List<Assertion> next() throws OntopConnectionException, OntopResultConversionException;
+    Assertion next() throws OntopConnectionException, OntopResultConversionException;
 
 	@Override
     void close() throws OntopConnectionException;
 
-    void addNewResultSet(List<Assertion> result);
+	@Deprecated
+    void addNewResult(Assertion assertion);
 
 }

@@ -256,24 +256,23 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		
 		OWLAPIIndividualTranslator translator = new OWLAPIIndividualTranslator();
 		
-		List<OWLAxiom> axiomList = new ArrayList<OWLAxiom>();
+		List<OWLAxiom> axiomList = new ArrayList<>();
 		if (resultSet != null) {
 			while (resultSet.hasNext()) {
-				for (Assertion assertion : resultSet.next()) {
-					if (assertion instanceof ClassAssertion) {
-						OWLAxiom classAxiom = translator.translate((ClassAssertion) assertion);
-						axiomList.add(classAxiom);
-					} 
-					else if (assertion instanceof ObjectPropertyAssertion) {
-						OWLAxiom objectPropertyAxiom = translator.translate((ObjectPropertyAssertion) assertion);
-						axiomList.add(objectPropertyAxiom);
-					}
-					else if (assertion instanceof DataPropertyAssertion) {
-						OWLAxiom objectPropertyAxiom = translator.translate((DataPropertyAssertion) assertion);
-						axiomList.add(objectPropertyAxiom);							
-					} 
+				Assertion assertion = resultSet.next();
+				if (assertion instanceof ClassAssertion) {
+					OWLAxiom classAxiom = translator.translate((ClassAssertion) assertion);
+					axiomList.add(classAxiom);
 				}
-			}
+				else if (assertion instanceof ObjectPropertyAssertion) {
+					OWLAxiom objectPropertyAxiom = translator.translate((ObjectPropertyAssertion) assertion);
+					axiomList.add(objectPropertyAxiom);
+				}
+				else if (assertion instanceof DataPropertyAssertion) {
+					OWLAxiom objectPropertyAxiom = translator.translate((DataPropertyAssertion) assertion);
+					axiomList.add(objectPropertyAxiom);
+				}
+				}
 		}
 		return axiomList;
 	}

@@ -83,12 +83,10 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 			List<Statement> results = new LinkedList<>();
 			if (res != null) {
 				while (res.hasNext()) {
-					List<Assertion> chunk = res.next();
-					for (Assertion as : chunk) {
-						Statement st = createStatement(as);
-						if (st!=null)
-							results.add(st);
-					}
+					Assertion as = res.next();
+					Statement st = createStatement(as);
+					if (st!=null)
+						results.add(st);
 				}
 			}
 			

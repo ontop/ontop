@@ -233,7 +233,7 @@ public abstract class QuestStatement implements OntopStatement {
 				} else if (set != null) {
 					// 2nd and manyth times execute, but collect result into one object
 					while (set.hasNext())
-						describeResultSet.addNewResultSet(set.next());
+						describeResultSet.addNewResult(set.next());
 				}
 			}
 			// execute describe <uriconst> in object position
@@ -247,7 +247,7 @@ public abstract class QuestStatement implements OntopStatement {
 					describeResultSet = set;
 				} else if (set != null) {
 					while (set.hasNext())
-						describeResultSet.addNewResultSet(set.next());
+						describeResultSet.addNewResult(set.next());
 				}
 			}
 			// Exception is re-cast because not due to the initial input query

@@ -35,16 +35,13 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.query.algebra.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class QuestGraphResultSet implements GraphResultSet {
 
-	private List<List<Assertion>> results = new ArrayList<>();
+	private List<Assertion> results = new ArrayList<>();
 
 	private TupleResultSet tupleResultSet;
 
@@ -74,15 +71,15 @@ public class QuestGraphResultSet implements GraphResultSet {
 			//process current result set into local buffer, 
 			//since additional results will be collected
 			while (resSet.nextRow()) {
-				this.results.add(processResults(resSet, template));
+				this.results.addAll(processResults(resSet, template));
 			}
 		}
 	}
 	
 	@Override
-	public void addNewResultSet(List<Assertion> result)
+	public void addNewResult(Assertion assertion)
 	{
-		results.add(result);
+		results.add(assertion);
 	}
 
 	/**
@@ -148,25 +145,29 @@ public class QuestGraphResultSet implements GraphResultSet {
     }
 
     @Override
-	public boolean hasNext() throws OntopConnectionException {
+	public boolean hasNext() throws OntopConnectionException, OntopResultConversionException {
+        if (results.size() > 0)
+            return true;
 		//in case of describe, we return the collected results list information
-		if (storeResults) {
-			return results.size() != 0;
-		} else {
-			//in case of construct advance the result set cursor on hasNext
-			return tupleResultSet.nextRow();
-		}
+		if (storeResults)
+			return false;
+		// construct
+        while(tupleResultSet.nextRow()) {
+            List<Assertion> newTriples = processResults(tupleResultSet, constructTemplate);
+            if (!newTriples.isEmpty()) {
+                results.addAll(newTriples);
+                return true;
+            }
+        }
+        return false;
 	}
 
 	@Override
-	public List<Assertion> next() throws OntopConnectionException, OntopResultConversionException {
-		//if we collect results, then remove and return the next one in the list
-		if (results.size() > 0) {
+	public Assertion next() {
+		if (results.size() > 0)
 			return results.remove(0);
-		} else {
-			//otherwise we need to process the unstored result
-			return processResults(tupleResultSet, constructTemplate);
-		}
+		else
+		    throw new NoSuchElementException("Please call hasNext() before calling next()");
 	}
 
     private Constant getConstant(ProjectionElem node, TupleResultSet resSet)

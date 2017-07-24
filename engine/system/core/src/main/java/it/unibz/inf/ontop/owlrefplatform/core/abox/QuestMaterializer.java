@@ -317,7 +317,7 @@ public class QuestMaterializer {
 				if (read && hasNext)
 				{
 					read = false;
-					return results.next().get(0);
+					return results.next();
 				}
 				else if (!read){
 					hasNext();
