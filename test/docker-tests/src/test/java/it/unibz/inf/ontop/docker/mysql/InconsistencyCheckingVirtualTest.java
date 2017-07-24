@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.docker.failing.mysql;
+package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLFactory;
