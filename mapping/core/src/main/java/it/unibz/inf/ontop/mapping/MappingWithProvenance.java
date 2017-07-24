@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
+import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 
 /**
  * TODO: find a better name!
@@ -18,16 +18,16 @@ public interface MappingWithProvenance {
 
     ImmutableSet<IntermediateQuery> getMappingAssertions();
 
-    ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> getProvenanceMap();
+    ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> getProvenanceMap();
 
-    PPTriplesMapProvenance getProvenance(IntermediateQuery mappingAssertion);
+    PPMappingAssertionProvenance getProvenance(IntermediateQuery mappingAssertion);
 
     /**
      * Conversion -> Provenance info is lost in this new data structure
      */
     Mapping toRegularMapping();
 
-    MappingWithProvenance newMappingWithProvenance(ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> provenanceMap);
+    MappingWithProvenance newMappingWithProvenance(ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> provenanceMap);
 
     ExecutorRegistry getExecutorRegistry();
 

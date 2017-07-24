@@ -52,29 +52,28 @@ public class InvalidMappingExceptionWithIndicator extends InvalidMappingExceptio
         StringBuilder sb = new StringBuilder();
         if (!indicators.isEmpty()) {
             sb.append("\n");
-            sb.append("The plugin cannot load the OBDA model: (REASON: Invalid mappings)\n");
-            sb.append("Please fix the following mappings and reload the file.\n\n");
+            sb.append("The syntax of the mapping is invalid (and therefore cannot be processed). Problems: \n\n");
             for (Indicator indicator : indicators) {
                 int lineNumber = indicator.getLineNumber();
                 String mappingId = "";
                 
                 switch (indicator.getReason()) {
                 case MAPPING_ID_IS_BLANK:
-                    sb.append(String.format("Line %d: Invalid input: (mappingId = null)\n\n", lineNumber));
+                    sb.append(String.format("Line %d: Mapping ID is missing\n\n", lineNumber));
                     break;
                 case TARGET_QUERY_IS_BLANK:
                     mappingId = (String) indicator.getHint();
                     if (!mappingId.isEmpty()) {
                         sb.append(String.format("MappingId = '%s'\n", mappingId));
                     }
-                    sb.append(String.format("Line %d: Invalid input: (targetQuery = null)\n\n", lineNumber));
+                    sb.append(String.format("Line %d: Target is missing\n\n", lineNumber));
                     break;
                 case SOURCE_QUERY_IS_BLANK:
                     mappingId = (String) indicator.getHint();
                     if (!mappingId.isEmpty()) {
                         sb.append(String.format("MappingId = '%s'\n", mappingId));
                     }
-                    sb.append(String.format("Line %d: Invalid input: (sourceQuery = null)\n\n", lineNumber));
+                    sb.append(String.format("Line %d: Source query is missing\n\n", lineNumber));
                     break;
                 case UNKNOWN_PREDICATE_IN_TARGET_QUERY:
                     Object[] hints1 = (Object[]) indicator.getHint();
@@ -93,7 +92,7 @@ public class InvalidMappingExceptionWithIndicator extends InvalidMappingExceptio
                         sb.append(String.format("MappingId = '%s'\n", mappingId));
                     }
                     String targetString = hints2[1];
-                    sb.append(String.format("Line %d: Cannot parse query: '%s'\n\n", lineNumber, targetString));
+                    sb.append(String.format("Line %d: Invalid target: '%s'\n\n", lineNumber, targetString));
                     break;
                 }
             }

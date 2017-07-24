@@ -33,6 +33,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SQLMappingExtractor implements MappingExtractor {
 
     private static final String ONTOLOGY_SATURATED_TBOX_ERROR_MSG = "the Ontology and TBoxReasoner must be both present, or none";
@@ -59,8 +60,9 @@ public class SQLMappingExtractor implements MappingExtractor {
 
     @Override
     public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<Ontology> ontology, Optional<TBoxReasoner> saturatedTBox,
-                                        ExecutorRegistry executorRegistry)
+                                        @Nonnull Optional<Ontology> ontology,
+                                        @Nonnull Optional<TBoxReasoner> saturatedTBox,
+                                        @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
 
         SQLPPMapping ppMapping = extractPPMapping(specInput);
@@ -90,8 +92,9 @@ public class SQLMappingExtractor implements MappingExtractor {
     @Override
     public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<Ontology> ontology, Optional<TBoxReasoner> saturatedTBox,
-                                        ExecutorRegistry executorRegistry)
+                                        @Nonnull Optional<Ontology> ontology,
+                                        @Nonnull Optional<TBoxReasoner> saturatedTBox,
+                                        @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
 
         if(ontology.isPresent() != saturatedTBox.isPresent()){
@@ -111,7 +114,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                                   OBDASpecInput specInput, Optional<Ontology> optionalOntology,
                                                   Optional<TBoxReasoner> optionalSaturatedTBox,
                                                   ExecutorRegistry executorRegistry)
-            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException {
+            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException {
 
 
         RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
@@ -149,8 +152,16 @@ public class SQLMappingExtractor implements MappingExtractor {
                                           OBDASpecInput specInput)
             throws DBMetadataExtractionException, MetaMappingExpansionException {
 
+        boolean isDBMetadataProvided = optionalDBMetadata.isPresent();
+
+        /*
+         * Metadata extraction can be disabled when DBMetadata is already provided
+         */
+        if (isDBMetadataProvided && (!settings.isProvidedDBMetadataCompletionEnabled()))
+            return optionalDBMetadata.get();
+
         try (Connection localConnection = createConnection()) {
-            return optionalDBMetadata.isPresent()
+            return isDBMetadataProvided
                     ? dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata.get(),
                             specInput.getConstraintFile())
                     : dbMetadataExtractor.extract(ppMapping, localConnection, specInput.getConstraintFile());
@@ -197,7 +208,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                 return Optional.of((RDBMetadata) md);
             }
             throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName()+" only supports instances of " +
-                    SQLPPMapping.class.getSimpleName());
+                    RDBMetadata.class.getSimpleName());
         }
         return Optional.empty();
     }

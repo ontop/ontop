@@ -58,6 +58,7 @@ import static it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator.
  */
 public class OntopNativeMappingParser implements SQLMappingParser {
 
+
     protected enum Label {
         /* Source decl.: */sourceUri, connectionUrl, username, password, driverClass,
         /* Mapping decl.: */mappingId, target, source
@@ -300,7 +301,13 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                     isMappingValid = false;
                 } else {
 	                // Load the target query
-	                targetQuery = loadTargetQuery(targetString, parsers);
+                    try {
+                        targetQuery = loadTargetQuery(targetString, parsers);
+                    } catch (UnparsableTargetQueryException e) {
+                        invalidMappingIndicators.add(new Indicator(lineNumber, new String[] {mappingId, targetString},
+                                ERROR_PARSING_TARGET_QUERY));
+                        isMappingValid = false;
+                    }
                 }
             } else if (currentLabel.equals(Label.source.name())) {
                 String sourceString = value;
