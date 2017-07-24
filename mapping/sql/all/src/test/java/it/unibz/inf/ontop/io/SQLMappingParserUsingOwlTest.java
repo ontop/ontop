@@ -115,7 +115,7 @@ public class SQLMappingParserUsingOwlTest {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile7.obda");
     }
 
-    @Test(expected=MappingIOException.class)
+    @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithBadTargetQuery() throws DuplicateMappingException, InvalidMappingException,
             InvalidPredicateDeclarationException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile8.obda");

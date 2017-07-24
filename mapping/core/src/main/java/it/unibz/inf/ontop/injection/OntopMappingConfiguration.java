@@ -30,6 +30,8 @@ public interface OntopMappingConfiguration extends OntopOBDASpecificationConfigu
 
         B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology);
 
+        B enableProvidedDBMetadataCompletion(boolean dbMetadataCompletion);
+
         B dbMetadata(@Nonnull DBMetadata dbMetadata);
 
     }

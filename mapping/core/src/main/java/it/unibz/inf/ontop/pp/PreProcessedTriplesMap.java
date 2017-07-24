@@ -10,5 +10,7 @@ public interface PreProcessedTriplesMap {
 
     ImmutableList<ImmutableFunctionalTerm> getTargetAtoms();
 
-    PPTriplesMapProvenance getProvenance(ImmutableFunctionalTerm targetAtom);
+    PPMappingAssertionProvenance getMappingAssertionProvenance(ImmutableFunctionalTerm targetAtom);
+
+    PPTriplesMapProvenance getTriplesMapProvenance();
 }

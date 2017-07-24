@@ -1,22 +1,15 @@
 package it.unibz.inf.ontop.spec.trans.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
-import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
+import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.trans.MappingDatatypeFiller;
-import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeCompletion;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 /**
  * Legacy code to infer datatypes not declared in the targets of mapping assertions.
@@ -60,7 +53,7 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     @Override
     public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping, DBMetadata dbMetadata) {
         MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata);
-        ImmutableMap<CQIE, PPTriplesMapProvenance> ruleMap = mapping2DatalogConverter.convert(mapping);
+        ImmutableMap<CQIE, PPMappingAssertionProvenance> ruleMap = mapping2DatalogConverter.convert(mapping);
 
         //CQIEs are mutable
         for(CQIE rule : ruleMap.keySet()){

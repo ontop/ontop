@@ -20,7 +20,7 @@ import it.unibz.inf.ontop.iq.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.predicate.AtomPredicate;
 import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
+import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -83,7 +83,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     }
 
     @Override
-    public MappingWithProvenance convertMappingRules(ImmutableMap<CQIE, PPTriplesMapProvenance> datalogMap,
+    public MappingWithProvenance convertMappingRules(ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap,
                                                      DBMetadata dbMetadata, ExecutorRegistry executorRegistry,
                                                      MappingMetadata mappingMetadata) {
         ImmutableSet<Predicate> extensionalPredicates = datalogMap.keySet().stream()
@@ -92,7 +92,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .collect(ImmutableCollectors.toSet());
 
 
-        ImmutableMap<IntermediateQuery, PPTriplesMapProvenance> iqMap = datalogMap.entrySet().stream()
+        ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> convertDatalogRule(dbMetadata, e.getKey(), extensionalPredicates, Optional.empty(),
                                 iqFactory, executorRegistry),
