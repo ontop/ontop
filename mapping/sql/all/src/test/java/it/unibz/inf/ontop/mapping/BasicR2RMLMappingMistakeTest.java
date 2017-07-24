@@ -7,14 +7,8 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.mapping.BasicNativeMappingMistakeTest.DB_METADATA;
-
-public class BasicR2RMLMappingMistakeTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicR2RMLMappingMistakeTest.class);
+public class BasicR2RMLMappingMistakeTest extends AbstractBasicMappingMistakeTest {
 
     @Test(expected = InvalidMappingSourceQueriesException.class)
     public void testUnboundTargetVariable() throws OBDASpecificationException {
@@ -38,19 +32,10 @@ public class BasicR2RMLMappingMistakeTest {
         execute("/mistake/invalid-predicate-object1-r2rml.ttl");
     }
 
-    private void execute(String mappingFile) throws OBDASpecificationException {
-        try {
-            OntopMappingSQLAllConfiguration configuration = createConfiguration(mappingFile);
-            configuration.loadSpecification();
-        } catch (Exception e) {
-            LOGGER.info(e.toString());
-            throw e;
-        }
-    }
-
-    private OntopMappingSQLAllConfiguration createConfiguration(String mappingFile) {
+    @Override
+    protected OntopMappingSQLAllConfiguration createConfiguration(String mappingFile) {
         return OntopMappingSQLAllConfiguration.defaultBuilder()
-                .dbMetadata(DB_METADATA)
+                .dbMetadata(getDBMetadata())
                 .r2rmlMappingFile(getClass().getResource(mappingFile).getPath())
                 .jdbcUrl("jdbc:h2://localhost/fake")
                 .jdbcUser("fake_user")
