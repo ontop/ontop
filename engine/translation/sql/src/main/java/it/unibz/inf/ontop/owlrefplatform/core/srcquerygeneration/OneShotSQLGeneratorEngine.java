@@ -337,10 +337,7 @@ public class OneShotSQLGeneratorEngine {
 		IntermediateQuery queryAfterPullOut = new PullOutVariableOptimizer().optimize(groundTermFreeQuery);
 		log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
 
-		IntermediateQuery queryAfterPushUp = new PushUpBooleanExpressionOptimizerImpl().optimize(queryAfterPullOut);
-		log.debug("New query after pushing up boolean expressions: \n" +queryAfterPushUp);
-
-		return queryAfterPushUp;
+		return queryAfterPullOut;
 	}
 
     private boolean hasSelectDistinctStatement(DatalogProgram query) {
@@ -590,47 +587,16 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 	/**
-	 * Here we normalize so that the form of the CQ is as close to the form of a
-	 * normal SQL algebra as possible, particularly, no shared variables, only
-	 * joins by means of equality. Also, equalities in nested expressions
-	 * (JOINS) are kept at their respective levels to generate correct ON and
-	 * wHERE clauses.
-	 *
-	 * @param cq
+	 * Normalizations of the Datalog program requirend by the Datalog to SQL translator
 	 */
 	private void normalizeRule(CQIE cq) {
 
-		// log.debug("Before pushing equalities: \n{}", cq);
-
-//		 EQNormalizer.enforceEqualities(cq);
-
-		// log.debug("Before folding Joins: \n{}", cq);
-
 		DatalogNormalizer.foldJoinTrees(cq);
 
-//		 log.debug("Before pulling out equalities: \n{}", cq);
-
-		// we dont need this anymore, done before
-		// DatalogNormalizer.pullOutEqualities(cq);
-
-		// log.debug("Before pulling out Left Join Conditions: \n{}", cq);
-
-//		DatalogNormalizer.pullOutLeftJoinConditions(cq);
-
-		// log.debug("Before pulling up nested references: \n{}", cq);
-
-//		DatalogNormalizer.pullUpNestedReferences(cq);
-
-		// log.debug("Before adding trivial equalities: \n{}, cq);", cq);
-
 		DatalogNormalizer.addMinimalEqualityToLeftJoin(cq);
-
-//		 log.debug("Normalized CQ: \n{}", cq);
 	}
 
 	/**
-	 * Normalizes a program, i.e., list of rules, in place
-	 *
 	 * @param program
 	 */
 	private void normalizeProgram(DatalogProgram program) {
