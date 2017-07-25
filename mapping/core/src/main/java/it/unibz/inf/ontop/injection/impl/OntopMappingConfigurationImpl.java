@@ -186,6 +186,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         private final B builder;
         private Optional<Boolean> obtainFullMetadata = Optional.empty();
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
+        private Optional<Boolean> completeDBMetadata = Optional.empty();
         private Optional<DBMetadata> dbMetadata = Optional.empty();
         private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
 
@@ -212,6 +213,12 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
 
         @Override
+        public B enableProvidedDBMetadataCompletion(boolean dbMetadataCompletion) {
+            this.completeDBMetadata = Optional.of(dbMetadataCompletion);
+            return builder;
+        }
+
+        @Override
         public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
             this.dbMetadata = Optional.of(dbMetadata);
             return builder;
@@ -226,6 +233,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             Properties properties = new Properties();
             obtainFullMetadata.ifPresent(m -> properties.put(OntopMappingSettings.OBTAIN_FULL_METADATA, m));
             queryingAnnotationsInOntology.ifPresent(b -> properties.put(OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS, b));
+            completeDBMetadata.ifPresent(b -> properties.put(OntopMappingSettings.COMPLETE_PROVIDED_METADATA, b));
             return properties;
         }
 
@@ -258,6 +266,11 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         @Override
         public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
             return mappingBuilderFragment.enableOntologyAnnotationQuerying(queryingAnnotationsInOntology);
+        }
+
+        @Override
+        public B enableProvidedDBMetadataCompletion(boolean dbMetadataCompletion) {
+            return mappingBuilderFragment.enableProvidedDBMetadataCompletion(dbMetadataCompletion);
         }
 
         @Override
@@ -316,6 +329,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
             return new OntopMappingConfigurationImpl(settings, options);
         }
+
     }
 
 }

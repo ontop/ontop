@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.mapping.validation.impl;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
@@ -20,7 +19,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
+import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -65,12 +64,12 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
         ImmutableMultimap<String, Datatype> datatypeMap = computeDataTypeMap(saturatedTBox);
 
-        for (Map.Entry<IntermediateQuery, PPTriplesMapProvenance> entry : mapping.getProvenanceMap().entrySet()) {
+        for (Map.Entry<IntermediateQuery, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
             validateAssertion(entry.getKey(), entry.getValue(), declaredVocabulary, datatypeMap);
         }
     }
 
-    private void validateAssertion(IntermediateQuery mappingAssertion, PPTriplesMapProvenance provenance,
+    private void validateAssertion(IntermediateQuery mappingAssertion, PPMappingAssertionProvenance provenance,
                                    ImmutableOntologyVocabulary vocabulary,
                                    ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
@@ -172,8 +171,9 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
 
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private void checkTripleObject(String predicateIRI, Optional<TermType> optionalTripleObjectType,
-                                   PPTriplesMapProvenance provenance,
+                                   PPMappingAssertionProvenance provenance,
                                    ImmutableOntologyVocabulary declaredVocabulary,
                                    ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
@@ -202,7 +202,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         }
     }
 
-    private void checkObjectOrAnnotationProperty(String predicateIRI, PPTriplesMapProvenance provenance,
+    private void checkObjectOrAnnotationProperty(String predicateIRI, PPMappingAssertionProvenance provenance,
                                                  ImmutableOntologyVocabulary declaredVocabulary)
             throws MappingOntologyMismatchException {
         /*
@@ -220,7 +220,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     }
 
     private void checkDataOrAnnotationProperty(TermType tripleObjectType, String predicateIRI,
-                                               PPTriplesMapProvenance provenance,
+                                               PPMappingAssertionProvenance provenance,
                                                ImmutableOntologyVocabulary declaredVocabulary,
                                                ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
@@ -264,7 +264,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         }
     }
 
-    private void checkClass(String predicateIRI, PPTriplesMapProvenance provenance,
+    private void checkClass(String predicateIRI, PPMappingAssertionProvenance provenance,
                             ImmutableOntologyVocabulary declaredVocabulary) throws MappingOntologyMismatchException {
         /*
          * Cannot be an object property
@@ -287,7 +287,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                     ANNOTATION_PROPERTY_STR, DATA_PROPERTY_STR));
     }
 
-    private static String generatePropertyOrClassConflictMessage(String predicateIRI, PPTriplesMapProvenance provenance,
+    private static String generatePropertyOrClassConflictMessage(String predicateIRI, PPMappingAssertionProvenance provenance,
                                                                  String declaredTypeString, String usedTypeString) {
 
         return predicateIRI +

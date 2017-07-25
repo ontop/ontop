@@ -7,12 +7,18 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
 
     boolean isFullMetadataExtractionEnabled();
 
+    /**
+     * Completes user-provided DBMetadata
+     */
+    boolean isProvidedDBMetadataCompletionEnabled();
+
     //--------------------------
     // Keys
     //--------------------------
 
     String OBTAIN_FULL_METADATA = "ontop.fullMetadataExtraction";
     String QUERY_ONTOLOGY_ANNOTATIONS = "ontop.queryOntologyAnnotation";
+    String COMPLETE_PROVIDED_METADATA = "ontop.completeProvidedMetadata";
 
     /**
      * Options to specify base IRI.

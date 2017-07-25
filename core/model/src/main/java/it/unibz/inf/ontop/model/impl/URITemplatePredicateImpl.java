@@ -28,7 +28,7 @@ public class URITemplatePredicateImpl extends PredicateImpl implements URITempla
 
 	public URITemplatePredicateImpl(int arity) {
 		// TODO: BAD CODE! Predicate shouldn't store the arity and the type.
-		super(OBDAVocabulary.QUEST_URI, arity, null);
+		super(OBDAVocabulary.QUEST_URI+arity, arity, null);
 	}
 	
 	@Override

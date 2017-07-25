@@ -82,14 +82,8 @@ public class R2RMLParser {
 	 * @param myGraph - the Graph to process
 	 * @return Collection<TriplesMap> - the collection of mappings
 	 */
-	public Collection<TriplesMap> getMappingNodes(Graph myGraph) {
-		Collection<TriplesMap> coll = null;
-		try {
-			coll = mapManager.importMappings(myGraph);
-		} catch (InvalidR2RMLMappingException e) {
-			e.printStackTrace();
-		}
-		return coll;
+	public Collection<TriplesMap> getMappingNodes(Graph myGraph) throws InvalidR2RMLMappingException {
+		return mapManager.importMappings(myGraph);
 	}
 
 	/**

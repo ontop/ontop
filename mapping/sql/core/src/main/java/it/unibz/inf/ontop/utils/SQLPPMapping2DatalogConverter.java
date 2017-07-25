@@ -24,9 +24,10 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.pp.PPTriplesMapProvenance;
+import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 
 import java.util.*;
@@ -34,6 +35,7 @@ import java.util.*;
 import it.unibz.inf.ontop.sql.parser.RAExpression;
 import it.unibz.inf.ontop.sql.parser.SelectQueryAttributeExtractor;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 
 import com.google.common.collect.ImmutableMap;
@@ -52,13 +54,13 @@ public class SQLPPMapping2DatalogConverter {
      * returns a Datalog representation of the mappings
      */
     public static ImmutableList<CQIE> constructDatalogProgram(Collection<SQLPPTriplesMap> triplesMaps,
-                                                              DBMetadata metadata) {
+                                                              DBMetadata metadata) throws InvalidMappingSourceQueriesException {
         return ImmutableList.copyOf(convert(triplesMaps, metadata).keySet());
     }
 
-    public static ImmutableMap<CQIE, PPTriplesMapProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
-                                                                     DBMetadata metadata0) {
-        Map<CQIE, PPTriplesMapProvenance> mutableMap = new HashMap<>();
+    public static ImmutableMap<CQIE, PPMappingAssertionProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
+                                                                     DBMetadata metadata0) throws InvalidMappingSourceQueriesException {
+        Map<CQIE, PPMappingAssertionProvenance> mutableMap = new HashMap<>();
 
         RDBMetadata metadata = (RDBMetadata)metadata0;
 
@@ -112,30 +114,32 @@ public class SQLPPMapping2DatalogConverter {
                 }
 
                 for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {
-                    PPTriplesMapProvenance provenance = mappingAxiom.getProvenance(atom);
-                    Function head = renameVariables(atom, lookupTable, idfac);
-                    CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
+                    PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
+                    try {
+                        Function head = renameVariables(atom, lookupTable, idfac);
+                        CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
 
-                    if (mutableMap.containsKey(rule)) {
-                        LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + mutableMap.get(rule));
-                    }
-                    else {
-                        mutableMap.put(rule, provenance);
+                        if (mutableMap.containsKey(rule)) {
+                            LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + mutableMap.get(rule));
+                        } else {
+                            mutableMap.put(rule, provenance);
+                        }
+                    } catch (UnboundVariableException e) {
+                        errorMessages.add("Error: " + e.getMessage()
+                                + " \nProblem location: source query of the mapping assertion \n["
+                                + provenance.getProvenanceInfo() + "]");
                     }
                 }
             }
-            catch (Exception e) { // in particular, InvalidSelectQueryException
-                errorMessages.add("Error in mapping with id: " + mappingAxiom.getId()
-                        + "\nDescription: " + e.getMessage()
-                        + "\nMapping: [" + mappingAxiom.toString() + "]");
+            catch (InvalidSelectQueryException e) {
+                errorMessages.add("Error: " + e.getMessage()
+                        + " \nProblem location: source query of triplesMap \n["
+                        +  mappingAxiom.getTriplesMapProvenance().getProvenanceInfo() + "]");
             }
         }
 
         if (!errorMessages.isEmpty())
-            throw new IllegalArgumentException(
-                    "There were errors analyzing the following mappings. " +
-                            "Please correct the issues to continue.\n\n" +
-                            Joiner.on("\n\n").join(errorMessages));
+            throw new InvalidMappingSourceQueriesException(Joiner.on("\n\n").join(errorMessages));
 
         return ImmutableMap.copyOf(mutableMap);
     }
@@ -145,7 +149,8 @@ public class SQLPPMapping2DatalogConverter {
      * Returns a new function by renaming variables occurring in the {@code function}
      *  according to the {@code attributes} lookup table
      */
-    private static Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Variable> attributes, QuotedIDFactory idfac) {
+    private static Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Variable> attributes,
+                                            QuotedIDFactory idfac) throws UnboundVariableException {
         List<Term> terms = function.getTerms();
         List<Term> newTerms = new ArrayList<>(terms.size());
         for (Term t : terms)
@@ -158,7 +163,8 @@ public class SQLPPMapping2DatalogConverter {
      * Returns a new term by renaming variables occurring in the {@code term}
      *  according to the {@code attributes} lookup table
      */
-    private static Term renameTermVariables(Term term, ImmutableMap<QualifiedAttributeID, Variable> attributes, QuotedIDFactory idfac) {
+    private static Term renameTermVariables(Term term, ImmutableMap<QualifiedAttributeID, Variable> attributes,
+                                            QuotedIDFactory idfac) throws UnboundVariableException {
 
         if (term instanceof Variable) {
             Variable var = (Variable) term;
@@ -175,7 +181,8 @@ public class SQLPPMapping2DatalogConverter {
                 newVar = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
 
                 if (newVar == null)
-                    throw new IllegalArgumentException("Column " + attribute + " ( " + var.getName() + " ) not found in " + attributes);
+                    throw new UnboundVariableException("The source query does not provide the attribute " + attribute
+                            + " (variable " + var.getName() + ") required by the target atom.");
             }
 
             return newVar;
@@ -187,5 +194,11 @@ public class SQLPPMapping2DatalogConverter {
             return term.clone();
 
         throw new RuntimeException("Unknown term type: " + term);
+    }
+
+    private static class UnboundVariableException extends Exception {
+        UnboundVariableException(String message) {
+            super(message);
+        }
     }
 }

@@ -26,6 +26,7 @@ package it.unibz.inf.ontop.r2rml;
  */
 
 
+import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -126,7 +127,7 @@ public class R2RMLManager {
 	 * @param myModel - the Model structure containing mappings
 	 * @return ArrayList<OBDAMappingAxiom> - list of mapping axioms read from the Model
 	 */
-	public ImmutableList<SQLPPTriplesMap> getMappings(Graph myModel) {
+	public ImmutableList<SQLPPTriplesMap> getMappings(Graph myModel) throws InvalidR2RMLMappingException {
 
 		List<SQLPPTriplesMap> mappings = new ArrayList<SQLPPTriplesMap>();
 
