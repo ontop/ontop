@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.impl.DefaultOntopRDFMaterializer;
 
@@ -16,7 +15,7 @@ public interface OntopRDFMaterializer {
      */
     MaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
                                            @Nonnull MaterializationParams params)
-            throws OBDASpecificationException, OntopConnectionException;
+            throws OBDASpecificationException;
 
     /**
      * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary
@@ -24,7 +23,7 @@ public interface OntopRDFMaterializer {
     MaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
                                            @Nonnull ImmutableSet<URI> selectedVocabulary,
                                            @Nonnull MaterializationParams params)
-            throws OBDASpecificationException, OntopConnectionException;
+            throws OBDASpecificationException;
 
     /**
      * Default implementation

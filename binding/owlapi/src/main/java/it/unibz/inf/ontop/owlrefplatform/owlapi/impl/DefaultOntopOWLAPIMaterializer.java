@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.impl;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
@@ -50,7 +49,7 @@ public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 			throws OWLException {
 		try {
 			return wrap(materializer.materialize(configuration, params));
-		} catch (OBDASpecificationException | OntopConnectionException e) {
+		} catch (OBDASpecificationException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -62,7 +61,7 @@ public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 			throws OWLException {
 		try {
 			return wrap(materializer.materialize(configuration, selectedVocabulary, params));
-		} catch (OBDASpecificationException | OntopConnectionException e) {
+		} catch (OBDASpecificationException e) {
 			throw new OntopOWLException(e);
 		}
 	}

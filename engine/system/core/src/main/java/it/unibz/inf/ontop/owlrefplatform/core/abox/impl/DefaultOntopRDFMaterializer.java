@@ -67,7 +67,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 	@Override
 	public MaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
 												  @Nonnull MaterializationParams params)
-			throws OBDASpecificationException, OntopConnectionException {
+			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
 		ImmutableSet<Predicate> vocabulary = extractVocabulary(obdaSpecification.getVocabulary());
 		return apply(obdaSpecification, vocabulary, params, configuration);
@@ -77,7 +77,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 	public MaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
 												  @Nonnull ImmutableSet<URI> selectedVocabulary,
 												  @Nonnull MaterializationParams params)
-			throws OBDASpecificationException, OntopConnectionException {
+			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
 
 		ImmutableMap<URI, Predicate> vocabularyMap = extractVocabulary(obdaSpecification.getVocabulary()).stream()
@@ -94,8 +94,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 	}
 
 	private MaterializedGraphResultSet apply(OBDASpecification obdaSpecification, ImmutableSet<Predicate> selectedVocabulary,
-											 MaterializationParams params, OntopSystemConfiguration configuration)
-			throws OntopConnectionException {
+											 MaterializationParams params, OntopSystemConfiguration configuration) {
 
 		Injector injector = configuration.getInjector();
 		OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
@@ -165,10 +164,12 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		private final InputQueryFactory inputQueryFactory;
 		private final boolean doStreamResults, canBeIncomplete;
 
-		private final OntopConnection ontopConnection;
+		private final OntopQueryEngine queryEngine;
 		private final UnmodifiableIterator<Predicate> vocabularyIterator;
 
 		private int counter;
+		@Nullable
+		private OntopConnection ontopConnection;
 		@Nullable
 		private OntopStatement tmpStatement;
 		@Nullable
@@ -179,16 +180,16 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		private Logger LOGGER = LoggerFactory.getLogger(DefaultMaterializedGraphResultSet.class);
 		private final List<URI> possiblyIncompleteClassesAndProperties;
 
+
 		DefaultMaterializedGraphResultSet(ImmutableSet<Predicate> vocabulary, MaterializationParams params,
-										  OntopQueryEngine queryEngine, InputQueryFactory inputQueryFactory)
-				throws OntopConnectionException {
+										  OntopQueryEngine queryEngine, InputQueryFactory inputQueryFactory) {
 
 			this.vocabulary = vocabulary.stream()
 					.map(DefaultOntopRDFMaterializer::convertIntoURI)
 					.collect(ImmutableCollectors.toSet());
 			this.vocabularyIterator = vocabulary.iterator();
 
-			ontopConnection = queryEngine.getConnection();
+			this.queryEngine = queryEngine;
 			this.doStreamResults = params.isDBResultStreamingEnabled();
 			this.canBeIncomplete = params.canMaterializationBeIncomplete();
 			this.inputQueryFactory = inputQueryFactory;
@@ -200,6 +201,8 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 			}
 
 			counter = 0;
+			// Lately initiated
+			ontopConnection = null;
 			tmpStatement = null;
 			tmpGraphResultSet = null;
 			nextAssertion = null;
@@ -213,6 +216,10 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
 		@Override
 		public boolean hasNext() throws OntopQueryAnsweringException, OntopConnectionException {
+			// Initialization
+			if (ontopConnection == null)
+				ontopConnection = queryEngine.getConnection();
+
 			if ((tmpGraphResultSet != null) && tmpGraphResultSet.hasNext()) {
 
 				// Two times in a row (can be tolerated)

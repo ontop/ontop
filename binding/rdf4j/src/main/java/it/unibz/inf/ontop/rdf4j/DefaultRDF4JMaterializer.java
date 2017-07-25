@@ -59,7 +59,7 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 
 			return new DefaultMaterializedGraphQuery(graphResultSet);
 
-		} catch (OBDASpecificationException | OntopConnectionException e) {
+		} catch (OBDASpecificationException e) {
 			throw new RepositoryException(e);
 		}
 	}
@@ -75,7 +75,7 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 
 			return new DefaultMaterializedGraphQuery(graphResultSet);
 
-		} catch (OBDASpecificationException | OntopConnectionException e) {
+		} catch (OBDASpecificationException e) {
 			throw new RepositoryException(e);
 		}
 	}

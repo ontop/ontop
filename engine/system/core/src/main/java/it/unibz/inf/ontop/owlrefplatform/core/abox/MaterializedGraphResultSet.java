@@ -9,6 +9,9 @@ import java.net.URI;
 
 /**
  * Lazy materialization result set
+ *
+ * Does not allocate resources (e.g. connection) before hasNext() is called.
+ *
  */
 public interface MaterializedGraphResultSet extends GraphResultSet<OntopQueryAnsweringException> {
 
