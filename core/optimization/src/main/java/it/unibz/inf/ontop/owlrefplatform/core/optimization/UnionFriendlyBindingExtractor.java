@@ -4,8 +4,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -177,6 +177,9 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
 
             ImmutableList<? extends ImmutableTerm> arguments1 = functionalTerm1.getArguments();
             ImmutableList<? extends ImmutableTerm> arguments2 = functionalTerm2.getArguments();
+            if(arguments1.size()!=arguments2.size()){
+                throw new IllegalStateException("Functions have different arities, they cannot be combined");
+            }
 
             ImmutableList.Builder<ImmutableTerm> argumentBuilder = ImmutableList.builder();
             for(int i=0; i <  arguments1.size(); i++) {
