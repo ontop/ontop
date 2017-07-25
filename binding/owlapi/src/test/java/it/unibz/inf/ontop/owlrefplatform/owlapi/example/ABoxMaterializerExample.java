@@ -23,9 +23,9 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 import java.io.*;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
-import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
-import org.semanticweb.owlapi.model.OWLIndividualAxiom;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLMaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
+import org.semanticweb.owlapi.model.OWLAxiom;
 
 /**
  * A very simple example that shows how to generate triples in an N-Triple file,
@@ -56,33 +56,28 @@ public class ABoxMaterializerExample {
 		/*
 		 * Start materializing data from database to triples.
 		 */
+		OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
 
-		// TODO: try the streaming mode.
-		try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(configuration, false)) {
-		
-		long numberOfTriples = materializer.getTriplesCount();
-		System.out.println("Generated triples: " + numberOfTriples);
+		try (OntopOWLMaterializedGraphResultSet graphResultSet = materializer.materialize(configuration)) {
 
-		/*
-		 * Obtain the triples iterator
-		 */
-		QuestOWLIndividualAxiomIterator triplesIter = materializer.getIterator();
-		
-		/*
-		 * Print the triples into an external file.
-		 */
-		File fout = new File(OUTPUT_FILE);
-		if (fout.exists()) {
-			fout.delete(); // clean any existing output file.
-		}
-		
-		try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fout, true)))) {
-			while (triplesIter.hasNext()) {
-				OWLIndividualAxiom individual = triplesIter.next();
-				out.println(individual.toString());
+			/*
+			 * Print the triples into an external file.
+			 */
+			File fout = new File(OUTPUT_FILE);
+			if (fout.exists()) {
+				fout.delete(); // clean any existing output file.
 			}
-			out.flush();
-		}
+
+			try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fout, true)))) {
+				while (graphResultSet.hasNext()) {
+					OWLAxiom individual = graphResultSet.next();
+					out.println(individual.toString());
+				}
+				out.flush();
+			}
+
+			long numberOfTriples = graphResultSet.getTripleCountSoFar();
+			System.out.println("Generated triples: " + numberOfTriples);
 		}
 	}
 

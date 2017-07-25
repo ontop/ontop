@@ -27,17 +27,20 @@ import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLMaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.*;
+import java.net.URI;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -163,10 +166,6 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         final long startTime = System.currentTimeMillis();
 
 
-
-        OWLAPIMaterializer materializer = new OWLAPIMaterializer(materializationConfig, predicate, doStreamResults);
-        QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
-
         System.err.println("Starts writing triples into files.");
 
         int tripleCount = 0;
@@ -186,16 +185,23 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         }
 
         String filePrefix = Paths.get(outputDir, predicate.getName().replaceAll("[^a-zA-Z0-9]", "_") +typePred +"_" ).toString();
+        OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
+        MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
+                .enableDBResultsStreaming(doStreamResults)
+                .build();
 
 
+        try (OntopOWLMaterializedGraphResultSet graphResultSet = materializer.materialize(materializationConfig,
+                ImmutableSet.of(URI.create(predicate.getName())), materializationParams)) {
 
-        while(iterator.hasNext()) {
-            tripleCount += serializeTripleBatch(ontology, iterator, filePrefix, predicate.getName(), fileCount, format);
-            fileCount++;
+            while (graphResultSet.hasNext()) {
+                tripleCount += serializeTripleBatch(ontology, graphResultSet, filePrefix, predicate.getName(), fileCount, format);
+                fileCount++;
+            }
+
+            System.out.println("NR of TRIPLES: " + tripleCount);
+            System.out.println("VOCABULARY SIZE (NR of QUERIES): " + graphResultSet.getSelectedVocabulary().size());
         }
-
-        System.out.println("NR of TRIPLES: " + tripleCount);
-        System.out.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());
 
         final long endTime = System.currentTimeMillis();
         final long time = endTime - startTime;
@@ -207,8 +213,8 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
      * Upper bound: TRIPLE_LIMIT_PER_FILE.
      *
      */
-    private int serializeTripleBatch(OWLOntology ontology, QuestOWLIndividualAxiomIterator iterator,
-                                            String filePrefix, String predicateName, int fileCount, String format) throws Exception {
+    private int serializeTripleBatch(OWLOntology ontology, OntopOWLMaterializedGraphResultSet iterator,
+                                     String filePrefix, String predicateName, int fileCount, String format) throws Exception {
         String suffix;
 
         switch (format) {
@@ -301,27 +307,28 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                         .build();
             }
 
-            OWLAPIMaterializer materializer = new OWLAPIMaterializer(materializerConfiguration, doStreamResults);
+            OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
+            MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
+                    .enableDBResultsStreaming(doStreamResults)
+                    .build();
 
 
             // OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
 
-
-            QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
             OWLOntologyManager manager = ontology.getOWLOntologyManager();
+            try (OntopOWLMaterializedGraphResultSet graphResults = materializer.materialize(
+                    materializerConfiguration, materializationParams)) {
 
-            while(iterator.hasNext())
-                manager.addAxiom(ontology, iterator.next());
+                while (graphResults.hasNext())
+                    manager.addAxiom(ontology, graphResults.next());
 
+                OWLDocumentFormat DocumentFormat = getDocumentFormat(format);
 
-            OWLDocumentFormat DocumentFormat = getDocumentFormat(format);
+                manager.saveOntology(ontology, DocumentFormat, new WriterDocumentTarget(writer));
 
-            manager.saveOntology(ontology, DocumentFormat, new WriterDocumentTarget(writer));
-
-            System.err.println("NR of TRIPLES: " + materializer.getTriplesCount());
-            System.err.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());
-
-            materializer.disconnect();
+                System.err.println("NR of TRIPLES: " + graphResults.getTripleCountSoFar());
+                System.err.println("VOCABULARY SIZE (NR of QUERIES): " + graphResults.getSelectedVocabulary().size());
+            }
             if (outputFile!=null)
                 output.close();
 

@@ -158,7 +158,7 @@ public abstract class QuestStatement implements OntopStatement {
 	/**
 	 * TODO: describe
 	 */
-	private GraphResultSet executeDescribeConstructQuery(ConstructQuery constructQuery, ExecutableQuery executableQuery)
+	private SimpleGraphResultSet executeDescribeConstructQuery(ConstructQuery constructQuery, ExecutableQuery executableQuery)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
 		return executeGraphQuery(constructQuery, executableQuery, true);
 	}
@@ -166,7 +166,7 @@ public abstract class QuestStatement implements OntopStatement {
 	/**
 	 * TODO: describe
 	 */
-	private GraphResultSet executeConstructQuery(ConstructQuery constructQuery, ExecutableQuery executableQuery)
+	private SimpleGraphResultSet executeConstructQuery(ConstructQuery constructQuery, ExecutableQuery executableQuery)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
 		return executeGraphQuery(constructQuery, executableQuery, false);
 	}
@@ -174,8 +174,8 @@ public abstract class QuestStatement implements OntopStatement {
 	/**
 	 * TODO: refactor
 	 */
-	protected abstract GraphResultSet executeGraphQuery(ConstructQuery query, ExecutableQuery executableQuery,
-														boolean collectResults)
+	protected abstract SimpleGraphResultSet executeGraphQuery(ConstructQuery query, ExecutableQuery executableQuery,
+															  boolean collectResults)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
 
 	/**
@@ -211,13 +211,13 @@ public abstract class QuestStatement implements OntopStatement {
 	 * TODO: completely refactor this old-way of processing DESCRIBE.
 	 *  ---> should be converted into 1 CONSTRUCT query
 	 */
-	private GraphResultSet executeDescribeQuery(DescribeQuery inputQuery)
+	private SimpleGraphResultSet executeDescribeQuery(DescribeQuery inputQuery)
 			throws OntopTranslationException, OntopResultConversionException, OntopConnectionException,
 			OntopQueryEvaluationException {
 
 		ImmutableSet<String> constants = extractDescribeQueryConstants(inputQuery);
 
-		GraphResultSet describeResultSet = null;
+		SimpleGraphResultSet describeResultSet = null;
 
 		try {
 			// execute describe <uriconst> in subject position
@@ -227,7 +227,7 @@ public abstract class QuestStatement implements OntopStatement {
 				String str = SPARQLQueryUtility.getConstructSubjQuery(constant);
 				ConstructQuery constructQuery = inputQueryFactory.createConstructQuery(str);
 
-				GraphResultSet set = executeInThread(constructQuery, this::executeDescribeConstructQuery);
+				SimpleGraphResultSet set = executeInThread(constructQuery, this::executeDescribeConstructQuery);
 				if (describeResultSet == null) { // just for the first time
 					describeResultSet = set;
 				} else if (set != null) {
@@ -241,7 +241,7 @@ public abstract class QuestStatement implements OntopStatement {
 				String str = SPARQLQueryUtility.getConstructObjQuery(constant);
 
 				ConstructQuery constructQuery = inputQueryFactory.createConstructQuery(str);
-				GraphResultSet set = executeInThread(constructQuery, this::executeDescribeConstructQuery);
+				SimpleGraphResultSet set = executeInThread(constructQuery, this::executeDescribeConstructQuery);
 
 				if (describeResultSet == null) { // just for the first time
 					describeResultSet = set;

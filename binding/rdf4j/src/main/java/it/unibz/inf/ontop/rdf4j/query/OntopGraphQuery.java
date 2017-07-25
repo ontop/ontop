@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.rdf4j.query;
 
 import it.unibz.inf.ontop.answering.input.GraphSPARQLQuery;
 import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
-import it.unibz.inf.ontop.model.GraphResultSet;
+import it.unibz.inf.ontop.model.SimpleGraphResultSet;
 import it.unibz.inf.ontop.ontology.Assertion;
 
 import java.util.HashMap;
@@ -76,7 +76,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 				: inputQueryFactory.createDescribeQuery(getQueryString(), parsedQuery);
 		try (
 				OntopStatement stm = conn.createStatement();
-				GraphResultSet res = stm.execute(query)
+				SimpleGraphResultSet res = stm.execute(query)
 		){
 			
 			Map<String, String> namespaces = new HashMap<>();
@@ -101,12 +101,12 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
         @Override
 	public void evaluate(RDFHandler handler) throws QueryEvaluationException,
 			RDFHandlerException {
-		GraphQueryResult result =  evaluate();
-		handler.startRDF();
-		while (result.hasNext())
-			handler.handleStatement(result.next());
-		handler.endRDF();
-
+		try(GraphQueryResult result =  evaluate()) {
+			handler.startRDF();
+			while (result.hasNext())
+				handler.handleStatement(result.next());
+			handler.endRDF();
+		}
 	}
 
     @Override

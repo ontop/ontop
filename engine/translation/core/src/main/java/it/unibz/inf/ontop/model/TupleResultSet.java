@@ -38,9 +38,6 @@ public interface TupleResultSet extends OBDAResultSet {
 
 	int getFetchSize() throws OntopConnectionException;
 
-	@Override
-    void close() throws OntopConnectionException;
-
 	boolean nextRow() throws OntopConnectionException;
 
 	/*

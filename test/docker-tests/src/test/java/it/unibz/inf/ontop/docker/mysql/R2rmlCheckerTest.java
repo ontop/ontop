@@ -313,7 +313,7 @@ public class R2rmlCheckerTest {
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			while (rs.nextRow()) {
+			while (rs.hasNext()) {
 				n++;
 			}
 			log.debug("number of results of q1: " + n);
@@ -384,7 +384,7 @@ public class R2rmlCheckerTest {
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			while (rs.nextRow()) {
+			while (rs.hasNext()) {
 				n++;
 			}
 			// log.info("description: " + n);
@@ -412,7 +412,7 @@ public class R2rmlCheckerTest {
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			while (rs.nextRow()) {
+			while (rs.hasNext()) {
 //				log.debug("result : "  + rs.getOWLObject("x"));
 //				log.debug("result : "  + rs.getOWLObject("y"));
 //				log.debug("result : "  + rs.getOWLLiteral("y"));
@@ -451,7 +451,7 @@ public class R2rmlCheckerTest {
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			while (rs.nextRow()) {
+			while (rs.hasNext()) {
 				if(n==0){
 					log.debug("result : "  + rs.getOWLObject("x"));
 					log.debug("result : "  + rs.getOWLLiteral("y"));

@@ -37,6 +37,7 @@ import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -44,15 +45,16 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
-import java.util.List;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 import static org.junit.Assert.assertEquals;
 
-public class VirtualABoxMaterializerTest {
+public class OntopMaterializerTest {
 
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
@@ -70,9 +72,9 @@ public class VirtualABoxMaterializerTest {
 	private static String username = "sa";
 	private static String password = "";
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(VirtualABoxMaterializerTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(OntopMaterializerTest.class);
 
-    public VirtualABoxMaterializerTest() {
+    public OntopMaterializerTest() {
     }
 
 	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {
@@ -115,21 +117,33 @@ public class VirtualABoxMaterializerTest {
 		st.executeUpdate(bf.toString());
 		conn.commit();
 
-		ImmutableSet<Predicate> vocabulary = ImmutableSet.of(fn, ln, age, hasschool, school);
+		ImmutableSet<URI> vocabulary = Stream.of(fn, ln, age, hasschool, school)
+				.map(p -> URI.create(p.getName()))
+				.collect(ImmutableCollectors.toSet());
 
 		//Ontology tbox = MappingVocabularyExtractor.extractOntology(ppMapping);
-		QuestMaterializer materializer = new QuestMaterializer(configuration, vocabulary, false);
+		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
 
-		List<Assertion> assertions = materializer.getAssertionList();
+		MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
+				.build();
 
-		LOGGER.debug("Assertions: \n");
-		assertions.forEach(a -> LOGGER.debug(a + "\n"));
+		try (MaterializedGraphResultSet materializationResultSet = materializer.materialize(
+				configuration, vocabulary, materializationParams)) {
 
-		assertEquals(15, assertions.size());
+			ImmutableList.Builder<Assertion> rdfGraphBuilder = ImmutableList.builder();
+			while (materializationResultSet.hasNext()) {
+				rdfGraphBuilder.add(materializationResultSet.next());
+			}
+			ImmutableList<Assertion> assertions = rdfGraphBuilder.build();
 
-		// Too late!
-		int count = materializer.getTripleCount();
-		assertEquals(0, count);
+			LOGGER.debug("Assertions: \n");
+			assertions.forEach(a -> LOGGER.debug(a + "\n"));
+
+			assertEquals(15, assertions.size());
+
+			long count = materializationResultSet.getTripleCountSoFar();
+			assertEquals(15, count);
+		}
 
 		conn.close();
 

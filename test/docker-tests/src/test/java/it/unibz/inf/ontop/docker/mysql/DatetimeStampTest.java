@@ -66,7 +66,7 @@ public class DatetimeStampTest {
                 double time = (end - start) / 1000;
 
                 int count = 0;
-                while (res.nextRow()) {
+                while (res.hasNext()) {
                     count += 1;
 
 //                    for (int i = 1; i <= res.getColumnCount(); i++) {

@@ -21,8 +21,9 @@ package it.unibz.inf.ontop.docker.failing.mysql;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.rdf4j.SesameMaterializer;
-import org.eclipse.rdf4j.model.Statement;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
+import it.unibz.inf.ontop.rdf4j.RDF4JMaterializer;
+import it.unibz.inf.ontop.rdf4j.MaterializationGraphQuery;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.n3.N3Writer;
 
@@ -30,14 +31,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Iterator;
 
-public class ABoxSesameMaterializerExample {
+public class RDF4JMaterializerExample {
 
-	/*
-	 * Use the sample database using H2 from
-	 * https://babbage.inf.unibz.it/trac/obdapublic/wiki/InstallingTutorialDatabases
-	 */
 	private static final String inputFile = "/mysql/example/exampleBooks.obda";
 	private static final String PROPERTY_FILE = "/mysql/example/exampleBooks.properties";
 	private static final String outputFile = "src/test/resources/mysql/example/exampleBooks.n3";
@@ -49,7 +45,7 @@ public class ABoxSesameMaterializerExample {
 	
 	public void generateTriples() throws Exception {
 
-		Class<? extends ABoxSesameMaterializerExample> klass = getClass();
+		Class<? extends RDF4JMaterializerExample> klass = getClass();
 
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(klass.getResource(inputFile).getPath())
@@ -57,15 +53,12 @@ public class ABoxSesameMaterializerExample {
 				.enableTestMode()
 				.build();
 
-		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
-		
-		long numberOfTriples = materializer.getTriplesCount();
-		System.out.println("Generated triples: " + numberOfTriples);
+		MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
+				.enableDBResultsStreaming(DO_STREAM_RESULTS)
+				.build();
 
-		/*
-		 * Obtain the triples iterator
-		 */
-		Iterator<Statement> triplesIter = materializer.getIterator();
+		RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer();
+		MaterializationGraphQuery graphQuery = materializer.materialize(configuration, materializationParams);
 		
 		/*
 		 * Print the triples into an external file.
@@ -80,22 +73,20 @@ public class ABoxSesameMaterializerExample {
 		    out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fout, true)));
 		    RDFWriter writer = new N3Writer(out);
 		    writer.startRDF();
-			while (triplesIter.hasNext()) {
-				Statement stmt = triplesIter.next();
-				writer.handleStatement(stmt);
-			}
-			writer.endRDF();
+			graphQuery.evaluate(writer);
+
+			long numberOfTriples = graphQuery.getTripleCountSoFar();
+			System.out.println("Generated triples: " + numberOfTriples);
 		} finally {
 		    if (out != null) {
 		    	out.close();
 		    }
-		    materializer.disconnect();
 		}
 	}
 
 	public static void main(String[] args) {
 		try {
-			ABoxSesameMaterializerExample example = new ABoxSesameMaterializerExample();
+			RDF4JMaterializerExample example = new RDF4JMaterializerExample();
 			example.generateTriples();
 		} catch (Exception e) {
 			e.printStackTrace();

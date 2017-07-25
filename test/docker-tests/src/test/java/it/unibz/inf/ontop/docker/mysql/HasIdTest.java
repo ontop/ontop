@@ -36,10 +36,10 @@ public class HasIdTest extends AbstractVirtualModeTest {
                 "    OPTIONAL { ?p :lastName ?lastName }" +
                 "}");
         // At least one result
-        assertTrue(results.nextRow());
+        assertTrue(results.hasNext());
         assertEquals(results.getOWLIndividual(1).toString(), "<http://example.com/persons/3>");
         assertEquals(results.getOWLLiteral(2), null);
         assertEquals(results.getOWLLiteral(3), null);
-        assertFalse(results.nextRow());
+        assertFalse(results.hasNext());
     }
 }

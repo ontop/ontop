@@ -125,7 +125,7 @@ public class H2SimpleFilterAndValuesTest {
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 			OWLLiteral ind1 = rs.getOWLLiteral("y");
 			retval = ind1.toString();
 

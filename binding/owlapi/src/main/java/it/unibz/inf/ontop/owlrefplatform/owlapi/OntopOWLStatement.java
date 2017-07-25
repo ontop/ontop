@@ -36,6 +36,10 @@ public interface OntopOWLStatement extends AutoCloseable {
 	List<OWLAxiom> executeDescribeQuery(String query) throws OntopOWLException;
 	List<OWLAxiom> executeGraph(String query) throws OntopOWLException;
 
+	/**
+	 * TODO: remove it
+	 */
+	@Deprecated
 	OntopOWLConnection getConnection() throws OntopOWLException;
 
 	boolean isClosed() throws OntopOWLException;

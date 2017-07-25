@@ -181,7 +181,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 	public void executeQueryAssertResults(String query, OntopOWLStatement st, int expectedRows) throws Exception {
 		QuestOWLResultSet rs = st.executeSelectQuery(query);
 		int count = 0;
-		while (rs.nextRow()) {
+		while (rs.hasNext()) {
 			count++;
 			for (int i = 1; i <= rs.getColumnCount(); i++) {
 				System.out.print(rs.getSignature().get(i-1));

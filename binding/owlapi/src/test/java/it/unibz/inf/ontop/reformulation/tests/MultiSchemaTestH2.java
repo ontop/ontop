@@ -161,7 +161,7 @@ public class MultiSchemaTestH2  {
 		OntopOWLStatement st = conn.createStatement();
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 
 		} catch (Exception e) {
 			throw e;

@@ -196,8 +196,8 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected GraphResultSet executeGraphQuery(ConstructQuery inputQuery, ExecutableQuery executableQuery,
-                                               boolean collectResults)
+    protected SimpleGraphResultSet executeGraphQuery(ConstructQuery inputQuery, ExecutableQuery executableQuery,
+                                                     boolean collectResults)
             throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
 
@@ -217,7 +217,7 @@ public class SQLQuestStatement extends QuestStatement {
                 throw new OntopQueryEvaluationException(e.getMessage());
             }
         }
-        return new QuestGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults);
+        return new DefaultSimpleGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults);
     }
 
     private SQLExecutableQuery checkAndConvertTargetQuery(ExecutableQuery executableQuery) {

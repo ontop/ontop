@@ -136,7 +136,7 @@ public class MetaMappingVirtualABoxTest {
              OntopOWLStatement st = conn.createStatement();
              QuestOWLResultSet rs1 = st.executeSelectQuery(query1);
         ) {
-            assertTrue(rs1.nextRow());
+            assertTrue(rs1.hasNext());
 			OWLObject ind = rs1.getOWLObject("x");
 			//OWLIndividual ind2 = rs.getOWLIndividual("y");
 			//OWLLiteral val = rs.getOWLLiteral("z");
@@ -153,7 +153,7 @@ public class MetaMappingVirtualABoxTest {
              OntopOWLStatement st = conn.createStatement();
              QuestOWLResultSet rs2 = st.executeSelectQuery(query2);
         ) {
-            assertTrue(rs2.nextRow());
+            assertTrue(rs2.hasNext());
 			OWLObject ind1 = rs2.getOWLObject("x");
             OWLObject ind2 = rs2.getOWLObject("y");
 			//OWLLiteral val = rs2.getOWLLiteral("y");

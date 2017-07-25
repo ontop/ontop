@@ -145,11 +145,11 @@ public class SPARQLRegExTest {
 
 			QuestOWLResultSet rs = st.executeTuple(query);
 			/*
-			 * boolean nextRow = rs.nextRow();
+			 * boolean hasNext = rs.hasNext();
 			 */
-			// assertTrue(rs.nextRow());
+			// assertTrue(rs.hasNext());
 			int count = 0;
-			while (rs.nextRow()) {
+			while (rs.hasNext()) {
 				for (int i = 1; i <= rs.getColumnCount(); i++) {
 					OWLObject ind1 = rs.getOWLObject(i);
 					System.out.println(" Result: " + ind1.toString());

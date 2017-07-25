@@ -116,7 +116,7 @@ public class H2ConstantTest {
 		String retval;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 			OWLObject ind1 =	rs.getOWLObject("y")	 ;
 			retval = ind1.toString();
 		} catch (Exception e) {

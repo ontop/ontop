@@ -121,7 +121,7 @@ public class ComplexWhereMappingTest {
 		StringBuilder bf = new StringBuilder(query);
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			OWLIndividual ind2 = rs.getOWLIndividual("y");
 			OWLLiteral val = rs.getOWLLiteral("z");

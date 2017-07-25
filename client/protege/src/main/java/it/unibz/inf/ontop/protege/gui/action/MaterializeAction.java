@@ -21,7 +21,8 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import com.google.common.collect.Sets;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLMaterializedGraphResultSet;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
@@ -44,17 +45,16 @@ public class MaterializeAction implements OBDAProgressListener {
 	
 	private OWLOntology currentOntology = null;
 	private OWLOntologyManager ontologyManager = null;
-	private OWLAPIMaterializer materializer = null;
-	private Iterator<OWLIndividualAxiom> iterator = null;
+	private final OntopOWLMaterializedGraphResultSet graphResultSet;
 	private Container cont = null;
 	private boolean bCancel = false;
 	private boolean errorShown = false;
 
-	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager, OWLAPIMaterializer materialize, Container cont) {
+	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager,
+							 OntopOWLMaterializedGraphResultSet graphResultSet, Container cont) {
 		this.currentOntology = currentOntology;
 		this.ontologyManager = ontologyManager;			
-		this.materializer = materialize;
-		this.iterator = materializer.getIterator();
+		this.graphResultSet = graphResultSet;
 		this.cont = cont;  
 	}
 
@@ -78,7 +78,12 @@ public class MaterializeAction implements OBDAProgressListener {
 		thread = new Thread("AddAxiomToOntology Thread") {
 			public void run() {
 				try {
-					Set<OWLAxiom> setAxioms = Sets.newHashSet(iterator);
+					Set<OWLAxiom> setAxioms = Sets.newHashSet();
+					while(graphResultSet.hasNext()) {
+						setAxioms.add(graphResultSet.next());
+					}
+					graphResultSet.close();
+
 					ontologyManager.addAxioms(currentOntology, setAxioms);
 
 					latch.countDown();

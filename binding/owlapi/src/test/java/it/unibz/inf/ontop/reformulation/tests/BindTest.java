@@ -140,7 +140,7 @@ public class BindTest {
 
         try {
             QuestOWLResultSet rs = st.executeSelectQuery(query);
-            rs.nextRow();
+            rs.hasNext();
             OWLObject ind1 = rs.getOWLObject("title");
             OWLObject ind2 = rs.getOWLObject("price");
 
@@ -515,7 +515,7 @@ public class BindTest {
         List<String> returnedValues = new ArrayList<>();
         try {
             QuestOWLResultSet rs = st.executeSelectQuery(query);
-            while (rs.nextRow()) {
+            while (rs.hasNext()) {
                 OWLObject ind1 = rs.getOWLObject("w");
                 // log.debug(ind1.toString());
                 returnedValues.add(ind1.toString());

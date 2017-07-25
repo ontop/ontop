@@ -113,7 +113,7 @@ public class CanonicalIRIUniversityTest {
                     String sparqlQuery = query.getQuery();
                     QuestOWLResultSet res = st.executeSelectQuery(sparqlQuery);
                     int columnSize = res.getColumnCount();
-                    while (res.nextRow()) {
+                    while (res.hasNext()) {
                         for (int idx = 1; idx <= columnSize; idx++) {
                             OWLObject binding = res.getOWLObject(idx);
                             System.out.print(binding.toString() + ", ");
@@ -176,7 +176,7 @@ public class CanonicalIRIUniversityTest {
         ArrayList<String> retVal = new ArrayList<>();
         try {
             QuestOWLResultSet rs = st.executeSelectQuery(query);
-            while(rs.nextRow()) {
+            while(rs.hasNext()) {
                 for (String s : rs.getSignature()) {
                     OWLObject binding = rs.getOWLObject(s);
 

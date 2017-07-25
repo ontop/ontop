@@ -82,7 +82,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
-            while (rs.nextRow()) {
+            while (rs.hasNext()) {
                 OWLObject ind1 = rs.getOWLObject("w");
 
 
@@ -802,7 +802,7 @@ public abstract class AbstractBindTestWithFunctions {
         List<String> returnedValues = new ArrayList<>();
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
-            while (rs.nextRow()) {
+            while (rs.hasNext()) {
                 OWLObject ind1 = rs.getOWLObject("w");
                 // log.debug(ind1.toString());
                 if (ind1 != null) {

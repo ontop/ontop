@@ -124,7 +124,7 @@ public class H2SameAsTest {
 		ArrayList<String> retVal = new ArrayList<>();
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			while(rs.nextRow()) {
+			while(rs.hasNext()) {
                 for (String s : rs.getSignature()) {
 					OWLObject binding = rs.getOWLObject(s);
 

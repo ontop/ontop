@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
@@ -136,7 +135,7 @@ public class CompanyTest  {
 			
 			QuestOWLResultSet rs2 = st.executeTuple(query);
 //
-			assertTrue(rs2.nextRow());
+			assertTrue(rs2.hasNext());
 
 			OWLObject ind2 = rs2.getOWLIndividual("z");
 			OWLObject ind3 = rs2.getOWLIndividual("x");
@@ -144,7 +143,7 @@ public class CompanyTest  {
 			assertEquals("<http://it.unibz.krdb/obda/test/company#mark>", ind2.toString());
 			assertEquals("<http://it.unibz.krdb/obda/test/company#1>", ind3.toString());
 			
-			assertFalse(rs2.nextRow());
+			assertFalse(rs2.hasNext());
 
 		} catch (Exception e) {
 			throw e;
@@ -172,7 +171,7 @@ public class CompanyTest  {
 
 			QuestOWLResultSet rs2 = st.executeTuple(query);
 
-			assertTrue(rs2.nextRow());
+			assertTrue(rs2.hasNext());
 			OWLLiteral ind1 = rs2.getOWLLiteral("y");
 			OWLObject ind2 = rs2.getOWLIndividual("z");
 
@@ -180,7 +179,7 @@ public class CompanyTest  {
 			assertEquals("<http://it.unibz.krdb/obda/test/company#mark>", ind2.toString());
 
 
-			assertFalse(rs2.nextRow());
+			assertFalse(rs2.hasNext());
 
 		} catch (Exception e) {
 			throw e;

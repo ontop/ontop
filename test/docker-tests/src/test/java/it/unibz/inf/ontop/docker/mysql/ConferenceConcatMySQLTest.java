@@ -68,7 +68,7 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 		QuestOWLResultSet rs = st.executeTuple(query);
 
 		OWLObject answer, answer2;
-		rs.nextRow();
+		rs.hasNext();
 
 
 

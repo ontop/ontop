@@ -480,7 +480,7 @@ public class QuestOWLExample_ReasoningDisabled {
 //				for (int i=0; i<nWarmUps; ++i){
 //					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
 //					int columnSize = rs.getColumnCount();
-//					while (rs.nextRow()) {
+//					while (rs.hasNext()) {
 //						for (int idx = 1; idx <= columnSize; idx++) {
 //							@SuppressWarnings("unused")
 //							OWLObject binding = rs.getOWLObject(idx);
@@ -503,7 +503,7 @@ public class QuestOWLExample_ReasoningDisabled {
                 QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
                 int columnSize = rs.getColumnCount();
                 count = 0;
-                while (rs.nextRow()) {
+                while (rs.hasNext()) {
                     count ++;
                     for (int idx = 1; idx <= columnSize; idx++) {
                         @SuppressWarnings("unused")

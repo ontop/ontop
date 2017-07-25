@@ -39,7 +39,7 @@ import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
-public class QuestGraphResultSet implements GraphResultSet {
+public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
 	private List<Assertion> results = new ArrayList<>();
 
@@ -57,8 +57,8 @@ public class QuestGraphResultSet implements GraphResultSet {
 
 	private AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 
-	public QuestGraphResultSet(TupleResultSet results, ConstructTemplate template,
-			boolean storeResult) throws OntopResultConversionException, OntopConnectionException {
+	public DefaultSimpleGraphResultSet(TupleResultSet results, ConstructTemplate template,
+                                       boolean storeResult) throws OntopResultConversionException, OntopConnectionException {
 		this.tupleResultSet = results;
 		this.constructTemplate = template;
 		this.storeResults = storeResult;

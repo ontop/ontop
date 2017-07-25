@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.answering.input.impl;
 
 import it.unibz.inf.ontop.answering.input.DescribeQuery;
-import it.unibz.inf.ontop.model.GraphResultSet;
+import it.unibz.inf.ontop.model.SimpleGraphResultSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 
-class RDF4JDescribeQuery extends RDF4JInputQuery<GraphResultSet> implements DescribeQuery {
+class RDF4JDescribeQuery extends RDF4JInputQuery<SimpleGraphResultSet> implements DescribeQuery {
     RDF4JDescribeQuery(ParsedQuery parsedQuery, String queryString) {
         super(parsedQuery, queryString);
     }

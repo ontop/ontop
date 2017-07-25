@@ -175,11 +175,11 @@ public class ReverseURITestH2 {
 
 			QuestOWLResultSet rs = st.executeTuple(query);
 			/*
-			 * boolean nextRow = rs.nextRow();
+			 * boolean hasNext = rs.hasNext();
 			 */
-			// assertTrue(rs.nextRow());
+			// assertTrue(rs.hasNext());
 			int count = 0;
-			while (rs.nextRow()) {
+			while (rs.hasNext()) {
 				OWLObject ind1 = rs.getOWLObject("x");
 				System.out.println("Result " + ind1.toString());
 				count += 1;
