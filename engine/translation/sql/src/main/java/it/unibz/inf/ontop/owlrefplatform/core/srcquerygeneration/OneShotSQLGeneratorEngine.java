@@ -603,7 +603,7 @@ public class OneShotSQLGeneratorEngine {
 		for (CQIE rule : program.getRules()) {
 			normalizeRule(rule);
 		}
-		log.debug("Program normalized for SQL translation "+program);
+		log.debug("Program normalized for SQL translation: \n"+program);
 	}
 
 	/**
