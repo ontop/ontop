@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.spec;
 
 import it.unibz.inf.ontop.spec.impl.OBDASpecInputImpl;
-import org.eclipse.rdf4j.model.Model;
-
+import org.apache.commons.rdf.api.Graph;
 import java.io.File;
 import java.io.Reader;
 import java.util.Optional;
@@ -19,11 +18,7 @@ public interface OBDASpecInput {
 
     Optional<Reader> getReader(String key);
 
-    /**
-     * TODO: use an abstraction independent of RDF4J
-     */
-    Optional<Model> getGraph(String key);
-
+    Optional<Graph> getGraph(String key);
 
     static Builder defaultBuilder() {
         return new OBDASpecInputImpl.BuilderImpl();
@@ -42,10 +37,7 @@ public interface OBDASpecInput {
         return getReader(MAPPING_KEY);
     }
 
-    /**
-     * TODO: use an abstraction independent of RDF4J
-     */
-    default Optional<Model> getMappingGraph() {
+    default Optional<Graph> getMappingGraph() {
         return getGraph(MAPPING_KEY);
     }
 
@@ -58,7 +50,7 @@ public interface OBDASpecInput {
 
         Builder addFile(String key, File file);
         Builder addReader(String key, Reader reader);
-        Builder addGraph(String key, Model graph);
+        Builder addGraph(String key, Graph graph);
 
         OBDASpecInput build();
 
@@ -70,7 +62,7 @@ public interface OBDASpecInput {
             return addReader(MAPPING_KEY, mappingReader);
         }
 
-        default Builder addMappingGraph(Model mappingGraph) {
+        default Builder addMappingGraph(Graph mappingGraph) {
             return addGraph(MAPPING_KEY, mappingGraph);
         }
 

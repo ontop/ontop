@@ -3,23 +3,23 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.MissingInputMappingException;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
-import it.unibz.inf.ontop.spec.OBDASpecInput;
-import it.unibz.inf.ontop.pp.PreProcessedMapping;
-import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
-import org.eclipse.rdf4j.model.Model;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
+import it.unibz.inf.ontop.pp.PreProcessedMapping;
+import it.unibz.inf.ontop.spec.OBDASpecInput;
+import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
+import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -95,7 +95,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                                                   Supplier<Optional<PreProcessedMapping>> ppMappingSupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
-                                                  Supplier<Optional<Model>> mappingGraphSupplier,
+                                                  Supplier<Optional<Graph>> mappingGraphSupplier,
                                                   Supplier<Optional<File>> constraintFileSupplier
                                                   ) throws OBDASpecificationException {
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
@@ -144,7 +144,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         /*
          * Graph
          */
-        Optional<Model> optionalMappingGraph = mappingGraphSupplier.get();
+        Optional<Graph> optionalMappingGraph = mappingGraphSupplier.get();
         if (optionalMappingGraph.isPresent()) {
             specInputBuilder.addMappingGraph(optionalMappingGraph.get());
 

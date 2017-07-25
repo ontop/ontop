@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
 import it.unibz.inf.ontop.spec.trans.MappingDatatypeFiller;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
+import org.apache.commons.rdf.api.Graph;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
@@ -81,7 +82,7 @@ public class SQLMappingExtractor implements MappingExtractor {
         if (optionalMappingReader.isPresent())
             return mappingParser.parse(optionalMappingReader.get());
 
-        Optional<Model> optionalMappingGraph = specInput.getMappingGraph();
+        Optional<Graph> optionalMappingGraph = specInput.getMappingGraph();
         if (optionalMappingGraph.isPresent())
             return mappingParser.parse(optionalMappingGraph.get());
 
