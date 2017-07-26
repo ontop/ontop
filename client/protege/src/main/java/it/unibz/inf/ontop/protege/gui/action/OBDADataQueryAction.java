@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
@@ -50,7 +50,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	private long time;
 
 	private boolean queryExecError = false;
-	private OWLStatement statement = null;
+	private OntopOWLStatement statement = null;
 	private CountDownLatch latch = null;
 	private Thread thread = null;
 	private String queryString = null;
@@ -73,7 +73,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	/**
 	 *  This function must do the call to e.g. statement.query()
 	 */
-	public abstract T executeQuery(OWLStatement st, String queryString) throws OWLException;
+	public abstract T executeQuery(OntopOWLStatement st, String queryString) throws OWLException;
 
 	/**
 	 * Must be implemented by the subclass for getting the current reasoner
@@ -174,7 +174,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	private class Canceller extends Thread {
 		private CountDownLatch old_latch;
 		private OWLConnection old_conn;
-		private OWLStatement old_stmt;
+		private OntopOWLStatement old_stmt;
 
 		Canceller() throws OntopConnectionException {
 			super();

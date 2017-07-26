@@ -20,7 +20,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     private OntopOWLReasoner reasoner;
     private final OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
     private final OntopConfigurationManager configurationManager;
-    private OWLConnection owlConnection;
+    private OntopOWLConnection owlConnection;
 
 
     protected OntopProtegeReasoner(OWLOntology rootOntology, OntopProtegeOWLConfiguration configuration) throws IllegalConfigurationException {
@@ -30,7 +30,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
         this.configurationManager = configuration.getOntopConfigurationManager();
     }
 
-    public OWLStatement getStatement() throws OWLException {
+    public OntopOWLStatement getStatement() throws OWLException {
         if (owlConnection == null)
             owlConnection = reasoner.getConnection();
 

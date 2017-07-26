@@ -29,7 +29,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.OntopRDFMaterializer;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.impl.DefaultOntopRDFMaterializer;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLMaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.MaterializedGraphOWLResultSet;
 import org.semanticweb.owlapi.model.OWLException;
 
 import javax.annotation.Nonnull;
@@ -44,7 +44,7 @@ public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 	}
 
 	@Override
-	public OWLMaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
+	public MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
                                                      @Nonnull MaterializationParams params)
 			throws OWLException {
 		try {
@@ -55,7 +55,7 @@ public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 	}
 
 	@Override
-	public OWLMaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
+	public MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
                                                      @Nonnull ImmutableSet<URI> selectedVocabulary,
                                                      @Nonnull MaterializationParams params)
 			throws OWLException {
@@ -66,7 +66,7 @@ public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 		}
 	}
 
-	private OWLMaterializedGraphResultSet wrap(MaterializedGraphResultSet graphResultSet) {
-		return new DefaultOWLMaterializedGraphResultSet(graphResultSet);
+	private MaterializedGraphOWLResultSet wrap(MaterializedGraphResultSet graphResultSet) {
+		return new OntopMaterializedGraphOWLResultSet(graphResultSet);
 	}
 }

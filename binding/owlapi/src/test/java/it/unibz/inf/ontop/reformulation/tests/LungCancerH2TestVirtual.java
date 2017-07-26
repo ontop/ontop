@@ -195,11 +195,10 @@ public class LungCancerH2TestVirtual extends TestCase {
 	}
 	
 	public void executeConstructQueryAssertResults(String query, OWLStatement st, int expectedRows) throws Exception {
-		List<OWLAxiom> rs = st.executeConstructQuery(query);
+		GraphOWLResultSet rs = st.executeConstructQuery(query);
 		int count = 0;
-		Iterator<OWLAxiom> axit = rs.iterator();
-		while (axit.hasNext()) {
-			System.out.println(axit.next());			
+		while (rs.hasNext()) {
+			System.out.println(rs.next());
 			count++;
 		}		
 		assertEquals(expectedRows, count);

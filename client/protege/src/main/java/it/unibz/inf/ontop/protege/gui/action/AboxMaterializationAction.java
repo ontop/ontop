@@ -24,7 +24,7 @@ import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLMaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.MaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -215,7 +215,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 						.build();
 				;
 
-				try (OWLMaterializedGraphResultSet graphResultSet = materializer.materialize(configuration, params)) {
+				try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(configuration, params)) {
 
 					Set<OWLAxiom> setAxioms = Sets.newHashSet();
 					while(graphResultSet.hasNext())
@@ -268,7 +268,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 						.enableDBResultsStreaming(DO_STREAM_RESULTS)
 						.build();
 				OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
-				OWLMaterializedGraphResultSet graphResultSet = materializer.materialize(configuration, materializationParams);
+				MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(configuration, materializationParams);
 
 				Container container = workspace.getRootPane().getParent();
 				final MaterializeAction action = new MaterializeAction(ontology, ontoManager, graphResultSet, container);

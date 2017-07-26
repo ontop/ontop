@@ -24,7 +24,8 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlapi.OWLResultSetWriter;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.GraphOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
@@ -40,7 +41,6 @@ import it.unibz.inf.ontop.protege.utils.TextMessageFrame;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.slf4j.Logger;
@@ -149,7 +149,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 
 			@Override
-			public Long executeQuery(OWLStatement st, String query) throws OWLException {
+			public Long executeQuery(OntopOWLStatement st, String query) throws OWLException {
 				return st.getTupleCount(query);
 			}
 
@@ -190,7 +190,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
                 return tm != null && tm.isFetching();
             }
 			@Override
-			public TupleOWLResultSet executeQuery(OWLStatement st,
+			public TupleOWLResultSet executeQuery(OntopOWLStatement st,
 												  String queryString) throws OWLException {
 				return st.executeSelectQuery(queryString);
 			}
@@ -198,7 +198,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		});
 
 		queryEditorPanel.setExecuteGraphQueryAction(
-                new OBDADataQueryAction<List<OWLAxiom>>("Executing queries...", QueryInterfaceView.this) {
+                new OBDADataQueryAction<GraphOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
 			
 			@Override
 			public OWLEditorKit getEditorKit(){
@@ -206,15 +206,15 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 
 			@Override
-			public List<OWLAxiom> executeQuery(OWLStatement st, String queryString) throws OWLException {
-				return st.executeGraph(queryString); 
+			public GraphOWLResultSet executeQuery(OntopOWLStatement st, String queryString) throws OWLException {
+				return st.executeGraphQuery(queryString);
 			}
 
 			@Override
-			public void handleResult(List<OWLAxiom> result){
+			public void handleResult(GraphOWLResultSet result) throws OWLException{
 				OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
 				populateResultUsingVisitor(result, owlVisitor);
-				showGraphResultInTextPanel(owlVisitor);	
+				showGraphResultInTextPanel(owlVisitor);
 			}
 
 			@Override
@@ -238,7 +238,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		queryEditorPanel.setRetrieveUCQExpansionAction(new OBDADataQueryAction<String>("Rewriting query...", QueryInterfaceView.this) {
 
 			@Override
-			public String executeQuery(OWLStatement st, String query) throws OWLException {
+			public String executeQuery(OntopOWLStatement st, String query) throws OWLException {
 				return st.getRewritingRendering(query);
 			}
 
@@ -263,7 +263,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction<String>("Unfolding queries...", QueryInterfaceView.this) {
 			@Override
-			public String executeQuery(OWLStatement st, String query) throws OWLException{
+			public String executeQuery(OntopOWLStatement st, String query) throws OWLException{
 				// UGLY!!! SQL-specific!
 				return ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
 			}
@@ -440,9 +440,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	}
 
-	private void populateResultUsingVisitor(List<OWLAxiom> result, OWLAxiomToTurtleVisitor visitor) {
-		if (result != null) {
-            result.forEach(ax -> ax.accept(visitor));
+	private void populateResultUsingVisitor(GraphOWLResultSet resultSet, OWLAxiomToTurtleVisitor visitor) throws OWLException {
+		if (resultSet != null) {
+			while (resultSet.hasNext()) {
+				resultSet.next().accept(visitor);
+			}
+            resultSet.close();
 		}
 	}
 

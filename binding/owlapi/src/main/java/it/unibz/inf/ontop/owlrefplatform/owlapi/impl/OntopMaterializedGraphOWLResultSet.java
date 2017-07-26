@@ -3,17 +3,17 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializedGraphResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLMaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.MaterializedGraphOWLResultSet;
 
 import java.net.URI;
 
 
-public class DefaultOWLMaterializedGraphResultSet extends DefaultOWLGraphResultSet
-        implements OWLMaterializedGraphResultSet {
+public class OntopMaterializedGraphOWLResultSet extends OntopGraphOWLResultSet
+        implements MaterializedGraphOWLResultSet {
 
     private final MaterializedGraphResultSet graphResultSet;
 
-    DefaultOWLMaterializedGraphResultSet(MaterializedGraphResultSet graphResultSet) {
+    OntopMaterializedGraphOWLResultSet(MaterializedGraphResultSet graphResultSet) {
         super(graphResultSet);
         this.graphResultSet = graphResultSet;
     }

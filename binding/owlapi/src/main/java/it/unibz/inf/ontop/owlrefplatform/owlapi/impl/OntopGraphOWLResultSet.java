@@ -7,17 +7,17 @@ import it.unibz.inf.ontop.model.GraphResultSet;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPIIndividualTranslator;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.GraphOWLResultSet;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
 
 
-public class DefaultOWLGraphResultSet implements OWLGraphResultSet {
+public class OntopGraphOWLResultSet implements GraphOWLResultSet {
 
     private final GraphResultSet graphResultSet;
     private final OWLAPIIndividualTranslator translator;
 
-    DefaultOWLGraphResultSet(GraphResultSet graphResultSet) {
+    public OntopGraphOWLResultSet(GraphResultSet graphResultSet) {
         this.graphResultSet = graphResultSet;
         this.translator = new OWLAPIIndividualTranslator();
     }

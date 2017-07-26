@@ -25,18 +25,11 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.BooleanResultSet;
 import it.unibz.inf.ontop.model.SimpleGraphResultSet;
 import it.unibz.inf.ontop.model.TupleResultSet;
-import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.ontology.ClassAssertion;
-import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
-import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
-import it.unibz.inf.ontop.owlapi.OWLAPIIndividualTranslator;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.impl.OntopGraphOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.impl.OntopBooleanOWLResultSet;
-import org.semanticweb.owlapi.model.*;
-
-import java.util.*;
 
 /***
  * A Statement to execute queries over a QuestOWLConnection. The logic of this
@@ -109,7 +102,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	}
 
 	@Override
-	public List<OWLAxiom> executeConstructQuery(String inputQuery) throws OntopOWLException {
+	public GraphOWLResultSet executeConstructQuery(String inputQuery) throws OntopOWLException {
 		try {
 			ConstructQuery query = inputQueryFactory.createConstructQuery(inputQuery);
 			return executeGraph(query);
@@ -119,7 +112,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	}
 
 	@Override
-	public List<OWLAxiom> executeDescribeQuery(String inputQuery) throws OntopOWLException {
+	public GraphOWLResultSet executeDescribeQuery(String inputQuery) throws OntopOWLException {
 		try {
 			DescribeQuery query = inputQueryFactory.createDescribeQuery(inputQuery);
 			return executeGraph(query);
@@ -129,7 +122,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	}
 
 	@Override
-	public List<OWLAxiom> executeGraph(String inputQuery) throws OntopOWLException {
+	public GraphOWLResultSet executeGraphQuery(String inputQuery) throws OntopOWLException {
 		try {
 			GraphSPARQLQuery query = inputQueryFactory.createGraphQuery(inputQuery);
 			return executeGraph(query);
@@ -138,12 +131,12 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	private List<OWLAxiom> executeGraph(GraphSPARQLQuery query)
+	private GraphOWLResultSet executeGraph(GraphSPARQLQuery query)
 			throws OntopQueryEvaluationException, OntopConnectionException, OntopTranslationException,
 			OntopResultConversionException {
 
 		SimpleGraphResultSet resultSet = st.execute(query);
-		return createOWLIndividualAxioms(resultSet);
+		return new OntopGraphOWLResultSet(resultSet);
 	}
 
 	public OWLConnection getConnection() throws OntopOWLException {
@@ -237,32 +230,6 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 		} catch (OntopTranslationException e) {
 			throw new OntopOWLException(e);
 		}
-	}
-
-	private List<OWLAxiom> createOWLIndividualAxioms(SimpleGraphResultSet resultSet)
-			throws OntopConnectionException, OntopResultConversionException {
-		
-		OWLAPIIndividualTranslator translator = new OWLAPIIndividualTranslator();
-		
-		List<OWLAxiom> axiomList = new ArrayList<>();
-		if (resultSet != null) {
-			while (resultSet.hasNext()) {
-				Assertion assertion = resultSet.next();
-				if (assertion instanceof ClassAssertion) {
-					OWLAxiom classAxiom = translator.translate((ClassAssertion) assertion);
-					axiomList.add(classAxiom);
-				}
-				else if (assertion instanceof ObjectPropertyAssertion) {
-					OWLAxiom objectPropertyAxiom = translator.translate((ObjectPropertyAssertion) assertion);
-					axiomList.add(objectPropertyAxiom);
-				}
-				else if (assertion instanceof DataPropertyAssertion) {
-					OWLAxiom objectPropertyAxiom = translator.translate((DataPropertyAssertion) assertion);
-					axiomList.add(objectPropertyAxiom);
-				}
-				}
-		}
-		return axiomList;
 	}
 
 	/**

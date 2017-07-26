@@ -23,9 +23,8 @@ package it.unibz.inf.ontop.reformulation.tests;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.junit.*;
-import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLException;
 
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -63,70 +62,71 @@ public class OWLConstructDescribeTest{
 	@Test
 	public void testAInsertData() throws Exception {
 		String query = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
-		List<OWLAxiom> rs = st.executeGraph(query);
-		Assert.assertEquals(4, rs.size());
+		Assert.assertEquals(4, countResult(query));
 	}
 	
 	@Test
 	public void testDescribeUri0() throws Exception {
 		String query = "DESCRIBE <http://www.semanticweb.org/ontologies/test#p1>";
-		List<OWLAxiom> rs = st.executeGraph(query);
-		Assert.assertEquals(0, rs.size());
+		Assert.assertEquals(0, countResult(query));
 	}
 	
 	@Test
 	public void testDescribeUri1() throws Exception {
 		String query = "DESCRIBE <http://example.org/D>";
-		List<OWLAxiom> rs = st.executeGraph(query);
-		Assert.assertEquals(1, rs.size());
+		Assert.assertEquals(1, countResult(query));
 	}
 	
 	@Test
 	public void testDescribeUri2() throws Exception {
 		String query = "DESCRIBE <http://example.org/C>";
-		List<OWLAxiom> rs = st.executeGraph(query);
-		Assert.assertEquals(2, rs.size());
+		Assert.assertEquals(2, countResult(query));
 	}
 	
 	@Test
 	public void testDescribeVar0() throws Exception {
 		String query = "DESCRIBE ?x WHERE {<http://example.org/C> ?x ?y }";
-		List<OWLAxiom> rs = st.executeGraph(query);
-		Assert.assertEquals(0, rs.size());
+		Assert.assertEquals(0, countResult(query));
 	}
 	
 	@Test
 	public void testDescribeVar1() throws Exception {
 		String query = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p2> <http://example.org/A>}";
-		List<OWLAxiom> rs = st.executeGraph(query);
-		Assert.assertEquals(1, rs.size());
+		Assert.assertEquals(1, countResult(query));
 	}
 	
 	@Test
 	public void testDescribeVar2() throws Exception {
 		String query = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p1> ?y}";
-		List<OWLAxiom> rs = st.executeGraph(query);
-		Assert.assertEquals(2, rs.size());
+		Assert.assertEquals(2, countResult(query));
 	}
 	
 	@Test
 	public void testConstruct0() throws Exception {
 		String query = "CONSTRUCT {?s ?p <http://www.semanticweb.org/ontologies/test/p1>} WHERE {?s ?p <http://www.semanticweb.org/ontologies/test/p1>}";
-		List<OWLAxiom> rs = st.executeGraph(query);
-		Assert.assertEquals(0, rs.size());
+		Assert.assertEquals(0, countResult(query));
 	}
 	
 	@Test
 	public void testConstruct1() throws Exception {
 		String query = "CONSTRUCT { ?s ?p <http://example.org/D> } WHERE { ?s ?p <http://example.org/D>}";
-		List<OWLAxiom> rs = st.executeGraph(query);
-		Assert.assertEquals(1, rs.size());
+		Assert.assertEquals(1, countResult(query));
 	}
 	
 	@Test
 	public void testConstruct2() throws Exception {
 		String query = "CONSTRUCT {<http://example.org/C> ?p ?o} WHERE {<http://example.org/C> ?p ?o}";
-		List<OWLAxiom> rs = st.executeGraph(query);
-		Assert.assertEquals(2, rs.size());
+		Assert.assertEquals(2, countResult(query));
+	}
+
+	private int countResult(String graphQuery) throws OWLException {
+		int count = 0;
+		try (GraphOWLResultSet rs = st.executeGraphQuery(graphQuery)) {
+			while(rs.hasNext()) {
+				rs.next();
+				count++;
+			}
+		}
+		return count;
 	}
 }

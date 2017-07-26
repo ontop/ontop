@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import com.google.common.collect.Sets;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLMaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.MaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -42,13 +42,13 @@ public class MaterializeAction implements OBDAProgressListener {
 	
 	private OWLOntology currentOntology = null;
 	private OWLOntologyManager ontologyManager = null;
-	private final OWLMaterializedGraphResultSet graphResultSet;
+	private final MaterializedGraphOWLResultSet graphResultSet;
 	private Container cont = null;
 	private boolean bCancel = false;
 	private boolean errorShown = false;
 
 	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager,
-							 OWLMaterializedGraphResultSet graphResultSet, Container cont) {
+                             MaterializedGraphOWLResultSet graphResultSet, Container cont) {
 		this.currentOntology = currentOntology;
 		this.ontologyManager = ontologyManager;			
 		this.graphResultSet = graphResultSet;

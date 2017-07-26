@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
-
-import java.util.List;
 
 /***
  * A Statement to execute queries over a OntopOWLConnection. The logic of this
@@ -31,9 +28,9 @@ public interface OWLStatement extends AutoCloseable {
 	TupleOWLResultSet executeSelectQuery(String query) throws OWLException;
 	BooleanOWLResultSet executeAskQuery(String query) throws OWLException;
 
-	List<OWLAxiom> executeConstructQuery(String query) throws OWLException;
-	List<OWLAxiom> executeDescribeQuery(String query) throws OWLException;
-	List<OWLAxiom> executeGraph(String query) throws OWLException;
+	GraphOWLResultSet executeConstructQuery(String query) throws OWLException;
+	GraphOWLResultSet executeDescribeQuery(String query) throws OWLException;
+	GraphOWLResultSet executeGraphQuery(String query) throws OWLException;
 
 	/**
 	 * TODO: remove it

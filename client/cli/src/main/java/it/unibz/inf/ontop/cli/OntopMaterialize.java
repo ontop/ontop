@@ -33,7 +33,7 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLMaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.MaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
@@ -191,7 +191,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 .build();
 
 
-        try (OWLMaterializedGraphResultSet graphResultSet = materializer.materialize(materializationConfig,
+        try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(materializationConfig,
                 ImmutableSet.of(URI.create(predicate.getName())), materializationParams)) {
 
             while (graphResultSet.hasNext()) {
@@ -213,7 +213,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
      * Upper bound: TRIPLE_LIMIT_PER_FILE.
      *
      */
-    private int serializeTripleBatch(OWLOntology ontology, OWLMaterializedGraphResultSet iterator,
+    private int serializeTripleBatch(OWLOntology ontology, MaterializedGraphOWLResultSet iterator,
                                      String filePrefix, String predicateName, int fileCount, String format) throws Exception {
         String suffix;
 
@@ -316,7 +316,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             // OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
 
             OWLOntologyManager manager = ontology.getOWLOntologyManager();
-            try (OWLMaterializedGraphResultSet graphResults = materializer.materialize(
+            try (MaterializedGraphOWLResultSet graphResults = materializer.materialize(
                     materializerConfiguration, materializationParams)) {
 
                 while (graphResults.hasNext())

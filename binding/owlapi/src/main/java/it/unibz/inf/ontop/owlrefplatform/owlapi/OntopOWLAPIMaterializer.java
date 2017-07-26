@@ -14,14 +14,14 @@ public interface OntopOWLAPIMaterializer {
     /**
      * Materializes the saturated RDF graph
      */
-    OWLMaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
+    MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
                                               @Nonnull MaterializationParams params)
             throws OWLException;
 
     /**
      * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary
      */
-    OWLMaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
+    MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
                                               @Nonnull ImmutableSet<URI> selectedVocabulary,
                                               @Nonnull MaterializationParams params)
             throws OWLException;
@@ -29,7 +29,7 @@ public interface OntopOWLAPIMaterializer {
     /**
      * Materializes the saturated RDF graph with the default options
      */
-    default OWLMaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration)
+    default MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration)
             throws OWLException {
         return materialize(configuration, MaterializationParams.defaultBuilder().build());
     }
@@ -38,7 +38,7 @@ public interface OntopOWLAPIMaterializer {
      * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary
      * with the default options
      */
-    default OWLMaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
+    default MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
                                                       @Nonnull ImmutableSet<URI> selectedVocabulary)
             throws OWLException {
         return materialize(configuration, selectedVocabulary, MaterializationParams.defaultBuilder().build());

@@ -33,7 +33,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -259,8 +258,11 @@ public class TreeWitnessRewriterH2Test{
 						count += 1;
 					}
 				} else {
-					List<OWLAxiom> list = st.executeGraph(query);
-					count += list.size();
+					GraphOWLResultSet rs = st.executeGraphQuery(query);
+					while (rs.hasNext()) {
+						rs.next();
+						count++;
+					}
 				}
 			} catch (Exception e) {
 				fail = true;
