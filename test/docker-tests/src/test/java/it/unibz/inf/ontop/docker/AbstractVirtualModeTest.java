@@ -4,13 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
@@ -19,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Common initialization for many tests
@@ -68,7 +65,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
 
-            assertTrue(rs.nextRow());
+            assertTrue(rs.hasNext());
             OWLIndividual ind1 = rs.getOWLIndividual("x");
             retval = ind1.toString();
 
@@ -87,7 +84,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
 
-            assertTrue(rs.nextRow());
+            assertTrue(rs.hasNext());
             OWLLiteral ind1 = rs.getOWLLiteral("x");
             retval = ind1.toString();
 
@@ -105,7 +102,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         boolean retval;
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
-            assertTrue(rs.nextRow());
+            assertTrue(rs.hasNext());
             OWLLiteral ind1 = rs.getOWLLiteral("x");
             retval = ind1.parseBoolean();
         } catch (Exception e) {
@@ -128,7 +125,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         OntopOWLStatement st = conn.createStatement();
         QuestOWLResultSet results = st.executeTuple(query);
         int count = 0;
-        while (results.nextRow()) {
+        while (results.hasNext()) {
             count++;
         }
         assertEquals(expectedCount, count);
@@ -140,7 +137,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         OntopOWLStatement st = conn.createStatement();
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
-            while (rs.nextRow()) {
+            while (rs.hasNext()) {
                 ImmutableMap<String, String> tuple = getTuple(rs);
                 if (mutableCopy.contains(tuple)) {
                     mutableCopy.remove(tuple);
@@ -169,7 +166,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         List<String> returnedUris = new ArrayList<>();
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
-            while (rs.nextRow()) {
+            while (rs.hasNext()) {
                 OWLNamedIndividual ind1 = (OWLNamedIndividual) rs.getOWLIndividual("x");
 
                 returnedUris.add(ind1.getIRI().toString());
@@ -191,7 +188,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         OntopOWLStatement st = conn.createStatement();
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
-            assertTrue(rs.nextRow());
+            assertTrue(rs.hasNext());
 
         } catch (Exception e) {
             throw e;
@@ -212,7 +209,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         boolean retval;
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
-            assertTrue(rs.nextRow());
+            assertTrue(rs.hasNext());
             OWLLiteral ind1 = rs.getOWLLiteral(1);
             retval = ind1.parseBoolean();
         } catch (Exception e) {
@@ -251,7 +248,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
                 double time = (end - start) / 1000;
 
                 int count = 0;
-                while (res.nextRow()) {
+                while (res.hasNext()) {
                     count += 1;
                 }
                 log.debug("Total result: {}", count);
@@ -268,7 +265,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         QuestOWLResultSet rs = st.executeTuple(query);
 
         int columnSize = rs.getColumnCount();
-        while (rs.nextRow()) {
+        while (rs.hasNext()) {
             for (int idx = 1; idx <= columnSize; idx++) {
                 OWLObject binding = rs.getOWLObject(idx);
                 log.debug(binding.toString() + ", ");

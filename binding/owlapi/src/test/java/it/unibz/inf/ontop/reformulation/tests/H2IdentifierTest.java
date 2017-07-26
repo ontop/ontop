@@ -178,7 +178,7 @@ public class H2IdentifierTest {
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			retval = ind1.toString();
 

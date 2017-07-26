@@ -135,7 +135,7 @@ public class LeftJoinMultipleMatchingTest {
                 double time = (end - start) / 1000;
 
                 int count = 0;
-                while (res.nextRow()) {
+                while (res.hasNext()) {
                     count += 1;
                 }
                 log.debug("Total result: {}", count);
@@ -197,7 +197,7 @@ public class LeftJoinMultipleMatchingTest {
         double time = (end - start) / 1000;
 
         int count = 0;
-        while (res.nextRow()) {
+        while (res.hasNext()) {
             count += 1;
         }
         log.debug("Total result: {}", count);

@@ -126,10 +126,10 @@ public class TMappingDisablingTest extends TestCase {
 		try {
 			st = conn.createStatement();
 			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-			assertTrue(!rs.nextRow());
+			assertTrue(!rs.hasNext());
 			rs.close();
 			rs = st.executeTuple(sparqlQuery1);
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 			rs.close();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -169,10 +169,10 @@ public class TMappingDisablingTest extends TestCase {
 		try {
 			st = conn.createStatement();
 			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-			assertTrue(!rs.nextRow());
+			assertTrue(!rs.hasNext());
 			rs.close();
 			rs = st.executeTuple(sparqlQuery1);
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 			rs.close();
 		}catch(Exception e){
 			e.printStackTrace();

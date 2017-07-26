@@ -20,9 +20,13 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
+
 /**
  * A common interface for TupleResultSet and GraphResultSet
  */
 public interface OBDAResultSet extends AutoCloseable{
-	// NO-OP
+
+    @Override
+    void close() throws OntopConnectionException;
 }

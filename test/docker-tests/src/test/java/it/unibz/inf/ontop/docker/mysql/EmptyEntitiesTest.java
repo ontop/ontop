@@ -128,7 +128,7 @@ public class EmptyEntitiesTest {
 		OntopOWLStatement st = conn.createStatement();
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			return (rs.nextRow());
+			return (rs.hasNext());
 
 		} catch (Exception e) {
 			throw e;
@@ -151,7 +151,7 @@ public class EmptyEntitiesTest {
 		OntopOWLStatement st = conn.createStatement();
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			return (rs.nextRow());
+			return (rs.hasNext());
 
 		} catch (Exception e) {
 			throw e;

@@ -128,10 +128,10 @@ public class TMappingConstantPositionsTest extends TestCase {
 		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A. }";
 		try {
 			QuestOWLResultSet rs = st.executeSelectQuery(query);
-			assertTrue(rs.nextRow());
-			assertTrue(rs.nextRow());
-			assertTrue(rs.nextRow());
-			assertFalse(rs.nextRow());
+			assertTrue(rs.hasNext());
+			assertTrue(rs.hasNext());
+			assertTrue(rs.hasNext());
+			assertFalse(rs.hasNext());
 		} 
 		catch (Exception e) {
 			throw e;

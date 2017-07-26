@@ -157,7 +157,7 @@ public class OWLResultSetTableModel implements TableModel {
 			return;
 		}
 
-		for (int rows_fetched = 0; results.nextRow() && !stopFetching && (isFetchingAll() || rows_fetched < size);rows_fetched++) {
+		for (int rows_fetched = 0; results.hasNext() && !stopFetching && (isFetchingAll() || rows_fetched < size); rows_fetched++) {
 			String[] crow = new String[numcols];
 			for (int j = 0; j < numcols; j++) {
 				if(stopFetching)
@@ -199,7 +199,7 @@ public class OWLResultSetTableModel implements TableModel {
 			// Append first the already fetched tuples
 			tabularData.addAll(resultsTable); 
 			// Append the rest
-			while (!stopFetching && results.nextRow()) {
+			while (!stopFetching && results.hasNext()) {
 				String[] crow = new String[numcols];
 				for (int j = 0; j < numcols; j++) {
 					OWLPropertyAssertionObject constant = results

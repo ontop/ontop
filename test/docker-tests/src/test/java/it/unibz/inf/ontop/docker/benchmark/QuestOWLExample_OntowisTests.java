@@ -290,7 +290,7 @@ public class QuestOWLExample_OntowisTests {
 					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
 					int columnSize = rs.getColumnCount();
 					count = 0;
-					while (rs.nextRow()) {
+					while (rs.hasNext()) {
 						count ++;
 						for (int idx = 1; idx <= columnSize; idx++) {
 							@SuppressWarnings("unused")

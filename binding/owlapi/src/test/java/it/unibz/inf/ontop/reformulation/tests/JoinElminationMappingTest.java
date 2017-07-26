@@ -116,7 +116,7 @@ public class JoinElminationMappingTest extends TestCase {
 		try {
 			System.out.println("\n\nSQL:\n" + st.getExecutableQuery(query));
 			QuestOWLResultSet rs = st.executeSelectQuery(query);
-			rs.nextRow();
+			rs.hasNext();
 		} catch (Exception e) {
 			log.debug(e.getMessage(), e);
 			fail = true;

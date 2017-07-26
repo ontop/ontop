@@ -108,7 +108,7 @@ public class MultipleSchemasTestH2 {
             QuestOWLResultSet rs = st.executeTuple(query);
 
             int count = 0;
-            while (rs.nextRow()) {
+            while (rs.hasNext()) {
                 OWLObject ind1 = rs.getOWLObject("x");
                 System.out.println("Result " + ind1.toString());
                 count += 1;

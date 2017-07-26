@@ -31,12 +31,12 @@ import org.semanticweb.owlapi.model.*;
 import java.util.List;
 
 /***
- * A wrapper for QuestResultSet that presents the results as OWLAPI objects.
+ * A wrapper for TupleResultSet that presents the results as OWLAPI objects.
  * 
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  * 
  */
-public class QuestOWLResultSet implements AutoCloseable {
+public class QuestOWLResultSet implements OntopOWLTupleResultSet {
 
 	private final TupleResultSet res;
 
@@ -87,7 +87,8 @@ public class QuestOWLResultSet implements AutoCloseable {
 		return owlst;
 	}
 
-	public boolean nextRow() throws OWLException {
+	@Override
+	public boolean hasNext() throws OWLException {
 		try {
 			return res.nextRow();
 		} catch (Exception e) {

@@ -143,7 +143,7 @@ public class PropertyCharacteristicTest extends TestCase {
 	
 	private int countResult(QuestOWLResultSet rs, boolean stdout) throws OWLException {
 		int counter = 0;
-		while (rs.nextRow()) {
+		while (rs.hasNext()) {
 			counter++;
 			if (stdout) {
 				for (int column = 1; column <= rs.getColumnCount(); column++) {

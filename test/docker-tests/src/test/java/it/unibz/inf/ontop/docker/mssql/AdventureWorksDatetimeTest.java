@@ -20,10 +20,8 @@ package it.unibz.inf.ontop.docker.mssql;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
@@ -54,8 +52,8 @@ public class AdventureWorksDatetimeTest extends AbstractVirtualModeTest {
 		String retval="";
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-//			while(rs.nextRow()) {
-				rs.nextRow();
+//			while(rs.hasNext()) {
+				rs.hasNext();
 				OWLObject ind1 = rs.getOWLObject("y");
 				retval = ind1.toString();
 //			}

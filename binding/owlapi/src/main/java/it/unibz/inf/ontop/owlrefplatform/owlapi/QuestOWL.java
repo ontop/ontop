@@ -744,11 +744,4 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		dispose();
 	}
 
-	/**
-	 * Internal format
-	 */
-	public Ontology getOntopOntology() {
-		return translatedOntologyMerge;
-	}
-
 }

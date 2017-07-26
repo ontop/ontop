@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -112,7 +111,7 @@ public class H2ComplexSameAsTest {
 		ArrayList<String> retVal = new ArrayList<>();
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			while(rs.nextRow()) {
+			while(rs.hasNext()) {
 				for (String s : rs.getSignature()) {
 					OWLObject binding = rs.getOWLObject(s);
 

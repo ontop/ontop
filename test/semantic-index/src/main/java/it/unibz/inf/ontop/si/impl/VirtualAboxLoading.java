@@ -1,9 +1,12 @@
 package it.unibz.inf.ontop.si.impl;
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.OntopRDFMaterializer;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.si.impl.SILoadingTools.RepositoryInit;
@@ -32,12 +35,17 @@ public class VirtualAboxLoading {
 
             RepositoryInit init = createRepository(inputOntology);
 
-            QuestMaterializer materializer = new QuestMaterializer(obdaConfiguration, true);
-            Iterator<Assertion> assertionIterator = materializer.getAssertionIterator();
+            OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
+            MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
+                    .enableDBResultsStreaming(true)
+                    .build();
+            try (MaterializedGraphResultSet graphResultSet = materializer.materialize(
+                    obdaConfiguration, materializationParams)) {
 
-            int count = init.dataRepository.insertData(init.localConnection, assertionIterator, 5000, 500);
-            materializer.disconnect();
-            LOG.debug("Inserted {} triples from the mappings.", count);
+                int count = init.dataRepository.insertData(init.localConnection,
+                        new GraphResultSetIterator(graphResultSet), 5000, 500);
+                LOG.debug("Inserted {} triples from the mappings.", count);
+            }
 
             /*
             Creates the configuration and the loader object
@@ -49,4 +57,35 @@ public class VirtualAboxLoading {
             throw new SemanticIndexException(e.getMessage());
         }
     }
+
+
+
+    private static class GraphResultSetIterator implements Iterator<Assertion> {
+
+        private final MaterializedGraphResultSet graphResultSet;
+
+        GraphResultSetIterator(MaterializedGraphResultSet graphResultSet) {
+            this.graphResultSet = graphResultSet;
+        }
+
+        @Override
+        public boolean hasNext() {
+            try {
+                return graphResultSet.hasNext();
+            } catch (OntopConnectionException | OntopQueryAnsweringException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public Assertion next() {
+            try {
+                return graphResultSet.next();
+            } catch (OntopConnectionException | OntopQueryAnsweringException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+
 }

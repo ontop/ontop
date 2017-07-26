@@ -26,8 +26,9 @@ import it.unibz.inf.ontop.ontology.ClassAssertion;
 import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import junit.framework.Assert;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.OntopRDFMaterializer;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializedGraphResultSet;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,19 +42,18 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
 
-public class QuestOWLMaterializerTest extends TestCase {
+public class OntopOntologyMaterializerTest extends TestCase {
 
 	private Connection jdbcconn = null;
 
-	private static final Logger LOGGER =  LoggerFactory.getLogger(QuestOWLMaterializerTest.class);
+	private static final Logger LOGGER =  LoggerFactory.getLogger(OntopOntologyMaterializerTest.class);
 
 	String url = "jdbc:h2:mem:questjunitdb";
 	String username = "sa";
 	String password = "";
 
-	public QuestOWLMaterializerTest() {
+	public OntopOntologyMaterializerTest() {
     }
 
 	@Override
@@ -114,30 +114,33 @@ public class QuestOWLMaterializerTest extends TestCase {
 				.enableTestMode()
 				.build();
 		
-			QuestMaterializer mat = new QuestMaterializer(configuration,false);
-			Iterator<Assertion> iterator = mat.getAssertionIterator();
+		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
+		MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
+				.build();
+
+		try (MaterializedGraphResultSet resultSet = materializer.materialize(configuration, materializationParams)) {
 			int classAss = 0;
 			int propAss = 0;
 			int objAss = 0;
 
 			LOGGER.debug("Assertions:");
-			while (iterator.hasNext()) {
-				Assertion assertion = iterator.next();
+			while (resultSet.hasNext()) {
+				Assertion assertion = resultSet.next();
 				LOGGER.debug(assertion.toString());
 
 				if (assertion instanceof ClassAssertion)
 					classAss++;
-				
+
 				else if (assertion instanceof ObjectPropertyAssertion)
 					objAss++;
-				
+
 				else // DataPropertyAssertion
 					propAss++;
 			}
-			Assert.assertEquals(6, classAss); //2 classes * 3 data rows for T1
-			Assert.assertEquals(42, propAss); //2 properties * 7 tables * 3 data rows each T2-T8
-			Assert.assertEquals(3, objAss); //3 data rows for T9
-
+			assertEquals(6, classAss); //2 classes * 3 data rows for T1
+			assertEquals(42, propAss); //2 properties * 7 tables * 3 data rows each T2-T8
+			assertEquals(3, objAss); //3 data rows for T9
+		}
 	}
 	
 	public void testDataWithModelAndOnto() throws Exception {
@@ -161,28 +164,30 @@ public class QuestOWLMaterializerTest extends TestCase {
 			System.out.println(onto.getSubObjectPropertyAxioms());
 			System.out.println(onto.getSubDataPropertyAxioms());
 
-			// TODO: why not using OWLAPIMaterializer instead?
-			QuestMaterializer mat = new QuestMaterializer(configuration,false);
-			Iterator<Assertion> iterator = mat.getAssertionIterator();
+		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
+		MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
+				.build();
+		try(MaterializedGraphResultSet resultSet = materializer.materialize(configuration, materializationParams)) {
+
 			int classAss = 0;
 			int propAss = 0;
 			int objAss = 0;
-			while (iterator.hasNext()) {
-				Assertion assertion = iterator.next();
+			while (resultSet.hasNext()) {
+				Assertion assertion = resultSet.next();
 				LOGGER.debug(assertion + "\n");
-				if (assertion instanceof ClassAssertion) 
+				if (assertion instanceof ClassAssertion)
 					classAss++;
-	
-				else if (assertion instanceof ObjectPropertyAssertion) 
+
+				else if (assertion instanceof ObjectPropertyAssertion)
 					objAss++;
-				
+
 				else // DataPropertyAssertion
 					propAss++;
 			}
-			Assert.assertEquals(6, classAss); //3 data rows x2 for subclass prop
-			Assert.assertEquals(42, propAss); //8 tables * 3 data rows each x2 for subclass
-			Assert.assertEquals(3, objAss); //3 since no subprop for obj prop
-
+			assertEquals(6, classAss); //3 data rows x2 for subclass prop
+			assertEquals(42, propAss); //8 tables * 3 data rows each x2 for subclass
+			assertEquals(3, objAss); //3 since no subprop for obj prop
+		}
 	}
 
 

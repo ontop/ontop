@@ -255,7 +255,7 @@ public class TreeWitnessRewriterH2Test{
 					QuestOWLResultSet rs = st.executeTuple(query);
 
 					end = System.currentTimeMillis();
-					while (rs.nextRow()) {
+					while (rs.hasNext()) {
 						count += 1;
 					}
 				} else {

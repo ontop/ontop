@@ -145,7 +145,7 @@ public class MarriageTest {
         Set<String> returnedValues = new HashSet<>();
         try {
             QuestOWLResultSet rs = st.executeSelectQuery(query);
-            while (rs.nextRow()) {
+            while (rs.hasNext()) {
                 OWLIndividual ind1 = rs.getOWLIndividual("x");
                 returnedValues.add(ind1.toStringID());
             }

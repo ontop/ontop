@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
@@ -18,8 +17,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
@@ -128,7 +125,7 @@ public class TypeInferenceTest {
         ImmutableSet.Builder<String> returnedValueBuilder = ImmutableSet.builder();
         try {
             QuestOWLResultSet rs = st.executeSelectQuery(query);
-            while (rs.nextRow()) {
+            while (rs.hasNext()) {
                 OWLObject ind1 = rs.getOWLObject("r");
                 log.debug(ind1.toString());
                 returnedValueBuilder.add(ind1.toString());

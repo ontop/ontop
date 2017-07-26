@@ -138,7 +138,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
         }
         wr.newLine();
 
-        while (result.nextRow()) {
+        while (result.hasNext()) {
             for (int c = 0; c < columns; c++) {
                 String value = ToStringRenderer.getInstance().getRendering(result.getOWLObject(c + 1));
                 wr.append(value);

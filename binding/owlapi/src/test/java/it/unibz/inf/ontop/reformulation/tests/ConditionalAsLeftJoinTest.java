@@ -133,7 +133,7 @@ public class ConditionalAsLeftJoinTest {
                 throw new IllegalStateException("A SQLExecutableQuery was expected");
             sql = ((SQLExecutableQuery)executableQuery).getSQL();
             QuestOWLResultSet rs = st.executeSelectQuery(query);
-            while (rs.nextRow()) {
+            while (rs.hasNext()) {
                 OWLObject ind1 = rs.getOWLObject("a");
                 returnedValues.add(ind1.toString());
                 log.debug("Returned values:" + ind1);

@@ -97,7 +97,7 @@ public class OntologyTypesTest {
 	private void executeQueryAssertResults(String query, OntopOWLStatement st, int expectedRows) throws Exception {
 		QuestOWLResultSet rs = st.executeTuple(query);
 		int count = 0;
-		while (rs.nextRow()) {
+		while (rs.hasNext()) {
 			count++;
 			for (int i = 1; i <= rs.getColumnCount(); i++) {
 				log.info(rs.getSignature().get(i-1));
