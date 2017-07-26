@@ -40,7 +40,7 @@ public class QuickErrorDialog implements Runnable{
 		writer.write(e.getLocalizedMessage());
 		writer.write("\n\n");
 		writer.write("###################################################\n");
-		writer.write("##    Debugging information (for the authors)    ##\n");
+		writer.write("##    Debugging information for developers    ##\n");
 		writer.write("###################################################\n\n");
 
 		StackTraceElement[] elemnts = e.getStackTrace();

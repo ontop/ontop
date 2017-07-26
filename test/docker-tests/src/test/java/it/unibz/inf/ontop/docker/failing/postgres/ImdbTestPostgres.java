@@ -42,13 +42,28 @@ public class ImdbTestPostgres extends AbstractVirtualModeTest {
                 "PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>\n" +
                 "PREFIX dbpedia: <http://dbpedia.org/ontology/>\n" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
-                "SELECT *\n" +
+                "SELECT  *\n" +
                 "WHERE { \n" +
                 "   $m a mo:Movie; mo:isProducedBy $y .\n" +
                 "   $y :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
                 "}\n";
 
         countResults(query2, 15175);
+    }
+
+    public void testCompanyLocationQuery() throws Exception {
+
+        String query = "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
+                "PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>\n" +
+                "PREFIX dbpedia: <http://dbpedia.org/ontology/>\n" +
+                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+                "SELECT $company_name\n" +
+                "WHERE { \n" +
+                "   $y :companyName $company_name; :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
+                "}\n";
+
+
+        countResults(query, 7738);
     }
 
     public void testIndividuals() throws Exception {
