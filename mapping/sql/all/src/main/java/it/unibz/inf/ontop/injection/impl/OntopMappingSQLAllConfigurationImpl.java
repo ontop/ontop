@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllSettings;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import org.apache.commons.rdf.api.Graph;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
@@ -80,12 +81,12 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
     static class OntopMappingSQLAllOptions {
         private final Optional<File> mappingFile;
         private final Optional<Reader> mappingReader;
-        private final Optional<Model> mappingGraph;
+        private final Optional<Graph> mappingGraph;
         private final Optional<File> constraintFile;
         final OntopMappingSQLOptions mappingSQLOptions;
 
         OntopMappingSQLAllOptions(Optional<File> mappingFile, Optional<Reader> mappingReader,
-                                  Optional<Model> mappingGraph, Optional<File> constraintFile,
+                                  Optional<Graph> mappingGraph, Optional<File> constraintFile,
                                   OntopMappingSQLOptions mappingSQLOptions) {
             this.mappingFile = mappingFile;
             this.mappingReader = mappingReader;
@@ -104,7 +105,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
 
         private Optional<File> mappingFile = Optional.empty();
         private Optional<Reader> mappingReader = Optional.empty();
-        private Optional<Model> mappingGraph = Optional.empty();
+        private Optional<Graph> mappingGraph = Optional.empty();
         private Optional<File> constraintFile = Optional.empty();
 
         private boolean useR2rml = false;
@@ -181,7 +182,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         }
 
         @Override
-        public B r2rmlMappingGraph(@Nonnull Model rdfGraph) {
+        public B r2rmlMappingGraph(@Nonnull Graph rdfGraph) {
             declareMappingDefinedCB.run();
             useR2rml = true;
             this.mappingGraph = Optional.of(rdfGraph);
@@ -299,7 +300,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         }
 
         @Override
-        public B r2rmlMappingGraph(@Nonnull Model rdfGraph) {
+        public B r2rmlMappingGraph(@Nonnull Graph rdfGraph) {
             return localFragmentBuilder.r2rmlMappingGraph(rdfGraph);
         }
 

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.spec.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
-import org.eclipse.rdf4j.model.Model;
+import org.apache.commons.rdf.api.Graph;
 
 import java.io.File;
 import java.io.Reader;
@@ -14,11 +14,11 @@ public class OBDASpecInputImpl implements OBDASpecInput {
 
     private final ImmutableMap<String, File> files;
     private final ImmutableMap<String, Reader> readers;
-    private final ImmutableMap<String, Model> graphs;
+    private final ImmutableMap<String, Graph> graphs;
 
     private OBDASpecInputImpl(ImmutableMap<String, File> files,
                               ImmutableMap<String, Reader> readers,
-                              ImmutableMap<String, Model> graphs) {
+                              ImmutableMap<String, Graph> graphs) {
         this.files = files;
         this.readers = readers;
         this.graphs = graphs;
@@ -36,7 +36,7 @@ public class OBDASpecInputImpl implements OBDASpecInput {
     }
 
     @Override
-    public Optional<Model> getGraph(String key) {
+    public Optional<Graph> getGraph(String key) {
         return Optional.ofNullable(graphs.get(key));
     }
 
@@ -45,7 +45,7 @@ public class OBDASpecInputImpl implements OBDASpecInput {
 
         private final Map<String, File> files = new HashMap<>();
         private final Map<String, Reader> readers = new HashMap<>();
-        private final Map<String, Model> graphs = new HashMap<>();
+        private final Map<String, Graph> graphs = new HashMap<>();
 
         @Override
         public Builder addFile(String key, File file) {
@@ -60,7 +60,7 @@ public class OBDASpecInputImpl implements OBDASpecInput {
         }
 
         @Override
-        public Builder addGraph(String key, Model graph) {
+        public Builder addGraph(String key, Graph graph) {
             graphs.put(key, graph);
             return this;
         }

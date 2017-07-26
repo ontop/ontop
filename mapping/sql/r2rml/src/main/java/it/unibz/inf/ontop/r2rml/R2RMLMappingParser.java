@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.rdf4j.RDF4J;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
@@ -61,8 +62,8 @@ public class R2RMLMappingParser implements SQLMappingParser {
     }
 
     @Override
-    public SQLPPMapping parse(Model mappingGraph) throws InvalidMappingException, DuplicateMappingException {
-        R2RMLManager r2rmlManager = new R2RMLManager(new RDF4J().asGraph(mappingGraph));
+    public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException, DuplicateMappingException {
+        R2RMLManager r2rmlManager = new R2RMLManager(mappingGraph);
         return parse(r2rmlManager);
     }
 
