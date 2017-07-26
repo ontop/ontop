@@ -39,7 +39,7 @@ public class DefaultOntopOWLConnection implements OntopOWLConnection {
 	@Override
 	public OntopOWLStatement createStatement() throws OWLException {
 		try {
-			return new DefaultOntopOWLStatement(conn.createStatement(), this, inputQueryFactory);
+			return new DefaultOntopOWLStatement(conn.createStatement(), inputQueryFactory);
 		} catch (OntopConnectionException e) {
 			throw new OWLException(e);
 		}

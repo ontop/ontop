@@ -50,10 +50,8 @@ import it.unibz.inf.ontop.owlrefplatform.owlapi.impl.OntopBooleanOWLResultSet;
 public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	private OntopStatement st;
 	private final InputQueryFactory inputQueryFactory;
-	private OWLConnection conn;
 
-	public DefaultOntopOWLStatement(OntopStatement st, OWLConnection conn, InputQueryFactory inputQueryFactory) {
-		this.conn = conn;
+	public DefaultOntopOWLStatement(OntopStatement st, InputQueryFactory inputQueryFactory) {
 		this.st = st;
 		this.inputQueryFactory = inputQueryFactory;
 	}
@@ -81,7 +79,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 			SelectQuery query = inputQueryFactory.createSelectQuery(inputQuery);
 			TupleResultSet resultSet = st.execute(query);
 
-			return new OntopTupleOWLResultSet(resultSet, this);
+			return new OntopTupleOWLResultSet(resultSet);
 
 		} catch (OntopQueryEngineException e) {
 			throw new OntopOWLException(e);
@@ -137,10 +135,6 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 
 		SimpleGraphResultSet resultSet = st.execute(query);
 		return new OntopGraphOWLResultSet(resultSet);
-	}
-
-	public OWLConnection getConnection() throws OntopOWLException {
-		return conn;
 	}
 
 	public int getFetchSize() throws OntopOWLException {

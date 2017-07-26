@@ -40,13 +40,10 @@ public class OntopTupleOWLResultSet implements TupleOWLResultSet {
 
 	private final TupleResultSet res;
 
-	private final DefaultOntopOWLStatement owlst;
-
-    public OntopTupleOWLResultSet(TupleResultSet res, DefaultOntopOWLStatement owlst) {
+    public OntopTupleOWLResultSet(TupleResultSet res) {
 		if (res == null)
 			throw new IllegalArgumentException("The result set must not be null");
 		this.res = res;
-		this.owlst = owlst;
 	}
 
 	@Override
@@ -84,10 +81,6 @@ public class OntopTupleOWLResultSet implements TupleOWLResultSet {
 			throw new OntopOWLException(e);
 		}
 
-	}
-
-	public DefaultOntopOWLStatement getStatement() {
-		return owlst;
 	}
 
 	@Override

@@ -32,12 +32,6 @@ public interface OWLStatement extends AutoCloseable {
 	GraphOWLResultSet executeDescribeQuery(String query) throws OWLException;
 	GraphOWLResultSet executeGraphQuery(String query) throws OWLException;
 
-	/**
-	 * TODO: remove it
-	 */
-	@Deprecated
-	OWLConnection getConnection() throws OWLException;
-
 	boolean isClosed() throws OWLException;
 
 	void setQueryTimeout(int seconds) throws OWLException;
