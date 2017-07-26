@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.owlapi.directmapping;
+package it.unibz.inf.ontop.owlapi.directmapping.impl;
 
 /*
  * #%L

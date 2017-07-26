@@ -19,7 +19,7 @@ import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
-import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingAxiomProducer;
+import it.unibz.inf.ontop.owlapi.directmapping.impl.DirectMappingAxiomProducer;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;

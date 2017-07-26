@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.impl.OntopMappingSQLConfigurationImpl;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
@@ -22,9 +23,9 @@ public interface OntopMappingSQLConfiguration extends OntopSQLCoreConfiguration,
         return new OntopMappingSQLConfigurationImpl.BuilderImpl<>();
     }
 
-    Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException;
+    Optional<SQLPPMapping> loadPPMapping() throws MappingException;
 
-    default SQLPPMapping loadProvidedPPMapping() throws DuplicateMappingException, MappingIOException, InvalidMappingException {
+    default SQLPPMapping loadProvidedPPMapping() throws MappingException {
         return loadPPMapping()
                 .orElseThrow(() -> new IllegalStateException("No PreProcessedMapping could have been loaded. " +
                         "Do not call this method unless you are sure of the input provision."));

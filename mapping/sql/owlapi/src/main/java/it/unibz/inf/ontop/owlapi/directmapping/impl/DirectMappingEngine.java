@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.owlapi.directmapping;
+package it.unibz.inf.ontop.owlapi.directmapping.impl;
 
 /*
  * #%L
@@ -23,9 +23,7 @@ package it.unibz.inf.ontop.owlapi.directmapping;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.MappingIOException;
+import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
@@ -39,6 +37,7 @@ import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingBootstrapper.BootstrappingResults;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -63,19 +62,21 @@ public class DirectMappingEngine {
 
 	private final MappingVocabularyExtractor vocabularyExtractor;
 
-	public static class BootstrappingResults {
+	public static class DefaultBootstrappingResults implements BootstrappingResults {
 		private final SQLPPMapping ppMapping;
 		private final OWLOntology ontology;
 
-		public BootstrappingResults(SQLPPMapping ppMapping, OWLOntology ontology) {
+		public DefaultBootstrappingResults(SQLPPMapping ppMapping, OWLOntology ontology) {
 			this.ppMapping = ppMapping;
 			this.ontology = ontology;
 		}
 
+		@Override
 		public SQLPPMapping getPPMapping() {
 			return ppMapping;
 		}
 
+		@Override
 		public OWLOntology getOntology() {
 			return ontology;
 		}
@@ -93,8 +94,8 @@ public class DirectMappingEngine {
 	 * Entry point.
 	 *
 	 */
-	public static BootstrappingResults bootstrap(OntopSQLOWLAPIConfiguration configuration, String baseIRI)
-			throws MappingIOException, InvalidMappingException, OWLOntologyCreationException, SQLException, OWLOntologyStorageException, DuplicateMappingException {
+	static BootstrappingResults bootstrap(OntopMappingSQLOWLAPIConfiguration configuration, String baseIRI)
+			throws MappingException, OWLOntologyCreationException, MappingBootstrappingException {
 		DirectMappingEngine engine = configuration.getInjector().getInstance(DirectMappingEngine.class);
 		return engine.bootstrapMappingAndOntology(baseIRI, configuration.loadPPMapping(),
 				configuration.loadInputOntology());
@@ -115,23 +116,27 @@ public class DirectMappingEngine {
 	 */
 	private BootstrappingResults bootstrapMappingAndOntology(String baseIRI, Optional<SQLPPMapping> inputPPMapping,
 															 Optional<OWLOntology> inputOntology)
-			throws SQLException, OWLOntologyCreationException, OWLOntologyStorageException, DuplicateMappingException {
+			throws MappingBootstrappingException {
 
 		setBaseURI(baseIRI);
 
-		SQLPPMapping newPPMapping = inputPPMapping.isPresent()
-				? extractPPMapping(inputPPMapping.get())
-				: extractPPMapping();
+		try {
+			SQLPPMapping newPPMapping = inputPPMapping.isPresent()
+					? extractPPMapping(inputPPMapping.get())
+					: extractPPMapping();
 
-		ImmutableOntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
-				newPPMapping.getTripleMaps().stream()
-						.flatMap(ax -> ax.getTargetAtoms().stream()));
+			ImmutableOntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
+					newPPMapping.getTripleMaps().stream()
+							.flatMap(ax -> ax.getTargetAtoms().stream()));
 
-		OWLOntology newOntology = inputOntology.isPresent()
-				? updateOntology(inputOntology.get(), newVocabulary)
-				: updateOntology(createEmptyOntology(baseIRI), newVocabulary);
+			OWLOntology newOntology = inputOntology.isPresent()
+					? updateOntology(inputOntology.get(), newVocabulary)
+					: updateOntology(createEmptyOntology(baseIRI), newVocabulary);
 
-		return new BootstrappingResults(newPPMapping, newOntology);
+			return new DefaultBootstrappingResults(newPPMapping, newOntology);
+		} catch (SQLException | MappingException | OWLOntologyStorageException | OWLOntologyCreationException e) {
+			throw new MappingBootstrappingException(e);
+		}
 	}
 
 	private static OWLOntology createEmptyOntology(String baseIRI) throws OWLOntologyCreationException {
@@ -194,7 +199,7 @@ public class DirectMappingEngine {
 	 *
 	 * @return a new OBDA Model containing all the extracted mappings
 	 */
-	private SQLPPMapping extractPPMapping() throws DuplicateMappingException, SQLException {
+	private SQLPPMapping extractPPMapping() throws MappingException, SQLException {
 		it.unibz.inf.ontop.io.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, UriTemplateMatcher.create(Stream.empty()));
 		SQLPPMapping emptyPPMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), mappingMetadata);
@@ -202,7 +207,7 @@ public class DirectMappingEngine {
 	}
 
 	private SQLPPMapping extractPPMapping(SQLPPMapping ppMapping)
-			throws DuplicateMappingException, SQLException {
+			throws MappingException, SQLException {
 		currentMappingIndex = ppMapping.getTripleMaps().size() + 1;
 		return bootstrapMappings(ppMapping);
 	}
