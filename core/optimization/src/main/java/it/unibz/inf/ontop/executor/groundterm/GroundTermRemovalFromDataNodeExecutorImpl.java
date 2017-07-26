@@ -28,7 +28,20 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 /**
- * TODO: explain
+ * Turns constant values from a data node d into explicit equalities.
+ * e.g. if d = A(5, x, 6),
+ * transforms d into d' = A(y1, x , y2),
+ * and generates the equalities y1 = 5 and y2 = 6.
+ *
+ * Then finds or creates a recipient node r in the query for these equalities.
+ * By default, r is the first candidate recipient encountered by searching the query upwards from d',
+ * up to the first construction or union node.
+ * r can only be a filter node, an inner join, or a left join encountered from its right subtree.
+ *
+ * If such recipient cannot be found in the query,
+ * r is a fresh filter node,
+ * inserted either as the parent of d',
+ * or as its grandparent if d' is the left child of a left join node.
  */
 @Singleton
 public class GroundTermRemovalFromDataNodeExecutorImpl implements
@@ -104,11 +117,25 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
             else {
                 ImmutableExpression joiningCondition = convertIntoBooleanExpression(pairExtraction.pairs);
                 FilterNode newFilterNode = iqFactory.createFilterNode(joiningCondition);
-                treeComponent.insertParent(pairExtraction.newDataNode, newFilterNode);
+                treeComponent.insertParent(getRecipientChild(pairExtraction.newDataNode, query), newFilterNode);
             }
         }
 
         return multimapBuilder.build();
+    }
+
+    private QueryNode getRecipientChild(DataNode dataNode, IntermediateQuery query) {
+
+        QueryNode parent = query.getParent(dataNode)
+                .orElseThrow(() -> new IllegalStateException("Node "+dataNode+" has no parent"));
+        if(parent instanceof LeftJoinNode) {
+            BinaryOrderedOperatorNode.ArgumentPosition position = query.getOptionalPosition(parent, dataNode)
+                    .orElseThrow(() -> new IllegalStateException("No position for left join child " + dataNode));
+            if (position.equals(BinaryOrderedOperatorNode.ArgumentPosition.LEFT)) {
+                return parent;
+            }
+        }
+        return dataNode;
     }
 
     private ImmutableExpression convertIntoBooleanExpression(Collection<VariableGroundTermPair> pairs) {
@@ -192,10 +219,10 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
                      * TODO: explain
                      */
                     switch (optionalPosition.get()) {
-                        case LEFT:
-                            break;
                         case RIGHT:
                             return Optional.of((JoinOrFilterNode)ancestor);
+                            /* continue searching upwards */
+                        case LEFT:;
                     }
                 }
                 else {
