@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.iq.proposal.impl.GroundTermRemovalFromDataNodeProposal
 
 /**
  * Collects all the data nodes that contains some ground terms
- * and proposes to move them of the data nodes (in filter or join-like nodes)
+ * and proposes to move them of the data nodes (in filter or join-like nodes).
  */
 public class GroundTermRemovalFromDataNodeReshaper implements IntermediateQueryOptimizer {
 
