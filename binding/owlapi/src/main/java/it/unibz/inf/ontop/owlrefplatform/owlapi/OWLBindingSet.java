@@ -8,7 +8,18 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
-public interface OWLBindingSet {
+import java.util.Iterator;
+import java.util.List;
+
+public interface OWLBindingSet extends Iterable<OWLBinding> {
+
+    @Override
+    Iterator<OWLBinding> iterator();
+
+    List<String> getBindingNames() throws OWLException;
+
+    OWLBinding getBinding(String bindingName) throws OWLException;
+
     OWLPropertyAssertionObject getOWLPropertyAssertionObject(int column) throws OWLException;
 
     OWLIndividual getOWLIndividual(int column) throws OWLException;
