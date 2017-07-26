@@ -11,6 +11,7 @@ import eu.optique.r2rml.api.binding.jena.JenaR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
@@ -79,7 +80,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
          */
         try {
             ppMapping = config.loadProvidedPPMapping();
-        } catch ( InvalidMappingException | DuplicateMappingException | MappingIOException e) {
+        } catch (MappingException e) {
             e.printStackTrace();
             System.exit(1);
             return;
