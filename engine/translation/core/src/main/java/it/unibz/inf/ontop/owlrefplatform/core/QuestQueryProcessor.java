@@ -125,7 +125,7 @@ public class QuestQueryProcessor implements QueryTranslator {
 			newprogramEq.appendRule(newquery);
 		}
 
-		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
+		DatalogProgramFlattener fl = new DatalogProgramFlattener(newprogramEq);
 		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
 		DatalogProgram newprogram = DATALOG_FACTORY.getDatalogProgram(program.getQueryModifiers(), p);
 

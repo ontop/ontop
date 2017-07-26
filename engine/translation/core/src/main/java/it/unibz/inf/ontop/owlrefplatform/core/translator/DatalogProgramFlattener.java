@@ -20,11 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
-public class SPARQLQueryFlattener {
+public class DatalogProgramFlattener {
 
-	private static final Logger log = LoggerFactory.getLogger(SPARQLQueryFlattener.class);
+	private static final Logger log = LoggerFactory.getLogger(DatalogProgramFlattener.class);
 
     /*
      TODO: eliminate both instance variables
@@ -32,7 +31,7 @@ public class SPARQLQueryFlattener {
     private final List<Predicate> irreducible = new LinkedList<>();
 	private final DatalogProgram program;
 
-    public SPARQLQueryFlattener(DatalogProgram program) {
+    public DatalogProgramFlattener(DatalogProgram program) {
 		this.program = program;
 	}
 

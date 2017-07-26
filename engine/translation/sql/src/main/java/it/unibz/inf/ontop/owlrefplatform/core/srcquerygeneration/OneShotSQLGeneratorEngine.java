@@ -26,6 +26,7 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.datalog.impl.DatalogProgramImpl;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopTranslationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
@@ -50,6 +51,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushUpBooleanExpressi
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.DatalogProgramFlattener;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
 import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -337,7 +339,10 @@ public class OneShotSQLGeneratorEngine {
 		IntermediateQuery queryAfterPullOut = new PullOutVariableOptimizer().optimize(groundTermFreeQuery);
 		log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
 
-		return queryAfterPullOut;
+		IntermediateQuery queryAfterPushUp = new PushUpBooleanExpressionOptimizerImpl().optimize(groundTermFreeQuery);
+		log.debug("New query after pushing up equalities: \n" + queryAfterPushUp);
+
+		return queryAfterPushUp;
 	}
 
     private boolean hasSelectDistinctStatement(DatalogProgram query) {
@@ -600,10 +605,27 @@ public class OneShotSQLGeneratorEngine {
 	 * @param program
 	 */
 	private void normalizeProgram(DatalogProgram program) {
+
 		for (CQIE rule : program.getRules()) {
 			normalizeRule(rule);
 		}
+		log.debug("Program before flattening : \n"+program);
+		program = flattenProgram(program);
 		log.debug("Program normalized for SQL translation: \n"+program);
+	}
+
+	private DatalogProgram flattenProgram(DatalogProgram program) {
+	    Predicate topLevelPredicate = program.getRules().stream()
+				.filter(r -> r.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY))
+				.findFirst()
+				.map(r -> r.getHead().getFunctionSymbol())
+				.orElseThrow(() -> new IllegalStateException("This program must have a rule with head predicate "+
+				OBDAVocabulary.QUEST_QUERY));
+
+		return  DATALOG_FACTORY.getDatalogProgram(
+				program.getQueryModifiers(),
+				new DatalogProgramFlattener(program)
+						.flatten(program.getRules(topLevelPredicate).get(0)));
 	}
 
 	/**
