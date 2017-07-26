@@ -114,8 +114,9 @@ public class CanonicalIRIUniversityTest {
                     TupleOWLResultSet  res = st.executeSelectQuery(sparqlQuery);
                     int columnSize = res.getColumnCount();
                     while (res.hasNext()) {
+                        final OWLBindingSet bindingSet = res.next();
                         for (int idx = 1; idx <= columnSize; idx++) {
-                            OWLObject binding = res.getOWLObject(idx);
+                            OWLObject binding = bindingSet.getOWLObject(idx);
                             System.out.print(binding.toString() + ", ");
                         }
                         System.out.print("\n");
@@ -177,9 +178,9 @@ public class CanonicalIRIUniversityTest {
         try {
             TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while(rs.hasNext()) {
+                final OWLBindingSet bindingSet = rs.next();
                 for (String s : rs.getSignature()) {
-                    OWLObject binding = rs.getOWLObject(s);
-
+                    OWLObject binding = bindingSet.getOWLObject(s);
                     String rendering = ToStringRenderer.getInstance().getRendering(binding);
                     retVal.add(rendering);
                     System.out.println((s + ":  " + rendering));

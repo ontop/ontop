@@ -421,7 +421,8 @@ public class LeftJoinProfTest {
             sql = ((SQLExecutableQuery)executableQuery).getSQL();
             TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
-                OWLLiteral ind1 = rs.getOWLLiteral("v");
+                final OWLBindingSet bindingSet = rs.next();
+                OWLLiteral ind1 = bindingSet.getOWLLiteral("v");
                 // log.debug(ind1.toString());
                 if (ind1 != null) {
                     returnedValues.add(ind1.getLiteral());

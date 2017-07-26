@@ -179,7 +179,8 @@ public class H2IdentifierTest {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 
 			assertTrue(rs.hasNext());
-			OWLIndividual ind1 = rs.getOWLIndividual("x");
+            final OWLBindingSet bindingSet = rs.next();
+            OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
 			retval = ind1.toString();
 
 		} catch (Exception e) {

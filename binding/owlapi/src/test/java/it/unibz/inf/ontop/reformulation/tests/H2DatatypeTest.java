@@ -153,7 +153,8 @@ public class H2DatatypeTest {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 
 			assertTrue(rs.hasNext());
-			OWLIndividual ind1 = rs.getOWLIndividual("x");
+            final OWLBindingSet bindingSet = rs.next();
+			OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
 			retval = ind1.toString();
 
 		} catch (Exception e) {
@@ -172,7 +173,8 @@ public class H2DatatypeTest {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 
 			assertTrue(rs.hasNext());
-			OWLLiteral ind1 = rs.getOWLLiteral("x");
+            final OWLBindingSet bindingSet = rs.next();
+            OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
 			retval = ind1.toString();
 
 		} catch (Exception e) {

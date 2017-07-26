@@ -63,8 +63,9 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		int count = 0;
 		int columns = res.getColumnCount();
 		while (res.hasNext()) {
-			for (int i = 0; i < columns; i++) {
-				OWLObject o = res.getOWLObject(i+1);
+            final OWLBindingSet bindingSet = res.next();
+            for (int i = 0; i < columns; i++) {
+				OWLObject o = bindingSet.getOWLObject(i+1);
 				System.out.println(o.toString());
 			}
 			count += 1;

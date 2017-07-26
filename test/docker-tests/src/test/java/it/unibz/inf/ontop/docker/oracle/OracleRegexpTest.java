@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.docker.oracle;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLBindingSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -47,7 +48,8 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 		TupleOWLResultSet rs = st.executeSelectQuery(query);
 		if(hasResult){
 			assertTrue(rs.hasNext());
-			OWLIndividual ind1 =	rs.getOWLIndividual("country")	 ;
+            final OWLBindingSet bindingSet = rs.next();
+            OWLIndividual ind1 = bindingSet.getOWLIndividual("country")	 ;
 			retval = ind1.toString();
 		} else {
 			assertFalse(rs.hasNext());

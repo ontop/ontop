@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLBindingSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -69,17 +70,14 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 
 		OWLObject answer, answer2;
 		rs.hasNext();
-
-
-
-		answer= rs.getOWLObject("x");
+        final OWLBindingSet bindingSet = rs.next();
+        answer= bindingSet.getOWLObject("x");
 		System.out.print("x =" + answer);
 		System.out.print(" ");
-		answer2= rs.getOWLObject("y");
+		answer2= bindingSet.getOWLObject("y");
 
 		System.out.print("y =" + answer2);
 		System.out.print(" ");
-
 
 		rs.close();
 		assertEquals("<http://myproject.org/odbs#tracepaper1>", answer.toString());

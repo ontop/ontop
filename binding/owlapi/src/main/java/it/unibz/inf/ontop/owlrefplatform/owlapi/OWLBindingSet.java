@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
+import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
@@ -12,6 +14,10 @@ public interface OWLBindingSet {
     OWLIndividual getOWLIndividual(int column) throws OWLException;
 
     OWLIndividual getOWLIndividual(String column) throws OWLException;
+
+    OWLNamedIndividual getOWLNamedIndividual(int column) throws OWLException;
+
+    OWLAnonymousIndividual getOWLAnonymousIndividual(int column) throws OWLException;
 
     OWLLiteral getOWLLiteral(int column) throws OWLException;
 

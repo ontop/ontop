@@ -72,7 +72,8 @@ public class QuestOWLExample {
             int columnSize = rs.getColumnCount();
             while (rs.hasNext()) {
                 for (int idx = 1; idx <= columnSize; idx++) {
-                    OWLObject binding = rs.getOWLObject(idx);
+                    final OWLBindingSet bindingSet = rs.next();
+                    OWLObject binding = bindingSet.getOWLObject(idx);
                     System.out.print(ToStringRenderer.getInstance().getRendering(binding) + ", ");
                 }
                 System.out.print("\n");

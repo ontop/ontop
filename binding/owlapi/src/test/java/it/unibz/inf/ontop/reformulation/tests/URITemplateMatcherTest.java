@@ -149,13 +149,14 @@ public class URITemplateMatcherTest {
 		String result = "";
 		int count = 0;
 		while (res.hasNext()) {
-			count += 1;
+            final OWLBindingSet bindingSet = res.next();
+            count += 1;
 			if (count == 1) {
 				for (int i = 1; i <= res.getColumnCount(); i++) {
-					log.debug("Example result " + res.getSignature().get(i - 1) + " = " + res.getOWLObject(i));
+					log.debug("Example result " + res.getSignature().get(i - 1) + " = " + bindingSet.getOWLObject(i));
 
 				}
-				result = ToStringRenderer.getInstance().getRendering(res.getOWLObject("s"));
+				result = ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject("s"));
 			}
 		}
 		log.debug("Total results: {}", count);

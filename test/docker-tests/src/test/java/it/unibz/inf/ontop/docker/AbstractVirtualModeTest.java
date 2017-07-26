@@ -66,7 +66,8 @@ public abstract class AbstractVirtualModeTest extends TestCase {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
 
             assertTrue(rs.hasNext());
-            OWLIndividual ind1 = rs.getOWLIndividual("x");
+            final OWLBindingSet bindingSet = rs.next();
+            OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
             retval = ind1.toString();
 
         } catch (Exception e) {
@@ -85,7 +86,8 @@ public abstract class AbstractVirtualModeTest extends TestCase {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
 
             assertTrue(rs.hasNext());
-            OWLLiteral ind1 = rs.getOWLLiteral("x");
+            final OWLBindingSet bindingSet = rs.next();
+            OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
             retval = ind1.toString();
 
         } catch (Exception e) {
@@ -103,7 +105,8 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         try {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             assertTrue(rs.hasNext());
-            OWLLiteral ind1 = rs.getOWLLiteral("x");
+            final OWLBindingSet bindingSet = rs.next();
+            OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
             retval = ind1.parseBoolean();
         } catch (Exception e) {
             throw e;
@@ -138,7 +141,8 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         try {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
-                ImmutableMap<String, String> tuple = getTuple(rs);
+                final OWLBindingSet bindingSet = rs.next();
+                ImmutableMap<String, String> tuple = getTuple(rs, bindingSet);
                 if (mutableCopy.contains(tuple)) {
                     mutableCopy.remove(tuple);
                 }
@@ -152,10 +156,10 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         return mutableCopy.isEmpty();
     }
 
-    protected ImmutableMap<String, String> getTuple(TupleOWLResultSet rs) throws OWLException {
+    protected ImmutableMap<String, String> getTuple(TupleOWLResultSet rs, OWLBindingSet bindingSet) throws OWLException {
         ImmutableMap.Builder<String, String> tuple = ImmutableMap.builder();
         for (String variable : rs.getSignature()) {
-            tuple.put(variable, rs.getOWLIndividual(variable).toString());
+            tuple.put(variable, bindingSet.getOWLIndividual(variable).toString());
         }
         return tuple.build();
     }
@@ -167,7 +171,8 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         try {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
-                OWLNamedIndividual ind1 = (OWLNamedIndividual) rs.getOWLIndividual("x");
+                final OWLBindingSet bindingSet = rs.next();
+                OWLNamedIndividual ind1 = (OWLNamedIndividual) bindingSet.getOWLIndividual("x");
 
                 returnedUris.add(ind1.getIRI().toString());
                 log.debug(ind1.getIRI().toString());
@@ -208,9 +213,11 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         OWLStatement st = conn.createStatement();
         boolean retval;
         try {
+            // FIXME: use propery ask query
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             assertTrue(rs.hasNext());
-            OWLLiteral ind1 = rs.getOWLLiteral(1);
+            final OWLBindingSet bindingSet = rs.next();
+            OWLLiteral ind1 = bindingSet.getOWLLiteral(1);
             retval = ind1.parseBoolean();
         } catch (Exception e) {
             throw e;
@@ -266,8 +273,9 @@ public abstract class AbstractVirtualModeTest extends TestCase {
 
         int columnSize = rs.getColumnCount();
         while (rs.hasNext()) {
+            final OWLBindingSet bindingSet = rs.next();
             for (int idx = 1; idx <= columnSize; idx++) {
-                OWLObject binding = rs.getOWLObject(idx);
+                OWLObject binding = bindingSet.getOWLObject(idx);
                 log.debug(binding.toString() + ", ");
             }
 

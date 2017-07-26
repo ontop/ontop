@@ -141,8 +141,9 @@ public class BindTest {
         try {
             TupleOWLResultSet  rs = st.executeSelectQuery(query);
             rs.hasNext();
-            OWLObject ind1 = rs.getOWLObject("title");
-            OWLObject ind2 = rs.getOWLObject("price");
+            final OWLBindingSet bindingSet = rs.next();
+            OWLObject ind1 = bindingSet.getOWLObject("title");
+            OWLObject ind2 = bindingSet.getOWLObject("price");
 
             return ind2;
 
@@ -516,7 +517,8 @@ public class BindTest {
         try {
             TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
-                OWLObject ind1 = rs.getOWLObject("w");
+                final OWLBindingSet bindingSet = rs.next();
+                OWLObject ind1 = bindingSet.getOWLObject("w");
                 // log.debug(ind1.toString());
                 returnedValues.add(ind1.toString());
                 java.lang.System.out.println(ind1);

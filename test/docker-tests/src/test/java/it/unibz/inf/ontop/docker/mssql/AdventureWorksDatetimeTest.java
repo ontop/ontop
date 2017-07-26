@@ -54,7 +54,7 @@ public class AdventureWorksDatetimeTest extends AbstractVirtualModeTest {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 //			while(rs.hasNext()) {
 				rs.hasNext();
-				OWLObject ind1 = rs.getOWLObject("y");
+				OWLObject ind1 = rs.next().getOWLObject("y");
 				retval = ind1.toString();
 //			}
 		} catch (Exception e) {

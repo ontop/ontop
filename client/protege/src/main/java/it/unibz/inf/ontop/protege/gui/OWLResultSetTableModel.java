@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.gui;
  */
 
 import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLBindingSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLException;
@@ -159,10 +160,12 @@ public class OWLResultSetTableModel implements TableModel {
 
 		for (int rows_fetched = 0; results.hasNext() && !stopFetching && (isFetchingAll() || rows_fetched < size); rows_fetched++) {
 			String[] crow = new String[numcols];
+            final OWLBindingSet bindingSet = results.next();
 			for (int j = 0; j < numcols; j++) {
 				if(stopFetching)
 					break;
-				OWLPropertyAssertionObject constant = results.getOWLPropertyAssertionObject(j + 1);
+
+                OWLPropertyAssertionObject constant = bindingSet.getOWLPropertyAssertionObject(j + 1);
 				if (constant != null) {
                     crow[j] = ToStringRenderer.getInstance().getRendering(constant);
 				}
@@ -200,10 +203,10 @@ public class OWLResultSetTableModel implements TableModel {
 			tabularData.addAll(resultsTable); 
 			// Append the rest
 			while (!stopFetching && results.hasNext()) {
-				String[] crow = new String[numcols];
+                final OWLBindingSet bindingSet = results.next();
+                String[] crow = new String[numcols];
 				for (int j = 0; j < numcols; j++) {
-					OWLPropertyAssertionObject constant = results
-							.getOWLPropertyAssertionObject(j + 1);
+					OWLPropertyAssertionObject constant = bindingSet.getOWLPropertyAssertionObject(j + 1);
 					if (constant != null) {
 						crow[j] = constant.toString();
 					}

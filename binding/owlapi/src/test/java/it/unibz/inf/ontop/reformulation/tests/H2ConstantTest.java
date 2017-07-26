@@ -117,7 +117,9 @@ public class H2ConstantTest {
 		try {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
-			OWLObject ind1 =	rs.getOWLObject("y")	 ;
+            final OWLBindingSet bindingSet = rs.next();
+
+            OWLObject ind1 = bindingSet.getOWLObject("y")	 ;
 			retval = ind1.toString();
 		} catch (Exception e) {
 			throw e;

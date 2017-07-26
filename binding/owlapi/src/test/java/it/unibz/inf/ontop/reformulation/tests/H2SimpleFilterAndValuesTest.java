@@ -126,7 +126,8 @@ public class H2SimpleFilterAndValuesTest {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 
 			assertTrue(rs.hasNext());
-			OWLLiteral ind1 = rs.getOWLLiteral("y");
+            final OWLBindingSet bindingSet = rs.next();
+            OWLLiteral ind1 = bindingSet.getOWLLiteral("y");
 			retval = ind1.toString();
 
 		} catch (Exception e) {

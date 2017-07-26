@@ -135,11 +135,12 @@ public class TMappingConcurrencyErrorFixTest{
 		try {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
-			OWLIndividual ind1 =	rs.getOWLIndividual("y")	 ;
+            final OWLBindingSet bindingSet = rs.next();
+			OWLIndividual ind1 = bindingSet.getOWLIndividual("y")	 ;
 			retval = ind1.toString();
 			assertEquals("<http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#111>", retval);
 			assertTrue(rs.hasNext());
-			OWLIndividual ind2 =	rs.getOWLIndividual("y")	 ;
+			OWLIndividual ind2 =	bindingSet.getOWLIndividual("y")	 ;
 			retval = ind2.toString();
 			assertEquals("<http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#112>", retval);
 		} catch (Exception e) {

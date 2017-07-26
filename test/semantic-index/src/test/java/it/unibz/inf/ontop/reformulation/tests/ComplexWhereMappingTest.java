@@ -122,9 +122,10 @@ public class ComplexWhereMappingTest {
 		try {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
-			OWLIndividual ind1 = rs.getOWLIndividual("x");
-			OWLIndividual ind2 = rs.getOWLIndividual("y");
-			OWLLiteral val = rs.getOWLLiteral("z");
+            final OWLBindingSet bindingSet = rs.next();
+            OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
+			OWLIndividual ind2 = bindingSet.getOWLIndividual("y");
+			OWLLiteral val = bindingSet.getOWLLiteral("z");
 			assertEquals("<http://it.unibz.inf/obda/test/simple#uri1>", ind1.toString());
 			assertEquals("<http://it.unibz.inf/obda/test/simple#uri1>", ind2.toString());
 			assertEquals("\"value1\"^^xsd:string", ToStringRenderer.getInstance().getRendering(val));

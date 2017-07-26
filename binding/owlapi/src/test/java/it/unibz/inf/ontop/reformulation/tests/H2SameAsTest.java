@@ -125,9 +125,9 @@ public class H2SameAsTest {
 		try {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			while(rs.hasNext()) {
+                final OWLBindingSet bindingSet = rs.next();
                 for (String s : rs.getSignature()) {
-					OWLObject binding = rs.getOWLObject(s);
-
+					OWLObject binding = bindingSet.getOWLObject(s);
 					String rendering = ToStringRenderer.getInstance().getRendering(binding);
 					retVal.add(rendering);
 					log.debug((s + ":  " + rendering));

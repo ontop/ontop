@@ -324,8 +324,9 @@ public class SameAsOntowisTest {
                 while (rs.hasNext()) {
                     count ++;
                     for (int idx = 1; idx <= columnSize; idx++) {
+                        final OWLBindingSet bindingSet = rs.next();
                         @SuppressWarnings("unused")
-                        OWLObject binding = rs.getOWLObject(idx);
+                        OWLObject binding = bindingSet.getOWLObject(idx);
 //                        System.out.print(binding.toString() + ", ");
                     }
 //                    System.out.print("\n");

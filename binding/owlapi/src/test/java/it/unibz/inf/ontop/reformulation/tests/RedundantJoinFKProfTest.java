@@ -138,7 +138,8 @@ public class RedundantJoinFKProfTest {
             sql = ((SQLExecutableQuery)executableQuery).getSQL();
             TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
-                OWLObject ind1 = rs.getOWLObject("p");
+                final OWLBindingSet bindingSet = rs.next();
+                OWLObject ind1 = bindingSet.getOWLObject("p");
                 // log.debug(ind1.toString());
                 returnedValues.add(ind1.toString());
                 java.lang.System.out.println(ind1);

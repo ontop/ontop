@@ -125,11 +125,12 @@ public class TypeInferenceTest {
         ImmutableSet.Builder<String> returnedValueBuilder = ImmutableSet.builder();
         try {
             TupleOWLResultSet  rs = st.executeSelectQuery(query);
+            final OWLBindingSet bindingSet = rs.next();
+
             while (rs.hasNext()) {
-                OWLObject ind1 = rs.getOWLObject("r");
+                OWLObject ind1 = bindingSet.getOWLObject("r");
                 log.debug(ind1.toString());
                 returnedValueBuilder.add(ind1.toString());
-
                 i++;
             }
         } catch (Exception e) {

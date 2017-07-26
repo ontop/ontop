@@ -24,6 +24,7 @@ package it.unibz.inf.ontop.docker.oracle;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLBindingSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -47,7 +48,8 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 		TupleOWLResultSet rs = st.executeSelectQuery(query);
 		if(hasResult){
 			assertTrue(rs.hasNext());
-			OWLObject ind1 =	rs.getOWLObject("y")	 ;
+            final OWLBindingSet bindingSet = rs.next();
+            OWLObject ind1 = bindingSet.getOWLObject("y")	 ;
 			retval = ind1.toString();
 		} else {
 			assertFalse(rs.hasNext());

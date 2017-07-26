@@ -136,10 +136,9 @@ public class BindTestWithFunctions {
         try {
             TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
-                OWLObject ind1 = rs.getOWLObject("w");
-
-
-               System.out.println(ind1);
+                final OWLBindingSet bindingSet = rs.next();
+                OWLObject ind1 = bindingSet.getOWLObject("w");
+                System.out.println(ind1);
                 i++;
             }
             assertTrue(i > 0);
@@ -804,7 +803,8 @@ public class BindTestWithFunctions {
             try {
                 TupleOWLResultSet  rs = st.executeSelectQuery(query);
                 while (rs.hasNext()) {
-                    OWLObject ind1 = rs.getOWLObject("w");
+                    final OWLBindingSet bindingSet = rs.next();
+                    OWLObject ind1 = bindingSet.getOWLObject("w");
                     // log.debug(ind1.toString());
                     returnedValues.add(ind1.toString());
                     java.lang.System.out.println(ind1);
