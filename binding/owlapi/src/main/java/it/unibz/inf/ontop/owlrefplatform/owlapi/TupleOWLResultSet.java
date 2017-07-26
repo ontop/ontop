@@ -4,7 +4,7 @@ import org.semanticweb.owlapi.model.*;
 
 import java.util.List;
 
-public interface TupleOWLResultSet extends IterableOWLResultSet {
+public interface TupleOWLResultSet extends IterableOWLResultSet<OWLBindingSet> {
 
     int getColumnCount() throws OWLException;
 
@@ -12,17 +12,4 @@ public interface TupleOWLResultSet extends IterableOWLResultSet {
 
     int getFetchSize() throws OWLException;
 
-    OWLPropertyAssertionObject getOWLPropertyAssertionObject(int column) throws OWLException;
-
-    OWLIndividual getOWLIndividual(int column) throws OWLException;
-
-    OWLIndividual getOWLIndividual(String column) throws OWLException;
-
-    OWLLiteral getOWLLiteral(int column) throws OWLException;
-
-    OWLLiteral getOWLLiteral(String column) throws OWLException;
-
-    OWLObject getOWLObject(int column) throws OWLException;
-
-    OWLObject getOWLObject(String column) throws OWLException;
 }
