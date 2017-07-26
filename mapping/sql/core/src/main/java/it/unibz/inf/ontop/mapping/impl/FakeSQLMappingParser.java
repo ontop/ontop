@@ -3,9 +3,9 @@ package it.unibz.inf.ontop.mapping.impl;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.model.SQLMappingParser;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
-import org.eclipse.rdf4j.model.Model;
+import it.unibz.inf.ontop.model.SQLMappingParser;
+import org.apache.commons.rdf.api.Graph;
 
 import java.io.File;
 import java.io.Reader;
@@ -30,7 +30,7 @@ public class FakeSQLMappingParser implements SQLMappingParser {
     }
 
     @Override
-    public SQLPPMapping parse(Model mappingGraph) throws InvalidMappingException, DuplicateMappingException {
+    public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException, DuplicateMappingException {
         throw new UnsupportedOperationException("This mapping parser is fake and thus does not parse");
     }
 }
