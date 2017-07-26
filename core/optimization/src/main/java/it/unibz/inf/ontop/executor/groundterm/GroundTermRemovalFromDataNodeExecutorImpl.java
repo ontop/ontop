@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
@@ -127,10 +128,10 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
     /** Recursive */
     private QueryNode getRecipientChild(QueryNode focusNode, IntermediateQuery query) {
         QueryNode parent = query.getParent(focusNode)
-                .orElseThrow(() -> new IllegalStateException("Node "+focusNode+" has no parent"));
+                .orElseThrow(() -> new InvalidIntermediateQueryException("Node "+focusNode+" has no parent"));
         if(parent instanceof LeftJoinNode) {
             BinaryOrderedOperatorNode.ArgumentPosition position = query.getOptionalPosition(parent, focusNode)
-                    .orElseThrow(() -> new IllegalStateException("No position for left join child " + focusNode));
+                    .orElseThrow(() -> new InvalidIntermediateQueryException("No position for left join child " + focusNode));
             if (position.equals(BinaryOrderedOperatorNode.ArgumentPosition.LEFT)) {
                 return getRecipientChild(parent, query);
             }

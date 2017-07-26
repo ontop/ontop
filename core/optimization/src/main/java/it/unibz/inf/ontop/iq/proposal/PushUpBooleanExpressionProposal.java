@@ -24,7 +24,7 @@ public interface PushUpBooleanExpressionProposal extends QueryOptimizationPropos
      * value (possibly empty): if only some conjuncts of the boolean expression attached to a node are propagated,
      * this is the conjunction of the remaining conjuncts
      */
-    ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> getProviderToNonPropagatedExpression();
+    ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> getProvider2NonPropagatedExpressionMap();
 
     /**
      * Recipient of the expression.
@@ -32,7 +32,6 @@ public interface PushUpBooleanExpressionProposal extends QueryOptimizationPropos
      */
     Optional<JoinOrFilterNode> getRecipientNode();
 
-    //Node blocking further propagation
     QueryNode getUpMostPropagatingNode();
 
     //All nodes projecting variables on the path between provider and blocking node

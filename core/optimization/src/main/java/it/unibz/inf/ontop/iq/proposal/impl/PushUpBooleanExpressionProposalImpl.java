@@ -50,7 +50,7 @@ public class PushUpBooleanExpressionProposalImpl implements PushUpBooleanExpress
         return propagatedExpression;
     }
 
-    public ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> getProviderToNonPropagatedExpression() {
+    public ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> getProvider2NonPropagatedExpressionMap() {
         return providerToNonPropagatedExpression;
     }
 }
