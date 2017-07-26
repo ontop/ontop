@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.model.term.Constant;
 
 import java.util.List;
 
-public interface TupleResultSet extends OBDAResultSet {
+public interface TupleResultSet extends IterativeOBDAResultSet<OntopResultConversionException> {
 
 	/*
 	 * ResultSet management functions
@@ -37,8 +37,6 @@ public interface TupleResultSet extends OBDAResultSet {
 	List<String> getSignature() throws OntopConnectionException;
 
 	int getFetchSize() throws OntopConnectionException;
-
-	boolean nextRow() throws OntopConnectionException;
 
 	/*
 	 * Main data fetching functions

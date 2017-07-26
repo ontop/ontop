@@ -134,15 +134,15 @@ public class URITemplateMatcherTest {
 		OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
-		OntopOWLConnection conn = reasoner.getConnection();
-		OntopOWLStatement st = conn.createStatement();
+		OWLConnection conn = reasoner.getConnection();
+		OWLStatement st = conn.createStatement();
 
 
 		log.debug("Executing query: ");
 		log.debug("Query: \n{}", query);
 
 		long start = System.nanoTime();
-		QuestOWLResultSet res = st.executeTuple(query);
+		TupleOWLResultSet  res = st.executeSelectQuery(query);
 		long end = System.nanoTime();
 
 		double time = (end - start) / 1000;

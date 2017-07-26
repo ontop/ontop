@@ -37,7 +37,7 @@ public class LeftJoinMultipleMatchingTest {
 
 
     private Connection sqlConnection;
-    private OntopOWLConnection conn;
+    private OWLConnection conn;
     private OntopOWLReasoner reasoner;
 
     String URL = "jdbc:h2:mem:raisjunit";
@@ -115,7 +115,7 @@ public class LeftJoinMultipleMatchingTest {
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLStatement st = conn.createStatement();
 
 
         QueryController qc = new QueryController();
@@ -129,7 +129,7 @@ public class LeftJoinMultipleMatchingTest {
                 log.debug("Query: \n{}", query.getQuery());
 
                 long start = System.nanoTime();
-                QuestOWLResultSet res = st.executeTuple(query.getQuery());
+                TupleOWLResultSet  res = st.executeSelectQuery(query.getQuery());
                 long end = System.nanoTime();
 
                 double time = (end - start) / 1000;
@@ -185,13 +185,13 @@ public class LeftJoinMultipleMatchingTest {
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLStatement st = conn.createStatement();
 
         log.debug("Executing query: ");
         log.debug("Query: \n{}", query);
 
         long start = System.nanoTime();
-        QuestOWLResultSet res = st.executeTuple(query);
+        TupleOWLResultSet  res = st.executeSelectQuery(query);
         long end = System.nanoTime();
 
         double time = (end - start) / 1000;

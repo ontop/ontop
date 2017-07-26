@@ -114,13 +114,13 @@ public class ComplexWhereMappingTest {
         OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
-		OntopOWLConnection conn = reasoner.getConnection();
-		OntopOWLStatement st = conn.createStatement();
+		OWLConnection conn = reasoner.getConnection();
+		OWLStatement st = conn.createStatement();
 
 		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
 		StringBuilder bf = new StringBuilder(query);
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			OWLIndividual ind2 = rs.getOWLIndividual("y");

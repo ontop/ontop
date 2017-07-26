@@ -59,8 +59,8 @@ public class DistinctResultSetTest { //
                 .build();
         OntopOWLReasoner reasoner = factory.createReasoner(config);
         // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLConnection conn = reasoner.getConnection();
+        OWLStatement st = conn.createStatement();
 
         int results = 0;
 
@@ -130,8 +130,8 @@ public class DistinctResultSetTest { //
 
         }
 
-    private int executeQueryAssertResults(String query, OntopOWLStatement st) throws Exception {
-        QuestOWLResultSet rs = st.executeTuple(query);
+    private int executeQueryAssertResults(String query, OWLStatement st) throws Exception {
+        TupleOWLResultSet  rs = st.executeSelectQuery(query);
         int count = 0;
         while (rs.hasNext()) {
             count++;

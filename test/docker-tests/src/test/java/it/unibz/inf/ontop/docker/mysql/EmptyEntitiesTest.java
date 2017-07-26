@@ -47,7 +47,7 @@ import java.util.Set;
 
 public class EmptyEntitiesTest {
 
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -125,9 +125,9 @@ public class EmptyEntitiesTest {
 
 	private boolean runSPARQLConceptsQuery(String description) throws Exception {
 		String query = "SELECT ?x WHERE {?x a " + description + ".}";
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			return (rs.hasNext());
 
 		} catch (Exception e) {
@@ -148,9 +148,9 @@ public class EmptyEntitiesTest {
 
 	private boolean runSPARQLRolesQuery(String description) throws Exception {
 		String query = "SELECT * WHERE {?x " + description + " ?y.}";
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			return (rs.hasNext());
 
 		} catch (Exception e) {

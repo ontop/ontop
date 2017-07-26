@@ -1,12 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
-
 import org.semanticweb.owlapi.model.OWLException;
 
-public interface OntopOWLResultSet extends AutoCloseable {
+public interface IterableOWLResultSet extends OWLResultSet {
 
     boolean hasNext() throws OWLException;
-
-    @Override
-    void close() throws OWLException;
 }

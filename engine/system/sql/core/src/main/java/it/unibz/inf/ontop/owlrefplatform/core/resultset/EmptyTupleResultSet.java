@@ -54,7 +54,7 @@ public class EmptyTupleResultSet implements TupleResultSet {
 	}
 
 	@Override
-	public boolean nextRow()  {
+	public boolean hasNext()  {
 		return false;
 	}
 

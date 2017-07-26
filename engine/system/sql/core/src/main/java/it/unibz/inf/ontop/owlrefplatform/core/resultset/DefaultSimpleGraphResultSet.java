@@ -70,13 +70,18 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 		if (storeResults) {
 			//process current result set into local buffer, 
 			//since additional results will be collected
-			while (resSet.nextRow()) {
+			while (resSet.hasNext()) {
 				this.results.addAll(processResults(resSet, template));
 			}
 		}
 	}
-	
-	@Override
+
+    @Override
+    public int getFetchSize() throws OntopConnectionException {
+        return tupleResultSet.getFetchSize();
+    }
+
+    @Override
 	public void addNewResult(Assertion assertion)
 	{
 		results.add(assertion);
@@ -152,7 +157,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 		if (storeResults)
 			return false;
 		// construct
-        while(tupleResultSet.nextRow()) {
+        while(tupleResultSet.hasNext()) {
             List<Assertion> newTriples = processResults(tupleResultSet, constructTemplate);
             if (!newTriples.isEmpty()) {
                 results.addAll(newTriples);

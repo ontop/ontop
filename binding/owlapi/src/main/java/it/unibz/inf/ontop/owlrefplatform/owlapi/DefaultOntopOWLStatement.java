@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.owlapi.OWLAPIIndividualTranslator;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.impl.OntopBooleanOWLResultSet;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.*;
@@ -44,7 +45,7 @@ import java.util.*;
  * <p>
  * <strong>Performance</strong> Note that you should not create multiple
  * statements over the same connection to execute parallel queries (see
- * {@link QuestOWLConnection}). Multiple statements over the same connection are
+ * {@link DefaultOntopOWLConnection}). Multiple statements over the same connection are
  * not going to be very useful until we support updates (then statements will
  * allow to implement transactions in the same way as JDBC Statements).
  * 
@@ -53,12 +54,12 @@ import java.util.*;
  * Used by the OWLAPI.
  *
  */
-public class QuestOWLStatement implements OntopOWLStatement {
+public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	private OntopStatement st;
 	private final InputQueryFactory inputQueryFactory;
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 
-	public QuestOWLStatement(OntopStatement st, OntopOWLConnection conn, InputQueryFactory inputQueryFactory) {
+	public DefaultOntopOWLStatement(OntopStatement st, OWLConnection conn, InputQueryFactory inputQueryFactory) {
 		this.conn = conn;
 		this.st = st;
 		this.inputQueryFactory = inputQueryFactory;
@@ -82,12 +83,12 @@ public class QuestOWLStatement implements OntopOWLStatement {
 	}
 
 	@Override
-	public QuestOWLResultSet executeSelectQuery(String inputQuery) throws OntopOWLException {
+	public TupleOWLResultSet executeSelectQuery(String inputQuery) throws OntopOWLException {
 		try {
 			SelectQuery query = inputQueryFactory.createSelectQuery(inputQuery);
 			TupleResultSet resultSet = st.execute(query);
 
-			return new QuestOWLResultSet(resultSet, this);
+			return new OntopTupleOWLResultSet(resultSet, this);
 
 		} catch (OntopQueryEngineException e) {
 			throw new OntopOWLException(e);
@@ -95,25 +96,12 @@ public class QuestOWLStatement implements OntopOWLStatement {
 	}
 
 	@Override
-	public QuestOWLResultSet executeAskQuery(String inputQuery) throws OntopOWLException {
+	public BooleanOWLResultSet executeAskQuery(String inputQuery) throws OntopOWLException {
 		try {
 			AskQuery query = inputQueryFactory.createAskQuery(inputQuery);
 			BooleanResultSet resultSet = st.execute(query);
 
-			return new QuestOWLResultSet(resultSet, this);
-
-		} catch (OntopQueryEngineException e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-	@Override
-	public QuestOWLResultSet executeTuple(String inputQuery) throws OntopOWLException {
-		try {
-			TupleSPARQLQuery<? extends TupleResultSet> query = inputQueryFactory.createTupleQuery(inputQuery);
-			TupleResultSet resultSet = st.execute(query);
-
-			return new QuestOWLResultSet(resultSet, this);
+			return new OntopBooleanOWLResultSet(resultSet);
 
 		} catch (OntopQueryEngineException e) {
 			throw new OntopOWLException(e);
@@ -158,7 +146,7 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		return createOWLIndividualAxioms(resultSet);
 	}
 
-	public OntopOWLConnection getConnection() throws OntopOWLException {
+	public OWLConnection getConnection() throws OntopOWLException {
 		return conn;
 	}
 

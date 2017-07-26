@@ -77,19 +77,6 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
     }
 
     @Override
-    public TupleSPARQLQuery createTupleQuery(String queryString)
-            throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
-        ParsedQuery parsedQuery = parseQueryString(queryString);
-
-        if (parsedQuery instanceof ParsedTupleQuery)
-            return rdf4jFactory.createSelectQuery(queryString, parsedQuery);
-        else if (parsedQuery instanceof ParsedBooleanQuery)
-            return rdf4jFactory.createAskQuery(queryString, parsedQuery);
-        else
-            throw new OntopUnsupportedInputQueryException("Unsupported tuple query: " + queryString);
-    }
-
-    @Override
     public GraphSPARQLQuery createGraphQuery(String queryString) throws OntopInvalidInputQueryException,
             OntopUnsupportedInputQueryException {
         ParsedQuery parsedQuery = parseQueryString(queryString);

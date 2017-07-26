@@ -60,10 +60,10 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected String runQueryAndReturnStringOfIndividualX(String query) throws Exception {
-        OntopOWLStatement st = conn.createStatement();
+        OWLStatement st = conn.createStatement();
         String retval;
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
 
             assertTrue(rs.hasNext());
             OWLIndividual ind1 = rs.getOWLIndividual("x");
@@ -79,10 +79,10 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected String runQueryAndReturnStringOfLiteralX(String query) throws Exception {
-        OntopOWLStatement st = conn.createStatement();
+        OWLStatement st = conn.createStatement();
         String retval;
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
 
             assertTrue(rs.hasNext());
             OWLLiteral ind1 = rs.getOWLLiteral("x");
@@ -98,10 +98,10 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected boolean runQueryAndReturnBooleanX(String query) throws Exception {
-        OntopOWLStatement st = conn.createStatement();
+        OWLStatement st = conn.createStatement();
         boolean retval;
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
             assertTrue(rs.hasNext());
             OWLLiteral ind1 = rs.getOWLLiteral("x");
             retval = ind1.parseBoolean();
@@ -122,8 +122,8 @@ public abstract class AbstractVirtualModeTest extends TestCase {
 
     protected void countResults(String query, int expectedCount) throws OWLException {
 
-        OntopOWLStatement st = conn.createStatement();
-        QuestOWLResultSet results = st.executeTuple(query);
+        OWLStatement st = conn.createStatement();
+        TupleOWLResultSet results = st.executeSelectQuery(query);
         int count = 0;
         while (results.hasNext()) {
             count++;
@@ -134,9 +134,9 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     protected boolean checkContainsTuplesSetSemantics(String query, ImmutableSet<ImmutableMap<String, String>> expectedTuples)
             throws Exception {
         HashSet<ImmutableMap<String, String>> mutableCopy = new HashSet<>(expectedTuples);
-        OntopOWLStatement st = conn.createStatement();
+        OWLStatement st = conn.createStatement();
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 ImmutableMap<String, String> tuple = getTuple(rs);
                 if (mutableCopy.contains(tuple)) {
@@ -152,7 +152,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         return mutableCopy.isEmpty();
     }
 
-    protected ImmutableMap<String, String> getTuple(QuestOWLResultSet rs) throws OWLException {
+    protected ImmutableMap<String, String> getTuple(TupleOWLResultSet rs) throws OWLException {
         ImmutableMap.Builder<String, String> tuple = ImmutableMap.builder();
         for (String variable : rs.getSignature()) {
             tuple.put(variable, rs.getOWLIndividual(variable).toString());
@@ -161,11 +161,11 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected void checkReturnedUris(String query, List<String> expectedUris) throws Exception {
-        OntopOWLStatement st = conn.createStatement();
+        OWLStatement st = conn.createStatement();
         int i = 0;
         List<String> returnedUris = new ArrayList<>();
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 OWLNamedIndividual ind1 = (OWLNamedIndividual) rs.getOWLIndividual("x");
 
@@ -185,9 +185,9 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected void checkThereIsAtLeastOneResult(String query) throws Exception {
-        OntopOWLStatement st = conn.createStatement();
+        OWLStatement st = conn.createStatement();
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
             assertTrue(rs.hasNext());
 
         } catch (Exception e) {
@@ -205,10 +205,10 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected boolean runASKTests(String query) throws Exception {
-        OntopOWLStatement st = conn.createStatement();
+        OWLStatement st = conn.createStatement();
         boolean retval;
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
             assertTrue(rs.hasNext());
             OWLLiteral ind1 = rs.getOWLLiteral(1);
             retval = ind1.parseBoolean();
@@ -229,7 +229,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
 
     protected void runQueries(String queryFileName) throws Exception {
 
-        OntopOWLStatement st = conn.createStatement();
+        OWLStatement st = conn.createStatement();
 
         QueryController qc = new QueryController();
         QueryIOManager qman = new QueryIOManager(qc);
@@ -242,7 +242,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
                 log.debug("Query: \n{}", query.getQuery());
 
                 long start = System.nanoTime();
-                QuestOWLResultSet res = st.executeTuple(query.getQuery());
+                TupleOWLResultSet res = st.executeSelectQuery(query.getQuery());
                 long end = System.nanoTime();
 
                 double time = (end - start) / 1000;
@@ -262,7 +262,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         long t1 = System.currentTimeMillis();
 
         OntopOWLStatement st = conn.createStatement();
-        QuestOWLResultSet rs = st.executeTuple(query);
+        TupleOWLResultSet rs = st.executeSelectQuery(query);
 
         int columnSize = rs.getColumnCount();
         while (rs.hasNext()) {

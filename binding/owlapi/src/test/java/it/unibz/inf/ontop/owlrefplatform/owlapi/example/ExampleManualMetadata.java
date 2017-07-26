@@ -6,9 +6,9 @@ import it.unibz.inf.ontop.answering.input.InputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.DefaultOntopOWLConnection;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
@@ -24,7 +24,7 @@ public class ExampleManualMetadata {
 	final String owlfile = "src/main/resources/example/exampleSensor.owl";
 	final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
 	final String propertyfile = "src/main/resources/example/UseCaseExampleMini.properties";
-	private OntopOWLStatement qst = null;
+	private OWLStatement qst = null;
 	private OntopQueryEngine queryEngine;
 
 	/*
@@ -51,7 +51,7 @@ private void setup()  throws Exception {
 	 */
 	
 	OntopConnection conn = queryEngine.getConnection();
-	OntopOWLConnection connOWL = new QuestOWLConnection(conn, injector.getInstance(InputQueryFactory.class));
+	OWLConnection connOWL = new DefaultOntopOWLConnection(conn, injector.getInstance(InputQueryFactory.class));
 	qst = connOWL.createStatement();
 }
 

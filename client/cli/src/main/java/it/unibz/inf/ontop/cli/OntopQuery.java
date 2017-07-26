@@ -47,7 +47,7 @@ import static java.util.stream.Collectors.joining;
 public class OntopQuery extends OntopReasoningCommandBase {
 
     @Option(type = OptionType.COMMAND, name = {"-q", "--query"}, title = "queryFile",
-            description = "SPARQL query file")
+            description = "SPARQL SELECT query file")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     @Required
     private String queryFile;
@@ -93,8 +93,8 @@ public class OntopQuery extends OntopReasoningCommandBase {
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
         try (OntopOWLReasoner reasoner = factory.createReasoner(configurationBuilder.build());
-             OntopOWLConnection conn = reasoner.getConnection();
-             OntopOWLStatement st = conn.createStatement();
+             OWLConnection conn = reasoner.getConnection();
+             OWLStatement st = conn.createStatement();
         ) {
 
 			/*
@@ -105,7 +105,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
             String query = Files.lines(Paths.get(queryFile), StandardCharsets.UTF_8).collect(joining("\n"));
 
-            QuestOWLResultSet result = st.executeTuple(query);
+            TupleOWLResultSet result = st.executeSelectQuery(query);
 
             OutputStream out = null;
             if (outputFile == null) {
@@ -122,7 +122,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
         }
     }
 
-    public static void printResult(OutputStream out, QuestOWLResultSet result) throws Exception {
+    public static void printResult(OutputStream out, TupleOWLResultSet result) throws Exception {
         BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, "utf8"));
 
 		/*

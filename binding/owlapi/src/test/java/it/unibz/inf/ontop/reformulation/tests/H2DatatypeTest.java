@@ -49,7 +49,7 @@ public class H2DatatypeTest {
 	private static final String JDBC_PASSWORD =  "";
 
 	private OntopOWLReasoner reasoner;
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 	Connection sqlConnection;
 
 
@@ -147,10 +147,10 @@ public class H2DatatypeTest {
 
 
 	private String runQueryReturnIndividual(String query) throws OWLException, SQLException {
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		String retval;
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 
 			assertTrue(rs.hasNext());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
@@ -166,10 +166,10 @@ public class H2DatatypeTest {
 	}
 
 	private String runQueryReturnLiteral(String query) throws OWLException, SQLException {
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		String retval;
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 
 			assertTrue(rs.hasNext());
 			OWLLiteral ind1 = rs.getOWLLiteral("x");

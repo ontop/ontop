@@ -79,7 +79,7 @@ public class QuestOWLExampleNotLatin {
 
 		try {
             long t1 = System.currentTimeMillis();
-			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+			TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
 			int columnSize = rs.getColumnCount();
 			while (rs.hasNext()) {
 				for (int idx = 1; idx <= columnSize; idx++) {

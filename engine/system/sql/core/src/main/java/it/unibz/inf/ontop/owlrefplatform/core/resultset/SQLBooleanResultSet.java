@@ -22,38 +22,18 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Vector;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class SQLBooleanResultSet implements BooleanResultSet {
 
-    private ResultSet set = null;
-    private boolean isTrue = false;
-    private int counter = 0;
-
-    private ValueConstant valueConstant;
+    private final ResultSet set;
+    private boolean hasRead;
 
     public SQLBooleanResultSet(ResultSet set) {
         this.set = set;
-        try {
-            isTrue = set.next();
-            valueConstant = DATA_FACTORY.getBooleanConstant(isTrue);
-        } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-
-    }
-
-    public SQLBooleanResultSet(boolean value) {
-        this.set = null;
-        isTrue = value;
+        this.hasRead = false;
     }
 
     @Override
@@ -62,74 +42,23 @@ public class SQLBooleanResultSet implements BooleanResultSet {
             return;
         try {
             set.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new OntopConnectionException(e);
         }
     }
 
     /**
-     * returns always 1
+     * Returns true if there is at least one result
      */
     @Override
-    public int getColumnCount() {
-        return 1;
-    }
-
-    /**
-     * returns the current fetch size. the default value is 100
-     */
-    @Override
-    public int getFetchSize() {
-        return 100;
-    }
-
-    /*
-     * TODO: GUOHUI (2016-01-09) Understand what should be the right behavior
-     */
-    @Override
-    public List<String> getSignature() throws OntopConnectionException {
-        Vector<String> signature = new Vector<String>();
-        if (set != null) {
-            int i = getColumnCount();
-
-            for (int j = 1; j <= i; j++) {
-                try {
-                    signature.add(set.getMetaData().getColumnLabel(j));
-                } catch (Exception e) {
-                    throw new OntopConnectionException(e.getMessage());
-                }
-            }
-        } else {
-            signature.add("value");
-        }
-        return signature;
-    }
-
-    /**
-     * Note: the boolean result set has only 1 row
-     *
-     * TODO: GUOHUI (2016-01-09) Understand what should be the right behavior
-     */
-    @Override
-    public boolean nextRow() {
-        if (!isTrue || counter > 0) {
-            return false;
-        } else {
-            counter++;
-            return true;
+    public boolean getValue() throws OntopConnectionException {
+        if (hasRead)
+            throw new IllegalStateException("getValue() can only called once!");
+        hasRead = true;
+        try {
+            return set.next();
+        } catch (SQLException e) {
+            throw new OntopConnectionException(e);
         }
     }
-
-    @Override
-    public Constant getConstant(int column) {
-
-        return valueConstant;
-    }
-
-    @Override
-    public Constant getConstant(String name) {
-        return valueConstant;
-    }
-
-
 }

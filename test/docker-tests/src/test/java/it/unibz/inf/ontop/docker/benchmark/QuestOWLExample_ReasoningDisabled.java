@@ -342,7 +342,7 @@ public class QuestOWLExample_ReasoningDisabled {
      * @param conn
      * @throws OWLException
      */
-    private void closeEverything(OntopOWLConnection conn) throws OWLException {
+    private void closeEverything(OWLConnection conn) throws OWLException {
 		/*
 		 * Close connection and resources
 		 */
@@ -384,9 +384,7 @@ public class QuestOWLExample_ReasoningDisabled {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-        OntopOWLConnection conn = reasoner.getConnection();
-
-        return conn;
+        return reasoner.getConnection();
     }
 
     private OntopOWLReasoner reasoner;
@@ -478,7 +476,7 @@ public class QuestOWLExample_ReasoningDisabled {
 
                 // Warm ups
 //				for (int i=0; i<nWarmUps; ++i){
-//					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+//					QuestOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
 //					int columnSize = rs.getColumnCount();
 //					while (rs.hasNext()) {
 //						for (int idx = 1; idx <= columnSize; idx++) {
@@ -500,7 +498,7 @@ public class QuestOWLExample_ReasoningDisabled {
 
                 //for (int i=0; i<nRuns; ++i){
                 long t1 = System.currentTimeMillis();
-                QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+                TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
                 int columnSize = rs.getColumnCount();
                 count = 0;
                 while (rs.hasNext()) {

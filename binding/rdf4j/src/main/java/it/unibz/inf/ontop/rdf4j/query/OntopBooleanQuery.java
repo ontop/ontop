@@ -22,12 +22,14 @@ package it.unibz.inf.ontop.rdf4j.query;
 
 import it.unibz.inf.ontop.answering.input.AskQuery;
 import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
+import it.unibz.inf.ontop.model.BooleanResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
 import org.eclipse.rdf4j.query.BooleanQuery;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 
-import it.unibz.inf.ontop.model.TupleResultSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuery {
@@ -46,14 +48,10 @@ public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuer
 		AskQuery query = factory.createAskQuery(getQueryString(), getParsedQuery());
 
 		try (OntopStatement stm = conn.createStatement();
-			 TupleResultSet rs = stm.execute(query)) {
+			 BooleanResultSet rs = stm.execute(query)) {
+			return rs.getValue();
 
-			boolean next = rs.nextRow();
-			if (next){
-				return true;
-			}
-			return false;
-		} catch (Exception e) {
+		} catch (OntopConnectionException | OntopQueryAnsweringException e) {
 			throw new QueryEvaluationException(e);
 		}
 	}

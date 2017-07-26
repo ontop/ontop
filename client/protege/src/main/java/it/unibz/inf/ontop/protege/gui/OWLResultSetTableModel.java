@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui;
  */
 
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
@@ -35,7 +35,7 @@ import java.util.List;
 
 public class OWLResultSetTableModel implements TableModel {
 
-	private QuestOWLResultSet results;
+	private TupleOWLResultSet results;
 	private int numcols;
 	private int numrows;
 	private int fetchSizeLimit;
@@ -66,8 +66,8 @@ public class OWLResultSetTableModel implements TableModel {
 	 * ResultSetTableModelFactory, which is what you should use to obtain a
 	 * ResultSetTableModel
 	 */
-	public OWLResultSetTableModel(QuestOWLResultSet results, PrefixManager prefixman, 
-			boolean hideUri, boolean fetchAll, int fetchSizeLimit) throws OWLException {
+	public OWLResultSetTableModel(TupleOWLResultSet results, PrefixManager prefixman,
+								  boolean hideUri, boolean fetchAll, int fetchSizeLimit) throws OWLException {
 		this.results = results;
 		this.prefixman = prefixman;
 		this.isHideUri = hideUri;

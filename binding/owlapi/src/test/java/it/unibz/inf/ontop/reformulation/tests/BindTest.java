@@ -134,12 +134,12 @@ public class BindTest {
 		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
 
         // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLConnection conn = reasoner.getConnection();
+        OWLStatement st = conn.createStatement();
 
 
         try {
-            QuestOWLResultSet rs = st.executeSelectQuery(query);
+            TupleOWLResultSet  rs = st.executeSelectQuery(query);
             rs.hasNext();
             OWLObject ind1 = rs.getOWLObject("title");
             OWLObject ind2 = rs.getOWLObject("price");
@@ -506,15 +506,15 @@ public class BindTest {
 			OntopOWLReasoner reasoner = factory.createReasoner(configuration);
 
 			// Now we are ready for querying
-			OntopOWLConnection conn = reasoner.getConnection();
-			OntopOWLStatement st = conn.createStatement();
+			OWLConnection conn = reasoner.getConnection();
+			OWLStatement st = conn.createStatement();
 
 
 
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            QuestOWLResultSet rs = st.executeSelectQuery(query);
+            TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 OWLObject ind1 = rs.getOWLObject("w");
                 // log.debug(ind1.toString());

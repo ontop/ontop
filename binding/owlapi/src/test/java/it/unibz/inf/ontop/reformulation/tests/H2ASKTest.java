@@ -24,7 +24,7 @@ public class H2ASKTest {
 	 "src/test/resources/stockexchange/stockexchange-h2.obda";
 
 	private OntopOWLReasoner reasoner;
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 	Connection sqlConnection;
 
 	@Before
@@ -104,13 +104,11 @@ public class H2ASKTest {
 	}
 
 	private boolean runQueryAndReturnBooleanX(String query) throws Exception {
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		boolean retval;
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
-			assertTrue(rs.hasNext());
-			OWLLiteral ind1 = rs.getOWLLiteral("x");
-			retval = ind1.parseBoolean();
+			BooleanOWLResultSet rs = st.executeAskQuery(query);
+			retval = rs.getValue();
 		} catch (Exception e) {
 			throw e;
 		} finally {

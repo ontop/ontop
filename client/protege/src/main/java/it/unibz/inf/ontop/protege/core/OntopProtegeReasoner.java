@@ -20,7 +20,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     private OntopOWLReasoner reasoner;
     private final OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
     private final OntopConfigurationManager configurationManager;
-    private OntopOWLConnection owlConnection;
+    private OWLConnection owlConnection;
 
 
     protected OntopProtegeReasoner(OWLOntology rootOntology, OntopProtegeOWLConfiguration configuration) throws IllegalConfigurationException {
@@ -30,7 +30,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
         this.configurationManager = configuration.getOntopConfigurationManager();
     }
 
-    public OntopOWLStatement getStatement() throws OWLException {
+    public OWLStatement getStatement() throws OWLException {
         if (owlConnection == null)
             owlConnection = reasoner.getConnection();
 
@@ -324,8 +324,8 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
      * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
      * @return The old connection: The caller must close this connection
      */
-    public OntopOWLConnection replaceConnection() throws OntopConnectionException {
-        OntopOWLConnection oldconn = this.owlConnection;
+    public OWLConnection replaceConnection() throws OntopConnectionException {
+        OWLConnection oldconn = this.owlConnection;
         owlConnection = reasoner.getConnection();
         return oldconn;
     }

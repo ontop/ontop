@@ -129,8 +129,8 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
         OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
-		OntopOWLConnection conn = reasoner.getConnection();
-		OntopOWLStatement st = conn.createStatement();
+		OWLConnection conn = reasoner.getConnection();
+		OWLStatement st = conn.createStatement();
 
 		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
 		try {
@@ -146,7 +146,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 //			long end = System.currentTimeMillis();
 //			long elapsed = end-start;
 //			log.info("Elapsed time: {}", elapsed);
-			QuestOWLResultSet rs = st.executeSelectQuery(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
 			OWLObject ind1 = rs.getOWLObject("x");
 			OWLObject ind2 = rs.getOWLObject("y");

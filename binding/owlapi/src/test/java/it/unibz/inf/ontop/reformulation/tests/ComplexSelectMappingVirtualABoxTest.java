@@ -151,7 +151,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 		    //System.out.println(sql);
 			// Inapplicable because TABLE1 is used in the view name
 			//assertEquals(num_joins, 0);
-			QuestOWLResultSet rs = st.executeSelectQuery(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			val = rs.getOWLLiteral("z");

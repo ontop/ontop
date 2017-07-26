@@ -5,9 +5,8 @@ import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.ontology.Assertion;
 
-public interface GraphResultSet<X extends OntopQueryAnsweringException> extends OBDAResultSet {
+public interface GraphResultSet<X extends OntopQueryAnsweringException> extends IterativeOBDAResultSet<X> {
 
-    boolean hasNext() throws OntopConnectionException, OntopResultConversionException, X;
 
     Assertion next() throws OntopConnectionException, OntopResultConversionException, X;
 

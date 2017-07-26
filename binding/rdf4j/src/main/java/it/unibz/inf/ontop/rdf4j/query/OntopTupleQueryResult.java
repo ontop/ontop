@@ -59,7 +59,7 @@ public class OntopTupleQueryResult implements TupleQueryResult {
 	@Override
 	public boolean hasNext() throws QueryEvaluationException {
 		try {
-			return res.nextRow();
+			return res.hasNext();
 		} catch (Exception e) {
 			throw new QueryEvaluationException(e);
 		}

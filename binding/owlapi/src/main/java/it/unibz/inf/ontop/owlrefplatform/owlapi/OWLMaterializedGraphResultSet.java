@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet;
 
 import java.net.URI;
 
-public interface OntopOWLMaterializedGraphResultSet extends OntopOWLGraphResultSet {
+public interface OWLMaterializedGraphResultSet extends OWLGraphResultSet {
 
     /**
      * Number of RDF triples that have been materialized.

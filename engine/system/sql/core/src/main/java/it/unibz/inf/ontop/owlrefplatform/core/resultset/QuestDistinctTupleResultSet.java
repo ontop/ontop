@@ -75,14 +75,14 @@ public class QuestDistinctTupleResultSet implements TupleResultSet {
     }
 
     @Override
-    public boolean nextRow() throws OntopConnectionException {
+    public boolean hasNext() throws OntopConnectionException {
         // return the row only if it is not a duplicate
 
         boolean next = false;
         
         List<Object> row = null; 
         do{
-            next = questTupleResultSet.nextRow();
+            next = questTupleResultSet.hasNext();
             if (next) {
                 row = new ArrayList<>();
                 for (int i = 1; i <= getSignature().size();  i ++ ) {

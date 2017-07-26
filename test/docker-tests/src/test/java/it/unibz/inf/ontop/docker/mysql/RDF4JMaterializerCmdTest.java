@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.docker.mysql;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLMaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLMaterializedGraphResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.rdf4j.MaterializationGraphQuery;
 import it.unibz.inf.ontop.rdf4j.RDF4JMaterializer;
@@ -172,7 +172,7 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 
 			OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
 
-			try(OntopOWLMaterializedGraphResultSet graphResultSet = materializer.materialize(configuration,
+			try(OWLMaterializedGraphResultSet graphResultSet = materializer.materialize(configuration,
 					materializationParams)) {
 
 				while (graphResultSet.hasNext())

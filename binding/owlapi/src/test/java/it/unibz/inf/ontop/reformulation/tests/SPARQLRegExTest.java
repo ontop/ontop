@@ -48,7 +48,7 @@ public class SPARQLRegExTest {
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private static OntopOWLConnection conn;
+	private static OWLConnection conn;
 
 	static Logger log = LoggerFactory.getLogger(SPARQLRegExTest.class);
 
@@ -140,10 +140,10 @@ public class SPARQLRegExTest {
 	}
 
 	private void runTests(String query, int numberOfResults) throws Exception {
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		try {
 
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			/*
 			 * boolean hasNext = rs.hasNext();
 			 */

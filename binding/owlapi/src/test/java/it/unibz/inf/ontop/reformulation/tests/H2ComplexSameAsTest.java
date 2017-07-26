@@ -105,12 +105,12 @@ public class H2ComplexSameAsTest {
 		OntopOWLReasoner reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
-		OntopOWLConnection conn = reasoner.getConnection();
+		OWLConnection conn = reasoner.getConnection();
 
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		ArrayList<String> retVal = new ArrayList<>();
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			while(rs.hasNext()) {
 				for (String s : rs.getSignature()) {
 					OWLObject binding = rs.getOWLObject(s);

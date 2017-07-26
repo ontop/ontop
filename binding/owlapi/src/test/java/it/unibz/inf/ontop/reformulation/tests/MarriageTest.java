@@ -139,12 +139,12 @@ public class MarriageTest {
 
 
         // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLConnection conn = reasoner.getConnection();
+        OWLStatement st = conn.createStatement();
 
         Set<String> returnedValues = new HashSet<>();
         try {
-            QuestOWLResultSet rs = st.executeSelectQuery(query);
+            TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 OWLIndividual ind1 = rs.getOWLIndividual("x");
                 returnedValues.add(ind1.toStringID());

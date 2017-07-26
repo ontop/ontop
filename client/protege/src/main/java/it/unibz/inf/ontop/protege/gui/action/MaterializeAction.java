@@ -21,11 +21,9 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import com.google.common.collect.Sets;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLMaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLMaterializedGraphResultSet;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -33,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
@@ -45,13 +42,13 @@ public class MaterializeAction implements OBDAProgressListener {
 	
 	private OWLOntology currentOntology = null;
 	private OWLOntologyManager ontologyManager = null;
-	private final OntopOWLMaterializedGraphResultSet graphResultSet;
+	private final OWLMaterializedGraphResultSet graphResultSet;
 	private Container cont = null;
 	private boolean bCancel = false;
 	private boolean errorShown = false;
 
 	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager,
-							 OntopOWLMaterializedGraphResultSet graphResultSet, Container cont) {
+							 OWLMaterializedGraphResultSet graphResultSet, Container cont) {
 		this.currentOntology = currentOntology;
 		this.ontologyManager = ontologyManager;			
 		this.graphResultSet = graphResultSet;

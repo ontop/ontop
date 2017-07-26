@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 import java.io.*;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLMaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLMaterializedGraphResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
@@ -58,7 +58,7 @@ public class ABoxMaterializerExample {
 		 */
 		OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
 
-		try (OntopOWLMaterializedGraphResultSet graphResultSet = materializer.materialize(configuration)) {
+		try (OWLMaterializedGraphResultSet graphResultSet = materializer.materialize(configuration)) {
 
 			/*
 			 * Print the triples into an external file.

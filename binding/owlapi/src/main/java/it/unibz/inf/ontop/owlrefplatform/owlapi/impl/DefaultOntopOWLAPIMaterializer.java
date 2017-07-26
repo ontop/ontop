@@ -29,7 +29,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.OntopRDFMaterializer;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.impl.DefaultOntopRDFMaterializer;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLMaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLMaterializedGraphResultSet;
 import org.semanticweb.owlapi.model.OWLException;
 
 import javax.annotation.Nonnull;
@@ -44,8 +44,8 @@ public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 	}
 
 	@Override
-	public OntopOWLMaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-														  @Nonnull MaterializationParams params)
+	public OWLMaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
+                                                     @Nonnull MaterializationParams params)
 			throws OWLException {
 		try {
 			return wrap(materializer.materialize(configuration, params));
@@ -55,9 +55,9 @@ public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 	}
 
 	@Override
-	public OntopOWLMaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-														  @Nonnull ImmutableSet<URI> selectedVocabulary,
-														  @Nonnull MaterializationParams params)
+	public OWLMaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
+                                                     @Nonnull ImmutableSet<URI> selectedVocabulary,
+                                                     @Nonnull MaterializationParams params)
 			throws OWLException {
 		try {
 			return wrap(materializer.materialize(configuration, selectedVocabulary, params));
@@ -66,7 +66,7 @@ public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 		}
 	}
 
-	private OntopOWLMaterializedGraphResultSet wrap(MaterializedGraphResultSet graphResultSet) {
-		return new DefaultOntopOWLMaterializedGraphResultSet(graphResultSet);
+	private OWLMaterializedGraphResultSet wrap(MaterializedGraphResultSet graphResultSet) {
+		return new DefaultOWLMaterializedGraphResultSet(graphResultSet);
 	}
 }

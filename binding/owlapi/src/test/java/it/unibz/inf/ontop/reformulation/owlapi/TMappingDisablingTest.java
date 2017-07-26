@@ -112,7 +112,7 @@ public class TMappingDisablingTest extends TestCase {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		OntopOWLConnection conn = reasoner.getConnection();
+		OWLConnection conn = reasoner.getConnection();
 		
 		
 		String sparqlQuery = 
@@ -122,13 +122,13 @@ public class TMappingDisablingTest extends TestCase {
 		String sparqlQuery1 = 
 				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
 				+ "SELECT ?y WHERE { ?y a :Man }";
-		OntopOWLStatement st = null;
+		OWLStatement st = null;
 		try {
 			st = conn.createStatement();
-			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+			TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
 			assertTrue(!rs.hasNext());
 			rs.close();
-			rs = st.executeTuple(sparqlQuery1);
+			rs = st.executeSelectQuery(sparqlQuery1);
 			assertTrue(rs.hasNext());
 			rs.close();
 		}catch(Exception e){
@@ -155,7 +155,7 @@ public class TMappingDisablingTest extends TestCase {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		OntopOWLConnection conn = reasoner.getConnection();
+		OWLConnection conn = reasoner.getConnection();
 		
 		
 		String sparqlQuery = 
@@ -165,13 +165,13 @@ public class TMappingDisablingTest extends TestCase {
 		String sparqlQuery1 = 
 				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
 				+ "SELECT ?y WHERE { ?y a :Man }";
-		OntopOWLStatement st = null;
+		OWLStatement st = null;
 		try {
 			st = conn.createStatement();
-			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+			TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
 			assertTrue(!rs.hasNext());
 			rs.close();
-			rs = st.executeTuple(sparqlQuery1);
+			rs = st.executeSelectQuery(sparqlQuery1);
 			assertTrue(rs.hasNext());
 			rs.close();
 		}catch(Exception e){

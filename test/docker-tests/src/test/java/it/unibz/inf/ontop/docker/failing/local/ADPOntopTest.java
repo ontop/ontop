@@ -41,8 +41,8 @@ public class ADPOntopTest {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		OntopOWLConnection conn = reasoner.getConnection();
-		OntopOWLStatement st = conn.createStatement();
+		OWLConnection conn = reasoner.getConnection();
+		OWLStatement st = conn.createStatement();
 
 		String sparqlQuery = Joiner.on("\n").join(
 				CharStreams.readLines(new FileReader(queryFile)));
@@ -50,7 +50,7 @@ public class ADPOntopTest {
 		//System.out.println(sparqlQuery);
 		
 		try {
-			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+			TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
 			int columnSize = rs.getColumnCount();
 			while (rs.hasNext()) {
 				for (int idx = 1; idx <= columnSize; idx++) {
@@ -64,7 +64,7 @@ public class ADPOntopTest {
 			/*
 			 * Print the query summary
 			 */
-			QuestOWLStatement qst = (QuestOWLStatement) st;
+			DefaultOntopOWLStatement qst = (DefaultOntopOWLStatement) st;
 			String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();;
 
 			System.out.println();

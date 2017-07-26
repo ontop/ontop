@@ -45,7 +45,7 @@ import java.sql.Statement;
  */
 public class URINamesTestH2 {
 
-	private static OntopOWLConnection conn;
+	private static OWLConnection conn;
 
 	static Logger log = LoggerFactory.getLogger(URINamesTestH2.class);
 
@@ -121,10 +121,10 @@ public class URINamesTestH2 {
 	}
 
 	private void runTests(String query, int numberOfResults) throws Exception {
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		try {
 
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			int count = 0;
 			while (rs.hasNext()) {
 				OWLObject ind1 = rs.getOWLObject("x");

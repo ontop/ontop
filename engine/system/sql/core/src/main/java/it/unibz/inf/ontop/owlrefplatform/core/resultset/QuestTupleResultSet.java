@@ -130,7 +130,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 	}
 
 	@Override
-    public boolean nextRow() throws OntopConnectionException {
+    public boolean hasNext() throws OntopConnectionException {
 		try {
 			return rs.next();
 		} catch (Exception e) {

@@ -55,7 +55,7 @@ public class CompanyTest  {
 	private static final String propertyfile = "src/test/resources/optional/company.properties";
 
 	private OntopOWLReasoner reasoner;
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 	Connection sqlConnection;
 
 //	public CompanyTest() {
@@ -119,7 +119,7 @@ public class CompanyTest  {
 
 	private void runOptionalTest() throws Exception {
 
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 
 		
 		String queryEx =  "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT * WHERE"
@@ -133,7 +133,7 @@ public class CompanyTest  {
 		
 			System.out.println(query);
 			
-			QuestOWLResultSet rs2 = st.executeTuple(query);
+			TupleOWLResultSet  rs2 = st.executeSelectQuery(query);
 //
 			assertTrue(rs2.hasNext());
 
@@ -158,7 +158,7 @@ public class CompanyTest  {
 
 	private void runOptionalFilterTest() throws Exception {
 
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 
 		String query = "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT ?y?z WHERE"
 				+ "{ ?c a :Company . Filter (?c=:A) OPTIONAL  {  ?x :companyName ?c .  ?x :depName ?y .  FILTER (?y =" +
@@ -169,7 +169,7 @@ public class CompanyTest  {
 
 			System.out.println(query);
 
-			QuestOWLResultSet rs2 = st.executeTuple(query);
+			TupleOWLResultSet  rs2 = st.executeSelectQuery(query);
 
 			assertTrue(rs2.hasNext());
 			OWLLiteral ind1 = rs2.getOWLLiteral("y");

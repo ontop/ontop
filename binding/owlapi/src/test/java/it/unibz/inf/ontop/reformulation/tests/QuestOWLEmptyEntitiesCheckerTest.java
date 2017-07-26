@@ -56,7 +56,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class QuestOWLEmptyEntitiesCheckerTest {
 
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 	private Connection connection;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());

@@ -49,7 +49,7 @@ public class H2SimpleFilterAndValuesTest {
 	private static final String JDBC_PASSWORD =  "";
 
 	private OntopOWLReasoner reasoner;
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 	Connection sqlConnection;
 
 
@@ -120,10 +120,10 @@ public class H2SimpleFilterAndValuesTest {
 
 
 	private String runQueryReturnLiteral(String query) throws OWLException, SQLException {
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		String retval;
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 
 			assertTrue(rs.hasNext());
 			OWLLiteral ind1 = rs.getOWLLiteral("y");

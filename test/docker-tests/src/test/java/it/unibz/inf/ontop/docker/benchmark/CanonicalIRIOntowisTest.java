@@ -77,7 +77,7 @@ public class CanonicalIRIOntowisTest {
     public void runQuery() throws Exception {
 
         long t1 = System.currentTimeMillis();
-        OntopOWLConnection conn =  createStuff();
+        OWLConnection conn =  createStuff();
         long t2 = System.currentTimeMillis();
 
         long time =  (t2-t1);
@@ -486,7 +486,7 @@ public class CanonicalIRIOntowisTest {
      * @param conn
      * @throws OWLException
      */
-    private void closeEverything(OntopOWLConnection conn) throws OWLException {
+    private void closeEverything(OWLConnection conn) throws OWLException {
 		/*
 		 * Close connection and resources
 		 */
@@ -504,7 +504,7 @@ public class CanonicalIRIOntowisTest {
      * @throws IOException
      * @throws OWLException
      */
-    private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
+    private OWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)
@@ -525,7 +525,7 @@ public class CanonicalIRIOntowisTest {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-        OntopOWLConnection conn = reasoner.getConnection();
+        OWLConnection conn = reasoner.getConnection();
 
         return conn;
 
@@ -534,7 +534,7 @@ public class CanonicalIRIOntowisTest {
 
 
 
-    private List<Long> runQueries(OntopOWLConnection conn, List<String> queries) throws OWLException {
+    private List<Long> runQueries(OWLConnection conn, List<String> queries) throws OWLException {
 
         //int nWarmUps = Constants.NUM_WARM_UPS;
         //int nRuns = Constants.NUM_RUNS;
@@ -545,7 +545,7 @@ public class CanonicalIRIOntowisTest {
         int length = queries.size();
         while (j < length){
             String sparqlQuery = queries.get(j);
-            OntopOWLStatement st = conn.createStatement();
+            OWLStatement st = conn.createStatement();
             try {
 
                 long time = 0;
@@ -553,7 +553,7 @@ public class CanonicalIRIOntowisTest {
 
                 //for (int i=0; i<nRuns; ++i){
                 long t1 = System.currentTimeMillis();
-                QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+                TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
                 int columnSize = rs.getColumnCount();
                 count = 0;
                 while (rs.hasNext()) {
@@ -575,7 +575,7 @@ public class CanonicalIRIOntowisTest {
 				/*
 				 * Print the query summary
 				 */
-                QuestOWLStatement qst = (QuestOWLStatement) st;
+                DefaultOntopOWLStatement qst = (DefaultOntopOWLStatement) st;
                 String sqlQuery = qst.getRewritingRendering(sparqlQuery);
 
                 System.out.println();

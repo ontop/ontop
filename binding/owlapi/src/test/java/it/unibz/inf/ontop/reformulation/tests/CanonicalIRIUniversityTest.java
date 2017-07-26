@@ -101,7 +101,7 @@ public class CanonicalIRIUniversityTest {
 
 
         try (
-             OntopOWLStatement st = conn.createStatement();
+                OntopOWLStatement st = conn.createStatement();
         ) {
             QueryController qc = new QueryController();
             QueryIOManager qman = new QueryIOManager(qc);
@@ -111,7 +111,7 @@ public class CanonicalIRIUniversityTest {
                 for (QueryControllerQuery query : group.getQueries()) {
 
                     String sparqlQuery = query.getQuery();
-                    QuestOWLResultSet res = st.executeSelectQuery(sparqlQuery);
+                    TupleOWLResultSet  res = st.executeSelectQuery(sparqlQuery);
                     int columnSize = res.getColumnCount();
                     while (res.hasNext()) {
                         for (int idx = 1; idx <= columnSize; idx++) {
@@ -172,10 +172,10 @@ public class CanonicalIRIUniversityTest {
     }
 
     private void runSelectQuery(String query) throws OWLException {
-        OntopOWLStatement st = conn.createStatement();
+        OWLStatement st = conn.createStatement();
         ArrayList<String> retVal = new ArrayList<>();
         try {
-            QuestOWLResultSet rs = st.executeSelectQuery(query);
+            TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while(rs.hasNext()) {
                 for (String s : rs.getSignature()) {
                     OWLObject binding = rs.getOWLObject(s);

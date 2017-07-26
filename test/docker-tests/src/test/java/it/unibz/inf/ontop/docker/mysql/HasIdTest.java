@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLException;
 
 
@@ -20,14 +20,14 @@ public class HasIdTest extends AbstractVirtualModeTest {
     }
 
 
-    private QuestOWLResultSet runLocalQuery(String query) throws OWLException {
+    private TupleOWLResultSet runLocalQuery(String query) throws OWLException {
 
-        OntopOWLStatement st = conn.createStatement();
-        return st.executeTuple(query);
+        OWLStatement st = conn.createStatement();
+        return st.executeSelectQuery(query);
     }
 
     public void test() throws OWLException {
-        QuestOWLResultSet results = runLocalQuery("PREFIX : <http://example.com/vocab#>" +
+        TupleOWLResultSet  results = runLocalQuery("PREFIX : <http://example.com/vocab#>" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                 "SELECT ?p ?firstName ?lastName " +
                 "WHERE { " +

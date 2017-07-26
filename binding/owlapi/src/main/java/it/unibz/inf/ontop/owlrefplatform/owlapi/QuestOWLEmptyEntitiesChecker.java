@@ -40,7 +40,7 @@ import java.util.Iterator;
 public class QuestOWLEmptyEntitiesChecker {
 
 	private Ontology onto;
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 
 	private int nEmptyConcepts = 0;
 	private int nEmptyRoles = 0;
@@ -52,7 +52,7 @@ public class QuestOWLEmptyEntitiesChecker {
 	 * @param translatedOntologyMerge the OWLAPI ontology, conn QuestOWL connection
 	 * @throws Exception
 	 */
-	public QuestOWLEmptyEntitiesChecker(Ontology translatedOntologyMerge, OntopOWLConnection conn) throws Exception {
+	public QuestOWLEmptyEntitiesChecker(Ontology translatedOntologyMerge, OWLConnection conn) throws Exception {
 		this.onto = translatedOntologyMerge;
 		this.conn = conn;
 
@@ -99,7 +99,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		private String queryConcepts = "SELECT ?x WHERE {?x a <%s>.} LIMIT 1";
 		private String queryRoles = "SELECT * WHERE {?x <%s> ?y.} LIMIT 1";
 
-		private OntopOWLConnection questConn;
+		private OWLConnection questConn;
 		private boolean hasNext = false;
 		private Predicate nextConcept;
 
@@ -110,7 +110,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		private Logger log = LoggerFactory.getLogger(EmptyEntitiesIterator.class);
 
 		/** iterator for classes  of the ontologies */
-		public EmptyEntitiesIterator(Iterator<OClass> classIterator, OntopOWLConnection questConn) {
+		public EmptyEntitiesIterator(Iterator<OClass> classIterator, OWLConnection questConn) {
 
 			this.questConn = questConn;
 
@@ -142,7 +142,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		}
 
 		/** iterator for roles of the ontologies */
-		public EmptyEntitiesIterator(Iterator<ObjectPropertyExpression> objectRoleIterator, Iterator<DataPropertyExpression> dataRoleIterator, OntopOWLConnection questConn) {
+		public EmptyEntitiesIterator(Iterator<ObjectPropertyExpression> objectRoleIterator, Iterator<DataPropertyExpression> dataRoleIterator, OWLConnection questConn) {
 
 			this.questConn = questConn;
 
@@ -228,9 +228,9 @@ public class QuestOWLEmptyEntitiesChecker {
 			String query =getQuery(entity);
 
 			//execute next query
-			try (OntopOWLStatement stm = questConn.createStatement()){
+			try (OWLStatement stm = questConn.createStatement()){
 
-				try (QuestOWLResultSet rs = stm.executeSelectQuery(query)) {
+				try (TupleOWLResultSet rs = stm.executeSelectQuery(query)) {
 
 					if (!rs.hasNext()) {
 

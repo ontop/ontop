@@ -47,7 +47,7 @@ import static org.junit.Assert.assertTrue;
  * Use to check that no concurrency error appears. 
  */
 public class TMappingConcurrencyErrorFixTest{
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 	private Connection connection;
 	
 
@@ -130,10 +130,10 @@ public class TMappingConcurrencyErrorFixTest{
 	}
 	
 	private String runTests(String query) throws Exception {
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		String retval=null;
 		try {
-			QuestOWLResultSet rs = st.executeSelectQuery(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
 			OWLIndividual ind1 =	rs.getOWLIndividual("y")	 ;
 			retval = ind1.toString();

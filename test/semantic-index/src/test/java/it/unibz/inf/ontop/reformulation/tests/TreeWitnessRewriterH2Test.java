@@ -231,8 +231,8 @@ public class TreeWitnessRewriterH2Test{
 		}
 
 		// Now we are ready for querying
-		OntopOWLConnection owlConnection = reasoner.getConnection();
-		OntopOWLStatement st = owlConnection.createStatement();
+		OWLConnection owlConnection = reasoner.getConnection();
+		OWLStatement st = owlConnection.createStatement();
 
 		List<Result> summaries = new LinkedList<TreeWitnessRewriterH2Test.Result>();
 
@@ -252,7 +252,7 @@ public class TreeWitnessRewriterH2Test{
 			try {
 
 				if (query.toLowerCase().contains("select")) {
-					QuestOWLResultSet rs = st.executeTuple(query);
+					TupleOWLResultSet  rs = st.executeSelectQuery(query);
 
 					end = System.currentTimeMillis();
 					while (rs.hasNext()) {

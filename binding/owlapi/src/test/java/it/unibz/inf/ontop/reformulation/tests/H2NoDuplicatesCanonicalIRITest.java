@@ -46,7 +46,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class H2NoDuplicatesCanonicalIRITest {
 
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -106,10 +106,10 @@ public class H2NoDuplicatesCanonicalIRITest {
 	}
 
 	private ArrayList runTests(String query) throws Exception {
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		ArrayList<String> retVal = new ArrayList<>();
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			while(rs.hasNext()) {
 				for (String s : rs.getSignature()) {
 					OWLObject binding = rs.getOWLObject(s);

@@ -43,7 +43,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class H2ConstantTest {
 
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -112,10 +112,10 @@ public class H2ConstantTest {
 
 	
 	private String runTests(String query) throws Exception {
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		String retval;
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
 			OWLObject ind1 =	rs.getOWLObject("y")	 ;
 			retval = ind1.toString();

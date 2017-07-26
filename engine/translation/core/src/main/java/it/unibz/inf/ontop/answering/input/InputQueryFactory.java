@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.answering.input;
 
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
-import it.unibz.inf.ontop.model.TupleResultSet;
 
 /**
  * NB: NOT USED by the Ontop RDF4J repository
@@ -26,8 +25,6 @@ public interface InputQueryFactory {
     //-----------------
 
     SPARQLQuery createSPARQLQuery(String queryString) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException;
-
-    TupleSPARQLQuery<? extends TupleResultSet> createTupleQuery(String queryString) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException;
 
     GraphSPARQLQuery createGraphQuery(String queryString) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException;
 

@@ -131,10 +131,10 @@ public class MetaMappingVirtualABoxTest {
 		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
 		String query2 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :P_1 ?y }";
         try (OntopOWLReasoner reasoner = factory.createReasoner(config);
-             // Now we are ready for querying
-             OntopOWLConnection conn = reasoner.getConnection();
-             OntopOWLStatement st = conn.createStatement();
-             QuestOWLResultSet rs1 = st.executeSelectQuery(query1);
+			 // Now we are ready for querying
+			 OWLConnection conn = reasoner.getConnection();
+			 OWLStatement st = conn.createStatement();
+			 TupleOWLResultSet  rs1 = st.executeSelectQuery(query1);
         ) {
             assertTrue(rs1.hasNext());
 			OWLObject ind = rs1.getOWLObject("x");
@@ -148,10 +148,10 @@ public class MetaMappingVirtualABoxTest {
 		}
 
         try (OntopOWLReasoner reasoner = factory.createReasoner(config);
-             // Now we are ready for querying
-             OntopOWLConnection conn = reasoner.getConnection();
-             OntopOWLStatement st = conn.createStatement();
-             QuestOWLResultSet rs2 = st.executeSelectQuery(query2);
+			 // Now we are ready for querying
+			 OWLConnection conn = reasoner.getConnection();
+			 OWLStatement st = conn.createStatement();
+			 TupleOWLResultSet  rs2 = st.executeSelectQuery(query2);
         ) {
             assertTrue(rs2.hasNext());
 			OWLObject ind1 = rs2.getOWLObject("x");

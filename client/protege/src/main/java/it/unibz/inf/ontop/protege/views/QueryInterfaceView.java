@@ -24,8 +24,8 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlapi.OWLResultSetWriter;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.gui.OWLResultSetTableModel;
@@ -149,7 +149,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 
 			@Override
-			public Long executeQuery(OntopOWLStatement st, String query) throws OWLException {
+			public Long executeQuery(OWLStatement st, String query) throws OWLException {
 				return st.getTupleCount(query);
 			}
 
@@ -159,7 +159,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 		});
 
-		queryEditorPanel.setExecuteSelectAction(new OBDADataQueryAction<QuestOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
+		queryEditorPanel.setExecuteSelectAction(new OBDADataQueryAction<TupleOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
 			
 			@Override
 			public OWLEditorKit getEditorKit(){
@@ -167,7 +167,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 
 			@Override
-			public void handleResult(QuestOWLResultSet result) throws OWLException{
+			public void handleResult(TupleOWLResultSet result) throws OWLException{
 				createTableModelFromResultSet(result);
 				showTupleResultInTablePanel();
 			}
@@ -190,9 +190,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
                 return tm != null && tm.isFetching();
             }
 			@Override
-			public QuestOWLResultSet executeQuery(OntopOWLStatement st,
-					String queryString) throws OWLException {
-				return st.executeTuple(queryString);
+			public TupleOWLResultSet executeQuery(OWLStatement st,
+												  String queryString) throws OWLException {
+				return st.executeSelectQuery(queryString);
 			}
 
 		});
@@ -206,7 +206,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 
 			@Override
-			public List<OWLAxiom> executeQuery(OntopOWLStatement st, String queryString) throws OWLException {
+			public List<OWLAxiom> executeQuery(OWLStatement st, String queryString) throws OWLException {
 				return st.executeGraph(queryString); 
 			}
 
@@ -238,7 +238,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		queryEditorPanel.setRetrieveUCQExpansionAction(new OBDADataQueryAction<String>("Rewriting query...", QueryInterfaceView.this) {
 
 			@Override
-			public String executeQuery(OntopOWLStatement st, String query) throws OWLException {
+			public String executeQuery(OWLStatement st, String query) throws OWLException {
 				return st.getRewritingRendering(query);
 			}
 
@@ -263,7 +263,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction<String>("Unfolding queries...", QueryInterfaceView.this) {
 			@Override
-			public String executeQuery(OntopOWLStatement st, String query) throws OWLException{
+			public String executeQuery(OWLStatement st, String query) throws OWLException{
 				// UGLY!!! SQL-specific!
 				return ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
 			}
@@ -383,7 +383,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	}
 
 	
-	private synchronized void createTableModelFromResultSet(QuestOWLResultSet result) throws OWLException {
+	private synchronized void createTableModelFromResultSet(TupleOWLResultSet result) throws OWLException {
 		if (result == null)
 			throw new NullPointerException("An error occurred. createTableModelFromResultSet cannot use a null QuestOWLResultSet");
         tableModel = new OWLResultSetTableModel(result, prefixManager,

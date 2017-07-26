@@ -42,7 +42,7 @@ public class InteractiveExample {
 	/*
 	 * Prepare the data connection for querying.
 	 */
-	OntopOWLConnection conn = reasoner.getConnection();
+		OntopOWLConnection conn = reasoner.getConnection();
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		OntopOWLStatement st = conn.createStatement();
@@ -56,7 +56,7 @@ public class InteractiveExample {
 				}
 				String sparqlQuery = builder.toString();
 				System.out.println(sparqlQuery);
-				QuestOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
+				TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
 				rs.close();
 				
 			/*

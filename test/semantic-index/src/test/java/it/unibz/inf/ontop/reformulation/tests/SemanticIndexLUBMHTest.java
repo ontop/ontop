@@ -178,9 +178,9 @@ public class SemanticIndexLUBMHTest extends TestCase {
 
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(completeOntology, p);
-            OntopOWLReasoner reasoner = factory.createReasoner(loader.getConfiguration());
-            OntopOWLConnection connection = reasoner.getConnection();
-            OntopOWLStatement st = connection.createStatement()) {
+			OntopOWLReasoner reasoner = factory.createReasoner(loader.getConfiguration());
+			OWLConnection connection = reasoner.getConnection();
+			OWLStatement st = connection.createStatement()) {
 
             QueryController qc = new QueryController();
             QueryIOManager qman = new QueryIOManager(qc);
@@ -204,7 +204,7 @@ public class SemanticIndexLUBMHTest extends TestCase {
                 // + " }";
 
                 start = System.nanoTime();
-                QuestOWLResultSet res = st.executeTuple(query.getQuery());
+                TupleOWLResultSet  res = st.executeSelectQuery(query.getQuery());
                 end = System.nanoTime();
 
                 double time = (end - start) / 1000000;

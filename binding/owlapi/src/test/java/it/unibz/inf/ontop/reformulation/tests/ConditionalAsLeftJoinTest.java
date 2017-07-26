@@ -132,7 +132,7 @@ public class ConditionalAsLeftJoinTest {
             if (! (executableQuery instanceof SQLExecutableQuery))
                 throw new IllegalStateException("A SQLExecutableQuery was expected");
             sql = ((SQLExecutableQuery)executableQuery).getSQL();
-            QuestOWLResultSet rs = st.executeSelectQuery(query);
+            TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 OWLObject ind1 = rs.getOWLObject("a");
                 returnedValues.add(ind1.toString());

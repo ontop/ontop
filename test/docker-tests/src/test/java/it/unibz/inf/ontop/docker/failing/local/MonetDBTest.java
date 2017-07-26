@@ -34,8 +34,8 @@ public class MonetDBTest {
             /* 
             * Prepare the data connection for querying. 
             */
-            OntopOWLConnection conn = reasoner.getConnection();
-            OntopOWLStatement st = conn.createStatement();
+            OWLConnection conn = reasoner.getConnection();
+            OWLStatement st = conn.createStatement();
 
             /* 
             * Get the book information that is stored in the database 
@@ -56,7 +56,7 @@ public class MonetDBTest {
 
             try {
                 long t1 = System.currentTimeMillis();
-                QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+                TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
                 int columnSize = rs.getColumnCount();
                 while (rs.hasNext()) {
                     for (int idx = 1; idx <= columnSize; idx++) {
@@ -71,7 +71,7 @@ public class MonetDBTest {
                 /* 
                 * Print the query summary 
                 */
-                QuestOWLStatement qst = (QuestOWLStatement) st;
+                DefaultOntopOWLStatement qst = (DefaultOntopOWLStatement) st;
                 String sqlQuery = qst.getRewritingRendering(sparqlQuery);
                 System.out.println();
                 System.out.println("The input SPARQL query:");

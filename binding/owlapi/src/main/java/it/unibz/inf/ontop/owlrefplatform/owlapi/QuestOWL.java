@@ -274,7 +274,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 		try {
 			OntopConnection conn = queryEngine.getConnection();
-			return new QuestOWLConnection(conn, inputQueryFactory);
+			return new DefaultOntopOWLConnection(conn, inputQueryFactory);
 		} catch (OntopConnectionException e) {
 			// TODO: find a better exception?
 			throw new ReasonerInternalException(e);
@@ -507,9 +507,8 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 			AskQuery query = inputQueryFactory.createAskQuery(strQuery);
 			BooleanResultSet trs = st.execute(query);
-			if (trs != null && trs.nextRow()) {
-				String value = trs.getConstant(0).getValue();
-				boolean b = Boolean.parseBoolean(value);
+			if (trs != null) {
+				boolean b = trs.getValue();
 				trs.close();
 				if (b)
 					return false;

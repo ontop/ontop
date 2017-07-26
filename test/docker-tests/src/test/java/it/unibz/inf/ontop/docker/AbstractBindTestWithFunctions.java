@@ -74,14 +74,14 @@ public abstract class AbstractBindTestWithFunctions {
         OntopOWLReasoner reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLConnection conn = reasoner.getConnection();
+        OWLStatement st = conn.createStatement();
 
 
         int i = 0;
 
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 OWLObject ind1 = rs.getOWLObject("w");
 
@@ -793,15 +793,15 @@ public abstract class AbstractBindTestWithFunctions {
 
 
         // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLConnection conn = reasoner.getConnection();
+        OWLStatement st = conn.createStatement();
 
 
 
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 OWLObject ind1 = rs.getOWLObject("w");
                 // log.debug(ind1.toString());

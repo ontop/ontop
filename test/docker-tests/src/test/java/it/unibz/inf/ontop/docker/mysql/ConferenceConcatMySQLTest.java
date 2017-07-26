@@ -22,8 +22,8 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLObject;
 
 /**
@@ -45,7 +45,7 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 
 	private void runTests(String query1) throws Exception {
 
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 
 
 		try {
@@ -64,8 +64,8 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 		}
 	}
 	
-	private void executeQueryAssertResults(String query, OntopOWLStatement st) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
+	private void executeQueryAssertResults(String query, OWLStatement st) throws Exception {
+		TupleOWLResultSet rs = st.executeSelectQuery(query);
 
 		OWLObject answer, answer2;
 		rs.hasNext();

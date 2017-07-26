@@ -45,8 +45,8 @@ public class R2rmlJoinTest {
         OntopOWLReasoner reasoner = factory.createReasoner(configBuilder.build());
 
         // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLConnection conn = reasoner.getConnection();
+        OWLStatement st = conn.createStatement();
 
 
         QueryController qc = new QueryController();
@@ -60,7 +60,7 @@ public class R2rmlJoinTest {
                 log.debug("Query: \n{}", query.getQuery());
 
                 long start = System.nanoTime();
-                QuestOWLResultSet res = st.executeTuple(query.getQuery());
+                TupleOWLResultSet  res = st.executeSelectQuery(query.getQuery());
                 long end = System.nanoTime();
 
                 double time = (end - start) / 1000;

@@ -118,13 +118,13 @@ public class TypeInferenceTest {
         OntopOWLReasoner reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLConnection conn = reasoner.getConnection();
+        OWLStatement st = conn.createStatement();
 
         int i = 0;
         ImmutableSet.Builder<String> returnedValueBuilder = ImmutableSet.builder();
         try {
-            QuestOWLResultSet rs = st.executeSelectQuery(query);
+            TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 OWLObject ind1 = rs.getOWLObject("r");
                 log.debug(ind1.toString());

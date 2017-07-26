@@ -100,7 +100,7 @@ public class QuestOWLExample_OntowisTests {
 
 		//	queries[30]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 .   } LIMIT 100000  ";
 
-		OntopOWLConnection conn =  createStuff(mKeys);
+		OWLConnection conn =  createStuff(mKeys);
 
 		// Results
 //		String[] resultsOne = new String[31];
@@ -198,7 +198,7 @@ public class QuestOWLExample_OntowisTests {
 	 * @param conn
 	 * @throws OWLException
 	 */
-	private void closeEverything(OntopOWLConnection conn) throws OWLException {
+	private void closeEverything(OWLConnection conn) throws OWLException {
 		/*
 		 * Close connection and resources
 		 */
@@ -216,7 +216,7 @@ public class QuestOWLExample_OntowisTests {
 	 * @throws IOException 
 	 * @throws OWLException
 	 */
-	private OntopOWLConnection createStuff(boolean manualKeys) throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
+	private OWLConnection createStuff(boolean manualKeys) throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -262,14 +262,14 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		OntopOWLConnection conn = reasoner.getConnection();
+		OWLConnection conn = reasoner.getConnection();
 
 		return conn;
 
 	}
 
 
-	private List<Long> runQueries(OntopOWLConnection conn, String[] queries) throws OWLException {
+	private List<Long> runQueries(OWLConnection conn, String[] queries) throws OWLException {
 		
 		//int nWarmUps = Constants.NUM_WARM_UPS;
 		//int nRuns = Constants.NUM_RUNS;
@@ -279,7 +279,7 @@ public class QuestOWLExample_OntowisTests {
 		int j=0;
 		while (j < queries.length){
 			String sparqlQuery = queries[j];
-			OntopOWLStatement st = conn.createStatement();
+			OWLStatement st = conn.createStatement();
 			try {
 
 				long time = 0;
@@ -287,7 +287,7 @@ public class QuestOWLExample_OntowisTests {
 				
 				//for (int i=0; i<nRuns; ++i){
 					long t1 = System.currentTimeMillis();
-					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+					TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
 					int columnSize = rs.getColumnCount();
 					count = 0;
 					while (rs.hasNext()) {
@@ -309,7 +309,7 @@ public class QuestOWLExample_OntowisTests {
 				/*
 				 * Print the query summary
 				 */
-				QuestOWLStatement qst = (QuestOWLStatement) st;
+				DefaultOntopOWLStatement qst = (DefaultOntopOWLStatement) st;
 				String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();
 
 				System.out.println();

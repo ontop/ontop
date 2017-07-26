@@ -52,7 +52,7 @@ public class MultiSchemaTestH2  {
             "src/test/resources/multischema/multischemah2.obda";
 
 	private OntopOWLReasoner reasoner;
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 	private String url = "jdbc:h2:mem:questrepository";
 	private String username =  "fish";
 	private String password = "fish";
@@ -158,9 +158,9 @@ public class MultiSchemaTestH2  {
 	}
 
 	private void checkThereIsAtLeastOneResult(String query) throws Exception {
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
 
 		} catch (Exception e) {

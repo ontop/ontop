@@ -36,19 +36,20 @@ import java.util.List;
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  * 
  */
-public class QuestOWLResultSet implements OntopOWLTupleResultSet {
+public class OntopTupleOWLResultSet implements TupleOWLResultSet {
 
 	private final TupleResultSet res;
 
-	private final QuestOWLStatement owlst;
+	private final DefaultOntopOWLStatement owlst;
 
-    public QuestOWLResultSet(TupleResultSet res, QuestOWLStatement owlst) {
+    public OntopTupleOWLResultSet(TupleResultSet res, DefaultOntopOWLStatement owlst) {
 		if (res == null)
 			throw new IllegalArgumentException("The result set must not be null");
 		this.res = res;
 		this.owlst = owlst;
 	}
 
+	@Override
 	public int getColumnCount() throws OWLException {
 		try {
 			return res.getColumnCount();
@@ -57,6 +58,7 @@ public class QuestOWLResultSet implements OntopOWLTupleResultSet {
 		}
 	}
 
+	@Override
 	public List<String> getSignature() throws OWLException {
 		try {
 			return res.getSignature();
@@ -65,6 +67,7 @@ public class QuestOWLResultSet implements OntopOWLTupleResultSet {
 		}
 	}
 
+	@Override
 	public int getFetchSize() throws OWLException {
 		try {
 			return res.getFetchSize();
@@ -83,14 +86,14 @@ public class QuestOWLResultSet implements OntopOWLTupleResultSet {
 
 	}
 
-	public QuestOWLStatement getStatement() {
+	public DefaultOntopOWLStatement getStatement() {
 		return owlst;
 	}
 
 	@Override
 	public boolean hasNext() throws OWLException {
 		try {
-			return res.nextRow();
+			return res.hasNext();
 		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
@@ -105,6 +108,7 @@ public class QuestOWLResultSet implements OntopOWLTupleResultSet {
 			return translator.translate((ValueConstant)c);
 	}
 
+	@Override
 	public OWLPropertyAssertionObject getOWLPropertyAssertionObject(int column) throws OWLException {
 		try {
 			return translate(res.getConstant(column));
@@ -113,6 +117,7 @@ public class QuestOWLResultSet implements OntopOWLTupleResultSet {
 		}
 	}
 
+	@Override
 	public OWLIndividual getOWLIndividual(int column) throws OWLException {
 		try {
 			return (OWLIndividual) translate(res.getConstant(column));
@@ -121,6 +126,7 @@ public class QuestOWLResultSet implements OntopOWLTupleResultSet {
 		}
 	}
 
+	@Override
 	public OWLIndividual getOWLIndividual(String column) throws OWLException {
 		try {
 			return (OWLIndividual) translate(res.getConstant(column));
@@ -146,6 +152,7 @@ public class QuestOWLResultSet implements OntopOWLTupleResultSet {
 	}
 
 
+	@Override
 	public OWLLiteral getOWLLiteral(int column) throws OWLException {
 		try {
 			return (OWLLiteral) translate(res.getConstant(column));
@@ -154,6 +161,7 @@ public class QuestOWLResultSet implements OntopOWLTupleResultSet {
 		}
 	}
 
+	@Override
 	public OWLLiteral getOWLLiteral(String column) throws OWLException {
 		try {
 			return (OWLLiteral) translate(res.getConstant(column));
@@ -162,6 +170,7 @@ public class QuestOWLResultSet implements OntopOWLTupleResultSet {
 		}
 	}
 
+	@Override
 	public OWLObject getOWLObject(int column) throws OWLException {
 		try {
 			return translate(res.getConstant(column));
@@ -170,6 +179,7 @@ public class QuestOWLResultSet implements OntopOWLTupleResultSet {
 		}
 	}
 
+	@Override
 	public OWLObject getOWLObject(String column) throws OWLException {
 		try {
 			return translate(res.getConstant(column));

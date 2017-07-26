@@ -250,7 +250,7 @@ public class SameAsOntowisTest {
      * @param conn
      * @throws OWLException
      */
-    private void closeEverything(OntopOWLConnection conn) throws OWLException {
+    private void closeEverything(OWLConnection conn) throws OWLException {
 		/*
 		 * Close connection and resources
 		 */
@@ -292,9 +292,7 @@ public class SameAsOntowisTest {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-        OntopOWLConnection conn = reasoner.getConnection();
-
-        return conn;
+        return reasoner.getConnection();
 
     }
 
@@ -320,7 +318,7 @@ public class SameAsOntowisTest {
 
                 //for (int i=0; i<nRuns; ++i){
                 long t1 = System.currentTimeMillis();
-                QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+                TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
                 int columnSize = rs.getColumnCount();
                 count = 0;
                 while (rs.hasNext()) {

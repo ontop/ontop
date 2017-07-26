@@ -74,8 +74,8 @@ public class OntologyTypesTest {
 		OntopOWLReasoner reasoner = factory.createReasoner(configBuilder.build());
 
 		// Now we are ready for querying
-		OntopOWLConnection conn = reasoner.getConnection();
-		OntopOWLStatement st = conn.createStatement();
+		OWLConnection conn = reasoner.getConnection();
+		OWLStatement st = conn.createStatement();
 
 
 		try {
@@ -94,8 +94,8 @@ public class OntologyTypesTest {
 		}
 	}
 
-	private void executeQueryAssertResults(String query, OntopOWLStatement st, int expectedRows) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
+	private void executeQueryAssertResults(String query, OWLStatement st, int expectedRows) throws Exception {
+		TupleOWLResultSet  rs = st.executeSelectQuery(query);
 		int count = 0;
 		while (rs.hasNext()) {
 			count++;

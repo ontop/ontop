@@ -68,7 +68,7 @@ public class QuestOWLExample {
              OntopOWLStatement st = conn.createStatement()) {
 
             long t1 = System.currentTimeMillis();
-            QuestOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
+            TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
             int columnSize = rs.getColumnCount();
             while (rs.hasNext()) {
                 for (int idx = 1; idx <= columnSize; idx++) {

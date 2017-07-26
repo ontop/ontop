@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.PredefinedBooleanResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
@@ -165,7 +166,7 @@ public class SQLQuestStatement extends QuestStatement {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
         String sqlQuery = sqlTargetQuery.getSQL();
         if (sqlQuery.equals("")) {
-            return new SQLBooleanResultSet(false);
+            return new PredefinedBooleanResultSet(false);
         }
 
         try {

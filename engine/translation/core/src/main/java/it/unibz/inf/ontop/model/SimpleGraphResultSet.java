@@ -20,10 +20,13 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.ontology.Assertion;
 
 public interface SimpleGraphResultSet extends GraphResultSet<OntopResultConversionException> {
+
+    int getFetchSize() throws OntopConnectionException;
 
     /**
      * TODO: remove this hack

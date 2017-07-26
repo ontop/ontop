@@ -50,7 +50,7 @@ public class H2IdentifierTest {
 	static final String propertyFile = "src/test/resources/identifiers/identifiers-h2.properties";
 
 	private OntopOWLReasoner reasoner;
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 	Connection sqlConnection;
 
 
@@ -173,10 +173,10 @@ public class H2IdentifierTest {
 	}
 
 	private String runQueryReturnIndividual(String query) throws OWLException, SQLException {
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		String retval;
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 
 			assertTrue(rs.hasNext());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");

@@ -271,7 +271,7 @@ public abstract class QuestStatement implements OntopStatement {
 				TupleResultSet resultSet = execute(selectQuery);
 
 				ImmutableSet.Builder<String> constantSetBuilder = ImmutableSet.builder();
-				while (resultSet.nextRow()) {
+				while (resultSet.hasNext()) {
 					Constant constant = resultSet.getConstant(1);
 					if (constant instanceof URIConstant) {
 						// collect constants in list
