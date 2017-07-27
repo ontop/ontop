@@ -225,8 +225,8 @@ public class OntopConstantConverter {
 
                     case DATE:
                         if (!isOracle) {
-                            Date dvalue = (Date)value;
-                            result = DATA_FACTORY.getConstantLiteral(dvalue.toString(), Predicate.COL_TYPE.DATE);
+                            //Date dvalue = (Date)value;
+                            result = DATA_FACTORY.getConstantLiteral(stringValue, Predicate.COL_TYPE.DATE);
                         }
                         else {
                             try {

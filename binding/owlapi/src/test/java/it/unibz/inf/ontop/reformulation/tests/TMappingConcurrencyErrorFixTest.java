@@ -140,7 +140,8 @@ public class TMappingConcurrencyErrorFixTest{
 			retval = ind1.toString();
 			assertEquals("<http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#111>", retval);
 			assertTrue(rs.hasNext());
-			OWLIndividual ind2 =	bindingSet.getOWLIndividual("y")	 ;
+            final OWLBindingSet bindingSet2 = rs.next();
+			OWLIndividual ind2 =	bindingSet2.getOWLIndividual("y")	 ;
 			retval = ind2.toString();
 			assertEquals("<http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#112>", retval);
 		} catch (Exception e) {
