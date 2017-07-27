@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.iq.proposal.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.CommutativeJoinOrFilterNode;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
@@ -14,19 +14,18 @@ import java.util.Optional;
 public class PushUpBooleanExpressionProposalImpl implements PushUpBooleanExpressionProposal {
 
     private final ImmutableExpression propagatedExpression;
-    private final ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> providerToNonPropagatedExpression;
+    private final ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> provider2NonPropagatedExpressionMap;
     private final QueryNode upMostPropagatingNode;
     private final Optional<JoinOrFilterNode> recipientNode;
-
-    private final ImmutableList<ExplicitVariableProjectionNode> inbetweenProjectors;
+    private final ImmutableSet<ExplicitVariableProjectionNode> inbetweenProjectors;
 
     public PushUpBooleanExpressionProposalImpl(ImmutableExpression propagatedExpression,
-                                               ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> providerToNonPropagatedExpression,
+                                               ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> provider2NonPropagatedExpressionMap,
                                                QueryNode upMostPropagatingNode,
                                                Optional<JoinOrFilterNode> recipientNode,
-                                               ImmutableList<ExplicitVariableProjectionNode> inbetweenProjectors) {
+                                               ImmutableSet<ExplicitVariableProjectionNode> inbetweenProjectors) {
         this.propagatedExpression = propagatedExpression;
-        this.providerToNonPropagatedExpression = providerToNonPropagatedExpression;
+        this.provider2NonPropagatedExpressionMap = provider2NonPropagatedExpressionMap;
         this.upMostPropagatingNode = upMostPropagatingNode;
         this.recipientNode = recipientNode;
         this.inbetweenProjectors = inbetweenProjectors;
@@ -41,7 +40,8 @@ public class PushUpBooleanExpressionProposalImpl implements PushUpBooleanExpress
         return upMostPropagatingNode;
     }
 
-    public ImmutableList<ExplicitVariableProjectionNode> getInbetweenProjectors() {
+    @Override
+    public ImmutableSet<ExplicitVariableProjectionNode> getInbetweenProjectors() {
         return inbetweenProjectors;
     }
 
@@ -51,6 +51,6 @@ public class PushUpBooleanExpressionProposalImpl implements PushUpBooleanExpress
     }
 
     public ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> getProvider2NonPropagatedExpressionMap() {
-        return providerToNonPropagatedExpression;
+        return provider2NonPropagatedExpressionMap;
     }
 }
