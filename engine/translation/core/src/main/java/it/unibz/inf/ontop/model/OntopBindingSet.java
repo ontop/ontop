@@ -7,10 +7,10 @@ import it.unibz.inf.ontop.model.term.Constant;
 import java.util.Iterator;
 import java.util.List;
 
-public interface OntopBindingSet extends Iterable<Binding> {
+public interface OntopBindingSet extends Iterable<OntopBinding> {
     
     @Override
-    Iterator<Binding> iterator();
+    Iterator<OntopBinding> iterator();
 
     List<String> getBidingNames();
 
@@ -24,7 +24,7 @@ public interface OntopBindingSet extends Iterable<Binding> {
 
     Constant getConstant(String name) throws OntopConnectionException, OntopResultConversionException;
 
-    Binding getBinding(int column) throws OntopConnectionException, OntopResultConversionException;
+    OntopBinding getBinding(int column) throws OntopConnectionException, OntopResultConversionException;
 
-    Binding getBinding(String name) throws OntopConnectionException, OntopResultConversionException;
+    OntopBinding getBinding(String name) throws OntopConnectionException, OntopResultConversionException;
 }

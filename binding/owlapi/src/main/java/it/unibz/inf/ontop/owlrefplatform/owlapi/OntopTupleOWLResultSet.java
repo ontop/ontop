@@ -92,11 +92,7 @@ public class OntopTupleOWLResultSet implements TupleOWLResultSet {
 
     @Override
     public OWLBindingSet next() throws OWLException {
-        try {
-            return new OntopOWLBindingSet(res.next(), res.getSignature());
-        } catch (OntopConnectionException e) {
-            throw new OntopOWLException(e);
-        }
+        return new OntopOWLBindingSet(res.next());
     }
 
 

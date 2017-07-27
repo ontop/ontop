@@ -1,10 +1,9 @@
 package it.unibz.inf.ontop.model.impl;
 
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.model.Binding;
-import it.unibz.inf.ontop.model.OntopBindingSet;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.term.Constant;
 
@@ -19,22 +18,25 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Iterator;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
-public class LazyOntopBindingSet implements OntopBindingSet{
+public class OntopConstantRetrieverFromJdbcResultSet {
 
-    private final ResultSet jdbcResultSet;
-    private final List<String> signature;
-    private IRIDictionary iriDictionary;
-    private Map<String, String> bnodeMap;
-    private Map<String, Integer> columnMap;
     private AtomicInteger bnodeCounter;
+    private IRIDictionary iriDictionary;
+
+    // TODO(xiao): isolate the following DB specific code
+    private final boolean isMsSQL;
+    private final boolean isOracle;
+    private final DateFormat dateFormat;
+
+    private final Map<String, String> bnodeMap;
 
     private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
@@ -44,53 +46,33 @@ public class LazyOntopBindingSet implements OntopBindingSet{
         formatter.setDecimalFormatSymbols(symbol);
     }
 
-    // TODO(xiao): isolate the following DB specific code
-    private final boolean isMsSQL;
-    private final boolean isOracle;
-    private final DateFormat dateFormat;
+    public OntopConstantRetrieverFromJdbcResultSet(DBMetadata dbMetadata,
+                                                   Optional<IRIDictionary> iriDictionary) {
+        this.iriDictionary = iriDictionary.orElse(null);
+        String vendor =  dbMetadata.getDriverName();
+        isOracle = vendor.contains("Oracle");
+        isMsSQL = vendor.contains("SQL Server");
+        
+        if (isOracle) {
+            String version = dbMetadata.getDriverVersion();
+            int versionInt = Integer.parseInt(version.substring(0, version.indexOf(".")));
 
+            if (versionInt >= 12)
+                dateFormat = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS" , Locale.ENGLISH); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+            else
+                dateFormat = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa" , Locale.ENGLISH); // For oracle driver v.11 and less
+        }
+        else if (isMsSQL) {
+            dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH );
+        }
+        else
+            dateFormat = null;
 
-    public LazyOntopBindingSet(ResultSet jdbcResultSet, List<String> signature, Map<String, Integer> columnMap, boolean isMsSQL, boolean isOracle,
-                               IRIDictionary iriDictionary, DateFormat dateFormat, Map<String, String> bnodeMap, AtomicInteger bnodeCounter) {
-        this.jdbcResultSet = jdbcResultSet;
-        this.signature = signature;
-        this.iriDictionary = iriDictionary;
-        this.bnodeMap = bnodeMap;
-        this.columnMap = columnMap;
-        this.isMsSQL = isMsSQL;
-        this.isOracle = isOracle;
-        this.dateFormat = dateFormat;
-        this.bnodeCounter = bnodeCounter;
+        this.bnodeCounter = new AtomicInteger();
+        bnodeMap = new HashMap<>(1000);
     }
 
-    @Override
-    public Iterator<Binding> iterator() {
-        // TODO(xiao):
-        return null;
-    }
-
-    @Override
-    public List<String> getBidingNames() {
-        return this.signature;
-    }
-
-    @Override
-    public Binding getBinding(int column) throws OntopConnectionException, OntopResultConversionException {
-        return null;
-    }
-
-    @Override
-    public Binding getBinding(String name) throws OntopConnectionException, OntopResultConversionException {
-        return null;
-    }
-
-
-
-    /***
-     * Returns the constant at column "column" recall that columns start at index 1.
-     */
-    @Override
-    public Constant getConstant(int column) throws OntopConnectionException, OntopResultConversionException {
+    public Constant getConstantFromJDBC(ResultSet jdbcResultSet, int column) throws OntopResultConversionException, OntopConnectionException {
         column = column * 3; // recall that the real SQL result set has 3
         // columns per value. From each group of 3 the actual value is the
         // 3rd column, the 2nd is the language, the 1st is the type code (an integer)
@@ -291,12 +273,5 @@ public class LazyOntopBindingSet implements OntopBindingSet{
         }
 
         return result;
-    }
-
-
-    @Override
-    public Constant getConstant(String name) throws OntopConnectionException, OntopResultConversionException {
-        Integer columnIndex = columnMap.get(name);
-        return getConstant(columnIndex);
     }
 }

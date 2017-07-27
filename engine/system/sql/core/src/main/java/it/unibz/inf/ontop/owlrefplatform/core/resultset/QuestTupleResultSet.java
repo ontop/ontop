@@ -21,39 +21,32 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  */
 
 
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.LazyOntopBindingSet;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.model.OntopBindingSet;
+import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.model.impl.OntopConstantRetrieverFromJdbcResultSet;
+import it.unibz.inf.ontop.model.impl.SimpleOntopBindingSet;
 
-import javax.annotation.Nullable;
 import java.sql.ResultSet;
-import java.text.*;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class QuestTupleResultSet implements TupleResultSet {
 
 	private final ResultSet rs;
+
 	private final List<String> signature;
 
 	private final Map<String, Integer> columnMap;
-	private final Map<String, String> bnodeMap;
 
-	private AtomicInteger bnodeCounter = new AtomicInteger();
-
-	@Nullable
-	private final IRIDictionary iriDictionary;
-	
-	private final boolean isOracle;
-    private final boolean isMsSQL;
-	
-	private final DateFormat dateFormat;
+    private final OntopConstantRetrieverFromJdbcResultSet ontopConstantRetriever;
 
 
-
-	/***
+    /***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
 	 * by terms and a statement. The statement is maintained only as a reference
 	 * for closing operations.
@@ -66,37 +59,19 @@ public class QuestTupleResultSet implements TupleResultSet {
 	public QuestTupleResultSet(ResultSet set, List<String> signature,
                                DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) {
 		this.rs = set;
-		this.iriDictionary = iriDictionary.orElse(null);
+
 		this.signature = signature;
 		
 		columnMap = new HashMap<>(signature.size() * 2);
-		bnodeMap = new HashMap<>(1000);
 
 		for (int j = 1; j <= signature.size(); j++) {
 			columnMap.put(signature.get(j - 1), j);
 		}
 
-		String vendor =  dbMetadata.getDriverName();
-		isOracle = vendor.contains("Oracle");
-		isMsSQL = vendor.contains("SQL Server");
+        this.ontopConstantRetriever = new OntopConstantRetrieverFromJdbcResultSet(dbMetadata, iriDictionary);
+    }
 
-		if (isOracle) {
-			String version = dbMetadata.getDriverVersion();
-			int versionInt = Integer.parseInt(version.substring(0, version.indexOf(".")));
-
-			if (versionInt >= 12) 
-				dateFormat = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS" , Locale.ENGLISH); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
-			else 
-				dateFormat = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa" , Locale.ENGLISH); // For oracle driver v.11 and less
-		}
-		else if (isMsSQL) {
-			dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH );
-		}
-		else
-			dateFormat = null;
-	}
-
-	@Override
+    @Override
     public int getColumnCount() {
 		return signature.size();
 	}
@@ -112,7 +87,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 
     @Override
     public OntopBindingSet next() {
-        return new LazyOntopBindingSet(rs, signature, columnMap, isMsSQL, isOracle, iriDictionary, dateFormat, bnodeMap, bnodeCounter);
+        return new SimpleOntopBindingSet(rs, signature, columnMap, ontopConstantRetriever);
     }
 
     @Override
@@ -139,7 +114,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 		}
 	}
 
-    public Object getRawObject(int column) throws OntopConnectionException {
+    Object getRawObject(int column) throws OntopConnectionException {
         try {
             Object realValue = rs.getObject(column);
             return realValue;
