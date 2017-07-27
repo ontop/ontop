@@ -37,5 +37,5 @@ public interface TupleResultSet extends IterativeOBDAResultSet<OntopBindingSet, 
 	int getFetchSize() throws OntopConnectionException;
 
 	@Override
-    OntopBindingSet next();
+    OntopBindingSet next() throws OntopConnectionException;
 }

@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.impl;
 
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.OntopBinding;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.owlapi.OWLAPIIndividualTranslator;
+import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLBinding;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -26,9 +28,14 @@ public class OntopOWLBinding implements OWLBinding {
         return ontopBinding.getName();
     }
 
+    // TODO(xiao): how about null??
     @Override
     public OWLObject getValue() throws OWLException {
-        return translate(ontopBinding.getValue());
+        try {
+            return translate(ontopBinding.getValue());
+        } catch (OntopResultConversionException e) {
+            throw new OntopOWLException(e);
+        }
     }
 
     // TODO(xiao): duplicated code

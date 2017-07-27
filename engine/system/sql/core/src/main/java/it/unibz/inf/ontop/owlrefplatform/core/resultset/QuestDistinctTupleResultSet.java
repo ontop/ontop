@@ -68,7 +68,7 @@ public class QuestDistinctTupleResultSet implements TupleResultSet {
     }
 
     @Override
-    public OntopBindingSet next() {
+    public OntopBindingSet next() throws OntopConnectionException {
         return questTupleResultSet.next();
     }
 

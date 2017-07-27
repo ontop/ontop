@@ -1,17 +1,20 @@
 package it.unibz.inf.ontop.model.impl;
 
-import it.unibz.inf.ontop.exception.ConversionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.OntopBinding;
+import it.unibz.inf.ontop.model.MainTypeLangValues;
 import it.unibz.inf.ontop.model.term.Constant;
 
 public class SimpleOntopBinding implements OntopBinding {
 
     private final String name;
-    private Constant value;
+    private final OntopConstantConverter constantRetriever;
+    private final MainTypeLangValues cell;
 
-    public SimpleOntopBinding(String name, Constant value){
+    public SimpleOntopBinding(String name, MainTypeLangValues cell, OntopConstantConverter constantRetriever){
         this.name = name;
-        this.value = value;
+        this.cell = cell;
+        this.constantRetriever = constantRetriever;
     }
     
     @Override
@@ -20,7 +23,16 @@ public class SimpleOntopBinding implements OntopBinding {
     }
 
     @Override
-    public Constant getValue() throws ConversionException {
-        return value;
+    public Constant getValue() throws OntopResultConversionException {
+        return constantRetriever.getConstantFromJDBC(cell);
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return getName() + "=" + getValue();
+        } catch (OntopResultConversionException e) {
+            return getName() + "=";
+        }
     }
 }

@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.model;
 
-import it.unibz.inf.ontop.exception.ConversionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Constant;
 
 public interface OntopBinding {
@@ -17,5 +17,5 @@ public interface OntopBinding {
      *
      * @return The value of the binding, never <tt>null</tt>.
      */
-    Constant getValue() throws ConversionException;
+    Constant getValue() throws OntopResultConversionException;
 }

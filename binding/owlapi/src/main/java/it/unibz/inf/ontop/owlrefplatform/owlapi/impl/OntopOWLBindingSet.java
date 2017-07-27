@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.impl;
 
 import com.google.common.collect.Iterators;
-import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.exception.OntopResultConversionException;
+import it.unibz.inf.ontop.model.OntopBinding;
 import it.unibz.inf.ontop.model.OntopBindingSet;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
@@ -24,7 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class OntopOWLBindingSet implements OWLBindingSet {
-	
+
     private final OntopBindingSet ontopBindingSet;
 
     public OntopOWLBindingSet(OntopBindingSet ontopBindingSet) {
@@ -39,18 +38,17 @@ public class OntopOWLBindingSet implements OWLBindingSet {
 
     @Override
     public List<String> getBindingNames() throws OWLException {
-        return ontopBindingSet.getBidingNames();
+        return ontopBindingSet.getBindingNames();
     }
 
     @Override
     public OWLBinding getBinding(String bindingName) throws OWLException {
-        try {
-            return new OntopOWLBinding(ontopBindingSet.getBinding(bindingName));
-        } catch (OntopConnectionException | OntopResultConversionException e) {
-            throw new OWLException(e);
+        final OntopBinding ontopBinding = ontopBindingSet.getBinding(bindingName);
+        if (ontopBinding == null) {
+            return null;
+        } else {
+            return new OntopOWLBinding(ontopBinding);
         }
-
-        // TODO(xiao): implement similar behavior as in RDF4J
     }
 
 

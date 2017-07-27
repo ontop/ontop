@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.rdf4j.query;
  */
 
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.OntopBindingSet;
 import it.unibz.inf.ontop.model.TupleResultSet;
 
@@ -68,16 +69,20 @@ public class OntopTupleQueryResult implements TupleQueryResult {
 
 	@Override
 	public BindingSet next() throws QueryEvaluationException {
-        final OntopBindingSet ontopBindingSet = res.next();
+        try {
+            return new OntopRDF4JBindingSet(res.next());
+        } catch (OntopConnectionException e) {
+            throw new QueryEvaluationException(e);
+        }
+//
+//        MapBindingSet set = new MapBindingSet(this.signature.size() * 2);
+//		for (String name : this.signature) {
+//			Binding binding = createBinding(name, ontopBindingSet, this.bindingNames);
+//			if (binding != null) {
+//				set.addBinding(binding);
+//			}
+//		}
 
-        MapBindingSet set = new MapBindingSet(this.signature.size() * 2);
-		for (String name : this.signature) {
-			Binding binding = createBinding(name, ontopBindingSet, this.bindingNames);
-			if (binding != null) {
-				set.addBinding(binding);
-			}
-		}
-		return set;
 	}
 
 	@Override
@@ -86,8 +91,8 @@ public class OntopTupleQueryResult implements TupleQueryResult {
 	}
 	
 
-	private Binding createBinding(String bindingName, OntopBindingSet set, Set<String> bindingnames) {
-		OntopRDF4JBindingSet bset = new OntopRDF4JBindingSet(set, bindingnames);
+	private Binding createBinding(String bindingName, OntopBindingSet set) {
+		OntopRDF4JBindingSet bset = new OntopRDF4JBindingSet(set);
 		return bset.getBinding(bindingName);
 	}
 

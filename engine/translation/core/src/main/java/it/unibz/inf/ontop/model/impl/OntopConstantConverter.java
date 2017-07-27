@@ -2,15 +2,13 @@ package it.unibz.inf.ontop.model.impl;
 
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
+import it.unibz.inf.ontop.model.MainTypeLangValues;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.term.Constant;
 
 import java.net.URISyntaxException;
 import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -26,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
-public class OntopConstantRetrieverFromJdbcResultSet {
+public class OntopConstantConverter {
 
     private AtomicInteger bnodeCounter;
     private IRIDictionary iriDictionary;
@@ -46,8 +44,8 @@ public class OntopConstantRetrieverFromJdbcResultSet {
         formatter.setDecimalFormatSymbols(symbol);
     }
 
-    public OntopConstantRetrieverFromJdbcResultSet(DBMetadata dbMetadata,
-                                                   Optional<IRIDictionary> iriDictionary) {
+    public OntopConstantConverter(DBMetadata dbMetadata,
+                                  Optional<IRIDictionary> iriDictionary) {
         this.iriDictionary = iriDictionary.orElse(null);
         String vendor =  dbMetadata.getDriverName();
         isOracle = vendor.contains("Oracle");
@@ -72,22 +70,25 @@ public class OntopConstantRetrieverFromJdbcResultSet {
         bnodeMap = new HashMap<>(1000);
     }
 
-    public Constant getConstantFromJDBC(ResultSet jdbcResultSet, int column) throws OntopResultConversionException, OntopConnectionException {
-        column = column * 3; // recall that the real SQL result set has 3
+    public Constant getConstantFromJDBC(MainTypeLangValues cell) throws OntopResultConversionException {
+        //column = column * 3; // recall that the real SQL result set has 3
         // columns per value. From each group of 3 the actual value is the
         // 3rd column, the 2nd is the language, the 1st is the type code (an integer)
 
         Constant result = null;
-        String value = "";
+        Object value = "";
+        String stringValue = "";
 
         try {
-            value = jdbcResultSet.getString(column);
+            value = cell.getMainValue();
 
             if (value == null) {
                 return null;
             }
             else {
-                int t = jdbcResultSet.getInt(column - 2);
+                stringValue = String.valueOf(value);
+
+                int t = cell.getTypeValue();
                 Predicate.COL_TYPE type = Predicate.COL_TYPE.getQuestType(t);
                 if (type == null)
                     throw new OntopResultConversionException("typeCode unknown: " + t);
@@ -100,22 +101,22 @@ public class OntopConstantRetrieverFromJdbcResultSet {
                     case OBJECT:
                         if (iriDictionary != null) {
                             try {
-                                Integer id = Integer.parseInt(value);
-                                value = iriDictionary.getURI(id);
+                                Integer id = Integer.parseInt(stringValue);
+                                stringValue = iriDictionary.getURI(id);
                             }
                             catch (NumberFormatException e) {
                                 // If its not a number, then it has to be a URI, so
                                 // we leave realValue as it is.
                             }
                         }
-                        result = DATA_FACTORY.getConstantURI(value.trim());
+                        result = DATA_FACTORY.getConstantURI(stringValue.trim());
                         break;
 
                     case BNODE:
-                        String scopedLabel = this.bnodeMap.get(value);
+                        String scopedLabel = this.bnodeMap.get(stringValue);
                         if (scopedLabel == null) {
                             scopedLabel = "b" + bnodeCounter.getAndIncrement();
-                            bnodeMap.put(value, scopedLabel);
+                            bnodeMap.put(stringValue, scopedLabel);
                         }
                         result = DATA_FACTORY.getConstantBNode(scopedLabel);
                         break;
@@ -127,33 +128,35 @@ public class OntopConstantRetrieverFromJdbcResultSet {
                         // The constant is a literal, we need to find if its
                         // rdfs:Literal or a normal literal and construct it
                         // properly.
-                        String language = jdbcResultSet.getString(column - 1);
+                        String language = cell.getLangValue();
                         if (language == null || language.trim().equals(""))
-                            result = DATA_FACTORY.getConstantLiteral(value);
+                            result = DATA_FACTORY.getConstantLiteral(stringValue);
                         else
-                            result = DATA_FACTORY.getConstantLiteral(value, language);
+                            result = DATA_FACTORY.getConstantLiteral(stringValue, language);
                         break;
 
                     case BOOLEAN:
-                        boolean bvalue = jdbcResultSet.getBoolean(column);
+                        // TODO(xiao): more careful
+                        boolean bvalue = Boolean.valueOf(stringValue);
+                        //boolean bvalue = (Boolean)value;
                         result = DATA_FACTORY.getBooleanConstant(bvalue);
                         break;
 
                     case DOUBLE:
-                        double d = jdbcResultSet.getDouble(column);
+                        double d = Double.valueOf(stringValue);
                         String s = formatter.format(d); // format name into correct double representation
                         result = DATA_FACTORY.getConstantLiteral(s, type);
                         break;
 
                     case INT:
-                        int intValue = jdbcResultSet.getInt(column);
-                        result = DATA_FACTORY.getConstantLiteral(String.valueOf(intValue), type);
+                        //int intValue = (Integer)value;
+                        result = DATA_FACTORY.getConstantLiteral(stringValue, type);
                         break;
 
                     case LONG:
                     case UNSIGNED_INT:
-                        long longValue = jdbcResultSet.getLong(column);
-                        result = DATA_FACTORY.getConstantLiteral(String.valueOf(longValue), type);
+                        //long longValue = (Long)value;
+                        result = DATA_FACTORY.getConstantLiteral(stringValue, type);
                         break;
 
                     case INTEGER:
@@ -164,10 +167,10 @@ public class OntopConstantRetrieverFromJdbcResultSet {
                         /**
                          * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
                          */
-                        int dotIndex = value.indexOf(".");
+                        int dotIndex = stringValue.indexOf(".");
                         String integerString = dotIndex >= 0
-                                ? value.substring(0, dotIndex)
-                                : value;
+                                ? stringValue.substring(0, dotIndex)
+                                : stringValue;
                         result = DATA_FACTORY.getConstantLiteral(integerString, type);
                         break;
 
@@ -178,13 +181,13 @@ public class OntopConstantRetrieverFromJdbcResultSet {
                          Oracle "dd-MMM-yy HH:mm:ss,SSSSSS" FOR ORACLE DRIVER 12.1.0.2
                          To overcome the problem we create a new Timestamp */
                         try {
-                            Timestamp tsvalue = jdbcResultSet.getTimestamp(column);
-                            result = DATA_FACTORY.getConstantLiteral(tsvalue.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME);
+                            //Timestamp tsvalue = (Timestamp)value;
+                            result = DATA_FACTORY.getConstantLiteral(stringValue.replace(' ', 'T'), Predicate.COL_TYPE.DATETIME);
                         }
                         catch (Exception e) {
                             if (isMsSQL || isOracle) {
                                 try {
-                                    java.util.Date date = dateFormat.parse(value);
+                                    java.util.Date date = dateFormat.parse(stringValue);
                                     Timestamp ts = new Timestamp(date.getTime());
                                     result = DATA_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME);
                                 }
@@ -199,16 +202,16 @@ public class OntopConstantRetrieverFromJdbcResultSet {
 
                     case DATETIME_STAMP:
                         if (!isOracle) {
-                            result = DATA_FACTORY.getConstantLiteral(value.replaceFirst(" ", "T").replaceAll(" ", ""), Predicate.COL_TYPE.DATETIME_STAMP);
+                            result = DATA_FACTORY.getConstantLiteral(stringValue.replaceFirst(" ", "T").replaceAll(" ", ""), Predicate.COL_TYPE.DATETIME_STAMP);
                         }
                         else {
 						/* oracle has the type timestamptz. The format returned by getString is not a valid xml format
 						we need to transform it. We first take the information about the timezone value, that is lost
 						during the conversion in java.util.Date and then we proceed with the conversion. */
                             try {
-                                int indexTimezone = value.lastIndexOf(" ");
-                                String timezone = value.substring(indexTimezone+1);
-                                String datetime = value.substring(0, indexTimezone);
+                                int indexTimezone = stringValue.lastIndexOf(" ");
+                                String timezone = stringValue.substring(indexTimezone+1);
+                                String datetime = stringValue.substring(0, indexTimezone);
 
                                 java.util.Date date = dateFormat.parse(datetime);
                                 Timestamp ts = new Timestamp(date.getTime());
@@ -222,13 +225,13 @@ public class OntopConstantRetrieverFromJdbcResultSet {
 
                     case DATE:
                         if (!isOracle) {
-                            Date dvalue = jdbcResultSet.getDate(column);
+                            Date dvalue = (Date)value;
                             result = DATA_FACTORY.getConstantLiteral(dvalue.toString(), Predicate.COL_TYPE.DATE);
                         }
                         else {
                             try {
                                 DateFormat df = new SimpleDateFormat("dd-MMM-yy" ,  Locale.ENGLISH);
-                                java.util.Date date = df.parse(value);
+                                java.util.Date date = df.parse(stringValue);
                             }
                             catch (ParseException e) {
                                 throw new OntopResultConversionException(e);
@@ -238,12 +241,12 @@ public class OntopConstantRetrieverFromJdbcResultSet {
                         break;
 
                     case TIME:
-                        Time tvalue = jdbcResultSet.getTime(column);
+                        Time tvalue = (Time)value;
                         result = DATA_FACTORY.getConstantLiteral(tvalue.toString().replace(' ', 'T'), Predicate.COL_TYPE.TIME);
                         break;
 
                     default:
-                        result = DATA_FACTORY.getConstantLiteral(value, type);
+                        result = DATA_FACTORY.getConstantLiteral(stringValue, type);
                 }
             }
         }
@@ -268,8 +271,8 @@ public class OntopConstantRetrieverFromJdbcResultSet {
                 throw ex;
             }
         }
-        catch (SQLException e) {
-            throw new OntopConnectionException(e);
+        catch (Exception e) {
+            throw new OntopResultConversionException(e);
         }
 
         return result;

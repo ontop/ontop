@@ -1,78 +1,109 @@
 package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.OntopBinding;
 import it.unibz.inf.ontop.model.OntopBindingSet;
+import it.unibz.inf.ontop.model.MainTypeLangValues;
 import it.unibz.inf.ontop.model.term.Constant;
 
-import java.sql.ResultSet;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public class SimpleOntopBindingSet implements OntopBindingSet{
+import static java.util.stream.Collectors.joining;
 
-    private final ResultSet jdbcResultSet;
+public class SimpleOntopBindingSet implements OntopBindingSet {
+
+    private final List<MainTypeLangValues> row;
     private final List<String> signature;
     private final Map<String, Integer> columnMap;
-    private final OntopConstantRetrieverFromJdbcResultSet constantRetriever;
+    private final OntopConstantConverter constantRetriever;
 
-    public SimpleOntopBindingSet(ResultSet jdbcResultSet, List<String> signature, Map<String, Integer> columnMap,
-                                 OntopConstantRetrieverFromJdbcResultSet constantRetriever) {
-        this.jdbcResultSet = jdbcResultSet;
+    public SimpleOntopBindingSet(List<MainTypeLangValues> row, List<String> signature, Map<String, Integer> columnMap,
+                                 OntopConstantConverter constantRetriever) {
+        this.row = row;
         this.signature = signature;
         this.columnMap = columnMap;
         this.constantRetriever = constantRetriever;
     }
 
     @Override
+    @Nonnull
     public Iterator<OntopBinding> iterator() {
-        final ImmutableList.Builder<OntopBinding> bindingsBuilder = ImmutableList.builder();
-        for(String name: signature){
-            try {
-                bindingsBuilder.add(getBinding(name));
-            } catch (OntopConnectionException | OntopResultConversionException e) {
-                // ugly bit
-                throw new RuntimeException(e);
-            }
-        }
+        ImmutableList<OntopBinding> bindings = computeAllBindings();
+        return bindings.iterator();
+    }
 
-        return bindingsBuilder.build().iterator();
+    private ImmutableList<OntopBinding> computeAllBindings() {
+        final ImmutableList.Builder<OntopBinding> bindingsBuilder = ImmutableList.builder();
+        for (String name : signature) {
+            final OntopBinding binding = getBinding(name);
+            if (binding != null)
+                bindingsBuilder.add(binding);
+        }
+        return bindingsBuilder.build();
     }
 
     @Override
-    public List<String> getBidingNames() {
-        return this.signature;
+    public List<String> getBindingNames() {
+        return this.signature.stream().filter(this::hasBinding).collect(Collectors.toList());
     }
 
     /**
-     *
      * @param column 1-based
-     *
      */
     @Override
-    public OntopBinding getBinding(int column) throws OntopConnectionException, OntopResultConversionException {
-        return new SimpleOntopBinding(signature.get(column-1), getConstant(column));
+    @Nullable
+    public OntopBinding getBinding(int column) {
+        final MainTypeLangValues cell = row.get(column - 1);
+        if (cell.getMainValue() == null) {
+            return null;
+        } else {
+            return new SimpleOntopBinding(signature.get(column - 1), cell, constantRetriever);
+        }
+
     }
 
     @Override
-    public OntopBinding getBinding(String name) throws OntopConnectionException, OntopResultConversionException {
-        return new SimpleOntopBinding(name, getConstant(name));
+    @Nullable
+    public OntopBinding getBinding(String name) {
+        return getBinding(columnMap.get(name));
+    }
+
+    @Override
+    public boolean hasBinding(String bindingName) {
+        return signature.contains(bindingName) &&
+                row.get(columnMap.get(bindingName) - 1).getMainValue() != null;
     }
 
     /***
      * Returns the constant at column "column" recall that columns start at index 1.
      */
     @Override
-    public Constant getConstant(int column) throws OntopConnectionException, OntopResultConversionException {
-        return constantRetriever.getConstantFromJDBC(jdbcResultSet, column);
+    @Nullable
+    public Constant getConstant(int column) throws OntopResultConversionException {
+        final MainTypeLangValues cell = row.get(column - 1);
+        if (cell.getMainValue() == null) {
+            return null;
+        } else {
+            return constantRetriever.getConstantFromJDBC(cell);
+        }
     }
 
     @Override
-    public Constant getConstant(String name) throws OntopConnectionException, OntopResultConversionException {
+    @Nullable
+    public Constant getConstant(String name) throws OntopResultConversionException {
         Integer columnIndex = columnMap.get(name);
         return getConstant(columnIndex);
+    }
+
+    @Override
+    public String toString() {
+        return computeAllBindings().stream().map(OntopBinding::toString)
+                .collect(joining(",", "[", "]"));
     }
 }

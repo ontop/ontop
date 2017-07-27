@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.model;
 
-import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Constant;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,7 +12,7 @@ public interface OntopBindingSet extends Iterable<OntopBinding> {
     @Override
     Iterator<OntopBinding> iterator();
 
-    List<String> getBidingNames();
+    List<String> getBindingNames();
 
     /***
      * Returns the constant at column "column" recall that columns start at index 1.
@@ -20,11 +20,25 @@ public interface OntopBindingSet extends Iterable<OntopBinding> {
      * @param column The column index of the value to be returned, start at 1
      * @return a constant
      */
-    Constant getConstant(int column) throws OntopConnectionException, OntopResultConversionException;
+    @Nullable
+    Constant getConstant(int column) throws OntopResultConversionException;
 
-    Constant getConstant(String name) throws OntopConnectionException, OntopResultConversionException;
+    @Nullable
+    Constant getConstant(String name) throws OntopResultConversionException;
 
-    OntopBinding getBinding(int column) throws OntopConnectionException, OntopResultConversionException;
+    @Nullable
+    OntopBinding getBinding(int column);
 
-    OntopBinding getBinding(String name) throws OntopConnectionException, OntopResultConversionException;
+    @Nullable
+    OntopBinding getBinding(String name);
+
+    /**
+     * Checks whether this BindingSet has a binding with the specified name.
+     *
+     * @param bindingName
+     *        The name of the binding.
+     * @return <tt>true</tt> if this BindingSet has a binding with the specified name, <tt>false</tt>
+     *         otherwise.
+     */
+    boolean hasBinding(String bindingName);
 }

@@ -24,12 +24,15 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.model.JDBCRowReader;
 import it.unibz.inf.ontop.model.OntopBindingSet;
+import it.unibz.inf.ontop.model.MainTypeLangValues;
 import it.unibz.inf.ontop.model.TupleResultSet;
-import it.unibz.inf.ontop.model.impl.OntopConstantRetrieverFromJdbcResultSet;
+import it.unibz.inf.ontop.model.impl.OntopConstantConverter;
 import it.unibz.inf.ontop.model.impl.SimpleOntopBindingSet;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,89 +40,96 @@ import java.util.Optional;
 
 public class QuestTupleResultSet implements TupleResultSet {
 
-	private final ResultSet rs;
+    private final ResultSet rs;
 
-	private final List<String> signature;
+    private final List<String> signature;
 
-	private final Map<String, Integer> columnMap;
+    private final Map<String, Integer> columnMap;
 
-    private final OntopConstantRetrieverFromJdbcResultSet ontopConstantRetriever;
+    private final OntopConstantConverter ontopConstantRetriever;
 
 
     /***
-	 * Constructs an OBDA statement from an SQL statement, a signature described
-	 * by terms and a statement. The statement is maintained only as a reference
-	 * for closing operations.
-	 * 
-	 * @param set
-	 * @param signature
-	 *            A list of terms that determines the type of the columns of
-	 *            this results set.
-	 */
-	public QuestTupleResultSet(ResultSet set, List<String> signature,
+     * Constructs an OBDA statement from an SQL statement, a signature described
+     * by terms and a statement. The statement is maintained only as a reference
+     * for closing operations.
+     *
+     * @param set
+     * @param signature
+     *            A list of terms that determines the type of the columns of
+     *            this results set.
+     */
+    public QuestTupleResultSet(ResultSet set, List<String> signature,
                                DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) {
-		this.rs = set;
+        this.rs = set;
 
-		this.signature = signature;
-		
-		columnMap = new HashMap<>(signature.size() * 2);
+        this.signature = signature;
 
-		for (int j = 1; j <= signature.size(); j++) {
-			columnMap.put(signature.get(j - 1), j);
-		}
+        columnMap = new HashMap<>(signature.size() * 2);
 
-        this.ontopConstantRetriever = new OntopConstantRetrieverFromJdbcResultSet(dbMetadata, iriDictionary);
+        for (int j = 1; j <= signature.size(); j++) {
+            columnMap.put(signature.get(j - 1), j);
+        }
+
+        this.ontopConstantRetriever = new OntopConstantConverter(dbMetadata, iriDictionary);
     }
 
     @Override
     public int getColumnCount() {
-		return signature.size();
-	}
-
-	@Override
-    public int getFetchSize() throws OntopConnectionException {
-		try {
-			return rs.getFetchSize();
-		} catch (Exception e) {
-			throw new OntopConnectionException(e.getMessage());
-		}
-	}
+        return signature.size();
+    }
 
     @Override
-    public OntopBindingSet next() {
-        return new SimpleOntopBindingSet(rs, signature, columnMap, ontopConstantRetriever);
+    public int getFetchSize() throws OntopConnectionException {
+        try {
+            return rs.getFetchSize();
+        } catch (Exception e) {
+            throw new OntopConnectionException(e.getMessage());
+        }
+    }
+
+    @Override
+    public OntopBindingSet next() throws OntopConnectionException {
+        JDBCRowReader rowReader = new JDBCRowReader();
+
+        try {
+            final List<MainTypeLangValues> cells = rowReader.read(rs, getColumnCount());
+            return new SimpleOntopBindingSet(cells, signature, columnMap, ontopConstantRetriever);
+        } catch (SQLException e) {
+            throw new OntopConnectionException(e);
+        }
+
     }
 
     @Override
     public List<String> getSignature() {
-		return signature;
-	}
+        return signature;
+    }
 
-	@Override
+    @Override
     public boolean hasNext() throws OntopConnectionException {
-		try {
-		    // FIXME(xiao): don't call rs.next() twice when calling this.hasNext() twice
-			return rs.next();
-		} catch (Exception e) {
-			throw new OntopConnectionException(e);
-		}
-	}
+        try {
+            // FIXME(xiao): don't call rs.next() twice when calling this.hasNext() twice
+            return rs.next();
+        } catch (Exception e) {
+            throw new OntopConnectionException(e);
+        }
+    }
 
-	@Override
+    @Override
     public void close() throws OntopConnectionException {
-		try {
-			rs.close();
-		} catch (Exception e) {
-			throw new OntopConnectionException(e);
-		}
-	}
+        try {
+            rs.close();
+        } catch (Exception e) {
+            throw new OntopConnectionException(e);
+        }
+    }
 
     Object getRawObject(int column) throws OntopConnectionException {
         try {
             Object realValue = rs.getObject(column);
             return realValue;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new OntopConnectionException(e);
         }
     }

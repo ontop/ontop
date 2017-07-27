@@ -20,103 +20,96 @@ package it.unibz.inf.ontop.rdf4j.query;
  * #L%
  */
 
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.OntopBindingSet;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.rdf4j.RDF4JHelper;
+import org.apache.commons.rdf.rdf4j.RDF4J;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.AbstractBindingSet;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.impl.SimpleBinding;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class OntopRDF4JBindingSet implements BindingSet {
+public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingSet {
 
     private static final long serialVersionUID = -8455466574395305166L;
 
-//    private TupleResultSet set = null;
-    private OntopBindingSet set;
+    private OntopBindingSet ontopBindingSet;
 
-    private int count = 0;
-    private final Set<String> bindingNames;
-
-    public OntopRDF4JBindingSet(OntopBindingSet set, Set<String> bindingNames) {
-        this.bindingNames = bindingNames;
-//		this.signature = signature;
-        this.set = set;
-        this.count = bindingNames.size();
+    public OntopRDF4JBindingSet(OntopBindingSet ontopBindingSet) {
+        this.ontopBindingSet = ontopBindingSet;
     }
 
     @Override
+    @Nullable
     public Binding getBinding(String bindingName) {
-        // return the Binding with bindingName
-        return createBinding(bindingName);
+        if (!hasBinding(bindingName)) {
+            return null;
+        } else {
+            final Value value = getValue(bindingName);
+            return new SimpleBinding(bindingName, value);
+        }
     }
 
     @Override
     public Set<String> getBindingNames() {
-        return bindingNames;
+        return new LinkedHashSet<>(ontopBindingSet.getBindingNames());
     }
 
     @Override
+    @Nullable
     public Value getValue(String bindingName) {
-        return createBinding(bindingName).getValue();
-    }
-
-    private Binding createBinding(String bindingName) {
-        Value value = null;
-        try {
-            if (hasBinding(bindingName)) {
-//				int column = set.getSignature().indexOf(bindingName) + 1;
-                Constant c = set.getConstant(bindingName);
-                if (c == null) {
-                    return null;
-                }
-                else {
-                    if (c instanceof ValueConstant) {
-                        value = RDF4JHelper.getLiteral((ValueConstant)c);
-                    }
-                    else {
-                        value = RDF4JHelper.getResource((ObjectConstant)c);
-                    }
-                }
+        if (!hasBinding(bindingName)) {
+            return null;
+        } else {
+            try {
+                final Constant constant = ontopBindingSet.getConstant(bindingName);
+                return RDF4JHelper.getValue(constant);
+            } catch (OntopResultConversionException e) {
+                throw new RuntimeException(e);
             }
-            return new SimpleBinding(bindingName, value);
         }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-//		return null;
     }
 
     @Override
     public boolean hasBinding(String bindingName) {
-        return bindingNames.contains(bindingName);
+        return ontopBindingSet.hasBinding(bindingName);
     }
 
     @Override
+    @Nonnull
     public Iterator<Binding> iterator() {
-
-        List<Binding> allBindings = new LinkedList<Binding>();
-        List<String> bindings;
-        try {
-            bindings = set.getBidingNames();
-            for (String s : bindings)
-                allBindings.add(createBinding(s));
-        } catch (Exception e) {
-            e.printStackTrace();
+        List<Binding> allBindings = new LinkedList<>();
+        List<String> names = ontopBindingSet.getBindingNames();
+        for (String s : names) {
+            if (ontopBindingSet.hasBinding(s)) {
+                allBindings.add(getBinding(s));
+            }
         }
-
         return allBindings.iterator();
     }
 
     @Override
     public int size() {
-        return count;
+        return ontopBindingSet.getBindingNames().size();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return super.equals(other);
     }
 }
