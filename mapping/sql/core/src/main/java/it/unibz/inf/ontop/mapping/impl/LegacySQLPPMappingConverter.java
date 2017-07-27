@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
+import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.impl.LegacyIsNotNullDatalogMappingFiller;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;

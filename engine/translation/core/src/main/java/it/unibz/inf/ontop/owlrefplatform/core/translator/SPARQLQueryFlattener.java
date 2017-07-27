@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
+import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;

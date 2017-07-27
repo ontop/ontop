@@ -10,8 +10,8 @@ import it.unibz.inf.ontop.iq.tools.QueryUnionSplitter;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
+import it.unibz.inf.ontop.datalog.DatalogNormalizer;
+import it.unibz.inf.ontop.datalog.IntermediateQueryToDatalogTranslator;
 import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 

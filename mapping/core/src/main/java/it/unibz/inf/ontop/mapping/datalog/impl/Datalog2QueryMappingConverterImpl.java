@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.datalog.DatalogProgram2QueryConverter;
+import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.datalog.impl.DatalogRule2QueryConverter.convertDatalogRule;
+import static it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter.convertDatalogRule;
 
 /**
  * Convert mapping assertions from Datalog to IntermediateQuery

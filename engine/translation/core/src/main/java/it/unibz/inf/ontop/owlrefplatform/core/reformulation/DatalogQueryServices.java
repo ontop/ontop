@@ -22,10 +22,11 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
+import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 
 import java.util.ArrayList;
 import java.util.Collections;

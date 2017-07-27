@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  */
 
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.model.term.functionsymbol.BuiltinPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
@@ -31,7 +32,6 @@ import it.unibz.inf.ontop.ontology.DataSomeValuesFrom;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.ObjectSomeValuesFrom;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;

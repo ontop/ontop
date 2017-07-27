@@ -1,29 +1,29 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
-import it.unibz.inf.ontop.executor.construction.ConstructionNodeCleaningExecutor;
-import it.unibz.inf.ontop.executor.expression.PushDownBooleanExpressionExecutor;
-import it.unibz.inf.ontop.executor.expression.PushUpBooleanExpressionExecutor;
-import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
-import it.unibz.inf.ontop.executor.join.InnerJoinExecutor;
-import it.unibz.inf.ontop.executor.leftjoin.LeftJoinExecutor;
-import it.unibz.inf.ontop.executor.merging.QueryMergingExecutor;
-import it.unibz.inf.ontop.executor.projection.ProjectionShrinkingExecutor;
-import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
-import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
-import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
-import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutor;
-import it.unibz.inf.ontop.executor.union.FlattenUnionExecutor;
-import it.unibz.inf.ontop.executor.union.UnionLiftExecutor;
-import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
+import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
+import it.unibz.inf.ontop.iq.executor.expression.PushDownBooleanExpressionExecutor;
+import it.unibz.inf.ontop.iq.executor.expression.PushUpBooleanExpressionExecutor;
+import it.unibz.inf.ontop.iq.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
+import it.unibz.inf.ontop.iq.executor.join.InnerJoinExecutor;
+import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinExecutor;
+import it.unibz.inf.ontop.iq.executor.merging.QueryMergingExecutor;
+import it.unibz.inf.ontop.iq.executor.projection.ProjectionShrinkingExecutor;
+import it.unibz.inf.ontop.iq.executor.pullout.PullVariableOutOfDataNodeExecutor;
+import it.unibz.inf.ontop.iq.executor.pullout.PullVariableOutOfSubTreeExecutor;
+import it.unibz.inf.ontop.iq.executor.substitution.SubstitutionPropagationExecutor;
+import it.unibz.inf.ontop.iq.executor.truenode.TrueNodeRemovalExecutor;
+import it.unibz.inf.ontop.iq.executor.union.FlattenUnionExecutor;
+import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
+import it.unibz.inf.ontop.iq.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
-import it.unibz.inf.ontop.iq.transform.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.InnerJoinOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.JoinLikeOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.LeftJoinOptimizer;
-import it.unibz.inf.ontop.iq.datalog.DatalogProgram2QueryConverter;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.InnerJoinOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.LeftJoinOptimizer;
+import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.iq.tools.QueryUnionSplitter;
 
 public class OntopOptimizationModule extends OntopAbstractModule {

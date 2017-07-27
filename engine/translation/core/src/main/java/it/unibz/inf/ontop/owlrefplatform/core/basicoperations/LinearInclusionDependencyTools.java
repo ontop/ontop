@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
+import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.ontology.*;
