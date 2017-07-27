@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 import java.sql.ResultSet;
 import java.text.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class QuestTupleResultSet implements TupleResultSet {
 
@@ -40,7 +41,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 	private final Map<String, Integer> columnMap;
 	private final Map<String, String> bnodeMap;
 
-	private int bnodeCounter = 0;
+	private AtomicInteger bnodeCounter = new AtomicInteger();
 
 	@Nullable
 	private final IRIDictionary iriDictionary;
@@ -111,7 +112,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 
     @Override
     public OntopBindingSet next() {
-        return new LazyOntopBindingSet(rs, signature, isMsSQL, isOracle, dateFormat, iriDictionary, bnodeMap, columnMap);
+        return new LazyOntopBindingSet(rs, signature, columnMap, isMsSQL, isOracle, iriDictionary, dateFormat, bnodeMap, bnodeCounter);
     }
 
     @Override

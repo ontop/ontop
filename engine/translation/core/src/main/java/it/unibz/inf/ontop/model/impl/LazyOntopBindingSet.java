@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.Binding;
 import it.unibz.inf.ontop.model.OntopBindingSet;
 import it.unibz.inf.ontop.model.predicate.Predicate;
 import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.owlrefplatform.core.QueryCache;
 
 import java.net.URISyntaxException;
 import java.sql.Date;
@@ -24,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
@@ -34,9 +34,7 @@ public class LazyOntopBindingSet implements OntopBindingSet{
     private IRIDictionary iriDictionary;
     private Map<String, String> bnodeMap;
     private Map<String, Integer> columnMap;
-
-    //FIXME(xiao): should be shared among multi instances
-    private int bnodeCounter;
+    private AtomicInteger bnodeCounter;
 
     private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
@@ -52,10 +50,8 @@ public class LazyOntopBindingSet implements OntopBindingSet{
     private final DateFormat dateFormat;
 
 
-    public LazyOntopBindingSet(ResultSet jdbcResultSet, List<String> signature, boolean isMsSQL, boolean isOracle,
-                               DateFormat dateFormat,
-                               IRIDictionary iriDictionary,
-                               Map<String, String> bnodeMap, Map<String, Integer> columnMap) {
+    public LazyOntopBindingSet(ResultSet jdbcResultSet, List<String> signature, Map<String, Integer> columnMap, boolean isMsSQL, boolean isOracle,
+                               IRIDictionary iriDictionary, DateFormat dateFormat, Map<String, String> bnodeMap, AtomicInteger bnodeCounter) {
         this.jdbcResultSet = jdbcResultSet;
         this.signature = signature;
         this.iriDictionary = iriDictionary;
@@ -64,6 +60,7 @@ public class LazyOntopBindingSet implements OntopBindingSet{
         this.isMsSQL = isMsSQL;
         this.isOracle = isOracle;
         this.dateFormat = dateFormat;
+        this.bnodeCounter = bnodeCounter;
     }
 
     @Override
@@ -135,8 +132,7 @@ public class LazyOntopBindingSet implements OntopBindingSet{
                     case BNODE:
                         String scopedLabel = this.bnodeMap.get(value);
                         if (scopedLabel == null) {
-                            scopedLabel = "b" + bnodeCounter;
-                            bnodeCounter += 1;
+                            scopedLabel = "b" + bnodeCounter.getAndIncrement();
                             bnodeMap.put(value, scopedLabel);
                         }
                         result = DATA_FACTORY.getConstantBNode(scopedLabel);
