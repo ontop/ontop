@@ -137,7 +137,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
              OntopOWLStatement st = conn.createStatement();
              QuestOWLResultSet rs1 = st.executeSelectQuery(query1);
         ) {
-            assertTrue(rs1.nextRow());
+            assertTrue(rs1.hasNext());
 			OWLIndividual ind = rs1.getOWLIndividual("x");
 			//OWLIndividual ind2 = rs.getOWLIndividual("y");
 			//OWLLiteral val = rs.getOWLLiteral("z");

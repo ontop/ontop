@@ -152,7 +152,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 			// Inapplicable because TABLE1 is used in the view name
 			//assertEquals(num_joins, 0);
 			QuestOWLResultSet rs = st.executeSelectQuery(query);
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			val = rs.getOWLLiteral("z");
 			assertEquals("<http://it.unibz.inf/obda/test/simple#uri%201>", ind1.toString());

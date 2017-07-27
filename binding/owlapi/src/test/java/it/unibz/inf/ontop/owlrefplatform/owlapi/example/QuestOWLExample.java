@@ -70,7 +70,7 @@ public class QuestOWLExample {
             long t1 = System.currentTimeMillis();
             QuestOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
             int columnSize = rs.getColumnCount();
-            while (rs.nextRow()) {
+            while (rs.hasNext()) {
                 for (int idx = 1; idx <= columnSize; idx++) {
                     OWLObject binding = rs.getOWLObject(idx);
                     System.out.print(ToStringRenderer.getInstance().getRendering(binding) + ", ");

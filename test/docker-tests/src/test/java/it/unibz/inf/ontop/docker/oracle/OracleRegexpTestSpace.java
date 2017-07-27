@@ -45,11 +45,11 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 		String retval;
 		QuestOWLResultSet rs = st.executeTuple(query);
 		if(hasResult){
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 			OWLIndividual ind1 =	rs.getOWLIndividual("country")	 ;
 			retval = ind1.toString();
 		} else {
-			assertFalse(rs.nextRow());
+			assertFalse(rs.hasNext());
 			retval = "";
 		}
 

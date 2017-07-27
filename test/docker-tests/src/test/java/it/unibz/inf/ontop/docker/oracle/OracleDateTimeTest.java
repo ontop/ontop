@@ -46,11 +46,11 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 		String retval;
 		QuestOWLResultSet rs = st.executeTuple(query);
 		if(hasResult){
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 			OWLObject ind1 =	rs.getOWLObject("y")	 ;
 			retval = ind1.toString();
 		} else {
-			assertFalse(rs.nextRow());
+			assertFalse(rs.hasNext());
 			retval = "";
 		}
 

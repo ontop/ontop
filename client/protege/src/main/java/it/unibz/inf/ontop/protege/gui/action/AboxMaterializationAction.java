@@ -23,7 +23,9 @@ package it.unibz.inf.ontop.protege.gui.action;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLMaterializedGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
@@ -208,18 +210,24 @@ public class AboxMaterializationAction extends ProtegeAction {
 				}
 
 				OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
+				OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
+				MaterializationParams params = MaterializationParams.defaultBuilder()
+						.enableDBResultsStreaming(DO_STREAM_RESULTS)
+						.build();
+				;
 
-				try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(configuration, DO_STREAM_RESULTS)) {
+				try (OntopOWLMaterializedGraphResultSet graphResultSet = materializer.materialize(configuration, params)) {
 
-					Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
+					Set<OWLAxiom> setAxioms = Sets.newHashSet();
+					while(graphResultSet.hasNext())
+						setAxioms.add(graphResultSet.next());
 
-					Set<OWLAxiom> setAxioms = Sets.newHashSet(iterator);
 					manager.addAxioms(ontology, setAxioms);
 
 					manager.saveOntology(ontology, ontoFormat, new WriterDocumentTarget(fileWriter));
 
-					count = materializer.getTriplesCount();
-					vocab = materializer.getVocabularySize();
+					count = graphResultSet.getTripleCountSoFar();
+					vocab = graphResultSet.getSelectedVocabulary().size();
 				}
 
 				fileWriter.close();
@@ -257,10 +265,14 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 				OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
 
+				MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
+						.enableDBResultsStreaming(DO_STREAM_RESULTS)
+						.build();
+				OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
+				OntopOWLMaterializedGraphResultSet graphResultSet = materializer.materialize(configuration, materializationParams);
 
-				OWLAPIMaterializer individuals = new OWLAPIMaterializer(configuration, DO_STREAM_RESULTS);
 				Container container = workspace.getRootPane().getParent();
-				final MaterializeAction action = new MaterializeAction(ontology, ontoManager, individuals, container);
+				final MaterializeAction action = new MaterializeAction(ontology, ontoManager, graphResultSet, container);
 
 				Thread th = new Thread("MaterializeDataInstances Thread") {
 					public void run() {

@@ -134,11 +134,11 @@ public class TMappingConcurrencyErrorFixTest{
 		String retval=null;
 		try {
 			QuestOWLResultSet rs = st.executeSelectQuery(query);
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 			OWLIndividual ind1 =	rs.getOWLIndividual("y")	 ;
 			retval = ind1.toString();
 			assertEquals("<http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#111>", retval);
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 			OWLIndividual ind2 =	rs.getOWLIndividual("y")	 ;
 			retval = ind2.toString();
 			assertEquals("<http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#112>", retval);

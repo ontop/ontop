@@ -133,7 +133,7 @@ public class DistinctResultSetTest { //
     private int executeQueryAssertResults(String query, OntopOWLStatement st) throws Exception {
         QuestOWLResultSet rs = st.executeTuple(query);
         int count = 0;
-        while (rs.nextRow()) {
+        while (rs.hasNext()) {
             count++;
             for (int i = 1; i <= rs.getColumnCount(); i++) {
 

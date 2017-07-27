@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.answering.input.impl;
 
 import it.unibz.inf.ontop.answering.input.ConstructQuery;
 import it.unibz.inf.ontop.answering.input.ConstructTemplate;
-import it.unibz.inf.ontop.model.GraphResultSet;
+import it.unibz.inf.ontop.model.SimpleGraphResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryLanguage;
@@ -10,7 +10,7 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 
 
-class RDF4JConstructQuery extends RDF4JInputQuery<GraphResultSet> implements ConstructQuery {
+class RDF4JConstructQuery extends RDF4JInputQuery<SimpleGraphResultSet> implements ConstructQuery {
     private final ConstructTemplate template;
 
     RDF4JConstructQuery(String queryString, ParsedQuery parsedQuery) {

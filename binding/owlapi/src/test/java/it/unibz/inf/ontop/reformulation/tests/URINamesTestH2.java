@@ -55,19 +55,6 @@ public class URINamesTestH2 {
 
 	private static Connection sqlConnection;
 
-
-	@Before
-	public void init() {
-		
-	}
-	
-	@After
-	public void after() {
-		
-	}
-	
-	
-
 	@BeforeClass
 	public static void setUp() throws Exception {
 
@@ -138,22 +125,13 @@ public class URINamesTestH2 {
 		try {
 
 			QuestOWLResultSet rs = st.executeTuple(query);
-			/*
-			 * boolean nextRow = rs.nextRow();
-			 */
-			// assertTrue(rs.nextRow());
 			int count = 0;
-			while (rs.nextRow()) {
+			while (rs.hasNext()) {
 				OWLObject ind1 = rs.getOWLObject("x");
 				System.out.println("Result " + ind1.toString());
 				count += 1;
 			}
 			Assert.assertTrue(count == numberOfResults);
-
-			/*
-			 * assertEquals("<uri1>", ind1.toString()); assertEquals("<uri1>",
-			 * ind2.toString()); assertEquals("\"value1\"", val.toString());
-			 */
 
 		} catch (Exception e) {
 			throw e;

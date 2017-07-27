@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.injection.impl.OntopMappingSQLAllConfigurationImpl;
-import org.eclipse.rdf4j.model.Model;
+import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -33,7 +33,7 @@ public interface OntopMappingSQLAllConfiguration extends OntopMappingSQLConfigur
 
         B r2rmlMappingReader(@Nonnull Reader mappingReader);
 
-        B r2rmlMappingGraph(@Nonnull Model rdfGraph);
+        B r2rmlMappingGraph(@Nonnull Graph rdfGraph);
 
         B basicImplicitConstraintFile(@Nonnull File constraintFile);
 

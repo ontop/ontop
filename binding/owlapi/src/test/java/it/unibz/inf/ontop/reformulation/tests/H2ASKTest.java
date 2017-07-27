@@ -108,7 +108,7 @@ public class H2ASKTest {
 		boolean retval;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			assertTrue(rs.nextRow());
+			assertTrue(rs.hasNext());
 			OWLLiteral ind1 = rs.getOWLLiteral("x");
 			retval = ind1.parseBoolean();
 		} catch (Exception e) {

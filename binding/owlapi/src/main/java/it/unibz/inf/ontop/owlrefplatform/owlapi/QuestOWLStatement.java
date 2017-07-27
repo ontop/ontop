@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 import it.unibz.inf.ontop.answering.input.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.BooleanResultSet;
-import it.unibz.inf.ontop.model.GraphResultSet;
+import it.unibz.inf.ontop.model.SimpleGraphResultSet;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.ClassAssertion;
@@ -154,7 +154,7 @@ public class QuestOWLStatement implements OntopOWLStatement {
 			throws OntopQueryEvaluationException, OntopConnectionException, OntopTranslationException,
 			OntopResultConversionException {
 
-		GraphResultSet resultSet = st.execute(query);
+		SimpleGraphResultSet resultSet = st.execute(query);
 		return createOWLIndividualAxioms(resultSet);
 	}
 
@@ -251,29 +251,28 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	private List<OWLAxiom> createOWLIndividualAxioms(GraphResultSet resultSet)
+	private List<OWLAxiom> createOWLIndividualAxioms(SimpleGraphResultSet resultSet)
 			throws OntopConnectionException, OntopResultConversionException {
 		
 		OWLAPIIndividualTranslator translator = new OWLAPIIndividualTranslator();
 		
-		List<OWLAxiom> axiomList = new ArrayList<OWLAxiom>();
+		List<OWLAxiom> axiomList = new ArrayList<>();
 		if (resultSet != null) {
 			while (resultSet.hasNext()) {
-				for (Assertion assertion : resultSet.next()) {
-					if (assertion instanceof ClassAssertion) {
-						OWLAxiom classAxiom = translator.translate((ClassAssertion) assertion);
-						axiomList.add(classAxiom);
-					} 
-					else if (assertion instanceof ObjectPropertyAssertion) {
-						OWLAxiom objectPropertyAxiom = translator.translate((ObjectPropertyAssertion) assertion);
-						axiomList.add(objectPropertyAxiom);
-					}
-					else if (assertion instanceof DataPropertyAssertion) {
-						OWLAxiom objectPropertyAxiom = translator.translate((DataPropertyAssertion) assertion);
-						axiomList.add(objectPropertyAxiom);							
-					} 
+				Assertion assertion = resultSet.next();
+				if (assertion instanceof ClassAssertion) {
+					OWLAxiom classAxiom = translator.translate((ClassAssertion) assertion);
+					axiomList.add(classAxiom);
 				}
-			}
+				else if (assertion instanceof ObjectPropertyAssertion) {
+					OWLAxiom objectPropertyAxiom = translator.translate((ObjectPropertyAssertion) assertion);
+					axiomList.add(objectPropertyAxiom);
+				}
+				else if (assertion instanceof DataPropertyAssertion) {
+					OWLAxiom objectPropertyAxiom = translator.translate((DataPropertyAssertion) assertion);
+					axiomList.add(objectPropertyAxiom);
+				}
+				}
 		}
 		return axiomList;
 	}

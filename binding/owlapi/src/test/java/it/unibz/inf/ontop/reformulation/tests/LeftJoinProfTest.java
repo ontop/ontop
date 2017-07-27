@@ -420,7 +420,7 @@ public class LeftJoinProfTest {
                 throw new IllegalStateException("A SQLExecutableQuery was expected");
             sql = ((SQLExecutableQuery)executableQuery).getSQL();
             QuestOWLResultSet rs = st.executeSelectQuery(query);
-            while (rs.nextRow()) {
+            while (rs.hasNext()) {
                 OWLLiteral ind1 = rs.getOWLLiteral("v");
                 // log.debug(ind1.toString());
                 if (ind1 != null) {

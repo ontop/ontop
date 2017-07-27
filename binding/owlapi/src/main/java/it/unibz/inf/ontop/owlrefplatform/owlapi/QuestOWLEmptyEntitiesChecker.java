@@ -232,7 +232,7 @@ public class QuestOWLEmptyEntitiesChecker {
 
 				try (QuestOWLResultSet rs = stm.executeSelectQuery(query)) {
 
-					if (!rs.nextRow()) {
+					if (!rs.hasNext()) {
 
 						nextConcept = entity;
 						log.debug( "Empty " + entity );

@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
+import org.apache.commons.rdf.api.Graph;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
@@ -82,7 +83,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
-                                                  Supplier<Optional<Model>> mappingGraphSupplier,
+                                                  Supplier<Optional<Graph>> mappingGraphSupplier,
                                                   Supplier<Optional<File>> constraintFileSupplier)
             throws OBDASpecificationException {
         return mappingConfiguration.loadSpecification(
@@ -107,7 +108,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
     Optional<SQLPPMapping> loadPPMapping(OntologySupplier ontologySupplier,
                                          Supplier<Optional<File>> mappingFileSupplier,
                                          Supplier<Optional<Reader>> mappingReaderSupplier,
-                                         Supplier<Optional<Model>> mappingGraphSupplier)
+                                         Supplier<Optional<Graph>> mappingGraphSupplier)
             throws MappingIOException, InvalidMappingException, DuplicateMappingException {
 
         if (options.ppMapping.isPresent()) {
@@ -125,7 +126,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
         if (optionalMappingReader.isPresent()) {
             return Optional.of(parser.parse(optionalMappingReader.get()));
         }
-        Optional<Model> optionalMappingGraph = mappingGraphSupplier.get();
+        Optional<Graph> optionalMappingGraph = mappingGraphSupplier.get();
         if (optionalMappingGraph.isPresent()) {
             return Optional.of(parser.parse(optionalMappingGraph.get()));
         }

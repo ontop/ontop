@@ -20,13 +20,12 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.ontology.AnnotationAssertion;
 import it.unibz.inf.ontop.ontology.ClassAssertion;
 import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
-import it.unibz.inf.ontop.model.term.BNode;
-import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.term.URIConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
@@ -69,6 +68,15 @@ public class OWLAPIIndividualTranslator {
 		return dataFactory.getOWLDataPropertyAssertionAxiom(property, subject, object);			
 	}
 
+	public OWLAnnotationAssertionAxiom translate(AnnotationAssertion opa) {
+		IRI roleIRI = IRI.create(opa.getProperty().getName());
+
+		OWLAnnotationProperty property = dataFactory.getOWLAnnotationProperty(roleIRI);
+		OWLAnnotationSubject subject = translateAnnotationSubject(opa.getSubject());
+		OWLAnnotationValue object = translateAnnotationValue(opa.getValue());
+		return dataFactory.getOWLAnnotationAssertionAxiom(property, subject, object);
+	}
+
 	/***
 	 * Translates from assertion objects into
 	 * 
@@ -100,6 +108,35 @@ public class OWLAPIIndividualTranslator {
 				return dataFactory.getOWLLiteral(value, datatype);
 			else 
 				throw new IllegalArgumentException(v.getType().toString());
+		}
+	}
+
+	public OWLAnnotationSubject translateAnnotationSubject(ObjectConstant subject) {
+		if (subject instanceof URIConstant)
+			return IRI.create(((URIConstant) subject).getURI());
+		else if (subject instanceof BNode)
+			return dataFactory.getOWLAnonymousIndividual(((BNode) subject).getName());
+		else
+			throw new UnexceptedAssertionTermException(subject);
+
+	}
+
+	public OWLAnnotationValue translateAnnotationValue(Constant constant) {
+		if (constant instanceof ValueConstant)
+			return translate((ValueConstant) constant);
+		else if (constant instanceof URIConstant)
+			return IRI.create(((URIConstant) constant).getURI());
+		else if (constant instanceof BNode)
+			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getName());
+		else
+			throw new UnexceptedAssertionTermException(constant);
+	}
+
+
+
+	private static class UnexceptedAssertionTermException extends OntopInternalBugException {
+		UnexceptedAssertionTermException(Term term) {
+			super("Unexpected term in an assertion (cannot be converted to OWLAPI): " + term);
 		}
 	}
 }
