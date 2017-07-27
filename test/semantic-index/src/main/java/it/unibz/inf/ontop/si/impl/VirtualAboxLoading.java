@@ -81,7 +81,7 @@ public class VirtualAboxLoading {
         public Assertion next() {
             try {
                 return graphResultSet.next();
-            } catch (OntopConnectionException | OntopQueryAnsweringException e) {
+            } catch (OntopQueryAnsweringException e) {
                 throw new RuntimeException(e);
             }
         }

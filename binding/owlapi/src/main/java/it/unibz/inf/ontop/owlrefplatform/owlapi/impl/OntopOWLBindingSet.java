@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.impl;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.model.OntopBindingSet;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
@@ -23,45 +24,33 @@ import java.util.Iterator;
 import java.util.List;
 
 public class OntopOWLBindingSet implements OWLBindingSet {
-    private final TupleResultSet res;
+	
+    private final OntopBindingSet res;
+    private final List<String> bindingNames;
 
-    public OntopOWLBindingSet(TupleResultSet res) {
+    public OntopOWLBindingSet(OntopBindingSet res, List<String> bindingNames) {
         this.res = res;
+        this.bindingNames = bindingNames;
     }
 
     @Override
     @Nonnull
     public Iterator<OWLBinding> iterator() {
-
         List<OWLBinding> bindings = new ArrayList<>();
-        final List<String> bindingNames;
-        try {
-            bindingNames = getBindingNames();
-            for (String name : bindingNames) {
-                bindings.add(new OntopOWLBinding(name, getOWLObject(name)));
-            }
-        } catch (OWLException e) {
-            e.printStackTrace();
+        for (String name : bindingNames) {
+            bindings.add(new OntopOWLBinding(this, name));
         }
         return bindings.iterator();
     }
 
     @Override
     public List<String> getBindingNames() throws OWLException {
-        try {
-            return res.getSignature();
-        } catch (OntopConnectionException e) {
-            throw new OWLException(e);
-        }
+        return res.getBidingNames();
     }
 
     @Override
     public OWLBinding getBinding(String bindingName) throws OWLException {
-        OWLObject value = getOWLObject(bindingName);
-        if (value != null) {
-            return new OntopOWLBinding(bindingName, value);
-        }
-        return null;
+        return new OntopOWLBinding(this, bindingName);
     }
 
 

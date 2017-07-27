@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 
 public interface OWLBinding {
@@ -16,5 +17,5 @@ public interface OWLBinding {
      *
      * @return The value of the binding, never <tt>null</tt>.
      */
-    OWLObject getValue();
+    OWLObject getValue() throws OWLException;
 }

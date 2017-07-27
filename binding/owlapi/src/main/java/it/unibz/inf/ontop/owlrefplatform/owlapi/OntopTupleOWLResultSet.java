@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.impl.OntopOWLBindingSet;
@@ -91,7 +92,11 @@ public class OntopTupleOWLResultSet implements TupleOWLResultSet {
 
     @Override
     public OWLBindingSet next() throws OWLException {
-        return new OntopOWLBindingSet(res);
+        try {
+            return new OntopOWLBindingSet(res.next(), res.getSignature());
+        } catch (OntopConnectionException e) {
+            throw new OntopOWLException(e);
+        }
     }
 
 

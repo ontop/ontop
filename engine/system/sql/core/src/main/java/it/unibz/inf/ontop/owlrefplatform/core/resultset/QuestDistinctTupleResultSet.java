@@ -68,6 +68,11 @@ public class QuestDistinctTupleResultSet implements TupleResultSet {
     }
 
     @Override
+    public OntopBindingSet next() {
+        return questTupleResultSet.next();
+    }
+
+    @Override
     public void close() throws OntopConnectionException {
         distinctKeys.clear();
         questTupleResultSet.close();
@@ -103,14 +108,16 @@ public class QuestDistinctTupleResultSet implements TupleResultSet {
         return next;
     }
 
-    @Override
-    public Constant getConstant(int column) throws OntopConnectionException, OntopResultConversionException {
-        return questTupleResultSet.getConstant(column);
-    }
 
-    @Override
-    public Constant getConstant(String name) throws OntopConnectionException, OntopResultConversionException {
-        return questTupleResultSet.getConstant(name);
-    }
+
+//    @Override
+//    public Constant getConstant(int column) throws OntopConnectionException, OntopResultConversionException {
+//        return questTupleResultSet.getConstant(column);
+//    }
+//
+//    @Override
+//    public Constant getConstant(String name) throws OntopConnectionException, OntopResultConversionException {
+//        return questTupleResultSet.getConstant(name);
+//    }
 
 }

@@ -20,37 +20,36 @@ package it.unibz.inf.ontop.rdf4j.query;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.OntopBindingSet;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.rdf4j.RDF4JHelper;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.impl.BindingImpl;
+import org.eclipse.rdf4j.query.impl.SimpleBinding;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class OntopBindingSet implements BindingSet {
+public class OntopRDF4JBindingSet implements BindingSet {
 
     private static final long serialVersionUID = -8455466574395305166L;
-    private TupleResultSet set = null;
+
+//    private TupleResultSet set = null;
+    private OntopBindingSet set;
+
     private int count = 0;
-    private final Set<String> bindingnames;
-//	private List<String> signature;
+    private final Set<String> bindingNames;
 
-    private final RDF4JHelper helper = new RDF4JHelper();
-
-    public OntopBindingSet(TupleResultSet set, Set<String> bindingnames) {
-        this.bindingnames = bindingnames;
+    public OntopRDF4JBindingSet(OntopBindingSet set, Set<String> bindingNames) {
+        this.bindingNames = bindingNames;
 //		this.signature = signature;
         this.set = set;
-        this.count = bindingnames.size();
-
+        this.count = bindingNames.size();
     }
 
     @Override
@@ -61,7 +60,7 @@ public class OntopBindingSet implements BindingSet {
 
     @Override
     public Set<String> getBindingNames() {
-        return bindingnames;
+        return bindingNames;
     }
 
     @Override
@@ -87,7 +86,7 @@ public class OntopBindingSet implements BindingSet {
                     }
                 }
             }
-            return new BindingImpl(bindingName, value);
+            return new SimpleBinding(bindingName, value);
         }
         catch (Exception e) {
             throw new RuntimeException(e);
@@ -97,13 +96,7 @@ public class OntopBindingSet implements BindingSet {
 
     @Override
     public boolean hasBinding(String bindingName) {
-        return bindingnames.contains(bindingName);
-//		try {
-//			return set.getSignature().contains(bindingName);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return false;
+        return bindingNames.contains(bindingName);
     }
 
     @Override
@@ -112,7 +105,7 @@ public class OntopBindingSet implements BindingSet {
         List<Binding> allBindings = new LinkedList<Binding>();
         List<String> bindings;
         try {
-            bindings = set.getSignature();
+            bindings = set.getBidingNames();
             for (String s : bindings)
                 allBindings.add(createBinding(s));
         } catch (Exception e) {
