@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.trans.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.CQIE;
@@ -57,10 +58,10 @@ public class LegacyMappingSaturator implements MappingSaturator {
                 .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableList<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(initialMappingRules, saturatedTBox, true,
+        ImmutableSet<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(initialMappingRules, saturatedTBox, true,
                 foreignKeyCQC, tMappingExclusionConfig).stream()
                 .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
-                .collect(ImmutableCollectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
         List<CQIE> allMappingRules = new ArrayList<>(saturatedMappingRules);
         allMappingRules.addAll(generateTripleMappings(saturatedMappingRules));
@@ -75,7 +76,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
      *
      * TODO: clean it
      */
-    private static List<CQIE> generateTripleMappings(List<CQIE> saturatedRules) {
+    private static List<CQIE> generateTripleMappings(ImmutableSet<CQIE> saturatedRules) {
         List<CQIE> newmappings = new LinkedList<CQIE>();
 
         for (CQIE mapping : saturatedRules) {
