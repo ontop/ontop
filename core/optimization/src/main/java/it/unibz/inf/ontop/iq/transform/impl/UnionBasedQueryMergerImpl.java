@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.optimization.FlattenUnionOptimizer
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import it.unibz.inf.ontop.model.impl.NeutralSubstitution;
+import it.unibz.inf.ontop.substitution.impl.NeutralSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
 import it.unibz.inf.ontop.iq.transform.UnionBasedQueryMerger;
@@ -29,7 +29,7 @@ import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 @Singleton
 public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
@@ -94,7 +94,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                 .skip(1)
                 .forEach(def -> {
                     // Updates the variable generator
-                    InjectiveVar2VarSubstitution disjointVariableSetRenaming = DATA_FACTORY.generateNotConflictingRenaming(
+                    InjectiveVar2VarSubstitution disjointVariableSetRenaming = SUBSTITUTION_FACTORY.generateNotConflictingRenaming(
                             variableGenerator, def.getKnownVariables());
 
                     ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(
@@ -198,7 +198,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     .filter(e -> !e.getKey().equals(e.getValue()))
                     .collect(ImmutableCollectors.toMap());
 
-            return Optional.of(DATA_FACTORY.getInjectiveVar2VarSubstitution(newMap));
+            return Optional.of(SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(newMap));
         }
     }
 

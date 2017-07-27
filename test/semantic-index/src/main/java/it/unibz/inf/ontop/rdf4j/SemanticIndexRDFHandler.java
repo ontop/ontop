@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.rdf4j;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.AssertionFactory;
 import it.unibz.inf.ontop.ontology.InconsistentOntologyException;
@@ -45,8 +45,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
@@ -106,9 +106,9 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 		
 		ObjectConstant c = null;
 		if (currSubject instanceof IRI) {
-			c = DATA_FACTORY.getConstantURI(currSubject.stringValue());
+			c = TERM_FACTORY.getConstantURI(currSubject.stringValue());
 		} else if (currSubject instanceof BNode) {
-			c = DATA_FACTORY.getConstantBNode(currSubject.stringValue());
+			c = TERM_FACTORY.getConstantBNode(currSubject.stringValue());
 		} else {
 			throw new RuntimeException("Unsupported subject found in triple: "	+ st.toString() + " (Required URI or BNode)");
 		}
@@ -118,13 +118,13 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
 		Predicate currentPredicate = null;
 		if (currObject instanceof Literal) {
-			currentPredicate = DATA_FACTORY.getDataPropertyPredicate(currPredicate.stringValue());
+			currentPredicate = TERM_FACTORY.getDataPropertyPredicate(currPredicate.stringValue());
 		} else {
 			String predStringValue = currPredicate.stringValue();
-			if (predStringValue.equals(OBDAVocabulary.RDF_TYPE)) {
-					currentPredicate = DATA_FACTORY.getClassPredicate(currObject.stringValue());
+			if (predStringValue.equals(IriConstants.RDF_TYPE)) {
+					currentPredicate = TERM_FACTORY.getClassPredicate(currObject.stringValue());
 			} else {
-				currentPredicate = DATA_FACTORY.getObjectPropertyPredicate(currPredicate.stringValue());
+				currentPredicate = TERM_FACTORY.getObjectPropertyPredicate(currPredicate.stringValue());
 			}
 		}
 		
@@ -136,11 +136,11 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 			} 
 			else if (currentPredicate.getArity() == 2) {
 				if (currObject instanceof IRI) {
-					ObjectConstant c2 = DATA_FACTORY.getConstantURI(currObject.stringValue());
+					ObjectConstant c2 = TERM_FACTORY.getConstantURI(currObject.stringValue());
 					assertion = ASSERTION_FACTORY.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
 				} 
 				else if (currObject instanceof BNode) {
-					ObjectConstant c2 = DATA_FACTORY.getConstantBNode(currObject.stringValue());
+					ObjectConstant c2 = TERM_FACTORY.getConstantBNode(currObject.stringValue());
 					assertion = ASSERTION_FACTORY.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
 				} 
 				else if (currObject instanceof Literal) {
@@ -155,15 +155,15 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 							type = Predicate.COL_TYPE.LITERAL;
 						} 
 						else {
-							type = DATATYPE_FACTORY.getDatatype(datatype);
+							type = TYPE_FACTORY.getDatatype(datatype);
 							if (type == null)
 								type = Predicate.COL_TYPE.UNSUPPORTED;
 						}			
 						
-						c2 = DATA_FACTORY.getConstantLiteral(l.getLabel(), type);
+						c2 = TERM_FACTORY.getConstantLiteral(l.getLabel(), type);
 					} 
 					else {
-						c2 = DATA_FACTORY.getConstantLiteral(l.getLabel(), lang.get());
+						c2 = TERM_FACTORY.getConstantLiteral(l.getLabel(), lang.get());
 					}
 					assertion = ASSERTION_FACTORY.createDataPropertyAssertion(currentPredicate.getName(), c, c2);
 				} 

@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.ontology.AnnotationProperty;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Represents AnnotationPropertyExpression from the OWL 2 QL Specification
@@ -48,7 +48,7 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 
 	AnnotationPropertyImpl(String name) {
 
-		this.predicate = DATA_FACTORY.getAnnotationPropertyPredicate(name);
+		this.predicate = TERM_FACTORY.getAnnotationPropertyPredicate(name);
 		this.name = name;
 //		this.domain =  new AnnotationPropertyDomainImpl(this);
 //		this.range = new AnnotationPropertyRangeImpl(this);

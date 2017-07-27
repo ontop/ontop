@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException
 import it.unibz.inf.ontop.iq.proposal.LeftJoinOptimizationProposal;
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
 import java.util.Optional;

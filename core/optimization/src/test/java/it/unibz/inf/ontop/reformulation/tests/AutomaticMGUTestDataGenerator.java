@@ -22,14 +22,14 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 /***
@@ -144,7 +144,7 @@ public class AutomaticMGUTestDataGenerator {
 		for (int i = 0; i < termstra.length; i++) {
 			terms.add(getTerm(termstra[i].trim()));
 		}
-		Function atom = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(atomstr.substring(0, 1), terms.size()), terms);
+		Function atom = TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(atomstr.substring(0, 1), terms.size()), terms);
 		return atom;
 	}
 
@@ -161,16 +161,16 @@ public class AutomaticMGUTestDataGenerator {
 			for (int i = 0; i < subtermstr.length; i++) {
 				fuctTerms.add(getTerm(subtermstr[i]));
 			}
-			Predicate fs = DATA_FACTORY.getPredicate(termstr.substring(0, 1), fuctTerms.size());
-			return DATA_FACTORY.getFunction(fs, fuctTerms);
+			Predicate fs = TERM_FACTORY.getPredicate(termstr.substring(0, 1), fuctTerms.size());
+			return TERM_FACTORY.getFunction(fs, fuctTerms);
 		} else if (termstr.charAt(0) == '"') {
-			return DATA_FACTORY.getConstantLiteral(termstr.substring(1, termstr.length() - 1));
+			return TERM_FACTORY.getConstantLiteral(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.charAt(0) == '<') {
-			return DATA_FACTORY.getConstantURI(termstr.substring(1, termstr.length() - 1));
+			return TERM_FACTORY.getConstantURI(termstr.substring(1, termstr.length() - 1));
 //		} else if (termstr.equals("#")) {
-//			return DATA_FACTORY.getVariableNondistinguished();
+//			return TERM_FACTORY.getVariableNondistinguished();
 		} else {
-			return DATA_FACTORY.getVariable(termstr);
+			return TERM_FACTORY.getVariable(termstr);
 			/* variable */
 		}
 		// }

@@ -5,6 +5,7 @@ import java.util.Optional;
 import fj.P2;
 import fj.data.List;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
@@ -12,8 +13,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import java.util.Collection;
 import java.util.HashSet;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Converts a Datalog rule into an intermediate query.
@@ -62,7 +62,8 @@ public class DatalogRule2QueryConverter {
 
         private static Optional<Function> extractOptionalGroupAtom(List<Function> atoms)
                 throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
-            List<Function> groupAtoms = atoms.filter(atom -> atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP));
+            List<Function> groupAtoms = atoms.filter(atom -> atom.getFunctionSymbol().equals(
+                    DatalogAlgebraOperatorPredicates.SPARQL_GROUP));
 
             switch(groupAtoms.length()) {
                 case 0:
@@ -236,7 +237,7 @@ public class DatalogRule2QueryConverter {
     private static Optional<ImmutableExpression> createFilterExpression(List<Function> booleanAtoms) {
         if (booleanAtoms.isEmpty())
             return Optional.empty();
-        return Optional.of(DATA_FACTORY.getImmutableExpression(DatalogTools.foldBooleanConditions(booleanAtoms)));
+        return Optional.of(TERM_FACTORY.getImmutableExpression(DatalogTools.foldBooleanConditions(booleanAtoms)));
     }
 
     /**
@@ -260,11 +261,11 @@ public class DatalogRule2QueryConverter {
                         (java.util.List<Function>)(java.util.List<?>)atom.getTerms());
 
                 Predicate atomPredicate = atom.getFunctionSymbol();
-                if (atomPredicate.equals(OBDAVocabulary.SPARQL_JOIN)) {
+                if (atomPredicate.equals(DatalogAlgebraOperatorPredicates.SPARQL_JOIN)) {
                     queryBuilder = convertJoinAtom(queryBuilder, parentNode, subAtoms, optionalPosition,
                             tablePredicates);
                 }
-                else if(atomPredicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
+                else if(atomPredicate.equals(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)) {
                     queryBuilder = convertLeftJoinAtom(queryBuilder, parentNode, subAtoms, optionalPosition,
                             tablePredicates);
                 }

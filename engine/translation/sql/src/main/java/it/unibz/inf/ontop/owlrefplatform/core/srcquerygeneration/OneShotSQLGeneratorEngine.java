@@ -26,20 +26,21 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopTranslationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
 import it.unibz.inf.ontop.injection.OntopTranslationSQLSettings;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
-import it.unibz.inf.ontop.model.predicate.BNodePredicate;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.TermUtils;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.TermConstants;
+import it.unibz.inf.ontop.model.term.impl.TermUtils;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
@@ -71,11 +72,11 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates.SPARQL_GROUP;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.*;
-import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.SPARQL_GROUP;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -109,7 +110,7 @@ public class OneShotSQLGeneratorEngine {
 
 
 	private static final String INDENT = "    ";
-	private static final Function TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+	private static final Function TRUE_EQ = TERM_FACTORY.getFunctionEQ(TermConstants.TRUE, TermConstants.TRUE);
 
 	private final RDBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
@@ -554,7 +555,7 @@ public class OneShotSQLGeneratorEngine {
 		List <Function> condFunctions = new LinkedList<Function> ();
 		//List<Variable> varsInHaving = Lists.newArrayList();
 		for (Function atom : body) {
-			if (atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_HAVING)) {
+			if (atom.getFunctionSymbol().equals(DatalogAlgebraOperatorPredicates.SPARQL_HAVING)) {
 				conditions = atom.getTerms();
 				break;
 			}
@@ -1047,7 +1048,7 @@ public class OneShotSQLGeneratorEngine {
 			return "";
 		} else if (atom.isAlgebraFunction()) {
 
-			if (predicate == OBDAVocabulary.SPARQL_GROUP) {
+			if (predicate == SPARQL_GROUP) {
 				return "";
 			}
 			List<Function> innerTerms = new ArrayList<>(atom.getTerms().size());
@@ -1055,11 +1056,11 @@ public class OneShotSQLGeneratorEngine {
 			boolean parenthesis = false;
 
 
-			if (predicate == OBDAVocabulary.SPARQL_JOIN || predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
+			if (predicate == DatalogAlgebraOperatorPredicates.SPARQL_JOIN || predicate == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
 
 				boolean isLeftJoin = false;
 
-				if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
+				if (predicate == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
 					isLeftJoin = true;
 				}
 
@@ -1174,7 +1175,7 @@ public class OneShotSQLGeneratorEngine {
 		boolean isLeftJoin = false;
 		boolean foundFirstDataAtom = false;
 
-		if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN) {
+		if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
 			isLeftJoin = true;
 		}
 		Set<Variable> innerVariables = new LinkedHashSet<>();
@@ -1269,7 +1270,7 @@ public class OneShotSQLGeneratorEngine {
 			Function f = (Function) term;
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
-				COL_TYPE type = DATATYPE_FACTORY.getDatatype(p.toString());
+				COL_TYPE type = TYPE_FACTORY.getDatatype(p.toString());
 				return jdbcTypeMapper.getSQLType(type);
 			}
 			// Return varchar for unknown
@@ -1281,8 +1282,8 @@ public class OneShotSQLGeneratorEngine {
 		/**
 		 * Boolean constant
 		 */
-		else if (term.equals(OBDAVocabulary.FALSE)
-				 || term.equals(OBDAVocabulary.TRUE)) {
+		else if (term.equals(TermConstants.FALSE)
+				 || term.equals(TermConstants.TRUE)) {
 			return Types.BOOLEAN;
 		}
 
@@ -1401,7 +1402,7 @@ public class OneShotSQLGeneratorEngine {
 			 * TODO: we should not have to treat NULL as a special case! It is because this constant is currently
 			 * a STRING!
 			 */
-		} else if (ht == OBDAVocabulary.NULL) {
+		} else if (ht == TermConstants.NULL) {
 			mainColumn = "NULL";
 		} else if (ht instanceof ValueConstant) {
 			mainColumn = getSQLLexicalForm((ValueConstant) ht);
@@ -1660,7 +1661,7 @@ public class OneShotSQLGeneratorEngine {
 			 */
 			if (ov.getTerms().size() > 1) {
 				int size = ov.getTerms().size();
-				if (DATATYPE_FACTORY.isLiteral(pred)) {
+				if (TYPE_FACTORY.isLiteral(pred)) {
 					size--;
 				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {

@@ -14,8 +14,7 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.injection.OntopTranslationSettings;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
@@ -37,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
+import static it.unibz.inf.ontop.model.atom.PredicateConstants.ONTOP_QUERY;
 
 /**
  * TODO: rename it QueryTranslatorImpl ?
@@ -120,7 +120,7 @@ public class QuestQueryProcessor implements QueryTranslator {
 			EQNormalizer.enforceEqualities(rule);
 
 			CQIE newquery = vocabularyValidator.replaceEquivalences(rule);
-			if (newquery.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY))
+			if (newquery.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
 				topLevelPredicate = newquery.getHead().getFunctionSymbol();
 			newprogramEq.appendRule(newquery);
 		}

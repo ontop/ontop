@@ -21,10 +21,10 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
  */
 
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.TermUtils;
+import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Set;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class DatalogNormalizer {
 
@@ -74,9 +74,9 @@ public class DatalogNormalizer {
 	private static void unfoldJoinTrees(List body, boolean isJoin) {
 		for (int i = 0; i < body.size(); i++) {
 			Function currentAtom = (Function) body.get(i);
-			if (currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
+			if (currentAtom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)
 				unfoldJoinTrees(currentAtom.getTerms(), false);
-			else if (currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_JOIN) {
+			else if (currentAtom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_JOIN) {
 				unfoldJoinTrees(currentAtom.getTerms(), true);
 				int dataAtoms = countDataItems(currentAtom.getTerms());
 				if (isJoin || dataAtoms == 1) {
@@ -110,9 +110,9 @@ public class DatalogNormalizer {
 				booleanAtoms.add(atom);
 			} else {
 				dataAtoms.add(atom);
-				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
+				if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)
 					foldJoinTrees(atom.getTerms(), false);
-				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_JOIN)
+				if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_JOIN)
 					foldJoinTrees(atom.getTerms(), true);
 			}
 
@@ -206,8 +206,8 @@ public class DatalogNormalizer {
 				booleanAtoms += 1;
 		}
 		if (isLeftJoin && booleanAtoms == 0) {
-			Function trivialEquality = DATA_FACTORY.getFunctionEQ(DATA_FACTORY.getConstantLiteral("1", COL_TYPE.INTEGER),
-					DATA_FACTORY.getConstantLiteral("1", COL_TYPE.INTEGER));
+			Function trivialEquality = TERM_FACTORY.getFunctionEQ(TERM_FACTORY.getConstantLiteral("1", COL_TYPE.INTEGER),
+					TERM_FACTORY.getConstantLiteral("1", COL_TYPE.INTEGER));
 			leftJoin.getTerms().add(trivialEquality);
 		}
 	}
@@ -249,7 +249,7 @@ public class DatalogNormalizer {
 			List<Term> subterms = atom.getTerms();
 
 			if (atom.isAlgebraFunction()) {
-				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
+				if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)
 					pullOutEqualities(subterms, substitutions, eqList, newVarCounter, true);
 				else
 					pullOutEqualities(subterms, substitutions, eqList, newVarCounter, false);
@@ -274,7 +274,7 @@ public class DatalogNormalizer {
 						 * a new variable and register in the substitutions, and
 						 * replace the current value with a fresh one.
 						 */
-						var2 = DATA_FACTORY.getVariable(var1.getName() + "f" + newVarCounter[0]);
+						var2 = TERM_FACTORY.getVariable(var1.getName() + "f" + newVarCounter[0]);
 
 						substitutions.put(var1, var2);
 						subterms.set(j, var2);
@@ -288,10 +288,10 @@ public class DatalogNormalizer {
 						 */
 
 						if (atom.isDataFunction()) {
-							Variable newVariable = DATA_FACTORY.getVariable(var1.getName() + newVarCounter[0]);
+							Variable newVariable = TERM_FACTORY.getVariable(var1.getName() + newVarCounter[0]);
 
 							subterms.set(j, newVariable);
-							Function equality = DATA_FACTORY.getFunctionEQ(var2, newVariable);
+							Function equality = TERM_FACTORY.getFunctionEQ(var2, newVariable);
 							eqList.add(equality);
 
 						} else { // if its not data function, just replace
@@ -310,9 +310,9 @@ public class DatalogNormalizer {
 					 */
 					// only relevant if in data function?
 					if (atom.isDataFunction()) {
-						Variable var = DATA_FACTORY.getVariable("f" + newVarCounter[0]);
+						Variable var = TERM_FACTORY.getVariable("f" + newVarCounter[0]);
 						newVarCounter[0] += 1;
-						Function equality = DATA_FACTORY.getFunctionEQ(var, subTerm);
+						Function equality = TERM_FACTORY.getFunctionEQ(var, subTerm);
 						subterms.set(j, var);
 						eqList.add(equality);
 					}
@@ -371,7 +371,7 @@ public class DatalogNormalizer {
 			List<Term> varList = new ArrayList<>(equalitySets.get(k));
 			for (int i = 0; i < varList.size() - 1; i++) {
 				for (int j = i + 1; j < varList.size(); j++) {
-					Function equality = DATA_FACTORY.getFunctionEQ(varList.get(i), varList.get(j));
+					Function equality = TERM_FACTORY.getFunctionEQ(varList.get(i), varList.get(j));
 					boolSet.add(equality);
 				}
 			}
@@ -672,7 +672,7 @@ public class DatalogNormalizer {
 				if (atom.isAlgebraFunction()) {
 					if (i != 0)
 						is2 = true;
-					if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
+					if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)
 						pullOutLJCond(subterms, leftConditionBooleans, true, currentBooleans, is2);
 					else
 						pullOutLJCond(subterms, leftConditionBooleans, false, currentBooleans, is2);

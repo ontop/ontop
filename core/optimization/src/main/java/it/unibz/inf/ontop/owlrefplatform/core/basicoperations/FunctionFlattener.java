@@ -6,16 +6,17 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
+import it.unibz.inf.ontop.model.term.TermConstants;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 
 import java.util.ArrayList;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Flattens JOINs and AND atoms that are found at the top of a Datalog body.
@@ -72,7 +73,7 @@ public class FunctionFlattener {
                 if (predicate.equals(ExpressionOperation.AND)) {
                     return flattenAND(atom);
                 }
-                else if (predicate.equals(OBDAVocabulary.SPARQL_JOIN)) {
+                else if (predicate.equals(DatalogAlgebraOperatorPredicates.SPARQL_JOIN)) {
                     return flattenJoinAtom(atom);
                 }
                 else {
@@ -104,7 +105,7 @@ public class FunctionFlattener {
                 }
             }
             else {
-                Function newAtom = DATA_FACTORY.getFunctionAND(subTerm, OBDAVocabulary.TRUE);
+                Function newAtom = TERM_FACTORY.getFunctionAND(subTerm, TermConstants.TRUE);
                flattenedAtoms = flattenedAtoms.append(List.cons(newAtom, EMPTY_ATOM_LIST));
             }
         }

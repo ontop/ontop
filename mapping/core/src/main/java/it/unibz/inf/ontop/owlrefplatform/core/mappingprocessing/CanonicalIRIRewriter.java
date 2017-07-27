@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Rewrite the mappings to use the canonical iri
@@ -160,7 +160,7 @@ public class CanonicalIRIRewriter {
                 Map<Variable, Term> map = variables.stream()
                         .collect(Collectors.toMap(
                                 var -> var,
-                                var -> DATA_FACTORY.getVariable(var.getName() + finalRename)));
+                                var -> TERM_FACTORY.getVariable(var.getName() + finalRename)));
 
                 //apply substitution for variables renaming
                 Substitution substitution = new SubstitutionImpl(map);

@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.mapping.SQLPPMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 /**
@@ -88,12 +88,12 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                     continue;
 
                 Function typedTerm = (Function) term;
-                if (typedTerm.getTerms().size() == 2 && typedTerm.getFunctionSymbol().getName().equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
+                if (typedTerm.getTerms().size() == 2 && typedTerm.getFunctionSymbol().getName().equals(IriConstants.RDFS_LITERAL_URI)) {
                     // changing the language, its always the second inner term (literal,lang)
                     Term originalLangTag = typedTerm.getTerm(1);
                     if (originalLangTag instanceof ValueConstant) {
                         ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
-                        Term normalizedLangTag = DATA_FACTORY.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
+                        Term normalizedLangTag = TERM_FACTORY.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
                                 originalLangConstant.getType());
                         typedTerm.setTerm(1, normalizedLangTag);
                     }

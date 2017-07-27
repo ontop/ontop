@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.mapping.datalog.Mapping2DatalogConverter;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
@@ -24,8 +24,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Uses the old Datalog-based mapping saturation code
@@ -85,12 +86,12 @@ public class LegacyMappingSaturator implements MappingSaturator {
 				 * head is Class(x) Forming head as triple(x,uri(rdf:type),
 				 * uri(Class))
 				 */
-                Function rdfTypeConstant = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
+                Function rdfTypeConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(IriConstants.RDF_TYPE));
 
                 String classname = currenthead.getFunctionSymbol().getName();
-                Term classConstant = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(classname));
+                Term classConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(classname));
 
-                newhead = DATA_FACTORY.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
+                newhead = ATOM_FACTORY.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
             }
             else if (currenthead.getArity() == 2) {
 				/*
@@ -98,9 +99,9 @@ public class LegacyMappingSaturator implements MappingSaturator {
 				 * y)
 				 */
                 String propname = currenthead.getFunctionSymbol().getName();
-                Function propConstant = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(propname));
+                Function propConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(propname));
 
-                newhead = DATA_FACTORY.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
+                newhead = ATOM_FACTORY.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
             }
             else {
 				/*

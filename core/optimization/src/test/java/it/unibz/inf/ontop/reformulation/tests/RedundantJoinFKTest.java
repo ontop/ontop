@@ -8,20 +8,21 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import org.junit.Test;
 
 import java.sql.Types;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.INTEGER;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -35,7 +36,7 @@ public class RedundantJoinFKTest {
     private final static AtomPredicate TABLE2_PREDICATE;
     private final static AtomPredicate TABLE3_PREDICATE;
     private final static AtomPredicate TABLE4_PREDICATE;
-    private final static AtomPredicate ANS1_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
+    private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable A = DATA_FACTORY.getVariable("A");
     private final static Variable B = DATA_FACTORY.getVariable("B");
@@ -104,7 +105,7 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(P1, generateURI1(A), C, generateURI1(D)));
+                SUBSTITUTION_FACTORY.getSubstitution(P1, generateURI1(A), C, generateURI1(D)));
         queryBuilder.init(projectionAtom, constructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -125,7 +126,7 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(P1, generateURI1(A), C, generateURI1(D)));
+                SUBSTITUTION_FACTORY.getSubstitution(P1, generateURI1(A), C, generateURI1(D)));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
         expectedQueryBuilder.addChild(constructionNode1, dataNode2);
 
@@ -143,7 +144,7 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         P1, generateURI1(A),
                         C, generateURI1(D),
                         X, generateURI1(B)));
@@ -177,7 +178,7 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         P1, generateURI1(A)));
         queryBuilder.init(projectionAtom, constructionNode);
 
@@ -208,7 +209,7 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         P1, generateURI1(A),
                         C, generateURI1(D)));
         queryBuilder.init(projectionAtom, constructionNode);
@@ -243,7 +244,7 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         P1, generateURI1(A)));
         queryBuilder.init(projectionAtom, constructionNode);
 
@@ -274,7 +275,7 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(P1, generateURI1(A), C, generateURI1(D)));
+                SUBSTITUTION_FACTORY.getSubstitution(P1, generateURI1(A), C, generateURI1(D)));
         queryBuilder.init(projectionAtom, constructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -307,7 +308,7 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(P1, generateURI1(A), C, generateURI1(D)));
+                SUBSTITUTION_FACTORY.getSubstitution(P1, generateURI1(A), C, generateURI1(D)));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(constructionNode1, joinNode1);
@@ -331,7 +332,7 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(P1, generateURI1(A)));
+                SUBSTITUTION_FACTORY.getSubstitution(P1, generateURI1(A)));
         queryBuilder.init(projectionAtom, constructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -352,7 +353,7 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(P1, generateURI1(A)));
+                SUBSTITUTION_FACTORY.getSubstitution(P1, generateURI1(A)));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
         expectedQueryBuilder.addChild(constructionNode1, dataNode2);
 
@@ -369,7 +370,7 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(P1, generateURI1(A)));
+                SUBSTITUTION_FACTORY.getSubstitution(P1, generateURI1(A)));
         queryBuilder.init(projectionAtom, constructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -399,7 +400,7 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(P1, generateURI1(A)));
+                SUBSTITUTION_FACTORY.getSubstitution(P1, generateURI1(A)));
         queryBuilder.init(projectionAtom, constructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();

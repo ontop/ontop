@@ -1,7 +1,8 @@
 package it.unibz.inf.ontop.model.type;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.Term;
 
 import java.util.List;

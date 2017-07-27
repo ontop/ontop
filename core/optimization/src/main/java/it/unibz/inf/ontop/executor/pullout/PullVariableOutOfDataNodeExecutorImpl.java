@@ -11,8 +11,8 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 /**
@@ -277,7 +277,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
 
         ImmutableList.Builder<ImmutableExpression> equalityBuilder = ImmutableList.builder();
         for (VariableRenaming renaming : renamingMap.values()) {
-            equalityBuilder.add(DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
+            equalityBuilder.add(TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
                     renaming.originalVariable, renaming.newVariable));
         }
         return ImmutabilityTools.foldBooleanExpressions(equalityBuilder.build()).get();

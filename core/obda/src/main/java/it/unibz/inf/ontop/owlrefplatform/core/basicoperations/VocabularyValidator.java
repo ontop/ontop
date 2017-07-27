@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
  */
 
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 //TODO: rename, and possibly split
 public class VocabularyValidator {
@@ -66,7 +66,7 @@ public class VocabularyValidator {
 				}
 				else if (atom.isAlgebraFunction()) {
 					// Calling recursively for nested expressions
-					nt = DATA_FACTORY.getFunction(atom.getFunctionSymbol(), replaceEquivalences(atom.getTerms()));
+					nt = TERM_FACTORY.getFunction(atom.getFunctionSymbol(), replaceEquivalences(atom.getTerms()));
 				}
 				else {
 					nt = getNormal(atom);
@@ -88,23 +88,23 @@ public class VocabularyValidator {
 			OClass c = voc.getClass(p.getName());
 			OClass equivalent = (OClass)reasoner.getClassDAG().getCanonicalForm(c);
 			if (equivalent != null && !equivalent.equals(c))
-				return DATA_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
+				return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
 		} 
 		else if (/*p.isObjectProperty()*/ (p.getArity() == 2) && voc.containsObjectProperty(p.getName())) {
 			ObjectPropertyExpression ope = voc.getObjectProperty(p.getName());
 			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyDAG().getCanonicalForm(ope);
 			if (equivalent != null && !equivalent.equals(ope)) {
 				if (!equivalent.isInverse()) 
-					return DATA_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
+					return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
 				else 
-					return DATA_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+					return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
 			}
 		}
 		else if (/*p.isDataProperty()*/ (p.getArity() == 2)  && voc.containsDataProperty(p.getName())) {
 			DataPropertyExpression dpe = voc.getDataProperty(p.getName());
 			DataPropertyExpression equivalent = reasoner.getDataPropertyDAG().getCanonicalForm(dpe);
 			if (equivalent != null && !equivalent.equals(dpe))
-				return DATA_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
+				return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
 		}
 		return atom;
 	}

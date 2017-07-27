@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getNextNodeAndQuery;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
@@ -371,7 +371,7 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
                     .filter(binding -> onlyRightVariables.contains(binding.getKey()))
                     .collect(ImmutableCollectors.toMap()))
                 .filter(m -> !m.isEmpty())
-                .map(DATA_FACTORY::getSubstitution);
+                .map(SUBSTITUTION_FACTORY::getSubstitution);
     }
 
 }

@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.iq.transform.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 

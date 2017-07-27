@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.dbschema.impl.AbstractDBMetadata;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 
 public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
 
@@ -209,7 +209,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
             return predicateCache.get(originalPredicate);
         }
         else {
-            AtomPredicate atomPredicate = DATA_FACTORY.getAtomPredicate(originalPredicate);
+            AtomPredicate atomPredicate = ATOM_FACTORY.getAtomPredicate(originalPredicate);
             // Cache it
             predicateCache.put(originalPredicate, atomPredicate);
             return atomPredicate;

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.iq.tools.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
-import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.iq.proposal.ProposalResults;
 import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;

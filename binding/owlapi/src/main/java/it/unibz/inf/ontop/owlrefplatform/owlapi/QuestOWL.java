@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.answering.input.AskQuery;
 import it.unibz.inf.ontop.answering.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;

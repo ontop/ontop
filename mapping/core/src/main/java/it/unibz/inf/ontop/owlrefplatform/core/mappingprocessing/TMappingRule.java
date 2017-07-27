@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.model.predicate.BuiltinPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.BuiltinPredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /***
  * Splits a given {@link mapping} into builtin predicates ({@link conditions})
@@ -96,9 +96,9 @@ public class TMappingRule {
 				Variable var = valueMap.get(c);
 				if (var == null) {
 					freshVarCount++;
-					var = DATA_FACTORY.getVariable("?FreshVar" + freshVarCount);
+					var = TERM_FACTORY.getVariable("?FreshVar" + freshVarCount);
 					valueMap.put(c, var);
-					filters.add(DATA_FACTORY.getFunctionEQ(var, c));
+					filters.add(TERM_FACTORY.getFunctionEQ(var, c));
 				}
 				atom.setTerm(i, var);
 			}
@@ -165,7 +165,7 @@ public class TMappingRule {
 			while (iterOR.hasNext()) {
 				list = iterOR.next();
 				Function e = getMergedByAND(list);
-				mergedConditions = DATA_FACTORY.getFunctionOR(e, mergedConditions);
+				mergedConditions = TERM_FACTORY.getFunctionOR(e, mergedConditions);
 			}
 			
 			combinedBody.add(mergedConditions);
@@ -195,7 +195,7 @@ public class TMappingRule {
 		Function mergedConditions = iterAND.next();
 		while (iterAND.hasNext()) {
 			Function e = iterAND.next();
-			mergedConditions = DATA_FACTORY.getFunctionAND(e, mergedConditions);
+			mergedConditions = TERM_FACTORY.getFunctionAND(e, mergedConditions);
 		}		
 		return mergedConditions;
 	}

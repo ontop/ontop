@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model;
 
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.DatalogProgramSyntaxFactory;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.datalog.DatalogProgramSyntaxFactory.func;

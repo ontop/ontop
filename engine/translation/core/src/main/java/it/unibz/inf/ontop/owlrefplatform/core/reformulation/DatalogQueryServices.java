@@ -41,7 +41,7 @@ import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class DatalogQueryServices {
 	
@@ -55,12 +55,12 @@ public class DatalogQueryServices {
 		for (Term t : a.getTerms()) {
 			if (t instanceof Variable) {
 				Variable v = (Variable)t;
-				termscopy.add(DATA_FACTORY.getVariable(v.getName() + suffix));
+				termscopy.add(TERM_FACTORY.getVariable(v.getName() + suffix));
 			}
 			else
 				termscopy.add(t.clone());
 		}
-		return DATA_FACTORY.getFunction(a.getFunctionSymbol(), termscopy);
+		return TERM_FACTORY.getFunction(a.getFunctionSymbol(), termscopy);
 		
 	}
 	

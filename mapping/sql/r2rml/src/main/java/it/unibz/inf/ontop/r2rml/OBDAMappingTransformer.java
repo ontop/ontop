@@ -33,12 +33,11 @@ import eu.optique.r2rml.api.model.Template;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.impl.SQLQueryImpl;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
 import it.unibz.inf.ontop.utils.URITemplates;
@@ -51,11 +50,6 @@ import java.util.Set;
 import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.rdf4j.RDF4J;
-//import org.eclipse.rdf4j.model.Resource;
-//import org.eclipse.rdf4j.model.Statement;
-//import org.eclipse.rdf4j.model.IRI;
-//import org.eclipse.rdf4j.model.ValueFactory;
-//import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import java.util.Collection;
 
@@ -68,7 +62,7 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.search.EntitySearcher;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Transform OBDA mappings in R2rml mappings
@@ -138,7 +132,7 @@ public class OBDAMappingTransformer {
 				Function predf = (Function)func.getTerm(1);
 				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) { //fixed string 
-						pred = DATA_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
+						pred = TERM_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = rdf4j.createIRI(pred.getName());
 					}
 					else {
@@ -159,7 +153,7 @@ public class OBDAMappingTransformer {
 			OWLObjectProperty objectProperty = factory.getOWLObjectProperty(propname);
             OWLDataProperty dataProperty = factory.getOWLDataProperty(propname);
 			
-			if (!predURIString.equals(OBDAVocabulary.RDF_TYPE) && pred.isClass() ) {
+			if (!predURIString.equals(IriConstants.RDF_TYPE) && pred.isClass() ) {
 				// The term is actually a SubjectMap (class)
 				//add class declaration to subject Map node
 				sm.addClass(predUri);
@@ -249,7 +243,7 @@ public class OBDAMappingTransformer {
 							
 							
 							//check if it is not a plain literal
-							if(!objectPred.getName().equals(OBDAVocabulary.RDFS_LITERAL_URI)){
+							if(!objectPred.getName().equals(IriConstants.RDFS_LITERAL_URI)){
 								
 								//set the datatype for the typed literal								
 								obm.setDatatype(rdf4j.createIRI(objectPred.getName()));

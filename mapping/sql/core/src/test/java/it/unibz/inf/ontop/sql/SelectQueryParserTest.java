@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.sql;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.sql.parser.RAExpression;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -397,18 +397,18 @@ public class SelectQueryParserTest {
     // END SUB SELECT TESTS
 
     private Function eqOf(String var1, String var2) {
-        return DATA_FACTORY.getFunction(ExpressionOperation.EQ,
-                ImmutableList.of(DATA_FACTORY.getVariable(var1), DATA_FACTORY.getVariable(var2)));
+        return TERM_FACTORY.getFunction(ExpressionOperation.EQ,
+                ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 
     private Function dataAtomOf(String predicate, String var1, String var2) {
-        return DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(predicate, new Predicate.COL_TYPE[]{ null, null }),
-                ImmutableList.of(DATA_FACTORY.getVariable(var1), DATA_FACTORY.getVariable(var2)));
+        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(predicate, new Predicate.COL_TYPE[]{ null, null }),
+                ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 
     private Function dataAtomOf(String predicate, String var1, String var2, String var3, String var4) {
-        return DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(predicate, new Predicate.COL_TYPE[]{ null, null, null, null }),
-                ImmutableList.of(DATA_FACTORY.getVariable(var1), DATA_FACTORY.getVariable(var2), DATA_FACTORY.getVariable(var3), DATA_FACTORY.getVariable(var4)));
+        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(predicate, new Predicate.COL_TYPE[]{ null, null, null, null }),
+                ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2), TERM_FACTORY.getVariable(var3), TERM_FACTORY.getVariable(var4)));
     }
 
     private void assertMatches(ImmutableList<Function> list0, List<Function> list) {

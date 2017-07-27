@@ -9,9 +9,10 @@ import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.model.impl.PredicateImpl;
-import it.unibz.inf.ontop.model.predicate.*;
-import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -28,10 +29,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.LITERAL_LANG;
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.OBJECT;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.LITERAL_LANG;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.OBJECT;
 
 
 @Singleton
@@ -113,18 +114,18 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                 Predicate functionSymbol = ((ImmutableFunctionalTerm) constructionTerm).getFunctionSymbol();
                 if ((functionSymbol instanceof BNodePredicate)
                         || (functionSymbol instanceof URITemplatePredicate)) {
-                    return Optional.of(DATA_FACTORY.getTermType(OBJECT));
+                    return Optional.of(TYPE_FACTORY.getTermType(OBJECT));
                 }
                 else if (functionSymbol instanceof DatatypePredicate) {
                     DatatypePredicate datatypeConstructionFunctionSymbol = (DatatypePredicate) functionSymbol;
 
-                    COL_TYPE internalDatatype = DATATYPE_FACTORY.getInternalType(datatypeConstructionFunctionSymbol)
+                    COL_TYPE internalDatatype = TYPE_FACTORY.getInternalType(datatypeConstructionFunctionSymbol)
                             .orElseThrow(() -> new RuntimeException("Unsupported datatype: " + functionSymbol
                                     + "\n TODO: throw a better exception"));
 
                     return internalDatatype == LITERAL_LANG
-                            ? Optional.of(DATA_FACTORY.getTermType(generateFreshVariable()))
-                            : Optional.of(DATA_FACTORY.getTermType(internalDatatype));
+                            ? Optional.of(TYPE_FACTORY.getTermType(generateFreshVariable()))
+                            : Optional.of(TYPE_FACTORY.getTermType(internalDatatype));
                 }
                 else {
                     throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
@@ -243,7 +244,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         for (Datatype declaredDatatype : datatypeMap.get(predicateIRI)) {
 
             // TODO: throw a better exception
-            COL_TYPE internalType = DATATYPE_FACTORY.getInternalType((DatatypePredicate) declaredDatatype.getPredicate())
+            COL_TYPE internalType = TYPE_FACTORY.getInternalType((DatatypePredicate) declaredDatatype.getPredicate())
                     .orElseThrow(() -> new RuntimeException("Unsupported datatype declared in the ontology: "
                             + declaredDatatype.getPredicate().getName() + "\n TODO: find a better exception"));
 
@@ -254,7 +255,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                                 " is declared with datatype " +
                                 declaredDatatype.getPredicate().getName() +
                                 " in the ontology, but has datatype " +
-                                DATATYPE_FACTORY.getTypePredicate(tripleObjectType.getColType()).getName() +
+                                TYPE_FACTORY.getTypePredicate(tripleObjectType.getColType()).getName() +
                                 " according to the following triplesMap (either declared in the triplesMap, or " +
                                 "inferred from its source):\n[\n" +
                                 provenance.getProvenanceInfo() +
@@ -394,6 +395,6 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     }
 
     private static Variable generateFreshVariable() {
-        return DATA_FACTORY.getVariable("fresh-" + UUID.randomUUID());
+        return TERM_FACTORY.getVariable("fresh-" + UUID.randomUUID());
     }
 }

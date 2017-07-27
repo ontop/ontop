@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.mapping.datalog.impl;
 
 
-import it.unibz.inf.ontop.model.predicate.AlgebraOperatorPredicate;
-import it.unibz.inf.ontop.model.predicate.OperationPredicate;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.datalog.AlgebraOperatorPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 
 import java.util.stream.Stream;

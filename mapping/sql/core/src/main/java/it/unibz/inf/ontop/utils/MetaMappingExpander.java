@@ -30,8 +30,7 @@ import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.sql.parser.SelectQueryAttributeExtractor2;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
@@ -52,7 +51,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 /**
@@ -171,9 +170,9 @@ public class MetaMappingExpander {
 
 			String predicateName = getPredicateName(templateAtom.getTerm(0), values);
 			ImmutableFunctionalTerm newTarget = (arity == 1)
-					? DATA_FACTORY.getImmutableFunctionalTerm(DATA_FACTORY.getClassPredicate(predicateName),
+					? TERM_FACTORY.getImmutableFunctionalTerm(TERM_FACTORY.getClassPredicate(predicateName),
 					target.getTerm(0))
-					: DATA_FACTORY.getImmutableFunctionalTerm(DATA_FACTORY.getObjectPropertyPredicate(predicateName),
+					: TERM_FACTORY.getImmutableFunctionalTerm(TERM_FACTORY.getObjectPropertyPredicate(predicateName),
 					target.getTerm(0), target.getTerm(2));
 
 			String newId = IDGenerator.getNextUniqueID(id + "#");
@@ -277,7 +276,7 @@ public class MetaMappingExpander {
 			if (func.getArity() == 1 && (func.getFunctionSymbol() instanceof URITemplatePredicate)) {
 				Term t0 = func.getTerm(0);
 				if (t0 instanceof ValueConstant)
-					return ((ValueConstant) t0).getValue().equals(OBDAVocabulary.RDF_TYPE);
+					return ((ValueConstant) t0).getValue().equals(IriConstants.RDF_TYPE);
 			}
 		}
 		return false;

@@ -9,15 +9,15 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import org.junit.Test;
 
@@ -26,9 +26,10 @@ import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.predicate.ExpressionOperation.*;
-import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.foldBooleanExpressions;
-import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.NULL;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
+import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.foldBooleanExpressions;
+import static it.unibz.inf.ontop.model.term.TermConstants.NULL;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static junit.framework.Assert.assertEquals;
@@ -49,9 +50,9 @@ public class RedundantSelfJoinTest {
     private final static AtomPredicate TABLE4_PREDICATE;
     private final static AtomPredicate TABLE5_PREDICATE;
     private final static AtomPredicate TABLE6_PREDICATE;
-    private final static AtomPredicate ANS1_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 3);
-    private final static AtomPredicate ANS1_PREDICATE_1 = DATA_FACTORY.getAtomPredicate("ans1", 1);
-    private final static AtomPredicate ANS1_PREDICATE_2 = DATA_FACTORY.getAtomPredicate("ans1", 2);
+    private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
+    private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
+    private final static AtomPredicate ANS1_PREDICATE_2 = ATOM_FACTORY.getAtomPredicate("ans1", 2);
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable Y = DATA_FACTORY.getVariable("Y");
     private final static Variable Z = DATA_FACTORY.getVariable("Z");
@@ -664,7 +665,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(O, TWO));
+                SUBSTITUTION_FACTORY.getSubstitution(O, TWO));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
         ExtensionalDataNode dataNode3 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N, TWO));
@@ -702,7 +703,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(M, TWO));
+                SUBSTITUTION_FACTORY.getSubstitution(M, TWO));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
         ExtensionalDataNode expectedDataNode =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE6_PREDICATE, TWO, N, O));
@@ -812,7 +813,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(N, NULL, O, NULL));
+                SUBSTITUTION_FACTORY.getSubstitution(N, NULL, O, NULL));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, leftConstructionNode);
         expectedQueryBuilder.addChild(leftConstructionNode, dataNode1);
@@ -858,7 +859,7 @@ public class RedundantSelfJoinTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(O, ONE));
+                SUBSTITUTION_FACTORY.getSubstitution(O, ONE));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
         ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, ONE));
@@ -1056,7 +1057,7 @@ public class RedundantSelfJoinTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(O, M));
+                SUBSTITUTION_FACTORY.getSubstitution(O, M));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
         LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(EQ, M, N));
@@ -1262,7 +1263,7 @@ public class RedundantSelfJoinTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(M, O));
+                SUBSTITUTION_FACTORY.getSubstitution(M, O));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
         LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(EQ, N, O));
@@ -1422,7 +1423,7 @@ public class RedundantSelfJoinTest {
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y));
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X, Y),
-                DATA_FACTORY.getSubstitution(Y, X)
+                SUBSTITUTION_FACTORY.getSubstitution(Y, X)
         );
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, unionNode);
@@ -1446,7 +1447,7 @@ public class RedundantSelfJoinTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
 
         DistinctVariableOnlyDataAtom ans1Atom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                DATA_FACTORY.getAtomPredicate("ans1", 1), Y);
+                ATOM_FACTORY.getAtomPredicate("ans1", 1), Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ans1Atom.getVariables());
         queryBuilder.init(ans1Atom, rootNode);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();

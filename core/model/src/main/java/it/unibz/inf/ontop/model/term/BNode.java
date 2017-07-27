@@ -20,9 +20,8 @@ package it.unibz.inf.ontop.model.term;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.ObjectConstant;
 
 public interface BNode extends ObjectConstant {
 
-	public String getName();
+	String getName();
 }

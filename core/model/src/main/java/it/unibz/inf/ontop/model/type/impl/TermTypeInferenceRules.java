@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
 
 /**
  * TODO: explain

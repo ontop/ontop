@@ -8,13 +8,13 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -31,7 +31,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static org.junit.Assert.fail;
 
@@ -45,13 +46,13 @@ public class MappingTest {
 
     private static final DBMetadata DB_METADATA;
 
-    private static Variable X = DATA_FACTORY.getVariable("x");
-    private static Variable S = DATA_FACTORY.getVariable("s");
-    private static Variable T = DATA_FACTORY.getVariable("t");
+    private static Variable X = TERM_FACTORY.getVariable("x");
+    private static Variable S = TERM_FACTORY.getVariable("s");
+    private static Variable T = TERM_FACTORY.getVariable("t");
 
-    private final static Variable F = DATA_FACTORY.getVariable("f0");
-    private final static Variable C = DATA_FACTORY.getVariable("client");
-    private final static Variable Y = DATA_FACTORY.getVariable("company");
+    private final static Variable F = TERM_FACTORY.getVariable("f0");
+    private final static Variable C = TERM_FACTORY.getVariable("client");
+    private final static Variable Y = TERM_FACTORY.getVariable("company");
 
     private static final DistinctVariableOnlyDataAtom P1_ST_ATOM;
     private static final DistinctVariableOnlyDataAtom P2_ST_ATOM;
@@ -99,8 +100,8 @@ public class MappingTest {
         BROKER_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(tableBrokerDef);
 
         URI_PREDICATE =  new URITemplatePredicateImpl(2);
-        ANS1_VAR1_PREDICATE = DATA_FACTORY.getAtomPredicate("http://example.org/Dealer", 1);
-        URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/person/{}");
+        ANS1_VAR1_PREDICATE = ATOM_FACTORY.getAtomPredicate("http://example.org/Dealer", 1);
+        URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/person/{}");
 
         BROKER_3_ATOM = ATOM_FACTORY.getDataAtom(BROKER_PREDICATE, ImmutableList.of(C,Y,C));
 
@@ -175,7 +176,7 @@ public class MappingTest {
     public void testTwoEqualVariablesInExtensionalTable() {
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(F),
-                DATA_FACTORY.getSubstitution(F, generateURI1(C)));
+                SUBSTITUTION_FACTORY.getSubstitution(F, generateURI1(C)));
 
         ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(BROKER_3_ATOM);
 
@@ -203,6 +204,6 @@ public class MappingTest {
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }
 }

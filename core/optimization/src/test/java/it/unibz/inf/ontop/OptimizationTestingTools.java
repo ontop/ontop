@@ -5,7 +5,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.OntopModelSingletons;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.InnerJoinOptimizer;
@@ -19,7 +19,7 @@ public class OptimizationTestingTools {
     private static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final DBMetadata EMPTY_METADATA = DBMetadataTestingTools.createDummyMetadata();
-    public static final OBDADataFactory DATA_FACTORY = OntopModelSingletons.DATA_FACTORY;
+    public static final TermFactory DATA_FACTORY = OntopModelSingletons.TERM_FACTORY;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
     public static final InnerJoinOptimizer INNER_JOIN_OPTIMIZER;
     public static final BindingLiftOptimizer BINDING_LIFT_OPTIMIZER;

@@ -7,23 +7,22 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.*;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.predicate.ExpressionOperation.CONCAT;
-import static it.unibz.inf.ontop.model.predicate.ExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.CONCAT;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
@@ -36,9 +35,9 @@ public class UriTemplateTest {
     private static Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral(URI_TEMPLATE_STR_2_PREFIX.getValue() + "{}");
     private static Constant URI_TEMPLATE_STR_3 =  DATA_FACTORY.getConstantLiteral("{}");
 
-    private final static AtomPredicate TABLE1_PREDICATE = DATA_FACTORY.getAtomPredicate("T1", 2);
-    private final static AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("T2", 2);
-    private final static AtomPredicate TABLE3_PREDICATE = DATA_FACTORY.getAtomPredicate("T3", 1);
+    private final static AtomPredicate TABLE1_PREDICATE = ATOM_FACTORY.getAtomPredicate("T1", 2);
+    private final static AtomPredicate TABLE2_PREDICATE = ATOM_FACTORY.getAtomPredicate("T2", 2);
+    private final static AtomPredicate TABLE3_PREDICATE = ATOM_FACTORY.getAtomPredicate("T3", 1);
 
     private final static Variable X = DATA_FACTORY.getVariable("x");
     private final static Variable Y = DATA_FACTORY.getVariable("y");
@@ -50,7 +49,7 @@ public class UriTemplateTest {
     private final static Variable E = DATA_FACTORY.getVariable("e");
     private final static Variable F = DATA_FACTORY.getVariable("f");
 
-    private final static AtomPredicate ANS1_PREDICATE_1 = DATA_FACTORY.getAtomPredicate("ans1", 1);
+    private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
 
     public UriTemplateTest() {
     }
@@ -71,21 +70,21 @@ public class UriTemplateTest {
         initialQueryBuilder.addChild(leftJoinNode, joinNode, LEFT);
 
         ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                DATA_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_1, A)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_1, A)));
         initialQueryBuilder.addChild(joinNode, leftConstructionNode);
 
         ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
         initialQueryBuilder.addChild(leftConstructionNode, leftDataNode);
 
         ConstructionNode middleConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                DATA_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_3, C)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_3, C)));
         initialQueryBuilder.addChild(joinNode, middleConstructionNode);
 
         ExtensionalDataNode middleDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
         initialQueryBuilder.addChild(middleConstructionNode, middleDataNode);
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                DATA_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_2, E)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_2, E)));
         initialQueryBuilder.addChild(leftJoinNode, rightConstructionNode, RIGHT);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, E));

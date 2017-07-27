@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;

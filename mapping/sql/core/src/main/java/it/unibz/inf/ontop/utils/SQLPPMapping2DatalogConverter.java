@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 public class SQLPPMapping2DatalogConverter {
@@ -102,7 +102,7 @@ public class SQLPPMapping2DatalogConverter {
                         QualifiedAttributeID qId = new QualifiedAttributeID(null, id);
                         if (needsCreating)
                             view.addAttribute(qId);
-                        Variable var = DATA_FACTORY.getVariable(id.getName());
+                        Variable var = TERM_FACTORY.getVariable(id.getName());
                         builder.put(qId, var);
                         arguments.add(var);
                     });
@@ -110,7 +110,7 @@ public class SQLPPMapping2DatalogConverter {
                     lookupTable = builder.build();
 
                     body = new ArrayList<>(1);
-                    body.add(DATA_FACTORY.getFunction(Relation2Predicate.createPredicateFromRelation(view), arguments));
+                    body.add(TERM_FACTORY.getFunction(Relation2Predicate.createPredicateFromRelation(view), arguments));
                 }
 
                 for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {
@@ -156,7 +156,7 @@ public class SQLPPMapping2DatalogConverter {
         for (Term t : terms)
             newTerms.add(renameTermVariables(t, attributes, idfac));
 
-        return DATA_FACTORY.getFunction(function.getFunctionSymbol(), newTerms);
+        return TERM_FACTORY.getFunction(function.getFunctionSymbol(), newTerms);
     }
 
     /**

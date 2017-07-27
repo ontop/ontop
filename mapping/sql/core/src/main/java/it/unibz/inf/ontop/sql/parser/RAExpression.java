@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.sql.parser.exceptions.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -159,7 +159,7 @@ public class RAExpression {
                     Variable v2 = re2.getAttributes().get(id);
                     if (v2 == null)
                         throw new IllegalArgumentException("Variable " + id + " not found in " + re2);
-                    return DATA_FACTORY.getFunctionEQ(v1, v2);
+                    return TERM_FACTORY.getFunctionEQ(v1, v2);
                 })
                 .collect(ImmutableCollectors.toList());
     }

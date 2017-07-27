@@ -3,9 +3,9 @@ package it.unibz.inf.ontop.reformulation.tests;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushDownBooleanExpressionOptimizer;
@@ -26,15 +26,15 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class PushDownBooleanExpressionOptimizerTest {
 
-    private final static AtomPredicate TABLE1_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 2);
-    private final static AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("table2", 2);
-    private final static AtomPredicate TABLE3_PREDICATE = DATA_FACTORY.getAtomPredicate("table3", 2);
-    private final static AtomPredicate TABLE4_PREDICATE = DATA_FACTORY.getAtomPredicate("table2", 3);
-    private final static AtomPredicate TABLE5_PREDICATE = DATA_FACTORY.getAtomPredicate("table3", 2);
-    private final static AtomPredicate ANS1_PREDICATE1 = DATA_FACTORY.getAtomPredicate("ans1", 4);
-    private final static AtomPredicate ANS1_PREDICATE2 = DATA_FACTORY.getAtomPredicate("ans1", 3);
-    private final static AtomPredicate ANS1_PREDICATE3 = DATA_FACTORY.getAtomPredicate("ans1", 5);
-    private final static AtomPredicate ANS2_PREDICATE1 = DATA_FACTORY.getAtomPredicate("ans2", 2);
+    private final static AtomPredicate TABLE1_PREDICATE = ATOM_FACTORY.getAtomPredicate("table1", 2);
+    private final static AtomPredicate TABLE2_PREDICATE = ATOM_FACTORY.getAtomPredicate("table2", 2);
+    private final static AtomPredicate TABLE3_PREDICATE = ATOM_FACTORY.getAtomPredicate("table3", 2);
+    private final static AtomPredicate TABLE4_PREDICATE = ATOM_FACTORY.getAtomPredicate("table2", 3);
+    private final static AtomPredicate TABLE5_PREDICATE = ATOM_FACTORY.getAtomPredicate("table3", 2);
+    private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getAtomPredicate("ans1", 4);
+    private final static AtomPredicate ANS1_PREDICATE2 = ATOM_FACTORY.getAtomPredicate("ans1", 3);
+    private final static AtomPredicate ANS1_PREDICATE3 = ATOM_FACTORY.getAtomPredicate("ans1", 5);
+    private final static AtomPredicate ANS2_PREDICATE1 = ATOM_FACTORY.getAtomPredicate("ans2", 2);
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable Y = DATA_FACTORY.getVariable("Y");
     private final static Variable Z = DATA_FACTORY.getVariable("Z");

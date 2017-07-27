@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.ObjectSomeValuesFrom;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Represents ObjectPropertyExpression from the OWL 2 QL Specification
@@ -66,7 +66,7 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	 */
 	
 	ObjectPropertyExpressionImpl(String name) {
-		this.predicate = DATA_FACTORY.getObjectPropertyPredicate(name);
+		this.predicate = TERM_FACTORY.getObjectPropertyPredicate(name);
 		this.isInverse = false;
 		this.string = name;
 		this.isTop = name.equals(owlTopObjectPropertyIRI);

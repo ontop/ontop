@@ -2,11 +2,13 @@ package it.unibz.inf.ontop.model.atom;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
 public interface AtomFactory {
+
+    AtomPredicate getAtomPredicate(String name, int arity);
+    AtomPredicate getAtomPredicate(Predicate datalogPredicate);
 
     /**
      * Beware: a DataAtom is immutable
@@ -31,4 +33,12 @@ public interface AtomFactory {
     VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, Variable... terms);
 
     VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> terms);
+
+    Function getTripleAtom(Term subject, Term predicate, Term object);
+
+    /**
+     * TODO: create an abstraction of DataAtom (Atom) that accepts arbitrary ImmutableTerms as arguments
+     * (not only Variable or ground terms)
+     */
+    ImmutableFunctionalTerm getImmutableTripleAtom(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object);
 }

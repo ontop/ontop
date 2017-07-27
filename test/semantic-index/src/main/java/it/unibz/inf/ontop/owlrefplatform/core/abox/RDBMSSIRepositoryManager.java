@@ -24,8 +24,8 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.ontology.Assertion;
@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Store ABox assertions in the DB
@@ -1022,50 +1022,50 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, COL_TYPE type) {
 
-		Variable X = DATA_FACTORY.getVariable("X");
+		Variable X = TERM_FACTORY.getVariable("X");
 
-		//Predicate headPredicate = DATA_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
-		//Function head = DATA_FACTORY.getFunction(headPredicate, X);
+		//Predicate headPredicate = TERM_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
+		//Function head = TERM_FACTORY.getFunction(headPredicate, X);
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (type == COL_TYPE.OBJECT) 
-			subjectTerm = DATA_FACTORY.getImmutableUriTemplate(X);
+			subjectTerm = TERM_FACTORY.getImmutableUriTemplate(X);
 		else {
 			assert (type == COL_TYPE.BNODE); 
-			subjectTerm = DATA_FACTORY.getImmutableBNodeTemplate(X);
+			subjectTerm = TERM_FACTORY.getImmutableBNodeTemplate(X);
 		}
 
-		ImmutableFunctionalTerm body = DATA_FACTORY.getImmutableFunctionalTerm(predicate, subjectTerm);
+		ImmutableFunctionalTerm body = TERM_FACTORY.getImmutableFunctionalTerm(predicate, subjectTerm);
 		return ImmutableList.of(body);
 	}
 	
 	
 	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
 
-		Variable X = DATA_FACTORY.getVariable("X");
-		Variable Y = DATA_FACTORY.getVariable("Y");
+		Variable X = TERM_FACTORY.getVariable("X");
+		Variable Y = TERM_FACTORY.getVariable("Y");
 
-		//Predicate headPredicate = DATA_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
-		//Function head = DATA_FACTORY.getFunction(headPredicate, X, Y);
+		//Predicate headPredicate = TERM_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
+		//Function head = TERM_FACTORY.getFunction(headPredicate, X, Y);
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (type1 == COL_TYPE.OBJECT) 
-			subjectTerm = DATA_FACTORY.getImmutableUriTemplate(X);
+			subjectTerm = TERM_FACTORY.getImmutableUriTemplate(X);
 		else {
 			assert (type1 == COL_TYPE.BNODE); 
-			subjectTerm = DATA_FACTORY.getImmutableBNodeTemplate(X);
+			subjectTerm = TERM_FACTORY.getImmutableBNodeTemplate(X);
 		}
 		
 		ImmutableFunctionalTerm objectTerm;
 		switch (type2) {
 			case BNODE:
-				objectTerm = DATA_FACTORY.getImmutableBNodeTemplate(Y);
+				objectTerm = TERM_FACTORY.getImmutableBNodeTemplate(Y);
 				break;
 			case OBJECT:
-				objectTerm = DATA_FACTORY.getImmutableUriTemplate(Y);
+				objectTerm = TERM_FACTORY.getImmutableUriTemplate(Y);
 				break;
 			case LITERAL_LANG:	
-				objectTerm = DATA_FACTORY.getImmutableTypedTerm(Y, DATA_FACTORY.getVariable("Z"));
+				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, TERM_FACTORY.getVariable("Z"));
 				break;
 			case DATE:
 			case TIME:
@@ -1073,10 +1073,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				// R: these three types were not covered by the old switch
 				throw new RuntimeException("Unsuported type: " + type2);
 			default:
-				objectTerm = DATA_FACTORY.getImmutableTypedTerm(Y, type2);
+				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, type2);
 		}
 
-		ImmutableFunctionalTerm body = DATA_FACTORY.getImmutableFunctionalTerm(predicate, subjectTerm, objectTerm);
+		ImmutableFunctionalTerm body = TERM_FACTORY.getImmutableFunctionalTerm(predicate, subjectTerm, objectTerm);
 		return ImmutableList.of(body);
 	}
 

@@ -3,12 +3,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Expression;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.type.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -22,8 +22,8 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.LITERAL;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.LITERAL;
 
 
 
@@ -32,7 +32,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
  */
 public class TypeExtractor {
 
-    private static final TermType LITERAL_TYPE = DATA_FACTORY.getTermType(LITERAL);
+    private static final TermType LITERAL_TYPE = TYPE_FACTORY.getTermType(LITERAL);
 
 
     public static class TypeResults {
@@ -135,7 +135,7 @@ public class TypeExtractor {
 
                             //get type from metadata
                             Predicate.COL_TYPE type = JdbcTypeMapper.getInstance().getPredicate(attribute.getType());
-                            defaultTypeBuilder.add(DATA_FACTORY.getTermType(type));
+                            defaultTypeBuilder.add(TYPE_FACTORY.getTermType(type));
                         }
                         else{
                             defaultTypeBuilder.add(LITERAL_TYPE);

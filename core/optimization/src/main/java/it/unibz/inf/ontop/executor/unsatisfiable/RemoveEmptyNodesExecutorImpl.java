@@ -22,7 +22,7 @@ import it.unibz.inf.ontop.iq.proposal.impl.NodeTrackingResultsImpl;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.executor.substitution.AscendingPropagationTools.propagateSubstitutionUp;
-import static it.unibz.inf.ontop.model.impl.ImmutableSubstitutionTools.computeNullSubstitution;
+import static it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools.computeNullSubstitution;
 
 /**
  * TODO: explain

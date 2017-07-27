@@ -22,8 +22,8 @@ package it.unibz.inf.ontop.parser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 
 import java.util.Map;
 
@@ -32,7 +32,7 @@ import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class TurtleOBDASyntaxParser implements TargetQueryParser {
 
@@ -79,7 +79,7 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 			TurtleOBDAParser parser = new TurtleOBDAParser(tokenStream);
 			return parser.parse().stream()
-					.map(DATA_FACTORY::getImmutableFunctionalTerm)
+					.map(TERM_FACTORY::getImmutableFunctionalTerm)
 					.collect(ImmutableCollectors.toList());
 		} catch (RecognitionException e) {
 			throw new TargetQueryParserException(input, e);
@@ -105,11 +105,11 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 			sb.append(">");
 			sb.append(" .\n");
 		}
-		sb.append("@PREFIX " + OBDAVocabulary.PREFIX_XSD + " <" + OBDAVocabulary.NS_XSD + "> .\n");
-		sb.append("@PREFIX " + OBDAVocabulary.PREFIX_OBDA + " <" + OBDAVocabulary.NS_OBDA + "> .\n");
-		sb.append("@PREFIX " + OBDAVocabulary.PREFIX_RDF + " <" + OBDAVocabulary.NS_RDF + "> .\n");
-		sb.append("@PREFIX " + OBDAVocabulary.PREFIX_RDFS + " <" + OBDAVocabulary.NS_RDFS + "> .\n");
-		sb.append("@PREFIX " + OBDAVocabulary.PREFIX_OWL + " <" + OBDAVocabulary.NS_OWL + "> .\n");
+		sb.append("@PREFIX " + IriConstants.PREFIX_XSD + " <" + IriConstants.NS_XSD + "> .\n");
+		sb.append("@PREFIX " + IriConstants.PREFIX_OBDA + " <" + IriConstants.NS_OBDA + "> .\n");
+		sb.append("@PREFIX " + IriConstants.PREFIX_RDF + " <" + IriConstants.NS_RDF + "> .\n");
+		sb.append("@PREFIX " + IriConstants.PREFIX_RDFS + " <" + IriConstants.NS_RDFS + "> .\n");
+		sb.append("@PREFIX " + IriConstants.PREFIX_OWL + " <" + IriConstants.NS_OWL + "> .\n");
 		query.insert(0, sb);
 	}
 }

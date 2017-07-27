@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.MaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
@@ -45,7 +45,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 @Command(name = "materialize",
         description = "Materialize the RDF graph exposed by the mapping and the OWL ontology")
@@ -140,19 +140,19 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         Collection<Predicate> predicates = new ArrayList<>();
 
         for (OWLClass owlClass : ontology.getClassesInSignature()) {
-            Predicate predicate = DATA_FACTORY.getClassPredicate(owlClass.getIRI().toString());
+            Predicate predicate = TERM_FACTORY.getClassPredicate(owlClass.getIRI().toString());
             predicates.add(predicate);
         }
         for (OWLDataProperty owlDataProperty : ontology.getDataPropertiesInSignature()) {
-            Predicate predicate = DATA_FACTORY.getDataPropertyPredicate(owlDataProperty.getIRI().toString());
+            Predicate predicate = TERM_FACTORY.getDataPropertyPredicate(owlDataProperty.getIRI().toString());
             predicates.add(predicate);
         }
         for(OWLObjectProperty owlObjectProperty: ontology.getObjectPropertiesInSignature()){
-            Predicate predicate = DATA_FACTORY.getObjectPropertyPredicate(owlObjectProperty.getIRI().toString());
+            Predicate predicate = TERM_FACTORY.getObjectPropertyPredicate(owlObjectProperty.getIRI().toString());
             predicates.add(predicate);
         }
         for (OWLAnnotationProperty owlAnnotationProperty : ontology.getAnnotationPropertiesInSignature()) {
-            Predicate predicate = DATA_FACTORY.getAnnotationPropertyPredicate(owlAnnotationProperty.getIRI().toString());
+            Predicate predicate = TERM_FACTORY.getAnnotationPropertyPredicate(owlAnnotationProperty.getIRI().toString());
             predicates.add(predicate);
         }
         return ImmutableList.copyOf(predicates);

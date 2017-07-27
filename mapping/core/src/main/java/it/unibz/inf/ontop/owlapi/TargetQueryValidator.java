@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,8 +113,8 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	}
 
 	@Override
-	public boolean isSameAs(Predicate p) { return p.getName().equals(OBDAVocabulary.SAME_AS); }
+	public boolean isSameAs(Predicate p) { return p.getName().equals(IriConstants.SAME_AS); }
 
     //@Override
-    public boolean isCanonicalIRI(Predicate p) { return p.getName().equals(OBDAVocabulary.CANONICAL_IRI); }
+    public boolean isCanonicalIRI(Predicate p) { return p.getName().equals(IriConstants.CANONICAL_IRI); }
 }

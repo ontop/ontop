@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class LinearInclusionDependencyTools {
 
@@ -82,41 +82,41 @@ public class LinearInclusionDependencyTools {
     private static final String variableZname = "z";
 
     private static Function translate(ObjectPropertyExpression property) {
-        final Variable varX = DATA_FACTORY.getVariable(variableXname);
-        final Variable varY = DATA_FACTORY.getVariable(variableYname);
+        final Variable varX = TERM_FACTORY.getVariable(variableXname);
+        final Variable varY = TERM_FACTORY.getVariable(variableYname);
 
         if (property.isInverse())
-            return DATA_FACTORY.getFunction(property.getPredicate(), varY, varX);
+            return TERM_FACTORY.getFunction(property.getPredicate(), varY, varX);
         else
-            return DATA_FACTORY.getFunction(property.getPredicate(), varX, varY);
+            return TERM_FACTORY.getFunction(property.getPredicate(), varX, varY);
     }
 
     private static Function translate(DataPropertyExpression property) {
-        final Variable varX = DATA_FACTORY.getVariable(variableXname);
-        final Variable varY = DATA_FACTORY.getVariable(variableYname);
+        final Variable varX = TERM_FACTORY.getVariable(variableXname);
+        final Variable varY = TERM_FACTORY.getVariable(variableYname);
 
-        return DATA_FACTORY.getFunction(property.getPredicate(), varX, varY);
+        return TERM_FACTORY.getFunction(property.getPredicate(), varX, varY);
     }
 
     private static Function translate(ClassExpression description, String existentialVariableName) {
-        final Variable varX = DATA_FACTORY.getVariable(variableXname);
+        final Variable varX = TERM_FACTORY.getVariable(variableXname);
         if (description instanceof OClass) {
             OClass klass = (OClass) description;
-            return DATA_FACTORY.getFunction(klass.getPredicate(), varX);
+            return TERM_FACTORY.getFunction(klass.getPredicate(), varX);
         }
         else if (description instanceof ObjectSomeValuesFrom) {
-            final Variable varY = DATA_FACTORY.getVariable(existentialVariableName);
+            final Variable varY = TERM_FACTORY.getVariable(existentialVariableName);
             ObjectPropertyExpression property = ((ObjectSomeValuesFrom) description).getProperty();
             if (property.isInverse())
-                return DATA_FACTORY.getFunction(property.getPredicate(), varY, varX);
+                return TERM_FACTORY.getFunction(property.getPredicate(), varY, varX);
             else
-                return DATA_FACTORY.getFunction(property.getPredicate(), varX, varY);
+                return TERM_FACTORY.getFunction(property.getPredicate(), varX, varY);
         }
         else {
             assert (description instanceof DataSomeValuesFrom);
-            final Variable varY = DATA_FACTORY.getVariable(existentialVariableName);
+            final Variable varY = TERM_FACTORY.getVariable(existentialVariableName);
             DataPropertyExpression property = ((DataSomeValuesFrom) description).getProperty();
-            return DATA_FACTORY.getFunction(property.getPredicate(), varX, varY);
+            return TERM_FACTORY.getFunction(property.getPredicate(), varX, varY);
         }
     }
 }

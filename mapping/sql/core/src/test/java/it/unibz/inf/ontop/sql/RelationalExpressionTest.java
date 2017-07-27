@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.sql.parser.ExpressionParser;
@@ -18,7 +18,7 @@ import net.sf.jsqlparser.schema.Table;
 import org.junit.Before;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -41,11 +41,11 @@ public class RelationalExpressionTest {
 
     @Before
     public void setupTest(){
-        x = DATA_FACTORY.getVariable("x");
-        y = DATA_FACTORY.getVariable("y");
+        x = TERM_FACTORY.getVariable("x");
+        y = TERM_FACTORY.getVariable("y");
 
-        f1 = DATA_FACTORY.getFunction(
-                DATA_FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
+        f1 = TERM_FACTORY.getFunction(
+                TERM_FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
                 ImmutableList.of(x, y));
 
         table1 = MDFAC.createRelationID(null, "P");
@@ -63,11 +63,11 @@ public class RelationalExpressionTest {
                         ImmutableMap.of(qaTx, x, qaTy, y, qaNx, x, qaNy, y),
                         ImmutableMap.of(attX, ImmutableSet.of(table1), attY, ImmutableSet.of(table1))));
 
-        u = DATA_FACTORY.getVariable("u");
-        v = DATA_FACTORY.getVariable("v");
+        u = TERM_FACTORY.getVariable("u");
+        v = TERM_FACTORY.getVariable("v");
 
-        f2 = DATA_FACTORY.getFunction(
-                DATA_FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
+        f2 = TERM_FACTORY.getFunction(
+                TERM_FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
                 ImmutableList.of(u, v));
 
         RelationID table2 = MDFAC.createRelationID(null, "Q");
@@ -86,11 +86,11 @@ public class RelationalExpressionTest {
                         ImmutableMap.of(attu, ImmutableSet.of(table2), attv, ImmutableSet.of(table2))));
 
 
-        Variable w = DATA_FACTORY.getVariable("u");
-        Variable z = DATA_FACTORY.getVariable("v");
+        Variable w = TERM_FACTORY.getVariable("u");
+        Variable z = TERM_FACTORY.getVariable("v");
 
-        Function f3 = DATA_FACTORY.getFunction(
-                DATA_FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
+        Function f3 = TERM_FACTORY.getFunction(
+                TERM_FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
                 ImmutableList.of(w, z));
 
         RelationID table3 = MDFAC.createRelationID(null, "R");
@@ -105,7 +105,7 @@ public class RelationalExpressionTest {
                 RAExpressionAttributes.create(ImmutableMap.of(attW, w, attZ, z), table3)
         );
 
-        eq = DATA_FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(x, u));
+        eq = TERM_FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(x, u));
 
         onExpression = new EqualsTo();
         onExpression.setLeftExpression(new Column(new Table("P"), "A"));

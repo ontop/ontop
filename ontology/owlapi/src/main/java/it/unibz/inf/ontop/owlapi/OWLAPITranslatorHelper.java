@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlapi;
 
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Constant;
@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorOWL2QL.TranslationException;
 import org.semanticweb.owlapi.model.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class OWLAPITranslatorHelper {
 
@@ -50,11 +50,11 @@ public class OWLAPITranslatorHelper {
 
 		ValueConstant c2;
 		if(!object.getLang().isEmpty()) {
-			c2 = DATA_FACTORY.getConstantLiteral(object.getLiteral(), object.getLang());
+			c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), object.getLang());
 		}
 		else {
 			Predicate.COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
-			c2 = DATA_FACTORY.getConstantLiteral(object.getLiteral(), type);
+			c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), type);
 		}
 		URIConstant c1 = getIndividual(ax.getSubject());
 
@@ -139,7 +139,7 @@ public class OWLAPITranslatorHelper {
 		if (ind.isAnonymous()) 
 			throw new TranslationException("Found anonymous individual, this feature is not supported:" + ind);
 
-		 return DATA_FACTORY.getConstantURI(ind.asOWLNamedIndividual().getIRI().toString());
+		 return TERM_FACTORY.getConstantURI(ind.asOWLNamedIndividual().getIRI().toString());
 	}
 
 
@@ -151,7 +151,7 @@ public class OWLAPITranslatorHelper {
      */
 	private URIConstant getIndividual(OWLAnnotationSubject subject) throws TranslationException {
 		if (subject instanceof IRI) {
-			return DATA_FACTORY.getConstantURI( ((IRI) subject).asIRI().get().toString());
+			return TERM_FACTORY.getConstantURI( ((IRI) subject).asIRI().get().toString());
 		}
 		else{
 			throw new TranslationException("Found anonymous individual, this feature is not supported:" + subject);
@@ -168,16 +168,16 @@ public class OWLAPITranslatorHelper {
 	private Constant getValue (OWLAnnotationValue value)  throws TranslationException {
 		try {
 			if (value instanceof IRI) {
-				return DATA_FACTORY.getConstantURI(value.asIRI().get().toString());
+				return TERM_FACTORY.getConstantURI(value.asIRI().get().toString());
 			}
 			if (value instanceof OWLLiteral) {
 				OWLLiteral owlLiteral = value.asLiteral().get();
 				if (!owlLiteral.getLang().isEmpty()) {
 
-					return DATA_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), owlLiteral.getLang());
+					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), owlLiteral.getLang());
 				} else {
 					Predicate.COL_TYPE type = OWLTypeMapper.getType(owlLiteral.getDatatype());
-					return DATA_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), type);
+					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), type);
 				}
 
 			} else {

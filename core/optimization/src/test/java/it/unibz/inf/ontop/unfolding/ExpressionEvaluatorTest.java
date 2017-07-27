@@ -6,15 +6,13 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
@@ -25,8 +23,10 @@ import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.predicate.ExpressionOperation.*;
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.INTEGER;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.*;
 import static org.junit.Assert.assertNotEquals;
 
@@ -35,11 +35,11 @@ import static org.junit.Assert.assertNotEquals;
  */
 public class ExpressionEvaluatorTest {
 
-    private final AtomPredicate TABLE1_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 2);
-    private final AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("table2", 2);
+    private final AtomPredicate TABLE1_PREDICATE = ATOM_FACTORY.getAtomPredicate("table1", 2);
+    private final AtomPredicate TABLE2_PREDICATE = ATOM_FACTORY.getAtomPredicate("table2", 2);
 
-    private final static AtomPredicate ANS1_ARITY_3_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 3);
-    private final static AtomPredicate ANS1_ARITY_2_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 2);
+    private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
+    private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
 
     private final Variable X = DATA_FACTORY.getVariable("x");
     private final Variable Y = DATA_FACTORY.getVariable("y");
@@ -93,14 +93,14 @@ public class ExpressionEvaluatorTest {
 
         //construct left side join
         ConstructionNode leftNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,W),
-                DATA_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B,B)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B,B)));
         queryBuilder.addChild(joinNode, leftNode);
 
         queryBuilder.addChild(leftNode, DATA_NODE_1);
 
         //construct right side join
         ConstructionNode rightNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                DATA_FACTORY.getSubstitution(X, generateURI1(C), Y, generateInt(D)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(C), Y, generateInt(D)));
 
         queryBuilder.addChild(joinNode, rightNode);
 
@@ -123,7 +123,7 @@ public class ExpressionEvaluatorTest {
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution( W, generateLangString(B, B), X, generateURI1(A), Y, generateInt(D)));
+                SUBSTITUTION_FACTORY.getSubstitution( W, generateLangString(B, B), X, generateURI1(A), Y, generateInt(D)));
 
         expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
 
@@ -151,7 +151,7 @@ public class ExpressionEvaluatorTest {
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(X, generateURI1(A), Y, generateInt(D), W, generateLangString(B, langValueConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), Y, generateInt(D), W, generateLangString(B, langValueConstant)));
 
         expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
 
@@ -178,7 +178,7 @@ public class ExpressionEvaluatorTest {
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
-                DATA_FACTORY.getSubstitution(X, generateURI1(C), Y, generateInt(D), W, generateLangString(B, langValueConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(C), Y, generateInt(D), W, generateLangString(B, langValueConstant)));
 
         expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
 
@@ -217,14 +217,14 @@ public class ExpressionEvaluatorTest {
 
         //construct left side join
         ConstructionNode leftNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,W),
-                DATA_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B,langValueConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B,langValueConstant)));
         queryBuilder.addChild(joinNode, leftNode);
 
         queryBuilder.addChild(leftNode, DATA_NODE_1);
 
         //construct right side join
         ConstructionNode rightNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                DATA_FACTORY.getSubstitution(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(C),
                         Y, generateInt(D)));
 
@@ -268,7 +268,7 @@ public class ExpressionEvaluatorTest {
 
         //construct left side join
         ConstructionNode leftNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                DATA_FACTORY.getSubstitution(
+                SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(C),
                         Y, generateInt(D)));
 
@@ -277,7 +277,7 @@ public class ExpressionEvaluatorTest {
 
         //construct right side join
         ConstructionNode rightNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,W),
-                DATA_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B,langValueConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B,langValueConstant)));
 
 
         queryBuilder.addChild(joinNode, rightNode);
@@ -309,9 +309,9 @@ public class ExpressionEvaluatorTest {
                 (ANS1_ARITY_2_PREDICATE, X ,Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                DATA_FACTORY.getSubstitution(X, generateURI2(A,B)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(A,B)));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
-                DATA_FACTORY.getSubstitution(Y, generateURI2(C,D)));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI2(C,D)));
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(NEQ, X, Y));
 
@@ -335,7 +335,7 @@ public class ExpressionEvaluatorTest {
 
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X, Y),
-                DATA_FACTORY.getSubstitution(X, generateURI2(A,B), Y, generateURI2(C,D)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(A,B), Y, generateURI2(C,D)));
 
         ImmutableExpression subExpression1 = DATA_FACTORY.getImmutableExpression(NEQ, A, C);
         ImmutableExpression subExpression2 = DATA_FACTORY.getImmutableExpression(NEQ, B, D);
@@ -474,25 +474,25 @@ public class ExpressionEvaluatorTest {
 
     private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, Constant argument2) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                DATA_FACTORY.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.LITERAL_LANG),
+                TYPE_FACTORY.getTypePredicate(Predicate.COL_TYPE.LITERAL_LANG),
                 argument1, argument2);
     }
     private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, VariableOrGroundTerm argument2) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                DATA_FACTORY.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.LITERAL_LANG),
+                TYPE_FACTORY.getTypePredicate(Predicate.COL_TYPE.LITERAL_LANG),
                 argument1, argument2);
     }
 
 
     private ImmutableFunctionalTerm generateLiteral(Constant argument1) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                DATA_FACTORY.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.LITERAL),
+                TYPE_FACTORY.getTypePredicate(Predicate.COL_TYPE.LITERAL),
                 argument1);
     }
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                DATA_FACTORY.getDatatypeFactory().getTypePredicate(INTEGER),
+                TYPE_FACTORY.getTypePredicate(INTEGER),
                 argument);
     }
 }

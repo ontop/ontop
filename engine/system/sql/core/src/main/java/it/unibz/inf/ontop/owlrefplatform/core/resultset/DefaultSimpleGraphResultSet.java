@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.AssertionFactory;
@@ -37,7 +36,7 @@ import org.eclipse.rdf4j.query.algebra.*;
 
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
@@ -128,7 +127,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 String predicateName = predicateConstant.getValue();
                 Assertion assertion;
                 try {
-                    if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
+                    if (predicateName.equals(IriConstants.RDF_TYPE)) {
                         assertion = ofac.createClassAssertion(objectConstant.getValue(), subjectConstant);
                     } else {
                         if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode))
@@ -191,11 +190,11 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
         if (ve instanceof org.eclipse.rdf4j.query.algebra.ValueConstant) {
             org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
             if (vc.getValue() instanceof IRI) {
-                constant = DATA_FACTORY.getConstantURI(vc.getValue().stringValue());
+                constant = TERM_FACTORY.getConstantURI(vc.getValue().stringValue());
             } else if (vc.getValue() instanceof Literal) {
-                constant = DATA_FACTORY.getConstantLiteral(vc.getValue().stringValue());
+                constant = TERM_FACTORY.getConstantLiteral(vc.getValue().stringValue());
             } else {
-                constant = DATA_FACTORY.getConstantBNode(vc.getValue().stringValue());
+                constant = TERM_FACTORY.getConstantBNode(vc.getValue().stringValue());
             }
         } else {
             constant = resSet.getConstant(node_name);

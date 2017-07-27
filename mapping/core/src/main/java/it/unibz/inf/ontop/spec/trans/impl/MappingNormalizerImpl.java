@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.trans.MappingNormalizer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -19,7 +19,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 
 @Singleton
@@ -64,8 +65,8 @@ public class MappingNormalizerImpl implements MappingNormalizer {
                                                                  IntermediateQuery query, int suffix) {
         Map<Variable, Variable> substitutionMap =
                 query.getKnownVariables().stream()
-                        .collect(Collectors.toMap(v -> v, v -> DATA_FACTORY.getVariable(v.getName()+"m"+suffix)));
-        QueryRenamer queryRenamer = transformerFactory.createRenamer(DATA_FACTORY.getInjectiveVar2VarSubstitution(substitutionMap));
+                        .collect(Collectors.toMap(v -> v, v -> TERM_FACTORY.getVariable(v.getName()+"m"+suffix)));
+        QueryRenamer queryRenamer = transformerFactory.createRenamer(SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(substitutionMap));
         return queryRenamer.transform(query);
     }
 }

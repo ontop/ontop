@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
-import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl.OntopMappingOptions;
@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
 import org.apache.commons.rdf.api.Graph;
-import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
 import java.io.File;

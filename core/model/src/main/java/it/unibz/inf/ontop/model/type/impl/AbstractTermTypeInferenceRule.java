@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 /**
  * TODO: explain
@@ -50,7 +50,7 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
                 .forEach(i -> argumentTypes.get(i)
                         .ifPresent(t -> expectedBaseTypes.get(i).ifPresent(expectedBaseType -> {
                             if (!t.isCompatibleWith(expectedBaseType)) {
-                                throw new IncompatibleTermException(DATA_FACTORY.getTermType(expectedBaseType), t);
+                                throw new IncompatibleTermException(TYPE_FACTORY.getTermType(expectedBaseType), t);
                             }
                         })));
         doAdditionalChecks(argumentTypes);

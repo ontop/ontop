@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.ontology.Datatype;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class DatatypeImpl implements Datatype {
 	
@@ -35,7 +35,7 @@ public class DatatypeImpl implements Datatype {
 	public static final  Datatype rdfsLiteral; 
 	
 	static {
-	    rdfsLiteral = new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL));
+	    rdfsLiteral = new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL));
 	}
 	
 	DatatypeImpl(Predicate p) {

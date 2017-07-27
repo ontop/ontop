@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyRangeExpression;
 import it.unibz.inf.ontop.ontology.DataSomeValuesFrom;
@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Represents DataPropertyExpression from the OWL 2 QL Specification
@@ -63,7 +63,7 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	
 
 	DataPropertyExpressionImpl(String name) {
-		this.predicate = DATA_FACTORY.getDataPropertyPredicate(name);
+		this.predicate = TERM_FACTORY.getDataPropertyPredicate(name);
 		this.name = name;		
 		this.isTop = name.equals(owlTopDataPropertyIRI);
 		this.isBottom = name.equals(owlBottomDataPropertyIRI);

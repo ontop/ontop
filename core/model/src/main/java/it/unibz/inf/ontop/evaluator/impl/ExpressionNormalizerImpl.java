@@ -2,12 +2,12 @@ package it.unibz.inf.ontop.evaluator.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.OperationPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 public class ExpressionNormalizerImpl implements ExpressionNormalizer {
@@ -37,7 +37,7 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
 
     private ImmutableExpression normalizeArguments(OperationPredicate functionSymbol,
                                                    ImmutableList<? extends ImmutableTerm> arguments) {
-        return DATA_FACTORY.getImmutableExpression(
+        return TERM_FACTORY.getImmutableExpression(
                 functionSymbol,
                 arguments.stream()
                     .map(this::normalizeArgument)
@@ -55,7 +55,7 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
 
     private ImmutableExpression normalizeCommutative(OperationPredicate functionSymbol,
                                                      ImmutableList<? extends ImmutableTerm> arguments) {
-        return DATA_FACTORY.getImmutableExpression(functionSymbol, sortArguments(arguments));
+        return TERM_FACTORY.getImmutableExpression(functionSymbol, sortArguments(arguments));
     }
 
     private ImmutableList<? extends ImmutableTerm> sortArguments(ImmutableList<? extends ImmutableTerm> arguments) {

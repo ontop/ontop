@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.si.impl;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
@@ -165,7 +165,7 @@ public class GraphLoading {
                 String dataProperty = pred.stringValue();
                 vb.createDataProperty(dataProperty);
             }
-            else if (pred.stringValue().equals(OBDAVocabulary.RDF_TYPE)) {
+            else if (pred.stringValue().equals(IriConstants.RDF_TYPE)) {
                 String className = obj.stringValue();
                 vb.createClass(className);
             }

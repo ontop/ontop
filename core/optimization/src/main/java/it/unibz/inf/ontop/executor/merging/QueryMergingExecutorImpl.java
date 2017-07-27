@@ -35,7 +35,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 @Singleton
 public class QueryMergingExecutorImpl implements QueryMergingExecutor {
@@ -230,7 +230,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
 
 
         VariableGenerator variableGenerator = new VariableGenerator(treeComponent.getKnownVariables());
-        InjectiveVar2VarSubstitution renamingSubstitution = DATA_FACTORY.generateNotConflictingRenaming(variableGenerator,
+        InjectiveVar2VarSubstitution renamingSubstitution = SUBSTITUTION_FACTORY.generateNotConflictingRenaming(variableGenerator,
                 subQuery.getKnownVariables());
 
         IntermediateQuery renamedSubQuery;
@@ -282,7 +282,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
             if (!(nodeToInsert instanceof EmptyNode)) {
                 QueryNode originalNode = transformation.getNodeFromSubQuery();
 
-                renamedSubQuery.getChildren(originalNode).stream()
+                renamedSubQuery.getChildren(originalNode)
                         .forEach(child ->
                                 originalNodesToVisit.add(new Transformation(renamedSubQuery, child,
                                         substitutionToPropagate, nodeToInsert,
@@ -317,7 +317,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                 (ImmutableList<VariableOrGroundTerm>) targetAtom.getArguments()).stream()
                 .collect(ImmutableCollectors.toMap());
 
-        return DATA_FACTORY.getSubstitution(newMap);
+        return SUBSTITUTION_FACTORY.getSubstitution(newMap);
     }
 
     /**

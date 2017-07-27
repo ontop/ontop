@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -234,7 +234,7 @@ public class SelectQueryParser {
             // the order in the loop is important
             relation.getAttributes().forEach(attribute -> {
                 QuotedID attributeId = attribute.getID();
-                Variable var = DATA_FACTORY.getVariable(attributeId.getName() + relationIndex);
+                Variable var = TERM_FACTORY.getVariable(attributeId.getName() + relationIndex);
                 terms.add(var);
                 attributes.put(attributeId, var);
             });
@@ -364,11 +364,11 @@ public class SelectQueryParser {
                     throw new InvalidSelectQueryRuntimeException("Complex expression in SELECT must have an alias", selectExpressionItem);
 
                 QuotedID name = idfac.createAttributeID(columnAlias.getName());
-                Variable var = DATA_FACTORY.getVariable(name.getName() + relationIndex);
+                Variable var = TERM_FACTORY.getVariable(name.getName() + relationIndex);
                 map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
 
                 Term term = new ExpressionParser(idfac, attributes).parseTerm(expr);
-                assignment = DATA_FACTORY.getFunctionEQ(var, term);
+                assignment = TERM_FACTORY.getFunctionEQ(var, term);
             }
         }
     }

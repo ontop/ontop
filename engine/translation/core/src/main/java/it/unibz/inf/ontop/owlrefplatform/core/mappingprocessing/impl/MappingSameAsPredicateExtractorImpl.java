@@ -29,9 +29,9 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.model.impl.PredicateImpl;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.ValueConstant;
@@ -42,7 +42,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * 19/07/2017: partially refactored, in order to support some (unconventional) mapping assertions.
@@ -53,7 +54,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredicateExtractor{
 
     private final VariableDefinitionExtractor definitionExtractor;
-    private final AtomPredicate sameAsAtomPredicate = DATA_FACTORY.getAtomPredicate(DATA_FACTORY.getOWLSameAsPredicate());
+    private final AtomPredicate sameAsAtomPredicate = ATOM_FACTORY.getAtomPredicate(TERM_FACTORY.getOWLSameAsPredicate());
 
     public class ResultImpl implements Result {
         private final ImmutableSet<Predicate> subjectOnlySameAsRewritingTargets;

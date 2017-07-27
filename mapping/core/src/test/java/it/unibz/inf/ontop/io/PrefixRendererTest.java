@@ -27,12 +27,12 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
+import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 
 import junit.framework.TestCase;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.MAPPING_FACTORY;
 
 
@@ -45,18 +45,18 @@ public class PrefixRendererTest extends TestCase {
 		query = DATALOG_FACTORY.getDatalogProgram();
 
 		LinkedList<Term> innerterms = new LinkedList<Term>();
-		innerterms.add(DATA_FACTORY.getVariable("id"));
+		innerterms.add(TERM_FACTORY.getVariable("id"));
 		
 //		IRIFactory fact = new IRIFactory();
 
 		List<Term> terms = new LinkedList<Term>();
-		terms.add(DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
+		terms.add(TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
 
-		Function body = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("http://obda.org/onto.owl#Person"), terms);
+		Function body = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("http://obda.org/onto.owl#Person"), terms);
 
 		terms = new LinkedList<Term>();
-		terms.add(DATA_FACTORY.getVariable("id"));
-		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("http://obda.org/predicates#q", 1), terms);
+		terms.add(TERM_FACTORY.getVariable("id"));
+		Function head = TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate("http://obda.org/predicates#q", 1), terms);
 
 		rule1 = DATALOG_FACTORY.getCQIE(head, Collections.singletonList(body));
 		query.appendRule(rule1);

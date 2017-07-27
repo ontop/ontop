@@ -23,10 +23,10 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.model.predicate.BNodePredicate;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 public class MappingDataTypeCompletion {
@@ -98,11 +98,11 @@ public class MappingDataTypeCompletion {
             Variable variable = (Variable) term;
             Term newTerm;
             Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
-            newTerm = DATA_FACTORY.getTypedTerm(variable, type);
+            newTerm = TERM_FACTORY.getTypedTerm(variable, type);
             log.warn("Datatype for the value " + variable + " of the property " + predicate + " has been inferred from the database");
             atom.setTerm(position, newTerm);
         } else if (term instanceof ValueConstant) {
-            Term newTerm = DATA_FACTORY.getTypedTerm(term, ((ValueConstant) term).getType());
+            Term newTerm = TERM_FACTORY.getTypedTerm(term, ((ValueConstant) term).getType());
             atom.setTerm(position, newTerm);
         } else {
             throw new IllegalArgumentException("Unsupported subtype of: " + Term.class.getSimpleName());
@@ -125,7 +125,7 @@ public class MappingDataTypeCompletion {
                     // insert the datatype of the evaluated operation
                     atom.setTerm(
                             position,
-                            DATA_FACTORY.getTypedTerm(
+                            TERM_FACTORY.getTypedTerm(
                                     term,
                                     inferredType.get().getColType()
                             ));

@@ -9,8 +9,8 @@ import it.unibz.inf.ontop.iq.mapping.TargetAtom;
 import it.unibz.inf.ontop.iq.mapping.impl.TargetAtomImpl;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Term;
@@ -22,10 +22,10 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Collection;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.impl.GroundTermTools.castIntoGroundTerm;
-import static it.unibz.inf.ontop.model.impl.GroundTermTools.isGroundTerm;
-import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertIntoImmutableTerm;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.castIntoGroundTerm;
+import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
+import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertIntoImmutableTerm;
 
 public class DatalogConversionTools {
 
@@ -55,7 +55,7 @@ public class DatalogConversionTools {
         Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
         AtomPredicate atomPredicate = (datalogAtomPredicate instanceof AtomPredicate)
                 ? (AtomPredicate) datalogAtomPredicate
-                : DATA_FACTORY.getAtomPredicate(datalogAtomPredicate);
+                : ATOM_FACTORY.getAtomPredicate(datalogAtomPredicate);
 
         ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
         ImmutableMap.Builder<Variable, ImmutableTerm> allBindingBuilder = ImmutableMap.builder();
@@ -105,7 +105,7 @@ public class DatalogConversionTools {
         }
 
         DistinctVariableOnlyDataAtom dataAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(atomPredicate, argListBuilder.build());
-        ImmutableSubstitution<ImmutableTerm> substitution = DATA_FACTORY.getSubstitution(allBindingBuilder.build());
+        ImmutableSubstitution<ImmutableTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(allBindingBuilder.build());
 
 
         return new TargetAtomImpl(dataAtom, substitution);

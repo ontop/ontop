@@ -2,21 +2,21 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
-import it.unibz.inf.ontop.model.predicate.BNodePredicate;
-import it.unibz.inf.ontop.model.predicate.DatatypePredicate;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.TermConstants;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.IncompatibleTermException;
 
 import java.util.Map;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
 
 public class TermTypeInferenceTools {
 
@@ -93,11 +93,11 @@ public class TermTypeInferenceTools {
         return tableBuilder.build();
     }
 
-    private static final Optional<TermType> OPTIONAL_OBJECT_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(OBJECT));
-    private static final Optional<TermType> OPTIONAL_BNODE_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(BNODE));
-    private static final Optional<TermType> OPTIONAL_NULL_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(NULL));
+    private static final Optional<TermType> OPTIONAL_OBJECT_TERM_TYPE = Optional.of(TYPE_FACTORY.getTermType(OBJECT));
+    private static final Optional<TermType> OPTIONAL_BNODE_TERM_TYPE = Optional.of(TYPE_FACTORY.getTermType(BNODE));
+    private static final Optional<TermType> OPTIONAL_NULL_TERM_TYPE = Optional.of(TYPE_FACTORY.getTermType(NULL));
 
-    private static final DatatypePredicate LITERAL_LANG_PREDICATE = DATA_FACTORY.getDatatypeFactory()
+    private static final DatatypePredicate LITERAL_LANG_PREDICATE = TYPE_FACTORY
             .getTypePredicate(LITERAL_LANG);
 
     /**
@@ -137,9 +137,9 @@ public class TermTypeInferenceTools {
                         throw new IllegalStateException("A lang literal function should have two arguments");
                     }
                     Term secondArgument = f.getTerms().get(1);
-                    return Optional.of(DATA_FACTORY.getTermType(secondArgument));
+                    return Optional.of(TYPE_FACTORY.getTermType(secondArgument));
                 }
-                return Optional.of(DATA_FACTORY.getTermType(f.getFunctionSymbol().getType(0)));
+                return Optional.of(TYPE_FACTORY.getTermType(f.getFunctionSymbol().getType(0)));
 
             } else if (typePred instanceof URITemplatePredicate) {
                 return  OPTIONAL_OBJECT_TERM_TYPE;
@@ -157,11 +157,11 @@ public class TermTypeInferenceTools {
              * Deals with the ugly definition of the NULL constant.
              * COL_TYPE of NULL should be NULL!
              */
-            if (term == OBDAVocabulary.NULL) {
+            if (term == TermConstants.NULL) {
                 return OPTIONAL_NULL_TERM_TYPE;
             }
             else {
-                return Optional.of(DATA_FACTORY.getTermType(((ValueConstant) term).getType()));
+                return Optional.of(TYPE_FACTORY.getTermType(((ValueConstant) term).getType()));
             }
         } else if(term instanceof URIConstant){
             return OPTIONAL_OBJECT_TERM_TYPE;
@@ -178,7 +178,7 @@ public class TermTypeInferenceTools {
             case STRING:
                 return termType;
             default:
-                return DATA_FACTORY.getTermType(LITERAL);
+                return TYPE_FACTORY.getTermType(LITERAL);
         }
     }
 }

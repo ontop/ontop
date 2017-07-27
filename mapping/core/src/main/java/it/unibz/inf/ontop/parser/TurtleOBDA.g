@@ -303,19 +303,19 @@ private class ColumnString implements FormatString {
 		                      Predicate predicate = DATA_FACTORY.getClassPredicate(c.getValue());
 		                      atom = DATA_FACTORY.getFunction(predicate, subject);
 		                  } else {
-		                       atom = DATA_FACTORY.getTripleAtom(subject, pred, object);
+		                       atom = ATOM_FACTORY.getTripleAtom(subject, pred, object);
 		                  }
 		             }
 		             else if (object instanceof  Variable){
 		                  Term uriOfPred = DATA_FACTORY.getUriTemplate(pred);
 		                  Term uriOfObject = DATA_FACTORY.getUriTemplate(object);
-		                  atom = DATA_FACTORY.getTripleAtom(subject, uriOfPred,  uriOfObject);
+		                  atom = ATOM_FACTORY.getTripleAtom(subject, uriOfPred,  uriOfObject);
 		              }
 		             else {
 		                  throw new IllegalArgumentException("parser cannot handle object " + object);
 		              }
 		        } else if( ! QueryUtils.isGrounded(pred) ){
-		             atom = DATA_FACTORY.getTripleAtom(subject, pred,  object);
+		             atom = ATOM_FACTORY.getTripleAtom(subject, pred,  object);
 		        } else {
                 			             //Predicate predicate = DATA_FACTORY.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
                 			             Predicate predicate;
@@ -346,12 +346,12 @@ private class ColumnString implements FormatString {
 
 
 private static boolean isRDFType(Term pred) {
-//		if (pred instanceof Constant && ((Constant) pred).getValue().equals(OBDAVocabulary.RDF_TYPE)) {
+//		if (pred instanceof Constant && ((Constant) pred).getValue().equals(IriConstants.RDF_TYPE)) {
 //			return true;
 //		}
 		if (pred instanceof Function && ((Function) pred).getTerm(0) instanceof Constant ) {
 			String c= ((Constant) ((Function) pred).getTerm(0)).getValue();
-			return c.equals(OBDAVocabulary.RDF_TYPE);
+			return c.equals(IriConstants.RDF_TYPE);
 		}	
 		return false;
 	}
@@ -433,7 +433,7 @@ predicateObjectList returns [List<Function> value]
 verb returns [Term value]
   : predicate { $value = $predicate.value; }
   | 'a' {
-  Term constant = DATA_FACTORY.getConstantLiteral(OBDAVocabulary.RDF_TYPE);
+  Term constant = DATA_FACTORY.getConstantLiteral(IriConstants.RDF_TYPE);
   $value = DATA_FACTORY.getUriTemplate(constant);
   }
   ;

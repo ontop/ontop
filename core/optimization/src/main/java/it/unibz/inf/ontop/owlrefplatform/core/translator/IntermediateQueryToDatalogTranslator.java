@@ -30,10 +30,10 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.slf4j.LoggerFactory;
@@ -42,8 +42,7 @@ import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertToMutableFunction;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertToMutableFunction;
 
 /***
  * Translate a intermediate queries expression into a Datalog program that has the
@@ -298,7 +297,7 @@ public class IntermediateQueryToDatalogTranslator {
 			//DataAtom projectionAtom = generateProjectionAtom(ImmutableSet.of());
 			//heads.add(new RuleHead(new ImmutableSubstitutionImpl<>(ImmutableMap.of()), projectionAtom,Optional.empty()));
 			//return body;
-			body.add(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(DATA_FACTORY.getAtomPredicate("dummy", 0), ImmutableList.of()));
+			body.add(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getAtomPredicate("dummy", 0), ImmutableList.of()));
 			return body;
 
 		} else {
@@ -346,7 +345,7 @@ public class IntermediateQueryToDatalogTranslator {
 	}
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
-		AtomPredicate newPredicate = DATA_FACTORY.getAtomPredicate(SUBQUERY_PRED_PREFIX+ ++subQueryCounter,
+		AtomPredicate newPredicate = ATOM_FACTORY.getAtomPredicate(SUBQUERY_PRED_PREFIX+ ++subQueryCounter,
 				projectedVariables.size());
 		return ATOM_FACTORY.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}

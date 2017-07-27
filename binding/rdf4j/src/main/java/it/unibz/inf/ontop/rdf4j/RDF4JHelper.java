@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.rdf4j;
 
+import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.BNode;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.AnnotationAssertion;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.ClassAssertion;
@@ -21,7 +21,7 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import java.util.Objects;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class RDF4JHelper {
 
@@ -51,7 +51,7 @@ public class RDF4JHelper {
                 // creates xsd:langString
                 return fact.createLiteral(literal.getValue(), literal.getLanguage());
             default:
-                IRI datatype = DATATYPE_FACTORY.getDatatypeURI(literal.getType());
+                IRI datatype = TYPE_FACTORY.getDatatypeURI(literal.getType());
                 if (datatype == null)
                     throw new RuntimeException(
                             "Found unknown TYPE for constant: " + literal + " with COL_TYPE=" + literal.getType());
@@ -122,7 +122,7 @@ public class RDF4JHelper {
 
 	private static Statement createStatement(ClassAssertion assertion) {
 		return fact.createStatement(getResource(assertion.getIndividual()),
-				createURI(OBDAVocabulary.RDF_TYPE),
+				createURI(IriConstants.RDF_TYPE),
 				createURI(assertion.getConcept().getPredicate().getName()));
 	}
 }

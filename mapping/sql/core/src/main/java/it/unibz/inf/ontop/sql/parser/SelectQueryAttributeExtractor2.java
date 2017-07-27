@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Created by Roman Kontchakov on 25/01/2017.
@@ -342,6 +342,6 @@ public class SelectQueryAttributeExtractor2 {
     }
 
     private Variable createVariable(QuotedID id) {
-        return DATA_FACTORY.getVariable(id.getName() + relationIndex);
+        return TERM_FACTORY.getVariable(id.getName() + relationIndex);
     }
 }

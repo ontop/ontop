@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getNextNodeAndQuery;
 
@@ -160,7 +160,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
             else {
                 variablesFromOtherSubTrees.addAll(substitutionMap.keySet());
 
-                InjectiveVar2VarSubstitution renamingSubstitution = DATA_FACTORY.getInjectiveVar2VarSubstitution(substitutionMap);
+                InjectiveVar2VarSubstitution renamingSubstitution = SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(substitutionMap);
 
                 PullVariableOutOfSubTreeProposal<JoinLikeNode> proposal = new PullVariableOutOfSubTreeProposalImpl<>(
                         currentJoinLikeNode, renamingSubstitution, childNode);

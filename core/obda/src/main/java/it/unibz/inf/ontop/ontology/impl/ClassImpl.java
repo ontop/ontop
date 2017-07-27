@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.ontology.OClass;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class ClassImpl implements OClass {
 
@@ -40,7 +40,7 @@ public class ClassImpl implements OClass {
     public static final OClass owlNothing = new ClassImpl(owlNothingIRI); 
     	
 	ClassImpl(String name) {
-		this.predicate = DATA_FACTORY.getClassPredicate(name);
+		this.predicate = TERM_FACTORY.getClassPredicate(name);
 		this.name = name;
 		this.isNothing = name.equals(owlNothingIRI);
 		this.isThing = name.equals(owlThingIRI);

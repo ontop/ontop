@@ -8,14 +8,14 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.iq.proposal.GroundTermRemovalFromDataNodeProposal;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.iq.proposal.ProposalResults;
 import it.unibz.inf.ontop.iq.proposal.impl.ProposalResultsImpl;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.GroundTerm;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * TODO: explain
@@ -115,7 +115,7 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
         ImmutableList.Builder<ImmutableExpression> booleanExpressionBuilder = ImmutableList.builder();
 
         for (VariableGroundTermPair pair : pairs ) {
-            booleanExpressionBuilder.add(DATA_FACTORY.getImmutableExpression(
+            booleanExpressionBuilder.add(TERM_FACTORY.getImmutableExpression(
                     ExpressionOperation.EQ, pair.variable, pair.groundTerm));
         }
         Optional<ImmutableExpression> optionalFoldExpression = ImmutabilityTools.foldBooleanExpressions(

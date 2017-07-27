@@ -30,11 +30,11 @@ import eu.optique.r2rml.api.model.Template;
 import eu.optique.r2rml.api.model.TermMap;
 import eu.optique.r2rml.api.model.TriplesMap;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
-import it.unibz.inf.ontop.model.predicate.DatatypePredicate;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.DatatypePredicateImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -54,8 +54,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class R2RMLParser {
 
@@ -170,7 +170,7 @@ public class R2RMLParser {
 		if (subj != null) {
 			if(template == null && (termType.equals(R2RMLVocabulary.iri))){
 
-				subjectAtom = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getVariable(subj));
+				subjectAtom = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getVariable(subj));
 
 			}
 			else {
@@ -200,7 +200,7 @@ public class R2RMLParser {
 		List<IRI> classes = sMap.getClasses();
 		for (Object o : classes) {
             // TODO(xiao): toString() is suspicious
-            classPredicates.add(DATA_FACTORY.getClassPredicate(o.toString()));
+            classPredicates.add(TERM_FACTORY.getClassPredicate(o.toString()));
 		}
 
 		if (subjectAtom == null)
@@ -225,7 +225,7 @@ public class R2RMLParser {
 		    //
 			String pmConstant = pm.getConstant().toString();
 			if (pmConstant != null) {
-				Predicate bodyPredicate = DATA_FACTORY.getPredicate(pmConstant, 2);
+				Predicate bodyPredicate = TERM_FACTORY.getPredicate(pmConstant, 2);
 				bodyPredicates.add(bodyPredicate);
 			}
 		}
@@ -312,24 +312,24 @@ public class R2RMLParser {
 			// if the literal has a language property or a datatype property we
 			// create the function object later
 			if (lan != null || datatype != null) {
-				objectAtom = DATA_FACTORY.getConstantLiteral(((Literal) constantObj).getLexicalForm());
+				objectAtom = TERM_FACTORY.getConstantLiteral(((Literal) constantObj).getLexicalForm());
 
 			} else {
-//				Term newlit = DATA_FACTORY.getConstantLiteral( ((Literal) constantObj).getLexicalForm());
+//				Term newlit = TERM_FACTORY.getConstantLiteral( ((Literal) constantObj).getLexicalForm());
 //
 //				if (obj.startsWith("http://")) {
-//					objectAtom = DATA_FACTORY.getUriTemplate(newlit);
+//					objectAtom = TERM_FACTORY.getUriTemplate(newlit);
 //				} else {
-//					objectAtom = DATA_FACTORY.getTypedTerm(newlit, COL_TYPE.LITERAL); // .RDFS_LITERAL;
+//					objectAtom = TERM_FACTORY.getTypedTerm(newlit, COL_TYPE.LITERAL); // .RDFS_LITERAL;
 //				}
 
 				if (constantObj instanceof Literal){
-                    objectAtom = DATA_FACTORY.getImmutableTypedTerm(
-                    		DATA_FACTORY.getConstantLiteral( ((Literal) constantObj).getLexicalForm()),
+                    objectAtom = TERM_FACTORY.getImmutableTypedTerm(
+                    		TERM_FACTORY.getConstantLiteral( ((Literal) constantObj).getLexicalForm()),
 							COL_TYPE.LITERAL); // .RDFS_LITERAL;
                 } else if (constantObj instanceof IRI){
-                    objectAtom = DATA_FACTORY.getImmutableTypedTerm(
-                    		DATA_FACTORY.getConstantLiteral( ((IRI) constantObj).getIRIString()), COL_TYPE.LITERAL);
+                    objectAtom = TERM_FACTORY.getImmutableTypedTerm(
+                    		TERM_FACTORY.getConstantLiteral( ((IRI) constantObj).getIRIString()), COL_TYPE.LITERAL);
 
                 }
 			}
@@ -345,7 +345,7 @@ public class R2RMLParser {
 				col = joinCond + col;
 			}
 
-			objectAtom = DATA_FACTORY.getVariable(col);
+			objectAtom = TERM_FACTORY.getVariable(col);
 
 		}
 
@@ -374,7 +374,7 @@ public class R2RMLParser {
 						value = joinCond + value;
 
 					}
-					objectAtom = DATA_FACTORY.getVariable(value);
+					objectAtom = TERM_FACTORY.getVariable(value);
 				} else {
 					IRI type = om.getTermType();
 
@@ -392,7 +392,7 @@ public class R2RMLParser {
 
 			} else if(termMapType.equals(TermMap.TermMapType.COLUMN_VALUED)){
 				if(typ.equals(R2RMLVocabulary.iri)) {
-					objectAtom = DATA_FACTORY.getImmutableUriTemplate(objectAtom);
+					objectAtom = TERM_FACTORY.getImmutableUriTemplate(objectAtom);
 				}
 			}
 
@@ -401,21 +401,21 @@ public class R2RMLParser {
 		// we check if it is a literal with language tag
 
 		if (lan != null) {
-			objectAtom = DATA_FACTORY.getImmutableTypedTerm(objectAtom, lan);
+			objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, lan);
 		}else if ((typ.equals(R2RMLVocabulary.literal)) && (concat)){
-			objectAtom = DATA_FACTORY.getImmutableTypedTerm(objectAtom, COL_TYPE.LITERAL);
+			objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, COL_TYPE.LITERAL);
 		}
 
 		// we check if it is a typed literal
 		if (datatype != null) {
-			Predicate.COL_TYPE type = DATATYPE_FACTORY.getDatatype(datatype.toString());
+			Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(datatype.toString());
 			if (type == null) {
 				// throw new RuntimeException("Unsupported datatype: " +
 				// datatype.toString());
 				logger.warn("Unsupported datatype will not be converted: "
 						+ datatype.toString());
 			} else {
-				objectAtom = DATA_FACTORY.getImmutableTypedTerm(objectAtom, type);
+				objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, type);
 			}
 		}
 
@@ -427,8 +427,8 @@ public class R2RMLParser {
 		if (objectString.startsWith("http:"))
 			return getURIFunction(objectString);
 		else { // literal
-			Constant constt = DATA_FACTORY.getConstantLiteral(objectString);
-			return DATA_FACTORY.getTypedTerm(constt, COL_TYPE.LITERAL);
+			Constant constt = TERM_FACTORY.getConstantLiteral(objectString);
+			return TERM_FACTORY.getTypedTerm(constt, COL_TYPE.LITERAL);
 
 		}
 	}
@@ -447,8 +447,8 @@ public class R2RMLParser {
 				type = type.substring(0, type.length() - 1);
 
 			DatatypePredicate predicate = new DatatypePredicateImpl(type, COL_TYPE.OBJECT);
-			Term constant = DATA_FACTORY.getConstantLiteral(consts);
-			typedObject = DATA_FACTORY.getFunction(predicate, constant);
+			Term constant = TERM_FACTORY.getConstantLiteral(consts);
+			typedObject = TERM_FACTORY.getFunction(predicate, constant);
 		}
 		return typedObject;
 	}
@@ -562,7 +562,7 @@ public class R2RMLParser {
 				if ((i = getIndexOfCurlyB(str)) > 0){
 					cons = str.substring(0, i);
 					str = str.substring(str.indexOf("}", i)+1, str.length());
-					terms.add(DATA_FACTORY.getConstantLiteral(cons));
+					terms.add(TERM_FACTORY.getConstantLiteral(cons));
 				}else{
 					str = str.substring(str.indexOf("}")+1);
 				}
@@ -571,7 +571,7 @@ public class R2RMLParser {
 			String var = trim(string.substring(begin + 1, end));
 
 			// trim for making variable
-			terms.add(DATA_FACTORY.getVariable(joinCond + (var)));
+			terms.add(TERM_FACTORY.getVariable(joinCond + (var)));
 
 			string = string.replace("{\"" + var + "\"}", "[]");
 			string = string.replace("{" + var + "}", "[]");
@@ -580,7 +580,7 @@ public class R2RMLParser {
 		if(type == 4){
 			if (!str.equals("")){
 				cons = str;
-				terms.add(DATA_FACTORY.getConstantLiteral(cons));
+				terms.add(TERM_FACTORY.getConstantLiteral(cons));
 			}
 		}
 	
@@ -591,33 +591,33 @@ public class R2RMLParser {
 		switch (type) {
 		// constant uri
 		case 0:
-			uriTemplate = DATA_FACTORY.getConstantLiteral(string);
+			uriTemplate = TERM_FACTORY.getConstantLiteral(string);
 			terms.add(0, uriTemplate); // the URI template is always on the
 										// first position in the term list
-			return DATA_FACTORY.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+			return TERM_FACTORY.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 			// URI or IRI
 		case 1:
-			uriTemplate = DATA_FACTORY.getConstantLiteral(string);
+			uriTemplate = TERM_FACTORY.getConstantLiteral(string);
 			terms.add(0, uriTemplate); // the URI template is always on the
 										// first position in the term list
-			return DATA_FACTORY.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+			return TERM_FACTORY.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 			// BNODE
 		case 2:
-			uriTemplate = DATA_FACTORY.getConstantBNode(string);
+			uriTemplate = TERM_FACTORY.getConstantBNode(string);
 			terms.add(0, uriTemplate); // the URI template is always on the
 										// first position in the term list
-			return DATA_FACTORY.getImmutableBNodeTemplate(ImmutableList.copyOf(terms));
+			return TERM_FACTORY.getImmutableBNodeTemplate(ImmutableList.copyOf(terms));
 			// simple LITERAL
 		case 3:
 			uriTemplate = terms.remove(0);
-			// pred = DATATYPE_FACTORY.getTypePredicate(); // OBDAVocabulary.RDFS_LITERAL;
+			// pred = TYPE_FACTORY.getTypePredicate(); // OBDAVocabulary.RDFS_LITERAL;
 			// the URI template is always on the first position in the term list
 			// terms.add(0, uriTemplate);
-			return DATA_FACTORY.getImmutableTypedTerm(uriTemplate, COL_TYPE.LITERAL);
+			return TERM_FACTORY.getImmutableTypedTerm(uriTemplate, COL_TYPE.LITERAL);
 		case 4://concat
-			ImmutableFunctionalTerm f = DATA_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
+			ImmutableFunctionalTerm f = TERM_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
             for(int j=2;j<terms.size();j++){
-                f = DATA_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, f, terms.get(j));
+                f = TERM_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, f, terms.get(j));
             }
             return f;
 		}

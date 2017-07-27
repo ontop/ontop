@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.utils;
  */
 
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 
 import java.sql.Types;
 import java.util.HashMap;

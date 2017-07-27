@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 public class ProjectionShrinkingExecutorImpl implements ProjectionShrinkingExecutor {
 
@@ -53,7 +53,7 @@ public class ProjectionShrinkingExecutorImpl implements ProjectionShrinkingExecu
 
                 ConstructionNode replacingNode = iqFactory.createConstructionNode(
                         retainedVariables,
-                        DATA_FACTORY.getSubstitution(shrinkedMap),
+                        SUBSTITUTION_FACTORY.getSubstitution(shrinkedMap),
                         ((ConstructionNode) focusNode).getOptionalModifiers()
                 );
                 treeComponent.replaceNode(focusNode, replacingNode);

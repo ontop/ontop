@@ -3,20 +3,18 @@ package it.unibz.inf.ontop.mapping;
 import it.unibz.inf.ontop.TestConnectionManager;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.model.predicate.DatatypePredicate;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.type.DatatypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
@@ -30,7 +28,6 @@ public class DatatypeInferenceTest {
     private static final String CREATE_SCRIPT = DIR + "create-db.sql";
     private static final String DROP_SCRIPT = DIR + "drop-db.sql";
     private static final String DEFAULT_OWL_FILE = DIR + "marriage.ttl";
-    private static final DatatypeFactory DATATYPE_FACTORY = DATA_FACTORY.getDatatypeFactory();
     private static TestConnectionManager TEST_MANAGER;
 
     @BeforeClass
@@ -105,6 +102,6 @@ public class DatatypeInferenceTest {
         @SuppressWarnings("OptionalGetWithoutIsPresent")
         Predicate datatype = optionalDatatype.get();
 
-        assertEquals(DATATYPE_FACTORY.getTypePredicate(expectedColType), datatype);
+        assertEquals(TYPE_FACTORY.getTypePredicate(expectedColType), datatype);
     }
 }

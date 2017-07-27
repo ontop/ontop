@@ -22,16 +22,16 @@ package it.unibz.inf.ontop.renderer;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 /**
  * A utility class to render a Target Query object into its representational
@@ -137,7 +137,7 @@ public class TargetQueryRenderer {
 			String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
 			if (function.isDataTypeFunction()) {
 				// Language tag case
-				if (DATATYPE_FACTORY.isString(functionSymbol) && (functionSymbol.getArity() == 2)) {
+				if (TYPE_FACTORY.isString(functionSymbol) && (functionSymbol.getArity() == 2)) {
 					// with the language tag
 					Term var = function.getTerms().get(0);
 					Term lang = function.getTerms().get(1);
@@ -178,7 +178,7 @@ public class TargetQueryRenderer {
 						}
 					}
 					String originalUri = String.format(templateFormat, varNames.toArray());
-					if (originalUri.equals(OBDAVocabulary.RDF_TYPE)) {
+					if (originalUri.equals(IriConstants.RDF_TYPE)) {
 						sb.append("a");
 					} else {
 						String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible

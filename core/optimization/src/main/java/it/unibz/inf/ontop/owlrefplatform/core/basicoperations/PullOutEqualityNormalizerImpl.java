@@ -5,12 +5,13 @@ import fj.data.List;
 import fj.data.Set;
 import fj.data.TreeMap;
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.Var2VarSubstitutionImpl;
+import it.unibz.inf.ontop.model.term.TermConstants;
+import it.unibz.inf.ontop.substitution.impl.Var2VarSubstitutionImpl;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
@@ -19,7 +20,7 @@ import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import java.util.*;
 
 import static it.unibz.inf.ontop.datalog.impl.DatalogTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Default implementation of PullOutEqualityNormalizer. Is Left-Join aware.
@@ -45,7 +46,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
     private final static List<P2<Variable, Constant>> EMPTY_VARIABLE_CONSTANT_LIST = List.nil();
     private final static List<P2<Variable, Variable>> EMPTY_VARIABLE_RENAMING_LIST = List.nil();
     private final static List<Function> EMPTY_ATOM_LIST = List.nil();
-    private final static Function TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+    private final static Function TRUE_EQ = TERM_FACTORY.getFunctionEQ(TermConstants.TRUE, TermConstants.TRUE);
 
 
     /**
@@ -208,9 +209,9 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          */
         if (atom.isAlgebraFunction()) {
             Predicate functionSymbol = atom.getFunctionSymbol();
-            if (functionSymbol.equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
+            if (functionSymbol.equals(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)) {
                 return normalizeLeftJoin(atom, variableDispatcher);
-            } else if (functionSymbol.equals(OBDAVocabulary.SPARQL_JOIN)) {
+            } else if (functionSymbol.equals(DatalogAlgebraOperatorPredicates.SPARQL_JOIN)) {
                 return normalizeJoin(atom, variableDispatcher);
             }
         }
@@ -270,7 +271,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         List<Function> remainingLJAtoms = leftNormalizationResults.getNonPushableAtoms().snoc(TRUE_EQ).
                 append(rightNormalizationResults.getAllAtoms()).append(joiningEqualities);
         // TODO: add a proper method in the data factory
-        Function normalizedLeftJoinAtom = DATA_FACTORY.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN,
+        Function normalizedLeftJoinAtom = TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN,
                 new ArrayList<Term>(remainingLJAtoms.toCollection()));
 
         /**
@@ -496,7 +497,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      */
     private static List<Function> generateVariableConstantEqualities(List<P2<Variable, Constant>> varConstantPairs) {
         return varConstantPairs
-                .map((F<P2<Variable, Constant>, Function>) pair -> DATA_FACTORY.getFunctionEQ(pair._1(), pair._2()));
+                .map((F<P2<Variable, Constant>, Function>) pair -> TERM_FACTORY.getFunctionEQ(pair._1(), pair._2()));
     }
 
     /**
@@ -506,7 +507,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         List<Variable> variableList = equivalentVariables.toList();
         List<P2<Variable, Variable>> variablePairs = variableList.zip(variableList.tail());
         return variablePairs
-                .map((F<P2<Variable, Variable>, Function>) pair -> DATA_FACTORY.getFunctionEQ(pair._1(), pair._2()));
+                .map((F<P2<Variable, Variable>, Function>) pair -> TERM_FACTORY.getFunctionEQ(pair._1(), pair._2()));
     }
 
 

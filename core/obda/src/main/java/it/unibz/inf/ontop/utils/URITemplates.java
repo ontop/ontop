@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.impl.TermUtils;
+import it.unibz.inf.ontop.model.term.impl.TermUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

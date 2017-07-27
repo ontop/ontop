@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.type;
 
-import it.unibz.inf.ontop.model.term.LanguageTag;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Term;
 
 import java.util.Optional;

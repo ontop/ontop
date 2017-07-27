@@ -24,12 +24,13 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.URIConstant;
@@ -37,7 +38,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * This class provides the translation service from Datalog Program to SPARQL string.
@@ -46,7 +47,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
  */
 public class DatalogToSparqlTranslator {
 	
-	private static final URIConstant RDF_TYPE = DATA_FACTORY.getConstantURI(OBDAVocabulary.RDF_TYPE);
+	private static final URIConstant RDF_TYPE = TERM_FACTORY.getConstantURI(IriConstants.RDF_TYPE);
 
 	private PrefixManager prefixManager;
 
@@ -259,7 +260,7 @@ public class DatalogToSparqlTranslator {
 
 	private Term getPredicate(Function function) {
 		Predicate predicate = function.getFunctionSymbol();
-		return DATA_FACTORY.getConstantURI(predicate.getName());
+		return TERM_FACTORY.getConstantURI(predicate.getName());
 	}
 
 	private Term getObject(Function function) {
@@ -321,11 +322,11 @@ public class DatalogToSparqlTranslator {
 
 	private void printJoinExpression(Function expression, DatalogProgram datalog, StringBuilder sb, int indentLevel) {
 		Predicate joinPredicate = expression.getFunctionSymbol();
-		if (joinPredicate == OBDAVocabulary.SPARQL_JOIN) {
+		if (joinPredicate == DatalogAlgebraOperatorPredicates.SPARQL_JOIN) {
 			printGraph((Function) expression.getTerm(0), datalog, sb, indentLevel);
 			printGraph((Function) expression.getTerm(1), datalog, sb, indentLevel);
 		} 
-		else if (joinPredicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
+		else if (joinPredicate == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
 			printGraph((Function) expression.getTerm(0), datalog, sb, indentLevel);
 			sb.append(indent(indentLevel));
 			sb.append(OPTIONAL + " {\n");

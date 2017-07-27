@@ -6,14 +6,14 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.UnionLiftProposalImpl;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -25,6 +25,7 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static org.junit.Assert.assertTrue;
 
 public class UnionLiftInternalTest {
@@ -32,13 +33,13 @@ public class UnionLiftInternalTest {
     private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
 
-    private static AtomPredicate P1_PREDICATE = DATA_FACTORY.getAtomPredicate("p1", 1);
-    private static AtomPredicate P2_PREDICATE = DATA_FACTORY.getAtomPredicate("p1", 2);
-    private static AtomPredicate P3_PREDICATE = DATA_FACTORY.getAtomPredicate("p1", 3);
-    private static AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 1);
-    private static AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 1);
-    private static AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
-    private static AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
+    private static AtomPredicate P1_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 1);
+    private static AtomPredicate P2_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 2);
+    private static AtomPredicate P3_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 3);
+    private static AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 1);
+    private static AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 1);
+    private static AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table3", 2);
+    private static AtomPredicate TABLE_4 = ATOM_FACTORY.getAtomPredicate("table4", 2);
 
     private static Variable X = DATA_FACTORY.getVariable("x");
     private static Variable Y = DATA_FACTORY.getVariable("y");
@@ -77,27 +78,27 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution());
+                SUBSTITUTION_FACTORY.getSubstitution());
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
 
         ConstructionNode table4Construction = IQ_FACTORY.createConstructionNode(TABLE4_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution(Y, generateURI1(E), Z, generateURI1(F)));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI1(E), Z, generateURI1(F)));
         ExtensionalDataNode table4DataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_4, E, F));
 
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
 
         ConstructionNode table1Construction = IQ_FACTORY.createConstructionNode(TABLE1_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution(X, generateURI1(A)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A)));
         ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, A));
 
         ConstructionNode table2Construction = IQ_FACTORY.createConstructionNode(TABLE2_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution(X, generateURI1(B)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(B)));
         ExtensionalDataNode table2DataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_2, B));
 
         ConstructionNode table3Construction = IQ_FACTORY.createConstructionNode(TABLE3_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution(X, generateURI1(C), Y, generateURI1(D)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(C), Y, generateURI1(D)));
         ExtensionalDataNode table3DataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_3, C, D));
 
         originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
@@ -132,7 +133,7 @@ public class UnionLiftInternalTest {
         LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode();
 
         ConstructionNode table3ConstructionExpected = IQ_FACTORY.createConstructionNode(TABLE3_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution(X, generateURI1(C), Y, generateURI1(D)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(C), Y, generateURI1(D)));
         ExtensionalDataNode table3DataNodeExpected = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_3, C, D));
 
         expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
@@ -167,11 +168,11 @@ public class UnionLiftInternalTest {
          * Original Query
          */
 
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
-        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
-        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
-        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
-        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = ATOM_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = ATOM_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -180,7 +181,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution(), Optional.empty());
+                SUBSTITUTION_FACTORY.getSubstitution(), Optional.empty());
 
         UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -250,11 +251,11 @@ public class UnionLiftInternalTest {
          * Original Query
          */
 
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
-        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
-        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
-        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
-        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = ATOM_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = ATOM_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -263,7 +264,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution());
+                SUBSTITUTION_FACTORY.getSubstitution());
 
         UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -349,11 +350,11 @@ public class UnionLiftInternalTest {
          * Original Query
          */
 
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
-        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
-        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
-        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
-        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = ATOM_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = ATOM_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -362,7 +363,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution());
+                SUBSTITUTION_FACTORY.getSubstitution());
 
         UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -443,11 +444,11 @@ public class UnionLiftInternalTest {
          * Original Query
          */
 
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
-        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
-        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
-        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
-        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = ATOM_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = ATOM_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -456,7 +457,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution());
+                SUBSTITUTION_FACTORY.getSubstitution());
 
         UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -636,11 +637,11 @@ public class UnionLiftInternalTest {
         /**
          * Original Query
          */
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
-        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
-        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
-        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
-        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = ATOM_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = ATOM_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -649,7 +650,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution());
+                SUBSTITUTION_FACTORY.getSubstitution());
 
         UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -686,11 +687,11 @@ public class UnionLiftInternalTest {
         /**
          * Original Query
          */
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
-        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
-        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
-        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
-        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 2);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = ATOM_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = ATOM_FACTORY.getAtomPredicate("table5", 2);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -699,7 +700,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution());
+                SUBSTITUTION_FACTORY.getSubstitution());
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
@@ -740,11 +741,11 @@ public class UnionLiftInternalTest {
         /**
          * Original Query
          */
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
-        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
-        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
-        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
-        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 2);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = ATOM_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = ATOM_FACTORY.getAtomPredicate("table5", 2);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -753,7 +754,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution());
+                SUBSTITUTION_FACTORY.getSubstitution());
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
@@ -795,10 +796,10 @@ public class UnionLiftInternalTest {
         /**
          * Original Query
          */
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
-        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
-        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
-        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 2);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_4 = ATOM_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = ATOM_FACTORY.getAtomPredicate("table5", 2);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -807,7 +808,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                DATA_FACTORY.getSubstitution());
+                SUBSTITUTION_FACTORY.getSubstitution());
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();

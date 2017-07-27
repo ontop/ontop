@@ -11,46 +11,46 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.ConstructionNodeCleaner;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
 import org.junit.Test;
 
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static junit.framework.TestCase.assertTrue;
 
 public class ConstructionNodeCleanerTest {
 
     private static final ConstructionNodeCleaner constructionNodeCleaner = new ConstructionNodeCleaner();
 
-    private final static AtomPredicate TABLE1_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 2);
-    private final static AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("table2", 2);
-    private final static AtomPredicate TABLE3_PREDICATE = DATA_FACTORY.getAtomPredicate("table3", 2);
-    private final static AtomPredicate ANS1_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
-    private final static AtomPredicate ANS2_PREDICATE = DATA_FACTORY.getAtomPredicate("ans2", 2);
-    private final static Variable X = DATA_FACTORY.getVariable("X");
-    private final static Variable X1 = DATA_FACTORY.getVariable("X1");
-    private final static Variable X2 = DATA_FACTORY.getVariable("X2");
-    private final static Variable Y = DATA_FACTORY.getVariable("Y");
-    private final static Variable Y1 = DATA_FACTORY.getVariable("Y1");
-    private final static Variable Y2 = DATA_FACTORY.getVariable("Y2");
-    private final static Variable Z = DATA_FACTORY.getVariable("Z");
-    private final static Variable Z1 = DATA_FACTORY.getVariable("Z1");
-    private final static Variable Z2 = DATA_FACTORY.getVariable("Z2");
+    private final static AtomPredicate TABLE1_PREDICATE = ATOM_FACTORY.getAtomPredicate("table1", 2);
+    private final static AtomPredicate TABLE2_PREDICATE = ATOM_FACTORY.getAtomPredicate("table2", 2);
+    private final static AtomPredicate TABLE3_PREDICATE = ATOM_FACTORY.getAtomPredicate("table3", 2);
+    private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
+    private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans2", 2);
+    private final static Variable X = TERM_FACTORY.getVariable("X");
+    private final static Variable X1 = TERM_FACTORY.getVariable("X1");
+    private final static Variable X2 = TERM_FACTORY.getVariable("X2");
+    private final static Variable Y = TERM_FACTORY.getVariable("Y");
+    private final static Variable Y1 = TERM_FACTORY.getVariable("Y1");
+    private final static Variable Y2 = TERM_FACTORY.getVariable("Y2");
+    private final static Variable Z = TERM_FACTORY.getVariable("Z");
+    private final static Variable Z1 = TERM_FACTORY.getVariable("Z1");
+    private final static Variable Z2 = TERM_FACTORY.getVariable("Z2");
 
 
     private URITemplatePredicate URI_PREDICATE = new URITemplatePredicateImpl(2);
     private URITemplatePredicate URI_2PREDICATE = new URITemplatePredicateImpl(3);
 
-    private Constant URI_TEMPLATE_STR_1 = DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private Constant URI_TEMPLATE_STR_2_2 = DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
+    private Constant URI_TEMPLATE_STR_1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
+    private Constant URI_TEMPLATE_STR_2_2 = TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
 
 
     @Test
@@ -60,7 +60,7 @@ public class ConstructionNodeCleanerTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(),
+                SUBSTITUTION_FACTORY.getSubstitution(),
                 Optional.of(new ImmutableQueryModifiersImpl(true, 100, -1, ImmutableList.of()))
         );
 
@@ -99,12 +99,12 @@ public class ConstructionNodeCleanerTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution()
+                SUBSTITUTION_FACTORY.getSubstitution()
         );
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X, Y),
-                DATA_FACTORY.getSubstitution(),
+                SUBSTITUTION_FACTORY.getSubstitution(),
                 Optional.of(new ImmutableQueryModifiersImpl(true, 100, -1, ImmutableList.of()))
         );
 
@@ -125,7 +125,7 @@ public class ConstructionNodeCleanerTest {
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(),
+                SUBSTITUTION_FACTORY.getSubstitution(),
                 Optional.of(new ImmutableQueryModifiersImpl(true, 100, -1, ImmutableList.of()))
         );
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
@@ -147,14 +147,14 @@ public class ConstructionNodeCleanerTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(),
+                SUBSTITUTION_FACTORY.getSubstitution(),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, -1, ImmutableList.of()))
 
         );
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X, Y),
-                DATA_FACTORY.getSubstitution(),
+                SUBSTITUTION_FACTORY.getSubstitution(),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, -1, ImmutableList.of()))
         );
 
@@ -174,7 +174,7 @@ public class ConstructionNodeCleanerTest {
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution()
+                SUBSTITUTION_FACTORY.getSubstitution()
 
         );
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
@@ -195,12 +195,12 @@ public class ConstructionNodeCleanerTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, Y),
+                SUBSTITUTION_FACTORY.getSubstitution(X, Y),
                 Optional.of(new ImmutableQueryModifiersImpl(false, 100, -1, ImmutableList.of()))
         );
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(Y),
-                DATA_FACTORY.getSubstitution(Y, Z),
+                SUBSTITUTION_FACTORY.getSubstitution(Y, Z),
                 Optional.of(new ImmutableQueryModifiersImpl(false, 50, -1, ImmutableList.of()))
         );
 
@@ -222,7 +222,7 @@ public class ConstructionNodeCleanerTest {
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, Z),
+                SUBSTITUTION_FACTORY.getSubstitution(X, Z),
                 Optional.of(new ImmutableQueryModifiersImpl(false, 50, -1, ImmutableList.of()))
         );
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
@@ -244,12 +244,12 @@ public class ConstructionNodeCleanerTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, Y),
+                SUBSTITUTION_FACTORY.getSubstitution(X, Y),
                 Optional.of(new ImmutableQueryModifiersImpl(false, 100, -1, ImmutableList.of()))
         );
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(Y),
-                DATA_FACTORY.getSubstitution(Y, Z),
+                SUBSTITUTION_FACTORY.getSubstitution(Y, Z),
                 Optional.of(new ImmutableQueryModifiersImpl(true, 50, -1, ImmutableList.of()))
         );
 
@@ -271,12 +271,12 @@ public class ConstructionNodeCleanerTest {
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, Z),
+                SUBSTITUTION_FACTORY.getSubstitution(X, Z),
                 Optional.of(new ImmutableQueryModifiersImpl(false, 100, -1, ImmutableList.of()))
         );
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(Z),
-                DATA_FACTORY.getSubstitution(),
+                SUBSTITUTION_FACTORY.getSubstitution(),
                 Optional.of(new ImmutableQueryModifiersImpl(true, 50, -1, ImmutableList.of()))
         );
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
@@ -299,17 +299,17 @@ public class ConstructionNodeCleanerTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, X1)
+                SUBSTITUTION_FACTORY.getSubstitution(X, X1)
         );
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1),
-                DATA_FACTORY.getSubstitution(X1, X2),
+                SUBSTITUTION_FACTORY.getSubstitution(X1, X2),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, -1, ImmutableList.of()))
 
         );
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X2),
-                DATA_FACTORY.getSubstitution(X2, Z1),
+                SUBSTITUTION_FACTORY.getSubstitution(X2, Z1),
                 Optional.of(new ImmutableQueryModifiersImpl(false, 100, -1, ImmutableList.of()))
         );
 
@@ -334,7 +334,7 @@ public class ConstructionNodeCleanerTest {
 
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, Z1),
+                SUBSTITUTION_FACTORY.getSubstitution(X, Z1),
                 Optional.of(new ImmutableQueryModifiersImpl(false, 100, -1, ImmutableList.of()))
         );
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
@@ -356,18 +356,18 @@ public class ConstructionNodeCleanerTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, X1),
+                SUBSTITUTION_FACTORY.getSubstitution(X, X1),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, 50, ImmutableList.of()))
         );
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1),
-                DATA_FACTORY.getSubstitution(X1, X2),
+                SUBSTITUTION_FACTORY.getSubstitution(X1, X2),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, -1, ImmutableList.of()))
 
         );
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X2),
-                DATA_FACTORY.getSubstitution(X2, Z1),
+                SUBSTITUTION_FACTORY.getSubstitution(X2, Z1),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, 40, ImmutableList.of()))
         );
 
@@ -392,7 +392,7 @@ public class ConstructionNodeCleanerTest {
 
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, Z1),
+                SUBSTITUTION_FACTORY.getSubstitution(X, Z1),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, 90, ImmutableList.of()))
         );
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
@@ -413,18 +413,18 @@ public class ConstructionNodeCleanerTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, X1),
+                SUBSTITUTION_FACTORY.getSubstitution(X, X1),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, 50, ImmutableList.of()))
         );
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1),
-                DATA_FACTORY.getSubstitution(X1, X2),
+                SUBSTITUTION_FACTORY.getSubstitution(X1, X2),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, 80, ImmutableList.of()))
 
         );
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X2),
-                DATA_FACTORY.getSubstitution(X2, Z1),
+                SUBSTITUTION_FACTORY.getSubstitution(X2, Z1),
                 Optional.of(new ImmutableQueryModifiersImpl(true, -1, 40, ImmutableList.of()))
         );
 
@@ -449,12 +449,12 @@ public class ConstructionNodeCleanerTest {
 
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, Z1),
+                SUBSTITUTION_FACTORY.getSubstitution(X, Z1),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, 130, ImmutableList.of()))
         );
         ConstructionNode constructionNode5 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(Z1),
-                DATA_FACTORY.getSubstitution(),
+                SUBSTITUTION_FACTORY.getSubstitution(),
                 Optional.of(new ImmutableQueryModifiersImpl(true, -1, 40, ImmutableList.of()))
         );
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
@@ -477,22 +477,22 @@ public class ConstructionNodeCleanerTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(),
+                SUBSTITUTION_FACTORY.getSubstitution(),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, 130, ImmutableList.of()))
         );
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X),
-                DATA_FACTORY.getSubstitution(X, X1),
+                SUBSTITUTION_FACTORY.getSubstitution(X, X1),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, 100, ImmutableList.of()))
         );
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1),
-                DATA_FACTORY.getSubstitution(X1, X2),
+                SUBSTITUTION_FACTORY.getSubstitution(X1, X2),
                 Optional.of(new ImmutableQueryModifiersImpl(true, -1, -1, ImmutableList.of()))
         );
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X2),
-                DATA_FACTORY.getSubstitution(X2, Y),
+                SUBSTITUTION_FACTORY.getSubstitution(X2, Y),
                 Optional.of(new ImmutableQueryModifiersImpl(true, -1, -1, ImmutableList.of()))
         );
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X1));
@@ -521,12 +521,12 @@ public class ConstructionNodeCleanerTest {
 
         ConstructionNode constructionNode5 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, X1),
+                SUBSTITUTION_FACTORY.getSubstitution(X, X1),
                 Optional.of(new ImmutableQueryModifiersImpl(false, -1, 230, ImmutableList.of()))
         );
         ConstructionNode constructionNode6 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1),
-                DATA_FACTORY.getSubstitution(X1, Y),
+                SUBSTITUTION_FACTORY.getSubstitution(X1, Y),
                 Optional.of(new ImmutableQueryModifiersImpl(true, -1, -1, ImmutableList.of()))
         );
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
@@ -551,11 +551,11 @@ public class ConstructionNodeCleanerTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, generateCompositeURI2(Y, Z))
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateCompositeURI2(Y, Z))
         );
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(Y, Z),
-                DATA_FACTORY.getSubstitution(Y, Y1, Z, Z1)
+                SUBSTITUTION_FACTORY.getSubstitution(Y, Y1, Z, Z1)
         );
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
@@ -576,7 +576,7 @@ public class ConstructionNodeCleanerTest {
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X, generateCompositeURI2(Y1, Z1))
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateCompositeURI2(Y1, Z1))
         );
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
 
@@ -597,11 +597,11 @@ public class ConstructionNodeCleanerTest {
                 X1, X2);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X1, Y1, X2, Y2)
+                SUBSTITUTION_FACTORY.getSubstitution(X1, Y1, X2, Y2)
         );
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(Y1, Y2),
-                DATA_FACTORY.getSubstitution(Y1, generateURI1(Z1), Y2, generateURI1(Z2))
+                SUBSTITUTION_FACTORY.getSubstitution(Y1, generateURI1(Z1), Y2, generateURI1(Z2))
         );
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
@@ -622,7 +622,7 @@ public class ConstructionNodeCleanerTest {
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
-                DATA_FACTORY.getSubstitution(X1, generateURI1(Z1), X2, generateURI1(Z2))
+                SUBSTITUTION_FACTORY.getSubstitution(X1, generateURI1(Z1), X2, generateURI1(Z2))
         );
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
 
@@ -692,10 +692,10 @@ public class ConstructionNodeCleanerTest {
 
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }
 
     private ImmutableFunctionalTerm generateCompositeURI2(ImmutableTerm argument1, ImmutableTerm argument2) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_2PREDICATE, URI_TEMPLATE_STR_2_2, argument1, argument2);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_2PREDICATE, URI_TEMPLATE_STR_2_2, argument1, argument2);
     }
 }

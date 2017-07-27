@@ -27,11 +27,11 @@ import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.atom.PredicateConstants;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.impl.MutableQueryModifiersImpl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +43,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 @SuppressWarnings("deprecation")
 public class DatalogToSparqlTranslatorTest {
@@ -131,7 +131,7 @@ public class DatalogToSparqlTranslatorTest {
 	public void testSimpleQueryWithCondition() {
 		
 		Function ans1 = createQuery(x, a);
-		Function cond = DATA_FACTORY.getFunctionEQ(a, c1);
+		Function cond = TERM_FACTORY.getFunctionEQ(a, c1);
 		
 		/**
 		 * ans1(x) :- Student(x), firstName(x,a), EQ(a,"John")
@@ -147,11 +147,11 @@ public class DatalogToSparqlTranslatorTest {
 	public void testSimpleQueryWithMoreConditions() {
 		
 		Function ans1 = createQuery(x, a);
-		Function cond1 = DATA_FACTORY.getFunctionEQ(a, c1);
-		Function cond2 = DATA_FACTORY.getFunctionNEQ(b, c2);
-		Function cond3 = DATA_FACTORY.getFunction(ExpressionOperation.GT, c, c3);
-		Function cond4 = DATA_FACTORY.getFunction(ExpressionOperation.GTE, d, c4);
-		Function cond5 = DATA_FACTORY.getFunction(ExpressionOperation.LT, e, c5);
+		Function cond1 = TERM_FACTORY.getFunctionEQ(a, c1);
+		Function cond2 = TERM_FACTORY.getFunctionNEQ(b, c2);
+		Function cond3 = TERM_FACTORY.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = TERM_FACTORY.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = TERM_FACTORY.getFunction(ExpressionOperation.LT, e, c5);
 		
 		/**
 		 * ans1(x) :- Student(x), firstName(x,a), lastName(x,b), age(x,c), grade(x,d), enrollmentDate(x,e),
@@ -169,7 +169,7 @@ public class DatalogToSparqlTranslatorTest {
 		
 		Function ans1 = createQuery(x, a);
 		Function ans2 = createRule(ANS2, x, a);
-		Function cond = DATA_FACTORY.getFunctionEQ(a, c1);
+		Function cond = TERM_FACTORY.getFunctionEQ(a, c1);
 		
 		/**
 		 * ans1(x,a) :- Student(x), ans2(x,a)
@@ -192,11 +192,11 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans4 = createRule(ANS4, x, c);
 		Function ans5 = createRule(ANS5, x, d);
 		Function ans6 = createRule(ANS6, x, e);
-		Function cond1 = DATA_FACTORY.getFunctionEQ(a, c1);
-		Function cond2 = DATA_FACTORY.getFunctionNEQ(b, c2);
-		Function cond3 = DATA_FACTORY.getFunction(ExpressionOperation.GT, c, c3);
-		Function cond4 = DATA_FACTORY.getFunction(ExpressionOperation.GTE, d, c4);
-		Function cond5 = DATA_FACTORY.getFunction(ExpressionOperation.LT, e, c5);
+		Function cond1 = TERM_FACTORY.getFunctionEQ(a, c1);
+		Function cond2 = TERM_FACTORY.getFunctionNEQ(b, c2);
+		Function cond3 = TERM_FACTORY.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = TERM_FACTORY.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = TERM_FACTORY.getFunction(ExpressionOperation.LT, e, c5);
 		
 		/**
 		 * ans1(x) :- Student(x), ans2(x,a)
@@ -223,13 +223,13 @@ public class DatalogToSparqlTranslatorTest {
 	public void testSimpleQueryWithNestedConditions() {
 		
 		Function ans1 = createQuery(x, a);
-		Function cond1 = DATA_FACTORY.getFunctionEQ(a, c1);
-		Function cond2 = DATA_FACTORY.getFunctionNEQ(b, c2);
-		Function cond3 = DATA_FACTORY.getFunction(ExpressionOperation.GT, c, c3);
-		Function cond4 = DATA_FACTORY.getFunction(ExpressionOperation.GTE, d, c4);
-		Function cond5 = DATA_FACTORY.getFunction(ExpressionOperation.LT, e, c5);
-		Function cond6 = DATA_FACTORY.getFunctionAND(cond3, cond4);
-		Function cond7 = DATA_FACTORY.getFunctionOR(cond6, cond5);
+		Function cond1 = TERM_FACTORY.getFunctionEQ(a, c1);
+		Function cond2 = TERM_FACTORY.getFunctionNEQ(b, c2);
+		Function cond3 = TERM_FACTORY.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = TERM_FACTORY.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = TERM_FACTORY.getFunction(ExpressionOperation.LT, e, c5);
+		Function cond6 = TERM_FACTORY.getFunctionAND(cond3, cond4);
+		Function cond7 = TERM_FACTORY.getFunctionOR(cond6, cond5);
 		
 		/**
 		 * ans1(x) :- Student(x), firstName(x,a), lastName(x,b), age(x,c), grade(x,d), enrollmentDate(x,e),
@@ -646,14 +646,14 @@ public class DatalogToSparqlTranslatorTest {
 
 	private Function createQuery(Variable... vars) {
 		int arity = vars.length;
-		Predicate queryPredicate = DATA_FACTORY.getPredicate(OBDAVocabulary.QUEST_QUERY, arity);
-		return DATA_FACTORY.getFunction(queryPredicate, vars);
+		Predicate queryPredicate = TERM_FACTORY.getPredicate(PredicateConstants.ONTOP_QUERY, arity);
+		return TERM_FACTORY.getFunction(queryPredicate, vars);
 	}
 
 	private Function createRule(String ruleName, Variable... vars) {
 		int arity = vars.length;
-		Predicate rulePredicate = DATA_FACTORY.getPredicate(ruleName, arity);
-		return DATA_FACTORY.getFunction(rulePredicate, vars);
+		Predicate rulePredicate = TERM_FACTORY.getPredicate(ruleName, arity);
+		return TERM_FACTORY.getFunction(rulePredicate, vars);
 	}
 
 	private DatalogProgram createDatalogProgram(MutableQueryModifiers modifiers, CQIE... queryAndRules) {
@@ -704,20 +704,20 @@ public class DatalogToSparqlTranslatorTest {
 	private static Predicate predHasAdvancedCourse;
 	
 	static {
-		predStudent = DATA_FACTORY.getClassPredicate("http://example.org/Student");
-		predBachelorStudent = DATA_FACTORY.getClassPredicate("http://example.org/BachelorStudent");
-		predMasterStudent = DATA_FACTORY.getClassPredicate("http://example.org/MasterStudent");
-		predDoctoralStudent = DATA_FACTORY.getClassPredicate("http://example.org/DoctoralStudent");
+		predStudent = TERM_FACTORY.getClassPredicate("http://example.org/Student");
+		predBachelorStudent = TERM_FACTORY.getClassPredicate("http://example.org/BachelorStudent");
+		predMasterStudent = TERM_FACTORY.getClassPredicate("http://example.org/MasterStudent");
+		predDoctoralStudent = TERM_FACTORY.getClassPredicate("http://example.org/DoctoralStudent");
 		
-		predFirstName = DATA_FACTORY.getDataPropertyPredicate("http://example.org/firstName", COL_TYPE.STRING);
-		predLastName = DATA_FACTORY.getDataPropertyPredicate("http://example.org/lastName", COL_TYPE.STRING);
-		predAge = DATA_FACTORY.getDataPropertyPredicate("http://example.org/age", COL_TYPE.INTEGER);
-		predGrade = DATA_FACTORY.getDataPropertyPredicate("http://example.org/grade", COL_TYPE.DECIMAL);
-		predEnrollmentDate = DATA_FACTORY.getDataPropertyPredicate("http://example.org/enrollmentDate", COL_TYPE.DATETIME);
+		predFirstName = TERM_FACTORY.getDataPropertyPredicate("http://example.org/firstName", COL_TYPE.STRING);
+		predLastName = TERM_FACTORY.getDataPropertyPredicate("http://example.org/lastName", COL_TYPE.STRING);
+		predAge = TERM_FACTORY.getDataPropertyPredicate("http://example.org/age", COL_TYPE.INTEGER);
+		predGrade = TERM_FACTORY.getDataPropertyPredicate("http://example.org/grade", COL_TYPE.DECIMAL);
+		predEnrollmentDate = TERM_FACTORY.getDataPropertyPredicate("http://example.org/enrollmentDate", COL_TYPE.DATETIME);
 		
-		predHasCourse = DATA_FACTORY.getObjectPropertyPredicate("http://example.org/hasCourse");
-		predHasElementaryCourse = DATA_FACTORY.getObjectPropertyPredicate("http://example.org/hasElementaryCourse");
-		predHasAdvancedCourse = DATA_FACTORY.getObjectPropertyPredicate("http://example.org/hasAdvancedCourse");
+		predHasCourse = TERM_FACTORY.getObjectPropertyPredicate("http://example.org/hasCourse");
+		predHasElementaryCourse = TERM_FACTORY.getObjectPropertyPredicate("http://example.org/hasElementaryCourse");
+		predHasAdvancedCourse = TERM_FACTORY.getObjectPropertyPredicate("http://example.org/hasAdvancedCourse");
 	}
 	
 	private static Variable x;
@@ -732,16 +732,16 @@ public class DatalogToSparqlTranslatorTest {
 	private static Variable f;
 	
 	static {
-		x = DATA_FACTORY.getVariable("x");
-		y = DATA_FACTORY.getVariable("y");
-		z = DATA_FACTORY.getVariable("z");
+		x = TERM_FACTORY.getVariable("x");
+		y = TERM_FACTORY.getVariable("y");
+		z = TERM_FACTORY.getVariable("z");
 		
-		a = DATA_FACTORY.getVariable("a");
-		b = DATA_FACTORY.getVariable("b");
-		c = DATA_FACTORY.getVariable("c");
-		d = DATA_FACTORY.getVariable("d");
-		e = DATA_FACTORY.getVariable("e");
-		f = DATA_FACTORY.getVariable("f");
+		a = TERM_FACTORY.getVariable("a");
+		b = TERM_FACTORY.getVariable("b");
+		c = TERM_FACTORY.getVariable("c");
+		d = TERM_FACTORY.getVariable("d");
+		e = TERM_FACTORY.getVariable("e");
+		f = TERM_FACTORY.getVariable("f");
 	}
 	
 	private static Constant c1;
@@ -751,11 +751,11 @@ public class DatalogToSparqlTranslatorTest {
 	private static Constant c5;
 	
 	static {
-		c1 = DATA_FACTORY.getConstantLiteral("John", COL_TYPE.STRING);
-		c2 = DATA_FACTORY.getConstantLiteral("Smith", COL_TYPE.STRING);
-		c3 = DATA_FACTORY.getConstantLiteral("25", COL_TYPE.INTEGER);
-		c4 = DATA_FACTORY.getConstantLiteral("48.50", COL_TYPE.DECIMAL);
-		c5 = DATA_FACTORY.getConstantLiteral("2012-03-20 00:00:00", COL_TYPE.DATETIME);
+		c1 = TERM_FACTORY.getConstantLiteral("John", COL_TYPE.STRING);
+		c2 = TERM_FACTORY.getConstantLiteral("Smith", COL_TYPE.STRING);
+		c3 = TERM_FACTORY.getConstantLiteral("25", COL_TYPE.INTEGER);
+		c4 = TERM_FACTORY.getConstantLiteral("48.50", COL_TYPE.DECIMAL);
+		c5 = TERM_FACTORY.getConstantLiteral("2012-03-20 00:00:00", COL_TYPE.DATETIME);
 	}
 	
 	private static Function student;
@@ -774,19 +774,19 @@ public class DatalogToSparqlTranslatorTest {
 	private static Function hasAdvancedCourse;
 	
 	static {
-		student = DATA_FACTORY.getFunction(predStudent, x);
-		bachelorStudent = DATA_FACTORY.getFunction(predBachelorStudent, x);
-		masterStudent = DATA_FACTORY.getFunction(predMasterStudent, x);
-		doctoralStudent = DATA_FACTORY.getFunction(predDoctoralStudent, x);
+		student = TERM_FACTORY.getFunction(predStudent, x);
+		bachelorStudent = TERM_FACTORY.getFunction(predBachelorStudent, x);
+		masterStudent = TERM_FACTORY.getFunction(predMasterStudent, x);
+		doctoralStudent = TERM_FACTORY.getFunction(predDoctoralStudent, x);
 		
-		firstName = DATA_FACTORY.getFunction(predFirstName, x, a);
-		lastName = DATA_FACTORY.getFunction(predLastName, x, b);
-		age = DATA_FACTORY.getFunction(predAge, x, c);
-		grade = DATA_FACTORY.getFunction(predGrade, x, d);
-		enrollmentDate = DATA_FACTORY.getFunction(predEnrollmentDate, x, e);
+		firstName = TERM_FACTORY.getFunction(predFirstName, x, a);
+		lastName = TERM_FACTORY.getFunction(predLastName, x, b);
+		age = TERM_FACTORY.getFunction(predAge, x, c);
+		grade = TERM_FACTORY.getFunction(predGrade, x, d);
+		enrollmentDate = TERM_FACTORY.getFunction(predEnrollmentDate, x, e);
 		
-		hasCourse = DATA_FACTORY.getFunction(predHasCourse, x, y);
-		hasElementaryCourse = DATA_FACTORY.getFunction(predHasElementaryCourse, x, y);
-		hasAdvancedCourse = DATA_FACTORY.getFunction(predHasAdvancedCourse, x, y);
+		hasCourse = TERM_FACTORY.getFunction(predHasCourse, x, y);
+		hasElementaryCourse = TERM_FACTORY.getFunction(predHasElementaryCourse, x, y);
+		hasAdvancedCourse = TERM_FACTORY.getFunction(predHasAdvancedCourse, x, y);
 	}
 }

@@ -32,7 +32,7 @@ import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.SQLMappingFactory;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.ValueConstant;
@@ -73,7 +73,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class MappingAssistantPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
@@ -563,7 +563,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		// Store concept in the body, if any
 		ImmutableTerm subjectTerm = createSubjectTerm(predicateSubjectMap);
 		if (!predicateSubjectMap.getName().equals("owl:Thing")) {
-			ImmutableFunctionalTerm concept = DATA_FACTORY.getImmutableFunctionalTerm(predicateSubjectMap.getSourcePredicate(), subjectTerm);
+			ImmutableFunctionalTerm concept = TERM_FACTORY.getImmutableFunctionalTerm(predicateSubjectMap.getSourcePredicate(), subjectTerm);
 			bodyBuilder.add(concept);
 		}
 
@@ -572,18 +572,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
 				ImmutableTerm objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
-				ImmutableFunctionalTerm attribute = DATA_FACTORY.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				ImmutableFunctionalTerm attribute = TERM_FACTORY.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				bodyBuilder.add(attribute);
 				//distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				ImmutableFunctionalTerm objectRefTerm = createRefObjectTerm(predicateObjectMap);
-				ImmutableFunctionalTerm role = DATA_FACTORY.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
+				ImmutableFunctionalTerm role = TERM_FACTORY.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
 				bodyBuilder.add(role);
 			}
 		}
 		// Create the head
 		//int arity = distinguishVariables.size();
-		//Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
+		//Function head = TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 
 		// Create and return the conjunctive query
 		return bodyBuilder.build();
@@ -606,11 +606,11 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			throw new RuntimeException("Invalid column mapping: " + column);
 		}
 		String columnName = columnStrings.get(0).toString();
-		Variable var = DATA_FACTORY.getVariable(columnName);
+		Variable var = TERM_FACTORY.getVariable(columnName);
 		if (datatype == null) {
 			return var;
 		} else {
-			return DATA_FACTORY.getImmutableFunctionalTerm(datatype, var);
+			return TERM_FACTORY.getImmutableFunctionalTerm(datatype, var);
 		}
 	}
 
@@ -651,7 +651,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private MapItem createPredicateSubjectMap() {
 		// Create a default subject map using owl:Thing as the subject
-		return new MapItem(new PredicateItem(DATA_FACTORY.getClassPredicate("owl:Thing"), prefixManager));
+		return new MapItem(new PredicateItem(TERM_FACTORY.getClassPredicate("owl:Thing"), prefixManager));
 	}
 
 	private ImmutableFunctionalTerm getUriFunctionTerm(String text) {
@@ -664,13 +664,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				sb.append(token.toString());
 			} else if (token instanceof ColumnString) {
 				sb.append(PLACEHOLDER);
-				Variable column = DATA_FACTORY.getVariable(token.toString());
+				Variable column = TERM_FACTORY.getVariable(token.toString());
 				terms.add(column);
 			}
 		}
-		ValueConstant uriTemplate = DATA_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
+		ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
 		terms.add(0, uriTemplate);
-		return DATA_FACTORY.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+		return TERM_FACTORY.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 	}
 
 	// Column placeholder pattern

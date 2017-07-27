@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.iq.node.JoinLikeNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.SubstitutionResults;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
@@ -19,8 +19,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.executor.substitution.DescendingPropagationTools.propagateSubstitutionDown;
-import static it.unibz.inf.ontop.model.predicate.ExpressionOperation.EQ;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * TODO: explain
@@ -52,7 +52,7 @@ public class PullVariableOutOfSubTreeExecutorImpl<N extends JoinLikeNode> implem
         N focusNode = proposal.getFocusNode();
 
         Stream<ImmutableExpression> newConditions = proposal.getRenamingSubstitution().getImmutableMap().entrySet().stream()
-                .map(e -> DATA_FACTORY.getImmutableExpression(EQ, e.getKey(), e.getValue()));
+                .map(e -> TERM_FACTORY.getImmutableExpression(EQ, e.getKey(), e.getValue()));
 
         Stream<ImmutableExpression> otherConditions = focusNode.getOptionalFilterCondition()
                 .map(exp -> exp.flattenAND().stream())

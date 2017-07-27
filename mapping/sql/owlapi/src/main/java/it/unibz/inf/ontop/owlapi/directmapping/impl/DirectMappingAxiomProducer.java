@@ -23,8 +23,8 @@ package it.unibz.inf.ontop.owlapi.directmapping.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -39,10 +39,10 @@ public class DirectMappingAxiomProducer {
 
 	private final String baseIRI;
 
-	private final OBDADataFactory df;
+	private final TermFactory df;
 	private final JdbcTypeMapper typeMapper;
 
-	public DirectMappingAxiomProducer(String baseIRI, OBDADataFactory dfac) {
+	public DirectMappingAxiomProducer(String baseIRI, TermFactory dfac) {
 		this.df = dfac;
         this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
 		/**

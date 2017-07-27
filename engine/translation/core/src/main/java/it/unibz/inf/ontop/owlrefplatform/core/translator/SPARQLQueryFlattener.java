@@ -9,8 +9,8 @@ import java.util.Stack;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 
 public class SPARQLQueryFlattener {
 
@@ -152,7 +151,7 @@ public class SPARQLQueryFlattener {
 
                 termidx.push(atomIdx);
                 List<CQIE> result;
-				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
+				if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)
 					result = computePartialEvaluationInLeftJoin(getSubAtoms(atom), rule, termidx);
 				else
 					result = computePartialEvaluation(getSubAtoms(atom), rule, termidx);
@@ -205,7 +204,7 @@ public class SPARQLQueryFlattener {
 
                 termidx.push(atomIdx);
 				List<CQIE> result;
-				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
+				if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)
 					result = computePartialEvaluationInLeftJoin(getSubAtoms(atom), rule, termidx);
 				else
 					result = computePartialEvaluation(getSubAtoms(atom), rule, termidx);

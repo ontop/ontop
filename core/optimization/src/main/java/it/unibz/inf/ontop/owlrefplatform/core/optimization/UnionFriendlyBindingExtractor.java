@@ -19,7 +19,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 /**
  * Only deals with construction and union nodes
@@ -59,7 +60,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
             @Override
             public Optional<ImmutableSubstitution<ImmutableTerm>> getOptionalSubstitution() {
                 return Optional.of(substitutionMap.getMergedBindings().collect(ImmutableCollectors.toMap())).filter(m -> !m.isEmpty())
-                        .map(DATA_FACTORY::getSubstitution);
+                        .map(SUBSTITUTION_FACTORY::getSubstitution);
             }
 
             @Override
@@ -192,7 +193,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
                     return Optional.empty();
                 }
             }
-            return Optional.of(DATA_FACTORY.getImmutableFunctionalTerm(functionalTerm1.getFunctionSymbol(),
+            return Optional.of(TERM_FACTORY.getImmutableFunctionalTerm(functionalTerm1.getFunctionSymbol(),
                     argumentBuilder.build()));
         }
         else {

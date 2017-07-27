@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 public class SQLPPMapping2DatalogConverterTest extends TestCase {
@@ -97,7 +97,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 	private void runAnalysis(String source, String targetString) throws Exception {
 		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm.getPrefixMap());
 		ImmutableList<ImmutableFunctionalTerm> target = targetParser.parse(targetString).stream()
-				.map(DATA_FACTORY::getImmutableFunctionalTerm)
+				.map(TERM_FACTORY::getImmutableFunctionalTerm)
 				.collect(ImmutableCollectors.toList());
 
 		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), target);

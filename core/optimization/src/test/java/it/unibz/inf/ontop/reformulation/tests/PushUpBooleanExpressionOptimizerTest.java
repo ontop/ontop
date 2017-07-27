@@ -6,11 +6,11 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushUpBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushUpBooleanExpressionOptimizerImpl;
@@ -26,37 +26,38 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.createQueryBuilder;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static junit.framework.TestCase.assertTrue;
 
 public class PushUpBooleanExpressionOptimizerTest {
 
-    private final static AtomPredicate TABLE1_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 2);
-    private final static AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("table2", 2);
-    private final static AtomPredicate TABLE3_PREDICATE = DATA_FACTORY.getAtomPredicate("table3", 3);
-    private final static AtomPredicate TABLE4_PREDICATE = DATA_FACTORY.getAtomPredicate("table4", 3);
-    private final static AtomPredicate TABLE5_PREDICATE = DATA_FACTORY.getAtomPredicate("table5", 1);
-    private final static AtomPredicate TABLE6_PREDICATE = DATA_FACTORY.getAtomPredicate("table6", 3);
-    private final static AtomPredicate TABLE7_PREDICATE = DATA_FACTORY.getAtomPredicate("table7", 4);
-    private final static AtomPredicate ANS1_PREDICATE1 = DATA_FACTORY.getAtomPredicate("ans1", 1);
-    private final static AtomPredicate ANS1_PREDICATE3 = DATA_FACTORY.getAtomPredicate("ans1", 3);
-    private final static Variable U = DATA_FACTORY.getVariable("U");
-    private final static Variable V = DATA_FACTORY.getVariable("V");
-    private final static Variable W = DATA_FACTORY.getVariable("W");
-    private final static Variable X = DATA_FACTORY.getVariable("X");
-    private final static Variable Y = DATA_FACTORY.getVariable("Y");
-    private final static Variable Z = DATA_FACTORY.getVariable("Z");
+    private final static AtomPredicate TABLE1_PREDICATE = ATOM_FACTORY.getAtomPredicate("table1", 2);
+    private final static AtomPredicate TABLE2_PREDICATE = ATOM_FACTORY.getAtomPredicate("table2", 2);
+    private final static AtomPredicate TABLE3_PREDICATE = ATOM_FACTORY.getAtomPredicate("table3", 3);
+    private final static AtomPredicate TABLE4_PREDICATE = ATOM_FACTORY.getAtomPredicate("table4", 3);
+    private final static AtomPredicate TABLE5_PREDICATE = ATOM_FACTORY.getAtomPredicate("table5", 1);
+    private final static AtomPredicate TABLE6_PREDICATE = ATOM_FACTORY.getAtomPredicate("table6", 3);
+    private final static AtomPredicate TABLE7_PREDICATE = ATOM_FACTORY.getAtomPredicate("table7", 4);
+    private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
+    private final static AtomPredicate ANS1_PREDICATE3 = ATOM_FACTORY.getAtomPredicate("ans1", 3);
+    private final static Variable U = TERM_FACTORY.getVariable("U");
+    private final static Variable V = TERM_FACTORY.getVariable("V");
+    private final static Variable W = TERM_FACTORY.getVariable("W");
+    private final static Variable X = TERM_FACTORY.getVariable("X");
+    private final static Variable Y = TERM_FACTORY.getVariable("Y");
+    private final static Variable Z = TERM_FACTORY.getVariable("Z");
 
-    private final static ImmutableExpression EXPRESSION1 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, X, Z);
-    private final static ImmutableExpression EXPRESSION2 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.NEQ, Y, Z);
-    private final static ImmutableExpression EXPRESSION3 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.GTE, W, Z);
-    private final static ImmutableExpression EXPRESSION4 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.LT, V, W);
-    private final static ImmutableExpression EXPRESSION5 = DATA_FACTORY.getImmutableExpression(
-            ExpressionOperation.NEQ, X, DATA_FACTORY.getConstantLiteral("a"));
+    private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getImmutableExpression(
+            ExpressionOperation.NEQ, X, TERM_FACTORY.getConstantLiteral("a"));
 
     @Test
     public void testPropagationFomInnerJoinProvider() throws EmptyQueryException {
@@ -426,7 +427,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X), DATA_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y, Z))));
+                ImmutableSet.of(X), SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y, Z))));
         FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION2);
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, W));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, Y, Z));
@@ -448,7 +449,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X, Y, Z), DATA_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y, Z))));
+                ImmutableSet.of(X, Y, Z), SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y, Z))));
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(Optional.of(EXPRESSION2));
 
         queryBuilder2.init(projectionAtom, constructionNode1);
@@ -470,10 +471,10 @@ public class PushUpBooleanExpressionOptimizerTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(EXPRESSION5);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X), DATA_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y, Z))));
+                ImmutableSet.of(X), SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y, Z))));
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(Optional.of(EXPRESSION2));
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(Z), DATA_FACTORY .getSubstitution(ImmutableMap.of (Z, generateURI(V, W))));
+                ImmutableSet.of(Z), SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of (Z, generateURI(V, W))));
         FilterNode filterNode2 = IQ_FACTORY.createFilterNode(EXPRESSION4);
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE5_PREDICATE, Y));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, V, W));
@@ -498,10 +499,10 @@ public class PushUpBooleanExpressionOptimizerTest {
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
         FilterNode filterNode3 = IQ_FACTORY.createFilterNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION5, EXPRESSION2, EXPRESSION4).get());
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(V, W, X, Y, Z), DATA_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y, Z))));
+                ImmutableSet.of(V, W, X, Y, Z), SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y, Z))));
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
         ConstructionNode constructionNode5 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(V, W, Z), DATA_FACTORY.getSubstitution(ImmutableMap.of(Z, generateURI(V, W))));
+                ImmutableSet.of(V, W, Z), SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Z, generateURI(V, W))));
 
         queryBuilder2.init(projectionAtom, constructionNode1);
         queryBuilder2.addChild(constructionNode1, filterNode3);
@@ -650,7 +651,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                DATA_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y))));
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y))));
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(Y));
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION3, EXPRESSION5).get());
         FilterNode filterNode2 = IQ_FACTORY.createFilterNode(EXPRESSION3);
@@ -685,7 +686,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(W, X, Z));
         UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(W, Y, Z));
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(X, W, Z), DATA_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y))));
+                ImmutableSet.of(X, W, Z), SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y))));
 
         queryBuilder2.init(projectionAtom, constructionNode1);
         queryBuilder2.addChild(constructionNode1, filterNode4);
@@ -711,10 +712,10 @@ public class PushUpBooleanExpressionOptimizerTest {
         for (VariableOrGroundTerm argument : arguments) {
             uriTemplateString = uriTemplateString.toString() + "{}";
         }
-        Constant uriTemplate = DATA_FACTORY.getConstantLiteral(uriTemplateString);
+        Constant uriTemplate = TERM_FACTORY.getConstantLiteral(uriTemplateString);
         ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
         builder.add(uriTemplate);
         builder.add(arguments);
-        return DATA_FACTORY.getImmutableFunctionalTerm(uriTemplatePredicate, builder.build());
+        return TERM_FACTORY.getImmutableFunctionalTerm(uriTemplatePredicate, builder.build());
     }
 }

@@ -4,7 +4,7 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.SubstitutionPropagationProposalImpl;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -22,8 +22,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 public class SelfJoinLikeExecutor {
 
@@ -243,7 +243,7 @@ public class SelfJoinLikeExecutor {
     protected static ImmutableSubstitution<VariableOrGroundTerm> unifyRedundantNodes(
             Collection<DataNode> redundantNodes) throws AtomUnificationException {
         // Non-final
-        ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution = DATA_FACTORY.getSubstitution();
+        ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution = SUBSTITUTION_FACTORY.getSubstitution();
 
         /*
          * Should normally not be called in this case.

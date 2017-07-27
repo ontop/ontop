@@ -7,12 +7,12 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.injection.OntopModelSettings.CardinalityPreservationMode.LOOSE;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 /**
  * Uses non-unique functional constraints to:
@@ -209,7 +209,7 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
                             .collect(ImmutableCollectors.toMap(
                                     Map.Entry::getKey,
                                     e -> ImmutabilityTools.convertIntoVariableOrGroundTerm(e.getValue()))))
-                    .map(DATA_FACTORY::getSubstitution)
+                    .map(SUBSTITUTION_FACTORY::getSubstitution)
                     .orElseThrow(AtomUnificationException::new);
 
             ImmutableSubstitution<VariableOrGroundTerm> candidateUnifier = currentUnifier.isPresent()

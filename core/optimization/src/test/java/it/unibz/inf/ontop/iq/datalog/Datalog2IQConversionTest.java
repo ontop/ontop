@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.datalog.impl.DatalogProgram2QueryConverterImpl;
 import it.unibz.inf.ontop.iq.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -14,7 +14,8 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.INTEGER;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER;
 import static it.unibz.inf.ontop.iq.datalog.impl.DatalogConversionTools.convertFromDatalogDataAtom;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -34,7 +35,7 @@ public class Datalog2IQConversionTest {
 
     @Test
     public void testHeadConversion() throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
-        AtomPredicate predicate = DATA_FACTORY.getAtomPredicate("ans", 5);
+        AtomPredicate predicate = ATOM_FACTORY.getAtomPredicate("ans", 5);
 
         Function datalogHead = DATA_FACTORY.getFunction(predicate,X,X,TWO, Y, URI_TEMPLATE);
 

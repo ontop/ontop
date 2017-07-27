@@ -30,7 +30,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.IriConstants;
 
 public class SimplePrefixManager extends AbstractPrefixManager {
 
@@ -84,11 +84,11 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 
     private static Map<String, String> initKnownPrefixes() {
         Map<String, String> prefixToURIMap = new HashMap<>();
-        prefixToURIMap.put(OBDAVocabulary.PREFIX_RDF, OBDAVocabulary.NS_RDF);
-        prefixToURIMap.put(OBDAVocabulary.PREFIX_RDFS, OBDAVocabulary.NS_RDFS);
-        prefixToURIMap.put(OBDAVocabulary.PREFIX_OWL, OBDAVocabulary.NS_OWL);
-        prefixToURIMap.put(OBDAVocabulary.PREFIX_XSD, OBDAVocabulary.NS_XSD);
-        prefixToURIMap.put(OBDAVocabulary.PREFIX_OBDA, OBDAVocabulary.NS_OBDA);
+        prefixToURIMap.put(IriConstants.PREFIX_RDF, IriConstants.NS_RDF);
+        prefixToURIMap.put(IriConstants.PREFIX_RDFS, IriConstants.NS_RDFS);
+        prefixToURIMap.put(IriConstants.PREFIX_OWL, IriConstants.NS_OWL);
+        prefixToURIMap.put(IriConstants.PREFIX_XSD, IriConstants.NS_XSD);
+        prefixToURIMap.put(IriConstants.PREFIX_OBDA, IriConstants.NS_OBDA);
         return prefixToURIMap;
 	}
 

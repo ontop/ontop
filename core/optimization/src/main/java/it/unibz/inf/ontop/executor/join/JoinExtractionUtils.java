@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * TODO: describe
@@ -101,10 +101,10 @@ public class JoinExtractionUtils {
                 Iterator<ImmutableExpression> it = booleanExpressions.iterator();
 
                 // Non-final
-                ImmutableExpression currentExpression = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND,
+                ImmutableExpression currentExpression = TERM_FACTORY.getImmutableExpression(ExpressionOperation.AND,
                         it.next(), it.next());
                 while(it.hasNext()) {
-                    currentExpression = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, currentExpression, it.next());
+                    currentExpression = TERM_FACTORY.getImmutableExpression(ExpressionOperation.AND, currentExpression, it.next());
                 }
 
                 return Optional.of(currentExpression);

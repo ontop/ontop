@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  *
@@ -184,7 +184,7 @@ public class OBDAModel {
                 .map(a -> {
                     if (a.getFunctionSymbol().equals(removedPredicate)) {
                         counter.incrementAndGet();
-                        return  DATA_FACTORY.getImmutableFunctionalTerm(newPredicate,
+                        return  TERM_FACTORY.getImmutableFunctionalTerm(newPredicate,
                                 ImmutableList.copyOf(a.getArguments()));
                     }
                     return a;

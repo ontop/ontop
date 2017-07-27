@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.ontology;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
 /**
  * Represents ObjectPropertyExpression from the OWL 2 QL Specification

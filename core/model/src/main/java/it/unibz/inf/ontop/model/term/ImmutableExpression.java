@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.term;
 
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.predicate.OperationPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 
 public interface ImmutableExpression extends Expression, ImmutableFunctionalTerm {
     @Override

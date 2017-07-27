@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -134,7 +134,7 @@ public class SubstitutionUtilities {
         Map<Variable, Term> entries = new HashMap<>();
 
         for (Variable var : vars) {
-            entries.put(var, OBDAVocabulary.NULL);
+            entries.put(var, TermConstants.NULL);
         }
         Substitution substitution = new SubstitutionImpl(entries);
         return substitution;
