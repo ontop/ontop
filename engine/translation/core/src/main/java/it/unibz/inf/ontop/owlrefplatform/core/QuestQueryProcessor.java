@@ -188,7 +188,7 @@ public class QuestQueryProcessor implements QueryTranslator {
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
-				intermediateQuery = new PushUpBooleanExpressionOptimizerImpl().optimize(intermediateQuery);
+				intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false).optimize(intermediateQuery);
 				log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
 
 				intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);

@@ -52,11 +52,20 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 
 public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpressionOptimizer {
 
+
+    private final boolean pushAboveUnions;
+
+    public PushUpBooleanExpressionOptimizerImpl(boolean pushAboveUnions) {
+        this.pushAboveUnions = pushAboveUnions;
+    }
+
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) {
         try {
             query = pushUpFromSubtree(query.getRootConstructionNode(), query);
-            return pushAboveUnions(query);
+            return pushAboveUnions ?
+                    pushAboveUnions(query) :
+                    query;
         } catch (EmptyQueryException e) {
             throw new IllegalStateException("This optimizer should not empty the query");
         }
@@ -280,7 +289,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
         for (Optional<CommutativeJoinOrFilterNode> provider : optProviders) {
             if (provider.isPresent()) {
                 providers.add(provider.get());
-            }else {
+            } else {
                 return ImmutableSet.of();
             }
         }
@@ -325,10 +334,10 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
     /**
      * Returns the boolean conjuncts shared by all providers.
      */
-    private ImmutableSet<ImmutableExpression> getExpressionsToPropagateAboveUnion (ImmutableSet<CommutativeJoinOrFilterNode> providers) {
-            return providers.stream()
-                    .map(n -> n.getOptionalFilterCondition().get().flattenAND())
-                    .reduce(this::computeIntersection).get();
+    private ImmutableSet<ImmutableExpression> getExpressionsToPropagateAboveUnion(ImmutableSet<CommutativeJoinOrFilterNode> providers) {
+        return providers.stream()
+                .map(n -> n.getOptionalFilterCondition().get().flattenAND())
+                .reduce(this::computeIntersection).get();
     }
 
     private ImmutableSet<ImmutableExpression> computeIntersection(ImmutableSet<ImmutableExpression> set1,
