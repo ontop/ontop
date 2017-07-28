@@ -62,8 +62,8 @@
             <artifactId>sqljdbc4</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>ojdbc16</artifactId>
+            <groupId>com.oracle.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
