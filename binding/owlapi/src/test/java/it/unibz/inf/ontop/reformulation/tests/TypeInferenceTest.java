@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.answering.reformulation.generation.impl.TypeExtractor;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
@@ -22,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * test Type inference in the SQL Generator with the use of metadata when the value is unknown.
- * @see it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.TypeExtractor
+ * @see TypeExtractor
  */
 public class TypeInferenceTest {
 

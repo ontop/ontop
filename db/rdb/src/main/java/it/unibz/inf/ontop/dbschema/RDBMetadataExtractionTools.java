@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.dbschema;
 
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

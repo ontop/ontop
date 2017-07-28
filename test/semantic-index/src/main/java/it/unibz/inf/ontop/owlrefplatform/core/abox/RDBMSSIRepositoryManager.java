@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;

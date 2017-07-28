@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.rdf4j.repository.impl;
  */
 
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
-import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
 
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.model.ValueFactory;

@@ -20,16 +20,10 @@ package it.unibz.inf.ontop.rdf4j.query;
  * #L%
  */
 
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.model.OntopBindingSet;
+import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.rdf4j.RDF4JHelper;
-import org.apache.commons.rdf.rdf4j.RDF4J;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.AbstractBindingSet;
 import org.eclipse.rdf4j.query.Binding;

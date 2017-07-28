@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 
-import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import org.semanticweb.owlapi.model.OWLException;
 
 public interface OntopOWLStatement extends OWLStatement {

@@ -24,7 +24,7 @@ package it.unibz.inf.ontop.docker.oracle;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;

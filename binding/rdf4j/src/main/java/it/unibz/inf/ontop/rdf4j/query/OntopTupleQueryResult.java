@@ -22,8 +22,8 @@ package it.unibz.inf.ontop.rdf4j.query;
 
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.model.OntopBindingSet;
-import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
+import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +33,6 @@ import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.TupleQueryResult;
-import org.eclipse.rdf4j.query.impl.MapBindingSet;
 
 public class OntopTupleQueryResult implements TupleQueryResult {
 

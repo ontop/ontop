@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.impl;
 
 import com.google.common.collect.Iterators;
-import it.unibz.inf.ontop.model.OntopBinding;
-import it.unibz.inf.ontop.model.OntopBindingSet;
+import it.unibz.inf.ontop.answering.resultset.OntopBinding;
+import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;

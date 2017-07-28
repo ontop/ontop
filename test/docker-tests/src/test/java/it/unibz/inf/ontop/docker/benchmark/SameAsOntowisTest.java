@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.docker.benchmark;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Ignore;
 import org.semanticweb.owlapi.model.OWLException;

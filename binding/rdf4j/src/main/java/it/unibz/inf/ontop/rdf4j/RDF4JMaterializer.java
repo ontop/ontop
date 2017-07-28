@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.rdf4j;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 
-import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
+import it.unibz.inf.ontop.materialization.MaterializationParams;
 import org.eclipse.rdf4j.repository.RepositoryException;
 
 import javax.annotation.Nonnull;

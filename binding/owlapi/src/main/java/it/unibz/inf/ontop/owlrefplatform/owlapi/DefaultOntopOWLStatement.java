@@ -20,14 +20,14 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.input.*;
+import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.model.BooleanResultSet;
-import it.unibz.inf.ontop.model.SimpleGraphResultSet;
-import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
+import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
+import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
-import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
+import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
+import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.impl.OntopGraphOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.impl.OntopBooleanOWLResultSet;
 

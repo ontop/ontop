@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 
 import java.io.BufferedReader;

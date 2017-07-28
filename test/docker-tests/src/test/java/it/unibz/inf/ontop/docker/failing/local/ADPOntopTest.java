@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.docker.failing.local;
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.semanticweb.owlapi.model.OWLObject;
 

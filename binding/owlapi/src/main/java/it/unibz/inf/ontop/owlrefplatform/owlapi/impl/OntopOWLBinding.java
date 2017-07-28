@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.impl;
 
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.model.OntopBinding;
+import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;

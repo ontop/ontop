@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.impl.OntopOWLBindingSet;
 import org.semanticweb.owlapi.model.*;

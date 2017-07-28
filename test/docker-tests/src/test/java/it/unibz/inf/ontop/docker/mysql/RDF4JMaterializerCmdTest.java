@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
+import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.MaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.rdf4j.MaterializationGraphQuery;

@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.rdf4j.query;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.input.GraphSPARQLQuery;
-import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
-import it.unibz.inf.ontop.model.SimpleGraphResultSet;
+import it.unibz.inf.ontop.answering.reformulation.input.GraphSPARQLQuery;
+import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 
 import java.util.HashMap;
@@ -30,9 +30,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
+import it.unibz.inf.ontop.answering.connection.OntopStatement;
+import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
 import it.unibz.inf.ontop.rdf4j.RDF4JHelper;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.GraphQuery;

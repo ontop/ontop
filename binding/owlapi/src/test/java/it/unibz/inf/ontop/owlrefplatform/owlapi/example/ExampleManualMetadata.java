@@ -2,10 +2,10 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
-import it.unibz.inf.ontop.answering.input.InputQueryFactory;
+import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.DefaultOntopOWLConnection;

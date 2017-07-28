@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.sql.pool.JDBCConnectionPool;
-import it.unibz.inf.ontop.sql.pool.impl.ConnectionGenerator;
+import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
+import it.unibz.inf.ontop.answering.connection.pool.impl.ConnectionGenerator;
 import org.protege.editor.core.Disposable;
 
 import java.util.ArrayList;

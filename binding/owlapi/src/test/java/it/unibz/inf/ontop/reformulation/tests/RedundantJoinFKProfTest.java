@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;

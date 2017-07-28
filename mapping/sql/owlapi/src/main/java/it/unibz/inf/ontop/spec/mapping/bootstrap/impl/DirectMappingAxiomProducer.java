@@ -30,7 +30,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.EncodeForURI;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
-import it.unibz.inf.ontop.utils.JdbcTypeMapper;
+import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 
 import java.util.*;
 import java.util.Map.Entry;

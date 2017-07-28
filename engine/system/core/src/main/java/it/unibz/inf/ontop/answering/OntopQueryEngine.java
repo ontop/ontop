@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.answering;
 
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
 
 public interface OntopQueryEngine extends AutoCloseable {
 

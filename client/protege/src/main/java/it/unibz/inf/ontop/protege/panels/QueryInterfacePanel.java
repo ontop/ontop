@@ -20,13 +20,13 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
+import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.utils.querymanager.QueryController;
 import it.unibz.inf.ontop.utils.OBDAPreferenceChangeListener;
 
 import javax.swing.*;

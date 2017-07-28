@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
+import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.impl.DefaultOntopOWLAPIMaterializer;
 import org.semanticweb.owlapi.model.OWLException;
 

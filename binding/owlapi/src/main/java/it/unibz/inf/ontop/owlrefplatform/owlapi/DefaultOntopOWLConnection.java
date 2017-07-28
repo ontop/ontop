@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.input.InputQueryFactory;
+import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import org.semanticweb.owlapi.model.OWLException;
 
 

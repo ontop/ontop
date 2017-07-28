@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.protege.views;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlapi.OWLResultSetWriter;
-import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;

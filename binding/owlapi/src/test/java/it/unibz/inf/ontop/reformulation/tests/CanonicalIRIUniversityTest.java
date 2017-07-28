@@ -2,13 +2,13 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.io.QueryIOManager;
+import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
 
-import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
-import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.utils.querymanager.QueryController;
+import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
+import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;

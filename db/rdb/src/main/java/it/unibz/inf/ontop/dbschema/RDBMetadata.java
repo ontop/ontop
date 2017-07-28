@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.dbschema;
 
 
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 
 import java.util.*;
 

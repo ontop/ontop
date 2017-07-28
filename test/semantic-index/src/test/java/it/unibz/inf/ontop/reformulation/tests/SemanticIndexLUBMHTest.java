@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.QueryIOManager;
+import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.utils.querymanager.QueryController;
+import it.unibz.inf.ontop.utils.querymanager.QueryControllerEntity;
+import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;

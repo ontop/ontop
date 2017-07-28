@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.docker.mssql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.io.QueryIOManager;
+import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
-import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.utils.querymanager.QueryController;
+import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
+import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

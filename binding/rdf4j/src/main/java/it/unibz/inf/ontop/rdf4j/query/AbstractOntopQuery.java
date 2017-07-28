@@ -19,7 +19,7 @@
  */
 package it.unibz.inf.ontop.rdf4j.query;
 
-import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;

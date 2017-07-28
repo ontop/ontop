@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.exception.OntopTranslationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
@@ -53,7 +54,7 @@ import static org.junit.Assert.assertTrue;
  * there and then query on top.
 /**
  * Class to test if bind in SPARQL is working properly.
- * Refer in particular to the class {@link it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator}
+ * Refer in particular to the class {@link SparqlAlgebraToDatalogTranslator}
  *
  * It uses the test from http://www.w3.org/TR/sparql11-query/#bind
  */

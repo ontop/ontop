@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.impl;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
-import it.unibz.inf.ontop.model.GraphResultSet;
+import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPIIndividualTranslator;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;

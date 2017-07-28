@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
-import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
+import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import org.semanticweb.owlapi.model.OWLException;
 
 /**

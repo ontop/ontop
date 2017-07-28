@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
@@ -45,7 +46,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
- * Refer in particular to the class {@link it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator}
+ * Refer in particular to the class {@link SparqlAlgebraToDatalogTranslator}
  *
  * It expands the tests from {@link BindTest}.
  */

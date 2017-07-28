@@ -2,13 +2,12 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import com.google.inject.util.Providers;
-import it.unibz.inf.ontop.answering.input.InputQueryFactory;
-import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
+import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopTranslationConfiguration;
 import it.unibz.inf.ontop.injection.OntopTranslationSettings;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAsPredicateExtractor;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SameAsRewriter;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.MappingSameAsPredicateExtractor;
 
 import java.util.Optional;
 

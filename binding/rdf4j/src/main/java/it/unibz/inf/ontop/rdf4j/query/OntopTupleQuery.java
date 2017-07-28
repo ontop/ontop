@@ -20,13 +20,13 @@ package it.unibz.inf.ontop.rdf4j.query;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
-import it.unibz.inf.ontop.answering.input.SelectQuery;
+import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
-import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 
-import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
+import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
