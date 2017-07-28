@@ -23,7 +23,7 @@ import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingAxiomProducer;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.*;
 

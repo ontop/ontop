@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.impl;
+package it.unibz.inf.ontop.protege.core.impl;
 
 /*
  * #%L
@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
 
 import java.net.URI;
 import java.util.Enumeration;

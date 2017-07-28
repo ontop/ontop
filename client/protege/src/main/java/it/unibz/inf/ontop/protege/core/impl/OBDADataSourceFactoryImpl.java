@@ -1,9 +1,9 @@
-package it.unibz.inf.ontop.model.impl;
+package it.unibz.inf.ontop.protege.core.impl;
 
 
 import com.google.common.base.Preconditions;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDADataSourceFactory;
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.core.OBDADataSourceFactory;
 
 import java.net.URI;
 import java.util.UUID;

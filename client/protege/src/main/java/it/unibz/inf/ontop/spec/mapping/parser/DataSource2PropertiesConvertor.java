@@ -1,8 +1,8 @@
-package it.unibz.inf.ontop.io;
+package it.unibz.inf.ontop.spec.mapping.parser;
 
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 
 import java.util.Properties;
 

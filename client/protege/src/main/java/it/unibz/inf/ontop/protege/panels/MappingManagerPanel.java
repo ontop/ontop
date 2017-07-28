@@ -22,12 +22,12 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
-import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
+import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.sql.SQLSourceQueryValidator;
-import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.spec.mapping.validation.SQLSourceQueryValidator;
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;

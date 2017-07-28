@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.impl;
+package it.unibz.inf.ontop.protege.core;
 
 /*
  * #%L
@@ -20,15 +20,28 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
+import java.net.URI;
+import java.util.Set;
 
-public class RDBMSourceParameterConstants {
+public interface OBDADataSource {
 
-	public static final String	DATABASE_USERNAME			= OntopSQLCoreSettings.JDBC_USER;
-	
-	public static final String	DATABASE_PASSWORD			= OntopSQLCoreSettings.JDBC_PASSWORD;
-	
-	public static final String	DATABASE_DRIVER				= OntopSQLCoreSettings.JDBC_DRIVER;
-	
-	public static final String	DATABASE_URL				= OntopSQLCoreSettings.JDBC_URL;
+	public abstract void setParameter(String parameter_uri, String value);
+
+	public abstract URI getSourceID();
+
+	public abstract void setNewID(URI newid);
+
+	public abstract String getParameter(String parameter_uri);
+
+	public abstract Set<Object> getParameters();
+
+	public abstract void setEnabled(boolean enabled);
+
+	public abstract boolean isEnabled();
+
+	public abstract void setRegistered(boolean registered);
+
+	public abstract boolean isRegistered();
+
+	public Object clone();
 }

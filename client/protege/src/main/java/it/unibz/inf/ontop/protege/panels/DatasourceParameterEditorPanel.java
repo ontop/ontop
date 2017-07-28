@@ -22,8 +22,8 @@ package it.unibz.inf.ontop.protege.panels;
 
 
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -31,7 +31,7 @@ import it.unibz.inf.ontop.protege.utils.ConnectionTools;
 import it.unibz.inf.ontop.protege.utils.CustomTraversalPolicy;
 import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;

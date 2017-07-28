@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model;
+package it.unibz.inf.ontop.protege.core;
 
 public interface OBDADataSourceFactory {
 

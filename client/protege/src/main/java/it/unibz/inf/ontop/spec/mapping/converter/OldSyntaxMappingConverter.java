@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.io;
+package it.unibz.inf.ontop.spec.mapping.converter;
 
 /*
  * #%L
@@ -25,8 +25,8 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
-import it.unibz.inf.ontop.model.OBDADataSourceFactory;
-import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
+import it.unibz.inf.ontop.protege.core.OBDADataSourceFactory;
+import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.impl;
+package it.unibz.inf.ontop.protege.core.impl;
 
 /**
  * TODO: remove them all

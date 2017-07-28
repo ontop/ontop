@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.Properties;
 
 import static it.unibz.inf.ontop.injection.OntopMappingSettings.OPTIMIZE_EQUIVALENCES;
-import static it.unibz.inf.ontop.model.impl.DeprecatedConstants.*;
+import static it.unibz.inf.ontop.protege.core.impl.DeprecatedConstants.*;
 
 /**
  * Mutable

@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.protege.utils;
 
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 
 import java.sql.Connection;
 import java.sql.SQLException;

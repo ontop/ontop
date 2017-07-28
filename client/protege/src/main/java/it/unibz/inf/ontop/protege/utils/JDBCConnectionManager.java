@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.sql;
+package it.unibz.inf.ontop.protege.utils;
 
 /*
  * #%L

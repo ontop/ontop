@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.sql;
+package it.unibz.inf.ontop.spec.mapping.validation;
 
 /*
  * #%L
@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.sql;
 
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

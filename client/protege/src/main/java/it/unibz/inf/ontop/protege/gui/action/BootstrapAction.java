@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
