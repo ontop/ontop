@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.quest.sparql;
+package it.unibz.inf.ontop.test.sparql;
 
 /*
  * #%L

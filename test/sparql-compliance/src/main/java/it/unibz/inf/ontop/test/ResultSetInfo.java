@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.quest;
+package it.unibz.inf.ontop.test;
 
 /*
  * #%L

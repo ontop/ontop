@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.quest;
+package it.unibz.inf.ontop.test;
 
 /*
  * #%L
@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.quest;
  * #L%
  */
 
-import static it.unibz.inf.ontop.quest.ResultSetInfoSchema.RESULTSET_SIZE;
-import static it.unibz.inf.ontop.quest.ResultSetInfoSchema.THROWN_EXCEPTION;
+import static it.unibz.inf.ontop.test.ResultSetInfoSchema.RESULTSET_SIZE;
+import static it.unibz.inf.ontop.test.ResultSetInfoSchema.THROWN_EXCEPTION;
 
 import java.util.Set;
 
