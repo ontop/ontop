@@ -88,7 +88,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -131,7 +131,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -162,7 +162,8 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl
+                (true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -200,7 +201,8 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl
+                (true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -233,7 +235,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -265,7 +267,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -310,7 +312,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -353,7 +355,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -396,7 +398,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -441,7 +443,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -490,7 +492,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -538,7 +540,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -580,7 +582,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -617,7 +619,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -673,7 +675,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);

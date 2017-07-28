@@ -24,6 +24,7 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
     private final QueryUnionSplitter unionSplitter;
     // For the translation of subqueries: prevents conflicts in generated predicate names
     private int ruleCounter;
+    private int dummyPredCounter;
 
     @Inject
     private Mapping2DatalogConverterImpl(QueryUnionSplitter unionSplitter) {
@@ -45,12 +46,14 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
     }
 
     private Stream<CQIE> convertMappingQuery(IntermediateQuery mappingQuery) {
+
         ImmutableSet<CQIE> rules = unionSplitter.splitUnion(mappingQuery)
-                .flatMap(q -> IntermediateQueryToDatalogTranslator.translate(q, ruleCounter).getRules().stream())
+                .flatMap(q -> IntermediateQueryToDatalogTranslator.translate(q, ruleCounter, dummyPredCounter).getRules().stream())
                 .collect(ImmutableCollectors.toSet());
         //CQIEs are mutable
         rules.forEach(DatalogNormalizer::unfoldJoinTrees);
-        ruleCounter+=rules.size();
+        ruleCounter+=IntermediateQueryToDatalogTranslator.getSubQueryCounter();
+        dummyPredCounter+=IntermediateQueryToDatalogTranslator.getDummyPredCounter();
         return rules.stream();
     }
 }
