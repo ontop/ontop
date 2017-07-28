@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLBindingSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLException;
@@ -37,9 +38,10 @@ public class HasIdTest extends AbstractVirtualModeTest {
                 "}");
         // At least one result
         assertTrue(results.hasNext());
-        assertEquals(results.getOWLIndividual(1).toString(), "<http://example.com/persons/3>");
-        assertEquals(results.getOWLLiteral(2), null);
-        assertEquals(results.getOWLLiteral(3), null);
+        final OWLBindingSet bindingSet = results.next();
+        assertEquals(bindingSet.getOWLIndividual(1).toString(), "<http://example.com/persons/3>");
+        assertEquals(bindingSet.getOWLLiteral(2), null);
+        assertEquals(bindingSet.getOWLLiteral(3), null);
         assertFalse(results.hasNext());
     }
 }

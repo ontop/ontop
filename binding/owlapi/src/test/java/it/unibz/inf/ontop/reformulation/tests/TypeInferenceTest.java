@@ -126,10 +126,10 @@ public class TypeInferenceTest {
         try {
             TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
-                OWLObject ind1 = rs.getOWLObject("r");
+                final OWLBindingSet bindingSet = rs.next();
+                OWLObject ind1 = bindingSet.getOWLObject("r");
                 log.debug(ind1.toString());
                 returnedValueBuilder.add(ind1.toString());
-
                 i++;
             }
         } catch (Exception e) {

@@ -150,8 +150,9 @@ public class SPARQLRegExTest {
 			// assertTrue(rs.hasNext());
 			int count = 0;
 			while (rs.hasNext()) {
-				for (int i = 1; i <= rs.getColumnCount(); i++) {
-					OWLObject ind1 = rs.getOWLObject(i);
+                final OWLBindingSet bindingSet = rs.next();
+                for (int i = 1; i <= rs.getColumnCount(); i++) {
+					OWLObject ind1 = bindingSet.getOWLObject(i);
 					System.out.println(" Result: " + ind1.toString());
 				}
 				count += 1;

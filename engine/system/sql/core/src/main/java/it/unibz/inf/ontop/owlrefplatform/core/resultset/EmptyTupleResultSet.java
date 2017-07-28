@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.OntopBindingSet;
 import it.unibz.inf.ontop.model.TupleResultSet;
 
 import java.util.List;
@@ -48,7 +48,12 @@ public class EmptyTupleResultSet implements TupleResultSet {
 		return 0;
 	}
 
-	@Override
+    @Override
+    public OntopBindingSet next() {
+        throw new NoSuchElementException();
+    }
+
+    @Override
 	public List<String> getSignature() {
 		return signature;
 	}
@@ -58,13 +63,4 @@ public class EmptyTupleResultSet implements TupleResultSet {
 		return false;
 	}
 
-	@Override
-	public Constant getConstant(int column) {
-        throw new NoSuchElementException();
-	}
-
-	@Override
-	public Constant getConstant(String name) {
-        throw new NoSuchElementException();
-	}
 }

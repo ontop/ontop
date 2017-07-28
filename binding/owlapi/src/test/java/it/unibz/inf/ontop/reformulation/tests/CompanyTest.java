@@ -136,9 +136,9 @@ public class CompanyTest  {
 			TupleOWLResultSet  rs2 = st.executeSelectQuery(query);
 //
 			assertTrue(rs2.hasNext());
-
-			OWLObject ind2 = rs2.getOWLIndividual("z");
-			OWLObject ind3 = rs2.getOWLIndividual("x");
+            final OWLBindingSet bindingSet = rs2.next();
+            OWLObject ind2 = bindingSet.getOWLIndividual("z");
+			OWLObject ind3 = bindingSet.getOWLIndividual("x");
 
 			assertEquals("<http://it.unibz.krdb/obda/test/company#mark>", ind2.toString());
 			assertEquals("<http://it.unibz.krdb/obda/test/company#1>", ind3.toString());
@@ -172,8 +172,9 @@ public class CompanyTest  {
 			TupleOWLResultSet  rs2 = st.executeSelectQuery(query);
 
 			assertTrue(rs2.hasNext());
-			OWLLiteral ind1 = rs2.getOWLLiteral("y");
-			OWLObject ind2 = rs2.getOWLIndividual("z");
+            final OWLBindingSet bindingSet = rs2.next();
+            OWLLiteral ind1 = bindingSet.getOWLLiteral("y");
+			OWLObject ind2 = bindingSet.getOWLIndividual("z");
 
 			assertEquals("HR", ind1.getLiteral());
 			assertEquals("<http://it.unibz.krdb/obda/test/company#mark>", ind2.toString());

@@ -180,7 +180,8 @@ public class ReverseURITestH2 {
 			// assertTrue(rs.hasNext());
 			int count = 0;
 			while (rs.hasNext()) {
-				OWLObject ind1 = rs.getOWLObject("x");
+				final OWLBindingSet bindingSet = rs.next();
+				OWLObject ind1 = bindingSet.getOWLObject("x");
 				System.out.println("Result " + ind1.toString());
 				count += 1;
 			}

@@ -417,10 +417,10 @@ public class R2rmlCheckerTest {
 //				log.debug("result : "  + rs.getOWLObject("y"));
 //				log.debug("result : "  + rs.getOWLLiteral("y"));
 				
+                final OWLBindingSet bindingSet = rs.next();
 				if(n==0){
-					log.debug("result : "  + rs.getOWLObject("x"));
-					log.debug("result : "  + rs.getOWLObject("y"));
-				
+                    log.debug("result : "  + bindingSet.getOWLObject("x"));
+					log.debug("result : "  + bindingSet.getOWLObject("y"));
 				}
 				n++;
 			}
@@ -452,9 +452,10 @@ public class R2rmlCheckerTest {
 		try {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			while (rs.hasNext()) {
-				if(n==0){
-					log.debug("result : "  + rs.getOWLObject("x"));
-					log.debug("result : "  + rs.getOWLLiteral("y"));
+                final OWLBindingSet bindingSet = rs.next();
+                if(n==0){
+					log.debug("result : "  + bindingSet.getOWLObject("x"));
+					log.debug("result : "  + bindingSet.getOWLLiteral("y"));
 				
 				}
 				n++;

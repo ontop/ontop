@@ -144,10 +144,11 @@ public class PropertyCharacteristicTest extends TestCase {
 	private int countResult(TupleOWLResultSet  rs, boolean stdout) throws OWLException {
 		int counter = 0;
 		while (rs.hasNext()) {
-			counter++;
+            final OWLBindingSet bindingSet = rs.next();
+            counter++;
 			if (stdout) {
 				for (int column = 1; column <= rs.getColumnCount(); column++) {
-					OWLObject binding = rs.getOWLObject(column);
+					OWLObject binding = bindingSet.getOWLObject(column);
 					log.debug(binding.toString() + ", ");
 				}
 

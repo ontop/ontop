@@ -137,7 +137,8 @@ public class MetaMappingVirtualABoxTest {
 			 TupleOWLResultSet  rs1 = st.executeSelectQuery(query1);
         ) {
             assertTrue(rs1.hasNext());
-			OWLObject ind = rs1.getOWLObject("x");
+            final OWLBindingSet bindingSet = rs1.next();
+            OWLObject ind = bindingSet.getOWLObject("x");
 			//OWLIndividual ind2 = rs.getOWLIndividual("y");
 			//OWLLiteral val = rs.getOWLLiteral("z");
 			assertEquals("<uri1>", ind.toString());
@@ -154,8 +155,9 @@ public class MetaMappingVirtualABoxTest {
 			 TupleOWLResultSet  rs2 = st.executeSelectQuery(query2);
         ) {
             assertTrue(rs2.hasNext());
-			OWLObject ind1 = rs2.getOWLObject("x");
-            OWLObject ind2 = rs2.getOWLObject("y");
+            final OWLBindingSet bindingSet = rs2.next();
+            OWLObject ind1 = bindingSet.getOWLObject("x");
+            OWLObject ind2 = bindingSet.getOWLObject("y");
 			//OWLLiteral val = rs2.getOWLLiteral("y");
             assertEquals("<uri1>", ind1.toString());
             assertEquals("<A>", ind2.toString());

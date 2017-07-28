@@ -138,7 +138,8 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 			 TupleOWLResultSet  rs1 = st.executeSelectQuery(query1);
         ) {
             assertTrue(rs1.hasNext());
-			OWLIndividual ind = rs1.getOWLIndividual("x");
+            final OWLBindingSet bindingSet = rs1.next();
+            OWLIndividual ind = bindingSet.getOWLIndividual("x");
 			//OWLIndividual ind2 = rs.getOWLIndividual("y");
 			//OWLLiteral val = rs.getOWLLiteral("z");
 			assertEquals("<uri1>", ind.toString());

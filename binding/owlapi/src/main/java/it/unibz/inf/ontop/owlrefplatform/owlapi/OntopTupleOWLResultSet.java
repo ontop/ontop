@@ -20,12 +20,10 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.owlapi.OWLAPIIndividualTranslator;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.impl.OntopOWLBindingSet;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.List;
@@ -92,93 +90,14 @@ public class OntopTupleOWLResultSet implements TupleOWLResultSet {
 		}
 	}
 
-	private OWLAPIIndividualTranslator translator = new OWLAPIIndividualTranslator();
-	
-	private OWLPropertyAssertionObject translate(Constant c) {
-		if (c instanceof ObjectConstant)
-			return translator.translate((ObjectConstant)c);
-		else
-			return translator.translate((ValueConstant)c);
-	}
+    @Override
+    public OWLBindingSet next() throws OWLException {
+        try {
+            return new OntopOWLBindingSet(res.next());
+        } catch (OntopConnectionException e) {
+            throw new OntopOWLException(e);
+        }
+    }
 
-	@Override
-	public OWLPropertyAssertionObject getOWLPropertyAssertionObject(int column) throws OWLException {
-		try {
-			return translate(res.getConstant(column));
-		} catch (Exception e) {
-			throw new OntopOWLException(e + " Column: " + column);
-		}
-	}
-
-	@Override
-	public OWLIndividual getOWLIndividual(int column) throws OWLException {
-		try {
-			return (OWLIndividual) translate(res.getConstant(column));
-		} catch (Exception e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-	@Override
-	public OWLIndividual getOWLIndividual(String column) throws OWLException {
-		try {
-			return (OWLIndividual) translate(res.getConstant(column));
-		} catch (Exception e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-	public OWLNamedIndividual getOWLNamedIndividual(int column) throws OWLException {
-		try {
-			return (OWLNamedIndividual) translate(res.getConstant(column));
-		} catch (Exception e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-	public OWLAnonymousIndividual getOWLAnonymousIndividual(int column) throws OWLException {
-		try {
-			return (OWLAnonymousIndividual) translate(res.getConstant(column));
-		} catch (Exception e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-
-	@Override
-	public OWLLiteral getOWLLiteral(int column) throws OWLException {
-		try {
-			return (OWLLiteral) translate(res.getConstant(column));
-		} catch (Exception e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-	@Override
-	public OWLLiteral getOWLLiteral(String column) throws OWLException {
-		try {
-			return (OWLLiteral) translate(res.getConstant(column));
-		} catch (Exception e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-	@Override
-	public OWLObject getOWLObject(int column) throws OWLException {
-		try {
-			return translate(res.getConstant(column));
-		} catch (Exception e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-	@Override
-	public OWLObject getOWLObject(String column) throws OWLException {
-		try {
-			return translate(res.getConstant(column));
-		} catch (Exception e) {
-			throw new OntopOWLException(e);
-		}
-	}
 
 }

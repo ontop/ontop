@@ -134,11 +134,10 @@ public class DistinctResultSetTest { //
         TupleOWLResultSet  rs = st.executeSelectQuery(query);
         int count = 0;
         while (rs.hasNext()) {
+            final OWLBindingSet bindingSet = rs.next();
             count++;
             for (int i = 1; i <= rs.getColumnCount(); i++) {
-
-                log.debug(rs.getSignature().get(i-1) + "=" + rs.getOWLObject(i));
-
+                log.debug(rs.getSignature().get(i-1) + "=" + bindingSet.getOWLObject(i));
             }
 
         }

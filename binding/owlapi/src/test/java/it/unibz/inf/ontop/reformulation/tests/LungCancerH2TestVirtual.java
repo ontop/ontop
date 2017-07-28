@@ -182,10 +182,12 @@ public class LungCancerH2TestVirtual extends TestCase {
 		TupleOWLResultSet  rs = st.executeSelectQuery(query);
 		int count = 0;
 		while (rs.hasNext()) {
-			count++;
+            final OWLBindingSet bindingSet = rs.next();
+
+            count++;
 			for (int i = 1; i <= rs.getColumnCount(); i++) {
 				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + rs.getOWLObject(i));
+				System.out.print("=" + bindingSet.getOWLObject(i));
 				System.out.print(" ");
 			}
 			System.out.println();

@@ -153,8 +153,9 @@ public class ComplexSelectMappingVirtualABoxTest  {
 			//assertEquals(num_joins, 0);
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
-			OWLIndividual ind1 = rs.getOWLIndividual("x");
-			val = rs.getOWLLiteral("z");
+            final OWLBindingSet bindingSet = rs.next();
+            OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
+			val = bindingSet.getOWLLiteral("z");
 			assertEquals("<http://it.unibz.inf/obda/test/simple#uri%201>", ind1.toString());
 
 			//assertEquals("\"value1\"", val.toString());

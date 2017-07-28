@@ -134,7 +134,8 @@ public class ConditionalAsLeftJoinTest {
             sql = ((SQLExecutableQuery)executableQuery).getSQL();
             TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
-                OWLObject ind1 = rs.getOWLObject("a");
+                final OWLBindingSet bindingSet = rs.next();
+                OWLObject ind1 = bindingSet.getOWLObject("a");
                 returnedValues.add(ind1.toString());
                 log.debug("Returned values:" + ind1);
                 i++;

@@ -144,9 +144,11 @@ public class MarriageTest {
 
         Set<String> returnedValues = new HashSet<>();
         try {
-            TupleOWLResultSet  rs = st.executeSelectQuery(query);
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
+
             while (rs.hasNext()) {
-                OWLIndividual ind1 = rs.getOWLIndividual("x");
+                final OWLBindingSet bindingSet = rs.next();
+                OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
                 returnedValues.add(ind1.toStringID());
             }
         } finally {

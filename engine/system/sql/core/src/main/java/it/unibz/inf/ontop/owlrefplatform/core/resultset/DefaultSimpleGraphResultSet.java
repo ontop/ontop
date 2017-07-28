@@ -197,7 +197,9 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 constant = TERM_FACTORY.getConstantBNode(vc.getValue().stringValue());
             }
         } else {
-            constant = resSet.getConstant(node_name);
+            // constant = resSet.getConstant(node_name);
+            // TODO(xiao): this fix is suspecious
+            constant = resSet.next().getConstant(node_name);
         }
         return constant;
     }

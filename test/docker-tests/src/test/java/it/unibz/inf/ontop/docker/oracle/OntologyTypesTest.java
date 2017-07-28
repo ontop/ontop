@@ -99,9 +99,10 @@ public class OntologyTypesTest {
 		int count = 0;
 		while (rs.hasNext()) {
 			count++;
+            final OWLBindingSet next = rs.next();
 			for (int i = 1; i <= rs.getColumnCount(); i++) {
 				log.info(rs.getSignature().get(i-1));
-				log.info("=" + rs.getOWLObject(i));
+                log.info("=" + next.getOWLObject(i));
 				log.info(" ");
 			}
 			System.out.println();

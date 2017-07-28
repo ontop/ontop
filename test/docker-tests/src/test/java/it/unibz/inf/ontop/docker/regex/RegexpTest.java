@@ -172,7 +172,8 @@ public class RegexpTest extends TestCase {
 		TupleOWLResultSet  rs = st.executeSelectQuery(query);
 		if(hasResult){
 			assertTrue(rs.hasNext());
-			OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
+            final OWLBindingSet bindingSet = rs.next();
+            OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
 			retval = ind1.toString();
 		} else {
 			assertFalse(rs.hasNext());

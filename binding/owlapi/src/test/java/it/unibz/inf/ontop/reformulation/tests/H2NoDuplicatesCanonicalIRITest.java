@@ -111,8 +111,9 @@ public class H2NoDuplicatesCanonicalIRITest {
 		try {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			while(rs.hasNext()) {
-				for (String s : rs.getSignature()) {
-					OWLObject binding = rs.getOWLObject(s);
+                final OWLBindingSet bindingSet = rs.next();
+                for (String s : rs.getSignature()) {
+					OWLObject binding = bindingSet.getOWLObject(s);
 
 					String rendering = ToStringRenderer.getInstance().getRendering(binding);
 					retVal.add(rendering);

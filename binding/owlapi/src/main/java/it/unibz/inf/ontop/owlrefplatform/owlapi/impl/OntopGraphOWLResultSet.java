@@ -35,7 +35,7 @@ public class OntopGraphOWLResultSet implements GraphOWLResultSet {
     public OWLAxiom next() throws OWLException {
         try {
             return convertAssertion(graphResultSet.next());
-        } catch (OntopConnectionException | OntopQueryAnsweringException e) {
+        } catch (OntopQueryAnsweringException e) {
             throw new OntopOWLException(e);
         }
     }

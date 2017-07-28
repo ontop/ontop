@@ -83,7 +83,8 @@ public abstract class AbstractBindTestWithFunctions {
         try {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
-                OWLObject ind1 = rs.getOWLObject("w");
+                final OWLBindingSet bindingSet = rs.next();
+                OWLObject ind1 = bindingSet.getOWLObject("w");
 
 
                 System.out.println(ind1);
@@ -803,7 +804,8 @@ public abstract class AbstractBindTestWithFunctions {
         try {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
-                OWLObject ind1 = rs.getOWLObject("w");
+                final OWLBindingSet bindingSet = rs.next();
+                OWLObject ind1 = bindingSet.getOWLObject("w");
                 // log.debug(ind1.toString());
                 if (ind1 != null) {
                     returnedValues.add(ind1.toString());
