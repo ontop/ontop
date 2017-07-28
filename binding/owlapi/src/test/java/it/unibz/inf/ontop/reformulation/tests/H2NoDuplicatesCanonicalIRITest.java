@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.spec.mapping.transformer.impl.CanonicalIRIRewriter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +43,7 @@ import static org.junit.Assert.assertTrue;
 
 /***
  * Test use of canonical iri in h2 simple database on wellbores
- * @see it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.CanonicalIRIRewriter
+ * @see CanonicalIRIRewriter
  */
 public class H2NoDuplicatesCanonicalIRITest {
 

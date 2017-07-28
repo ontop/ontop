@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
-import it.unibz.inf.ontop.parser.EncodeForURI;
+import it.unibz.inf.ontop.utils.EncodeForURI;
 
 import java.sql.Types;
 import java.util.Collection;

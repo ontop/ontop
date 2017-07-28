@@ -20,14 +20,14 @@ package it.unibz.inf.ontop.quest.dag;
  * #L%
  */
 
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.DataPropertyRangeExpression;
-import it.unibz.inf.ontop.ontology.DataSomeValuesFrom;
-import it.unibz.inf.ontop.ontology.Datatype;
-import it.unibz.inf.ontop.ontology.Description;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.ObjectSomeValuesFrom;
+import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.DataPropertyRangeExpression;
+import it.unibz.inf.ontop.spec.ontology.DataSomeValuesFrom;
+import it.unibz.inf.ontop.spec.ontology.Datatype;
+import it.unibz.inf.ontop.spec.ontology.Description;
+import it.unibz.inf.ontop.spec.ontology.OClass;
+import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 
 import java.io.Serializable;

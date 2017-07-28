@@ -21,12 +21,12 @@ package it.unibz.inf.ontop.quest.dag;
  */
 
 
-import it.unibz.inf.ontop.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 import junit.framework.TestCase;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;

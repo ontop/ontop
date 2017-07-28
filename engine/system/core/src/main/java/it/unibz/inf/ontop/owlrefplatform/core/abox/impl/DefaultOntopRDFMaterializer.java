@@ -33,7 +33,7 @@ import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.model.SimpleGraphResultSet;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 
 import java.net.URI;

@@ -4,7 +4,7 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.model.GraphResultSet;
-import it.unibz.inf.ontop.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPIIndividualTranslator;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.GraphOWLResultSet;

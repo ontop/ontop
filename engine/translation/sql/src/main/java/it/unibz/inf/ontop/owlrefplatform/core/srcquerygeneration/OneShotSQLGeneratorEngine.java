@@ -54,7 +54,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapt
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.datalog.IntermediateQueryToDatalogTranslator;
-import it.unibz.inf.ontop.parser.EncodeForURI;
+import it.unibz.inf.ontop.utils.EncodeForURI;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.datalog.DatalogDependencyGraphGenerator;

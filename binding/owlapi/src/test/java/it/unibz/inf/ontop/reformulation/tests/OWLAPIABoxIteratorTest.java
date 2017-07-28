@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import com.google.common.collect.Lists;
-import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;

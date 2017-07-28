@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.ontology.*;
-import it.unibz.inf.ontop.ontology.impl.ClassImpl;
-import it.unibz.inf.ontop.ontology.impl.DataPropertyExpressionImpl;
-import it.unibz.inf.ontop.ontology.impl.DatatypeImpl;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;

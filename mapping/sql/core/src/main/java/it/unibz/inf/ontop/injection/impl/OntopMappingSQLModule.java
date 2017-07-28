@@ -7,11 +7,11 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
-import it.unibz.inf.ontop.mapping.SQLPPMappingConverter;
-import it.unibz.inf.ontop.model.SQLMappingParser;
-import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
-import it.unibz.inf.ontop.spec.MappingExtractor;
-import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintExtractor;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
+import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
+import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
+import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
+import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
 
 public class OntopMappingSQLModule extends OntopAbstractModule {
 

@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 
 import javax.swing.*;

@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.MaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;

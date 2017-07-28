@@ -31,7 +31,7 @@ import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.BooleanResultSet;
-import it.unibz.inf.ontop.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;

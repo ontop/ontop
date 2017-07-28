@@ -4,9 +4,9 @@ import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
-import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingBootstrapper;
-import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingBootstrapper.BootstrappingResults;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 

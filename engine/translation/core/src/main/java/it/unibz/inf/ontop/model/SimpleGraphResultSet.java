@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.model;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.Assertion;
 
 public interface SimpleGraphResultSet extends GraphResultSet<OntopResultConversionException> {
 

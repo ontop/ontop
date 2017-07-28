@@ -1,9 +1,12 @@
 package it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht;
 
-import it.unibz.inf.ontop.ontology.ClassExpression;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.ClassExpression;
+import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.OClass;
+import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.Equivalences;
+import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
+import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
@@ -14,7 +17,6 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
-import it.unibz.inf.ontop.ontology.*;
 
 import java.util.HashMap;
 import java.util.LinkedList;

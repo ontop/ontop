@@ -23,13 +23,13 @@ package it.unibz.inf.ontop.reformulation.tests;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.ontology.*;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencyTools;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 import org.junit.Before;
 import org.junit.Test;
 

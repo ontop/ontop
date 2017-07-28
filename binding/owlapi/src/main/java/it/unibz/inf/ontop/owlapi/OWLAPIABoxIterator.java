@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.ontology.InconsistentOntologyException;
+import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorOWL2QL.TranslationException;
 import org.semanticweb.owlapi.model.*;
 

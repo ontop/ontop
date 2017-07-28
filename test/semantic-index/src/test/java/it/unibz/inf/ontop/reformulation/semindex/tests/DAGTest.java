@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.reformulation.semindex.tests;
  */
 
 
-import it.unibz.inf.ontop.ontology.*;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.Equivalences;
+import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import junit.framework.TestCase;
 
 import java.util.LinkedList;

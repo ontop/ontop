@@ -22,11 +22,11 @@ package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.ontology.AnnotationAssertion;
-import it.unibz.inf.ontop.ontology.ClassAssertion;
-import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
+import it.unibz.inf.ontop.spec.ontology.AnnotationAssertion;
+import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
+import it.unibz.inf.ontop.spec.ontology.DataPropertyAssertion;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
+import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;

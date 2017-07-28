@@ -5,8 +5,9 @@ import com.google.inject.Guice;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.exception.ImplicitDBContraintException;
-import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintExtractor;
-import it.unibz.inf.ontop.spec.PreProcessedImplicitRelationalDBConstraintSet;
+import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
+import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintSet;
+import it.unibz.inf.ontop.spec.dbschema.impl.BasicPreProcessedImplicitRelationalDBConstraintExtractor;
 import org.junit.Before;
 import org.junit.Test;
 

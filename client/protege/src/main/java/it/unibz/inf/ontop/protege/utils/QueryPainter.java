@@ -21,15 +21,15 @@ package it.unibz.inf.ontop.protege.utils;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.URIConstant;
-import it.unibz.inf.ontop.parser.TargetQueryParserException;
-import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
+import it.unibz.inf.ontop.exception.TargetQueryParserException;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 
 import javax.swing.*;

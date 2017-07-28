@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.gui;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLBindingSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
 import org.semanticweb.owlapi.io.ToStringRenderer;

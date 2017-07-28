@@ -1,12 +1,9 @@
 package it.unibz.inf.ontop.injection;
 
 
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingException;
-import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.impl.OntopMappingSQLConfigurationImpl;
-import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;

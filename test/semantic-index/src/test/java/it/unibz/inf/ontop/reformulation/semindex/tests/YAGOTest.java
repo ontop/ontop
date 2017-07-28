@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.reformulation.semindex.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.ontology.OntologyFactory;
-import it.unibz.inf.ontop.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
+import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

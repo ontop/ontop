@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.injection.impl.OntopMappingOWLAPIConfigurationImpl.Ont
 import it.unibz.inf.ontop.injection.impl.OntopMappingOWLAPIConfigurationImpl.StandardMappingOWLAPIBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.OntopMappingOntologyOptions;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.StandardMappingOntologyBuilderFragment;
-import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;

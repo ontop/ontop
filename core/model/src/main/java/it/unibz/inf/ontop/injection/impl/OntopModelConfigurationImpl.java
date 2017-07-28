@@ -80,7 +80,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
                 injector = injectorSupplier.get();
             }
             else {
-                Set<Class> moduleClasses = new HashSet();
+                Set<Class> moduleClasses = new HashSet<>();
 
                 // Only keeps the first instance of a module class
                 ImmutableList<Module> modules = buildGuiceModules()

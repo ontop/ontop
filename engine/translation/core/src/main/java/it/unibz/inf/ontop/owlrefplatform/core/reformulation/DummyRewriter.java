@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
  */
 
 import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 
 /***
  * A query rewriter that does nothing on the given query.

@@ -20,13 +20,13 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
-import it.unibz.inf.ontop.ontology.ClassExpression;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.ObjectSomeValuesFrom;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.inf.ontop.spec.ontology.ClassExpression;
+import it.unibz.inf.ontop.spec.ontology.OClass;
+import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
+import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Intersection;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 
 import java.util.Collection;
 import java.util.HashMap;

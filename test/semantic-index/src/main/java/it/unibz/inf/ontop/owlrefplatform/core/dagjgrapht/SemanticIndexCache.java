@@ -1,9 +1,10 @@
 package it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht;
 
-import it.unibz.inf.ontop.ontology.ClassExpression;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.ClassExpression;
+import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.OClass;
+import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +17,7 @@ public class SemanticIndexCache {
 	private final Map<ObjectPropertyExpression, SemanticIndexRange> opeRanges = new HashMap<>();
 	private final Map<DataPropertyExpression, SemanticIndexRange> dpeRanges = new HashMap<>();
 
-	private final TBoxReasoner reasonerDag; 
+	private final TBoxReasoner reasonerDag;
 	
 	public SemanticIndexCache(TBoxReasoner reasonerDag) {
 		this.reasonerDag = reasonerDag;

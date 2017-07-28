@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;

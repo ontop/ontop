@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht;
 
+import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;

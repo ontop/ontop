@@ -21,14 +21,14 @@ package it.unibz.inf.ontop.protege.utils;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
-import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
+import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
+import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
 
 import javax.swing.*;
 import javax.swing.text.Style;

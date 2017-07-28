@@ -22,8 +22,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
 
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.ontology.ClassExpression;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.ClassExpression;
+import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Intersection;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessSet.QueryConnectedComponentCache;
 

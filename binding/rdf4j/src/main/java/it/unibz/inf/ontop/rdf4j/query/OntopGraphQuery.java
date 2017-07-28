@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.rdf4j.query;
 import it.unibz.inf.ontop.answering.input.GraphSPARQLQuery;
 import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.model.SimpleGraphResultSet;
-import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.Assertion;
 
 import java.util.HashMap;
 import java.util.LinkedList;

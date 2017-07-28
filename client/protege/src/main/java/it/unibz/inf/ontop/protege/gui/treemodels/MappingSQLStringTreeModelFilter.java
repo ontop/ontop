@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 
 /**
  * This filter receives a string in the constructor and returns true if any mapping contains the string in the body.

@@ -21,7 +21,8 @@ package it.unibz.inf.ontop.utils;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.protege.core.OBDAModel;

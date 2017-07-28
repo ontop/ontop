@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.common.base.Splitter;
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
-import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;

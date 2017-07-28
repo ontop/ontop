@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.model.OntopModelSingletons;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
-import it.unibz.inf.ontop.spec.trans.MappingNormalizer;
+import it.unibz.inf.ontop.spec.mapping.transformer.MappingNormalizer;
 
 public class MappingTestingTools {
 
