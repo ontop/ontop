@@ -21,7 +21,12 @@ package it.unibz.inf.ontop.docker.oracle;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Test;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
@@ -95,7 +100,7 @@ public class OntologyTypesTest {
 	}
 
 	private void executeQueryAssertResults(String query, OWLStatement st, int expectedRows) throws Exception {
-		TupleOWLResultSet  rs = st.executeSelectQuery(query);
+		TupleOWLResultSet rs = st.executeSelectQuery(query);
 		int count = 0;
 		while (rs.hasNext()) {
 			count++;

@@ -22,7 +22,12 @@ package it.unibz.inf.ontop.docker.regex;
 
 import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Before;
@@ -169,7 +174,7 @@ public class RegexpTest extends TestCase {
 
 	private String runTest(OWLStatement st, String query, boolean hasResult) throws Exception {
 		String retval;
-		TupleOWLResultSet  rs = st.executeSelectQuery(query);
+		TupleOWLResultSet rs = st.executeSelectQuery(query);
 		if(hasResult){
 			assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();

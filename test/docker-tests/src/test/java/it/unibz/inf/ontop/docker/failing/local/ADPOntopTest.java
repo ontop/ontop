@@ -4,7 +4,13 @@ import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLObject;
 
 import java.io.FileReader;
@@ -50,7 +56,7 @@ public class ADPOntopTest {
 		//System.out.println(sparqlQuery);
 		
 		try {
-			TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
+			TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
 			int columnSize = rs.getColumnCount();
 			while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();

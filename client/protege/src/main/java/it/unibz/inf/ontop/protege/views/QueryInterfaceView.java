@@ -22,11 +22,11 @@ package it.unibz.inf.ontop.protege.views;
 
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.owlapi.OWLResultSetWriter;
+import it.unibz.inf.ontop.owlapi.resultset.utils.OWLResultSetWriter;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.GraphOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
+import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.gui.OWLResultSetTableModel;

@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.protege.gui;
  */
 
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLBindingSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;

@@ -21,12 +21,16 @@ package it.unibz.inf.ontop.docker.mysql;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -127,7 +131,7 @@ public class EmptyEntitiesTest {
 		String query = "SELECT ?x WHERE {?x a " + description + ".}";
 		OWLStatement st = conn.createStatement();
 		try {
-			TupleOWLResultSet  rs = st.executeSelectQuery(query);
+			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			return (rs.hasNext());
 
 		} catch (Exception e) {

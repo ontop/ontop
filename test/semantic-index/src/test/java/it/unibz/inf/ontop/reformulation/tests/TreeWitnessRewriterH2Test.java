@@ -22,9 +22,14 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.OntopTranslationSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.utils.querymanager.QueryController;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
@@ -251,7 +256,7 @@ public class TreeWitnessRewriterH2Test{
 			try {
 
 				if (query.toLowerCase().contains("select")) {
-					TupleOWLResultSet  rs = st.executeSelectQuery(query);
+					TupleOWLResultSet rs = st.executeSelectQuery(query);
 
 					end = System.currentTimeMillis();
 					while (rs.hasNext()) {

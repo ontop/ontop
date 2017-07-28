@@ -20,8 +20,12 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.utils.querymanager.QueryController;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
@@ -204,7 +208,7 @@ public class SemanticIndexLUBMHTest extends TestCase {
                 // + " }";
 
                 start = System.nanoTime();
-                TupleOWLResultSet  res = st.executeSelectQuery(query.getQuery());
+                TupleOWLResultSet res = st.executeSelectQuery(query.getQuery());
                 end = System.nanoTime();
 
                 double time = (end - start) / 1000000;

@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
 import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.inf.ontop.rdf4j.SemanticIndexRDFHandler;
+import it.unibz.inf.ontop.rdf4j.rio.helpers.SemanticIndexRDFHandler;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import org.eclipse.rdf4j.model.*;

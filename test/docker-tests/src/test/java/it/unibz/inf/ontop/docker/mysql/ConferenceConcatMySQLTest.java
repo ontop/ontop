@@ -22,9 +22,9 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLBindingSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.TupleOWLResultSet;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLObject;
 
 /**

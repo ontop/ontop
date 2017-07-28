@@ -3,7 +3,13 @@ package it.unibz.inf.ontop.docker.benchmark;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Ignore;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -553,7 +559,7 @@ public class CanonicalIRIOntowisTest {
 
                 //for (int i=0; i<nRuns; ++i){
                 long t1 = System.currentTimeMillis();
-                TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
+                TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
                 int columnSize = rs.getColumnCount();
                 count = 0;
                 while (rs.hasNext()) {

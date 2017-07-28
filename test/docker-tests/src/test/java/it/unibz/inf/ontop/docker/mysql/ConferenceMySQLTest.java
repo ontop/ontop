@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.docker.mysql;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import org.junit.Test;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 

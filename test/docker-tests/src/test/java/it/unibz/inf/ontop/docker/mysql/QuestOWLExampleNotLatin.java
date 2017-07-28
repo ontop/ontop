@@ -22,7 +22,12 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
 
@@ -79,7 +84,7 @@ public class QuestOWLExampleNotLatin {
 
 		try {
             long t1 = System.currentTimeMillis();
-			TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
+			TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
 			int columnSize = rs.getColumnCount();
 			while (rs.hasNext()) {
                     final OWLBindingSet bindingSet = rs.next();

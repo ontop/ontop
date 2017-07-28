@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.reformulation.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
 import org.junit.Test;

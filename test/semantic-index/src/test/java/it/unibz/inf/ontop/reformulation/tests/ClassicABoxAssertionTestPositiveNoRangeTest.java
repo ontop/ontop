@@ -20,7 +20,12 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.model.OWLException;
@@ -59,7 +64,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		String prefix = "PREFIX : <http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#> \n PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
 		String query = prefix + " " + q;
 
-		TupleOWLResultSet  res = st.executeSelectQuery(query);
+		TupleOWLResultSet res = st.executeSelectQuery(query);
 		int count = 0;
 		int columns = res.getColumnCount();
 		while (res.hasNext()) {

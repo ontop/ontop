@@ -3,7 +3,12 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.answering.resultset.impl.SQLDistinctTupleResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryLanguage;
@@ -131,7 +136,7 @@ public class DistinctResultSetTest { //
         }
 
     private int executeQueryAssertResults(String query, OWLStatement st) throws Exception {
-        TupleOWLResultSet  rs = st.executeSelectQuery(query);
+        TupleOWLResultSet rs = st.executeSelectQuery(query);
         int count = 0;
         while (rs.hasNext()) {
             final OWLBindingSet bindingSet = rs.next();
