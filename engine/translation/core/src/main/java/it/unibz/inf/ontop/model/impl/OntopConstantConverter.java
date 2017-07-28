@@ -241,8 +241,8 @@ public class OntopConstantConverter {
                         break;
 
                     case TIME:
-                        Time tvalue = (Time)value;
-                        result = DATA_FACTORY.getConstantLiteral(tvalue.toString().replace(' ', 'T'), Predicate.COL_TYPE.TIME);
+                        //Time tvalue = (Time)value;
+                        result = DATA_FACTORY.getConstantLiteral(stringValue.replace(' ', 'T'), Predicate.COL_TYPE.TIME);
                         break;
 
                     default:
