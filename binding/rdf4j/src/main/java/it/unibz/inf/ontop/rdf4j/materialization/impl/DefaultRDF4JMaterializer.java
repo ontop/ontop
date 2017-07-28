@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.rdf4j;
+package it.unibz.inf.ontop.rdf4j.materialization.impl;
 
 /*
  * #%L
@@ -30,6 +30,9 @@ import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
+import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
+import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
+import it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -52,7 +55,7 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 
 	@Override
 	public MaterializationGraphQuery materialize(@Nonnull OntopSystemConfiguration configuration,
-												 @Nonnull MaterializationParams params) throws RepositoryException {
+                                                 @Nonnull MaterializationParams params) throws RepositoryException {
 		try {
 			MaterializedGraphResultSet graphResultSet = materializer.materialize(
 					configuration, params);

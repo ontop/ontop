@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.sql;
+package it.unibz.inf.ontop.rdf4j.repository;
 
 import static org.junit.Assert.assertTrue;
 
@@ -46,7 +46,7 @@ import org.eclipse.rdf4j.query.TupleQueryResult;
     Therefore, I disable this test until we can solve it
     */
 @Ignore
-public class SesameResultIterationTest {
+public class RDF4JResultIterationTest {
     static String owlfile = "src/test/resources/userconstraints/uc.owl";
     static String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
 

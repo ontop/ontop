@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.rdf4j.query;
+package it.unibz.inf.ontop.rdf4j.query.impl;
 
 /*
  * #%L
@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.rdf4j.query;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.rdf4j.RDF4JHelper;
+import it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.AbstractBindingSet;
 import org.eclipse.rdf4j.query.Binding;

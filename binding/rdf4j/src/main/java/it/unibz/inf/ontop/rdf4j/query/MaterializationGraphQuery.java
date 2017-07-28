@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.rdf4j;
+package it.unibz.inf.ontop.rdf4j.query;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;

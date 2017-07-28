@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.sql;
+package it.unibz.inf.ontop.rdf4j.repository;
 
 import static org.junit.Assert.assertTrue;
 
@@ -31,7 +31,7 @@ import org.eclipse.rdf4j.query.TupleQueryResult;
  * @author dhovl
  *
  */
-public class TestSesameTimeout {
+public class TestRDF4JTimeout {
 	static String owlfile = "src/test/resources/userconstraints/uc.owl";
 	static String obdafile = "src/test/resources/userconstraints/uc.obda";
 	static String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";

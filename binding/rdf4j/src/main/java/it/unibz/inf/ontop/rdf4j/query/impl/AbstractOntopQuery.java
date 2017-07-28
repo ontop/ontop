@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package it.unibz.inf.ontop.rdf4j.query;
+package it.unibz.inf.ontop.rdf4j.query.impl;
 
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import org.eclipse.rdf4j.model.IRI;

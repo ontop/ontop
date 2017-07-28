@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.rdf4j.query;
+package it.unibz.inf.ontop.rdf4j.query.impl;
 
 /*
  * #%L
@@ -33,7 +33,7 @@ import java.util.Map;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
-import it.unibz.inf.ontop.rdf4j.RDF4JHelper;
+import it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.GraphQueryResult;

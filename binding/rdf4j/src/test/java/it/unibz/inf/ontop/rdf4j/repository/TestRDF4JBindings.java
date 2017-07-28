@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.unibz.inf.ontop.sql;
+package it.unibz.inf.ontop.rdf4j.repository;
 
 import java.io.File;
 import java.sql.Connection;
@@ -38,7 +38,7 @@ import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
 
-public class TestSesameBindings {
+public class TestRDF4JBindings {
 
     static String owlfile = "src/test/resources/userconstraints/uc.owl";
     static String obdafile = "src/test/resources/userconstraints/uc.obda";

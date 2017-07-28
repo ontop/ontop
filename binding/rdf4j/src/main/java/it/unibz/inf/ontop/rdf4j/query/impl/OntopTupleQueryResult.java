@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.rdf4j.query;
+package it.unibz.inf.ontop.rdf4j.query.impl;
 
 /*
  * #%L

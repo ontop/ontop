@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.rdf4j;
+package it.unibz.inf.ontop.rdf4j.utils;
 
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.BNode;

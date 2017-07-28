@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.sql;
+package it.unibz.inf.ontop.rdf4j.repository;
 
 /*
  * #%L
@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class SesameRepoTest {
+public class RDF4JRepoTest {
 Logger log = LoggerFactory.getLogger("newlogger");
 	@Test
 	public void test() {
