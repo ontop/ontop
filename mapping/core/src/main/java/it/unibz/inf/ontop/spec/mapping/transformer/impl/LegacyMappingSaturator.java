@@ -57,7 +57,8 @@ public class LegacyMappingSaturator implements MappingSaturator {
                 .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableSet<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(initialMappingRules, saturatedTBox, true,
+        ImmutableSet<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(initialMappingRules, saturatedTBox,
+                true,
                 foreignKeyCQC, tMappingExclusionConfig).stream()
                 .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
                 .collect(ImmutableCollectors.toSet());
@@ -79,7 +80,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
         List<CQIE> newmappings = new LinkedList<CQIE>();
 
         for (CQIE mapping : saturatedRules) {
-            Function newhead = null;
+            Function newhead;
             Function currenthead = mapping.getHead();
             if (currenthead.getArity() == 1) {
 				/*

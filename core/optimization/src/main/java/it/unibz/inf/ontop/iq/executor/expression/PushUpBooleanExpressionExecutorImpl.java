@@ -57,7 +57,7 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
          * Replace or delete the nodes providing the expression
          */
         ImmutableSet.Builder<QueryNode> providerReplacementNodesBuilder = ImmutableSet.builder();
-        for(Map.Entry<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> entry : proposal.getProviderToNonPropagatedExpression().entrySet()){
+        for (Map.Entry<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> entry : proposal.getProvider2NonPropagatedExpressionMap().entrySet()) {
             Optional<CommutativeJoinOrFilterNode> replacingProvider = getProviderReplacementNode(entry.getKey(),
                     entry.getValue());
             if (replacingProvider.isPresent()) {
@@ -69,7 +69,6 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
         }
         return new PushUpBooleanExpressionResultsImpl(providerReplacementNodesBuilder.build(), query);
     }
-
 
 
     private ImmutableExpression getCombinedExpression(ImmutableExpression expressionToPropagate, JoinOrFilterNode recipientNode) {
@@ -91,40 +90,39 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
 
         if (replacedNode instanceof UnionNode) {
             return Optional.of(iqFactory.createUnionNode(allProjectedVariablesBuilder.build()));
-        } else if (replacedNode instanceof ConstructionNode) {
+        }
+        if (replacedNode instanceof ConstructionNode) {
             return Optional.of(iqFactory.createConstructionNode(allProjectedVariablesBuilder.build(),
                     ((ConstructionNode) replacedNode).getSubstitution(),
                     ((ConstructionNode) replacedNode).getOptionalModifiers()));
-        } else {
-            throw new IllegalStateException("Unsupported node type");
         }
+        throw new IllegalStateException("Unsupported node type");
+
     }
 
     private JoinOrFilterNode getRecipientReplacementNode(JoinOrFilterNode replacedNode, ImmutableExpression expressionToPropagate) {
         ImmutableExpression combinedExpression = getCombinedExpression(expressionToPropagate, replacedNode);
-        if (replacedNode instanceof InnerJoinNode) {
+        if (replacedNode instanceof InnerJoinNode)
             return iqFactory.createInnerJoinNode(Optional.of(combinedExpression));
-        } else if (replacedNode instanceof LeftJoinNode) {
+        if (replacedNode instanceof LeftJoinNode)
             return iqFactory.createLeftJoinNode(Optional.of(combinedExpression));
-        } else if (replacedNode instanceof FilterNode) {
+        if (replacedNode instanceof FilterNode)
             return iqFactory.createFilterNode(combinedExpression);
-        } else {
-            throw new IllegalStateException("Invalid proposal: A CommutativeJoinOrFilterNode must be a commutative join or filter node");
-        }
+        throw new IllegalStateException("Invalid proposal: A CommutativeJoinOrFilterNode must be a commutative join or filter node");
     }
 
     private Optional<CommutativeJoinOrFilterNode> getProviderReplacementNode(CommutativeJoinOrFilterNode providerNode,
                                                                              Optional<ImmutableExpression> nonPropagatedExpression) {
         if (providerNode instanceof InnerJoinNode) {
             return Optional.of(iqFactory.createInnerJoinNode(nonPropagatedExpression));
-        } else if (providerNode instanceof FilterNode) {
+        }
+        if (providerNode instanceof FilterNode) {
             if (nonPropagatedExpression.isPresent()) {
                 return Optional.of(iqFactory.createFilterNode(nonPropagatedExpression.get()));
             }
             return Optional.empty();
-        } else {
-            throw new IllegalStateException("Invalid proposal: A CommutativeJoinOrFilterNode must be a commutative join or filter node");
         }
+        throw new IllegalStateException("Invalid proposal: A CommutativeJoinOrFilterNode must be a commutative " +
+                "join or filter node");
     }
-
 }

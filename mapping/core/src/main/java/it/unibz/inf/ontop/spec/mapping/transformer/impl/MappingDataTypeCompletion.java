@@ -99,7 +99,9 @@ public class MappingDataTypeCompletion {
             Term newTerm;
             Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
             newTerm = TERM_FACTORY.getTypedTerm(variable, type);
-            log.warn("Datatype for the value " + variable + " of the property " + predicate + " has been inferred from the database");
+            log.warn("Datatype "+type+" for the value " + variable + " of the property " + predicate + " has been " +
+                    "inferred " +
+                    "from the database");
             atom.setTerm(position, newTerm);
         } else if (term instanceof ValueConstant) {
             Term newTerm = TERM_FACTORY.getTypedTerm(term, ((ValueConstant) term).getType());

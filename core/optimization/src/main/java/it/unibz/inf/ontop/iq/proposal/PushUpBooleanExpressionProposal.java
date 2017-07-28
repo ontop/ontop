@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.iq.proposal;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.iq.node.CommutativeJoinOrFilterNode;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
@@ -24,7 +24,7 @@ public interface PushUpBooleanExpressionProposal extends QueryOptimizationPropos
      * value (possibly empty): if only some conjuncts of the boolean expression attached to a node are propagated,
      * this is the conjunction of the remaining conjuncts
      */
-    ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> getProviderToNonPropagatedExpression();
+    ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> getProvider2NonPropagatedExpressionMap();
 
     /**
      * Recipient of the expression.
@@ -32,9 +32,8 @@ public interface PushUpBooleanExpressionProposal extends QueryOptimizationPropos
      */
     Optional<JoinOrFilterNode> getRecipientNode();
 
-    //Node blocking further propagation
     QueryNode getUpMostPropagatingNode();
 
     //All nodes projecting variables on the path between provider and blocking node
-    ImmutableList<ExplicitVariableProjectionNode> getInbetweenProjectors();
+    ImmutableSet<ExplicitVariableProjectionNode> getInbetweenProjectors();
 }

@@ -66,22 +66,33 @@ public class IntermediateQueryToDatalogTranslator {
             this.optionalChildNode = optionalChildNode;
         }
 	}
-	
-	//private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+
+//private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(IntermediateQueryToDatalogTranslator.class);
 
 	// Incremented
-	private int subQueryCounter;
+	private static int subQueryCounter;
+	private static int dummyPredCounter;
 
 	private IntermediateQueryToDatalogTranslator(IntermediateQueryFactory iqFactory) {
 		this.iqFactory = iqFactory;
 		subQueryCounter = 0;
+		dummyPredCounter = 0;
 	}
 
-	private IntermediateQueryToDatalogTranslator(IntermediateQueryFactory iqFactory, int subQueryCounter) {
+	private IntermediateQueryToDatalogTranslator(IntermediateQueryFactory iqFactory, int subQueryCounter, int dummyPredCounter) {
 		this.iqFactory = iqFactory;
-		subQueryCounter = subQueryCounter;
+		this.subQueryCounter = subQueryCounter;
+		this.dummyPredCounter = dummyPredCounter;
+	}
+
+	public static int getSubQueryCounter() {
+		return subQueryCounter;
+	}
+
+	public static int getDummyPredCounter() {
+		return dummyPredCounter;
 	}
 
 	/**
@@ -100,9 +111,9 @@ public class IntermediateQueryToDatalogTranslator {
 	 * where the string for Pred is of the form SUBQUERY_PRED_PREFIX + y,
 	 * with y > subqueryCounter.
 	 */
-	public static DatalogProgram translate(IntermediateQuery query, int subQueryCounter) {
+	public static DatalogProgram translate(IntermediateQuery query, int subQueryCounter, int dummyPredCounter) {
 		IntermediateQueryToDatalogTranslator translator = new IntermediateQueryToDatalogTranslator(query.getFactory(),
-				subQueryCounter);
+				subQueryCounter, dummyPredCounter);
 		return translator.translateQuery(query);
 	}
 
@@ -294,7 +305,13 @@ public class IntermediateQueryToDatalogTranslator {
 			//DataAtom projectionAtom = generateProjectionAtom(ImmutableSet.of());
 			//heads.add(new RuleHead(new ImmutableSubstitutionImpl<>(ImmutableMap.of()), projectionAtom,Optional.empty()));
 			//return body;
-			body.add(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getAtomPredicate("dummy", 0), ImmutableList.of()));
+			body.add(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+					ATOM_FACTORY.getAtomPredicate(
+							"dummy"+(++dummyPredCounter),
+							0
+					),
+					ImmutableList.of()
+			));
 			return body;
 
 		} else {

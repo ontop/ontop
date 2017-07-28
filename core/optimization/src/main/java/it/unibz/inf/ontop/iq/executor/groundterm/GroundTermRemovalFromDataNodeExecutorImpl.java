@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -28,7 +29,20 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
- * TODO: explain
+ * Turns constant values from a data node d into explicit equalities.
+ * e.g. if d = A(5, x, 6),
+ * transforms d into d' = A(y1, x , y2),
+ * and generates the equalities y1 = 5 and y2 = 6.
+ *
+ * Then finds or creates a recipient node r in the query for these equalities.
+ * By default, r is the first candidate recipient encountered by searching the query upwards from d',
+ * up to the first construction or union node.
+ * r can only be a filter node, an inner join, or a left join encountered from its right subtree.
+ *
+ * If such recipient cannot be found in the query,
+ * r is a fresh filter node.
+ * r is inserted as the child of the first ancestor of d' which is not a left join node accessed from the left
+ * (bottom up)
  */
 @Singleton
 public class GroundTermRemovalFromDataNodeExecutorImpl implements
@@ -104,11 +118,25 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
             else {
                 ImmutableExpression joiningCondition = convertIntoBooleanExpression(pairExtraction.pairs);
                 FilterNode newFilterNode = iqFactory.createFilterNode(joiningCondition);
-                treeComponent.insertParent(pairExtraction.newDataNode, newFilterNode);
+                treeComponent.insertParent(getRecipientChild(pairExtraction.newDataNode, query), newFilterNode);
             }
         }
 
         return multimapBuilder.build();
+    }
+
+    /** Recursive */
+    private QueryNode getRecipientChild(QueryNode focusNode, IntermediateQuery query) {
+        QueryNode parent = query.getParent(focusNode)
+                .orElseThrow(() -> new InvalidIntermediateQueryException("Node "+focusNode+" has no parent"));
+        if(parent instanceof LeftJoinNode) {
+            BinaryOrderedOperatorNode.ArgumentPosition position = query.getOptionalPosition(parent, focusNode)
+                    .orElseThrow(() -> new InvalidIntermediateQueryException("No position for left join child " + focusNode));
+            if (position.equals(BinaryOrderedOperatorNode.ArgumentPosition.LEFT)) {
+                return getRecipientChild(parent, query);
+            }
+        }
+        return focusNode;
     }
 
     private ImmutableExpression convertIntoBooleanExpression(Collection<VariableGroundTermPair> pairs) {
@@ -192,10 +220,10 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
                      * TODO: explain
                      */
                     switch (optionalPosition.get()) {
-                        case LEFT:
-                            break;
                         case RIGHT:
                             return Optional.of((JoinOrFilterNode)ancestor);
+                            /* continue searching upwards */
+                        case LEFT:;
                     }
                 }
                 else {

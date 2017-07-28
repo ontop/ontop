@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
+import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
@@ -174,7 +175,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 			//final long startTime = System.currentTimeMillis();
 
-			DatalogProgram programAfterUnfolding;
 			try {
 				IntermediateQuery intermediateQuery = datalogConverter.convertDatalogProgram(
 						dbMetadata, programAfterRewriting, ImmutableList.of(), executorRegistry);
@@ -194,7 +194,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
-				;
+				intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false).optimize(intermediateQuery);
+				log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
+
 				intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
 
 				log.debug("After projection shrinking: \n" + intermediateQuery.toString());

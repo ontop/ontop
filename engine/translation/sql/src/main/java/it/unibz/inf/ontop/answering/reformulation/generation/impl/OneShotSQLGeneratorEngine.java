@@ -25,7 +25,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopTranslationException;
@@ -45,9 +44,6 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
 import it.unibz.inf.ontop.datalog.DatalogNormalizer;
-import it.unibz.inf.ontop.datalog.FunctionFlattener;
-import it.unibz.inf.ontop.datalog.PullOutEqualityNormalizer;
-import it.unibz.inf.ontop.datalog.impl.PullOutEqualityNormalizerImpl;
 import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.DB2SQLDialectAdapter;
@@ -73,10 +69,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates.SPARQL_GROUP;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -110,7 +104,6 @@ public class OneShotSQLGeneratorEngine {
 
 
 	private static final String INDENT = "    ";
-	private static final Function TRUE_EQ = TERM_FACTORY.getFunctionEQ(TermConstants.TRUE, TermConstants.TRUE);
 
 	private final RDBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
@@ -268,7 +261,9 @@ public class OneShotSQLGeneratorEngine {
 	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
 			throws OntopTranslationException {
 
-		DatalogProgram queryProgram = convertAndPrepare(intermediateQuery);
+		IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
+
+		DatalogProgram queryProgram = IntermediateQueryToDatalogTranslator.translate(normalizedQuery);
 
 		normalizeProgram(queryProgram);
 
@@ -329,45 +324,16 @@ public class OneShotSQLGeneratorEngine {
 		}
 	}
 
-	/**
-	 * TODO: explain
-	 */
-	protected static DatalogProgram convertAndPrepare(IntermediateQuery intermediateQuery) {
-		GroundTermRemovalFromDataNodeReshaper groundTermNormalizer = new GroundTermRemovalFromDataNodeReshaper();
-		intermediateQuery = groundTermNormalizer.optimize(intermediateQuery);
-		log.debug("New query after removing ground terms: \n" + intermediateQuery.toString());
+	private IntermediateQuery normalizeIQ(IntermediateQuery intermediateQuery) {
 
-		PullOutVariableOptimizer pullOutVariableNormalizer = new PullOutVariableOptimizer();
-		intermediateQuery = pullOutVariableNormalizer.optimize(intermediateQuery);
-		log.debug("New query after pulling out equalities: \n" + intermediateQuery.toString());
+		IntermediateQuery groundTermFreeQuery = new GroundTermRemovalFromDataNodeReshaper()
+				.optimize(intermediateQuery);
+		log.debug("New query after removing ground terms: \n" + groundTermFreeQuery);
 
-		DatalogProgram datalogProgram = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+		IntermediateQuery queryAfterPullOut = new PullOutVariableOptimizer().optimize(groundTermFreeQuery);
+		log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
 
-		log.debug("New Datalog query: \n" + datalogProgram.toString());
-
-		/**
-		 * TODO: try to get rid of this flattener
-		 */
-		datalogProgram = FunctionFlattener.flattenDatalogProgram(datalogProgram);
-		log.debug("New flattened Datalog query: \n" + datalogProgram.toString());
-
-		/**
-		 * This code is only partially useful (for properly dealing with boolean expressions) anymore
-		 * TODO: get rid of it
-		 */
-		log.debug("Datalog syntax normalizer (low-level)...");
-		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
-
-		List<CQIE> normalizedRules = new ArrayList<>();
-		for (CQIE rule: datalogProgram.getRules()) {
-			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
-		}
-
-		MutableQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
-		datalogProgram = DATALOG_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
-		log.debug("Normalized Datalog query: \n" + datalogProgram.toString());
-
-		return datalogProgram;
+		return queryAfterPullOut;
 	}
 
     private boolean hasSelectDistinctStatement(DatalogProgram query) {
@@ -617,55 +583,23 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 	/**
-	 * Here we normalize so that the form of the CQ is as close to the form of a
-	 * normal SQL algebra as possible, particularly, no shared variables, only
-	 * joins by means of equality. Also, equalities in nested expressions
-	 * (JOINS) are kept at their respective levels to generate correct ON and
-	 * wHERE clauses.
-	 *
-	 * @param cq
+	 * Normalizations of the Datalog program requirend by the Datalog to SQL translator
 	 */
 	private void normalizeRule(CQIE cq) {
 
-		// log.debug("Before pushing equalities: \n{}", cq);
-
-		// TODO: Check this!!!
-		// EQNormalizer.enforceEqualities(cq);
-
-		// log.debug("Before folding Joins: \n{}", cq);
-
 		DatalogNormalizer.foldJoinTrees(cq);
 
-		// log.debug("Before pulling out equalities: \n{}", cq);
-
-		// we dont need this anymore, done before
-		// DatalogNormalizer.pullOutEqualities(cq);
-
-		// log.debug("Before pulling out Left Join Conditions: \n{}", cq);
-
-		// ----- TODO check if we really need ---
-		// DatalogNormalizer.pullOutLeftJoinConditions(cq);
-
-		// log.debug("Before pulling up nested references: \n{}", cq);
-
-		DatalogNormalizer.pullUpNestedReferences(cq);
-
-		// log.debug("Before adding trivial equalities: \n{}, cq);", cq);
-
 		DatalogNormalizer.addMinimalEqualityToLeftJoin(cq);
-
-		// log.debug("Normalized CQ: \n{}", cq);
 	}
 
 	/**
-	 * Normalizes a program, i.e., list of rules, in place
-	 *
 	 * @param program
 	 */
 	private void normalizeProgram(DatalogProgram program) {
 		for (CQIE rule : program.getRules()) {
 			normalizeRule(rule);
 		}
+		log.debug("Program normalized for SQL translation: \n"+program);
 	}
 
 	/**
@@ -1064,13 +998,14 @@ public class OneShotSQLGeneratorEngine {
 					isLeftJoin = true;
 				}
 
-				for (Term innerTerm : atom.getTerms()) {
-					Function innerTerm1 = (Function) innerTerm;
+				int i =0;
+				for (Term term : atom.getTerms()){
+					Function innerTerm1 = (Function) term;
 					if(innerTerm1.isAlgebraFunction()){
 						//nested joins we need to add parenthesis later
 						parenthesis = true;
 					}
-					else if(isLeftJoin && innerTerm1.equals(TRUE_EQ)){
+					else if(isLeftJoin && i == 1){
 						//in case of left join we  want to add the parenthesis
 						// only for the right tables
 						//we ignore nested joins from the left tables
@@ -1078,6 +1013,7 @@ public class OneShotSQLGeneratorEngine {
 						parenthesis = false;
 					}
 					innerTerms.add(innerTerm1);
+					i++;
 				}
 				String tableDefinitions =  getTableDefinitions(innerTerms,
 						index, false, isLeftJoin, parenthesis, indent + INDENT );
