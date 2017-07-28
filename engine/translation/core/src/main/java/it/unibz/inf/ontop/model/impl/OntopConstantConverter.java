@@ -71,9 +71,6 @@ public class OntopConstantConverter {
     }
 
     public Constant getConstantFromJDBC(MainTypeLangValues cell) throws OntopResultConversionException {
-        //column = column * 3; // recall that the real SQL result set has 3
-        // columns per value. From each group of 3 the actual value is the
-        // 3rd column, the 2nd is the language, the 1st is the type code (an integer)
 
         Constant result = null;
         Object value = "";
@@ -180,23 +177,17 @@ public class OntopConstantConverter {
                          Oracle DateFormat "dd-MMM-yy HH.mm.ss.SSSSSS aa" For oracle driver v.11 and less
                          Oracle "dd-MMM-yy HH:mm:ss,SSSSSS" FOR ORACLE DRIVER 12.1.0.2
                          To overcome the problem we create a new Timestamp */
-                        try {
                             //Timestamp tsvalue = (Timestamp)value;
-                            result = DATA_FACTORY.getConstantLiteral(stringValue.replace(' ', 'T'), Predicate.COL_TYPE.DATETIME);
-                        }
-                        catch (Exception e) {
-                            if (isMsSQL || isOracle) {
-                                try {
-                                    java.util.Date date = dateFormat.parse(stringValue);
-                                    Timestamp ts = new Timestamp(date.getTime());
-                                    result = DATA_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME);
-                                }
-                                catch (ParseException pe) {
-                                    throw new OntopResultConversionException(pe);
-                                }
+                        if (isMsSQL || isOracle) {
+                            try {
+                                java.util.Date date = dateFormat.parse(stringValue);
+                                Timestamp ts = new Timestamp(date.getTime());
+                                result = DATA_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME);
+                            } catch (ParseException pe) {
+                                throw new OntopResultConversionException(pe);
                             }
-                            else
-                                throw new OntopResultConversionException(e);
+                        } else {
+                            result = DATA_FACTORY.getConstantLiteral(stringValue.replace(' ', 'T'), Predicate.COL_TYPE.DATETIME);
                         }
                         break;
 
