@@ -20,10 +20,11 @@ package it.unibz.inf.ontop.owlapi.si;
  * #L%
  */
 
+import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.utils.OWLAPIABoxIterator;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import it.unibz.inf.ontop.si.repository.impl.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 import it.unibz.inf.ontop.owlapi.impl.QuestOWL;
@@ -48,7 +49,7 @@ public class SemanticIndexManager {
 	private final TBoxReasoner reasoner;
 	private final ImmutableOntologyVocabulary voc;
 
-	private final RDBMSSIRepositoryManager dataRepository;
+	private final SIRepositoryManager dataRepository;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 

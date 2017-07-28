@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -15,7 +16,7 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import it.unibz.inf.ontop.si.repository.impl.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 import it.unibz.inf.ontop.si.SemanticIndexException;
@@ -45,13 +46,13 @@ class SILoadingTools {
     private static final boolean OPTIMIZE_EQUIVALENCES = true;;
 
     static class RepositoryInit {
-        final RDBMSSIRepositoryManager dataRepository;
+        final SIRepositoryManager dataRepository;
         final Optional<Set<OWLOntology>> ontologyClosure;
         final String jdbcUrl;
         final ImmutableOntologyVocabulary vocabulary;
         final Connection localConnection;
 
-        private RepositoryInit(RDBMSSIRepositoryManager dataRepository, Optional<Set<OWLOntology>> ontologyClosure, String jdbcUrl,
+        private RepositoryInit(SIRepositoryManager dataRepository, Optional<Set<OWLOntology>> ontologyClosure, String jdbcUrl,
                                ImmutableOntologyVocabulary vocabulary, Connection localConnection) {
             this.dataRepository = dataRepository;
             this.ontologyClosure = ontologyClosure;
@@ -78,7 +79,7 @@ class SILoadingTools {
 
         final TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(ontology, OPTIMIZE_EQUIVALENCES);
 
-        RDBMSSIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, vocabulary);
+        SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, vocabulary);
 
         LOG.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
         // we work in memory (with H2), the database is clean and
@@ -99,18 +100,18 @@ class SILoadingTools {
         }
     }
 
-    static OntopSQLOWLAPIConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
+    static OntopSQLOWLAPIConfiguration createConfiguration(SIRepositoryManager dataRepository,
                                                            OWLOntology ontology,
                                                            String jdbcUrl, Properties properties) throws SemanticIndexException {
         return createConfiguration(dataRepository, Optional.of(ontology), jdbcUrl, properties);
     }
 
-    static OntopSQLOWLAPIConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
+    static OntopSQLOWLAPIConfiguration createConfiguration(SIRepositoryManager dataRepository,
                                                   String jdbcUrl, Properties properties) throws SemanticIndexException {
         return createConfiguration(dataRepository, Optional.empty(), jdbcUrl, properties);
     }
 
-    private static OntopSQLOWLAPIConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
+    private static OntopSQLOWLAPIConfiguration createConfiguration(SIRepositoryManager dataRepository,
                                                   Optional<OWLOntology> optionalOntology,
                                                   String jdbcUrl, Properties properties) throws SemanticIndexException {
         SQLPPMapping ppMapping = createPPMapping(dataRepository);
@@ -147,7 +148,7 @@ class SILoadingTools {
         return builder.build();
     }
 
-    private static SQLPPMapping createPPMapping(RDBMSSIRepositoryManager dataRepository) {
+    private static SQLPPMapping createPPMapping(SIRepositoryManager dataRepository) {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
                 .build();
         SpecificationFactory specificationFactory = defaultConfiguration.getInjector().getInstance(SpecificationFactory.class);

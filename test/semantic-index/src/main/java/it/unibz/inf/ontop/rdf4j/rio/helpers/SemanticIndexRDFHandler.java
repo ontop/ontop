@@ -24,11 +24,11 @@ import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.AssertionFactory;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.spec.ontology.impl.AssertionFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -51,14 +51,14 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
 	private static final AssertionFactory ASSERTION_FACTORY = AssertionFactoryImpl.getInstance();
-	private final RDBMSSIRepositoryManager repositoryManager;
+	private final SIRepositoryManager repositoryManager;
 	private final Connection connection;
 
 	private List<Statement> buffer;
 	private int MAX_BUFFER_SIZE = 5000;
 	private int count;
 
-	public SemanticIndexRDFHandler(RDBMSSIRepositoryManager repositoryManager, Connection connection) {
+	public SemanticIndexRDFHandler(SIRepositoryManager repositoryManager, Connection connection) {
 		this.repositoryManager = repositoryManager;
 		this.connection = connection;
 		this.buffer = new ArrayList<>(MAX_BUFFER_SIZE);
