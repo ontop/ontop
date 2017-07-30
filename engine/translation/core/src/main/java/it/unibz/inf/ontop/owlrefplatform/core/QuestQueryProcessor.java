@@ -169,7 +169,6 @@ public class QuestQueryProcessor implements QueryTranslator {
 
 			//final long startTime = System.currentTimeMillis();
 
-			DatalogProgram programAfterUnfolding;
 			try {
 				IntermediateQuery intermediateQuery = datalogConverter.convertDatalogProgram(
 						dbMetadata, programAfterRewriting, ImmutableList.of(), executorRegistry);
@@ -189,7 +188,9 @@ public class QuestQueryProcessor implements QueryTranslator {
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
-				;
+				intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false).optimize(intermediateQuery);
+				log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
+
 				intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
 
 				log.debug("After projection shrinking: \n" + intermediateQuery.toString());

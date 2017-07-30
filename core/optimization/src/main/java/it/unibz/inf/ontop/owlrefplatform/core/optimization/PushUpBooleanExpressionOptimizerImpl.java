@@ -36,9 +36,12 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
  * then it becomes the recipient of e.
  * Otherwise a fresh FilterNode is inserted between u (resp. r) and n to support e.
  * <p>
- * As an exception to this default behavior, an expression e may be propagated up though a UnionNode u
- * iff:
- * - all children of u are InnerJoin or FilterNodes, and
+ * As a first exception to this default behavior,
+ * a filter is never inserted between a parent union node and a child construction node.
+ * <p>
+ * As a second exception, an expression e may be propagated up though a UnionNode u iff the following is satisfied (TODO: generalize)
+ * - each operand subtree of u contains a filter or inner join node which is only separated from u by construction
+ * nodes, and
  * - e is an (explicit) filtering (sub)expression for each of them.
  * <p>
  * Note that some projections may need to be extended.
@@ -49,27 +52,39 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 
 public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpressionOptimizer {
 
+
+    private final boolean pushAboveUnions;
+
+    public PushUpBooleanExpressionOptimizerImpl(boolean pushAboveUnions) {
+        this.pushAboveUnions = pushAboveUnions;
+    }
+
     @Override
-    public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
-        return pushAboveUnions(pushUpFromSubtree(query.getRootConstructionNode(), query));
+    public IntermediateQuery optimize(IntermediateQuery query) {
+        try {
+            query = pushUpFromSubtree(query.getRootConstructionNode(), query);
+            return pushAboveUnions ?
+                    pushAboveUnions(query) :
+                    query;
+        } catch (EmptyQueryException e) {
+            throw new IllegalStateException("This optimizer should not empty the query");
+        }
     }
 
     private IntermediateQuery pushUpFromSubtree(QueryNode subtreeRoot, IntermediateQuery query) throws EmptyQueryException {
-        Optional<QueryNode> optionalNextNode;
-        Optional<PushUpBooleanExpressionProposal> optionalProposal = Optional.empty();
 
         if (subtreeRoot instanceof CommutativeJoinOrFilterNode) {
-            optionalProposal = makeNodeCentricProposal((CommutativeJoinOrFilterNode) subtreeRoot, query);
+            Optional<PushUpBooleanExpressionProposal> optionalProposal = makeNodeCentricProposal((CommutativeJoinOrFilterNode) subtreeRoot, query);
+            if (optionalProposal.isPresent()) {
+                PushUpBooleanExpressionResults optimizationResults = (PushUpBooleanExpressionResults) query.applyProposal(optionalProposal.get());
+                query = optimizationResults.getResultingQuery();
+                QueryNode nextNode = optimizationResults.getExpressionProviderReplacingNodes().iterator().next();
+                return pushUpFromSubtree(nextNode, query);
+            }
         }
-        if (optionalProposal.isPresent()) {
-            PushUpBooleanExpressionResults optimizationResults = (PushUpBooleanExpressionResults) query.applyProposal(optionalProposal.get());
-            query = optimizationResults.getResultingQuery();
-            optionalNextNode = Optional.of(optimizationResults.getExpressionProviderReplacingNodes().iterator().next());
-        } else {
-            optionalNextNode = QueryNodeNavigationTools.getDepthFirstNextNode(query, subtreeRoot);
-        }
-        return (optionalNextNode.isPresent()) ?
-                pushUpFromSubtree(optionalNextNode.get(), query) :
+        Optional<QueryNode> optNextNode = QueryNodeNavigationTools.getDepthFirstNextNode(query, subtreeRoot);
+        return optNextNode.isPresent() ?
+                pushUpFromSubtree(optNextNode.get(), query) :
                 query;
     }
 
@@ -84,7 +99,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
                 if (node instanceof UnionNode) {
                     Optional<PushUpBooleanExpressionProposal> proposal = makeProposalForUnionNode((UnionNode) node, query);
                     if (proposal.isPresent()) {
-                        query = ((PushUpBooleanExpressionResults)query.applyProposal(proposal.get())).getResultingQuery();
+                        query = ((PushUpBooleanExpressionResults) query.applyProposal(proposal.get())).getResultingQuery();
                         fixPointReached = false;
                     }
                 }
@@ -118,7 +133,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
                                                                               boolean propagateThroughNextUnionNodeAncestor) {
 
         Optional<JoinOrFilterNode> recipient;
-        ImmutableList.Builder<ExplicitVariableProjectionNode> inbetweenProjectorsBuilder = ImmutableList.builder();
+        ImmutableSet.Builder<ExplicitVariableProjectionNode> inbetweenProjectorsBuilder = ImmutableSet.builder();
 
         boolean stopPropagation = false;
         QueryNode currentChildNode;
@@ -130,25 +145,25 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
                     .orElseThrow(() -> new InvalidIntermediateQueryException("This node must have a parent node"));
 
             if (currentParentNode instanceof ConstructionNode) {
-                if (currentParentNode != query.getRootConstructionNode()) {
-                    // Keep track of Construction nodes on the path between provider and recipient
+                if (canPropagate((ConstructionNode) currentParentNode, propagateThroughNextUnionNodeAncestor, query)) {
+                    /* keep track of Construction nodes on the path between provider and recipient */
                     inbetweenProjectorsBuilder.add((ConstructionNode) currentParentNode);
                 } else {
                     stopPropagation = true;
                 }
 
             } else if (currentParentNode instanceof UnionNode) {
-                // Optionally propagate the expression through the first encountered UnionNode
+                /* optionally propagate the expression through the first encountered UnionNode */
                 if (propagateThroughNextUnionNodeAncestor) {
                     propagateThroughNextUnionNodeAncestor = false;
-                    // Keep track of it as an inbetween projector
+                    /* keep track of it as an inbetween projector */
                     inbetweenProjectorsBuilder.add((ExplicitVariableProjectionNode) currentParentNode);
                 } else {
                     stopPropagation = true;
                 }
 
             } else if (currentParentNode instanceof LeftJoinNode && (query.getOptionalPosition(currentChildNode)
-                    .orElseThrow(() -> new IllegalStateException("The child of a LeftJoin node must have a position"))
+                    .orElseThrow(() -> new InvalidIntermediateQueryException("The child of a LeftJoin node must have a position"))
                     == RIGHT)) {
                 /**
                  * Stop propagation when reaching a LeftJoinNode from its right branch,
@@ -185,96 +200,150 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
                 ));
     }
 
-    private Optional<PushUpBooleanExpressionProposal> makeProposalForUnionNode(UnionNode unionNode,
-                                                                               IntermediateQuery query) {
-        // Get the boolean conjuncts to propagate
-        ImmutableSet<ImmutableExpression> propagatedExpressions = getExpressionsToPropagateAboveUnion(unionNode, query);
+    private boolean canPropagate(ConstructionNode constructionNode,
+                                 boolean propagateThroughNextUnionNodeAncestor,
+                                 IntermediateQuery query) {
+        if (constructionNode == query.getRootConstructionNode()) {
+            return false;
+        }
+        QueryNode parent = query.getParent(constructionNode)
+                .orElseThrow(() -> new InvalidIntermediateQueryException("Node " + constructionNode + " has no parent"));
+        if (parent instanceof UnionNode && !propagateThroughNextUnionNodeAncestor) {
+            return false;
+        }
+        return true;
+    }
 
-        // The conjunction of all conjuncts to propagate (Optional.empty() if there is none of them)
-        Optional<ImmutableExpression> propagatedExpressionsConjunction = ImmutabilityTools
-                .foldBooleanExpressions(propagatedExpressions.stream());
+    private Optional<PushUpBooleanExpressionProposal> makeProposalForUnionNode(UnionNode unionNode, IntermediateQuery query) {
 
-        // If there is something to propagate
-        if (propagatedExpressionsConjunction.isPresent()) {
 
-            // A propagation proposal for the first child of the UnionNode
-            Optional<PushUpBooleanExpressionProposal> firstChildProposal = Optional.empty();
-            // Keeps track of the possibly non propagated subexpression for each child of the UnionNode
-            ImmutableMap.Builder<CommutativeJoinOrFilterNode,
-                    Optional<ImmutableExpression>> childToRetainedExpressionBuilder = ImmutableMap.builder();
+        ImmutableSet<CommutativeJoinOrFilterNode> providers = getProviders(unionNode, query);
 
-            for (QueryNode child : query.getChildren(unionNode)) {
-                ImmutableExpression fullBooleanExpression = ((CommutativeJoinOrFilterNode) child).getOptionalFilterCondition()
-                        .orElseThrow(() -> new IllegalStateException("All children must have a filtering condition"));
+        if (providers.isEmpty()) {
+            return Optional.empty();
+        }
+        /* get the boolean conjuncts to propagate */
+        ImmutableSet<ImmutableExpression> propagatedExpressions = getExpressionsToPropagateAboveUnion(providers);
 
-                // The conjuncts which will not be propagated up from this child
-                Optional<ImmutableExpression> nonPropagatedExpressionsConjunction = ImmutabilityTools.foldBooleanExpressions(
-                        fullBooleanExpression.flattenAND().stream()
-                                .filter(e -> !propagatedExpressions.contains(e)));
+        if (propagatedExpressions.isEmpty()) {
+            return Optional.empty();
+        }
 
-                childToRetainedExpressionBuilder.put((CommutativeJoinOrFilterNode) child,
-                        nonPropagatedExpressionsConjunction);
+        /* conjunction of all conjuncts to propagate */
+        ImmutableExpression conjunction = ImmutabilityTools.foldBooleanExpressions(propagatedExpressions.stream())
+                .orElseThrow(() -> new IllegalStateException("The conjunction should be present"));
 
-                // Make a propagation proposal for the first child only
-                if (!firstChildProposal.isPresent()) {
-                    firstChildProposal = Optional.of(makeNodeCentricProposal((CommutativeJoinOrFilterNode) child,
-                            propagatedExpressionsConjunction.get(), nonPropagatedExpressionsConjunction, query, true)
-                            .orElseThrow(() -> new IllegalStateException("This proposal cannot be empty")));
-                }
-            }
-            // Extend the proposal made for the first child with all the non propagated expressions
+        Optional<Optional<PushUpBooleanExpressionProposal>> merge = providers.stream()
+                .map(n -> makeNodeCentricProposal(
+                        n,
+                        conjunction,
+                        getRetainedSubExpression(propagatedExpressions, n),
+                        query,
+                        true
+                ))
+                .reduce(this::mergeProposals);
+        return merge.isPresent() ?
+                merge.get() :
+                Optional.empty();
+    }
+
+    private Optional<PushUpBooleanExpressionProposal> mergeProposals(Optional<PushUpBooleanExpressionProposal> optProposal1,
+                                                                     Optional<PushUpBooleanExpressionProposal> optProposal2) {
+
+        if (optProposal1.isPresent() && optProposal2.isPresent()) {
+            PushUpBooleanExpressionProposal p1 = optProposal1.get();
+            PushUpBooleanExpressionProposal p2 = optProposal2.get();
+
+            ImmutableSet<ExplicitVariableProjectionNode> inBetweenProjectors =
+                    ImmutableSet.<ExplicitVariableProjectionNode>builder()
+                            .addAll(p1.getInbetweenProjectors())
+                            .addAll(p2.getInbetweenProjectors())
+                            .build();
+
+            ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> provider2retainedExpression =
+                    ImmutableMap.<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>>builder()
+                            .putAll(p1.getProvider2NonPropagatedExpressionMap())
+                            .putAll(p2.getProvider2NonPropagatedExpressionMap())
+                            .build();
+
             return Optional.of(
-                    mergeProposals(
-                            firstChildProposal.get(),
-                            childToRetainedExpressionBuilder.build()
-                    ));
+                    new PushUpBooleanExpressionProposalImpl(
+                            p1.getPropagatedExpression(),
+                            provider2retainedExpression,
+                            p1.getUpMostPropagatingNode(),
+                            p1.getRecipientNode(),
+                            inBetweenProjectors)
+            );
+        }
+        return Optional.empty();
+
+    }
+
+    private ImmutableSet<CommutativeJoinOrFilterNode> getProviders(UnionNode unionNode, IntermediateQuery query) {
+
+        ImmutableList<Optional<CommutativeJoinOrFilterNode>> optProviders = query.getChildren(unionNode).stream()
+                .map(n -> getCandidateProvider(n, query))
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableSet.Builder<CommutativeJoinOrFilterNode> providers = ImmutableSet.builder();
+        for (Optional<CommutativeJoinOrFilterNode> provider : optProviders) {
+            if (provider.isPresent()) {
+                providers.add(provider.get());
+            } else {
+                return ImmutableSet.of();
+            }
+        }
+        return providers.build();
+    }
+
+    /**
+     * Recursive
+     */
+    private Optional<CommutativeJoinOrFilterNode> getCandidateProvider(QueryNode subtreeRoot, IntermediateQuery query) {
+
+        if (subtreeRoot instanceof ConstructionNode) {
+            Optional<QueryNode> optChild = query.getFirstChild(subtreeRoot);
+            return optChild.isPresent() ?
+                    getCandidateProvider(optChild.get(), query) :
+                    Optional.empty();
+        }
+        if (subtreeRoot instanceof CommutativeJoinOrFilterNode) {
+            CommutativeJoinOrFilterNode castNode = (CommutativeJoinOrFilterNode) subtreeRoot;
+            if (castNode.getOptionalFilterCondition().isPresent()) {
+                return Optional.of(castNode);
+            }
         }
         return Optional.empty();
     }
 
-    private PushUpBooleanExpressionProposal mergeProposals(PushUpBooleanExpressionProposal partialProposal,
-                                                           ImmutableMap<CommutativeJoinOrFilterNode,
-                                                                   Optional<ImmutableExpression>> providerToRetainedExpression) {
-        return new PushUpBooleanExpressionProposalImpl(partialProposal.getPropagatedExpression(),
-                providerToRetainedExpression,
-                partialProposal.getUpMostPropagatingNode(),
-                partialProposal.getRecipientNode(),
-                partialProposal.getInbetweenProjectors());
+
+    private Optional<ImmutableExpression> getRetainedSubExpression
+            (ImmutableSet<ImmutableExpression> propagatedExpressions,
+             CommutativeJoinOrFilterNode provider) {
+
+        ImmutableExpression fullBooleanExpression = provider.getOptionalFilterCondition()
+                .orElseThrow(() -> new IllegalStateException("The provider is expected to have a filtering condition"));
+
+        // conjuncts which will not be propagated up from this child
+        return ImmutabilityTools.foldBooleanExpressions(
+                fullBooleanExpression.flattenAND().stream()
+                        .filter(e -> !propagatedExpressions.contains(e))
+        );
     }
 
-
     /**
-     * Takes a UnionNode u as input.
-     * If all children of u are InnerJoin of FilterNodes,
-     * returns the boolean conjuncts shared by all of them as filter conditions.
-     * <p>
-     * Otherwise returns the empty set.
+     * Returns the boolean conjuncts shared by all providers.
      */
-    private ImmutableSet<ImmutableExpression> getExpressionsToPropagateAboveUnion(UnionNode unionNode,
-                                                                                  IntermediateQuery query) {
-        // Temporary optional object
-        Optional<ImmutableSet<ImmutableExpression>> optionalSharedExpressions = Optional.empty();
-        for (QueryNode child : query.getChildren(unionNode)) {
-            if (!(child instanceof CommutativeJoinOrFilterNode &&
-                    ((CommutativeJoinOrFilterNode) child).getOptionalFilterCondition().isPresent())) {
-                return ImmutableSet.of();
-            }
-            ImmutableSet<ImmutableExpression> childBooleanExpressions =
-                    ((CommutativeJoinOrFilterNode) child).getOptionalFilterCondition().get().flattenAND();
+    private ImmutableSet<ImmutableExpression> getExpressionsToPropagateAboveUnion(ImmutableSet<CommutativeJoinOrFilterNode> providers) {
+        return providers.stream()
+                .map(n -> n.getOptionalFilterCondition().get().flattenAND())
+                .reduce(this::computeIntersection).get();
+    }
 
-            if (optionalSharedExpressions.isPresent()) {
-                optionalSharedExpressions = Optional.of(optionalSharedExpressions.get().stream()
-                        .filter(e -> childBooleanExpressions.contains(e))
-                        .collect(ImmutableCollectors.toSet()));
-            } else {
-                optionalSharedExpressions = Optional.of(childBooleanExpressions);
-            }
-        }
-        /**
-         *  At this stage, the temporary optional cannot be empty anymore (although its value may be the empty set),
-         *  unless the UnionNode has no child
-         */
-        return optionalSharedExpressions.
-                orElseThrow(() -> new InvalidIntermediateQueryException("A UnionNode must have children"));
+    private ImmutableSet<ImmutableExpression> computeIntersection(ImmutableSet<ImmutableExpression> set1,
+                                                                  ImmutableSet<ImmutableExpression> set2) {
+        return set1.stream()
+                .filter(e -> set2.contains(e))
+                .collect(ImmutableCollectors.toSet());
     }
 }
