@@ -45,12 +45,12 @@ public class JDBC2ConstantConverter {
         symbol.setDecimalSeparator('.');
         formatter.setDecimalFormatSymbols(symbol);
 
-
         possibleDateFormats.add(new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa", Locale.ENGLISH)); // For oracle driver v.11 and less
         possibleDateFormats.add(new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS", Locale.ENGLISH)); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
         possibleDateFormats.add(new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH)); // For MSSQL
         possibleDateFormats.add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)); // ISO with 'T'
         possibleDateFormats.add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)); // ISO without 'T'
+        possibleDateFormats.add(new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)); // ISO without time
         possibleDateFormats.add(new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH)); // another common case
     }
 
@@ -179,7 +179,6 @@ public class JDBC2ConstantConverter {
 
                     case DATETIME:
                         result = convertDatetimeConstant(value);
-
                         break;
 
                     case DATETIME_STAMP:
