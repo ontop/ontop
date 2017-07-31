@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import javafx.util.Pair;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -15,9 +16,7 @@ import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.rio.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -33,17 +32,22 @@ public class OntopMappingCleanup {
     final static boolean REDUCE_TEMPLATES_TO_COLUMNS = true;  // replace rr:template with rr:column whenever possible
     final static boolean REPLACE_SIMPLE_SQL = true;  // replace rr:sqlQuery with rr:tableName whenever possible
 
+    private enum Label {
+        /* Source decl.: */sourceUri, connectionUrl, username, password, driverClass,
+        /* Mapping decl.: */mappingId, target, source
+    }
     // TWO ENTRY POINTS: processOBDA and processR2RML for obda and r2rml/ttl files, respectively
 
     public static void main(String[] args) {
         try {
             //processOBDA("/Users/roman/Project/code/ontop3/ontop/ontop-cli/target/test-classes/npd-v2-ql-mysql-ontop1.17.obda");
 
-            File ontDir = new File("client/cli/src/test/resources");
+            File ontDir = new File("src/test/resources");
             String path = ontDir.getAbsolutePath() + "/";
-            String file = path + "npd-v2-ql-mysql-ontop1.17.ttl";
+            String file = path + "bootstrapped-univ-benchQL.obda";
 
-            processR2RML(file);
+            processOBDA(file);
+//            processR2RML(file);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -54,10 +58,15 @@ public class OntopMappingCleanup {
 
     public static void processOBDA(String file) throws Exception {
 
-        File f = new File(file);
-        try (Scanner sc = new Scanner(f)) {
+        File inputFile = new File(file);
+        File tempFile = new File(file+ ".tmp");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+        try (Scanner sc = new Scanner(inputFile)) {
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
+                if (line.contains("[SourceDeclaration]")){
+                    readSourceDeclaration(sc, inputFile);
+                }
                 if (line.startsWith("mappingId")) {
                     String target = sc.nextLine();
                     String source = sc.nextLine();
@@ -101,24 +110,72 @@ public class OntopMappingCleanup {
                             }
                         }
                         System.out.println(line);
+                        writer.write(line + System.getProperty("line.separator"));
 
                         String replacementSelectClause = getRenaming(sqlRenaming, selectClause, mapping);
                         String resultingSql = sql.replace(selectClause, replacementSelectClause);
                         if (SIMPLIFY_SQL_PROJECTIONS)
                             resultingSql = getSimplifiedProjection(resultingSql);
                         System.out.println("source" + resultingSql);
+                        writer.write("source" + resultingSql + System.getProperty("line.separator"));
 
                         for (Map.Entry<String, String> r : renaming.entrySet())
                             target = target.replace("{" + r.getKey() + "}", "{" + r.getValue() + "}");
                         System.out.println(target);
+                        writer.write( target + System.getProperty("line.separator"));
                     }
                     else
                         System.err.println("ERROR: cannot find the SELECT clause in " + mapping);
                 }
-                else
+                else {
                     System.out.println(line);
+                    writer.write(line + System.getProperty("line.separator"));
+                }
             }
         }
+
+        writer.flush();
+        writer.close();
+        if (!tempFile.renameTo(inputFile))
+            System.out.println("Could not rename file");
+
+
+}
+    //read and store datasource information
+    private static void readSourceDeclaration(Scanner sc, File f) throws IOException {
+        String line;
+        Properties dataSourceProperties  = new Properties();
+
+        while (!(line = sc.nextLine()).isEmpty()) {
+            String[] tokens = line.split("[\t| ]+", 2);
+
+            final String parameter = tokens[0].trim();
+            final String inputParameter = tokens[1].trim();
+
+            if (parameter.equals(Label.sourceUri.name())) {
+                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_NAME, inputParameter);
+            } else if (parameter.equals(Label.connectionUrl.name())) {
+                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_URL, inputParameter);
+            } else if (parameter.equals(Label.username.name())) {
+                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_USER, inputParameter);
+            } else if (parameter.equals(Label.password.name())) {
+                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_PASSWORD, inputParameter);
+            } else if (parameter.equals(Label.driverClass.name())) {
+                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_DRIVER, inputParameter);
+
+            } else {
+                String msg = String.format("Unknown parameter name \"%s\"", parameter);
+                throw new IOException(msg);
+            }
+        }
+        String absolutePath = f.getAbsolutePath();
+        String propertyFilePath = absolutePath.substring(0, absolutePath.lastIndexOf("."))+ ".properties";
+        File propertyFile = new File(propertyFilePath);
+        FileOutputStream outputStream = new FileOutputStream(propertyFile);
+        dataSourceProperties.store(outputStream, null);
+        outputStream.flush();
+        outputStream.close();
+
     }
 
     public static void processR2RML(String file) throws Exception {
