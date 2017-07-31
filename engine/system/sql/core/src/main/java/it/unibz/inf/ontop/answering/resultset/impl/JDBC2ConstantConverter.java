@@ -13,7 +13,9 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -36,32 +38,40 @@ public class JDBC2ConstantConverter {
 
     private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
+    private static List<DateFormat> possibleDateFormats = new ArrayList<>();
+
     static {
         DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
         symbol.setDecimalSeparator('.');
         formatter.setDecimalFormatSymbols(symbol);
+
+
+        possibleDateFormats.add(new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa", Locale.ENGLISH)); // For oracle driver v.11 and less
+        possibleDateFormats.add(new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS", Locale.ENGLISH)); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+        possibleDateFormats.add(new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH)); // For MSSQL
+        possibleDateFormats.add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)); // ISO with 'T'
+        possibleDateFormats.add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)); // ISO without 'T'
+        possibleDateFormats.add(new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH)); // another common case
     }
 
     public JDBC2ConstantConverter(DBMetadata dbMetadata,
                                   Optional<IRIDictionary> iriDictionary) {
         this.iriDictionary = iriDictionary.orElse(null);
-        String vendor =  dbMetadata.getDriverName();
+        String vendor = dbMetadata.getDriverName();
         isOracle = vendor.contains("Oracle");
         isMsSQL = vendor.contains("SQL Server");
-        
+
         if (isOracle) {
             String version = dbMetadata.getDriverVersion();
             int versionInt = Integer.parseInt(version.substring(0, version.indexOf(".")));
 
             if (versionInt >= 12)
-                dateFormat = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS" , Locale.ENGLISH); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+                dateFormat = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS", Locale.ENGLISH); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
             else
-                dateFormat = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa" , Locale.ENGLISH); // For oracle driver v.11 and less
-        }
-        else if (isMsSQL) {
-            dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH );
-        }
-        else
+                dateFormat = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa", Locale.ENGLISH); // For oracle driver v.11 and less
+        } else if (isMsSQL) {
+            dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH);
+        } else
             dateFormat = null;
 
         this.bnodeCounter = new AtomicInteger();
@@ -79,8 +89,7 @@ public class JDBC2ConstantConverter {
 
             if (value == null) {
                 return null;
-            }
-            else {
+            } else {
                 stringValue = String.valueOf(value);
 
                 int t = cell.getTypeValue();
@@ -98,8 +107,7 @@ public class JDBC2ConstantConverter {
                             try {
                                 Integer id = Integer.parseInt(stringValue);
                                 stringValue = iriDictionary.getURI(id);
-                            }
-                            catch (NumberFormatException e) {
+                            } catch (NumberFormatException e) {
                                 // If its not a number, then it has to be a URI, so
                                 // we leave realValue as it is.
                             }
@@ -170,43 +178,26 @@ public class JDBC2ConstantConverter {
                         break;
 
                     case DATETIME:
-                        /** set.getTimestamp() gives problem with MySQL and Oracle drivers we need to specify the dateformat
-                         MySQL DateFormat ("MMM DD YYYY HH:mmaa");
-                         Oracle DateFormat "dd-MMM-yy HH.mm.ss.SSSSSS aa" For oracle driver v.11 and less
-                         Oracle "dd-MMM-yy HH:mm:ss,SSSSSS" FOR ORACLE DRIVER 12.1.0.2
-                         To overcome the problem we create a new Timestamp */
-                            //Timestamp tsvalue = (Timestamp)value;
-                        if (isMsSQL || isOracle) {
-                            try {
-                                java.util.Date date = dateFormat.parse(stringValue);
-                                Timestamp ts = new Timestamp(date.getTime());
-                                result = TERM_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME);
-                            } catch (ParseException pe) {
-                                throw new OntopResultConversionException(pe);
-                            }
-                        } else {
-                            result = TERM_FACTORY.getConstantLiteral(stringValue.replace(' ', 'T'), Predicate.COL_TYPE.DATETIME);
-                        }
+                        result = convertDatetimeConstant(value);
+
                         break;
 
                     case DATETIME_STAMP:
                         if (!isOracle) {
                             result = TERM_FACTORY.getConstantLiteral(stringValue.replaceFirst(" ", "T").replaceAll(" ", ""), Predicate.COL_TYPE.DATETIME_STAMP);
-                        }
-                        else {
-						/* oracle has the type timestamptz. The format returned by getString is not a valid xml format
-						we need to transform it. We first take the information about the timezone value, that is lost
+                        } else {
+                        /* oracle has the type timestamptz. The format returned by getString is not a valid xml format
+                        we need to transform it. We first take the information about the timezone value, that is lost
 						during the conversion in java.util.Date and then we proceed with the conversion. */
                             try {
                                 int indexTimezone = stringValue.lastIndexOf(" ");
-                                String timezone = stringValue.substring(indexTimezone+1);
+                                String timezone = stringValue.substring(indexTimezone + 1);
                                 String datetime = stringValue.substring(0, indexTimezone);
 
                                 java.util.Date date = dateFormat.parse(datetime);
                                 Timestamp ts = new Timestamp(date.getTime());
-                                result = TERM_FACTORY.getConstantLiteral(ts.toString().replaceFirst(" ", "T").replaceAll(" ", "")+timezone, Predicate.COL_TYPE.DATETIME_STAMP);
-                            }
-                            catch (ParseException pe) {
+                                result = TERM_FACTORY.getConstantLiteral(ts.toString().replaceFirst(" ", "T").replaceAll(" ", "") + timezone, Predicate.COL_TYPE.DATETIME_STAMP);
+                            } catch (ParseException pe) {
                                 throw new OntopResultConversionException(pe);
                             }
                         }
@@ -216,13 +207,11 @@ public class JDBC2ConstantConverter {
                         if (!isOracle) {
                             //Date dvalue = (Date)value;
                             result = TERM_FACTORY.getConstantLiteral(stringValue, Predicate.COL_TYPE.DATE);
-                        }
-                        else {
+                        } else {
                             try {
-                                DateFormat df = new SimpleDateFormat("dd-MMM-yy" ,  Locale.ENGLISH);
+                                DateFormat df = new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH);
                                 java.util.Date date = df.parse(stringValue);
-                            }
-                            catch (ParseException e) {
+                            } catch (ParseException e) {
                                 throw new OntopResultConversionException(e);
                             }
                             result = TERM_FACTORY.getConstantLiteral(value.toString(), Predicate.COL_TYPE.DATE);
@@ -238,8 +227,7 @@ public class JDBC2ConstantConverter {
                         result = TERM_FACTORY.getConstantLiteral(stringValue, type);
                 }
             }
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             Throwable cause = e.getCause();
             if (cause instanceof URISyntaxException) {
                 OntopResultConversionException ex = new OntopResultConversionException(
@@ -252,18 +240,44 @@ public class JDBC2ConstantConverter {
                                 + "Detailed message: " + cause.getMessage());
                 ex.setStackTrace(e.getStackTrace());
                 throw ex;
-            }
-            else {
+            } else {
                 OntopResultConversionException ex = new OntopResultConversionException("Quest couldn't parse the data value to Java object: " + value + "\n"
                         + "Please review the mapping rules to have the datatype assigned properly.");
                 ex.setStackTrace(e.getStackTrace());
                 throw ex;
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new OntopResultConversionException(e);
         }
 
         return result;
+    }
+
+    private Constant convertDatetimeConstant(Object value) throws OntopResultConversionException {
+        java.util.Date dateValue = null;
+
+        if (value instanceof java.util.Date) {
+            // If JDBC gives us proper Java object, we are good
+            dateValue = (java.util.Date) value;
+        } else {
+            // Otherwise, we need to deal with possible String representation of datetime
+            String stringValue = String.valueOf(value);
+            for (DateFormat format : possibleDateFormats) {
+                try {
+                    dateValue = format.parse(stringValue);
+                    break;
+                } catch (ParseException e) {
+                    // continue with the next try
+                }
+            }
+
+            if (dateValue == null) {
+                throw new OntopResultConversionException("unparseable datetime: " + stringValue);
+            }
+        }
+        final Timestamp ts = new Timestamp(dateValue.getTime());
+        final String dateTimeLexicalValue = ts.toString().replace(' ', 'T');
+
+        return TERM_FACTORY.getConstantLiteral(dateTimeLexicalValue, Predicate.COL_TYPE.DATETIME);
     }
 }
