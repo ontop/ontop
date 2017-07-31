@@ -22,7 +22,12 @@ package it.unibz.inf.ontop.docker.regex;
 
 import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Before;
@@ -54,7 +59,7 @@ public class RegexpTest extends TestCase {
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology ontology;
@@ -167,12 +172,13 @@ public class RegexpTest extends TestCase {
 	}
 	
 
-	private String runTest(OntopOWLStatement st, String query, boolean hasResult) throws Exception {
+	private String runTest(OWLStatement st, String query, boolean hasResult) throws Exception {
 		String retval;
-		QuestOWLResultSet rs = st.executeTuple(query);
+		TupleOWLResultSet rs = st.executeSelectQuery(query);
 		if(hasResult){
 			assertTrue(rs.hasNext());
-			OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
+            final OWLBindingSet bindingSet = rs.next();
+            OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
 			retval = ind1.toString();
 		} else {
 			assertFalse(rs.hasNext());
@@ -188,7 +194,7 @@ public class RegexpTest extends TestCase {
 	 */
 	@Test
 	public void testSparql2sqlRegex() throws Exception {
-		OntopOWLStatement st = null;
+		OWLStatement st = null;
 		try {
 			st = conn.createStatement();
 

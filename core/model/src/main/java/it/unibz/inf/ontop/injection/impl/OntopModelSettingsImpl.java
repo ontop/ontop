@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

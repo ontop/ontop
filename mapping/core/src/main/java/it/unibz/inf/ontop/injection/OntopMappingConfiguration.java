@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
+import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;

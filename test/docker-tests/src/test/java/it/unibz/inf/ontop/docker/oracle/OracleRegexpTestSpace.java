@@ -21,8 +21,9 @@ package it.unibz.inf.ontop.docker.oracle;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLIndividual;
 
 
@@ -41,12 +42,13 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 	}
 
 
-	private String runTest(OntopOWLStatement st, String query, boolean hasResult) throws Exception {
+	private String runTest(OWLStatement st, String query, boolean hasResult) throws Exception {
 		String retval;
-		QuestOWLResultSet rs = st.executeTuple(query);
+		TupleOWLResultSet rs = st.executeSelectQuery(query);
 		if(hasResult){
 			assertTrue(rs.hasNext());
-			OWLIndividual ind1 =	rs.getOWLIndividual("country")	 ;
+            final OWLBindingSet bindingSet = rs.next();
+            OWLIndividual ind1 = bindingSet.getOWLIndividual("country")	 ;
 			retval = ind1.toString();
 		} else {
 			assertFalse(rs.hasNext());
@@ -61,7 +63,7 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 	 * @throws Exception
 	 */
 	public void testSparql2OracleRegexWhere() throws Exception {
-		OntopOWLStatement st = null;
+		OWLStatement st = null;
 		try {
 			st = conn.createStatement();
 
@@ -88,7 +90,7 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 	 * @throws Exception
 	 */
 	public void testSparql2OracleRegexNoWhere() throws Exception {
-		OntopOWLStatement st = null;
+		OWLStatement st = null;
 		try {
 			st = conn.createStatement();
 
@@ -114,7 +116,7 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 	 * @throws Exception
 	 */
 	public void testSparql2OracleRegexNoWhereNoSubquery() throws Exception {
-		OntopOWLStatement st = null;
+		OWLStatement st = null;
 		try {
 			st = conn.createStatement();
 			

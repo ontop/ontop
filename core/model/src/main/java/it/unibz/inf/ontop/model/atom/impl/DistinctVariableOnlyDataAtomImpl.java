@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 

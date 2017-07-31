@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.impl.*;
+import it.unibz.inf.ontop.model.term.impl.*;
 import it.unibz.inf.ontop.substitution.AppendableSubstitution;
 
 import java.util.*;

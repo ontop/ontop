@@ -2,12 +2,13 @@ package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.impl.GroundTermTools;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.term.GroundTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.areVariablesDistinct;
 import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.isVariableOnly;
 
@@ -21,6 +22,16 @@ public class AtomFactoryImpl implements AtomFactory {
 
     public static AtomFactory getInstance() {
         return INSTANCE;
+    }
+
+    @Override
+    public AtomPredicate getAtomPredicate(String name, int arity) {
+        return new AtomPredicateImpl(name, arity);
+    }
+
+    @Override
+    public AtomPredicate getAtomPredicate(Predicate datalogPredicate) {
+        return new AtomPredicateImpl(datalogPredicate);
     }
 
     @Override
@@ -86,5 +97,16 @@ public class AtomFactoryImpl implements AtomFactory {
         else {
             return new VariableOnlyDataAtomImpl(predicate, arguments);
         }
+    }
+
+    @Override
+    public Function getTripleAtom(Term subject, Term predicate, Term object) {
+        return TERM_FACTORY.getFunction(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
+    }
+
+    @Override
+    public ImmutableFunctionalTerm getImmutableTripleAtom(ImmutableTerm subject, ImmutableTerm predicate,
+                                                          ImmutableTerm object) {
+        return TERM_FACTORY.getImmutableFunctionalTerm(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
     }
 }

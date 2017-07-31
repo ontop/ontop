@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 
 import javax.swing.*;
@@ -29,7 +29,7 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class DataTypeComboBox extends JComboBox {
 
@@ -46,7 +46,7 @@ public class DataTypeComboBox extends JComboBox {
 	
 	private static Predicate[] getQuestDataTypePredicates() {
 		
-		List<Predicate> prediacteList = DATATYPE_FACTORY.getDatatypePredicates();
+		List<Predicate> prediacteList = TYPE_FACTORY.getDatatypePredicates();
 		
 		int length = prediacteList.size() + 1;
 		Predicate[] dataTypes = new Predicate[length];
@@ -69,10 +69,10 @@ public class DataTypeComboBox extends JComboBox {
 				if (value instanceof Predicate) {
 					Predicate item = (Predicate) value;
 					String name = item.toString();
-					if (name.contains(OBDAVocabulary.NS_XSD)) {
-						name = name.replace(OBDAVocabulary.NS_XSD, "xsd:");
-					} else if (name.contains(OBDAVocabulary.NS_RDFS)) {
-						name = name.replace(OBDAVocabulary.NS_RDFS, "rdfs:");
+					if (name.contains(IriConstants.NS_XSD)) {
+						name = name.replace(IriConstants.NS_XSD, "xsd:");
+					} else if (name.contains(IriConstants.NS_RDFS)) {
+						name = name.replace(IriConstants.NS_RDFS, "rdfs:");
 					}
 					setText(name);
 					setIcon(IconLoader.getImageIcon("images/datarange.png"));

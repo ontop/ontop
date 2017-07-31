@@ -4,9 +4,9 @@ import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
-import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
-import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine.BootstrappingResults;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -36,7 +36,8 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
                     .propertyFile(propertiesFile)
                     .build();
 
-            BootstrappingResults results = DirectMappingEngine.bootstrap(configuration, baseIRI);
+            DirectMappingBootstrapper bootstrapper = DirectMappingBootstrapper.defaultBootstrapper();
+            BootstrappingResults results = bootstrapper.bootstrap(configuration, baseIRI);
 
             File ontologyFile = new File(owlFile);
             File obdaFile = new File(mappingFile);

@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
@@ -173,7 +173,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	 */
 	private class Canceller extends Thread {
 		private CountDownLatch old_latch;
-		private OntopOWLConnection old_conn;
+		private OWLConnection old_conn;
 		private OntopOWLStatement old_stmt;
 
 		Canceller() throws OntopConnectionException {

@@ -29,6 +29,7 @@ public interface OntopSemanticIndexLoader extends AutoCloseable {
      * An in-memory DB like H2 is dropped when no-one connects to it.
      *
      */
+    @Override
     void close();
 
 

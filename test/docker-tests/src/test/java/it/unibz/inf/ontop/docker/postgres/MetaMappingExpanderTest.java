@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.docker.postgres;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLObject;
 
 
 /**

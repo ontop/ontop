@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.docker.oracle;
 
 
 
+import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -32,7 +33,7 @@ import java.util.List;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
- * Refer in particular to the class {@link it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator}
+ * Refer in particular to the class {@link SparqlAlgebraToDatalogTranslator}
  *
  */
 

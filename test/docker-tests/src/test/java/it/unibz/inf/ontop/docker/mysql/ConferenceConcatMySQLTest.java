@@ -22,8 +22,9 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLObject;
 
 /**
@@ -45,7 +46,7 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 
 	private void runTests(String query1) throws Exception {
 
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 
 
 		try {
@@ -64,22 +65,19 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 		}
 	}
 	
-	private void executeQueryAssertResults(String query, OntopOWLStatement st) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
+	private void executeQueryAssertResults(String query, OWLStatement st) throws Exception {
+		TupleOWLResultSet rs = st.executeSelectQuery(query);
 
 		OWLObject answer, answer2;
 		rs.hasNext();
-
-
-
-		answer= rs.getOWLObject("x");
+        final OWLBindingSet bindingSet = rs.next();
+        answer= bindingSet.getOWLObject("x");
 		System.out.print("x =" + answer);
 		System.out.print(" ");
-		answer2= rs.getOWLObject("y");
+		answer2= bindingSet.getOWLObject("y");
 
 		System.out.print("y =" + answer2);
 		System.out.print(" ");
-
 
 		rs.close();
 		assertEquals("<http://myproject.org/odbs#tracepaper1>", answer.toString());

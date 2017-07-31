@@ -10,13 +10,10 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import org.jgrapht.DirectedGraph;

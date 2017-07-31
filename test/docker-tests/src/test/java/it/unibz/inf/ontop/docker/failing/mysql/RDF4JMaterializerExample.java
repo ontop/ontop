@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.docker.failing.mysql;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
-import it.unibz.inf.ontop.rdf4j.RDF4JMaterializer;
-import it.unibz.inf.ontop.rdf4j.MaterializationGraphQuery;
+import it.unibz.inf.ontop.materialization.MaterializationParams;
+import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
+import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.n3.N3Writer;
 

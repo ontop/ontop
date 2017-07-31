@@ -3,8 +3,14 @@ package it.unibz.inf.ontop.docker.failing.local;
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLObject;
 
 import java.io.FileReader;
@@ -41,8 +47,8 @@ public class ADPOntopTest {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		OntopOWLConnection conn = reasoner.getConnection();
-		OntopOWLStatement st = conn.createStatement();
+		OWLConnection conn = reasoner.getConnection();
+		OWLStatement st = conn.createStatement();
 
 		String sparqlQuery = Joiner.on("\n").join(
 				CharStreams.readLines(new FileReader(queryFile)));
@@ -50,11 +56,12 @@ public class ADPOntopTest {
 		//System.out.println(sparqlQuery);
 		
 		try {
-			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+			TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
 			int columnSize = rs.getColumnCount();
 			while (rs.hasNext()) {
+                final OWLBindingSet bindingSet = rs.next();
 				for (int idx = 1; idx <= columnSize; idx++) {
-					OWLObject binding = rs.getOWLObject(idx);
+                    OWLObject binding = bindingSet.getOWLObject(idx);
 					System.out.print(binding.toString() + ", ");
 				}
 				System.out.print("\n");
@@ -64,7 +71,7 @@ public class ADPOntopTest {
 			/*
 			 * Print the query summary
 			 */
-			QuestOWLStatement qst = (QuestOWLStatement) st;
+			DefaultOntopOWLStatement qst = (DefaultOntopOWLStatement) st;
 			String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();;
 
 			System.out.println();

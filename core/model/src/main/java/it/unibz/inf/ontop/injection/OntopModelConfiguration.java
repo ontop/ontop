@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OntopModelConfigurationImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 

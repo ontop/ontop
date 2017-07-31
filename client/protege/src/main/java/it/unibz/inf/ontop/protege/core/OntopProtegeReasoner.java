@@ -1,7 +1,12 @@
 package it.unibz.inf.ontop.protege.core;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.impl.OWLReasonerBase;
@@ -10,7 +15,7 @@ import org.semanticweb.owlapi.util.Version;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL.loadOntologies;
+import static it.unibz.inf.ontop.owlapi.impl.QuestOWL.loadOntologies;
 
 /**
  * Wrapper around OntopOWLReasoner to use inside Protege
@@ -324,8 +329,8 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
      * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
      * @return The old connection: The caller must close this connection
      */
-    public OntopOWLConnection replaceConnection() throws OntopConnectionException {
-        OntopOWLConnection oldconn = this.owlConnection;
+    public OWLConnection replaceConnection() throws OntopConnectionException {
+        OWLConnection oldconn = this.owlConnection;
         owlConnection = reasoner.getConnection();
         return oldconn;
     }

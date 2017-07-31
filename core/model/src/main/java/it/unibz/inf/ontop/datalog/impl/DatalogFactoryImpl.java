@@ -4,8 +4,7 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -13,7 +12,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 public class DatalogFactoryImpl implements DatalogFactory {
@@ -56,12 +55,12 @@ public class DatalogFactoryImpl implements DatalogFactory {
 
     @Override
     public Function getSPARQLJoin(Function t1, Function t2) {
-        return DATA_FACTORY.getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
+        return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_JOIN, t1, t2);
     }
 
     @Override
     public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition) {
-        return DATA_FACTORY.getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2, joinCondition);
+        return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_JOIN, t1, t2, joinCondition);
     }
 
 
@@ -82,12 +81,12 @@ public class DatalogFactoryImpl implements DatalogFactory {
          */
         optionalCondition.ifPresent(joinTerms::add);
 
-        return DATA_FACTORY.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, joinTerms);
+        return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN, joinTerms);
     }
 
     @Override
     public Function getSPARQLLeftJoin(Term t1, Term t2) {
-        return DATA_FACTORY.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2);
+        return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN, t1, t2);
     }
 
 
@@ -146,7 +145,7 @@ public class DatalogFactoryImpl implements DatalogFactory {
         Term newTerm;
         if (term instanceof Variable) {
             Variable variable = (Variable) term;
-            newTerm = DATA_FACTORY.getVariable(variable.getName() + "_" + suff);
+            newTerm = TERM_FACTORY.getVariable(variable.getName() + "_" + suff);
         }
         else if (term instanceof Function) {
             Function functionalTerm = (Function) term;
@@ -157,7 +156,7 @@ public class DatalogFactoryImpl implements DatalogFactory {
                 newInnerTerms.add(getFreshTerm(innerTerm, suff));
             }
             Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-            Function newFunctionalTerm = DATA_FACTORY.getFunction(newFunctionSymbol, newInnerTerms);
+            Function newFunctionalTerm = TERM_FACTORY.getFunction(newFunctionSymbol, newInnerTerms);
             newTerm = newFunctionalTerm;
         }
         else if (term instanceof Constant) {

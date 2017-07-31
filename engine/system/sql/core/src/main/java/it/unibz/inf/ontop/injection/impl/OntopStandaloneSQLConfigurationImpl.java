@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
-import it.unibz.inf.ontop.executor.ProposalExecutor;
+import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopSystemSQLConfigurationImpl.OntopSystemSQLOptions;

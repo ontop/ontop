@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.spec;
 
 
-import it.unibz.inf.ontop.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 
 /**
  * TODO: find a better name

@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLException;
 
 
@@ -20,14 +21,14 @@ public class HasIdTest extends AbstractVirtualModeTest {
     }
 
 
-    private QuestOWLResultSet runLocalQuery(String query) throws OWLException {
+    private TupleOWLResultSet runLocalQuery(String query) throws OWLException {
 
-        OntopOWLStatement st = conn.createStatement();
-        return st.executeTuple(query);
+        OWLStatement st = conn.createStatement();
+        return st.executeSelectQuery(query);
     }
 
     public void test() throws OWLException {
-        QuestOWLResultSet results = runLocalQuery("PREFIX : <http://example.com/vocab#>" +
+        TupleOWLResultSet  results = runLocalQuery("PREFIX : <http://example.com/vocab#>" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                 "SELECT ?p ?firstName ?lastName " +
                 "WHERE { " +
@@ -37,9 +38,10 @@ public class HasIdTest extends AbstractVirtualModeTest {
                 "}");
         // At least one result
         assertTrue(results.hasNext());
-        assertEquals(results.getOWLIndividual(1).toString(), "<http://example.com/persons/3>");
-        assertEquals(results.getOWLLiteral(2), null);
-        assertEquals(results.getOWLLiteral(3), null);
+        final OWLBindingSet bindingSet = results.next();
+        assertEquals(bindingSet.getOWLIndividual(1).toString(), "<http://example.com/persons/3>");
+        assertEquals(bindingSet.getOWLLiteral(2), null);
+        assertEquals(bindingSet.getOWLLiteral(3), null);
         assertFalse(results.hasNext());
     }
 }

@@ -3,10 +3,10 @@ package it.unibz.inf.ontop.datalog.impl;
 import fj.F;
 import fj.F2;
 import fj.data.List;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.OperationPredicate;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.TermConstants;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Expression;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -15,13 +15,14 @@ import it.unibz.inf.ontop.model.term.Term;
 import java.util.ArrayList;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 /**
  * Tool methods when manipulate some Datalog programs and their rules.
  */
 public class DatalogTools {
-    private final static Expression TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+    private final static Expression TRUE_EQ = TERM_FACTORY.getFunctionEQ(TermConstants.TRUE, TermConstants.TRUE);
 
     private final static  F<Function, Boolean> IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = new F<Function, Boolean>() {
         @Override
@@ -39,7 +40,7 @@ public class DatalogTools {
         @Override
         public Boolean f(Function atom) {
             return atom.isOperation()
-                    ||  DATA_FACTORY.getDatatypeFactory().isBoolean(atom.getFunctionSymbol());
+                    ||  TYPE_FACTORY.isBoolean(atom.getFunctionSymbol());
         }
     };
 
@@ -49,8 +50,8 @@ public class DatalogTools {
 
     public static Boolean isLeftJoinOrJoinAtom(Function atom) {
         Predicate predicate = atom.getFunctionSymbol();
-        return predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN) ||
-                predicate.equals(OBDAVocabulary.SPARQL_JOIN);
+        return predicate.equals(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) ||
+                predicate.equals(DatalogAlgebraOperatorPredicates.SPARQL_JOIN);
     }
 
     public static List<Function> filterDataAndCompositeAtoms(List<Function> atoms) {
@@ -77,7 +78,7 @@ public class DatalogTools {
         return booleanAtoms.tail().foldLeft(new F2<Expression, Function, Expression>() {
             @Override
             public Expression f(Expression previousAtom, Function currentAtom) {
-                return DATA_FACTORY.getFunctionAND(previousAtom, currentAtom);
+                return TERM_FACTORY.getFunctionAND(previousAtom, currentAtom);
             }
         }, firstBooleanAtom);
     }
@@ -88,11 +89,11 @@ public class DatalogTools {
 
         Predicate predicate = atom.getFunctionSymbol();
         if (predicate instanceof OperationPredicate)
-            return DATA_FACTORY.getExpression((OperationPredicate)predicate,
+            return TERM_FACTORY.getExpression((OperationPredicate)predicate,
                     atom.getTerms());
         // XSD:BOOLEAN case
-        else if (DATA_FACTORY.getDatatypeFactory().isBoolean(predicate)) {
-            return DATA_FACTORY.getExpression(ExpressionOperation.IS_TRUE, atom);
+        else if (TYPE_FACTORY.isBoolean(predicate)) {
+            return TERM_FACTORY.getExpression(ExpressionOperation.IS_TRUE, atom);
         }
 
         throw new IllegalArgumentException(atom + " is not a boolean atom");
@@ -165,6 +166,6 @@ public class DatalogTools {
     }
 
     public static Function constructNewFunction(Predicate functionSymbol, List<Term> subTerms) {
-        return DATA_FACTORY.getFunction(functionSymbol, new ArrayList<>(subTerms.toCollection()));
+        return TERM_FACTORY.getFunction(functionSymbol, new ArrayList<>(subTerms.toCollection()));
     }
 }

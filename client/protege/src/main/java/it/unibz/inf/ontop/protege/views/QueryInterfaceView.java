@@ -20,12 +20,13 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.owlapi.OWLResultSetWriter;
-import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.owlapi.resultset.utils.OWLResultSetWriter;
+import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
+import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.gui.OWLResultSetTableModel;
@@ -40,7 +41,6 @@ import it.unibz.inf.ontop.protege.utils.TextMessageFrame;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.slf4j.Logger;
@@ -159,7 +159,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 		});
 
-		queryEditorPanel.setExecuteSelectAction(new OBDADataQueryAction<QuestOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
+		queryEditorPanel.setExecuteSelectAction(new OBDADataQueryAction<TupleOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
 			
 			@Override
 			public OWLEditorKit getEditorKit(){
@@ -167,7 +167,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 
 			@Override
-			public void handleResult(QuestOWLResultSet result) throws OWLException{
+			public void handleResult(TupleOWLResultSet result) throws OWLException{
 				createTableModelFromResultSet(result);
 				showTupleResultInTablePanel();
 			}
@@ -190,15 +190,15 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
                 return tm != null && tm.isFetching();
             }
 			@Override
-			public QuestOWLResultSet executeQuery(OntopOWLStatement st,
-					String queryString) throws OWLException {
-				return st.executeTuple(queryString);
+			public TupleOWLResultSet executeQuery(OntopOWLStatement st,
+												  String queryString) throws OWLException {
+				return st.executeSelectQuery(queryString);
 			}
 
 		});
 
 		queryEditorPanel.setExecuteGraphQueryAction(
-                new OBDADataQueryAction<List<OWLAxiom>>("Executing queries...", QueryInterfaceView.this) {
+                new OBDADataQueryAction<GraphOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
 			
 			@Override
 			public OWLEditorKit getEditorKit(){
@@ -206,15 +206,15 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 
 			@Override
-			public List<OWLAxiom> executeQuery(OntopOWLStatement st, String queryString) throws OWLException {
-				return st.executeGraph(queryString); 
+			public GraphOWLResultSet executeQuery(OntopOWLStatement st, String queryString) throws OWLException {
+				return st.executeGraphQuery(queryString);
 			}
 
 			@Override
-			public void handleResult(List<OWLAxiom> result){
+			public void handleResult(GraphOWLResultSet result) throws OWLException{
 				OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
 				populateResultUsingVisitor(result, owlVisitor);
-				showGraphResultInTextPanel(owlVisitor);	
+				showGraphResultInTextPanel(owlVisitor);
 			}
 
 			@Override
@@ -383,7 +383,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	}
 
 	
-	private synchronized void createTableModelFromResultSet(QuestOWLResultSet result) throws OWLException {
+	private synchronized void createTableModelFromResultSet(TupleOWLResultSet result) throws OWLException {
 		if (result == null)
 			throw new NullPointerException("An error occurred. createTableModelFromResultSet cannot use a null QuestOWLResultSet");
         tableModel = new OWLResultSetTableModel(result, prefixManager,
@@ -440,9 +440,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	}
 
-	private void populateResultUsingVisitor(List<OWLAxiom> result, OWLAxiomToTurtleVisitor visitor) {
-		if (result != null) {
-            result.forEach(ax -> ax.accept(visitor));
+	private void populateResultUsingVisitor(GraphOWLResultSet resultSet, OWLAxiomToTurtleVisitor visitor) throws OWLException {
+		if (resultSet != null) {
+			while (resultSet.hasNext()) {
+				resultSet.next().accept(visitor);
+			}
+            resultSet.close();
 		}
 	}
 

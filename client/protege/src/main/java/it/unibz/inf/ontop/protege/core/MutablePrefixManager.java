@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.core;
  */
 
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.io.impl.AbstractPrefixManager;
+import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -21,11 +21,11 @@ package it.unibz.inf.ontop.evaluator;
  */
 
 import it.unibz.inf.ontop.evaluator.impl.ExpressionNormalizerImpl;
-import it.unibz.inf.ontop.model.predicate.*;
-import it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
@@ -36,8 +36,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATATYPE_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 public class ExpressionEvaluator {
@@ -98,8 +98,8 @@ public class ExpressionEvaluator {
 				return optionalExpression.get();
 			else
 				return optionalBooleanValue
-						.map(v -> v ? OBDAVocabulary.TRUE : OBDAVocabulary.FALSE)
-						.orElse(OBDAVocabulary.NULL);
+						.map(v -> v ? TermConstants.TRUE : TermConstants.FALSE)
+						.orElse(TermConstants.NULL);
 		}
 	}
 
@@ -120,22 +120,22 @@ public class ExpressionEvaluator {
 						+ evaluatedFunctionalTerm);
 			}
 
-			return new EvaluationResult(DATA_FACTORY.getImmutableExpression(
-					DATA_FACTORY.getExpression((OperationPredicate) predicate,
+			return new EvaluationResult(TERM_FACTORY.getImmutableExpression(
+					TERM_FACTORY.getExpression((OperationPredicate) predicate,
 							evaluatedFunctionalTerm.getTerms())));
 		}
 		else if (evaluatedTerm instanceof Constant) {
-			if (evaluatedTerm == OBDAVocabulary.FALSE) {
+			if (evaluatedTerm == TermConstants.FALSE) {
 				return new EvaluationResult(false);
 			}
-			else if (evaluatedTerm == OBDAVocabulary.NULL)
+			else if (evaluatedTerm == TermConstants.NULL)
 				return new EvaluationResult();
 			else {
 				return new EvaluationResult(true);
 			}
 		}
 		else if (evaluatedTerm instanceof Variable) {
-		    return new EvaluationResult(DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_TRUE,
+		    return new EvaluationResult(TERM_FACTORY.getImmutableExpression(ExpressionOperation.IS_TRUE,
                     ImmutabilityTools.convertIntoImmutableTerm(evaluatedTerm)));
         }
 		else {
@@ -159,17 +159,17 @@ public class ExpressionEvaluator {
 
 	private Term eval(Function expr) {
 		Predicate p = expr.getFunctionSymbol();
-		if (expr.isAlgebraFunction()) { // p == OBDAVocabulary.SPARQL_JOIN || p == OBDAVocabulary.SPARQL_LEFTJOIN
+		if (expr.isAlgebraFunction()) { // p == DatalogAlgebraOperatorPredicates.SPARQL_JOIN || p == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN
 			List<Term> terms = expr.getTerms();
 			for (int i=0; i<terms.size(); i++) {
 				Term old = terms.get(i);
 				if (old instanceof Function) {
 					Term newterm = eval((Function)old);
 					if (!newterm.equals(old))
-						if (newterm == OBDAVocabulary.FALSE) {
+						if (newterm == TermConstants.FALSE) {
 							//
-							terms.set(i, DATA_FACTORY.getTypedTerm(OBDAVocabulary.FALSE, COL_TYPE.BOOLEAN));
-						} else if (newterm == OBDAVocabulary.TRUE) {
+							terms.set(i, TERM_FACTORY.getTypedTerm(TermConstants.FALSE, COL_TYPE.BOOLEAN));
+						} else if (newterm == TermConstants.TRUE) {
 							//remove
 							terms.remove(i);
 							i--;
@@ -190,30 +190,30 @@ public class ExpressionEvaluator {
 			if (t0 instanceof Constant) {
 				ValueConstant value = (ValueConstant) t0;
 				String valueString = value.getValue();
-				if (DATATYPE_FACTORY.isBoolean(p)) { // OBDAVocabulary.XSD_BOOLEAN
+				if (TYPE_FACTORY.isBoolean(p)) { // OBDAVocabulary.XSD_BOOLEAN
 					if (valueString.equals("true") || valueString.equals("1")) {
-						return OBDAVocabulary.TRUE;
+						return TermConstants.TRUE;
 					} 
 					else if (valueString.equals("false") || valueString.equals("0")) {
-						return OBDAVocabulary.FALSE;
+						return TermConstants.FALSE;
 					}
 				}
-				else if (DATATYPE_FACTORY.isInteger(p)) {
+				else if (TYPE_FACTORY.isInteger(p)) {
 					long valueInteger = Long.parseLong(valueString);
-					return DATA_FACTORY.getBooleanConstant(valueInteger != 0);
+					return TERM_FACTORY.getBooleanConstant(valueInteger != 0);
 				} 
-				else if (DATATYPE_FACTORY.isFloat(p)) {
+				else if (TYPE_FACTORY.isFloat(p)) {
 					double valueD = Double.parseDouble(valueString);
-					return DATA_FACTORY.getBooleanConstant(valueD > 0);
+					return TERM_FACTORY.getBooleanConstant(valueD > 0);
 				} 
-				else if (DATATYPE_FACTORY.isString(p) || DATATYPE_FACTORY.isLiteral(p)) {
+				else if (TYPE_FACTORY.isString(p) || TYPE_FACTORY.isLiteral(p)) {
 					// ROMAN (18 Dec 2015): toString() was wrong -- it contains "" and so is never empty
-					return DATA_FACTORY.getBooleanConstant(valueString.length() != 0);
+					return TERM_FACTORY.getBooleanConstant(valueString.length() != 0);
 				}
 				// TODO (R): year, date and time are not covered?
 			} 
 			else if (t0 instanceof Variable) {
-				return DATA_FACTORY.getFunctionIsTrue(expr);
+				return TERM_FACTORY.getFunctionIsTrue(expr);
 			} 
 			else {
 				return expr;
@@ -287,7 +287,7 @@ public class ExpressionEvaluator {
                 return term;
             }
 			else
-				return OBDAVocabulary.FALSE;
+				return TermConstants.FALSE;
 			
 		} 
 		else if (pred == ExpressionOperation.QUEST_CAST) {
@@ -307,7 +307,7 @@ public class ExpressionEvaluator {
 		Term innerTerm = term.getTerm(0);
 		if (innerTerm instanceof Function) {
 			Function function = (Function) innerTerm;
-			return DATA_FACTORY.getBooleanConstant(function.isDataTypeFunction());
+			return TERM_FACTORY.getBooleanConstant(function.isDataTypeFunction());
 		} 
 		else {
 			return term;
@@ -322,7 +322,7 @@ public class ExpressionEvaluator {
 		if (teval instanceof Function) {
 			Function function = (Function) teval;
 			Predicate predicate = function.getFunctionSymbol();
-			return DATA_FACTORY.getBooleanConstant(predicate instanceof BNodePredicate);
+			return TERM_FACTORY.getBooleanConstant(predicate instanceof BNodePredicate);
 		}
 		return term;
 	}
@@ -335,7 +335,7 @@ public class ExpressionEvaluator {
 		if (teval instanceof Function) {
 			Function function = (Function) teval;
 			Predicate predicate = function.getFunctionSymbol();
-			return DATA_FACTORY.getBooleanConstant(predicate instanceof URITemplatePredicate);
+			return TERM_FACTORY.getBooleanConstant(predicate instanceof URITemplatePredicate);
 		}
 		return term;
 	}
@@ -350,23 +350,23 @@ public class ExpressionEvaluator {
 			Predicate predicate = function.getFunctionSymbol();
 			Term parameter = function.getTerm(0);
 			if (function.isDataTypeFunction()) {
-				if (DATATYPE_FACTORY.isString(predicate) || DATATYPE_FACTORY.isLiteral(predicate)) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
-					return DATA_FACTORY.getTypedTerm(
-							DATA_FACTORY.getVariable(parameter.toString()), COL_TYPE.STRING);
+				if (TYPE_FACTORY.isString(predicate) || TYPE_FACTORY.isLiteral(predicate)) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
+					return TERM_FACTORY.getTypedTerm(
+							TERM_FACTORY.getVariable(parameter.toString()), COL_TYPE.STRING);
 				} 
 
 				else {
-					return DATA_FACTORY.getTypedTerm(
-							DATA_FACTORY.getFunctionCast(DATA_FACTORY.getVariable(parameter.toString()),
-									DATA_FACTORY.getConstantLiteral(DATATYPE_FACTORY.getDatatypeURI(COL_TYPE.STRING).stringValue())),
+					return TERM_FACTORY.getTypedTerm(
+							TERM_FACTORY.getFunctionCast(TERM_FACTORY.getVariable(parameter.toString()),
+									TERM_FACTORY.getConstantLiteral(TYPE_FACTORY.getDatatypeURI(COL_TYPE.STRING).stringValue())),
 										COL_TYPE.STRING);
 				}
 			} 
 			else if (predicate instanceof URITemplatePredicate) {
-				return DATA_FACTORY.getTypedTerm(function.clone(), COL_TYPE.STRING);
+				return TERM_FACTORY.getTypedTerm(function.clone(), COL_TYPE.STRING);
 			} 
 			else if (predicate instanceof BNodePredicate) {
-				return OBDAVocabulary.NULL;
+				return TermConstants.NULL;
 			}
 		}
 		return term;
@@ -387,7 +387,7 @@ public class ExpressionEvaluator {
 	private Function getDatatype(Function function) {
 		Predicate predicate = function.getFunctionSymbol();
 		if (function.isDataTypeFunction()) {
-			return DATA_FACTORY.getUriTemplateForDatatype(predicate.toString());
+			return TERM_FACTORY.getUriTemplateForDatatype(predicate.toString());
 		} 
 		else if (predicate instanceof BNodePredicate) {
 			return null;
@@ -396,7 +396,7 @@ public class ExpressionEvaluator {
 			return null;
 		} 
 		else if (function.isAlgebraFunction()) {
-			return DATA_FACTORY.getUriTemplateForDatatype(DATATYPE_FACTORY.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
+			return TERM_FACTORY.getUriTemplateForDatatype(TYPE_FACTORY.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 		} 
 		else if (predicate == ExpressionOperation.ADD || predicate == ExpressionOperation.SUBTRACT || 
 				predicate == ExpressionOperation.MULTIPLY || predicate == ExpressionOperation.DIVIDE)
@@ -412,10 +412,10 @@ public class ExpressionEvaluator {
 
 			Predicate pred2 = getDatatypePredicate(arg2);
 			if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
-				return DATA_FACTORY.getUriTemplateForDatatype(pred1.toString());
+				return TERM_FACTORY.getUriTemplateForDatatype(pred1.toString());
 			} 
 			else if (isNumeric(pred1) && isDouble(pred2)) {
-				return DATA_FACTORY.getUriTemplateForDatatype(pred2.toString());
+				return TERM_FACTORY.getUriTemplateForDatatype(pred2.toString());
 			} 
 			else {
 				return null;
@@ -423,7 +423,7 @@ public class ExpressionEvaluator {
 		}
 		else if (function.isOperation()) {
 			//return boolean uri
-			return DATA_FACTORY.getUriTemplateForDatatype(DATATYPE_FACTORY.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
+			return TERM_FACTORY.getUriTemplateForDatatype(TYPE_FACTORY.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 		}
 		return null;
 	}
@@ -436,9 +436,9 @@ public class ExpressionEvaluator {
 		else if (term instanceof Constant) {
 			Constant constant = (Constant) term;
 			COL_TYPE type = constant.getType();
-			Predicate pred = DATATYPE_FACTORY.getTypePredicate(type);
+			Predicate pred = TYPE_FACTORY.getTypePredicate(type);
 			if (pred == null)
-				pred = DATATYPE_FACTORY.getTypePredicate(COL_TYPE.STRING); // .XSD_STRING;
+				pred = TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING); // .XSD_STRING;
 			return pred;
 		} 
 		else {
@@ -447,18 +447,18 @@ public class ExpressionEvaluator {
 	}
 	
 	private boolean isDouble(Predicate pred) {
-		return (pred.equals(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.DOUBLE)) || pred.equals(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.FLOAT)));
+		return (pred.equals(TYPE_FACTORY.getTypePredicate(COL_TYPE.DOUBLE)) || pred.equals(TYPE_FACTORY.getTypePredicate(COL_TYPE.FLOAT)));
 	}
 	
 	private boolean isNumeric(Predicate pred) {
-		return (DATATYPE_FACTORY.isInteger(pred) || DATATYPE_FACTORY.isFloat(pred));
+		return (TYPE_FACTORY.isInteger(pred) || TYPE_FACTORY.isFloat(pred));
 	}
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		Predicate.COL_TYPE type = DATATYPE_FACTORY.getDatatype(constantValue);
+		Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(constantValue);
 		if (type != null) {
-			Predicate p = DATATYPE_FACTORY.getTypePredicate(type);
+			Predicate p = TYPE_FACTORY.getTypePredicate(type);
 			return isNumeric(p);
 		}
 		return false;	
@@ -471,7 +471,7 @@ public class ExpressionEvaluator {
 		Term innerTerm = term.getTerm(0);
 
 		// Create a default return constant: blank language with literal type.
-		Term emptyconstant = DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral("", COL_TYPE.STRING), COL_TYPE.STRING);
+		Term emptyconstant = TERM_FACTORY.getTypedTerm(TERM_FACTORY.getConstantLiteral("", COL_TYPE.STRING), COL_TYPE.STRING);
 
         if (innerTerm instanceof Variable) {
             return term;
@@ -488,7 +488,7 @@ public class ExpressionEvaluator {
 
 		Predicate predicate = function.getFunctionSymbol();
 		//String datatype = predicate.toString();
-		if (!DATATYPE_FACTORY.isString(predicate)) { // (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI))
+		if (!TYPE_FACTORY.isString(predicate)) { // (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI))
 			return emptyconstant;
 		}
 
@@ -498,11 +498,11 @@ public class ExpressionEvaluator {
 		else { // rdfs:Literal(text, lang)
 			Term parameter = function.getTerm(1);
 			if (parameter instanceof Variable) {
-				return DATA_FACTORY.getTypedTerm(parameter.clone(), COL_TYPE.STRING);
+				return TERM_FACTORY.getTypedTerm(parameter.clone(), COL_TYPE.STRING);
 			} 
 			else if (parameter instanceof Constant) {
-				return DATA_FACTORY.getTypedTerm(
-						DATA_FACTORY.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.STRING), COL_TYPE.STRING);
+				return TERM_FACTORY.getTypedTerm(
+						TERM_FACTORY.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.STRING), COL_TYPE.STRING);
 			}
 		}
 		return term;
@@ -519,14 +519,14 @@ public class ExpressionEvaluator {
 		 */
 		Term teval1 = eval(term.getTerm(0));
 		if (teval1 == null) {
-			return OBDAVocabulary.NULL; // ROMAN (10 Jan 2017): not FALSE
+			return TermConstants.NULL; // ROMAN (10 Jan 2017): not FALSE
 		}
 		/*
 		 * Evaluate the second term
 		 */
 		Term innerTerm2 = term.getTerm(1);
 		if (innerTerm2 == null) {
-			return OBDAVocabulary.NULL; // ROMAN (10 Jan 2017): not FALSE
+			return TermConstants.NULL; // ROMAN (10 Jan 2017): not FALSE
 		}
 
 		/*
@@ -537,12 +537,12 @@ public class ExpressionEvaluator {
 			String lang2 = ((Constant) innerTerm2).getValue();	
 			if (lang2.equals(SELECT_ALL)) {
 				if (lang1.isEmpty()) 
-					return DATA_FACTORY.getFunctionIsNull(teval1);
+					return TERM_FACTORY.getFunctionIsNull(teval1);
 				else 
-					return DATA_FACTORY.getFunctionIsNotNull(teval1);
+					return TERM_FACTORY.getFunctionIsNotNull(teval1);
 			} 
 			else {
-				return DATA_FACTORY.getBooleanConstant(lang1.equals(lang2));
+				return TERM_FACTORY.getBooleanConstant(lang1.equals(lang2));
 			}
 		} 
 		else if (teval1 instanceof Variable && innerTerm2 instanceof Constant) {
@@ -550,9 +550,9 @@ public class ExpressionEvaluator {
 			Constant lang = (Constant) innerTerm2;
 			if (lang.getValue().equals(SELECT_ALL)) {
 				// The char * means to get all languages
-				return DATA_FACTORY.getFunctionIsNotNull(var);
+				return TERM_FACTORY.getFunctionIsNotNull(var);
 			} else {
-				return DATA_FACTORY.getFunctionEQ(var, lang);
+				return TERM_FACTORY.getFunctionEQ(var, lang);
 			}
 		} 
 		else if (teval1 instanceof Function && innerTerm2 instanceof Function) {
@@ -561,7 +561,7 @@ public class ExpressionEvaluator {
 			if(f1.isOperation()){
 				return term;
 			}
-			return evalLangMatches(DATA_FACTORY.getLANGMATCHESFunction(f1.getTerm(0),
+			return evalLangMatches(TERM_FACTORY.getLANGMATCHESFunction(f1.getTerm(0),
 					f2.getTerm(0)));
 		} 
 		else {
@@ -580,14 +580,14 @@ public class ExpressionEvaluator {
         Term eval3 = term.getTerm(2);
         eval3 = evalRegexSingleExpression(eval3);
 
-        if(eval1.equals(OBDAVocabulary.FALSE)
-                || eval2.equals(OBDAVocabulary.FALSE)
-                || eval3.equals(OBDAVocabulary.FALSE))
+        if(eval1.equals(TermConstants.FALSE)
+                || eval2.equals(TermConstants.FALSE)
+                || eval3.equals(TermConstants.FALSE))
         {
-            return OBDAVocabulary.FALSE;
+            return TermConstants.FALSE;
         }
 
-        return DATA_FACTORY.getFunction(term.getFunctionSymbol(), eval1, eval2, term.getTerm(2));
+        return TERM_FACTORY.getFunction(term.getFunctionSymbol(), eval1, eval2, term.getTerm(2));
 
 	}
 
@@ -598,7 +598,7 @@ public class ExpressionEvaluator {
             Predicate predicate1 = function1.getFunctionSymbol();
             if((predicate1 instanceof URITemplatePredicate)
                     ||(predicate1 instanceof BNodePredicate)) {
-                return OBDAVocabulary.FALSE;
+                return TermConstants.FALSE;
             }
             if (!function1.isDataTypeFunction()){
                 return evalRegexSingleExpression( eval(expr));
@@ -614,17 +614,17 @@ public class ExpressionEvaluator {
 		if (innerTerm instanceof Function) {
 			Function f = (Function) innerTerm;
 			if (f.isDataTypeFunction()) {
-				Function isNotNullInnerInnerTerm = DATA_FACTORY.getFunction(ExpressionOperation.IS_NOT_NULL,
+				Function isNotNullInnerInnerTerm = TERM_FACTORY.getFunction(ExpressionOperation.IS_NOT_NULL,
 						((Function) innerTerm).getTerms());
 				return evalIsNullNotNull(isNotNullInnerInnerTerm , isnull);
 			}
 		}
 		Term result = eval(innerTerm);
-		if (result == OBDAVocabulary.NULL) {
-			return DATA_FACTORY.getBooleanConstant(isnull);
+		if (result == TermConstants.NULL) {
+			return TERM_FACTORY.getBooleanConstant(isnull);
 		} 
 		else if (result instanceof Constant) {
-			return DATA_FACTORY.getBooleanConstant(!isnull);
+			return TERM_FACTORY.getBooleanConstant(!isnull);
 		}
 
 		/*
@@ -643,9 +643,9 @@ public class ExpressionEvaluator {
 		 * and Bnodes never return null
 		 */
 		if (isnull) {
-			return DATA_FACTORY.getFunctionIsNull(result);
+			return TERM_FACTORY.getFunctionIsNull(result);
 		} else {
-			return DATA_FACTORY.getFunctionIsNotNull(result);
+			return TERM_FACTORY.getFunctionIsNotNull(result);
 		}
 	}
 
@@ -657,27 +657,27 @@ public class ExpressionEvaluator {
 		if (isNull) {
 			switch (variables.size()) {
 				case 0:
-					return DATA_FACTORY.getFunctionIsNull(uriTemplate);
+					return TERM_FACTORY.getFunctionIsNull(uriTemplate);
 				case 1:
-					return DATA_FACTORY.getFunctionIsNull(variables.iterator().next());
+					return TERM_FACTORY.getFunctionIsNull(variables.iterator().next());
 				default:
 					return variables.stream()
 							.reduce(null,
 									(e, v) -> e == null
-											? DATA_FACTORY.getFunctionIsNull(v)
-											: DATA_FACTORY.getFunctionOR(e, DATA_FACTORY.getFunctionIsNull(v)),
+											? TERM_FACTORY.getFunctionIsNull(v)
+											: TERM_FACTORY.getFunctionOR(e, TERM_FACTORY.getFunctionIsNull(v)),
 									(e1, e2) -> e1 == null
 											? e2
-											: (e2 == null) ? e1 : DATA_FACTORY.getFunctionOR(e1, e2));
+											: (e2 == null) ? e1 : TERM_FACTORY.getFunctionOR(e1, e2));
 			}
 		}
 		else {
 			if (variables.isEmpty())
-				return DATA_FACTORY.getFunctionIsNotNull(uriTemplate);
+				return TERM_FACTORY.getFunctionIsNotNull(uriTemplate);
 			else
 				return DatalogTools.foldBooleanConditions(
 						variables.stream()
-								.map(DATA_FACTORY::getFunctionIsNotNull)
+								.map(TERM_FACTORY::getFunctionIsNotNull)
 								.collect(Collectors.toList()));
 		}
 	}
@@ -688,13 +688,13 @@ public class ExpressionEvaluator {
 			Function f = (Function) teval;
 			Predicate predicate = f.getFunctionSymbol();
 			if (predicate == ExpressionOperation.IS_NOT_NULL) {
-				return DATA_FACTORY.getFunctionIsNotNull(f.getTerm(0));
+				return TERM_FACTORY.getFunctionIsNotNull(f.getTerm(0));
 			} else if (predicate == ExpressionOperation.IS_NULL) {
-				return DATA_FACTORY.getFunctionIsNull(f.getTerm(0));
+				return TERM_FACTORY.getFunctionIsNull(f.getTerm(0));
 			} else if (predicate == ExpressionOperation.NEQ) {
-				return DATA_FACTORY.getFunctionNEQ(f.getTerm(0), f.getTerm(1));
+				return TERM_FACTORY.getFunctionNEQ(f.getTerm(0), f.getTerm(1));
 			} else if (predicate == ExpressionOperation.EQ) {
-				return DATA_FACTORY.getFunctionEQ(f.getTerm(0), f.getTerm(1));
+				return TERM_FACTORY.getFunctionEQ(f.getTerm(0), f.getTerm(1));
 			}
 		} else if (teval instanceof Constant) {
 			return teval;
@@ -709,20 +709,20 @@ public class ExpressionEvaluator {
 			Function f = (Function) teval;
 			Predicate predicate = f.getFunctionSymbol();
 			if (predicate == ExpressionOperation.IS_NOT_NULL) {
-				return DATA_FACTORY.getFunctionIsNull(f.getTerm(0));
+				return TERM_FACTORY.getFunctionIsNull(f.getTerm(0));
 			} else if (predicate == ExpressionOperation.IS_NULL) {
-				return DATA_FACTORY.getFunctionIsNotNull(f.getTerm(0));
+				return TERM_FACTORY.getFunctionIsNotNull(f.getTerm(0));
 			} else if (predicate == ExpressionOperation.NEQ) {
-				return DATA_FACTORY.getFunctionEQ(f.getTerm(0), f.getTerm(1));
+				return TERM_FACTORY.getFunctionEQ(f.getTerm(0), f.getTerm(1));
 			} else if (predicate == ExpressionOperation.EQ) {
-				return DATA_FACTORY.getFunctionNEQ(f.getTerm(0), f.getTerm(1));
+				return TERM_FACTORY.getFunctionNEQ(f.getTerm(0), f.getTerm(1));
 			}
 		} else if (teval instanceof Constant) {
-			if (teval == OBDAVocabulary.FALSE)
-				return OBDAVocabulary.TRUE;
-			else if (teval == OBDAVocabulary.TRUE)
-				return OBDAVocabulary.FALSE;
-			else if (teval == OBDAVocabulary.NULL)
+			if (teval == TermConstants.FALSE)
+				return TermConstants.TRUE;
+			else if (teval == TermConstants.TRUE)
+				return TermConstants.FALSE;
+			else if (teval == TermConstants.NULL)
 				return teval;
 			// ROMAN (10 Jan 2017): this needs to be revised
 			return teval;
@@ -742,15 +742,15 @@ public class ExpressionEvaluator {
 			if (!(t1.isDataTypeFunction())) {
 				teval1 = eval(term.getTerm(0));
 				if (teval1 == null) {
-					return OBDAVocabulary.FALSE;
+					return TermConstants.FALSE;
 				}
 			} else {
 				teval1 = term.getTerm(0);
 			}
 		}
 		// This follows the SQL semantics NULL != NULL
-		else if (term.getTerm(0).equals(OBDAVocabulary.NULL)) {
-			return eq ? OBDAVocabulary.FALSE : OBDAVocabulary.TRUE;
+		else if (term.getTerm(0).equals(TermConstants.NULL)) {
+			return eq ? TermConstants.FALSE : TermConstants.TRUE;
 		}
 		else {
 			teval1 = eval(term.getTerm(0));
@@ -766,15 +766,15 @@ public class ExpressionEvaluator {
 			if (!(t2.isDataTypeFunction())) {
 				teval2 = eval(term.getTerm(1));
 				if (teval2 == null) {
-					return OBDAVocabulary.FALSE;
+					return TermConstants.FALSE;
 				}
 			} else {
 				teval2 = term.getTerm(1);
 			}
 		}
 		// This follows the SQL semantics NULL != NULL
-		else if (term.getTerm(1).equals(OBDAVocabulary.NULL)) {
-			return eq ? OBDAVocabulary.FALSE : OBDAVocabulary.TRUE;
+		else if (term.getTerm(1).equals(TermConstants.NULL)) {
+			return eq ? TermConstants.FALSE : TermConstants.TRUE;
 		}
 		else {
 			teval2 = eval(term.getTerm(1));
@@ -791,9 +791,9 @@ public class ExpressionEvaluator {
 		} 
 		else if (eval1 instanceof Constant && eval2 instanceof Constant) {
 			if (eval1.equals(eval2)) 
-				return DATA_FACTORY.getBooleanConstant(eq);
+				return TERM_FACTORY.getBooleanConstant(eq);
 			else 
-				return DATA_FACTORY.getBooleanConstant(!eq);
+				return TERM_FACTORY.getBooleanConstant(!eq);
 			
 		} 
 		else if (eval1 instanceof Function) {
@@ -822,9 +822,9 @@ public class ExpressionEvaluator {
 				/*
 				 * Evaluate both terms by comparing their datatypes
 				 */
-				if (DATATYPE_FACTORY.isString(pred1) && DATATYPE_FACTORY.isString(pred2)) { // R: replaced incorrect check
-																		//  pred1 == DATA_FACTORY.getDataTypePredicateLiteral()
-																		// && pred2 == DATA_FACTORY.getDataTypePredicateLiteral())
+				if (TYPE_FACTORY.isString(pred1) && TYPE_FACTORY.isString(pred2)) { // R: replaced incorrect check
+																		//  pred1 == TERM_FACTORY.getDataTypePredicateLiteral()
+																		// && pred2 == TERM_FACTORY.getDataTypePredicateLiteral())
 																	    // which does not work for LITERAL_LANG
 					/*
 					 * Special code to handle quality of Literals (plain, and
@@ -832,7 +832,7 @@ public class ExpressionEvaluator {
 					 */
 					if (f1.getTerms().size() != f2.getTerms().size()) {
 						// case one is with language another without
-						return DATA_FACTORY.getBooleanConstant(!eq);
+						return TERM_FACTORY.getBooleanConstant(!eq);
 					} 
 					else if (f1.getTerms().size() == 2) {
 						// SIZE == 2
@@ -842,23 +842,23 @@ public class ExpressionEvaluator {
 						// exactly as normal datatypes.
 						// This is copy paste code
 						if (eq) {
-							Function eqValues = DATA_FACTORY.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
-							Function eqLang = DATA_FACTORY.getFunctionEQ(f1.getTerm(1), f2.getTerm(1));
+							Function eqValues = TERM_FACTORY.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
+							Function eqLang = TERM_FACTORY.getFunctionEQ(f1.getTerm(1), f2.getTerm(1));
 							return evalAnd(eqValues, eqLang);
 						}
-						Function eqValues = DATA_FACTORY.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
-						Function eqLang = DATA_FACTORY.getFunctionNEQ(f1.getTerm(1), f2.getTerm(1));
+						Function eqValues = TERM_FACTORY.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
+						Function eqLang = TERM_FACTORY.getFunctionNEQ(f1.getTerm(1), f2.getTerm(1));
 						return evalOr(eqValues, eqLang);
 					}
 					// case literals without language, its exactly as normal
 					// datatypes
 					// this is copy paste code
 					if (eq) {
-						Function neweq = DATA_FACTORY.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
+						Function neweq = TERM_FACTORY.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
 						return evalEqNeq(neweq, true);
 					} 
 					else {
-						Function neweq = DATA_FACTORY.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
+						Function neweq = TERM_FACTORY.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
 						return evalEqNeq(neweq, false);
 					}
 				} 
@@ -868,17 +868,17 @@ public class ExpressionEvaluator {
 					} 
 					else {
 						if (eq) {
-							Function neweq = DATA_FACTORY.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
+							Function neweq = TERM_FACTORY.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
 							return evalEqNeq(neweq, true);
 						} 
 						else {
-							Function neweq = DATA_FACTORY.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
+							Function neweq = TERM_FACTORY.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
 							return evalEqNeq(neweq, false);
 						}
 					}
 				} 
 				else if (!pred1.equals(pred2)) {
-					return DATA_FACTORY.getBooleanConstant(!eq);
+					return TERM_FACTORY.getBooleanConstant(!eq);
 				} 
 				else {
 					return term;
@@ -888,9 +888,9 @@ public class ExpressionEvaluator {
 
 		/* eval2 is not a function */
 		if (eq) {
-			return DATA_FACTORY.getFunctionEQ(eval1, eval2);
+			return TERM_FACTORY.getFunctionEQ(eval1, eval2);
 		} else {
-			return DATA_FACTORY.getFunctionNEQ(eval1, eval2);
+			return TERM_FACTORY.getFunctionNEQ(eval1, eval2);
 		}
 	}
 
@@ -902,12 +902,12 @@ public class ExpressionEvaluator {
 				return evalUriFunctionsWithSingleTerm(uriFunction1, uriFunction2, isEqual);
 			} else if (arityForFunction2 > 1) {
 				// Currently, we assume the arity should be the same (already decomposed URIs)
-				return DATA_FACTORY.getBooleanConstant(!isEqual);
+				return TERM_FACTORY.getBooleanConstant(!isEqual);
 			}
 		} else if (arityForFunction1 > 1) {
 			if (arityForFunction2 == 1) {
 				// Currently, we assume the arity should be the same (already decomposed URIs)
-				return DATA_FACTORY.getBooleanConstant(!isEqual);
+				return TERM_FACTORY.getBooleanConstant(!isEqual);
 			} else if (arityForFunction2 > 1) {
 				return evalUriFunctionsWithMultipleTerms(uriFunction1, uriFunction2, isEqual);
 			}
@@ -922,30 +922,30 @@ public class ExpressionEvaluator {
 		if (term2 instanceof Variable) {
 
 			if (isEqual) {
-				return DATA_FACTORY.getFunctionEQ(term2, term1);
+				return TERM_FACTORY.getFunctionEQ(term2, term1);
 			} else {
 				if(term1 instanceof ValueConstant){
 					if (isEqual)
-						return DATA_FACTORY.getFunctionEQ(term1, term2);
+						return TERM_FACTORY.getFunctionEQ(term1, term2);
 					else
-						return DATA_FACTORY.getFunctionNEQ(term1, term2);
+						return TERM_FACTORY.getFunctionNEQ(term1, term2);
 				}
-				return DATA_FACTORY.getFunctionNEQ(term2, term1);
+				return TERM_FACTORY.getFunctionNEQ(term2, term1);
 			}
 
 		} else if (term2 instanceof ValueConstant) {
 
 			if (term1.equals(term2))
-				return DATA_FACTORY.getBooleanConstant(isEqual);
+				return TERM_FACTORY.getBooleanConstant(isEqual);
 			else
 				{
 				if (term1 instanceof Variable) {
 					if (isEqual)
-						return DATA_FACTORY.getFunctionEQ(term1, term2);
+						return TERM_FACTORY.getFunctionEQ(term1, term2);
 					else
-						return DATA_FACTORY.getFunctionNEQ(term1, term2);
+						return TERM_FACTORY.getFunctionNEQ(term1, term2);
 				}
-				return DATA_FACTORY.getBooleanConstant(!isEqual);
+				return TERM_FACTORY.getBooleanConstant(!isEqual);
 			}
 		}
 		return null;
@@ -954,12 +954,12 @@ public class ExpressionEvaluator {
 	private Term evalUriFunctionsWithMultipleTerms(Function uriFunction1, Function uriFunction2, boolean isEqual) {
 		Substitution theta = UnifierUtilities.getMGU(uriFunction1, uriFunction2);
 		if (theta == null) {
-			return DATA_FACTORY.getBooleanConstant(!isEqual);
+			return TERM_FACTORY.getBooleanConstant(!isEqual);
 		} 
 		else {
 			boolean isEmpty = theta.isEmpty();
 			if (isEmpty) {
-				return DATA_FACTORY.getBooleanConstant(!isEqual);
+				return TERM_FACTORY.getBooleanConstant(!isEqual);
 			} 
 			else {
 				Function result = null;
@@ -967,16 +967,16 @@ public class ExpressionEvaluator {
 				Set<Variable> keys = theta.getMap().keySet();
 				for (Variable var : keys) {
 					if (isEqual) 
-						result = DATA_FACTORY.getFunctionEQ(var, theta.get(var));
+						result = TERM_FACTORY.getFunctionEQ(var, theta.get(var));
 					else 
-						result = DATA_FACTORY.getFunctionNEQ(var, theta.get(var));
+						result = TERM_FACTORY.getFunctionNEQ(var, theta.get(var));
 					
 					temp.add(result);
 					if (temp.size() == 2) {
 						if (isEqual){
-							result = DATA_FACTORY.getFunctionAND(temp.get(0), temp.get(1));
+							result = TERM_FACTORY.getFunctionAND(temp.get(0), temp.get(1));
 						}else{
-							result = DATA_FACTORY.getFunctionOR(temp.get(0), temp.get(1));
+							result = TERM_FACTORY.getFunctionOR(temp.get(0), temp.get(1));
 						}
 						temp.clear();
 						temp.add(result);
@@ -992,31 +992,31 @@ public class ExpressionEvaluator {
 		Term e1 = eval(t1);
 		Term e2 = eval(t2);
 	
-		if (e1 == OBDAVocabulary.FALSE || e2 == OBDAVocabulary.FALSE)
-			return OBDAVocabulary.FALSE;
+		if (e1 == TermConstants.FALSE || e2 == TermConstants.FALSE)
+			return TermConstants.FALSE;
 		
-		if (e1 == OBDAVocabulary.TRUE)
+		if (e1 == TermConstants.TRUE)
 			return e2;
 		
-		if (e2 == OBDAVocabulary.TRUE)
+		if (e2 == TermConstants.TRUE)
 			return e1;
 		
-		return DATA_FACTORY.getFunctionAND(e1, e2);
+		return TERM_FACTORY.getFunctionAND(e1, e2);
 	}
 
 	private Term evalOr(Term t1, Term t2) {
 		Term e1 = eval(t1);
 		Term e2 = eval(t2);
 	
-		if (e1 == OBDAVocabulary.TRUE || e2 == OBDAVocabulary.TRUE)
-			return OBDAVocabulary.TRUE;
+		if (e1 == TermConstants.TRUE || e2 == TermConstants.TRUE)
+			return TermConstants.TRUE;
 		
-		if (e1 == OBDAVocabulary.FALSE)
+		if (e1 == TermConstants.FALSE)
 			return e2;
 		
-		if (e2 == OBDAVocabulary.FALSE)
+		if (e2 == TermConstants.FALSE)
 			return e1;
 		
-		return DATA_FACTORY.getFunctionOR(e1, e2);
+		return TERM_FACTORY.getFunctionOR(e1, e2);
 	}
 }

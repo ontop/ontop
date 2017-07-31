@@ -20,12 +20,12 @@ package it.unibz.inf.ontop.rdf4j.repository.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
-import it.unibz.inf.ontop.rdf4j.query.OntopBooleanQuery;
-import it.unibz.inf.ontop.rdf4j.query.OntopGraphQuery;
-import it.unibz.inf.ontop.rdf4j.query.OntopTupleQuery;
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
+import it.unibz.inf.ontop.rdf4j.query.impl.OntopBooleanQuery;
+import it.unibz.inf.ontop.rdf4j.query.impl.OntopGraphQuery;
+import it.unibz.inf.ontop.rdf4j.query.impl.OntopTupleQuery;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;

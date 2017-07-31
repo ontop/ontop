@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;

@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDAMappingListener;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 

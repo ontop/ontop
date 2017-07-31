@@ -21,13 +21,19 @@ package it.unibz.inf.ontop.docker.mysql;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.OClass;
+import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +58,7 @@ import static org.junit.Assert.assertTrue;
  * We use the npd database.
  */
 public class R2rmlCheckerTest {
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology owlOntology;
@@ -133,8 +139,8 @@ public class R2rmlCheckerTest {
 	@Test
 	public void testDescriptionsCheck() throws Exception {
 
-		try (OntopOWLConnection obdaConnection = reasonerOBDA.getConnection();
-			 OntopOWLConnection r2rmlConnection = reasonerR2rml.getConnection()) {
+		try (OWLConnection obdaConnection = reasonerOBDA.getConnection();
+			 OWLConnection r2rmlConnection = reasonerR2rml.getConnection()) {
 
 			// Now we are ready for querying
 			log.debug("Comparing concepts");
@@ -302,17 +308,17 @@ public class R2rmlCheckerTest {
 	 * Execute Npd query 1 and give the number of results
 	 * @return 
 	 */
-	private int npdQuery(OntopOWLConnection ontopOWLConnection) throws OWLException {
+	private int npdQuery(OWLConnection OWLConnection) throws OWLException {
 		String query = "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#> SELECT DISTINCT ?licenceURI WHERE { ?licenceURI a npdv:ProductionLicence ."
 				+ "[ ] a npdv:ProductionLicenceLicensee ; "
 				+ "npdv:dateLicenseeValidFrom ?date ;"
 				+ "npdv:licenseeInterest ?interest ;"
 				+ "npdv:licenseeForLicence ?licenceURI . "
 				+ "FILTER(?date > '1979-12-31T00:00:00')	}";
-		OntopOWLStatement st = ontopOWLConnection.createStatement();
+		OWLStatement st = OWLConnection.createStatement();
 		int n = 0;
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			while (rs.hasNext()) {
 				n++;
 			}
@@ -378,12 +384,12 @@ public class R2rmlCheckerTest {
 
 	}
 
-	private int runSPARQLConceptsQuery(String description,	OntopOWLConnection conn) throws Exception {
+	private int runSPARQLConceptsQuery(String description,	OWLConnection conn) throws Exception {
 		String query = "SELECT ?x WHERE {?x a " + description + ".}";
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		int n = 0;
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			while (rs.hasNext()) {
 				n++;
 			}
@@ -406,21 +412,21 @@ public class R2rmlCheckerTest {
 
 	}
 
-	private int runSPARQLRolesQuery(String description, OntopOWLConnection conn) throws Exception {
+	private int runSPARQLRolesQuery(String description, OWLConnection conn) throws Exception {
 		String query = "SELECT * WHERE {?x " + description + " ?y.}";
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		int n = 0;
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			while (rs.hasNext()) {
 //				log.debug("result : "  + rs.getOWLObject("x"));
 //				log.debug("result : "  + rs.getOWLObject("y"));
 //				log.debug("result : "  + rs.getOWLLiteral("y"));
 				
+                final OWLBindingSet bindingSet = rs.next();
 				if(n==0){
-					log.debug("result : "  + rs.getOWLObject("x"));
-					log.debug("result : "  + rs.getOWLObject("y"));
-				
+                    log.debug("result : "  + bindingSet.getOWLObject("x"));
+					log.debug("result : "  + bindingSet.getOWLObject("y"));
 				}
 				n++;
 			}
@@ -445,16 +451,17 @@ public class R2rmlCheckerTest {
 
 	}
 	
-	private int runSPARQLRoleFilterQuery(String description, OntopOWLConnection connection) throws OWLException {
+	private int runSPARQLRoleFilterQuery(String description, OWLConnection connection) throws OWLException {
 		String query = "SELECT * WHERE {?x " + description + " ?y. FILTER(isLiteral(?y))}";
-		OntopOWLStatement st = connection.createStatement();
+		OWLStatement st = connection.createStatement();
 		int n = 0;
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			while (rs.hasNext()) {
-				if(n==0){
-					log.debug("result : "  + rs.getOWLObject("x"));
-					log.debug("result : "  + rs.getOWLLiteral("y"));
+                final OWLBindingSet bindingSet = rs.next();
+                if(n==0){
+					log.debug("result : "  + bindingSet.getOWLObject("x"));
+					log.debug("result : "  + bindingSet.getOWLLiteral("y"));
 				
 				}
 				n++;

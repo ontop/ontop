@@ -22,7 +22,10 @@ package it.unibz.inf.ontop.docker.service;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import junit.framework.TestCase;
 import org.eclipse.rdf4j.common.io.IOUtil;
 import org.semanticweb.owlapi.model.OWLException;

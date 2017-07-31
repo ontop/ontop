@@ -2,13 +2,13 @@ package it.unibz.inf.ontop.si.impl;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.ontology.OntologyFactory;
-import it.unibz.inf.ontop.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.inf.ontop.rdf4j.SemanticIndexRDFHandler;
+import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
+import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.rdf4j.rio.helpers.SemanticIndexRDFHandler;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import org.eclipse.rdf4j.model.*;
@@ -58,7 +58,7 @@ public class GraphLoading {
 
 
 
-    private static void insertDataset(RDBMSSIRepositoryManager dataRepository, Connection localConnection, Dataset dataset)
+    private static void insertDataset(SIRepositoryManager dataRepository, Connection localConnection, Dataset dataset)
             throws SemanticIndexException {
         // Merge default and named graphs to filter duplicates
         Set<IRI> graphIRIs = new HashSet<>();
@@ -70,7 +70,7 @@ public class GraphLoading {
         }
     }
 
-    private static void insertGraph(RDBMSSIRepositoryManager dataRepository, Connection localConnection,
+    private static void insertGraph(SIRepositoryManager dataRepository, Connection localConnection,
                                     IRI graphIRI) throws SemanticIndexException {
 
         RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphIRI.toString()).get();
@@ -165,7 +165,7 @@ public class GraphLoading {
                 String dataProperty = pred.stringValue();
                 vb.createDataProperty(dataProperty);
             }
-            else if (pred.stringValue().equals(OBDAVocabulary.RDF_TYPE)) {
+            else if (pred.stringValue().equals(IriConstants.RDF_TYPE)) {
                 String className = obj.stringValue();
                 vb.createClass(className);
             }

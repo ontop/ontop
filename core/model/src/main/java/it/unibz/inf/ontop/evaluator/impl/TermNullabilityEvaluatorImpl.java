@@ -6,12 +6,12 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.OperationPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 
-import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.NULL;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.model.term.TermConstants.NULL;
 
 
 @Singleton
@@ -40,7 +40,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
     @Override
     public boolean isFilteringNullValue(ImmutableExpression expression, Variable variable) {
-        ImmutableExpression nullCaseExpression = DATA_FACTORY.getSubstitution(variable, NULL)
+        ImmutableExpression nullCaseExpression = SUBSTITUTION_FACTORY.getSubstitution(variable, NULL)
                 .applyToBooleanExpression(expression);
 
         // TODO: inject the expression evaluator instead

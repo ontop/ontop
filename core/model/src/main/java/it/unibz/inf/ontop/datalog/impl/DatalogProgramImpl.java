@@ -27,10 +27,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
+import it.unibz.inf.ontop.model.term.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 

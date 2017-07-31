@@ -32,15 +32,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.MappingIOException;
+import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
-import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFHandler;
@@ -67,7 +66,6 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.Rio;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -296,11 +294,11 @@ public class RDB2RDFTest {
 	 * Bootstraps the mapping and returns a new configuration
 	 */
 	OntopSQLOWLAPIConfiguration bootstrapDMConfiguration()
-			throws SQLException, MappingIOException, InvalidMappingException, OWLOntologyStorageException,
-			OWLOntologyCreationException, DuplicateMappingException {
+			throws OWLOntologyCreationException, MappingException, MappingBootstrappingException {
 
 		OntopSQLOWLAPIConfiguration initialConfiguration = createInMemoryBuilder().build();
-		DirectMappingEngine.BootstrappingResults results = DirectMappingEngine.bootstrap(initialConfiguration, BASE_IRI);
+		DirectMappingBootstrapper bootstrapper = DirectMappingBootstrapper.defaultBootstrapper();
+		BootstrappingResults results = bootstrapper.bootstrap(initialConfiguration, BASE_IRI);
 
 		SQLPPMapping bootstrappedMapping = results.getPPMapping();
 

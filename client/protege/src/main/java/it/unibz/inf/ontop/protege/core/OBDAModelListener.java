@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataSource;
-
 import java.io.Serializable;
 
 public interface OBDAModelListener extends Serializable {

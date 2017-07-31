@@ -6,9 +6,9 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopOBDAConfiguration;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.mapping.MappingMetadata;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
 class OntopOBDAModule extends OntopAbstractModule {

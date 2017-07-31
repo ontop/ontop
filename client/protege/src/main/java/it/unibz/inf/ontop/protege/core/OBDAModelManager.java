@@ -22,21 +22,20 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.base.Optional;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.io.OldSyntaxMappingConverter;
-import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.owlapi.SQLPPMappingValidator;
+import it.unibz.inf.ontop.spec.mapping.converter.OldSyntaxMappingConverter;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.spec.mapping.validation.SQLPPMappingValidator;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.querymanager.*;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.utils.querymanager.*;
+import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.ui.util.UIUtil;
@@ -63,7 +62,7 @@ import java.io.Reader;
 import java.net.URI;
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class OBDAModelManager implements Disposable {
 
@@ -371,20 +370,20 @@ public class OBDAModelManager implements Disposable {
 			}
 			String uri = entity.getIRI().toString();
 
-			p = DATA_FACTORY.getClassPredicate(uri);
+			p = TERM_FACTORY.getClassPredicate(uri);
 		} else if (entity instanceof OWLObjectProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = DATA_FACTORY.getObjectPropertyPredicate(uri);
+			p = TERM_FACTORY.getObjectPropertyPredicate(uri);
 		} else if (entity instanceof OWLDataProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = DATA_FACTORY.getDataPropertyPredicate(uri);
+			p = TERM_FACTORY.getDataPropertyPredicate(uri);
 
 		} else if (entity instanceof OWLAnnotationProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = DATA_FACTORY.getAnnotationPropertyPredicate(uri);
+			p = TERM_FACTORY.getAnnotationPropertyPredicate(uri);
 		}
 		return p;
 	}

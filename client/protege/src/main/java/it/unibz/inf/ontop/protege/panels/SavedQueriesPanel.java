@@ -26,11 +26,11 @@ import it.unibz.inf.ontop.protege.gui.treemodels.QueryControllerTreeModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.QueryGroupTreeElement;
 import it.unibz.inf.ontop.protege.gui.treemodels.QueryTreeElement;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
-import it.unibz.inf.ontop.querymanager.QueryControllerListener;
-import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.utils.querymanager.QueryController;
+import it.unibz.inf.ontop.utils.querymanager.QueryControllerEntity;
+import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
+import it.unibz.inf.ontop.utils.querymanager.QueryControllerListener;
+import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
 
 import java.awt.Dialog.ModalityType;
 import java.util.Vector;

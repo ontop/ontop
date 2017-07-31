@@ -16,12 +16,12 @@ import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.predicate.BNodePredicate;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.model.term.TermConstants;
+import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
@@ -37,7 +37,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
@@ -90,7 +91,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  TermNullabilityEvaluator nullabilityEvaluator) {
         this.projectedVariables = projectedVariables;
         this.nullabilityEvaluator = nullabilityEvaluator;
-        this.substitution = DATA_FACTORY.getSubstitution();
+        this.substitution = SUBSTITUTION_FACTORY.getSubstitution();
         this.optionalModifiers = Optional.empty();
     }
 
@@ -228,7 +229,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .filter(e -> projectedVariables.contains(e.getKey()))
                 .forEach(newSubstitutionMapBuilder::put);
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = DATA_FACTORY.getSubstitution(
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
                 newSubstitutionMapBuilder.build());
 
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
@@ -266,11 +267,11 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                         : arg)
                 .collect(ImmutableCollectors.toList());
         if (newArguments.stream()
-                .anyMatch(arg -> arg.equals(OBDAVocabulary.NULL))) {
-            return OBDAVocabulary.NULL;
+                .anyMatch(arg -> arg.equals(TermConstants.NULL))) {
+            return TermConstants.NULL;
         }
 
-        return DATA_FACTORY.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newArguments);
+        return TERM_FACTORY.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newArguments);
     }
 
     /**
@@ -374,7 +375,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
         }
         else if (substitutionValue instanceof Constant) {
-            return substitutionValue.equals(OBDAVocabulary.NULL);
+            return substitutionValue.equals(TermConstants.NULL);
         }
         else if (substitutionValue instanceof Variable) {
             return isChildVariableNullable(query, (Variable)substitutionValue);
@@ -478,7 +479,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .map(e -> (Map.Entry<Variable, NonVariableTerm>) e)
                 .collect(ImmutableCollectors.toMap());
 
-        return DATA_FACTORY.getSubstitution(newMap);
+        return SUBSTITUTION_FACTORY.getSubstitution(newMap);
     }
 
     /**
@@ -487,7 +488,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private static Var2VarSubstitution extractTauEq(Var2VarSubstitution tauR) {
         int domainVariableCount = tauR.getDomain().size();
         if (domainVariableCount <= 1) {
-            return DATA_FACTORY.getVar2VarSubstitution(ImmutableMap.of());
+            return SUBSTITUTION_FACTORY.getVar2VarSubstitution(ImmutableMap.of());
         }
 
         ImmutableMultimap<Variable, Variable> inverseMultimap = tauR.getImmutableMap().entrySet().stream()
@@ -510,7 +511,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 })
                 .collect(ImmutableCollectors.toMap());
 
-        return DATA_FACTORY.getVar2VarSubstitution(newMap);
+        return SUBSTITUTION_FACTORY.getVar2VarSubstitution(newMap);
     }
 
     private static ImmutableSubstitution<ImmutableTerm> extractEtaB(ImmutableSubstitution<ImmutableTerm> eta,
@@ -525,7 +526,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .filter(e -> !tauCDomain.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap());
 
-        return DATA_FACTORY.getSubstitution(newMap);
+        return SUBSTITUTION_FACTORY.getSubstitution(newMap);
     }
 
     private static ImmutableSubstitution<? extends ImmutableTerm> computeDelta(
@@ -547,7 +548,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .distinct()
                 .collect(ImmutableCollectors.toMap());
 
-        return DATA_FACTORY.getSubstitution(newMap);
+        return SUBSTITUTION_FACTORY.getSubstitution(newMap);
     }
 
     /**

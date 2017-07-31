@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.QueryUnionSplitter;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
 
 import java.util.LinkedList;
 import java.util.Optional;

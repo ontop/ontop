@@ -8,8 +8,8 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
-import it.unibz.inf.ontop.model.predicate.ExpressionOperation;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
@@ -22,9 +22,9 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 
 public class IQValidationTest {
 
-    private final static AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 2);
-    private final static AtomPredicate P3_PREDICATE = DATA_FACTORY.getAtomPredicate("p1", 3);
-    private final static AtomPredicate ANS1_VAR1_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
+    private final static AtomPredicate TABLE2_PREDICATE = ATOM_FACTORY.getAtomPredicate("table1", 2);
+    private final static AtomPredicate P3_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 3);
+    private final static AtomPredicate ANS1_VAR1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
     private final static Variable X = DATA_FACTORY.getVariable("x");
     private final static Variable Y = DATA_FACTORY.getVariable("y");
     private final static Variable Z = DATA_FACTORY.getVariable("z");
@@ -43,8 +43,8 @@ public class IQValidationTest {
 
     @Test(expected = InvalidIntermediateQueryException.class)
     public void testConstructionNodeChild() {
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 1);
-        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 1);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 1);
+        AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 1);
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A));
         ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, A));
@@ -62,9 +62,9 @@ public class IQValidationTest {
 
     @Test(expected = InvalidIntermediateQueryException.class)
     public void testUnionNodeChild() {
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
-        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
-        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_4 = ATOM_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = ATOM_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -95,11 +95,11 @@ public class IQValidationTest {
 
     @Test(expected = InvalidIntermediateQueryException.class)
     public void testUnionNodeProjectedVariables() {
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
-        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
-        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
-        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
-        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = ATOM_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = ATOM_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -171,9 +171,9 @@ public class IQValidationTest {
 
     @Test(expected = InvalidIntermediateQueryException.class)
     public void testExtensionalDataNodeChildren() {
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 1);
-        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 1);
-        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table2", 1);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 1);
+        AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 1);
+        AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table2", 1);
 
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EXPRESSION);
@@ -193,9 +193,9 @@ public class IQValidationTest {
 
     @Test(expected = InvalidIntermediateQueryException.class)
     public void testIntensionalDataNodeChildren() {
-        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 1);
-        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 1);
-        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table2", 1);
+        AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 1);
+        AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 1);
+        AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table2", 1);
 
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EXPRESSION);
