@@ -2,18 +2,18 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.NonUniqueFunctionalConstraint;
+import it.unibz.inf.ontop.dbschema.FunctionalDependency;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class NonUniqueFunctionalConstraintImpl implements NonUniqueFunctionalConstraint {
+public class FunctionalDependencyImpl implements FunctionalDependency {
 
     private final ImmutableSet<Attribute> determinants;
     private final ImmutableSet<Attribute> dependents;
 
-    private NonUniqueFunctionalConstraintImpl(ImmutableSet<Attribute> determinants,
-                                             ImmutableSet<Attribute> dependents) {
+    private FunctionalDependencyImpl(ImmutableSet<Attribute> determinants,
+                                     ImmutableSet<Attribute> dependents) {
         this.determinants = determinants;
         this.dependents = dependents;
     }
@@ -53,8 +53,8 @@ public class NonUniqueFunctionalConstraintImpl implements NonUniqueFunctionalCon
         }
 
         @Override
-        public NonUniqueFunctionalConstraint build() {
-            return new NonUniqueFunctionalConstraintImpl(ImmutableSet.copyOf(determinants),
+        public FunctionalDependency build() {
+            return new FunctionalDependencyImpl(ImmutableSet.copyOf(determinants),
                     ImmutableSet.copyOf(dependents));
         }
     }

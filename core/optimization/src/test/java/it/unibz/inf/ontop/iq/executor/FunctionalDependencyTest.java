@@ -33,7 +33,7 @@ import static junit.framework.TestCase.assertTrue;
 /**
  * Elimination of redundant self-joins using a non unique functional constraint
  */
-public class NonUniqueFunctionalConstraintTest {
+public class FunctionalDependencyTest {
 
     private final static AtomPredicate TABLE1_PREDICATE;
     private final static AtomPredicate TABLE2_PREDICATE;
@@ -92,7 +92,7 @@ public class NonUniqueFunctionalConstraintTest {
         // Independent
         table1Def.addAttribute(idFactory.createAttributeID("col5"), Types.INTEGER, null, false);
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
-        table1Def.addNonUniqueFunctionalConstraint(NonUniqueFunctionalConstraint.defaultBuilder()
+        table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
                 .addDeterminant(col2T1)
                 .addDependent(col3T1)
                 .addDependent(col4T1)
@@ -121,11 +121,11 @@ public class NonUniqueFunctionalConstraintTest {
         Attribute col5T3 = table3Def.addAttribute(idFactory.createAttributeID("col5"), Types.INTEGER, null, false);
         table3Def.addAttribute(idFactory.createAttributeID("col6"), Types.INTEGER, null, false);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
-        table3Def.addNonUniqueFunctionalConstraint(NonUniqueFunctionalConstraint.defaultBuilder()
+        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
                 .addDeterminant(col2T3)
                 .addDependent(col3T3)
                 .build());
-        table3Def.addNonUniqueFunctionalConstraint(NonUniqueFunctionalConstraint.defaultBuilder()
+        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
                 .addDeterminant(col4T3)
                 .addDependent(col5T3)
                 .build());
@@ -142,11 +142,11 @@ public class NonUniqueFunctionalConstraintTest {
         // Independent
         table4Def.addAttribute(idFactory.createAttributeID("col5"), Types.INTEGER, null, false);
         table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
-        table4Def.addNonUniqueFunctionalConstraint(NonUniqueFunctionalConstraint.defaultBuilder()
+        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
                 .addDeterminant(col3T4)
                 .addDependent(col4T4)
                 .build());
-        table4Def.addNonUniqueFunctionalConstraint(NonUniqueFunctionalConstraint.defaultBuilder()
+        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
                 .addDeterminant(col2T4)
                 .addDependent(col3T4)
                 .addDependent(col4T4)
