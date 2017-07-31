@@ -131,8 +131,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 	@Override
 	protected void runTest() throws Exception {
 		ResultSetInfo expectedResult = readResultSetInfo();
-		RepositoryConnection con = dataRep.getConnection();
-		try {
+		try (RepositoryConnection con = dataRep.getConnection()){
 			String queryString = readQueryString();
 			Query query = con.prepareQuery(QueryLanguage.SPARQL, queryString, queryFileURL);
 			if (query instanceof TupleQuery) {
@@ -145,9 +144,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 			e.printStackTrace();
 			compareThrownException(e, expectedResult); // compare the thrown exception class
 		}
-		finally {
-			con.close();
-		}
+
 	}
 
 	private void compareResultSize(TupleQueryResult queryResult, ResultSetInfo expectedResult) throws Exception {

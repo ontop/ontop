@@ -24,14 +24,9 @@ import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.answering.input.SelectQuery;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.model.TupleResultSet;
-
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
-import org.eclipse.rdf4j.query.QueryEvaluationException;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.TupleQueryResult;
-import org.eclipse.rdf4j.query.TupleQueryResultHandler;
-import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
+import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 import java.util.List;
@@ -50,10 +45,9 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
     @Override
 	public TupleQueryResult evaluate() throws QueryEvaluationException {
 		TupleResultSet res;
-		OntopStatement stm;
+
 		long start = System.currentTimeMillis();
-		try {
-			stm = conn.createStatement();
+		try (OntopStatement stm = conn.createStatement()){
 			if(this.queryTimeout > 0)
 				stm.setQueryTimeout(this.queryTimeout);
 			try {
