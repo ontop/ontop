@@ -9,9 +9,9 @@
         <numeric/manifest-oracle.ttl>
         <character/manifest-oracle.ttl>
         <datetime/manifest-oracle.ttl>
-        <boolean/manifest-oracle.ttl>
-        <binary/manifest-oracle.ttl>
-        <others/manifest-oracle.ttl>
+        #<boolean/manifest-oracle.ttl>
+        #<binary/manifest-oracle.ttl>
+        #<others/manifest-oracle.ttl>
 		<general/manifest-oracle.ttl>
 
     ).
