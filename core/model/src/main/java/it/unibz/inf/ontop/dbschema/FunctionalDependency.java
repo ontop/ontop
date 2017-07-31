@@ -1,12 +1,12 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.impl.NonUniqueFunctionalConstraintImpl;
+import it.unibz.inf.ontop.dbschema.impl.FunctionalDependencyImpl;
 
 /**
- * A functional dependency (which is not a unique constraint)
+ * A functional dependency
  */
-public interface NonUniqueFunctionalConstraint {
+public interface FunctionalDependency {
 
     ImmutableSet<Attribute> getDeterminants();
 
@@ -16,10 +16,10 @@ public interface NonUniqueFunctionalConstraint {
         Builder addDeterminant(Attribute determinant);
         Builder addDependent(Attribute dependent);
 
-        NonUniqueFunctionalConstraint build();
+        FunctionalDependency build();
     }
 
     static Builder defaultBuilder() {
-        return new NonUniqueFunctionalConstraintImpl.BuilderImpl();
+        return new FunctionalDependencyImpl.BuilderImpl();
     }
 }

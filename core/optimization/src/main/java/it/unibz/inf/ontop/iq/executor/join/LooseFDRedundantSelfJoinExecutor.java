@@ -26,7 +26,9 @@ import static it.unibz.inf.ontop.injection.OntopModelSettings.CardinalityPreserv
 import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 /**
- * Uses non-unique functional constraints to:
+ * Focuses on functional dependencies that are not unique constraints.
+ *
+ * Uses them to:
  *   (1) unify some terms (a functional dependency is generating equalities)
  *   (2) detect and remove redundant self inner joins.
  *
@@ -35,12 +37,12 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY
  *
  */
 @Singleton
-public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor {
+public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor {
 
     private final OntopOptimizationSettings settings;
 
     @Inject
-    private LooseNUFCRedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory, OntopOptimizationSettings settings) {
+    private LooseFDRedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory, OntopOptimizationSettings settings) {
         super(iqFactory);
         this.settings = settings;
     }
@@ -65,8 +67,8 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
         if (databaseRelation == null)
             return Optional.empty();
 
-        ImmutableMap<NonUniqueFunctionalConstraint, ImmutableCollection<Collection<DataNode>>> constraintNodeMap =
-                databaseRelation.getNonUniqueFunctionalConstraints().stream()
+        ImmutableMap<FunctionalDependency, ImmutableCollection<Collection<DataNode>>> constraintNodeMap =
+                databaseRelation.getOtherFunctionalDependencies().stream()
                     .collect(ImmutableCollectors.toMap(
                         c -> c,
                         c -> groupDataNodesPerConstraint(c, initialNodes)));
@@ -90,7 +92,7 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
      * @throws AtomUnificationException
      */
     private ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> extractDependentUnifiers(
-            DatabaseRelationDefinition databaseRelation, ImmutableMap<NonUniqueFunctionalConstraint,
+            DatabaseRelationDefinition databaseRelation, ImmutableMap<FunctionalDependency,
             ImmutableCollection<Collection<DataNode>>> constraintNodeMap,
             ImmutableSet<DataNode> nodesToRemove) throws AtomUnificationException {
 
@@ -100,7 +102,7 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> dependentUnifierBuilder = ImmutableList.builder();
-        for (Map.Entry<NonUniqueFunctionalConstraint, ImmutableCollection<Collection<DataNode>>> constraintEntry : constraintNodeMap.entrySet()) {
+        for (Map.Entry<FunctionalDependency, ImmutableCollection<Collection<DataNode>>> constraintEntry : constraintNodeMap.entrySet()) {
             dependentUnifierBuilder.addAll(extractDependentUnifiers(constraintEntry.getKey(), constraintEntry.getValue(),
                     nodesToRemove, nullableIndexes));
         }
@@ -109,7 +111,7 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
     }
 
     private ImmutableCollection<Collection<DataNode>> groupDataNodesPerConstraint(
-            NonUniqueFunctionalConstraint constraint, ImmutableCollection<DataNode> initialNodes) {
+            FunctionalDependency constraint, ImmutableCollection<DataNode> initialNodes) {
 
         ImmutableList<Integer> constraintDeterminantIndexes = constraint.getDeterminants().stream()
                 .map(Attribute::getIndex)
@@ -132,7 +134,7 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
     }
 
     private ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> extractDependentUnifiers(
-            NonUniqueFunctionalConstraint constraint, ImmutableCollection<Collection<DataNode>> dataNodeClusters,
+            FunctionalDependency constraint, ImmutableCollection<Collection<DataNode>> dataNodeClusters,
             ImmutableSet<DataNode> nodesToRemove, ImmutableSet<Integer> nullableIndexes)
             throws AtomUnificationException {
         ImmutableList<Integer> dependentIndexes = constraint.getDependents().stream()
@@ -240,7 +242,7 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
      */
     private ImmutableSet<DataNode> selectNodesToRemove(
 
-            ImmutableSet<Variable> requiredAndCooccuringVariables, ImmutableMap<NonUniqueFunctionalConstraint, ImmutableCollection<Collection<DataNode>>> constraintNodeMap, AtomPredicate predicate) {
+            ImmutableSet<Variable> requiredAndCooccuringVariables, ImmutableMap<FunctionalDependency, ImmutableCollection<Collection<DataNode>>> constraintNodeMap, AtomPredicate predicate) {
 
         if (settings.getCardinalityPreservationMode() != LOOSE) {
             return ImmutableSet.of();
@@ -283,7 +285,7 @@ public class LooseNUFCRedundantSelfJoinExecutor extends RedundantSelfJoinExecuto
     }
 
     private Stream<DataNode> selectNodesToRemovePerConstraint(ImmutableSet<Variable> requiredAndCooccuringVariables,
-                                                              NonUniqueFunctionalConstraint constraint,
+                                                              FunctionalDependency constraint,
                                                               ImmutableCollection<Collection<DataNode>> clusters,
                                                               AtomPredicate predicate) {
         ImmutableList<Integer> determinantIndexes = constraint.getDeterminants().stream()

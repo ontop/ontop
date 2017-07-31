@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +40,7 @@ import java.util.List;
  *
  */
 
-public class UniqueConstraint {
+public class UniqueConstraint implements FunctionalDependency {
 
 	public static final class Builder {
 		private final ImmutableList.Builder<Attribute> builder = new ImmutableList.Builder<>();
@@ -159,6 +161,18 @@ public class UniqueConstraint {
 	
 	public ImmutableList<Attribute> getAttributes() {
 		return attributes;
+	}
+
+	@Override
+	public ImmutableSet<Attribute> getDeterminants() {
+		return ImmutableSet.copyOf(attributes);
+	}
+
+	@Override
+	public ImmutableSet<Attribute> getDependents() {
+		return getRelation().getAttributes().stream()
+				.filter(a -> !attributes.contains(a))
+				.collect(ImmutableCollectors.toSet());
 	}
 	
 	@Override

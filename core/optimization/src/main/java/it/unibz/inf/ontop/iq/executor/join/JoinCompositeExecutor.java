@@ -24,7 +24,7 @@ public class JoinCompositeExecutor
     @Inject
     private JoinCompositeExecutor(JoinBooleanExpressionExecutor expressionExecutor,
                                   UCRedundantSelfJoinExecutor ucSelfJoinExecutor,
-                                  LooseNUFCRedundantSelfJoinExecutor nufcSelfJoinExecutor,
+                                  LooseFDRedundantSelfJoinExecutor nufcSelfJoinExecutor,
                                   RedundantJoinFKExecutor fkExecutor) {
         ImmutableList.Builder<SimpleNodeCentricExecutor<InnerJoinNode, InnerJoinOptimizationProposal>>
                 executorBuilder = ImmutableList.builder();
