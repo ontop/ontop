@@ -32,6 +32,29 @@ public class BasicNativeMappingMistakeTest extends AbstractBasicMappingMistakeTe
         execute("/mistake/missing-target-term.obda");
     }
 
+    /**
+     * Currently, does not complain but fixes the mistake
+     */
+    @Test
+    //@Test(expected = InvalidMappingException.class)
+    public void testFQDNInTargetTerm1() throws OBDASpecificationException {
+        execute("/mistake/fqdn1.obda");
+    }
+
+    /**
+     * Currently, does not complain but fixes the mistake
+     */
+    @Test
+    //@Test(expected = InvalidMappingException.class)
+    public void testFQDNInTargetTerm2() throws OBDASpecificationException {
+        execute("/mistake/fqdn2.obda");
+    }
+
+    @Test(expected = InvalidMappingException.class)
+    public void testFQDNInTargetTerm3() throws OBDASpecificationException {
+        execute("/mistake/fqdn3.obda");
+    }
+
     @Override
     protected OntopMappingSQLAllConfiguration createConfiguration(String obdaFile) {
         return OntopMappingSQLAllConfiguration.defaultBuilder()
