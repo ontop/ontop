@@ -137,6 +137,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 			if (query instanceof TupleQuery) {
 				TupleQueryResult queryResult = ((TupleQuery)query).evaluate();
 				compareResultSize(queryResult, expectedResult);
+				queryResult.close();
 			} else {
 				throw new RuntimeException("Unexpected query type: " + query.getClass());
 			}

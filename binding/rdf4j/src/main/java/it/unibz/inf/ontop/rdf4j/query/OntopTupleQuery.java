@@ -47,7 +47,8 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 		TupleResultSet res;
 
 		long start = System.currentTimeMillis();
-		try (OntopStatement stm = conn.createStatement()){
+		try {
+			OntopStatement stm = conn.createStatement();
 			if(this.queryTimeout > 0)
 				stm.setQueryTimeout(this.queryTimeout);
 			try {
