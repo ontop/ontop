@@ -2,12 +2,14 @@ package it.unibz.inf.ontop.docker;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.answering.reformulation.input.AskQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
@@ -106,27 +108,13 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected boolean runQueryAndReturnBooleanX(String query) throws Exception {
-        OWLStatement st = conn.createStatement();
-        boolean retval;
-        try {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
-            assertTrue(rs.hasNext());
-            final OWLBindingSet bindingSet = rs.next();
-            OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
-            retval = ind1.parseBoolean();
-        } catch (Exception e) {
-            throw e;
+        try (OWLStatement st = conn.createStatement()) {
+            BooleanOWLResultSet rs = st.executeAskQuery(query);
+            return rs.getValue();
         } finally {
-            try {
-
-            } catch (Exception e) {
-                st.close();
-                assertTrue(false);
-            }
             conn.close();
             reasoner.dispose();
         }
-        return retval;
     }
 
     protected void countResults(String query, int expectedCount) throws OWLException {
