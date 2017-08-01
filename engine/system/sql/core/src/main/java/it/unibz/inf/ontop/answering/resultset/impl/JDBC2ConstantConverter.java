@@ -32,6 +32,7 @@ public class JDBC2ConstantConverter {
     // TODO(xiao): isolate the following DB specific code
     private final boolean isMsSQL;
     private final boolean isOracle;
+    private final DateFormat dateFormat;
 
     private final Map<String, String> bnodeMap;
 
@@ -44,7 +45,8 @@ public class JDBC2ConstantConverter {
         symbol.setDecimalSeparator('.');
         formatter.setDecimalFormatSymbols(symbol);
 
-        possibleDateFormats.add(new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSSSSS aa XXX", Locale.ENGLISH)); //For ORACLE driver 12.1.0.2 (TODO: check earlier versions)
+        possibleDateFormats.add(new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa", Locale.ENGLISH)); // For oracle driver v.11 and less
+        possibleDateFormats.add(new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS", Locale.ENGLISH)); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
         possibleDateFormats.add(new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH)); // For MSSQL
         possibleDateFormats.add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)); // ISO with 'T'
         possibleDateFormats.add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)); // ISO without 'T'
@@ -58,130 +60,171 @@ public class JDBC2ConstantConverter {
         String vendor = dbMetadata.getDriverName();
         isOracle = vendor.contains("Oracle");
         isMsSQL = vendor.contains("SQL Server");
+
+        if (isOracle) {
+            String version = dbMetadata.getDriverVersion();
+            int versionInt = Integer.parseInt(version.substring(0, version.indexOf(".")));
+
+            if (versionInt >= 12)
+                dateFormat = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS", Locale.ENGLISH); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+            else
+                dateFormat = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa", Locale.ENGLISH); // For oracle driver v.11 and less
+        } else if (isMsSQL) {
+            dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH);
+        } else
+            dateFormat = null;
+
         this.bnodeCounter = new AtomicInteger();
         bnodeMap = new HashMap<>(1000);
     }
 
     public Constant getConstantFromJDBC(MainTypeLangValues cell) throws OntopResultConversionException {
 
+        Constant result = null;
         Object value = "";
-        String stringValue;
+        String stringValue = "";
 
         try {
             value = cell.getMainValue();
 
             if (value == null) {
                 return null;
-            }
-            stringValue = String.valueOf(value);
+            } else {
+                stringValue = String.valueOf(value);
 
-            int t = cell.getTypeValue();
-            Predicate.COL_TYPE type = Predicate.COL_TYPE.getQuestType(t);
-            if (type == null)
-                throw new OntopResultConversionException("typeCode unknown: " + t);
+                int t = cell.getTypeValue();
+                Predicate.COL_TYPE type = Predicate.COL_TYPE.getQuestType(t);
+                if (type == null)
+                    throw new OntopResultConversionException("typeCode unknown: " + t);
 
-            switch (type) {
-                case NULL:
-                    return null;
+                switch (type) {
+                    case NULL:
+                        result = null;
+                        break;
 
-                case OBJECT:
-                    if (iriDictionary != null) {
-                        try {
-                            Integer id = Integer.parseInt(stringValue);
-                            stringValue = iriDictionary.getURI(id);
-                        } catch (NumberFormatException e) {
-                            // If its not a number, then it has to be a URI, so
-                            // we leave realValue as it is.
+                    case OBJECT:
+                        if (iriDictionary != null) {
+                            try {
+                                Integer id = Integer.parseInt(stringValue);
+                                stringValue = iriDictionary.getURI(id);
+                            } catch (NumberFormatException e) {
+                                // If its not a number, then it has to be a URI, so
+                                // we leave realValue as it is.
+                            }
                         }
-                    }
-                    return TERM_FACTORY.getConstantURI(stringValue.trim());
+                        result = TERM_FACTORY.getConstantURI(stringValue.trim());
+                        break;
 
-                case BNODE:
-                    String scopedLabel = this.bnodeMap.get(stringValue);
-                    if (scopedLabel == null) {
-                        scopedLabel = "b" + bnodeCounter.getAndIncrement();
-                        bnodeMap.put(stringValue, scopedLabel);
-                    }
-                    return TERM_FACTORY.getConstantBNode(scopedLabel);
-
-                /**
-                 * TODO: the language tag should be reserved to LITERAL_LANG
-                 */
-                case LITERAL:
-                case LITERAL_LANG:
-                    // The constant is a literal, we need to find if its
-                    // rdfs:Literal or a normal literal and construct it
-                    // properly.
-                    String language = cell.getLangValue();
-                    if (language == null || language.trim().equals(""))
-                        return TERM_FACTORY.getConstantLiteral(stringValue);
-                    else
-                        return TERM_FACTORY.getConstantLiteral(stringValue, language);
-
-                case BOOLEAN:
-                    // TODO(xiao): more careful
-                    boolean bvalue = Boolean.valueOf(stringValue);
-                    //boolean bvalue = (Boolean)value;
-                    return TERM_FACTORY.getBooleanConstant(bvalue);
-
-                case DOUBLE:
-                    double d = Double.valueOf(stringValue);
-                    String s = formatter.format(d); // format name into correct double representation
-                    return TERM_FACTORY.getConstantLiteral(s, type);
-
-                case INT:
-                    return TERM_FACTORY.getConstantLiteral(stringValue, type);
-
-                case LONG:
-                case UNSIGNED_INT:
-                    return TERM_FACTORY.getConstantLiteral(stringValue, type);
-
-                case INTEGER:
-                case NEGATIVE_INTEGER:
-                case NON_NEGATIVE_INTEGER:
-                case POSITIVE_INTEGER:
-                case NON_POSITIVE_INTEGER:
+                    case BNODE:
+                        String scopedLabel = this.bnodeMap.get(stringValue);
+                        if (scopedLabel == null) {
+                            scopedLabel = "b" + bnodeCounter.getAndIncrement();
+                            bnodeMap.put(stringValue, scopedLabel);
+                        }
+                        result = TERM_FACTORY.getConstantBNode(scopedLabel);
+                        break;
                     /**
-                     * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
+                     * TODO: the language tag should be reserved to LITERAL_LANG
                      */
-                    int dotIndex = stringValue.indexOf(".");
-                    String integerString = dotIndex >= 0
-                            ? stringValue.substring(0, dotIndex)
-                            : stringValue;
-                    return TERM_FACTORY.getConstantLiteral(integerString, type);
+                    case LITERAL:
+                    case LITERAL_LANG:
+                        // The constant is a literal, we need to find if its
+                        // rdfs:Literal or a normal literal and construct it
+                        // properly.
+                        String language = cell.getLangValue();
+                        if (language == null || language.trim().equals(""))
+                            result = TERM_FACTORY.getConstantLiteral(stringValue);
+                        else
+                            result = TERM_FACTORY.getConstantLiteral(stringValue, language);
+                        break;
 
-                case DATETIME:
-                    return TERM_FACTORY.getConstantLiteral(
-                            convertDatetimeString(value),
-                            Predicate.COL_TYPE.DATETIME
-                    );
+                    case BOOLEAN:
+                        // TODO(xiao): more careful
+                        boolean bvalue = Boolean.valueOf(stringValue);
+                        //boolean bvalue = (Boolean)value;
+                        result = TERM_FACTORY.getBooleanConstant(bvalue);
+                        break;
 
-                case DATETIME_STAMP:
-                    stringValue = isOracle?
-                            convertDatetimeString(stringValue):
-                            stringValue;
-                return TERM_FACTORY.getConstantLiteral(
-                        stringValue.replaceFirst(" ", "T").replaceAll(" ", ""),
-                        Predicate.COL_TYPE.DATETIME_STAMP
-                );
+                    case DOUBLE:
+                        double d = Double.valueOf(stringValue);
+                        String s = formatter.format(d); // format name into correct double representation
+                        result = TERM_FACTORY.getConstantLiteral(s, type);
+                        break;
 
-                case DATE:
-                    if(isOracle) {
-                        try {
-                            DateFormat df = new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH);
-                            java.util.Date date = df.parse(stringValue);
-                            stringValue = date.toString();
-                        } catch (ParseException e) {
-                            throw new OntopResultConversionException(e);
+                    case INT:
+                        //int intValue = (Integer)value;
+                        result = TERM_FACTORY.getConstantLiteral(stringValue, type);
+                        break;
+
+                    case LONG:
+                    case UNSIGNED_INT:
+                        //long longValue = (Long)value;
+                        result = TERM_FACTORY.getConstantLiteral(stringValue, type);
+                        break;
+
+                    case INTEGER:
+                    case NEGATIVE_INTEGER:
+                    case NON_NEGATIVE_INTEGER:
+                    case POSITIVE_INTEGER:
+                    case NON_POSITIVE_INTEGER:
+                        /**
+                         * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
+                         */
+                        int dotIndex = stringValue.indexOf(".");
+                        String integerString = dotIndex >= 0
+                                ? stringValue.substring(0, dotIndex)
+                                : stringValue;
+                        result = TERM_FACTORY.getConstantLiteral(integerString, type);
+                        break;
+
+                    case DATETIME:
+                        result = convertDatetimeConstant(value);
+                        break;
+
+                    case DATETIME_STAMP:
+                        if (!isOracle) {
+                            result = TERM_FACTORY.getConstantLiteral(stringValue.replaceFirst(" ", "T").replaceAll(" ", ""), Predicate.COL_TYPE.DATETIME_STAMP);
+                        } else {
+                        /* oracle has the type timestamptz. The format returned by getString is not a valid xml format
+                        we need to transform it. We first take the information about the timezone value, that is lost
+						during the conversion in java.util.Date and then we proceed with the conversion. */
+                            try {
+                                int indexTimezone = stringValue.lastIndexOf(" ");
+                                String timezone = stringValue.substring(indexTimezone + 1);
+                                String datetime = stringValue.substring(0, indexTimezone);
+
+                                java.util.Date date = dateFormat.parse(datetime);
+                                Timestamp ts = new Timestamp(date.getTime());
+                                result = TERM_FACTORY.getConstantLiteral(ts.toString().replaceFirst(" ", "T").replaceAll(" ", "") + timezone, Predicate.COL_TYPE.DATETIME_STAMP);
+                            } catch (ParseException pe) {
+                                throw new OntopResultConversionException(pe);
+                            }
                         }
-                    }
-                    return TERM_FACTORY.getConstantLiteral(stringValue, Predicate.COL_TYPE.DATE);
+                        break;
 
-                case TIME:
-                    return TERM_FACTORY.getConstantLiteral(stringValue.replace(' ', 'T'), Predicate.COL_TYPE.TIME);
+                    case DATE:
+                        if (!isOracle) {
+                            //Date dvalue = (Date)value;
+                            result = TERM_FACTORY.getConstantLiteral(stringValue, Predicate.COL_TYPE.DATE);
+                        } else {
+                            try {
+                                DateFormat df = new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH);
+                                java.util.Date date = df.parse(stringValue);
+                            } catch (ParseException e) {
+                                throw new OntopResultConversionException(e);
+                            }
+                            result = TERM_FACTORY.getConstantLiteral(value.toString(), Predicate.COL_TYPE.DATE);
+                        }
+                        break;
 
-                default:
-                    return TERM_FACTORY.getConstantLiteral(stringValue, type);
+                    case TIME:
+                        //Time tvalue = (Time)value;
+                        result = TERM_FACTORY.getConstantLiteral(stringValue.replace(' ', 'T'), Predicate.COL_TYPE.TIME);
+                        break;
+
+                    default:
+                        result = TERM_FACTORY.getConstantLiteral(stringValue, type);
+                }
             }
         } catch (IllegalArgumentException e) {
             Throwable cause = e.getCause();
@@ -205,9 +248,11 @@ public class JDBC2ConstantConverter {
         } catch (Exception e) {
             throw new OntopResultConversionException(e);
         }
+
+        return result;
     }
 
-    private String convertDatetimeString(Object value) throws OntopResultConversionException {
+    private Constant convertDatetimeConstant(Object value) throws OntopResultConversionException {
         java.util.Date dateValue = null;
 
         if (value instanceof java.util.Date) {
@@ -230,6 +275,8 @@ public class JDBC2ConstantConverter {
             }
         }
         final Timestamp ts = new Timestamp(dateValue.getTime());
-        return ts.toString().replace(' ', 'T');
+        final String dateTimeLexicalValue = ts.toString().replace(' ', 'T');
+
+        return TERM_FACTORY.getConstantLiteral(dateTimeLexicalValue, Predicate.COL_TYPE.DATETIME);
     }
 }
