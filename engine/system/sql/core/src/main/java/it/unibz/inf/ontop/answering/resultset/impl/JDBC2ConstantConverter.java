@@ -130,14 +130,13 @@ public class JDBC2ConstantConverter {
                     return TERM_FACTORY.getConstantLiteral(s, type);
 
                 case INT:
-                    //int intValue = (Integer)value;
                     return TERM_FACTORY.getConstantLiteral(stringValue, type);
 
                 case LONG:
                 case UNSIGNED_INT:
-                    //long longValue = (Long)value;
                     return TERM_FACTORY.getConstantLiteral(stringValue, type);
 
+                case INTEGER:
                 case NEGATIVE_INTEGER:
                 case NON_NEGATIVE_INTEGER:
                 case POSITIVE_INTEGER:
