@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
@@ -13,53 +15,84 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.DEFAULT;
+import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.MSSQL;
+import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.ORACLE;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 public class JDBC2ConstantConverter {
 
-    private AtomicInteger bnodeCounter;
-    private IRIDictionary iriDictionary;
-
-    // TODO(xiao): isolate the following DB specific code
-    private final boolean isMsSQL;
-    private final boolean isOracle;
-
-    private final Map<String, String> bnodeMap;
+    enum System {ORACLE, MSSQL, DEFAULT}
 
     private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
-    private static List<DateFormat> possibleDateFormats = new ArrayList<>();
+    private static ImmutableMap<System, ImmutableList<DateFormat>> system2DateFormats = buildDateFormatMap();
+
+    private AtomicInteger bnodeCounter;
+    private IRIDictionary iriDictionary;
+
+    private final Map<String, String> bnodeMap;
+
+    private final System system;
 
     static {
         DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
         symbol.setDecimalSeparator('.');
         formatter.setDecimalFormatSymbols(symbol);
-
-        possibleDateFormats.add(new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSSSSS aa XXX", Locale.ENGLISH)); //For ORACLE driver 12.1.0.2 (TODO: check earlier versions)
-        possibleDateFormats.add(new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH)); // For MSSQL
-        possibleDateFormats.add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)); // ISO with 'T'
-        possibleDateFormats.add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)); // ISO without 'T'
-        possibleDateFormats.add(new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)); // ISO without time
-        possibleDateFormats.add(new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH)); // another common case
+        system2DateFormats = buildDateFormatMap();
     }
 
-    public JDBC2ConstantConverter(DBMetadata dbMetadata,
-                                  Optional<IRIDictionary> iriDictionary) {
+
+    private static ImmutableMap<System,ImmutableList<DateFormat>> buildDateFormatMap() {
+        return ImmutableMap.of(
+
+                DEFAULT, ImmutableList.<DateFormat>builder()
+                        .add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)) // ISO with 'T'
+                        .add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)) // ISO without 'T'
+                        .add(new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)) // ISO without time
+                        .add(new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH)) // another common case
+                        .build(),
+                ORACLE, ImmutableList.<DateFormat>builder()
+                        //For ORACLE driver 12.1.0.2 (TODO: check earlier versions)
+                        .add(new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSSSSS aa XXX", Locale.ENGLISH))
+                        //TODO: check whether the following formats are necessary
+                        .add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH))
+                        .add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH))
+                        .add(new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH))
+                        .add(new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH))
+                        .build(),
+                MSSQL, ImmutableList.<DateFormat>builder()
+                        .add(new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH))
+                        //TODO: check whether the following formats are necessary
+                        .add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH))
+                        .add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH))
+                        .add(new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH))
+                        .add(new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH))
+                        .build()
+        );
+    }
+
+    public JDBC2ConstantConverter(DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) {
         this.iriDictionary = iriDictionary.orElse(null);
         String vendor = dbMetadata.getDriverName();
-        isOracle = vendor.contains("Oracle");
-        isMsSQL = vendor.contains("SQL Server");
+        system = identifySystem(vendor);
         this.bnodeCounter = new AtomicInteger();
         bnodeMap = new HashMap<>(1000);
+    }
+
+    private System identifySystem(String vendor) {
+        if(vendor.contains("Oracle"))
+            return ORACLE;
+        if(vendor.contains("MSSQL"))
+            return MSSQL;
+        return DEFAULT;
     }
 
     public Constant getConstantFromJDBC(MainTypeLangValues cell) throws OntopResultConversionException {
@@ -157,7 +190,7 @@ public class JDBC2ConstantConverter {
                     );
 
                 case DATETIME_STAMP:
-                    stringValue = isOracle?
+                    stringValue = system.equals(ORACLE)?
                             convertDatetimeString(stringValue):
                             stringValue;
                 return TERM_FACTORY.getConstantLiteral(
@@ -166,7 +199,7 @@ public class JDBC2ConstantConverter {
                 );
 
                 case DATE:
-                    if(isOracle) {
+                    if(system.equals(ORACLE)) {
                         try {
                             DateFormat df = new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH);
                             java.util.Date date = df.parse(stringValue);
@@ -216,7 +249,7 @@ public class JDBC2ConstantConverter {
         } else {
             // Otherwise, we need to deal with possible String representation of datetime
             String stringValue = String.valueOf(value);
-            for (DateFormat format : possibleDateFormats) {
+            for (DateFormat format : system2DateFormats.get(system)) {
                 try {
                     dateValue = format.parse(stringValue);
                     break;
