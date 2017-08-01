@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.docker.failing.mysql;
+package it.unibz.inf.ontop.docker.mysql;
 
 /*
  * #%L
@@ -31,12 +31,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.file.Paths;
 
 public class RDF4JMaterializerExample {
 
 	private static final String inputFile = "/mysql/example/exampleBooks.obda";
 	private static final String PROPERTY_FILE = "/mysql/example/exampleBooks.properties";
-	private static final String outputFile = "src/test/resources/mysql/example/exampleBooks.n3";
+	private static final String OUTPUT_BASENAME = "exampleBooks.n3";
 
 	/**
 	 * TODO: try with result streaming
@@ -46,10 +47,11 @@ public class RDF4JMaterializerExample {
 	public void generateTriples() throws Exception {
 
 		Class<? extends RDF4JMaterializerExample> klass = getClass();
+		File propertyFile = new File(klass.getResource(PROPERTY_FILE).getPath());
 
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(klass.getResource(inputFile).getPath())
-				.propertyFile(klass.getResource(PROPERTY_FILE).getPath())
+				.propertyFile(propertyFile)
 				.enableTestMode()
 				.build();
 
@@ -63,7 +65,7 @@ public class RDF4JMaterializerExample {
 		/*
 		 * Print the triples into an external file.
 		 */
-		File fout = new File(outputFile);
+		File fout = Paths.get(propertyFile.getParent(), OUTPUT_BASENAME).toFile();
 		if (fout.exists()) {
 			fout.delete(); // clean any existing output file.
 		}
@@ -72,7 +74,6 @@ public class RDF4JMaterializerExample {
 		try {
 		    out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fout, true)));
 		    RDFWriter writer = new N3Writer(out);
-		    writer.startRDF();
 			graphQuery.evaluate(writer);
 
 			long numberOfTriples = graphQuery.getTripleCountSoFar();
