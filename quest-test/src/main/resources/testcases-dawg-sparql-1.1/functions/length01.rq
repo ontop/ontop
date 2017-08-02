@@ -1,4 +1,0 @@
-PREFIX : <http://example.org/>
-SELECT ?str (STRLEN(?str) AS ?len) WHERE {
-	?s :str ?str
-}

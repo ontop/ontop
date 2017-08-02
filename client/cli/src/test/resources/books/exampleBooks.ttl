@@ -1,0 +1,285 @@
+<http://example.org/cl_AudioBook>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "select \"bk_code\", \"bk_title\" from \"tb_books\" where \"bk_type\"='A'"
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#SubjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                  <http://www.w3.org/ns/r2rml#class>
+                          <http://meraka/moss/exampleBooks.owl#AudioBook> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "http://meraka/moss/exampleBooks.owl#book/{bk_code}/" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#IRI>
+                ] .
+
+<http://example.org/dp_genre>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "select \"id_bk\", \"gen_name\" from \"tb_bk_gen\""
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "gen_name" ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#string> ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://meraka/moss/exampleBooks.owl#genre>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#SubjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "http://meraka/moss/exampleBooks.owl#book/{id_bk}/" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#IRI>
+                ] .
+
+<http://example.org/cl_Books_1>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "select \"bk_code\", \"bk_title\" from \"tb_books\""
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "bk_title" ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#string> ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://meraka/moss/exampleBooks.owl#title>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#SubjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                  <http://www.w3.org/ns/r2rml#class>
+                          <http://meraka/moss/exampleBooks.owl#Book> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "http://meraka/moss/exampleBooks.owl#book/{bk_code}/" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#IRI>
+                ] .
+
+<http://example.org/op_hasEdition>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "select \"ed_code\", \"bk_id\" from \"tb_edition\""
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#template>
+                                    "http://meraka/moss/exampleBooks.owl#edition/{ed_code}/" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#IRI>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://meraka/moss/exampleBooks.owl#hasEdition>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#SubjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "http://meraka/moss/exampleBooks.owl#book/{bk_id}/" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#IRI>
+                ] .
+
+<http://example.org/cl_Authors_1>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "select \"wr_code\", \"wr_name\" from \"tb_affiliated_writers\""
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "wr_name" ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#string> ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://meraka/moss/exampleBooks.owl#name>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#SubjectMap> ;
+                  <http://www.w3.org/ns/r2rml#class>
+                          <http://meraka/moss/exampleBooks.owl#Author> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "http://meraka/moss/exampleBooks.owl#author/{wr_code}/" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#IRI>
+                ] .
+
+<http://example.org/cl_EmergingWriter_1>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "select \"wr_code\", \"wr_name\" from \"tb_on_prob_wr\""
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "wr_name" ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#string> ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://meraka/moss/exampleBooks.owl#name>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#SubjectMap> ;
+                  <http://www.w3.org/ns/r2rml#class>
+                          <http://meraka/moss/exampleBooks.owl#EmergingWriter> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "http://meraka/moss/exampleBooks.owl#author/{wr_code}/" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#IRI>
+                ] .
+
+<http://example.org/cl_SpecialEdition>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "select \"ed_code\", \"pub_date\", \"n_edt\" from \"tb_edition\" where \"ed_type\"='S'"
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#SubjectMap> ;
+                  <http://www.w3.org/ns/r2rml#class>
+                          <http://meraka/moss/exampleBooks.owl#SpecialEdition> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "http://meraka/moss/exampleBooks.owl#edition/{ed_code}/" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#IRI>
+                ] .
+
+<http://example.org/cl_Editions_1>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "select \"ed_code\", \"pub_date\", \"n_edt\" from \"tb_edition\""
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "n_edt" ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#integer> ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://meraka/moss/exampleBooks.owl#editionNumber>
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "pub_date" ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#dateTime> ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://meraka/moss/exampleBooks.owl#dateOfPublication>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#SubjectMap> ;
+                  <http://www.w3.org/ns/r2rml#class>
+                          <http://meraka/moss/exampleBooks.owl#Edition> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "http://meraka/moss/exampleBooks.owl#edition/{ed_code}/" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#IRI>
+                ] .
+
+<http://example.org/cl_Editors_1>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "select \"ed_code\", \"ed_name\" from \"tb_editor\""
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "ed_name" ;
+                            <http://www.w3.org/ns/r2rml#datatype>
+                                    <http://www.w3.org/2001/XMLSchema#string> ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://meraka/moss/exampleBooks.owl#name>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#SubjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                  <http://www.w3.org/ns/r2rml#class>
+                          <http://meraka/moss/exampleBooks.owl#Editor> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "http://meraka/moss/exampleBooks.owl#editor/{ed_code}/" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#IRI>
+                ] .
+
+<http://example.org/op_writtenBy>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "select \"bk_code\", \"wr_id\" from \"tb_authors\""
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#template>
+                                    "http://meraka/moss/exampleBooks.owl#author/{wr_id}/" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#IRI>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://meraka/moss/exampleBooks.owl#writtenBy>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#SubjectMap> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "http://meraka/moss/exampleBooks.owl#book/{bk_code}/" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#IRI>
+                ] .

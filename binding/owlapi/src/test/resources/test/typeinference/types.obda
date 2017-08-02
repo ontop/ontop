@@ -1,0 +1,23 @@
+[PrefixDeclaration]
+:		http://example.org/types/voc#
+
+
+[MappingDeclaration] @collection [[
+
+mappingId	Companies in Belgium
+target		:company/{id} a :European_Company ; :hasCompanyLocation :Belgium .
+source		select "id"  from "company_name" where "country_code" = '[be]'
+
+mappingId	Companies in Philippines
+target		:company/{id} a :Asian_Company ; :hasCompanyLocation :Philippines .
+source		select "id" from "company_name" where "country_code" = '[ph]'
+
+mappingId	Companies in Italy
+target		:company/{id} a :European_Company ; :hasCompanyLocation :Italy .
+source		select "id"  from "company_name" where "country_code" = '[it]'
+
+mappingId	Companies in China
+target		:company/{id} a :Asian_Company ; :hasCompanyLocation :China .
+source		select "id" from "company_name" where "country_code" = '[cn]'
+]]
+
