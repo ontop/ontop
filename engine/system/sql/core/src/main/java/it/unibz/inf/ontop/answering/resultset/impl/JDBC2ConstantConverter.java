@@ -90,7 +90,7 @@ public class JDBC2ConstantConverter {
     private System identifySystem(String vendor) {
         if(vendor.contains("Oracle"))
             return ORACLE;
-        if(vendor.contains("MSSQL"))
+        if(vendor.contains("SQL Server"))
             return MSSQL;
         return DEFAULT;
     }
