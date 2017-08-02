@@ -21,13 +21,15 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
+import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.utils.querymanager.QueryController;
 import it.unibz.inf.ontop.utils.OBDAPreferenceChangeListener;
+import it.unibz.inf.ontop.utils.querymanager.QueryController;
+import org.semanticweb.owlapi.model.OWLException;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -55,6 +57,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	private DefaultStyledDocument styledDocument;
 	
 	private OBDADataQueryAction<TupleOWLResultSet> executeSelectAction;
+	private OBDADataQueryAction<BooleanOWLResultSet> executeAskAction;
 	private OBDADataQueryAction<?> executeGraphQueryAction;
 	private OBDADataQueryAction<?> executeEQLAction;
 	private OBDADataQueryAction<String> retrieveUCQExpansionAction;
@@ -337,8 +340,10 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
                 OBDADataQueryAction<?> action = null;
 				if (query.isEmpty()){
 					JOptionPane.showMessageDialog(QueryInterfacePanel.this, "Query editor cannot be empty.");
-				} else if (query.isSelectQuery() || query.isAskQuery()) {
-                    action = QueryInterfacePanel.this.getExecuteSelectAction();
+				} else if (query.isSelectQuery() ) {
+					action = QueryInterfacePanel.this.getExecuteSelectAction();
+				} else if (query.isAskQuery()){
+					action = QueryInterfacePanel.this.getExecuteAskAction();
                 } else if ( (query.isConstructQuery() || query.isDescribeQuery()) ){
                     action = QueryInterfacePanel.this.getExecuteGraphQueryAction();
                 } else {
@@ -349,14 +354,19 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 					execTime = action.getExecutionTime();
 					do {
 						int rows = action.getNumberOfRows();
-						updateStatus(rows);
+						if(rows > -1) {
+							updateStatus(rows);
+						}
 						try {
 							Thread.sleep(100);
 						} catch (InterruptedException e) {
 							break;
 						}
 					} while (action.isRunning());
-					updateStatus(action.getNumberOfRows());
+					int rows = action.getNumberOfRows();
+					if(rows > -1) {
+						updateStatus(rows);
+					}
 				}
             });
 			queryRunnerThread.start();
@@ -409,6 +419,14 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		return executeSelectAction;
 	}
 
+	public void setExecuteAskAction(OBDADataQueryAction<BooleanOWLResultSet> executeUCQAction) {
+		this.executeAskAction = executeUCQAction;
+	}
+
+	public OBDADataQueryAction<?> getExecuteAskAction() {
+		return executeAskAction;
+	}
+
 	public void setExecuteGraphQueryAction(OBDADataQueryAction<?> action) {
 		this.executeGraphQueryAction = action;
 	}
@@ -457,7 +475,8 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			this.s = s;
 		}
 		public void run(){
-			lblExecutionInfo.setText(s);	
+			lblExecutionInfo.setText(s);
+			lblExecutionInfo.setBackground(null);
 		}
 	}
 	
@@ -466,6 +485,50 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		String s = String.format("Execution time: %s sec - Number of rows retrieved: %,d ", time, result);
 		Runnable time_setter = new ExecTimeSetter(s);
 		SwingUtilities.invokeLater(time_setter);
+	}
+
+	private class AskQueryInfo implements Runnable{
+		String title;
+		BooleanOWLResultSet result;
+
+		OBDADataQueryAction<?> action;
+
+		AskQueryInfo(String title, BooleanOWLResultSet result){
+			this.title = title;
+			this.result = result;
+		}
+		@Override
+		public void run()
+		{
+			String answer;
+			try {
+				if(result.getValue()){
+                    answer = "true";
+                    lblExecutionInfo.setBackground(Color.GREEN);
+
+                }
+                else{
+                    answer = "false";
+                    lblExecutionInfo.setBackground(Color.RED);
+                }
+
+				lblExecutionInfo.setText(title+ " "+ answer);
+
+			} catch (OWLException e) {
+				JOptionPane.showMessageDialog(
+						QueryInterfacePanel.this,
+						e);
+			}
+
+		}
+
+	}
+
+	public  void showBooleanActionResultInTextInfo(String title, BooleanOWLResultSet result) throws OWLException {
+
+
+		AskQueryInfo alter_result_panel = new AskQueryInfo(title, result);
+		SwingUtilities.invokeLater(alter_result_panel);
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

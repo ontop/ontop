@@ -20,13 +20,12 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.owlapi.resultset.utils.OWLResultSetWriter;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
+import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import it.unibz.inf.ontop.owlapi.resultset.utils.OWLResultSetWriter;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.gui.OWLResultSetTableModel;
@@ -38,6 +37,8 @@ import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import it.unibz.inf.ontop.protege.utils.TextMessageFrame;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
@@ -142,6 +143,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public int getNumberOfRows() {
 				return -1;
 			}
+
+			@Override
+			public void run(String query){
+				removeResultTable();
+				super.run(query);
+			}
+
 			@Override
 			public void handleResult(Long result){
 				updateTablePanelStatus(result);	
@@ -197,6 +205,42 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		});
 
+
+		queryEditorPanel.setExecuteAskAction(new OBDADataQueryAction<BooleanOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
+
+			@Override
+			public OWLEditorKit getEditorKit(){
+				return getOWLEditorKit();
+			}
+
+			@Override
+			public void handleResult(BooleanOWLResultSet result) throws OWLException{
+
+				queryEditorPanel.showBooleanActionResultInTextInfo("Ask Result:", result);
+			}
+
+			@Override
+			public void run(String query){
+				removeResultTable();
+				super.run(query);
+			}
+
+			@Override
+			public int getNumberOfRows() {
+				return -1;
+			}
+			@Override
+			public boolean isRunning() {
+				return false;
+			}
+			@Override
+			public BooleanOWLResultSet executeQuery(OntopOWLStatement st,
+												  String queryString) throws OWLException {
+				return st.executeAskQuery(queryString);
+			}
+
+		});
+
 		queryEditorPanel.setExecuteGraphQueryAction(
                 new OBDADataQueryAction<GraphOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
 			
@@ -211,6 +255,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 
 			@Override
+			public void run(String query) {
+				removeResultTable();
+				super.run(query);
+			}
+
+			@Override
 			public void handleResult(GraphOWLResultSet result) throws OWLException{
 				OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
 				populateResultUsingVisitor(result, owlVisitor);
@@ -219,10 +269,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 			@Override
 			public int getNumberOfRows() {
-				OWLResultSetTableModel tm = getTableModel();
-				if (tm == null)
-					return 0;
-				return getTableModel().getRowCount();
+				return -1;
 			}
 
             @Override
@@ -245,6 +292,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public OWLEditorKit getEditorKit(){
 				return getOWLEditorKit();
+			}
+
+			@Override
+			public void run(String query){
+				removeResultTable();
+				super.run(query);
 			}
 
 			@Override
@@ -271,6 +324,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public OWLEditorKit getEditorKit(){
 				return getOWLEditorKit();
+			}
+
+			@Override
+			public void run(String query){
+				removeResultTable();
+				super.run(query);
 			}
 
 			@Override
@@ -542,6 +601,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			return this.errorShown;
 		}
 	}
+
 
 	@Override
 	public void activeOntologyChanged() {
