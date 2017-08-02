@@ -134,6 +134,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		setupListeners();
 		
 		// Setting up actions for all the buttons of this view.
+
+		//count the tuples in the result table for SELECT queries
 		resultTablePanel.setCountAllTuplesActionForUCQ(new OBDADataQueryAction<Long>("Counting tuples...", QueryInterfaceView.this) {
 			@Override
 			public OWLEditorKit getEditorKit(){
@@ -142,12 +144,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public int getNumberOfRows() {
 				return -1;
-			}
-
-			@Override
-			public void run(String query){
-				removeResultTable();
-				super.run(query);
 			}
 
 			@Override
@@ -167,6 +163,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 		});
 
+		//action clicking on execute button with a select query
 		queryEditorPanel.setExecuteSelectAction(new OBDADataQueryAction<TupleOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
 			
 			@Override
@@ -206,6 +203,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		});
 
 
+		//action clicking on execute button with an ask query
 		queryEditorPanel.setExecuteAskAction(new OBDADataQueryAction<BooleanOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
 
 			@Override
@@ -216,13 +214,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public void handleResult(BooleanOWLResultSet result) throws OWLException{
 
-				queryEditorPanel.showBooleanActionResultInTextInfo("Ask Result:", result);
-			}
-
-			@Override
-			public void run(String query){
-				removeResultTable();
-				super.run(query);
+				queryEditorPanel.showBooleanActionResultInTextInfo("Result:", result);
 			}
 
 			@Override
@@ -231,16 +223,19 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 			@Override
 			public boolean isRunning() {
-				return false;
+				OWLResultSetTableModel tm = getTableModel();
+				return tm != null && tm.isFetching();
 			}
 			@Override
 			public BooleanOWLResultSet executeQuery(OntopOWLStatement st,
 												  String queryString) throws OWLException {
+				removeResultTable();
 				return st.executeAskQuery(queryString);
 			}
 
 		});
 
+		//action clicking on execute button with an graph query (describe or construct)
 		queryEditorPanel.setExecuteGraphQueryAction(
                 new OBDADataQueryAction<GraphOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
 			
@@ -251,13 +246,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 			@Override
 			public GraphOWLResultSet executeQuery(OntopOWLStatement st, String queryString) throws OWLException {
-				return st.executeGraphQuery(queryString);
-			}
-
-			@Override
-			public void run(String query) {
 				removeResultTable();
-				super.run(query);
+				return st.executeGraphQuery(queryString);
 			}
 
 			@Override
@@ -269,7 +259,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 			@Override
 			public int getNumberOfRows() {
-				return -1;
+				return 0;
 			}
 
             @Override
@@ -281,23 +271,18 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		});
 
-		
+		//action after right click on the query for UCQ expansion
 		queryEditorPanel.setRetrieveUCQExpansionAction(new OBDADataQueryAction<String>("Rewriting query...", QueryInterfaceView.this) {
 
 			@Override
 			public String executeQuery(OntopOWLStatement st, String query) throws OWLException {
+				removeResultTable();
 				return st.getRewritingRendering(query);
 			}
 
 			@Override
 			public OWLEditorKit getEditorKit(){
 				return getOWLEditorKit();
-			}
-
-			@Override
-			public void run(String query){
-				removeResultTable();
-				super.run(query);
 			}
 
 			@Override
@@ -314,9 +299,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 		});
 
+		//action after right click on the query for UCQ Unfolding
 		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction<String>("Unfolding queries...", QueryInterfaceView.this) {
 			@Override
 			public String executeQuery(OntopOWLStatement st, String query) throws OWLException{
+				removeResultTable();
 				// UGLY!!! SQL-specific!
 				return ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
 			}
@@ -324,12 +311,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public OWLEditorKit getEditorKit(){
 				return getOWLEditorKit();
-			}
-
-			@Override
-			public void run(String query){
-				removeResultTable();
-				super.run(query);
 			}
 
 			@Override
@@ -346,6 +327,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 		});
 
+		//action to save the query on a file
 		resultTablePanel.setOBDASaveQueryToFileAction(fileLocation -> {
             OBDAProgressMonitor monitor = null;
             try {
@@ -369,7 +351,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		log.debug("Query Manager view initialized");
 	}
 
-	
+
+
 	private class UCQExpansionPanel implements Runnable{
 		String title;
 		String result;
@@ -425,6 +408,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		TableModelSetter(OWLResultSetTableModel currentTableModel){
 			this.currentTableModel = currentTableModel;
 		}
+
 		@Override
         public void run(){
 				resultTablePanel.setTableModel(currentTableModel);
@@ -463,6 +447,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		if (tm != null){
 			tm.close();
 		}
+		resultTablePanel.setTableModel(new DefaultTableModel());
 	}
 
 	private OWLResultSetTableModel getTableModel() {
