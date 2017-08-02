@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.mapping.SQLMappingParser;
+import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import junit.framework.TestCase;
 
 import java.io.File;
