@@ -29,7 +29,7 @@ public class TemporalMappingParserTest extends TestCase {
                 .build();
 
         Injector injector = configuration.getInjector();
-        tmParser = injector.getInstance(SQLMappingParser.class);
+        //tmParser = injector.getInstance(SQLMappingParser.class);
         try {
             tmParser.parse(new File("src/test/resources/siemens.tobda"));
         } catch (InvalidMappingException e) {
