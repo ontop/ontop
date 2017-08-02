@@ -58,6 +58,7 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
     /**
      * Create an SQL Temporal Mapping Parser for generating an OBDA model.
      */
+    @Inject
     public OntopNativeTemporalMappingParser(NativeQueryLanguageComponentFactory nativeQLFactory,
                                      SpecificationFactory specificationFactory,
                                      SQLPPMappingFactory ppMappingFactory) {

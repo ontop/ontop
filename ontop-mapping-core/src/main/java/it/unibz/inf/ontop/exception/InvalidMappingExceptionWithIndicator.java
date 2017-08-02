@@ -43,6 +43,7 @@ public class InvalidMappingExceptionWithIndicator extends InvalidMappingExceptio
     public static final int SOURCE_QUERY_IS_BLANK = 3;
     public static final int UNKNOWN_PREDICATE_IN_TARGET_QUERY = 4;
     public static final int ERROR_PARSING_TARGET_QUERY = 5;
+    public static final int INTERVAL_QUERY_IS_BLANK = 6;
     
     public InvalidMappingExceptionWithIndicator(List<Indicator> indicators) {
         super(buildMessage(indicators));
@@ -94,6 +95,8 @@ public class InvalidMappingExceptionWithIndicator extends InvalidMappingExceptio
                     }
                     String targetString = hints2[1];
                     sb.append(String.format("Line %d: Cannot parse query: '%s'\n\n", lineNumber, targetString));
+                    break;
+                case INTERVAL_QUERY_IS_BLANK:
                     break;
                 }
             }
