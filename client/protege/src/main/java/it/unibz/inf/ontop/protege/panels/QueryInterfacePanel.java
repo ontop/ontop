@@ -21,13 +21,15 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
+import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.utils.querymanager.QueryController;
 import it.unibz.inf.ontop.utils.OBDAPreferenceChangeListener;
+import it.unibz.inf.ontop.utils.querymanager.QueryController;
+import org.semanticweb.owlapi.model.OWLException;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -55,6 +57,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	private DefaultStyledDocument styledDocument;
 	
 	private OBDADataQueryAction<TupleOWLResultSet> executeSelectAction;
+	private OBDADataQueryAction<BooleanOWLResultSet> executeAskAction;
 	private OBDADataQueryAction<?> executeGraphQueryAction;
 	private OBDADataQueryAction<?> executeEQLAction;
 	private OBDADataQueryAction<String> retrieveUCQExpansionAction;
@@ -337,8 +340,10 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
                 OBDADataQueryAction<?> action = null;
 				if (query.isEmpty()){
 					JOptionPane.showMessageDialog(QueryInterfacePanel.this, "Query editor cannot be empty.");
-				} else if (query.isSelectQuery() || query.isAskQuery()) {
-                    action = QueryInterfacePanel.this.getExecuteSelectAction();
+				} else if (query.isSelectQuery() ) {
+					action = QueryInterfacePanel.this.getExecuteSelectAction();
+				} else if (query.isAskQuery()){
+					action = QueryInterfacePanel.this.getExecuteAskAction();
                 } else if ( (query.isConstructQuery() || query.isDescribeQuery()) ){
                     action = QueryInterfacePanel.this.getExecuteGraphQueryAction();
                 } else {
@@ -356,7 +361,9 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 							break;
 						}
 					} while (action.isRunning());
-					updateStatus(action.getNumberOfRows());
+					int rows = action.getNumberOfRows();
+						updateStatus(rows);
+
 				}
             });
 			queryRunnerThread.start();
@@ -409,6 +416,14 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		return executeSelectAction;
 	}
 
+	public void setExecuteAskAction(OBDADataQueryAction<BooleanOWLResultSet> executeUCQAction) {
+		this.executeAskAction = executeUCQAction;
+	}
+
+	public OBDADataQueryAction<?> getExecuteAskAction() {
+		return executeAskAction;
+	}
+
 	public void setExecuteGraphQueryAction(OBDADataQueryAction<?> action) {
 		this.executeGraphQueryAction = action;
 	}
@@ -417,14 +432,6 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		return this.executeGraphQueryAction;
 	}
 
-	
-	public void setExecuteEQLAction(OBDADataQueryAction<?> executeEQLAction) {
-		this.executeEQLAction = executeEQLAction;
-	}
-
-	public OBDADataQueryAction<?> getExecuteEQLAction() {
-		return executeEQLAction;
-	}
 
 	public void setRetrieveUCQExpansionAction(OBDADataQueryAction<String> retrieveUCQExpansionAction) {
 		this.retrieveUCQExpansionAction = retrieveUCQExpansionAction;
@@ -442,13 +449,9 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		return retrieveUCQUnfoldingAction;
 	}
 
-	public void setRetrieveEQLUnfoldingAction(OBDADataQueryAction<?> retrieveEQLUnfoldingAction) {
-		this.retrieveEQLUnfoldingAction = retrieveEQLUnfoldingAction;
-	}
 
-	public OBDADataQueryAction<?> getRetrieveEQLUnfoldingAction() {
-		return retrieveEQLUnfoldingAction;
-	}
+
+	//set the information about the time and the number of results
 
 	private class ExecTimeSetter implements Runnable {
 		String s;
@@ -457,15 +460,69 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			this.s = s;
 		}
 		public void run(){
-			lblExecutionInfo.setText(s);	
+			lblExecutionInfo.setText(s);
+			lblExecutionInfo.setOpaque(false);
 		}
 	}
-	
+
+	//get and update the info box with  the actual time in seconds of the execution of the query
 	public void updateStatus(long result) {
-		Double time = execTime / 1000;
-		String s = String.format("Execution time: %s sec - Number of rows retrieved: %,d ", time, result);
-		Runnable time_setter = new ExecTimeSetter(s);
-		SwingUtilities.invokeLater(time_setter);
+		if(result != - 1) {
+			Double time = execTime / 1000;
+			String s = String.format("Execution time: %s sec - Number of rows retrieved: %,d ", time, result);
+			Runnable time_setter = new ExecTimeSetter(s);
+			SwingUtilities.invokeLater(time_setter);
+		}
+	}
+
+	//set the boolean result in the info box of the ask query
+	private class AskQueryInfoSetter implements Runnable{
+		String title;
+		BooleanOWLResultSet result;
+
+
+
+		AskQueryInfoSetter(String title, BooleanOWLResultSet result){
+			super();
+			this.title = title;
+			this.result = result;
+		}
+		@Override
+		public void run()
+		{
+			Double time = execTime / 1000;
+			String s = String.format("Execution time: %s sec - ", time);
+			String answer;
+			try {
+				if(result.getValue()){
+                    answer = "true";
+                    lblExecutionInfo.setBackground(Color.GREEN);
+					lblExecutionInfo.setOpaque(true);
+                }
+                else{
+                    answer = "false";
+                    lblExecutionInfo.setBackground(Color.RED);
+					lblExecutionInfo.setOpaque(true);
+                }
+
+				lblExecutionInfo.setText(s+ title+ " "+ answer);
+
+			} catch (OWLException e) {
+				JOptionPane.showMessageDialog(
+						QueryInterfacePanel.this,
+						e);
+			}
+
+		}
+
+	}
+
+	//show the result for ask query
+
+	public  void showBooleanActionResultInTextInfo(String title, BooleanOWLResultSet result) throws OWLException {
+
+		AskQueryInfoSetter alter_result_panel = new AskQueryInfoSetter(title, result);
+		SwingUtilities.invokeLater(alter_result_panel);
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -488,6 +545,8 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
     private javax.swing.JTextField txtFetchSize;
     // End of variables declaration//GEN-END:variables
 
+	//update the number of rows when the table change
+	@Override
 	public void tableChanged(TableModelEvent e) {
 		int rows = ((TableModel) e.getSource()).getRowCount();
 		updateStatus(rows);
