@@ -2,12 +2,7 @@ package it.unibz.inf.ontop.cli;
 
 import com.github.rvesse.airline.Cli;
 import com.github.rvesse.airline.builder.CliBuilder;
-import com.github.rvesse.airline.parser.errors.ParseArgumentsUnexpectedException;
-import com.github.rvesse.airline.parser.errors.ParseCommandMissingException;
-import com.github.rvesse.airline.parser.errors.ParseCommandUnrecognizedException;
-import com.github.rvesse.airline.parser.errors.ParseException;
-import com.github.rvesse.airline.parser.errors.ParseOptionMissingException;
-import com.google.common.base.Strings;
+import com.github.rvesse.airline.parser.errors.*;
 
 
 public class Ontop {
@@ -64,7 +59,8 @@ public class Ontop {
                 .withDescription("Manipulate mapping files")
                 .withCommand(OntopOBDAToR2RML.class)
                 .withCommand(OntopR2RMLToOBDA.class)
-                .withCommand(OntopR2RMLPrettify.class);
+                .withCommand(OntopR2RMLPrettify.class)
+                .withCommand(OntopMappingV1ToV3.class);
 
         return builder.build();
     }

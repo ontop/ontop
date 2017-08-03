@@ -26,19 +26,4 @@ abstract class OntopMappingOntologyRelatedCommand implements OntopCommand {
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String propertiesFile;
 
-//    @Option(type = OptionType.COMMAND, name = {"-u", "--username"}, title = "jdbcUserName",
-//            description = "user name for the jdbc connection (only for R2RML mapping)")
-//    String jdbcUserName;
-//
-//    @Option(type = OptionType.COMMAND, name = {"-p", "--password"}, title = "jdbcPassword",
-//            description = "password for the jdbc connection  (only for R2RML mapping)")
-//    String jdbcPassword;
-//
-//    @Option(type = OptionType.COMMAND, name = {"-l", "--url"}, title = "jdbcURL",
-//            description = "jdbcURL for the jdbc connection  (only for R2RML mapping)")
-//    String jdbcURL;
-//
-//    @Option(type = OptionType.COMMAND, name = {"-d", "--driver-class"}, title = "jdbcDriver",
-//            description = "class name of the jdbc Driver (only for R2RML mapping)")
-//    String jdbcDriverClass;
 }
