@@ -60,8 +60,7 @@ public class Ontop {
                 .withCommand(OntopOBDAToR2RML.class)
                 .withCommand(OntopR2RMLToOBDA.class)
                 .withCommand(OntopR2RMLPrettify.class)
-                .withCommand(OntopOBDACleanup.class)
-                .withCommand(OntopR2RMLCleanup.class);
+                .withCommand(OntopMappingV1ToV3.class);
 
         return builder.build();
     }
