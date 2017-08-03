@@ -21,14 +21,14 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.ontology.ClassAssertion;
-import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.OntopRDFMaterializer;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializedGraphResultSet;
+import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
+import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.materialization.MaterializationParams;
+import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
+import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -567,9 +567,9 @@
                 <version>4.0.2206.100</version>
             </dependency>
             <dependency>
-                <groupId>com.oracle</groupId>
-                <artifactId>ojdbc16</artifactId>
-                <version>11.2.0.3</version>
+                <groupId>com.oracle.jdbc</groupId>
+                <artifactId>ojdbc8</artifactId>
+                <version>12.2.0.1</version>
             </dependency>
             <dependency>
                 <groupId>mysql</groupId>

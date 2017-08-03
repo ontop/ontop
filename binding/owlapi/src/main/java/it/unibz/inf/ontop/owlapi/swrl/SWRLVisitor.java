@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.owlapi.swrl;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import org.semanticweb.owlapi.model.*;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 /**
@@ -151,7 +151,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		if(!node.getPredicate().isAnonymous()){
 			
 		//get predicate for datalog
-		Predicate predicate= DATA_FACTORY.getClassPredicate(node.getPredicate().asOWLClass().toStringID());
+		Predicate predicate= TERM_FACTORY.getClassPredicate(node.getPredicate().asOWLClass().toStringID());
 		
 		terms = new ArrayList<Term>();
 		//get terms for datalog
@@ -160,7 +160,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 			
 		}
 		
-		function = DATA_FACTORY.getFunction(predicate, terms);
+		function = TERM_FACTORY.getFunction(predicate, terms);
 		}
 		else{
 			notSupported=false;
@@ -185,7 +185,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		//we consider only namedOwlObjectProperty example not an object property expression such as inv(p)
 		if(!node.getPredicate().isAnonymous()){
 			
-			predicate= DATA_FACTORY.getObjectPropertyPredicate(node.getPredicate().asOWLObjectProperty().toStringID());
+			predicate= TERM_FACTORY.getObjectPropertyPredicate(node.getPredicate().asOWLObjectProperty().toStringID());
 			
 			terms = new ArrayList<Term>();
 			//get terms for datalog
@@ -193,7 +193,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 				argument.accept(this);
 	
 			}
-			function = DATA_FACTORY.getFunction(predicate, terms);
+			function = TERM_FACTORY.getFunction(predicate, terms);
 		}
 		else{
 			notSupported=false;
@@ -209,7 +209,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		if(!node.getPredicate().isAnonymous()){
 		
 			//get predicate for datalog
-			 predicate= DATA_FACTORY.getDataPropertyPredicate(node.getPredicate().asOWLDataProperty().toStringID());
+			 predicate= TERM_FACTORY.getDataPropertyPredicate(node.getPredicate().asOWLDataProperty().toStringID());
 					
 			terms = new ArrayList<Term>();
 					//get terms for datalog
@@ -217,7 +217,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 						argument.accept(this);
 			
 					}
-			function = DATA_FACTORY.getFunction(predicate, terms);
+			function = TERM_FACTORY.getFunction(predicate, terms);
 		}
 		else{
 			notSupported=false;
@@ -239,7 +239,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	@Override
 	public void visit(SWRLVariable node) {
 		
-		terms.add(DATA_FACTORY.getVariable(node.getIRI().getFragment()));
+		terms.add(TERM_FACTORY.getVariable(node.getIRI().getFragment()));
 		
 	}
 
@@ -247,7 +247,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	public void visit(SWRLIndividualArgument node) {
 	
 		//get the id without the quotes <>
-		terms.add(DATA_FACTORY.getConstantLiteral(node.getIndividual().toStringID(), Predicate.COL_TYPE.STRING));
+		terms.add(TERM_FACTORY.getConstantLiteral(node.getIndividual().toStringID(), Predicate.COL_TYPE.STRING));
 	}
 
 	@Override
@@ -256,17 +256,17 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		OWLLiteral literal=node.getLiteral();
 		
 		if (literal.isBoolean()) 
-			terms.add(DATA_FACTORY.getBooleanConstant(literal.parseBoolean()));
+			terms.add(TERM_FACTORY.getBooleanConstant(literal.parseBoolean()));
 		else if(literal.hasLang())
-			terms.add(DATA_FACTORY.getConstantLiteral(literal.getLiteral(), literal.getLang()));
+			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), literal.getLang()));
 		else if (literal.isDouble())
-			terms.add(DATA_FACTORY.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DOUBLE));
+			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DOUBLE));
 		else if (literal.isFloat())
-			terms.add(DATA_FACTORY.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DECIMAL));
+			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DECIMAL));
 		else if (literal.isInteger())
-			terms.add(DATA_FACTORY.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.INTEGER));
+			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.INTEGER));
 		else 
-			DATA_FACTORY.getConstantLiteral(literal.getLiteral());
+			TERM_FACTORY.getConstantLiteral(literal.getLiteral());
 	}
 
 //	we do not support swrl same as

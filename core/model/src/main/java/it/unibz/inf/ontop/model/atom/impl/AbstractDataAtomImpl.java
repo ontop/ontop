@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.impl.ImmutableFunctionalTermImpl;
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.term.impl.ImmutableFunctionalTermImpl;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 

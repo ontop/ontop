@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.core;
 
 
 import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
+import it.unibz.inf.ontop.owlapi.impl.QuestOWLConfiguration;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
 import javax.annotation.Nonnull;

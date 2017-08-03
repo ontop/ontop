@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.exception;
 
 import java.util.List;
 
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
 /**
  * This happens if users insert an invalid mapping, i.e., one or more conditions below are occurred:

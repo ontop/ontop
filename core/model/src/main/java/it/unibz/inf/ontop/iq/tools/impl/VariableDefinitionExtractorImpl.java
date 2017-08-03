@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 public class VariableDefinitionExtractorImpl implements VariableDefinitionExtractor {
 
@@ -90,6 +90,6 @@ public class VariableDefinitionExtractorImpl implements VariableDefinitionExtrac
     private ImmutableTerm substitute(Variable initialVariable, Variable currentVariable, ImmutableTerm def) {
         return initialVariable.equals(currentVariable) ?
                 def :
-                DATA_FACTORY.getSubstitution(currentVariable, initialVariable).apply(def);
+                SUBSTITUTION_FACTORY.getSubstitution(currentVariable, initialVariable).apply(def);
     }
 }

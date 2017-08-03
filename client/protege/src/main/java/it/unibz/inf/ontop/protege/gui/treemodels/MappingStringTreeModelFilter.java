@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 
 import java.util.List;
 

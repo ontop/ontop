@@ -3,11 +3,11 @@ package it.unibz.inf.ontop.spec.impl;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.pp.PreProcessedMapping;
-import it.unibz.inf.ontop.spec.MappingExtractor;
+import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
+import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 
 import javax.annotation.Nonnull;

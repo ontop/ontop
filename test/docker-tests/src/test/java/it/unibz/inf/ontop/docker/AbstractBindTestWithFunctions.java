@@ -20,9 +20,15 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
@@ -37,12 +43,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static org.junit.Assert.assertTrue;
 
 /***
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
- * Refer in particular to the class {@link it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator}
+ * Refer in particular to the class {@link SparqlAlgebraToDatalogTranslator}
  */
 
 public abstract class AbstractBindTestWithFunctions {
@@ -74,16 +80,17 @@ public abstract class AbstractBindTestWithFunctions {
         OntopOWLReasoner reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLConnection conn = reasoner.getConnection();
+        OWLStatement st = conn.createStatement();
 
 
         int i = 0;
 
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
-                OWLObject ind1 = rs.getOWLObject("w");
+                final OWLBindingSet bindingSet = rs.next();
+                OWLObject ind1 = bindingSet.getOWLObject("w");
 
 
                 System.out.println(ind1);
@@ -772,7 +779,7 @@ public abstract class AbstractBindTestWithFunctions {
         try {
             date = df.parse(value);
             Timestamp ts = new Timestamp(date.getTime());
-            System.out.println(DATA_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
+            System.out.println(TERM_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
 
         } catch (ParseException pe) {
 
@@ -793,17 +800,18 @@ public abstract class AbstractBindTestWithFunctions {
 
 
         // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLConnection conn = reasoner.getConnection();
+        OWLStatement st = conn.createStatement();
 
 
 
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
-                OWLObject ind1 = rs.getOWLObject("w");
+                final OWLBindingSet bindingSet = rs.next();
+                OWLObject ind1 = bindingSet.getOWLObject("w");
                 // log.debug(ind1.toString());
                 if (ind1 != null) {
                     returnedValues.add(ind1.toString());

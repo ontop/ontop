@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.predicate.Predicate;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

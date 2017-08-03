@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.term;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
 import java.util.List;
 

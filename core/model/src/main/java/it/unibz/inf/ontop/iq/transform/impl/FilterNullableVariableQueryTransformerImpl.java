@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.iq.*;
@@ -27,9 +27,9 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.predicate.ExpressionOperation.IS_NOT_NULL;
-import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.foldBooleanExpressions;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
+import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.foldBooleanExpressions;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 @Singleton
 public class FilterNullableVariableQueryTransformerImpl implements FilterNullableVariableQueryTransformer {
@@ -64,7 +64,7 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
         Stream<ImmutableExpression> filteringExpressionStream = nullableProjectedVariables.stream()
                 .map(v -> Optional.ofNullable(topSubstitution.get(v))
                         .orElse(v))
-                .map(t -> DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, t))
+                .map(t -> TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, t))
                 .distinct();
 
         ImmutableExpression nonOptimizedExpression = foldBooleanExpressions(filteringExpressionStream)

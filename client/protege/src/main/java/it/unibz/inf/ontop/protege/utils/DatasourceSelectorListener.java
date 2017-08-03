@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
 
 public interface DatasourceSelectorListener
 {

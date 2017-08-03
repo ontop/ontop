@@ -28,7 +28,12 @@ import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -47,7 +52,7 @@ import static java.util.stream.Collectors.joining;
 public class OntopQuery extends OntopReasoningCommandBase {
 
     @Option(type = OptionType.COMMAND, name = {"-q", "--query"}, title = "queryFile",
-            description = "SPARQL query file")
+            description = "SPARQL SELECT query file")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     @Required
     private String queryFile;
@@ -93,8 +98,8 @@ public class OntopQuery extends OntopReasoningCommandBase {
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
         try (OntopOWLReasoner reasoner = factory.createReasoner(configurationBuilder.build());
-             OntopOWLConnection conn = reasoner.getConnection();
-             OntopOWLStatement st = conn.createStatement();
+             OWLConnection conn = reasoner.getConnection();
+             OWLStatement st = conn.createStatement();
         ) {
 
 			/*
@@ -105,7 +110,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
             String query = Files.lines(Paths.get(queryFile), StandardCharsets.UTF_8).collect(joining("\n"));
 
-            QuestOWLResultSet result = st.executeTuple(query);
+            TupleOWLResultSet result = st.executeSelectQuery(query);
 
             OutputStream out = null;
             if (outputFile == null) {
@@ -122,7 +127,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
         }
     }
 
-    public static void printResult(OutputStream out, QuestOWLResultSet result) throws Exception {
+    public static void printResult(OutputStream out, TupleOWLResultSet result) throws Exception {
         BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, "utf8"));
 
 		/*
@@ -139,8 +144,9 @@ public class OntopQuery extends OntopReasoningCommandBase {
         wr.newLine();
 
         while (result.hasNext()) {
+            final OWLBindingSet bindingSet = result.next();
             for (int c = 0; c < columns; c++) {
-                String value = ToStringRenderer.getInstance().getRendering(result.getOWLObject(c + 1));
+                String value = ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject(c + 1));
                 wr.append(value);
                 if (c + 1 < columns)
                     wr.append(",");

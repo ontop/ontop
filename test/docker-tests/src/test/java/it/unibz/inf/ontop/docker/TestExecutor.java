@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.docker;
 
 
-import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
+import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
 import org.eclipse.rdf4j.common.io.IOUtil;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.*;

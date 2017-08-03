@@ -1,11 +1,15 @@
 package it.unibz.inf.ontop.docker.mssql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
-import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
+import it.unibz.inf.ontop.utils.querymanager.QueryController;
+import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
+import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +49,8 @@ public class R2rmlJoinTest {
         OntopOWLReasoner reasoner = factory.createReasoner(configBuilder.build());
 
         // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLConnection conn = reasoner.getConnection();
+        OWLStatement st = conn.createStatement();
 
 
         QueryController qc = new QueryController();
@@ -60,7 +64,7 @@ public class R2rmlJoinTest {
                 log.debug("Query: \n{}", query.getQuery());
 
                 long start = System.nanoTime();
-                QuestOWLResultSet res = st.executeTuple(query.getQuery());
+                TupleOWLResultSet res = st.executeSelectQuery(query.getQuery());
                 long end = System.nanoTime();
 
                 double time = (end - start) / 1000;

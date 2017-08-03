@@ -21,7 +21,12 @@ package it.unibz.inf.ontop.docker.oracle;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Test;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
@@ -74,8 +79,8 @@ public class OntologyTypesTest {
 		OntopOWLReasoner reasoner = factory.createReasoner(configBuilder.build());
 
 		// Now we are ready for querying
-		OntopOWLConnection conn = reasoner.getConnection();
-		OntopOWLStatement st = conn.createStatement();
+		OWLConnection conn = reasoner.getConnection();
+		OWLStatement st = conn.createStatement();
 
 
 		try {
@@ -94,14 +99,15 @@ public class OntologyTypesTest {
 		}
 	}
 
-	private void executeQueryAssertResults(String query, OntopOWLStatement st, int expectedRows) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
+	private void executeQueryAssertResults(String query, OWLStatement st, int expectedRows) throws Exception {
+		TupleOWLResultSet rs = st.executeSelectQuery(query);
 		int count = 0;
 		while (rs.hasNext()) {
 			count++;
+            final OWLBindingSet next = rs.next();
 			for (int i = 1; i <= rs.getColumnCount(); i++) {
 				log.info(rs.getSignature().get(i-1));
-				log.info("=" + rs.getOWLObject(i));
+                log.info("=" + next.getOWLObject(i));
 				log.info(" ");
 			}
 			System.out.println();

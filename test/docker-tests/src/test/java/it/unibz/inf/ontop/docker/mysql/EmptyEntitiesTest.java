@@ -21,12 +21,16 @@ package it.unibz.inf.ontop.docker.mysql;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.ontology.*;
-import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.Equivalences;
+import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +51,7 @@ import java.util.Set;
 
 public class EmptyEntitiesTest {
 
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -125,9 +129,9 @@ public class EmptyEntitiesTest {
 
 	private boolean runSPARQLConceptsQuery(String description) throws Exception {
 		String query = "SELECT ?x WHERE {?x a " + description + ".}";
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			return (rs.hasNext());
 
 		} catch (Exception e) {
@@ -148,9 +152,9 @@ public class EmptyEntitiesTest {
 
 	private boolean runSPARQLRolesQuery(String description) throws Exception {
 		String query = "SELECT * WHERE {?x " + description + " ?y.}";
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			return (rs.hasNext());
 
 		} catch (Exception e) {

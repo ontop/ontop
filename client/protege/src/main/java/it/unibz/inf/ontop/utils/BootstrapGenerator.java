@@ -8,21 +8,22 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
-import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingAxiomProducer;
+import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.OClass;
+import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingAxiomProducer;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.*;
 
@@ -33,7 +34,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 public class BootstrapGenerator {
@@ -163,7 +164,7 @@ public class BootstrapGenerator {
 
     private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {
 
-        DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, DATA_FACTORY);
+        DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, TERM_FACTORY);
 
         List<SQLPPTriplesMap> axioms = new ArrayList<>();
         axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));

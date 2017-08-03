@@ -2,18 +2,19 @@ package it.unibz.inf.ontop.dbschema;
 
 import java.util.List;
 
-import it.unibz.inf.ontop.model.predicate.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Term;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class Relation2Predicate {
 
 	public static Predicate createPredicateFromRelation(RelationDefinition r) {
 		
-		Predicate pred = DATA_FACTORY.getPredicate(extractPredicateName(r), r.getAttributes().size());
+		Predicate pred = TERM_FACTORY.getPredicate(extractPredicateName(r), r.getAttributes().size());
 		return pred;
 	}
 
@@ -28,7 +29,7 @@ public class Relation2Predicate {
 	}
 
 	public static AtomPredicate createAtomPredicateFromRelation(RelationDefinition r) {
-		return DATA_FACTORY.getAtomPredicate(extractPredicateName(r), r.getAttributes().size());
+		return ATOM_FACTORY.getAtomPredicate(extractPredicateName(r), r.getAttributes().size());
 	}
 	
 	public static Function getAtom(RelationDefinition r, List<Term> terms) {
@@ -36,7 +37,7 @@ public class Relation2Predicate {
 			throw new IllegalArgumentException("The number of terms does not match the arity of relation");
 		
 		Predicate pred = createPredicateFromRelation(r);
-		return DATA_FACTORY.getFunction(pred, terms);
+		return TERM_FACTORY.getFunction(pred, terms);
 	}
 	
 	/**

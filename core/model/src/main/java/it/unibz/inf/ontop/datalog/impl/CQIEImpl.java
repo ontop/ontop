@@ -30,7 +30,7 @@ import java.util.Set;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.ListenableFunction;
 
-import it.unibz.inf.ontop.model.impl.TermUtils;
+import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Term;

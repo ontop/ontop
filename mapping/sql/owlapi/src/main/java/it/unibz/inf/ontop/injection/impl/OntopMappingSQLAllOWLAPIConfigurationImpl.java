@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOWLAPIConfigurationImpl.OntopMappingOWLAPIOptions;

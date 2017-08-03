@@ -20,12 +20,12 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
-import it.unibz.inf.ontop.r2rml.SQLPPMappingToR2RMLConverter;
+import it.unibz.inf.ontop.spec.mapping.serializer.SQLPPMappingToR2RMLConverter;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;

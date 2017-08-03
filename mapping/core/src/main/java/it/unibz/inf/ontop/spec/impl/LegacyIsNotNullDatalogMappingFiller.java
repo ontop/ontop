@@ -6,8 +6,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.TermUtils;
+import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 public class LegacyIsNotNullDatalogMappingFiller {
@@ -33,7 +32,7 @@ public class LegacyIsNotNullDatalogMappingFiller {
         for (Variable var : headvars) {
             List<Function> body = rule.getBody();
             if (isNullable(var, body, dbMetadata)) {
-                Function notnull = DATA_FACTORY.getFunctionIsNotNull(var);
+                Function notnull = TERM_FACTORY.getFunctionIsNotNull(var);
                 if (!body.contains(notnull))
                     body.add(notnull);
             }

@@ -4,16 +4,11 @@ package it.unibz.inf.ontop.docker.postgres;
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 /**
  * Class to test if annotation property can be treated as data property and object property

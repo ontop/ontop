@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.testsuite;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.sparql.QuestMemorySPARQLQueryTest;
+import it.unibz.inf.ontop.test.sparql.QuestMemorySPARQLQueryTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

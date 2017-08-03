@@ -7,16 +7,17 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.ontology.OntologyFactory;
-import it.unibz.inf.ontop.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
+import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
@@ -29,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  *
@@ -184,7 +185,7 @@ public class OBDAModel {
                 .map(a -> {
                     if (a.getFunctionSymbol().equals(removedPredicate)) {
                         counter.incrementAndGet();
-                        return  DATA_FACTORY.getImmutableFunctionalTerm(newPredicate,
+                        return  TERM_FACTORY.getImmutableFunctionalTerm(newPredicate,
                                 ImmutableList.copyOf(a.getArguments()));
                     }
                     return a;

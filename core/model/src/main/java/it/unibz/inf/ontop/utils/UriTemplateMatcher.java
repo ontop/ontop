@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.mapping.TargetAtom;
-import it.unibz.inf.ontop.model.predicate.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 
 import java.util.*;
@@ -32,7 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class UriTemplateMatcher {
 
@@ -82,7 +82,7 @@ public class UriTemplateMatcher {
                     continue;
                 }
 
-                ImmutableFunctionalTerm templateFunction = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getVariable("x"));
+                ImmutableFunctionalTerm templateFunction = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getVariable("x"));
                 Pattern matcher = Pattern.compile("(.+)");
                 uriTemplateMatcher.uriTemplateMatcher.put(matcher, templateFunction);
                 templateStrings.add("(.+)");
@@ -168,16 +168,16 @@ public class UriTemplateMatcher {
                     values.add(baseParameter);
                     for (int i = 0; i < matcher.groupCount(); i++) {
                         String value = matcher.group(i + 1);
-                        values.add(DATA_FACTORY.getConstantLiteral(value));
+                        values.add(TERM_FACTORY.getConstantLiteral(value));
                     }
-                    functionURI = DATA_FACTORY.getImmutableUriTemplate(values.build());
+                    functionURI = TERM_FACTORY.getImmutableUriTemplate(values.build());
                 }
             } else if (baseParameter instanceof Variable) {
 				/*
 				 * This is a direct mapping to a column, uri(x)
 				 * we need to match x with the subjectURI
 				 */
-                functionURI = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getConstantLiteral(uriString));
+                functionURI = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral(uriString));
             }
             break;
         }
@@ -185,7 +185,7 @@ public class UriTemplateMatcher {
 			/* If we cannot match against a template, we try to match against the most general template (which will
 			 * generate empty queries later in the query answering process
 			 */
-            functionURI = DATA_FACTORY.getImmutableUriTemplate(DATA_FACTORY.getConstantLiteral(uriString));
+            functionURI = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral(uriString));
         }
 
         return functionURI;

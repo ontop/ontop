@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.injection;
 
-import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
+import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 
 /**
  * Factory following the Guice AssistedInject pattern.

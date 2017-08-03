@@ -2,9 +2,8 @@ package it.unibz.inf.ontop.protege.core;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
+import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import javax.annotation.Nonnull;

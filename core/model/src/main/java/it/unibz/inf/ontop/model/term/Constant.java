@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.model.term;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
 /**
  * This class defines a type of {@link Term} in which it has a constant

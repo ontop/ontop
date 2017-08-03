@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
-import it.unibz.inf.ontop.sql.pool.JDBCConnectionPool;
+import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
 
 
 public class OntopSystemSQLModule extends OntopAbstractModule {

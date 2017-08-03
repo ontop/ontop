@@ -2,8 +2,13 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestDistinctTupleResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.answering.resultset.impl.SQLDistinctTupleResultSet;
+import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryLanguage;
@@ -24,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test to check the use of SPARQL Select distinct in Sesame and QuestOWL.
- * Use the class {@link QuestDistinctTupleResultSet}
+ * Use the class {@link SQLDistinctTupleResultSet}
  */
 
 public class DistinctResultSetTest { //
@@ -59,8 +64,8 @@ public class DistinctResultSetTest { //
                 .build();
         OntopOWLReasoner reasoner = factory.createReasoner(config);
         // Now we are ready for querying
-        OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
+        OWLConnection conn = reasoner.getConnection();
+        OWLStatement st = conn.createStatement();
 
         int results = 0;
 
@@ -130,15 +135,14 @@ public class DistinctResultSetTest { //
 
         }
 
-    private int executeQueryAssertResults(String query, OntopOWLStatement st) throws Exception {
-        QuestOWLResultSet rs = st.executeTuple(query);
+    private int executeQueryAssertResults(String query, OWLStatement st) throws Exception {
+        TupleOWLResultSet rs = st.executeSelectQuery(query);
         int count = 0;
         while (rs.hasNext()) {
+            final OWLBindingSet bindingSet = rs.next();
             count++;
             for (int i = 1; i <= rs.getColumnCount(); i++) {
-
-                log.debug(rs.getSignature().get(i-1) + "=" + rs.getOWLObject(i));
-
+                log.debug(rs.getSignature().get(i-1) + "=" + bindingSet.getOWLObject(i));
             }
 
         }

@@ -3,10 +3,10 @@ package it.unibz.inf.ontop.si.impl;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializedGraphResultSet;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.OntopRDFMaterializer;
+import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.materialization.MaterializationParams;
+import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
+import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.si.impl.SILoadingTools.RepositoryInit;
@@ -81,7 +81,7 @@ public class VirtualAboxLoading {
         public Assertion next() {
             try {
                 return graphResultSet.next();
-            } catch (OntopConnectionException | OntopQueryAnsweringException e) {
+            } catch (OntopQueryAnsweringException e) {
                 throw new RuntimeException(e);
             }
         }

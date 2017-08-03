@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Generates new variables that are guaranteed to not conflict with
@@ -51,7 +51,7 @@ public class VariableGenerator {
     public Variable generateNewVariableFromVar(Variable previousVariable) {
         Variable newVariable;
         do {
-            newVariable = DATA_FACTORY.getVariable(previousVariable.getName() + SUFFIX_PREFIX + (count++));
+            newVariable = TERM_FACTORY.getVariable(previousVariable.getName() + SUFFIX_PREFIX + (count++));
         } while(knownVariables.contains(newVariable));
 
         knownVariables.add(newVariable);
@@ -64,7 +64,7 @@ public class VariableGenerator {
     public Variable generateNewVariableIfConflicting(Variable previousVariable) {
         Variable newVariable = previousVariable;
         while(knownVariables.contains(newVariable)) {
-            newVariable = DATA_FACTORY.getVariable(previousVariable.getName() + SUFFIX_PREFIX + (count++));
+            newVariable = TERM_FACTORY.getVariable(previousVariable.getName() + SUFFIX_PREFIX + (count++));
         }
 
         knownVariables.add(newVariable);
@@ -77,7 +77,7 @@ public class VariableGenerator {
     public Variable generateNewVariable() {
         Variable newVariable;
         do {
-            newVariable = DATA_FACTORY.getVariable(SUFFIX_PREFIX + (count++));
+            newVariable = TERM_FACTORY.getVariable(SUFFIX_PREFIX + (count++));
         } while(knownVariables.contains(newVariable));
 
         knownVariables.add(newVariable);

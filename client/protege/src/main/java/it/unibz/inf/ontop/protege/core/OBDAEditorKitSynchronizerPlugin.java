@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
@@ -31,8 +31,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.impl.DeprecatedConstants.ABOX_MODE;
-import static it.unibz.inf.ontop.model.impl.DeprecatedConstants.CLASSIC;
+import static it.unibz.inf.ontop.protege.core.impl.DeprecatedConstants.ABOX_MODE;
+import static it.unibz.inf.ontop.protege.core.impl.DeprecatedConstants.CLASSIC;
 
 /***
  * This class is responsible for initializing all base classes for the OBDA

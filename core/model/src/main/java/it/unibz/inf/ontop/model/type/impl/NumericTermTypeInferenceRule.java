@@ -3,15 +3,15 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.IncompatibleTermException;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.INTEGER;
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.NUMERIC_TYPES;
-import static it.unibz.inf.ontop.model.predicate.Predicate.COL_TYPE.INTEGER_TYPES;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.NUMERIC_TYPES;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER_TYPES;
 
 
 public class NumericTermTypeInferenceRule extends UnifierTermTypeInferenceRule {
@@ -38,6 +38,6 @@ public class NumericTermTypeInferenceRule extends UnifierTermTypeInferenceRule {
     @Override
     protected Optional<TermType> postprocessInferredType(Optional<TermType> optionalTermType) {
         return optionalTermType
-                .map(t -> INTEGER_TYPES.contains(t.getColType()) ? DATA_FACTORY.getTermType(INTEGER) : t);
+                .map(t -> INTEGER_TYPES.contains(t.getColType()) ? TYPE_FACTORY.getTermType(INTEGER) : t);
     }
 }

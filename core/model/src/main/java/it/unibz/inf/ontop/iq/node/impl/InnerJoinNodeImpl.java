@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
@@ -77,7 +77,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         }
 
         ImmutableSet<Variable> nullVariables = substitution.getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue().equals(OBDAVocabulary.NULL))
+                .filter(e -> e.getValue().equals(TermConstants.NULL))
                 .map(Map.Entry::getKey)
                 .collect(ImmutableCollectors.toSet());
 

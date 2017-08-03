@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.docker.oracle;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
+import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.slf4j.Logger;

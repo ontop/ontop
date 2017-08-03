@@ -22,10 +22,10 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.MaterializationParams;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLMaterializedGraphResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLAPIMaterializer;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.materialization.MaterializationParams;
+import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
+import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
@@ -47,7 +47,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.*;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
@@ -216,7 +215,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 						.build();
 				;
 
-				try (OntopOWLMaterializedGraphResultSet graphResultSet = materializer.materialize(configuration, params)) {
+				try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(configuration, params)) {
 
 					Set<OWLAxiom> setAxioms = Sets.newHashSet();
 					while(graphResultSet.hasNext())
@@ -269,7 +268,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 						.enableDBResultsStreaming(DO_STREAM_RESULTS)
 						.build();
 				OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
-				OntopOWLMaterializedGraphResultSet graphResultSet = materializer.materialize(configuration, materializationParams);
+				MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(configuration, materializationParams);
 
 				Container container = workspace.getRootPane().getParent();
 				final MaterializeAction action = new MaterializeAction(ontology, ontoManager, graphResultSet, container);

@@ -20,13 +20,13 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.utils.querymanager.QueryController;
 import it.unibz.inf.ontop.utils.OBDAPreferenceChangeListener;
 
 import javax.swing.*;
@@ -54,7 +54,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	
 	private DefaultStyledDocument styledDocument;
 	
-	private OBDADataQueryAction<QuestOWLResultSet> executeSelectAction;
+	private OBDADataQueryAction<TupleOWLResultSet> executeSelectAction;
 	private OBDADataQueryAction<?> executeGraphQueryAction;
 	private OBDADataQueryAction<?> executeEQLAction;
 	private OBDADataQueryAction<String> retrieveUCQExpansionAction;
@@ -401,7 +401,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			currentId = new_id;
 		}
 
-	public void setExecuteSelectAction(OBDADataQueryAction<QuestOWLResultSet> executeUCQAction) {
+	public void setExecuteSelectAction(OBDADataQueryAction<TupleOWLResultSet> executeUCQAction) {
 		this.executeSelectAction = executeUCQAction;
 	}
 

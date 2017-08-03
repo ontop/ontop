@@ -20,7 +20,9 @@ package it.unibz.inf.ontop.docker.mssql;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -35,7 +37,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class AdventureWorksDatetimeTest extends AbstractVirtualModeTest {
 
-	private OntopOWLConnection conn;
+	private OWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -48,13 +50,13 @@ public class AdventureWorksDatetimeTest extends AbstractVirtualModeTest {
 	}
 
 	private String runTests(String query) throws Exception {
-		OntopOWLStatement st = conn.createStatement();
+		OWLStatement st = conn.createStatement();
 		String retval="";
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			TupleOWLResultSet rs = st.executeSelectQuery(query);
 //			while(rs.hasNext()) {
 				rs.hasNext();
-				OWLObject ind1 = rs.getOWLObject("y");
+				OWLObject ind1 = rs.next().getOWLObject("y");
 				retval = ind1.toString();
 //			}
 		} catch (Exception e) {

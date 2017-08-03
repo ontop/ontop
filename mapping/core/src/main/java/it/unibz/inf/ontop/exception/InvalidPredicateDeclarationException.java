@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.exception;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.predicate.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
 import java.util.List;
 

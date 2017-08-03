@@ -4,16 +4,21 @@ import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.impl.DatalogFactoryImpl;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.impl.AtomFactoryImpl;
-import it.unibz.inf.ontop.model.impl.DatatypeFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.type.DatatypeFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.impl.TypeFactoryImpl;
+import it.unibz.inf.ontop.model.term.impl.TermFactoryImpl;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionFactoryImpl;
 
 /**
  * Ubiquitously used in the code
  */
-public class OntopModelSingletons {
-    public static final DatatypeFactory DATATYPE_FACTORY = DatatypeFactoryImpl.getInstance();
-    public static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-    public static final AtomFactory ATOM_FACTORY = AtomFactoryImpl.getInstance();
-    public static final DatalogFactory DATALOG_FACTORY = DatalogFactoryImpl.getInstance();
+public interface OntopModelSingletons {
+
+    TypeFactory TYPE_FACTORY = TypeFactoryImpl.getInstance();
+    TermFactory TERM_FACTORY = TermFactoryImpl.getInstance();
+    AtomFactory ATOM_FACTORY = AtomFactoryImpl.getInstance();
+    SubstitutionFactory SUBSTITUTION_FACTORY = SubstitutionFactoryImpl.getInstance();
+    DatalogFactory DATALOG_FACTORY = DatalogFactoryImpl.getInstance();
 }
