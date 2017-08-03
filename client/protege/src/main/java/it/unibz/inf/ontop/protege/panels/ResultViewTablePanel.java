@@ -228,14 +228,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 	public void setCountAllTuplesActionForUCQ(OBDADataQueryAction countAllTuples) {
 		this.countAllTuplesAction = countAllTuples;
 	}
-	
-	public OBDADataQueryAction getCountAllTuplesActionForEQL() {
-		return countAllTuplesActionEQL;
-	}
 
-	public void setCountAllTuplesActionForEQL(OBDADataQueryAction countAllTuples) {
-		this.countAllTuplesActionEQL = countAllTuples;
-	}
 	
 	public void setOBDASaveQueryToFileAction(OBDASaveQueryResultToFileAction action){
 		this.saveToFileAction = action;
