@@ -4,8 +4,8 @@ The [-ontop-](http://ontop.inf.ubibz.it) framework is an open source project ava
 [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.txt). 
 By downloading these packages you are agreeing with them.
 
-* Current version: 1.18.1
-* Release date: 16/06/2017
+* Current version: 3.0-BETA-1
+* Release date: 04/08/2017
 * [Changelog](https://github.com/ontop/ontop/wiki/OntopReleases)
 
 

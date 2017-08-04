@@ -13,39 +13,39 @@ public class OntopQueryTest {
 
     @Test
     public void testOntopQueryCMD (){
-        String[] argv = {"query", "-m", "src/test/resources/books/exampleBooks.obda",
-                "-p", "src/test/resources/books/exampleBooks.properties",
-                "-t", "src/test/resources/books/exampleBooks.owl",
-                "-q", "src/test/resources/books/q1.rq"};
+        String[] argv = {"query", "-m", "client/cli/src/test/resources/books/exampleBooks.obda",
+                "-p", "client/cli/src/test/resources/books/exampleBooks.properties",
+                "-t", "client/cli/src/test/resources/books/exampleBooks.owl",
+                "-q", "client/cli/src/test/resources/books/q1.rq"};
         Ontop.main(argv);
     }
 
 
     @Test
     public void testOntopQueryCMD_Out (){
-        String[] argv = {"query", "-m", "src/test/resources/books/exampleBooks.obda",
-                "-p", "src/test/resources/books/exampleBooks.properties",
-                "-t", "src/test/resources/books/exampleBooks.owl",
-                "-q", "src/test/resources/books/q1.rq",
-                "-o", "src/test/resources/output/q1-answer.csv"};
+        String[] argv = {"query", "-m", "client/cli/src/test/resources/books/exampleBooks.obda",
+                "-p", "client/cli/src/test/resources/books/exampleBooks.properties",
+                "-t", "client/cli/src/test/resources/books/exampleBooks.owl",
+                "-q", "client/cli/src/test/resources/books/q1.rq",
+                "-o", "client/cli/src/test/resources/output/q1-answer.csv"};
         Ontop.main(argv);
     }
 
     @Test
     public void testOntopQueryR2RML (){
-        String[] argv = {"query", "-m", "src/test/resources/books/exampleBooks.ttl",
-                "-p", "src/test/resources/books/exampleBooks.properties",
-                "-t", "src/test/resources/books/exampleBooks.owl",
-                "-q", "src/test/resources/books/q1.rq"};
+        String[] argv = {"query", "-m", "client/cli/src/test/resources/books/exampleBooks.ttl",
+                "-p", "client/cli/src/test/resources/books/exampleBooks.properties",
+                "-t", "client/cli/src/test/resources/books/exampleBooks.owl",
+                "-q", "client/cli/src/test/resources/books/q1.rq"};
         Ontop.main(argv);
     }
 
     @Test
     public void testOntopQueryR2RML_noOntology (){
         String[] argv = {"query",
-                "-m", "src/test/resources/books/exampleBooks.ttl",
-                "-p", "src/test/resources/books/exampleBooks.properties",
-                "-q", "src/test/resources/books/q1.rq"};
+                "-m", "client/cli/src/test/resources/books/exampleBooks.ttl",
+                "-p", "client/cli/src/test/resources/books/exampleBooks.properties",
+                "-q", "client/cli/src/test/resources/books/q1.rq"};
         Ontop.main(argv);
     }
 
@@ -53,9 +53,9 @@ public class OntopQueryTest {
     @Test
     public void testOntopQueryAnnotations_Ontology (){
         String[] argv = {"query",
-                "-m", "../ontop-docker-tests/src/test/resources/pgsql/annotation/doid.obda",
-                "-t", "../ontop-docker-tests/src/test/resources/pgsql/annotation/doid.owl",
-                "-q", "../ontop-docker-tests/src/test/resources/pgsql/annotation/q1.q",
+                "-m", "client/cli/src/test/resources/pgsql/annotation/doid.obda",
+                "-t", "client/cli/src/test/resources/pgsql/annotation/doid.owl",
+                "-q", "client/cli/src/test/resources/pgsql/annotation/q1.q",
                 "--enable-annotations"
         };
         Ontop.main(argv);
