@@ -65,10 +65,10 @@ public class OntopMaterializeTest {
 
     @Test
     public void testOntopMaterializeNoStreamResults (){
-        String[] argv = {"materialize", "-m", "client/cli/src/test/resources/books/exampleBooks.obda",
-                "-t", "client/cli/src/test/resources/books/exampleBooks.owl",
-                "-p", "client/cli/src/test/resources/books/exampleBooks.properties",
-                "-f", "turtle", "-o", "client/cli/src/test/resources/output/exampleBooks.materialized.nostreaming.ttl",
+        String[] argv = {"materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+                "-t", "src/test/resources/books/exampleBooks.owl",
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-f", "turtle", "-o", "src/test/resources/output/exampleBooks.materialized.nostreaming.ttl",
                 "--no-streaming"
         };
         Ontop.main(argv);
@@ -76,20 +76,20 @@ public class OntopMaterializeTest {
 
     @Test
     public void testOntopMaterialize (){
-        String[] argv = {"materialize", "-m", "client/cli/src/test/resources/books/exampleBooks.obda",
-                "-t", "client/cli/src/test/resources/books/exampleBooks.owl",
-                "-p", "client/cli/src/test/resources/books/exampleBooks.properties",
-                "-f", "turtle", "-o", "client/cli/src/test/resources/output/exampleBooks.materialized.ttl",
+        String[] argv = {"materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+                "-t", "src/test/resources/books/exampleBooks.owl",
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-f", "turtle", "-o", "src/test/resources/output/exampleBooks.materialized.ttl",
         };
         Ontop.main(argv);
     }
 
     @Test
     public void testOntopMaterializeSeparatefiles (){
-        String[] argv = {"materialize", "-m", "client/cli/src/test/resources/books/exampleBooks.obda",
-                "-t", "client/cli/src/test/resources/books/exampleBooks.owl",
-                "-p", "client/cli/src/test/resources/books/exampleBooks.properties",
-                "-f", "turtle", "-o", "client/cli/src/test/resources/output/",  "--separate-files",
+        String[] argv = {"materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+                "-t", "src/test/resources/books/exampleBooks.owl",
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-f", "turtle", "-o", "src/test/resources/output/",  "--separate-files",
         };
         Ontop.main(argv);
     }

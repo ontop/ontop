@@ -32,7 +32,7 @@ public class SimpleMaterializerTest {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     private OWLOntology ontology;
 
-    final String owlfile = "client/cli/src/test/resources/test/simplemapping.owl";
+    final String owlfile = "src/test/resources/test/simplemapping.owl";
     // final String obdafile = "src/test/resources/test/simplemapping.obda";
 
     @Before
@@ -48,7 +48,7 @@ public class SimpleMaterializerTest {
         conn = DriverManager.getConnection(url, username, password);
         Statement st = conn.createStatement();
 
-        FileReader reader = new FileReader("client/cli/src/test/resources/test/simplemapping-create-h2.sql");
+        FileReader reader = new FileReader("src/test/resources/test/simplemapping-create-h2.sql");
         BufferedReader in = new BufferedReader(reader);
         StringBuilder bf = new StringBuilder();
         String line = in.readLine();
@@ -75,7 +75,7 @@ public class SimpleMaterializerTest {
 
         Statement st = conn.createStatement();
 
-        FileReader reader = new FileReader("client/cli/src/test/resources/test/simplemapping-drop-h2.sql");
+        FileReader reader = new FileReader("src/test/resources/test/simplemapping-drop-h2.sql");
         BufferedReader in = new BufferedReader(reader);
         StringBuilder bf = new StringBuilder();
         String line = in.readLine();
@@ -91,10 +91,10 @@ public class SimpleMaterializerTest {
 
     @Test
     public void runMaterializationWithReasoning() throws Exception {
-        String outFile = "client/cli/src/test/resources/output/simplemapping_materialzed_with_reasnoing.owl";
-        String ontoFile = "client/cli/src/test/resources/test/simplemapping.owl";
-        String mappingFile = "client/cli/src/test/resources/test/simplemapping.obda";
-        String propertiesFile = "client/cli/src/test/resources/test/simplemapping.properties";
+        String outFile = "src/test/resources/output/simplemapping_materialzed_with_reasnoing.owl";
+        String ontoFile = "src/test/resources/test/simplemapping.owl";
+        String mappingFile = "src/test/resources/test/simplemapping.obda";
+        String propertiesFile = "src/test/resources/test/simplemapping.properties";
         Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile,
                 "-o", outFile, "-p", propertiesFile);
         assertEquals(5, numOfClassAssertions(outFile));
@@ -104,10 +104,10 @@ public class SimpleMaterializerTest {
 
     @Test
     public void runMaterializationWithoutReasoning() throws Exception {
-        String outFile = "client/cli/src/test/resources/output/simplemapping_materialzed_no_reasnoing.owl";
-        String ontoFile = "client/cli/src/test/resources/test/simplemapping.owl";
-        String mappingFile = "client/cli/src/test/resources/test/simplemapping.obda";
-        String propertiesFile = "client/cli/src/test/resources/test/simplemapping.properties";
+        String outFile = "src/test/resources/output/simplemapping_materialzed_no_reasnoing.owl";
+        String ontoFile = "src/test/resources/test/simplemapping.owl";
+        String mappingFile = "src/test/resources/test/simplemapping.obda";
+        String propertiesFile = "src/test/resources/test/simplemapping.properties";
         Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile,
                 "-o", outFile, "--disable-reasoning", "-p", propertiesFile);
         assertEquals(3, numOfClassAssertions(outFile));

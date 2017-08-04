@@ -19,9 +19,9 @@ public class OntopBootstrapTest {
     public void testOntopBootstrap (){
         String[] argv = {"bootstrap",
                 "-b", "http://www.example.org/",
-                "-p", "client/cli/src/test/resources/books/exampleBooks.properties",
-                "-m", "client/cli/src/test/resources/output/exampleBooks-bootstrapped.obda",
-                "-t", "client/cli/src/test/resources/output/exampleBooks-bootstrapped.owl"
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-m", "src/test/resources/output/exampleBooks-bootstrapped.obda",
+                "-t", "src/test/resources/output/exampleBooks-bootstrapped.owl"
         };
         Ontop.main(argv);
     }

@@ -15,8 +15,8 @@ public class OntopOBDAToR2RMLTest {
     @Test
     public void testOntopOBDAToR2RML (){
         String[] argv = {"mapping", "to-r2rml",
-                "-i", "client/cli/src/test/resources/books/exampleBooks.obda",
-                "-t", "client/cli/src/test/resources/books/exampleBooks.owl"
+                "-i", "src/test/resources/books/exampleBooks.obda",
+                "-t", "src/test/resources/books/exampleBooks.owl"
         };
         Ontop.main(argv);
     }
@@ -24,9 +24,9 @@ public class OntopOBDAToR2RMLTest {
     @Test
     public void testOntopOBDAToR2RML2 (){
         String[] argv = {"mapping", "to-r2rml",
-                "-i", "client/cli/src/test/resources/mapping-northwind.obda",
-                "-t", "client/cli/src/test/resources/mapping-northwind.owl",
-                "-o", "client/cli/src/test/resources/output/mapping-northwind.r2rml"
+                "-i", "src/test/resources/mapping-northwind.obda",
+                "-t", "src/test/resources/mapping-northwind.owl",
+                "-o", "src/test/resources/output/mapping-northwind.r2rml"
         };
         Ontop.main(argv);
     }
@@ -34,8 +34,8 @@ public class OntopOBDAToR2RMLTest {
     @Test
     public void testOntopOBDAToR2RML_NoOntology (){
         String[] argv = {"mapping", "to-r2rml",
-                "-i", "client/cli/src/test/resources/books/exampleBooks.obda",
-                "-o", "client/cli/src/test/resources/output/exampleBooks.r2rml"
+                "-i", "src/test/resources/books/exampleBooks.obda",
+                "-o", "src/test/resources/output/exampleBooks.r2rml"
         };
         Ontop.main(argv);
     }
@@ -43,9 +43,9 @@ public class OntopOBDAToR2RMLTest {
     @Test
     public void testOntopOBDAToR2RML3 (){
         String[] argv = {"mapping", "to-r2rml",
-                "-i", "client/cli/src/test/resources/oreda_bootstrapped_mapping.obda",
-                "-t", "client/cli/src/test/resources/oreda_bootstrapped_ontology.owl",
-                "-o", "client/cli/src/test/resources/output/oreda_bootstrapped_mapping.r2rml"
+                "-i", "src/test/resources/oreda_bootstrapped_mapping.obda",
+                "-t", "src/test/resources/oreda_bootstrapped_ontology.owl",
+                "-o", "src/test/resources/output/oreda_bootstrapped_mapping.r2rml"
         };
         Ontop.main(argv);
     }
