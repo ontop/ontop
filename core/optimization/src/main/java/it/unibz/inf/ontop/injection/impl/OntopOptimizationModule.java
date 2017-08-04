@@ -42,28 +42,28 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bind(OntopOptimizationSettings.class).toInstance(configuration.getSettings());
 
         // Executors
-        bindFromPreferences(InnerJoinExecutor.class);
-        bindFromPreferences(SubstitutionPropagationExecutor.class);
-        bindFromPreferences(PushDownBooleanExpressionExecutor.class);
-        bindFromPreferences(PushUpBooleanExpressionExecutor.class);
-        bindFromPreferences(GroundTermRemovalFromDataNodeExecutor.class);
-        bindFromPreferences(PullVariableOutOfDataNodeExecutor.class);
-        bindFromPreferences(PullVariableOutOfSubTreeExecutor.class);
-        bindFromPreferences(RemoveEmptyNodesExecutor.class);
-        bindFromPreferences(UnionBasedQueryMerger.class);
-        bindFromPreferences(QueryMergingExecutor.class);
-        bindFromPreferences(UnionLiftExecutor.class);
-        bindFromPreferences(LeftJoinExecutor.class);
-        bindFromPreferences(ProjectionShrinkingExecutor.class);
-        bindFromPreferences(TrueNodeRemovalExecutor.class);
-        bindFromPreferences(FlattenUnionExecutor.class);
-        bindFromPreferences(ConstructionNodeCleaningExecutor.class);
-        bindFromPreferences(DatalogProgram2QueryConverter.class);
-        bindFromPreferences(QueryUnionSplitter.class);
-        bindFromPreferences(InnerJoinOptimizer.class);
-        bindFromPreferences(JoinLikeOptimizer.class);
-        bindFromPreferences(LeftJoinOptimizer.class);
-        bindFromPreferences(BindingLiftOptimizer.class);
+        bindFromSettings(InnerJoinExecutor.class);
+        bindFromSettings(SubstitutionPropagationExecutor.class);
+        bindFromSettings(PushDownBooleanExpressionExecutor.class);
+        bindFromSettings(PushUpBooleanExpressionExecutor.class);
+        bindFromSettings(GroundTermRemovalFromDataNodeExecutor.class);
+        bindFromSettings(PullVariableOutOfDataNodeExecutor.class);
+        bindFromSettings(PullVariableOutOfSubTreeExecutor.class);
+        bindFromSettings(RemoveEmptyNodesExecutor.class);
+        bindFromSettings(UnionBasedQueryMerger.class);
+        bindFromSettings(QueryMergingExecutor.class);
+        bindFromSettings(UnionLiftExecutor.class);
+        bindFromSettings(LeftJoinExecutor.class);
+        bindFromSettings(ProjectionShrinkingExecutor.class);
+        bindFromSettings(TrueNodeRemovalExecutor.class);
+        bindFromSettings(FlattenUnionExecutor.class);
+        bindFromSettings(ConstructionNodeCleaningExecutor.class);
+        bindFromSettings(DatalogProgram2QueryConverter.class);
+        bindFromSettings(QueryUnionSplitter.class);
+        bindFromSettings(InnerJoinOptimizer.class);
+        bindFromSettings(JoinLikeOptimizer.class);
+        bindFromSettings(LeftJoinOptimizer.class);
+        bindFromSettings(BindingLiftOptimizer.class);
 
         // Releases the configuration (enables some GC)
         this.configuration = null;

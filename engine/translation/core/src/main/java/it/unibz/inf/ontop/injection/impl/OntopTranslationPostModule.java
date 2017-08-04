@@ -36,7 +36,7 @@ public class OntopTranslationPostModule extends OntopAbstractModule {
             bind(QueryRewriter.class).to(DummyRewriter.class);
         }
 
-        bindFromPreferences(QueryCache.class);
+        bindFromSettings(QueryCache.class);
 
         Module reformulationFactoryModule = buildFactory(
                 ImmutableList.of(

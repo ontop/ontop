@@ -27,11 +27,11 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
     protected void configure() {
         bind(OntopMappingSQLSettings.class).toInstance(settings);
 
-        bindFromPreferences(SQLPPMappingFactory.class);
-        bindFromPreferences(SQLMappingParser.class);
-        bindFromPreferences(SQLPPMappingConverter.class);
-        bindFromPreferences(PreProcessedImplicitRelationalDBConstraintExtractor.class);
-        bindFromPreferences(MappingExtractor.class);
+        bindFromSettings(SQLPPMappingFactory.class);
+        bindFromSettings(SQLMappingParser.class);
+        bindFromSettings(SQLPPMappingConverter.class);
+        bindFromSettings(PreProcessedImplicitRelationalDBConstraintExtractor.class);
+        bindFromSettings(MappingExtractor.class);
 
         Module nativeQLFactoryModule = buildFactory(
                 ImmutableList.of(RDBMetadataExtractor.class),

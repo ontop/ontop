@@ -7,9 +7,6 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 
 import java.util.List;
 
-/**
- * TODO: add generic code about property analysis
- */
 public abstract class OntopAbstractModule extends AbstractModule {
 
     /**
@@ -71,7 +68,7 @@ public abstract class OntopAbstractModule extends AbstractModule {
     /**
      * To bind classes with default constructors.
      */
-    protected void bindFromPreferences(Class abstractClass) {
+    protected void bindFromSettings(Class abstractClass) {
         bind(abstractClass).to(getImplementation(abstractClass.getCanonicalName()));
     }
 
