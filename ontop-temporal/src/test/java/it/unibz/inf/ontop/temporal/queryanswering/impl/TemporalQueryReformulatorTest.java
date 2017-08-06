@@ -1,15 +1,7 @@
 package it.unibz.inf.ontop.temporal.queryanswering.impl;
 
-import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.DatalogProgramImpl;
-import it.unibz.inf.ontop.temporal.model.*;
-import it.unibz.inf.ontop.temporal.model.impl.*;
-import org.junit.Test;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-import java.time.Duration;
-import java.util.ArrayList;
+import org.junit.Test;
 
 public class TemporalQueryReformulatorTest {
 

@@ -1,7 +1,8 @@
 package it.unibz.inf.ontop.temporal.mapping;
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Variable;
+
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Variable;
 
 public interface TemporalMappingTarget {
 

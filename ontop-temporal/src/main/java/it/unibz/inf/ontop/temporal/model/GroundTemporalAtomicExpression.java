@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.temporal.model;
 
-import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.Term;
+
+import it.unibz.inf.ontop.model.term.Constant;
 
 import java.util.List;
 

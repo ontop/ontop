@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.temporal.iq.node;
 
-import it.unibz.inf.ontop.model.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.Variable;
+
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 public interface IntervalColumnsProjection {
     Variable getBeginInclusive();

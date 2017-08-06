@@ -1,18 +1,12 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.OntopEngineFactory;
-import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
-import it.unibz.inf.ontop.sql.RDBMetadata;
-import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.dbschema.RDBMetadata;
+import it.unibz.inf.ontop.model.OntopModelSingletons;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.temporal.model.*;
 import junit.framework.TestCase;
 import org.junit.Test;
@@ -29,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class SiemensUseCaseTest extends TestCase {
 
@@ -70,7 +63,7 @@ public class SiemensUseCaseTest extends TestCase {
         //DatalogMTL Program
 
         DatalogMTLFactory f = DatalogMTLFactoryImpl.getInstance();
-        OBDADataFactory odf = DATA_FACTORY;
+        TermFactory odf = OntopModelSingletons.TERM_FACTORY;
 
         TemporalRange rangeLRS = f.createTemporalRange(false, true, Duration.parse("PT0M"), Duration.parse("PT1M"));
         TemporalRange rangeHRS = f.createTemporalRange(false, true, Duration.parse("PT0S"), Duration.parse("PT30S"));
@@ -78,18 +71,18 @@ public class SiemensUseCaseTest extends TestCase {
         TemporalRange rangeDiamondInner = f.createTemporalRange(false, true, Duration.parse("PT0M"), Duration.parse("PT2M"));
         TemporalRange rangeDiamondOuter = f.createTemporalRange(false, true, Duration.parse("PT0M"), Duration.parse("PT10M"));
 
-        final Predicate conceptLRS = odf.getAtomPredicate("LowRotorSpeed", 1);
-        final Predicate conceptHRS = odf.getAtomPredicate("HighRotorSpeed", 1);
-        final Predicate conceptMFON = odf.getAtomPredicate("MainFlameOn", 1);
-        final Predicate dataPropertyRs = odf.getAtomPredicate("rotorSpeed", 2);
-        final Predicate conceptPIO = odf.getAtomPredicate("PurgingIsOver", 1);
+        final Predicate conceptLRS = odf.getClassPredicate("LowRotorSpeed");
+        final Predicate conceptHRS = odf.getClassPredicate("HighRotorSpeed");
+        final Predicate conceptMFON = odf.getClassPredicate("MainFlameOn");
+        final Predicate dataPropertyRs = odf.getObjectPropertyPredicate("rotorSpeed");
+        final Predicate conceptPIO = odf.getClassPredicate("PurgingIsOver");
 
-        final Predicate conceptTurbine = odf.getAtomPredicate("Turbine", 1);
-        final Predicate conceptTempSensor = odf.getAtomPredicate("TemperatureSensor",1);
-        final Predicate conceptRotSpeedSensor = odf.getAtomPredicate("RotationSpeedSensor", 1);
-        final Predicate objectPropertyIMB = odf.getAtomPredicate("isMonitoredBy", 2);
-        final Predicate objectPropertyIPO = odf.getAtomPredicate("isPartOf", 2);
-        final Predicate conceptCLTRS = odf.getAtomPredicate("ColocTempRotSensors", 3);
+        final Predicate conceptTurbine = odf.getClassPredicate("Turbine");
+        final Predicate conceptTempSensor = odf.getClassPredicate("TemperatureSensor");
+        final Predicate conceptRotSpeedSensor = odf.getClassPredicate("RotationSpeedSensor");
+        final Predicate objectPropertyIMB = odf.getObjectPropertyPredicate("isMonitoredBy");
+        final Predicate objectPropertyIPO = odf.getObjectPropertyPredicate("isPartOf");
+        final Predicate conceptCLTRS = odf.getClassPredicate("ColocTempRotSensors");
 
         final Variable varRs = odf.getVariable("rs");
         final Variable varTs = odf.getVariable("ts");

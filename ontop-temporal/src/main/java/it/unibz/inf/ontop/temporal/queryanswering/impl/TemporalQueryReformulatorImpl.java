@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.temporal.queryanswering.impl;
 
-import it.unibz.inf.ontop.sql.RDBMSMappingAxiom;
 import it.unibz.inf.ontop.temporal.mapping.TemporalMappingAxiom;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 import it.unibz.inf.ontop.temporal.model.TemporalQuery;

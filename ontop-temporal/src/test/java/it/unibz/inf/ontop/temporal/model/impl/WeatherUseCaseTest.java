@@ -1,14 +1,14 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.OntopModelSingletons;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.temporal.model.*;
 import org.junit.Test;
 
 import java.time.Duration;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class WeatherUseCaseTest {
 
@@ -19,10 +19,10 @@ public class WeatherUseCaseTest {
 
         TemporalRange range = f.createTemporalRange(true, true, Duration.parse("PT0H"), Duration.parse("PT1H"));
 
-        OBDADataFactory odf = DATA_FACTORY;
+        TermFactory odf = OntopModelSingletons.TERM_FACTORY;
 
-        final Predicate p1 = odf.getPredicate("Hurricane", 1);
-        final Predicate p2 = odf.getPredicate("HurricaneForceWind", 1);
+        final Predicate p1 = odf.getClassPredicate("Hurricane");
+        final Predicate p2 = odf.getClassPredicate("HurricaneForceWind");
 
         final Variable v1 = odf.getVariable("SID");
 
@@ -35,8 +35,8 @@ public class WeatherUseCaseTest {
 
         DatalogMTLRule rule1 = f.createRule(head, body);
 
-        final Predicate p3 = odf.getPredicate("LocatedInState", 2);
-        final Predicate p4 = odf.getPredicate("HurricaneAffectedState", 1);
+        final Predicate p3 = odf.getObjectPropertyPredicate("LocatedInState");
+        final Predicate p4 = odf.getClassPredicate("HurricaneAffectedState");
 
         final Variable v2 = odf.getVariable("state");
 
@@ -61,13 +61,13 @@ public class WeatherUseCaseTest {
 
         TemporalRange range = f.createTemporalRange(true, true, Duration.parse("PT0H"), Duration.parse("PT24H"));
 
-        OBDADataFactory odf = DATA_FACTORY;
+        TermFactory odf = OntopModelSingletons.TERM_FACTORY;
 
-        final Predicate p1 = odf.getPredicate("TempAbove24", 1);
-        final Predicate p2 = odf.getPredicate("TempAbove41", 1);
-        final Predicate p3 = odf.getPredicate("ExcessiveHeat", 1);
-        final Predicate p4 = odf.getPredicate("LocatedInCounty", 2);
-        final Predicate p5 = odf.getPredicate("HeatAffectedCounty", 2);
+        final Predicate p1 = odf.getClassPredicate("TempAbove24");
+        final Predicate p2 = odf.getClassPredicate("TempAbove41");
+        final Predicate p3 = odf.getClassPredicate("ExcessiveHeat");
+        final Predicate p4 = odf.getObjectPropertyPredicate("LocatedInCounty");
+        final Predicate p5 = odf.getClassPredicate("HeatAffectedCounty");
 
         final Variable v1 = odf.getVariable("SID");
         final Variable v2 = odf.getVariable("county");
@@ -101,12 +101,12 @@ public class WeatherUseCaseTest {
 
         TemporalRange range = f.createTemporalRange(true, true, Duration.parse("PT0M"), Duration.parse("PT30M"));
 
-        OBDADataFactory odf = DATA_FACTORY;
+        TermFactory odf = OntopModelSingletons.TERM_FACTORY;
 
-        final Predicate p1 = odf.getPredicate("Precipitation", 1);
-        final Predicate p2 = odf.getPredicate("NoPrecipitation", 1);
-        final Predicate p3 = odf.getPredicate("LocatedInCounty", 2);
-        final Predicate p4 = odf.getPredicate("ShoweryPatternCounty", 1);
+        final Predicate p1 = odf.getClassPredicate("Precipitation");
+        final Predicate p2 = odf.getClassPredicate("NoPrecipitation");
+        final Predicate p3 = odf.getObjectPropertyPredicate("LocatedInCounty");
+        final Predicate p4 = odf.getClassPredicate("ShoweryPatternCounty");
 
         final Variable v1 = odf.getVariable("SID1");
         final Variable v2 = odf.getVariable("SID2");
@@ -133,14 +133,14 @@ public class WeatherUseCaseTest {
 
         DatalogMTLFactory f = DatalogMTLFactoryImpl.getInstance();
 
-        OBDADataFactory odf = DATA_FACTORY;
+        TermFactory odf = OntopModelSingletons.TERM_FACTORY;
 
-        final Predicate p1 = odf.getPredicate("CyclonePatternState", 1);
-        final Predicate p2 = odf.getPredicate("LocatedInState", 2);
-        final Predicate p3 = odf.getPredicate("NorthWind", 1);
-        final Predicate p4 = odf.getPredicate("EastWind", 1);
-        final Predicate p5 = odf.getPredicate("SouthWind", 1);
-        final Predicate p6 = odf.getPredicate("WestWind", 1);
+        final Predicate p1 = odf.getClassPredicate("CyclonePatternState");
+        final Predicate p2 = odf.getObjectPropertyPredicate("LocatedInState");
+        final Predicate p3 = odf.getClassPredicate("NorthWind");
+        final Predicate p4 = odf.getClassPredicate("EastWind");
+        final Predicate p5 = odf.getClassPredicate("SouthWind");
+        final Predicate p6 = odf.getClassPredicate("WestWind");
 
         final Variable v1 = odf.getVariable("SID1");
         final Variable v2 = odf.getVariable("SID2");

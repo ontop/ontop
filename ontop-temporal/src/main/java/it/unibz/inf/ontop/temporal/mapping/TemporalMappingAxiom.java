@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.temporal.mapping;
 
-import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 
 import java.util.List;
 

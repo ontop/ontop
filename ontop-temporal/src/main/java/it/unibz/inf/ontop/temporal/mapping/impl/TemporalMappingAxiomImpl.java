@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.temporal.mapping.impl;
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.temporal.mapping.TemporalMappingAxiom;
 import it.unibz.inf.ontop.temporal.mapping.TemporalMappingInterval;
 import it.unibz.inf.ontop.temporal.mapping.TemporalMappingTarget;

@@ -4,20 +4,24 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
+import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.mapping.SQLMappingParser;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.parser.TargetQueryParser;
-import it.unibz.inf.ontop.parser.TargetQueryParserException;
-import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
-import it.unibz.inf.ontop.parser.UnparsableTargetQueryException;
-import it.unibz.inf.ontop.temporal.mapping.impl.SQLPPTemporalMappingAxiomImpl;
-import org.eclipse.rdf4j.model.Model;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
+import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
+import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
+import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
+import it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.temporal.mapping.impl.SQLPPTemporalTriplesMapImpl;
+import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import org.apache.commons.rdf.api.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +55,6 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
     private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(OntopNativeTemporalMappingParser.class);
 
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
 
@@ -59,10 +62,8 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
      * Create an SQL Temporal Mapping Parser for generating an OBDA model.
      */
     @Inject
-    public OntopNativeTemporalMappingParser(NativeQueryLanguageComponentFactory nativeQLFactory,
-                                     SpecificationFactory specificationFactory,
+    public OntopNativeTemporalMappingParser(SpecificationFactory specificationFactory,
                                      SQLPPMappingFactory ppMappingFactory) {
-        this.nativeQLFactory = nativeQLFactory;
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
     }
@@ -71,7 +72,7 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
     public SQLPPMapping parse(File file) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
         checkFile(file);
         try (Reader reader = new FileReader(file)) {
-            return load(reader, specificationFactory, nativeQLFactory, ppMappingFactory, file.getName());
+            return load(reader, specificationFactory, ppMappingFactory, file.getName());
         } catch (IOException e) {
             throw new MappingIOException(e);
         }
@@ -83,8 +84,9 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
     }
 
     @Override
-    public SQLPPMapping parse(Model mappingGraph) throws InvalidMappingException, DuplicateMappingException {
-        return null;
+    public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException, DuplicateMappingException {
+        throw new IllegalArgumentException("The Ontop native temporal mapping language has no RDF serialization. Passing a RDF graph" +
+                "to the OntopNativeTemporalMappingParser is thus invalid.");
     }
 
     private static void checkFile(File file) throws MappingIOException {
@@ -98,12 +100,11 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
     }
 
     private static SQLPPMapping load(Reader reader, SpecificationFactory specificationFactory,
-                                     NativeQueryLanguageComponentFactory nativeQLFactory,
                                      SQLPPMappingFactory ppMappingFactory, String fileName)
             throws MappingIOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
 
         final Map<String, String> prefixes = new HashMap<>();
-        final List<SQLPPMappingAxiom> mappings = new ArrayList<>();
+        final List<SQLPPTriplesMap> mappings = new ArrayList<>();
         final List<Indicator> invalidMappingIndicators = new ArrayList<>();
 
         List<TargetQueryParser> parsers = null;
@@ -144,8 +145,7 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
                         if (parsers == null) {
                             parsers = createParsers(ImmutableMap.copyOf(prefixes));
                         }
-                        mappings.addAll(readMappingDeclaration(lineNumberReader, parsers, invalidMappingIndicators,
-                                nativeQLFactory));
+                        mappings.addAll(readMappingDeclaration(lineNumberReader, parsers, invalidMappingIndicators));
                     } else {
                         throw new IOException("Unknown syntax: " + line);
                     }
@@ -164,15 +164,15 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
             throw new InvalidMappingExceptionWithIndicator(invalidMappingIndicators);
         }
 
-        PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.copyOf(prefixes));
-        ImmutableList<SQLPPMappingAxiom> mappingAxioms = ImmutableList.copyOf(mappings);
+        it.unibz.inf.ontop.spec.mapping.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.copyOf(prefixes));
+        ImmutableList<SQLPPTriplesMap> mappingAxioms = ImmutableList.copyOf(mappings);
 
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                 mappingAxioms.stream()
-                        .flatMap(ax -> ax.getTargetQuery().stream())
-                        .flatMap(atom -> atom.getTerms().stream())
-                        .filter(t -> t instanceof Function)
-                        .map(t -> (Function) t));
+                        .flatMap(ax -> ax.getTargetAtoms().stream())
+                        .flatMap(atom -> atom.getArguments().stream())
+                        .filter(t -> t instanceof ImmutableFunctionalTerm)
+                        .map(t -> (ImmutableFunctionalTerm) t));
 
         MappingMetadata metadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
         return ppMappingFactory.createSQLPreProcessedMapping(mappingAxioms, metadata);
@@ -189,7 +189,6 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
         parsers.add(new TurtleOBDASyntaxParser(prefixes));
         return ImmutableList.copyOf(parsers);
     }
-
 
     /*
      * Helper methods related to load file.
@@ -213,17 +212,16 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
      * @return The updated mapping set of the current source
      * @throws IOException
      */
-    private static List<SQLPPTemporalMappingAxiom> readMappingDeclaration(LineNumberReader reader,
-                                                                  List<TargetQueryParser> parsers,
-                                                                  List<Indicator> invalidMappingIndicators,
-                                                                  NativeQueryLanguageComponentFactory nativeQLFactory)
+    private static List<SQLPPTemporalTriplesMap> readMappingDeclaration(LineNumberReader reader,
+                                                                        List<TargetQueryParser> parsers,
+                                                                        List<Indicator> invalidMappingIndicators)
             throws IOException {
-        List<SQLPPTemporalMappingAxiom> currentSourceMappings = new ArrayList<>();
+        List<SQLPPTemporalTriplesMap> currentSourceMappings = new ArrayList<>();
 
         String mappingId = "";
         String currentLabel = ""; // the reader is working on which label
         StringBuffer sourceQuery = null;
-        List<Function> targetQuery = null;
+        ImmutableList<ImmutableFunctionalTerm> targetQuery = null;
         TemporalMappingInterval intevalQuery = null;
         int wsCount = 0;  // length of whitespace used as the separator
         boolean isMappingValid = true; // a flag to load the mapping to the model if valid
@@ -238,8 +236,7 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
                     // Save the mapping to the model (if valid) at this point
                     if (isMappingValid) {
                         currentSourceMappings =
-                                addNewMapping(mappingId, sourceQuery.toString(), targetQuery, intevalQuery, currentSourceMappings,
-                                        nativeQLFactory);
+                                addNewMapping(mappingId, sourceQuery.toString(), targetQuery, intevalQuery, currentSourceMappings);
                         mappingId = "";
                         sourceQuery = null;
                         targetQuery = null;
@@ -323,17 +320,16 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
         // Save the last mapping entry to the model
         if (!mappingId.isEmpty() && isMappingValid) {
             currentSourceMappings = addNewMapping(mappingId, sourceQuery.toString(), targetQuery, intevalQuery,
-                    currentSourceMappings, nativeQLFactory);
+                    currentSourceMappings);
         }
 
         return currentSourceMappings;
     }
     //TODO: extend NativeQueryLanguageComponentFactory to support creating temporal mapping axioms
     //TODO: replace TemporalMappingFactory with NativeQueryLanguageComponentFactory
-    private static List<SQLPPTemporalMappingAxiom> addNewMapping(String mappingId, String sourceQuery, List<Function> targetQuery, TemporalMappingInterval intervalQuery,
-                                                         List<SQLPPTemporalMappingAxiom> currentSourceMappings,
-                                                         NativeQueryLanguageComponentFactory nativeQLFactory) {
-        SQLPPTemporalMappingAxiom mapping = new SQLPPTemporalMappingAxiomImpl(mappingId, SQL_MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery, intervalQuery);
+    private static List<SQLPPTemporalTriplesMap> addNewMapping(String mappingId, String sourceQuery, ImmutableList<ImmutableFunctionalTerm> targetQuery, TemporalMappingInterval intervalQuery,
+                                                               List<SQLPPTemporalTriplesMap> currentSourceMappings) {
+        SQLPPTemporalTriplesMap mapping = new SQLPPTemporalTriplesMapImpl(mappingId, SQL_MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery, intervalQuery);
         if (!currentSourceMappings.contains(mapping)) {
             currentSourceMappings.add(mapping);
         }
@@ -343,12 +339,12 @@ public class OntopNativeTemporalMappingParser implements SQLMappingParser {
         return currentSourceMappings;
     }
 
-    private static List<Function> loadTargetQuery(String targetString,
-                                                  List<TargetQueryParser> parsers) throws UnparsableTargetQueryException {
+    private static ImmutableList<ImmutableFunctionalTerm> loadTargetQuery(String targetString,
+                                                                          List<TargetQueryParser> parsers) throws it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException {
         Map<TargetQueryParser, TargetQueryParserException> exceptions = new HashMap<>();
         for (TargetQueryParser parser : parsers) {
             try {
-                List<Function> parse = parser.parse(targetString);
+                ImmutableList<ImmutableFunctionalTerm> parse = parser.parse(targetString);
                 return parse;
             } catch (TargetQueryParserException e) {
                 exceptions.put(parser, e);

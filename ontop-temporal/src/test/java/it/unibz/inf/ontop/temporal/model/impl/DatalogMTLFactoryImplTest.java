@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.OntopModelSingletons;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLFactory;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
@@ -16,7 +17,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class DatalogMTLFactoryImplTest {
 
@@ -29,12 +29,12 @@ public class DatalogMTLFactoryImplTest {
 
         TemporalRange range2 = f.createTemporalRange(true, true, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"));
 
-        OBDADataFactory odf = DATA_FACTORY;
+        TermFactory odf = OntopModelSingletons.TERM_FACTORY;
 
-        final Predicate p1 = odf.getPredicate("P1", 1);
-        final Predicate p2 = odf.getPredicate("P2", 2);
-        final Predicate p3 = odf.getPredicate("P3", 1);
-        final Predicate p4 = odf.getPredicate("P4", 1);
+        final Predicate p1 = odf.getClassPredicate("P1");
+        final Predicate p2 = odf.getObjectPropertyPredicate("P2");
+        final Predicate p3 = odf.getClassPredicate("P3");
+        final Predicate p4 = odf.getClassPredicate("P4");
 
         final Variable v1 = odf.getVariable("v1");
         final Variable v2 = odf.getVariable("v2");
@@ -69,9 +69,9 @@ public class DatalogMTLFactoryImplTest {
 
         TemporalRange range2 = f.createTemporalRange(true, true, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"));
 
-        OBDADataFactory odf = DATA_FACTORY;
+        TermFactory odf = OntopModelSingletons.TERM_FACTORY;
 
-        final Predicate p1 = odf.getPredicate("P1", 1);
+        final Predicate p1 = odf.getClassPredicate("P1");
         final Predicate p2 = odf.getPredicate("P2", 2);
         final Predicate p3 = odf.getPredicate("P3", 1);
         final Predicate p4 = odf.getPredicate("P4", 1);

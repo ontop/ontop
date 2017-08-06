@@ -1,18 +1,17 @@
 package it.unibz.inf.ontop.temporal.mapping;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.OntopModelSingletons;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.temporal.mapping.impl.TemporalMappingIntervalImpl;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
-
 public class IntervalQueryParser {
 
     public static TemporalMappingInterval parse(String input){
-        OBDADataFactory odf = DATA_FACTORY;
+        TermFactory odf = OntopModelSingletons.TERM_FACTORY;
         boolean beginInclusive = false;
         boolean endInclusive = false;
         Variable begin;

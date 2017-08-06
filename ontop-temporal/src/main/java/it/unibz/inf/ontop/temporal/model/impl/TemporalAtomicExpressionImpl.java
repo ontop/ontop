@@ -1,7 +1,8 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Term;
+
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.temporal.model.TemporalAtomicExpression;
 
 import java.util.Arrays;
