@@ -191,6 +191,17 @@ public class SQLMappingExtractor implements MappingExtractor {
     }
 
     private Connection createConnection() throws SQLException {
+
+        // HACKY(xiao): This part is still necessary for Tomcat.
+        // Otherwise, JDBC drivers are not initialized by default.
+        settings.getJdbcDriver().ifPresent(className -> {
+            try {
+                Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+
         return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
     }
 
