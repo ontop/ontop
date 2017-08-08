@@ -9,7 +9,7 @@ import java.io.Reader;
 public interface OntopMappingSQLTemporalConfiguration extends OntopMappingSQLAllConfiguration {
 
     @Override
-    OntopMappingSQLAllSettings getSettings();
+    OntopMappingSQLTemporalSettings getSettings();
 
     static Builder<? extends OntopMappingSQLTemporalConfiguration.Builder> defaultBuilder() {
         return new OntopMappingSQLTemporalConfigurationImpl.BuilderImpl<>();

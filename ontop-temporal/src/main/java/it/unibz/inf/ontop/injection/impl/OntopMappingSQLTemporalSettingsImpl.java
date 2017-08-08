@@ -19,10 +19,10 @@ public class OntopMappingSQLTemporalSettingsImpl extends OntopMappingSQLSettings
         String defaultFile = DEFAULT_OBDA_PROPERTIES_FILE;
         if(isR2rml)
             defaultFile = DEFAULT_R2RML_PROPERTIES_FILE;
-        if(isTemporal)
-            defaultFile = DEFAULT_TOBDA_PROPERTIES_FILE;
-
-        Properties properties = loadDefaultPropertiesFromFile(OntopMappingSQLAllSettings.class, defaultFile);
+        Properties properties = loadDefaultPropertiesFromFile(OntopMappingSQLTemporalSettings.class, defaultFile);
+        if(isTemporal) {
+            properties.putAll(loadDefaultPropertiesFromFile(OntopMappingSQLTemporalSettings.class, DEFAULT_TOBDA_PROPERTIES_FILE));
+        }
         properties.putAll(userPreferences);
         return properties;
     }

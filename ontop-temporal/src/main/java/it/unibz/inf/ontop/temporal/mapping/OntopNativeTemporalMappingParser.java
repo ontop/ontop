@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
@@ -31,10 +31,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator.*;
+import static it.unibz.inf.ontop.exception.InvalidMappingTemporalExceptionwithIndicator.*;
 
 
-public class OntopNativeTemporalMappingParser implements SQLMappingParser {
+public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
 
     protected enum Label {
         /* Source decl.: */sourceUri, connectionUrl, username, password, driverClass,

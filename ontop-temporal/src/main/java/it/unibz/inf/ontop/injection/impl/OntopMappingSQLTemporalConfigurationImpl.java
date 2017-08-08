@@ -1,11 +1,13 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.inject.Module;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLTemporalSettings;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
+import it.unibz.inf.ontop.spec.TOBDASpecInput;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.injection.OntopMappingSQLTemporalConfiguration;
@@ -20,6 +22,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLConfigurationImpl implements OntopMappingSQLTemporalConfiguration {
 
@@ -30,6 +33,16 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
         super(settings, options.mappingSQLOptions);
         this.settings = settings;
         this.options = options;
+    }
+
+    /**
+     * To be overloaded
+     *
+     */
+    @Override
+    protected Stream<Module> buildGuiceModules() {
+        return Stream.concat(super.buildGuiceModules(),
+                Stream.of(new OntopTemporalModule(this)));
     }
 
     @Override
@@ -46,6 +59,7 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
             throws OBDASpecificationException {
 
         return loadSpecification(ontologySupplier,
+                () -> options.temporalMappingFile,
                 () -> options.mappingFile,
                 () -> options.mappingReader,
                 () -> options.mappingGraph,
@@ -53,6 +67,7 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
+                                        Supplier<Optional<File>> temporalMappingFileSupplier,
                                         Supplier<Optional<File>> mappingFileSupplier,
                                         Supplier<Optional<Reader>> mappingReaderSupplier,
                                         Supplier<Optional<Graph>> mappingGraphSupplier,
@@ -61,6 +76,7 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
         return loadSpecification(
                 ontologySupplier,
                 () -> options.mappingSQLOptions.ppMapping.map(m -> (PreProcessedMapping) m),
+                temporalMappingFileSupplier,
                 mappingFileSupplier,
                 mappingReaderSupplier,
                 mappingGraphSupplier,
@@ -70,6 +86,7 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
                                         Supplier<Optional<PreProcessedMapping>> ppMappingSupplier,
+                                        Supplier<Optional<File>> temporalMappingFileSupplier,
                                         Supplier<Optional<File>> mappingFileSupplier,
                                         Supplier<Optional<Reader>> mappingReaderSupplier,
                                         Supplier<Optional<Graph>> mappingGraphSupplier,
@@ -85,7 +102,7 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
          */
         Optional<PreProcessedMapping> optionalPPMapping = ppMappingSupplier.get();
 
-        OBDASpecInput.Builder specInputBuilder = OBDASpecInput.defaultBuilder();
+        TOBDASpecInput.Builder specInputBuilder = TOBDASpecInput.defaultBuilder();
         constraintFileSupplier.get()
                 .ifPresent(specInputBuilder::addConstraintFile);
 
@@ -100,9 +117,17 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
          * Mapping file
          */
         Optional<File> optionalMappingFile = mappingFileSupplier.get();
+
         if (optionalMappingFile.isPresent()) {
             specInputBuilder.addMappingFile(optionalMappingFile.get());
+        }
 
+        Optional<File> optionalTemporalMappingFile = temporalMappingFileSupplier.get();
+        if (optionalTemporalMappingFile.isPresent()) {
+            specInputBuilder.addTemporalMappingFile(optionalTemporalMappingFile.get());
+        }
+
+        if (optionalTemporalMappingFile.isPresent() || optionalMappingFile.isPresent()) {
             return extractor.extract(specInputBuilder.build(), optionalMetadata, optionalOntology,
                     getExecutorRegistry());
         }
@@ -383,7 +408,7 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
     }
 
     protected abstract static class OntopMappingSQLTemporalBuilderMixin<B extends OntopMappingSQLTemporalConfiguration.Builder<B>>
-            extends OntopMappingSQLAllConfigurationImpl.OntopMappingSQLAllBuilderMixin<B>
+            extends OntopMappingSQLBuilderMixin<B>
             implements OntopMappingSQLTemporalConfiguration.Builder<B> {
 
         private final OntopMappingSQLTemporalConfigurationImpl.StandardMappingSQLTemporalBuilderFragment<B> localFragmentBuilder;
@@ -410,9 +435,53 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
             return localFragmentBuilder.nativeOntopTemporalMappingReader(mappingReader);
         }
 
+        @Override
+        public B nativeOntopMappingFile(@Nonnull File mappingFile) {
+            return localFragmentBuilder.nativeOntopMappingFile(mappingFile);
+        }
+
+        @Override
+        public B nativeOntopMappingFile(@Nonnull String mappingFilename) {
+            return localFragmentBuilder.nativeOntopMappingFile(mappingFilename);
+        }
+
+        @Override
+        public B nativeOntopMappingReader(@Nonnull Reader mappingReader) {
+            return localFragmentBuilder.nativeOntopMappingReader(mappingReader);
+        }
+
+        @Override
+        public B r2rmlMappingFile(@Nonnull File mappingFile) {
+            return localFragmentBuilder.r2rmlMappingFile(mappingFile);
+        }
+
+        @Override
+        public B r2rmlMappingFile(@Nonnull String mappingFilename) {
+            return localFragmentBuilder.r2rmlMappingFile(mappingFilename);
+        }
+
+        @Override
+        public B r2rmlMappingReader(@Nonnull Reader mappingReader) {
+            return localFragmentBuilder.r2rmlMappingReader(mappingReader);
+        }
+
+        @Override
+        public B r2rmlMappingGraph(@Nonnull Graph rdfGraph) {
+            return localFragmentBuilder.r2rmlMappingGraph(rdfGraph);
+        }
+
+        @Override
+        public B basicImplicitConstraintFile(@Nonnull File constraintFile) {
+            return localFragmentBuilder.basicImplicitConstraintFile(constraintFile);
+        }
+
+        @Override
+        public B basicImplicitConstraintFile(@Nonnull String constraintFilename) {
+            return localFragmentBuilder.basicImplicitConstraintFile(constraintFilename);
+        }
+
         final OntopMappingSQLTemporalConfigurationImpl.OntopMappingSQLTemporalOptions generateMappingSQLTemporalOptions() {
-            OntopMappingSQLOptions sqlMappingOptions = generateMappingSQLAllOptions().mappingSQLOptions;
-            return localFragmentBuilder.generateMappingSQLTemporalOptions(sqlMappingOptions);
+            return localFragmentBuilder.generateMappingSQLTemporalOptions(generateMappingSQLOptions());
         }
 
         @Override
@@ -423,6 +492,10 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
         }
 
         boolean isTemporal(){return localFragmentBuilder.isTemporal();}
+
+        boolean isR2rml() {
+            return localFragmentBuilder.isR2rml();
+        }
 
         void declareImplicitConstraintSetDefined() {
             if (isImplicitConstraintSetDefined)
