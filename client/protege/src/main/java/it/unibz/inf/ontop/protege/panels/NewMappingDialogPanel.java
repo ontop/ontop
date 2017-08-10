@@ -189,12 +189,11 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 				try {
 					OBDAModel mapcon = obdaModel;
 					URI sourceID = dataSource.getSourceID();
-					System.out.println(sourceID.toString()+" \n");
 
 					OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source.trim());
-					System.out.println(body.toString()+" \n");
 
 					String newId = txtMappingID.getText().trim();
+					log.info("Insert Mapping: \n"+ target + "\n" + source);
 
 					if (mapping == null) {
 						// Case when we are creating a new mapping
