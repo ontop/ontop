@@ -101,7 +101,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                         @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
 
-        if(ontology.isPresent() != saturatedTBox.isPresent()){
+        if (ontology.isPresent() != saturatedTBox.isPresent()) {
             throw new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG);
         }
         return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, ontology, saturatedTBox,
@@ -110,9 +110,8 @@ public class SQLMappingExtractor implements MappingExtractor {
 
     /**
      * Converts the PPMapping into a Mapping.
-     *
+     * <p>
      * During the conversion, data types are inferred and mapping assertions are validated
-     *
      */
     private MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
                                                   OBDASpecInput specInput, Optional<Ontology> optionalOntology,
@@ -172,20 +171,19 @@ public class SQLMappingExtractor implements MappingExtractor {
         try (Connection localConnection = createConnection()) {
             return isDBMetadataProvided
                     ? dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata.get(),
-                            specInput.getConstraintFile())
+                    specInput.getConstraintFile())
                     : dbMetadataExtractor.extract(ppMapping, localConnection, specInput.getConstraintFile());
         }
         /*
          * Problem while creating the connection
-         */
-        catch (SQLException e) {
+         */ catch (SQLException e) {
             throw new DBMetadataExtractionException(e.getMessage());
         }
     }
 
     /**
      * Validation:
-     *    - Mismatch between the ontology and the mapping
+     * - Mismatch between the ontology and the mapping
      */
     private void validateMapping(Optional<Ontology> optionalOntology, Optional<TBoxReasoner> optionalSaturatedTBox,
                                  MappingWithProvenance filledProvMapping) throws MappingOntologyMismatchException {
@@ -200,34 +198,41 @@ public class SQLMappingExtractor implements MappingExtractor {
 
     private Connection createConnection() throws SQLException {
 
-        // HACKY(xiao): This part is still necessary for Tomcat.
-        // Otherwise, JDBC drivers are not initialized by default.
-        settings.getJdbcDriver().ifPresent(className -> {
-            try {
-                Class.forName(className);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        });
+        try {
+            // This should work in most cases (e.g. from CLI, Protege, or Jetty)
+            return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
+        } catch (SQLException ex) {
+            // HACKY(xiao): This part is still necessary for Tomcat.
+            // Otherwise, JDBC drivers are not initialized by default.
+            settings.getJdbcDriver().ifPresent(className -> {
+                try {
+                    Class.forName(className);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            });
 
-        return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
+            return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
+        }
+
+
     }
 
     private SQLPPMapping castPPMapping(PreProcessedMapping ppMapping) {
-        if(ppMapping instanceof SQLPPMapping){
+        if (ppMapping instanceof SQLPPMapping) {
             return (SQLPPMapping) ppMapping;
         }
-        throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName()+" only supports instances of " +
+        throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName() + " only supports instances of " +
                 SQLPPMapping.class.getSimpleName());
     }
 
     private Optional<RDBMetadata> castDBMetadata(@Nonnull Optional<DBMetadata> optionalDBMetadata) {
-        if(optionalDBMetadata.isPresent()){
+        if (optionalDBMetadata.isPresent()) {
             DBMetadata md = optionalDBMetadata.get();
-            if(optionalDBMetadata.get() instanceof RDBMetadata){
+            if (optionalDBMetadata.get() instanceof RDBMetadata) {
                 return Optional.of((RDBMetadata) md);
             }
-            throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName()+" only supports instances of " +
+            throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName() + " only supports instances of " +
                     RDBMetadata.class.getSimpleName());
         }
         return Optional.empty();
