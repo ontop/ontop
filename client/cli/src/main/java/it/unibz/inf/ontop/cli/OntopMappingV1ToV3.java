@@ -12,7 +12,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
-import javafx.util.Pair;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
@@ -283,7 +282,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                     for (Resource mapping : logicalTable.keySet())
                         performRenamingInTemplates(mapping);
 
-                    Map<Pair<String, String>, List<Resource>> idmap = new HashMap<>();
+                    Map<String, List<Resource>> idmap = new HashMap<>();
                     for (Resource mapping : TripleMap) {
                         Resource lt = logicalTable.get(mapping);
                         String sql = sqlQuery.get(lt);
@@ -295,9 +294,9 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                         if (tmpl == null)
                             tmpl = column.get(subj);
 
-                        Pair<String, String> key = new Pair(sql, tmpl);
+                        String key = sql+tmpl;
                         if (!idmap.containsKey(key))
-                            idmap.put(key, new ArrayList<Resource>());
+                            idmap.put(key, new ArrayList<>());
                         idmap.get(key).add(mapping);
                     }
 
