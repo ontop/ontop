@@ -22,23 +22,23 @@ package it.unibz.inf.ontop.owlapi.impl;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
+import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.reformulation.input.AskQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
+import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.answering.connection.OntopConnection;
-import it.unibz.inf.ontop.answering.connection.OntopStatement;
-import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -160,6 +160,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		version = extractVersion();
 
 		prepareReasoner();
+
     }
 
 
@@ -204,7 +205,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			log.debug(e.getMessage());
 		}
 
-		log.debug("Initializing a new Quest instance...");
+		log.info("Initializing a new Quest instance...");
 
 
 		// pm.reasonerTaskStarted("Classifying...");
@@ -216,7 +217,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		// Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 
 		questready = true;
-		log.debug("Ontop has completed the setup and it is ready for query answering!");
+
 	}
 
 	@Override

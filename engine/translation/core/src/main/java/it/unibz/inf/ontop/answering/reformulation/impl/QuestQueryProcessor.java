@@ -1,45 +1,42 @@
 package it.unibz.inf.ontop.answering.reformulation.impl;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.QueryCache;
+import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
+import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
-import it.unibz.inf.ontop.datalog.InternalSparqlQuery;
-import it.unibz.inf.ontop.datalog.SPARQLQueryFlattener;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
+import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
+import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopTranslationException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.injection.OntopTranslationSettings;
 import it.unibz.inf.ontop.injection.TranslationFactory;
-import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
-import it.unibz.inf.ontop.answering.reformulation.QueryCache;
-import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.iq.optimizer.*;
-import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
-import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.datalog.DatalogProgramRenderer;
-
-import java.util.*;
-
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.atom.PredicateConstants.ONTOP_QUERY;
@@ -87,6 +84,12 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 
+		if(log.isDebugEnabled()){
+
+			String saturatedMappings = Joiner.on("\n").join(saturatedMapping.getQueries());
+			log.debug("Mapping: \n{}",saturatedMappings);
+		}
+
 		this.queryUnfolder = translationFactory.create(saturatedMapping);
 
 		this.vocabularyValidator = new VocabularyValidator(obdaSpecification.getSaturatedTBox(),
@@ -99,6 +102,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.queryCache = queryCache;
 		this.executorRegistry = executorRegistry;
 		this.datalogConverter = datalogConverter;
+
+		log.info("Ontop has completed the setup and it is ready for query answering!");
 	}
 	
 	private DatalogProgram translateAndPreProcess(InputQuery inputQuery)

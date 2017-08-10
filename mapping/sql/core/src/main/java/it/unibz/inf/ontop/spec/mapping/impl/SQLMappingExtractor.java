@@ -9,21 +9,23 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
+import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
+import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
+import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
+import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
-import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
+import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
+import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
-import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
-import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import org.apache.commons.rdf.api.Graph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -45,6 +47,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final OntopMappingSQLSettings settings;
     private final MappingDatatypeFiller mappingDatatypeFiller;
+    private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
@@ -119,6 +122,11 @@ public class SQLMappingExtractor implements MappingExtractor {
 
 
         RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
+
+        log.debug("DB Metadata: \n{}", dbMetadata);
+
+        log.debug(dbMetadata.printKeys());
+
         SQLPPMapping expandedPPMapping = expandPPMapping(ppMapping, settings, dbMetadata);
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)
