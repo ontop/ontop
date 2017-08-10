@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDAMappingListener;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 
 import javax.swing.*;
 import java.net.URI;
@@ -126,7 +126,7 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 	}
 
 	@Override
-	public void mappingUpdated(URI srcid) {
+	public void mappingUpdated() {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 

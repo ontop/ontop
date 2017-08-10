@@ -278,11 +278,7 @@ public class OBDAModelManager implements Disposable {
 					}
 				}
 
-				if (idx + 1 >= changes.size()) {
-					continue;
-				}
-
-				if (change instanceof RemoveAxiom && changes.get(idx + 1) instanceof AddAxiom) {
+				 if (idx + 1 < changes.size() && change instanceof RemoveAxiom && changes.get(idx + 1) instanceof AddAxiom) {
 
 					// Found the pattern of a renaming refactoring
 					RemoveAxiom remove = (RemoveAxiom) change;
@@ -301,6 +297,11 @@ public class OBDAModelManager implements Disposable {
 					// Found the pattern of a deletion
 					OWLDeclarationAxiom declaration = (OWLDeclarationAxiom) change.getAxiom();
 					OWLEntity removedEntity = declaration.getEntity();
+
+					if(removedEntity.getIRI().toQuotedString().equals("<http://www.unibz.it/inf/obdaplugin#RandomClass6677841155>")){
+						//Hack this has been done just to trigger a change int the ontology
+						continue;
+					 }
 					removals.add(removedEntity);
 				}
 			}
@@ -790,7 +791,7 @@ public class OBDAModelManager implements Disposable {
 		}
 
 		@Override
-		public void mappingUpdated(URI srcuri) {
+		public void mappingUpdated() {
 			triggerOntologyChanged();
 
 		}
