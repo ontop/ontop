@@ -22,13 +22,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
-import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
-import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.validation.SQLSourceQueryValidator;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -36,6 +30,11 @@ import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.SynchronizedMappingListModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
 import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.validation.SQLSourceQueryValidator;
+import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -505,7 +504,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	private void menuValidateBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateBodyActionPerformed
 		final MappingValidationDialog outputField = new MappingValidationDialog(mappingsTree);
 
-		outputField.setLocationRelativeTo(this);
+		outputField.setLocationRelativeTo(getParent());
 		Runnable action = () -> {
             canceled = false;
             final List path = mappingList.getSelectedValuesList();
@@ -521,7 +520,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
                 OntopSQLCoreConfiguration config = OntopSQLCoreConfiguration.defaultBuilder()
                         .properties(DataSource2PropertiesConvertor.convert(selectedSource))
                         .build();
-                validator = new SQLSourceQueryValidator(config.getSettings(), (OBDASQLQuery)o.getSourceQuery());
+                validator = new SQLSourceQueryValidator(config.getSettings(), o.getSourceQuery());
                 long timestart = System.nanoTime();
 
                 if (canceled) {
@@ -566,7 +565,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
                 }
                 try {
                     canceled = true;
-                    validator.cancelValidation();
+                    if(validator !=null) {
+                        validator.cancelValidation();
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
