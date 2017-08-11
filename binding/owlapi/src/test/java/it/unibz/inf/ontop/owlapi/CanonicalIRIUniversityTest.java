@@ -45,7 +45,7 @@ public class CanonicalIRIUniversityTest {
     private OntopOWLConnection conn;
     Connection sqlConnection;
 
-    private static final String JDBC_URL =  "jdbc:h2:mem:university";
+    private static final String JDBC_URL =  "jdbc:h2:mem:uni";
     private static final String JDBC_USER =  "sa";
     private static final String JDBC_PASSWORD =  "";
 
