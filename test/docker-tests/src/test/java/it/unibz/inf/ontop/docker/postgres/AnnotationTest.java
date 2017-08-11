@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.docker.postgres;
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,9 @@ import java.io.FileReader;
  *
  *
  */
+
+// FIXME(sarah)
+@Ignore("ignore for v3-beta-1 release")
 public class AnnotationTest extends AbstractVirtualModeTest {
 
     Logger log = LoggerFactory.getLogger(this.getClass());
