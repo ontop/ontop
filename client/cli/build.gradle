@@ -1,0 +1,18 @@
+description = ''
+dependencies {
+    compile group: 'eu.optique-project', name: 'r2rml-api-jena-binding', version: '0.6.0'
+    compile(group: 'org.apache.jena', name: 'jena-arq', version: '3.1.1') {
+        exclude(module: 'slf4j-log4j12')
+        exclude(module: 'log4j')
+    }
+    compile group: 'org.apache.commons', name: 'commons-rdf-jena', version: '0.3.0-incubating'
+    compile project(':ontop-binding:ontop-owlapi')
+    compile project(':ontop-binding:ontop-rdf4j')
+    compile project(':ontop-mapping:ontop-mapping-sql:ontop-mapping-sql-all')
+    compile project(':ontop-engine:ontop-system:ontop-system-sql:ontop-system-sql-owlapi')
+    compile group: 'com.github.rvesse', name: 'airline', version: '2.3.0'
+    compile group: 'com.github.rvesse', name: 'airline-help-bash', version: '2.3.0'
+    testCompile group: 'mysql', name: 'mysql-connector-java', version: '5.1.35'
+    testCompile group: 'org.postgresql', name: 'postgresql', version: '42.0.0'
+    testCompile group: 'com.h2database', name: 'h2', version: '1.4.190'
+}

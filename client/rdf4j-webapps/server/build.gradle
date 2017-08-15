@@ -1,0 +1,11 @@
+
+apply plugin: 'war'
+
+description = 'ontop-rdf4j-server'
+dependencies {
+    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-http-server', version:'2.2.2'
+  compile project(':ontop-client:ontop-rdf4j-webapps:ontop-rdf4j-config-sql')
+    providedCompile group: 'javax.servlet', name: 'servlet-api', version:'2.5'
+    providedCompile group: 'org.eclipse.rdf4j', name: 'rdf4j-runtime', version:'2.2.2'
+    providedCompile group: 'org.eclipse.rdf4j', name: 'rdf4j-config', version:'2.2.2'
+}

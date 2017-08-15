@@ -1,0 +1,91 @@
+rootProject.name = 'ontop'
+
+include ':ontop-binding:ontop-owlapi'
+include ':ontop-binding:ontop-rdf4j'
+include ':ontop-binding'
+include ':ontop-build:ontop-distribution'
+include ':ontop-build'
+include ':ontop-client:ontop-cli'
+include ':ontop-client:ontop-protege'
+include ':ontop-client:ontop-rdf4j-webapps:ontop-rdf4j-workbench'
+include ':ontop-client:ontop-rdf4j-webapps:ontop-rdf4j-server'
+include ':ontop-client:ontop-rdf4j-webapps:ontop-rdf4j-config-sql'
+include ':ontop-client:ontop-rdf4j-webapps'
+include ':ontop-client'
+include ':ontop-core:ontop-model'
+include ':ontop-core:ontop-obda-core'
+include ':ontop-core:ontop-optimization'
+include ':ontop-core'
+include ':ontop-db:ontop-rdb'
+include ':ontop-db'
+include ':ontop-engine:ontop-translation:ontop-translation-core'
+include ':ontop-engine:ontop-translation:ontop-translation-sql'
+include ':ontop-engine:ontop-translation'
+include ':ontop-engine:ontop-system:ontop-system-core'
+include ':ontop-engine:ontop-system:ontop-system-owlapi'
+include ':ontop-engine:ontop-system:ontop-system-sql:ontop-system-sql-core'
+include ':ontop-engine:ontop-system:ontop-system-sql:ontop-system-sql-owlapi'
+include ':ontop-engine:ontop-system:ontop-system-sql'
+include ':ontop-engine:ontop-system'
+include ':ontop-engine'
+include ':ontop-mapping:ontop-mapping-core'
+include ':ontop-mapping:ontop-mapping-owlapi'
+include ':ontop-mapping:ontop-mapping-sql:ontop-mapping-sql-all'
+include ':ontop-mapping:ontop-mapping-sql:ontop-mapping-sql-core'
+include ':ontop-mapping:ontop-mapping-sql:ontop-mapping-native'
+include ':ontop-mapping:ontop-mapping-sql:ontop-mapping-sql-owlapi'
+include ':ontop-mapping:ontop-mapping-sql:ontop-mapping-r2rml'
+include ':ontop-mapping:ontop-mapping-sql'
+include ':ontop-mapping'
+include ':ontop-ontology:ontop-ontology-owlapi'
+include ':ontop-ontology'
+include ':ontop-test:ontop-docker-tests'
+include ':ontop-test:ontop-rdb2rdf-compliance'
+include ':ontop-test:ontop-sparql-compliance'
+include ':ontop-test:ontop-semantic-index'
+include ':ontop-test'
+
+project(':ontop-binding:ontop-owlapi').projectDir = "$rootDir/binding/owlapi" as File
+project(':ontop-binding:ontop-rdf4j').projectDir = "$rootDir/binding/rdf4j" as File
+project(':ontop-binding').projectDir = "$rootDir/binding" as File
+project(':ontop-build:ontop-distribution').projectDir = "$rootDir/build/distribution" as File
+project(':ontop-build').projectDir = "$rootDir/build" as File
+project(':ontop-client:ontop-cli').projectDir = "$rootDir/client/cli" as File
+project(':ontop-client:ontop-protege').projectDir = "$rootDir/client/protege" as File
+project(':ontop-client:ontop-rdf4j-webapps:ontop-rdf4j-workbench').projectDir = "$rootDir/client/rdf4j-webapps/workbench" as File
+project(':ontop-client:ontop-rdf4j-webapps:ontop-rdf4j-server').projectDir = "$rootDir/client/rdf4j-webapps/server" as File
+project(':ontop-client:ontop-rdf4j-webapps:ontop-rdf4j-config-sql').projectDir = "$rootDir/client/rdf4j-webapps/config-sql" as File
+project(':ontop-client:ontop-rdf4j-webapps').projectDir = "$rootDir/client/rdf4j-webapps" as File
+project(':ontop-client').projectDir = "$rootDir/client" as File
+project(':ontop-core:ontop-model').projectDir = "$rootDir/core/model" as File
+project(':ontop-core:ontop-obda-core').projectDir = "$rootDir/core/obda" as File
+project(':ontop-core:ontop-optimization').projectDir = "$rootDir/core/optimization" as File
+project(':ontop-core').projectDir = "$rootDir/core" as File
+project(':ontop-db:ontop-rdb').projectDir = "$rootDir/db/rdb" as File
+project(':ontop-db').projectDir = "$rootDir/db" as File
+project(':ontop-engine:ontop-translation:ontop-translation-core').projectDir = "$rootDir/engine/translation/core" as File
+project(':ontop-engine:ontop-translation:ontop-translation-sql').projectDir = "$rootDir/engine/translation/sql" as File
+project(':ontop-engine:ontop-translation').projectDir = "$rootDir/engine/translation" as File
+project(':ontop-engine:ontop-system:ontop-system-core').projectDir = "$rootDir/engine/system/core" as File
+project(':ontop-engine:ontop-system:ontop-system-owlapi').projectDir = "$rootDir/engine/system/owlapi" as File
+project(':ontop-engine:ontop-system:ontop-system-sql:ontop-system-sql-core').projectDir = "$rootDir/engine/system/sql/core" as File
+project(':ontop-engine:ontop-system:ontop-system-sql:ontop-system-sql-owlapi').projectDir = "$rootDir/engine/system/sql/owlapi" as File
+project(':ontop-engine:ontop-system:ontop-system-sql').projectDir = "$rootDir/engine/system/sql" as File
+project(':ontop-engine:ontop-system').projectDir = "$rootDir/engine/system" as File
+project(':ontop-engine').projectDir = "$rootDir/engine" as File
+project(':ontop-mapping:ontop-mapping-core').projectDir = "$rootDir/mapping/core" as File
+project(':ontop-mapping:ontop-mapping-owlapi').projectDir = "$rootDir/mapping/owlapi" as File
+project(':ontop-mapping:ontop-mapping-sql:ontop-mapping-sql-all').projectDir = "$rootDir/mapping/sql/all" as File
+project(':ontop-mapping:ontop-mapping-sql:ontop-mapping-sql-core').projectDir = "$rootDir/mapping/sql/core" as File
+project(':ontop-mapping:ontop-mapping-sql:ontop-mapping-native').projectDir = "$rootDir/mapping/sql/native" as File
+project(':ontop-mapping:ontop-mapping-sql:ontop-mapping-sql-owlapi').projectDir = "$rootDir/mapping/sql/owlapi" as File
+project(':ontop-mapping:ontop-mapping-sql:ontop-mapping-r2rml').projectDir = "$rootDir/mapping/sql/r2rml" as File
+project(':ontop-mapping:ontop-mapping-sql').projectDir = "$rootDir/mapping/sql" as File
+project(':ontop-mapping').projectDir = "$rootDir/mapping" as File
+project(':ontop-ontology:ontop-ontology-owlapi').projectDir = "$rootDir/ontology/owlapi" as File
+project(':ontop-ontology').projectDir = "$rootDir/ontology" as File
+project(':ontop-test:ontop-docker-tests').projectDir = "$rootDir/test/docker-tests" as File
+project(':ontop-test:ontop-rdb2rdf-compliance').projectDir = "$rootDir/test/rdb2rdf-compliance" as File
+project(':ontop-test:ontop-sparql-compliance').projectDir = "$rootDir/test/sparql-compliance" as File
+project(':ontop-test:ontop-semantic-index').projectDir = "$rootDir/test/semantic-index" as File
+project(':ontop-test').projectDir = "$rootDir/test" as File
