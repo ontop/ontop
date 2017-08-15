@@ -1,0 +1,8 @@
+
+description = 'ontop-distribution'
+dependencies {
+  compile project(':ontop-binding:ontop-owlapi')
+    compile group: 'com.h2database', name: 'h2', version:'1.4.190'
+  compile project(':ontop-binding:ontop-rdf4j')
+  compile project(':ontop-client:ontop-cli')
+}
