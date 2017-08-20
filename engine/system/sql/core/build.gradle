@@ -9,8 +9,8 @@ dependencies {
     compile group: 'com.google.inject', name: 'guice', version:'4.1.0'
     compile group: 'com.google.inject.extensions', name: 'guice-assistedinject', version:'4.1.0'
     compile group: 'com.google.code.findbugs', name: 'jsr305', version:'2.0.1'
-    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-queryparser-api', version:'2.2.2'
-    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-queryparser-sparql', version:'2.2.2'
+    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-queryparser-api', version:rootProject.ext.rdf4jVersion
+    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-queryparser-sparql', version:rootProject.ext.rdf4jVersion
     compile group: 'org.apache.tomcat', name: 'tomcat-jdbc', version:'9.0.0.M22'
     compile group: 'com.zaxxer', name: 'HikariCP', version:'2.6.3'
     testCompile group: 'junit', name: 'junit', version:'4.12'

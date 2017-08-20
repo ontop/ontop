@@ -4,9 +4,9 @@ dependencies {
   compile project(':ontop-mapping:ontop-mapping-sql:ontop-mapping-sql-core')
   compile project(':ontop-mapping:ontop-mapping-sql:ontop-mapping-native')
     compile group: 'junit', name: 'junit', version:'4.12'
-    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-model', version:'2.2.2'
-    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-api', version:'2.2.2'
-    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-turtle', version:'2.2.2'
+    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-model', version:rootProject.ext.rdf4jVersion
+    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-api', version:rootProject.ext.rdf4jVersion
+    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-turtle', version:rootProject.ext.rdf4jVersion
     compile group: 'eu.optique-project', name: 'r2rml-api-core', version:'0.6.0'
     compile group: 'eu.optique-project', name: 'r2rml-api-rdf4j-binding', version:'0.6.0'
     compile group: 'eu.optique-project', name: 'r2rml-api-jena-binding', version:'0.6.0'
