@@ -1,20 +1,17 @@
 package it.unibz.inf.ontop.owlapi;
 
 
+import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
-
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.utils.querymanager.QueryController;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -24,7 +21,6 @@ import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 
 import java.io.File;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -33,8 +29,6 @@ import java.util.Scanner;
 
 import static org.junit.Assert.assertTrue;
 
-// FIXME(sarah)
-@Ignore("ignore for v3-beta-1 release")
 public class CanonicalIRIUniversityTest {
 
 
