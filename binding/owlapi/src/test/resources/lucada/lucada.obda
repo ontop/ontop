@@ -1,0 +1,164 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2011/3/LUCADAOntology.owl#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+quest:		http://obda.org/quest#
+
+[MappingDeclaration] @collection [[
+mappingId	Patient
+target		:PT-{PID} a :Patient ; :Sex {SEX} ; :AgeDiagnosis {AGE} . 
+source		select "DB Identifier" as PID, "Sex" as SEX, "Age at time of diagnosis" as AGE from patient
+
+mappingId	ClinicalFinding
+target		:CF-{PID}-{PRIMADIAG} a :ClinicalFinding ; :hasPreTStaging {TSTAGE} ; :hasPreNStaging {NSTAGE} ; :hasPreMStaging {MSTAGE} ; :hasPreTNMStaging {TNMSTAGE} . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG, "T Category (final pre-treatment)" as TSTAGE, "N Category (final pre-treatment)" as NSTAGE, "M Category (final pre-treatment)" as MSTAGE, "TNM category (final pre-treatment)" as TNMSTAGE from patient
+
+mappingId	Patient-With-ClinicalFindingGeneral
+target		:PT-{PID} :hasClinicalFinding :CF-{PID}-{PRIMADIAG} . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient
+
+mappingId	Patient-With-ClinicalFindingC33
+target		:CF-{PID}-{PRIMADIAG} a :MalignantTumourofTrachea . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C33'
+
+mappingId	Patient-With-ClinicalFindingC34
+target		:CF-{PID}-{PRIMADIAG} a :MalignantNeoplasmofBronchusorLungNOS . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C34'
+
+mappingId	Patient-With-ClinicalFindingC34.0
+target		:CF-{PID}-{PRIMADIAG} a :MalignantNeoplasmofMainBronchus . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C34.0'
+
+mappingId	Patient-With-ClinicalFindingC34.2
+target		:CF-{PID}-{PRIMADIAG} a :MalignantNeoplasmofMiddleLobeBronchusorLung . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C34.2'
+
+mappingId	Patient-With-ClinicalFindingC34.3
+target		:CF-{PID}-{PRIMADIAG} a :MalignantNeoplasmofLowerLobeBronchusorLung . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C34.3'
+
+mappingId	Patient-With-ClinicalFindingC34.8
+target		:CF-{PID}-{PRIMADIAG} a :OverlappingMalignantNeoplasmofBronchusandLung . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C34.8'
+
+mappingId	Patient-With-ClinicalFindingC34.9
+target		:CF-{PID}-{PRIMADIAG} a :XMalignantNeoplasmofBronchusorLungUnspecified . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C34.9'
+
+mappingId	Patient-With-ClinicalFindingC38
+target		:CF-{PID}-{PRIMADIAG} a :MalignantNeoplasmofHeartMediastinumandPleura . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C38'
+
+mappingId	Patient-With-ClinicalFindingC38.3
+target		:CF-{PID}-{PRIMADIAG} a :XMalignantNeoplasmofMediastinumPartUnspecified . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C38.3'
+
+mappingId	Patient-With-ClinicalFindingC38.4
+target		:CF-{PID}-{PRIMADIAG} a :MalignantTumourofPleura . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C38.4'
+
+mappingId	Patient-With-ClinicalFindingC38.8
+target		:CF-{PID}-{PRIMADIAG} a :OverlappingMalignantNeoplasmofHeartMediastinumandPleura . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C38.8'
+
+mappingId	Patient-With-ClinicalFindingC45
+target		:CF-{PID}-{PRIMADIAG} a :Mesothelioma . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C45'
+
+mappingId	Patient-With-ClinicalFindingC45.0
+target		:CF-{PID}-{PRIMADIAG} a :MalignantMesotheliomaofPleura . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Primary diagnosis"='C45.0'
+
+mappingId	Patient-PerformanceStatus0
+target		:PT-{PID} :hasPerformanceStatus :ReferenceWHOPerformanceStatusGrade0/{PID} . :ReferenceWHOPerformanceStatusGrade0/{PID} a :WHOPerformanceStatusGrade0 . 
+source		select "DB Identifier" as PID from patient where "Performance Status (adult)" = '0'
+
+mappingId	Patient-PerformanceStatus1
+target		:PT-{PID} :hasPerformanceStatus :ReferenceWHOPerformanceStatusGrade1/{PID} . :ReferenceWHOPerformanceStatusGrade1/{PID} a :WHOPerformanceStatusGrade1 . 
+source		select "DB Identifier" as PID from patient where "Performance Status (adult)" = '1'
+
+mappingId	Patient-PerformanceStatus2
+target		:ReferenceWHOPerformanceStatusGrade2/{PID} a :WHOPerformanceStatusGrade2 . :PT-{PID} :hasPerformanceStatus :ReferenceWHOPerformanceStatusGrade2/{PID} . 
+source		select "DB Identifier" as PID from patient where "Performance Status (adult)" = '2'
+
+mappingId	Patient-PerformanceStatus3
+target		:PT-{PID} :hasPerformanceStatus :ReferenceWHOPerformanceStatusGrade3/{PID} . :ReferenceWHOPerformanceStatusGrade3/{PID} a :WHOPerformanceStatusGrade3 . 
+source		select "DB Identifier" as PID from patient where "Performance Status (adult)" = '3'
+
+mappingId	Patient-PerformanceStatus4
+target		:PT-{PID} :hasPerformanceStatus :ReferenceWHOPerformanceStatusGrade4/{PID} . :ReferenceWHOPerformanceStatusGrade4/{PID} a :WHOPerformanceStatusGrade4 . 
+source		select "DB Identifier" as PID from patient where "Performance Status (adult)" = '4'
+
+mappingId	ClinicalFinding-With-HistologyM8010/2
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceCarcinomainSitu/{PID}/{PRIMADIAG} . :ReferenceCarcinomainSitu/{PID}/{PRIMADIAG} a :CarcinomainSitu . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M8010/2'
+
+mappingId	ClinicalFinding-With-HistologyM8012/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceLargeCellCarcinoma/{PID}/{PRIMADIAG} . :ReferenceLargeCellCarcinoma/{PID}/{PRIMADIAG} a :LargeCellCarcinoma . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M8012/3'
+
+mappingId	ClinicalFinding-With-HistologyM8013/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceLargeCellNeuroendocrineCarcinoma/{PID}/{PRIMADIAG} . :ReferenceLargeCellNeuroendocrineCarcinoma/{PID}/{PRIMADIAG} a :LargeCellNeuroendocrineCarcinoma . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M8013/3'
+
+mappingId	ClinicalFinding-With-HistologyM8020/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceCarcinomaUndifferentiated/{PID}/{PRIMADIAG} . :ReferenceCarcinomaUndifferentiated/{PID}/{PRIMADIAG} a :CarcinomaUndifferentiated . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M8020/3'
+
+mappingId	ClinicalFinding-With-HistologyM8041/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceSmallCellCarcinoma/{PID}/{PRIMADIAG} . :ReferenceSmallCellCarcinoma/{PID}/{PRIMADIAG} a :SmallCellCarcinoma . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M8041/3'
+
+mappingId	ClinicalFinding-With-HistologyM8046/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceNonsmallCellCarcinoma/{PID}/{PRIMADIAG} . :ReferenceNonsmallCellCarcinoma/{PID}/{PRIMADIAG} a :NonsmallCellCarcinoma . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M8046/3'
+
+mappingId	ClinicalFinding-With-HistologyM8070/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceSquamousCellCarcinomainSituNOS/{PID}/{PRIMADIAG} . :ReferenceSquamousCellCarcinomainSituNOS/{PID}/{PRIMADIAG} a :SquamousCellCarcinomainSituNOS . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M8070/3'
+
+mappingId	ClinicalFinding-With-HistologyM8140/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceAdenocarcinoma/{PID}/{PRIMADIAG} . :ReferenceAdenocarcinoma/{PID}/{PRIMADIAG} a :Adenocarcinoma . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M8140/3'
+
+mappingId	ClinicalFinding-With-HistologyM8240/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceCarcinoidTumourNOS/{PID}/{PRIMADIAG} . :ReferenceCarcinoidTumourNOS/{PID}/{PRIMADIAG} a :CarcinoidTumourNOS . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M8240/3'
+
+mappingId	ClinicalFinding-With-HistologyM8250/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceBronchioAlveolarAdenocarcinoma/{PID}/{PRIMADIAG} . :ReferenceBronchioAlveolarAdenocarcinoma/{PID}/{PRIMADIAG} a :BronchioAlveolarAdenocarcinoma . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M8250/3'
+
+mappingId	ClinicalFinding-With-HistologyM8940/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceMalignantMixedTumour/{PID}/{PRIMADIAG} . :ReferenceMalignantMixedTumour/{PID}/{PRIMADIAG} a :MalignantMixedTumour . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M8940/3'
+
+mappingId	ClinicalFinding-With-HistologyM8980/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceCarcinosarcoma/{PID}/{PRIMADIAG} . :ReferenceCarcinosarcoma/{PID}/{PRIMADIAG} a :Carcinosarcoma . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M8980/3'
+
+mappingId	ClinicalFinding-With-HistologyM9050/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceMalignantMesothelioma/{PID}/{PRIMADIAG} . :ReferenceMalignantMesothelioma/{PID}/{PRIMADIAG} a :MalignantMesothelioma . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M9050/3'
+
+mappingId	ClinicalFinding-With-HistologyM9051/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceSarcomatoidMesothelioma/{PID}/{PRIMADIAG} . :ReferenceSarcomatoidMesothelioma/{PID}/{PRIMADIAG} a :SarcomatoidMesothelioma . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M9051/3'
+
+mappingId	ClinicalFinding-With-HistologyM9052/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceEpithelioidMesothelioma/{PID}/{PRIMADIAG} . :ReferenceEpithelioidMesothelioma/{PID}/{PRIMADIAG} a :EpithelioidMesothelioma . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M9052/3'
+
+mappingId	ClinicalFinding-With-HistologyM9053/3
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceBiphasicMesothelioma/{PID}/{PRIMADIAG} . :ReferenceBiphasicMesothelioma/{PID}/{PRIMADIAG} a :BiphasicMesothelioma . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M9053/3'
+
+mappingId	ClinicalFinding-With-HistologyM9999/9
+target		:CF-{PID}-{PRIMADIAG} :hasPreHistology :ReferenceOtherBodyStructure/{PID}/{PRIMADIAG} . :ReferenceOtherBodyStructure/{PID}/{PRIMADIAG} a :OtherBodyStructure . 
+source		select "DB Identifier" as PID, "Primary diagnosis" as PRIMADIAG from patient where "Histology (SNOMED)" = 'M9999/9'
+]]
+
