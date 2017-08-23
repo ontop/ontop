@@ -6,12 +6,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 
 import java.util.Optional;
 
@@ -56,7 +56,18 @@ public class MappingImpl implements Mapping {
 
     @Override
     public Optional<IntermediateQuery> getDefinition(AtomPredicate predicate) {
-        return Optional.ofNullable(definitions.get(predicate));
+
+        IntermediateQuery query = definitions.get(predicate);
+        if(query != null){
+            return checkArities(query, predicate)?
+                    Optional.of(query):
+                    Optional.empty();
+        }
+        return Optional.empty();
+    }
+
+    private boolean checkArities(IntermediateQuery query, AtomPredicate predicate) {
+        return  query.getProjectionAtom().getPredicate().getArity() == predicate.getArity();
     }
 
     @Override
