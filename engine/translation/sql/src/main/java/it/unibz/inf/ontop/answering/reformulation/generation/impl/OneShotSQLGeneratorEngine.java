@@ -23,8 +23,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopTranslationException;
@@ -43,17 +42,15 @@ import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
-import it.unibz.inf.ontop.datalog.DatalogNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.DB2SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.datalog.IntermediateQueryToDatalogTranslator;
+import it.unibz.inf.ontop.datalog.impl.IntermediateQuery2DatalogTranslatorImpl;
 import it.unibz.inf.ontop.utils.EncodeForURI;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
-import it.unibz.inf.ontop.datalog.DatalogDependencyGraphGenerator;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
@@ -107,6 +104,7 @@ public class OneShotSQLGeneratorEngine {
 
 	private final RDBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
+	private final IntermediateQuery2DatalogTranslator iq2DatalogTranslator;
 
 
 	private boolean generatingREPLACE = true;
@@ -133,8 +131,10 @@ public class OneShotSQLGeneratorEngine {
 	private final JdbcTypeMapper jdbcTypeMapper;
 
 	OneShotSQLGeneratorEngine(DBMetadata metadata,
-                              IRIDictionary iriDictionary, OntopTranslationSQLSettings settings,
-                              JdbcTypeMapper jdbcTypeMapper) {
+							  IRIDictionary iriDictionary,
+							  OntopTranslationSQLSettings settings,
+							  JdbcTypeMapper jdbcTypeMapper,
+							  IntermediateQuery2DatalogTranslator iq2DatalogTranslator) {
 
 		String driverURI = settings.getJdbcDriver()
 				.orElseGet(() -> {
@@ -154,6 +154,7 @@ public class OneShotSQLGeneratorEngine {
 		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI,this.metadata.getDbmsVersion(), settings);
 		this.operations = buildOperations(sqladapter);
 		this.distinctResultSet = settings.isDistinctPostProcessingEnabled();
+		this.iq2DatalogTranslator = iq2DatalogTranslator;
 
 
 		this.generatingREPLACE = settings.isIRISafeEncodingEnabled();
@@ -182,7 +183,8 @@ public class OneShotSQLGeneratorEngine {
 	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
                                       String replace1, String replace2, boolean distinctResultSet,
                                       IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
-                                      ImmutableMap<ExpressionOperation, String> operations) {
+                                      ImmutableMap<ExpressionOperation, String> operations,
+									  IntermediateQuery2DatalogTranslator iq2DatalogTranslator) {
 		this.metadata = metadata;
 		this.sqladapter = sqlAdapter;
 		this.operations = operations;
@@ -192,6 +194,7 @@ public class OneShotSQLGeneratorEngine {
 		this.distinctResultSet = distinctResultSet;
 		this.uriRefIds = uriRefIds;
 		this.jdbcTypeMapper = jdbcTypeMapper;
+		this.iq2DatalogTranslator = iq2DatalogTranslator;
 	}
 
 	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -248,7 +251,7 @@ public class OneShotSQLGeneratorEngine {
 	@Override
 	public OneShotSQLGeneratorEngine clone() {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter, generatingREPLACE,
-				replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper, operations);
+				replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator);
 	}
 
 	/**
@@ -263,7 +266,7 @@ public class OneShotSQLGeneratorEngine {
 
 		IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
 
-		DatalogProgram queryProgram = IntermediateQueryToDatalogTranslator.translate(normalizedQuery);
+		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedQuery);
 
 		normalizeProgram(queryProgram);
 

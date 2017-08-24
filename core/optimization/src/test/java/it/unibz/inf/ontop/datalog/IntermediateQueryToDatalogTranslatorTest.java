@@ -2,9 +2,9 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.IntermediateQueryToDatalogTranslator;
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.datalog.impl.IntermediateQuery2DatalogTranslatorImpl;
+import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 
 public class IntermediateQueryToDatalogTranslatorTest {
+
 
     private static Variable X = DATA_FACTORY.getVariable("x");
     private static AtomPredicate ANS1_IQ_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
@@ -52,6 +53,10 @@ public class IntermediateQueryToDatalogTranslatorTest {
 
     @Test
     public void testUnionNodeChild() {
+
+        IntermediateQuery2DatalogTranslator translator = OntopOptimizationConfiguration.defaultBuilder().enableTestMode().build()
+                .getInjector()
+                .getInstance(IntermediateQuery2DatalogTranslator.class);
 
         Exception thrownException = null;
         /**
@@ -80,7 +85,7 @@ public class IntermediateQueryToDatalogTranslatorTest {
 
         DatalogProgram dp = null;
         try {
-            dp = IntermediateQueryToDatalogTranslator.translate(inputQuery);
+            dp = translator.translate(inputQuery);
         } catch (ClassCastException e) {
             thrownException = e;
         }
@@ -91,7 +96,6 @@ public class IntermediateQueryToDatalogTranslatorTest {
         /**
          Expected Datalog program
          */
-
         Function ans1Atom = DATA_FACTORY.getFunction(ANS1_DATALOG_PREDICATE, X);
         Function ansSQ1Atom = DATA_FACTORY.getFunction(ANSSQ1_DATALOG_PREDICATE, X);
         Function p1Atom = DATA_FACTORY.getFunction(P1_DATALOG_PREDICATE, X);

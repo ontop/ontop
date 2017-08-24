@@ -458,7 +458,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .orElseThrow(() -> new IllegalStateException("Bug: dom(tauG) must be disjoint with dom(tauEq)"));
 
 
-        ImmutableSubstitution<ImmutableTerm> eta = ImmutableUnificationTools.computeMGUS(formerTheta, tauC)
+        ImmutableSubstitution<ImmutableTerm> eta = ImmutableUnificationTools.computeMGUS(formerTheta, tau)
                 .orElseThrow(() -> new QueryNodeSubstitutionException("The descending substitution " + tau
                         + " is incompatible with " + this));
 

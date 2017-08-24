@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.datalog;
+package it.unibz.inf.ontop.datalog.impl;
 
 /*
  * #%L
@@ -23,15 +23,20 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.IntermediateQuery2DatalogTranslator;
+import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.impl.MutableQueryModifiersImpl;
-import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +55,7 @@ import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertToMuta
  * 
  * @author mrezk
  */
-public class IntermediateQueryToDatalogTranslator {
+public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuery2DatalogTranslator {
 
 	private static final String SUBQUERY_PRED_PREFIX = "ansSQ";
 	private final IntermediateQueryFactory iqFactory;
@@ -67,41 +72,18 @@ public class IntermediateQueryToDatalogTranslator {
         }
 	}
 
-//private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(IntermediateQueryToDatalogTranslator.class);
+	private static final org.slf4j.Logger log = LoggerFactory.getLogger(IntermediateQuery2DatalogTranslatorImpl.class);
 
 	// Incremented
-	private static int subQueryCounter;
-	private static int dummyPredCounter;
+	private int subQueryCounter;
+	private int dummyPredCounter;
 
-	private IntermediateQueryToDatalogTranslator(IntermediateQueryFactory iqFactory) {
+	@Inject
+	private IntermediateQuery2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory) {
 		this.iqFactory = iqFactory;
-		subQueryCounter = 0;
-		dummyPredCounter = 0;
-	}
-
-	private IntermediateQueryToDatalogTranslator(IntermediateQueryFactory iqFactory, int subQueryCounter, int dummyPredCounter) {
-		this.iqFactory = iqFactory;
-		this.subQueryCounter = subQueryCounter;
-		this.dummyPredCounter = dummyPredCounter;
-	}
-
-	public static int getSubQueryCounter() {
-		return subQueryCounter;
-	}
-
-	public static int getDummyPredCounter() {
-		return dummyPredCounter;
-	}
-
-	/**
-	 * Translate an intermediate query tree into a Datalog program 
-	 * 
-	 */
-	public static DatalogProgram translate(IntermediateQuery query) {
-		IntermediateQueryToDatalogTranslator translator = new IntermediateQueryToDatalogTranslator(query.getFactory());
-		return translator.translateQuery(query);
+		this.subQueryCounter = 0;
+		this.dummyPredCounter = 0;
 	}
 
 	/**
@@ -111,13 +93,8 @@ public class IntermediateQueryToDatalogTranslator {
 	 * where the string for Pred is of the form SUBQUERY_PRED_PREFIX + y,
 	 * with y > subqueryCounter.
 	 */
-	public static DatalogProgram translate(IntermediateQuery query, int subQueryCounter, int dummyPredCounter) {
-		IntermediateQueryToDatalogTranslator translator = new IntermediateQueryToDatalogTranslator(query.getFactory(),
-				subQueryCounter, dummyPredCounter);
-		return translator.translateQuery(query);
-	}
-
-	private DatalogProgram translateQuery(IntermediateQuery query) {
+	@Override
+	public DatalogProgram translate(IntermediateQuery query) {
 		ConstructionNode root = query.getRootConstructionNode();
 		
 		Optional<ImmutableQueryModifiers> optionalModifiers =  root.getOptionalModifiers();
@@ -137,9 +114,6 @@ public class IntermediateQueryToDatalogTranslator {
         }
 
 		translate(query,  dProgram, root);
-		
-	
-		
 		
 		return dProgram;
 	}
