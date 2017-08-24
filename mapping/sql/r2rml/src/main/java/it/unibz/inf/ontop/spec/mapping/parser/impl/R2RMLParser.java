@@ -291,13 +291,16 @@ public class R2RMLParser {
 
 			// if the literal has a language property or a datatype property we
 			// create the function object later
-			ValueConstant constantLiteral = TERM_FACTORY.getConstantLiteral(((Literal) constantObj).getLexicalForm());
+
 			if (lan != null || datatype != null) {
+				ValueConstant constantLiteral = TERM_FACTORY.getConstantLiteral(((Literal) constantObj).getLexicalForm());
 				objectAtom = constantLiteral;
 
 			} else {
 
 				if (constantObj instanceof Literal){
+
+					ValueConstant constantLiteral = TERM_FACTORY.getConstantLiteral(((Literal) constantObj).getLexicalForm());
 					Literal constantLit1 = (Literal) constantObj;
 
 					String lanConstant = om.getLanguageTag();
