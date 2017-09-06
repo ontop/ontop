@@ -21,6 +21,18 @@ public class OntopOBDAToR2RMLTest {
         Ontop.main(argv);
     }
 
+
+
+    @Test
+    public void testOntopOBDAToR2RML1 (){
+        String[] argv = {"mapping", "to-r2rml",
+                "-i", "src/test/resources/templateExample.obda",
+                "-t", "src/test/resources/books/exampleBooks.owl",
+                "-o", "src/test/resources/output/templateExample.r2rml"
+        };
+        Ontop.main(argv);
+    }
+
     @Test
     public void testOntopOBDAToR2RML2 (){
         String[] argv = {"mapping", "to-r2rml",
@@ -46,6 +58,15 @@ public class OntopOBDAToR2RMLTest {
                 "-i", "src/test/resources/oreda_bootstrapped_mapping.obda",
                 "-t", "src/test/resources/oreda_bootstrapped_ontology.owl",
                 "-o", "src/test/resources/output/oreda_bootstrapped_mapping.r2rml"
+        };
+        Ontop.main(argv);
+    }
+
+    @Test
+    public void testOntopOBDAToR2RML4 (){
+        String[] argv = {"mapping", "to-r2rml",
+                "-i", "src/test/resources/npd-boolean-mapping.obda",
+                "-o", "src/test/resources/output/npd-boolean-mapping.ttl"
         };
         Ontop.main(argv);
     }
