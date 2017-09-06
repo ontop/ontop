@@ -54,33 +54,6 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         this.settings = settings;
     }
 
-//    @Override
-//    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
-//                                        @Nonnull Optional<Ontology> ontology,
-//                                        @Nonnull Optional<TBoxReasoner> saturatedTBox,
-//                                        @Nonnull ExecutorRegistry executorRegistry)
-//            throws MappingException, DBMetadataExtractionException {
-//
-//        SQLPPMapping ppMapping = extractPPMapping(specInput);
-//
-//        return extract(ppMapping, specInput, dbMetadata, ontology, saturatedTBox, executorRegistry);
-//    }
-//
-//    @Override
-//    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull OBDASpecInput specInput,
-//                                        @Nonnull Optional<DBMetadata> dbMetadata,
-//                                        @Nonnull Optional<Ontology> ontology,
-//                                        @Nonnull Optional<TBoxReasoner> saturatedTBox,
-//                                        @Nonnull ExecutorRegistry executorRegistry)
-//            throws MappingException, DBMetadataExtractionException {
-//
-//        if (ontology.isPresent() != saturatedTBox.isPresent()) {
-//            throw new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG);
-//        }
-//        return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, ontology, saturatedTBox,
-//                executorRegistry);
-//    }
-
     /**
      * Converts the PPMapping into a Mapping.
      * <p>
@@ -155,21 +128,6 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         }
     }
 
-//    /**
-//     * Validation:
-//     * - Mismatch between the ontology and the mapping
-//     */
-//    private void validateMapping(Optional<Ontology> optionalOntology, Optional<TBoxReasoner> optionalSaturatedTBox,
-//                                 MappingWithProvenance filledProvMapping) throws MappingOntologyMismatchException {
-//        if (optionalOntology.isPresent()) {
-//            Ontology ontology = optionalOntology.get();
-//            TBoxReasoner saturatedTBox = optionalSaturatedTBox
-//                    .orElseThrow(() -> new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG));
-//
-//            ontologyComplianceValidator.validate(filledProvMapping, ontology.getVocabulary(), saturatedTBox);
-//        }
-//    }
-
     private Connection createConnection() throws SQLException {
 
         try {
@@ -188,8 +146,6 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
             return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
         }
-
-
     }
 
     protected SQLPPMapping castPPMapping(PreProcessedMapping ppMapping) {
