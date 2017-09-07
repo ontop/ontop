@@ -7,23 +7,16 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.text.*;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.DEFAULT;
-import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.MSSQL;
-import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.ORACLE;
+import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
@@ -58,6 +51,10 @@ public class JDBC2ConstantConverter {
                         .add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)) // ISO without 'T'
                         .add(new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)) // ISO without time
                         .add(new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH)) // another common case
+                        .add(new SimpleDateFormat(("'T'HH:mm:ss"), Locale.ENGLISH)) // ISO time with 'T'
+                        .add(new SimpleDateFormat(("'T'HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone with 'T'
+                        .add(new SimpleDateFormat(("HH:mm:ss"), Locale.ENGLISH)) // ISO time without 'T'
+                        .add(new SimpleDateFormat(("HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone without 'T'
                         .build(),
                 ORACLE, ImmutableList.<DateFormat>builder()
                         //For ORACLE driver 12.1.0.2 (TODO: check earlier versions)
@@ -67,6 +64,10 @@ public class JDBC2ConstantConverter {
                         .add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH))
                         .add(new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH))
                         .add(new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH))
+                        .add(new SimpleDateFormat(("'T'HH:mm:ss"), Locale.ENGLISH)) // ISO time with 'T'
+                        .add(new SimpleDateFormat(("'T'HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone with 'T'
+                        .add(new SimpleDateFormat(("HH:mm:ss"), Locale.ENGLISH)) // ISO time without 'T'
+                        .add(new SimpleDateFormat(("HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone without 'T'
                         .build(),
                 MSSQL, ImmutableList.<DateFormat>builder()
                         .add(new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH))
@@ -75,6 +76,10 @@ public class JDBC2ConstantConverter {
                         .add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH))
                         .add(new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH))
                         .add(new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH))
+                        .add(new SimpleDateFormat(("'T'HH:mm:ss"), Locale.ENGLISH)) // ISO time with 'T'
+                        .add(new SimpleDateFormat(("'T'HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone with 'T'
+                        .add(new SimpleDateFormat(("HH:mm:ss"), Locale.ENGLISH)) // ISO time without 'T'
+                        .add(new SimpleDateFormat(("HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone without 'T'
                         .build()
         );
     }
@@ -184,34 +189,27 @@ public class JDBC2ConstantConverter {
                     return TERM_FACTORY.getConstantLiteral(integerString, type);
 
                 case DATETIME:
-                    return TERM_FACTORY.getConstantLiteral(
-                            convertDatetimeString(value),
-                            Predicate.COL_TYPE.DATETIME
+                    Timestamp ts = new Timestamp(convertToJavaDate(value).getTime());
+                    return TERM_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'),Predicate.COL_TYPE.DATETIME
                     );
 
                 case DATETIME_STAMP:
-                    stringValue = system.equals(ORACLE)?
-                            convertDatetimeString(stringValue):
-                            stringValue;
+                    Timestamp ts1 = new Timestamp(convertToJavaDate(value).getTime());
                 return TERM_FACTORY.getConstantLiteral(
-                        stringValue.replaceFirst(" ", "T").replaceAll(" ", ""),
+                        ts1.toString().replaceFirst(" ", "T").replaceAll(" ", ""),
                         Predicate.COL_TYPE.DATETIME_STAMP
                 );
 
                 case DATE:
-                    if(system.equals(ORACLE)) {
-                        try {
-                            DateFormat df = new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH);
-                            java.util.Date date = df.parse(stringValue);
-                            stringValue = date.toString();
-                        } catch (ParseException e) {
-                            throw new OntopResultConversionException(e);
-                        }
-                    }
+                    FastDateFormat datef = DateFormatUtils.ISO_DATE_FORMAT;
+                    stringValue = datef.format(convertToJavaDate(value));
+
                     return TERM_FACTORY.getConstantLiteral(stringValue, Predicate.COL_TYPE.DATE);
 
                 case TIME:
-                    return TERM_FACTORY.getConstantLiteral(stringValue.replace(' ', 'T'), Predicate.COL_TYPE.TIME);
+                    FastDateFormat timef = DateFormatUtils.ISO_TIME_NO_T_TIME_ZONE_FORMAT;
+                    stringValue = timef.format(convertToJavaDate(value));
+                    return TERM_FACTORY.getConstantLiteral(stringValue, Predicate.COL_TYPE.TIME);
 
                 default:
                     return TERM_FACTORY.getConstantLiteral(stringValue, type);
@@ -240,12 +238,12 @@ public class JDBC2ConstantConverter {
         }
     }
 
-    private String convertDatetimeString(Object value) throws OntopResultConversionException {
-        java.util.Date dateValue = null;
+    private Date convertToJavaDate(Object value) throws OntopResultConversionException {
+        Date dateValue = null;
 
-        if (value instanceof java.util.Date) {
+        if (value instanceof Date) {
             // If JDBC gives us proper Java object, we are good
-            dateValue = (java.util.Date) value;
+            dateValue = (Date) value;
         } else {
             // Otherwise, we need to deal with possible String representation of datetime
             String stringValue = String.valueOf(value);
@@ -262,7 +260,9 @@ public class JDBC2ConstantConverter {
                 throw new OntopResultConversionException("unparseable datetime: " + stringValue);
             }
         }
-        final Timestamp ts = new Timestamp(dateValue.getTime());
-        return ts.toString().replace(' ', 'T');
+        return dateValue;
+
     }
+
+
 }

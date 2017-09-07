@@ -20,15 +20,11 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
 
 import java.sql.Types;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -50,7 +46,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.CHAR, "CHAR");
 		SqlDatatypes.put(Types.VARCHAR, "VARCHAR(4000)");
 		SqlDatatypes.put(Types.CLOB, "CLOB");
-		SqlDatatypes.put(Types.TIMESTAMP, "VARCHAR(4000)");
+		SqlDatatypes.put(Types.TIMESTAMP, "TIMESTAMP");
 		SqlDatatypes.put(Types.INTEGER, "INTEGER");
 		SqlDatatypes.put(Types.BIGINT, "NUMBER(19)");
 		SqlDatatypes.put(Types.REAL, "NUMBER");
