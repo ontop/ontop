@@ -20,13 +20,14 @@ package it.unibz.inf.ontop.answering.resultset.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -34,89 +35,51 @@ import java.util.*;
  * See test case DistinctResultSetTest
  */
 
-public class SQLDistinctTupleResultSet implements TupleResultSet {
+public class SQLDistinctTupleResultSet extends DelegatedIriSQLTupleResultSet implements TupleResultSet {
 
-    private SQLTupleResultSet tupleResultSet;
+    private Set<List<Object>> rowKeys;
 
-    private Set<List<Object>> distinctKeys;
-
-    public SQLDistinctTupleResultSet(ResultSet set, List<String> signature,
+    public SQLDistinctTupleResultSet(ResultSet rs, ImmutableList<String> signature,
                                      DBMetadata dbMetadata,
                                      Optional<IRIDictionary> iriDictionary) {
 
-        tupleResultSet = new SQLTupleResultSet(set, signature, dbMetadata, iriDictionary);
-
-        distinctKeys = new HashSet<>();
-
+        super(rs, signature, dbMetadata, iriDictionary);
+        rowKeys = new HashSet<>();
     }
 
-
+    /**
+     * Moves cursor until we get a fresh row
+     */
     @Override
-    public int getColumnCount() {
-        return tupleResultSet.getColumnCount();
-    }
-
-    @Override
-    public List<String> getSignature() {
-        return tupleResultSet.getSignature();
-    }
-
-    @Override
-    public int getFetchSize() throws OntopConnectionException {
-        return tupleResultSet.getFetchSize();
-    }
-
-    @Override
-    public OntopBindingSet next() throws OntopConnectionException {
-        return tupleResultSet.next();
-    }
-
-    @Override
-    public void close() throws OntopConnectionException {
-        distinctKeys.clear();
-        tupleResultSet.close();
-
-    }
-
-    @Override
-    public boolean hasNext() throws OntopConnectionException {
-        // return the row only if it is not a duplicate
-
-        boolean next = false;
-        
-        List<Object> row = null; 
+    protected boolean moveCursor() throws SQLException, OntopConnectionException {
+        boolean foundFreshRow;
+        List<Object> currentKey;
         do{
-            next = tupleResultSet.hasNext();
-            if (next) {
-                row = new ArrayList<>();
-                for (int i = 1; i <= getSignature().size();  i ++ ) {
-                    
-                    int column = i * 3;
-                    row.add(tupleResultSet.getRawObject(column-2));  //type
-                    row.add(tupleResultSet.getRawObject(column-1)); //lang
-                    row.add(tupleResultSet.getRawObject(column)); //value
-                    
-                }
-            }
-            else{
-                distinctKeys.clear();
-                break;
-            }
-        }while( !distinctKeys.add(row) );
-        
-        return next;
+           foundFreshRow = rs.next();
+           currentKey = computeRowKey(rs);
+        } while(foundFreshRow && !rowKeys.add(currentKey));
+
+        return foundFreshRow;
     }
 
+    private List<Object> computeRowKey(ResultSet rs) throws OntopConnectionException {
 
+        ArrayList rowKey = new ArrayList<>();
+        for (int i = 1; i <= getSignature().size();  i ++ ) {
+            int column = i * 3;
+            rowKey.add(getRawObject(column-2));  //type
+            rowKey.add(getRawObject(column-1)); //lang
+            rowKey.add(getRawObject(column)); //value
+        }
+        return rowKey;
+    }
 
-//    @Override
-//    public Constant getConstant(int column) throws OntopConnectionException, OntopResultConversionException {
-//        return tupleResultSet.getConstant(column);
-//    }
-//
-//    @Override
-//    public Constant getConstant(String name) throws OntopConnectionException, OntopResultConversionException {
-//        return tupleResultSet.getConstant(name);
-//    }
-
+    Object getRawObject(int column) throws OntopConnectionException {
+        try {
+            Object realValue = rs.getObject(column);
+            return realValue;
+        } catch (Exception e) {
+            throw new OntopConnectionException(e);
+        }
+    }
 }
