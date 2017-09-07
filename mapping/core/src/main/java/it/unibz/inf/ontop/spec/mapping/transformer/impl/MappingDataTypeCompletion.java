@@ -23,11 +23,12 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
+import it.unibz.inf.ontop.exception.UnknownDatatypeException;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 public class MappingDataTypeCompletion {
 
     private final DBMetadata metadata;
+    private final boolean defaultDatatypeInferred;
 
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeCompletion.class);
 
@@ -53,11 +55,13 @@ public class MappingDataTypeCompletion {
      *
      * @param metadata The database metadata.
      */
-    public MappingDataTypeCompletion(DBMetadata metadata) {
+    public MappingDataTypeCompletion(DBMetadata metadata,
+                                     boolean defaultDatatypeInferred) {
         this.metadata = metadata;
+        this.defaultDatatypeInferred = defaultDatatypeInferred;
     }
 
-    public void insertDataTyping(CQIE rule) {
+    public void insertDataTyping(CQIE rule) throws UnknownDatatypeException {
         Function atom = rule.getHead();
         Predicate predicate = atom.getFunctionSymbol();
         if (predicate.getArity() == 2) { // we check both for data and object property
@@ -76,7 +80,7 @@ public class MappingDataTypeCompletion {
      * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
      */
     private void insertVariableDataTyping(Term term, Function atom, int position,
-                                          Map<String, List<IndexedPosition>> termOccurenceIndex) {
+                                          Map<String, List<IndexedPosition>> termOccurenceIndex) throws UnknownDatatypeException {
         Predicate predicate = atom.getFunctionSymbol();
 
         if (term instanceof Function) {
@@ -88,8 +92,15 @@ public class MappingDataTypeCompletion {
                 // NO-OP for already assigned datatypes, or object properties, or bnodes
             }
             else if (function.isOperation()) {
+                Predicate.COL_TYPE type = treatUnknownDatatype();
+
                 for (int i = 0; i < function.getArity(); i++) {
-                    insertVariableDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
+
+                    Term newTerm = TERM_FACTORY.getTypedTerm(function.getTerm(i), type);
+                    log.info("Datatype "+type+" for the value " + function.getTerm(i) + " of the property " + predicate + " has been " +
+                            "inferred " +
+                            "from the database");
+                    atom.setTerm(position, newTerm);
                 }
             } else {
                 throw new IllegalArgumentException("Unsupported subtype of: " + Function.class.getSimpleName());
@@ -160,7 +171,7 @@ public class MappingDataTypeCompletion {
      * @param variable
      * @return
      */
-    private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) {
+    private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) throws UnknownDatatypeException {
 
 
         List<IndexedPosition> list = termOccurenceIndex.get(variable.getName());
@@ -176,9 +187,19 @@ public class MappingDataTypeCompletion {
         RelationDefinition td = metadata.getRelation(tableId);
         Attribute attribute = td.getAttribute(ip.pos);
 
-        return metadata.getColType(attribute)
-                // Default datatype : XSD_STRING
-                .orElse(Predicate.COL_TYPE.STRING);
+        Optional<Predicate.COL_TYPE> colType = metadata.getColType(attribute);
+        if(defaultDatatypeInferred)
+            return colType.orElse(Predicate.COL_TYPE.STRING) ;
+        else {
+            return colType.orElseThrow(() -> new UnknownDatatypeException("Variable"));
+        }
+
+    }
+
+    private Predicate.COL_TYPE treatUnknownDatatype() throws UnknownDatatypeException {
+         if(defaultDatatypeInferred)
+             return Predicate.COL_TYPE.STRING ;
+         throw new UnknownDatatypeException("Operation");
     }
 
     private static class IndexedPosition {

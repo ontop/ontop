@@ -49,7 +49,7 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
                 "}";
 
         String result = runQueryAndReturnStringOfLiteralX(query1);
-		assertEquals(result, "\"2013-03-18\"");
+		assertEquals(result, "\"2013-03-18\"^^xsd:date");
 	}
 	
     public void testDatatypeTime() throws Exception {
@@ -61,7 +61,7 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
                 "}";
 
         String result = runQueryAndReturnStringOfLiteralX(query1);
-        assertEquals(result, "\"10:12:10\"");
+        assertEquals(result, "\"10:12:10\"^^xsd:time");
     }
 	
     public void testDatatypeYear() throws Exception {
@@ -71,7 +71,7 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
                 "   FILTER ( ?x = \"2013\"^^xsd:gYear ) .\n" +
                 "}";
         String result = runQueryAndReturnStringOfLiteralX(query1);
-        assertEquals(result, "\"2013\"");
+        assertEquals(result, "\"2013\"^^xsd:gYear");
     }
 
 

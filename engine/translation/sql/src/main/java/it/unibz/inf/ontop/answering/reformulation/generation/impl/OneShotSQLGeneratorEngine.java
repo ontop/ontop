@@ -23,38 +23,32 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
+import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
+import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.DB2SQLDialectAdapter;
+import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
+import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.exception.OntopTranslationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
 import it.unibz.inf.ontop.injection.OntopTranslationSQLSettings;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
+import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.term.TermConstants;
-import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
-import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
-import it.unibz.inf.ontop.datalog.DatalogNormalizer;
-import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
-import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.DB2SQLDialectAdapter;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.datalog.IntermediateQueryToDatalogTranslator;
 import it.unibz.inf.ontop.utils.EncodeForURI;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
-import it.unibz.inf.ontop.datalog.DatalogDependencyGraphGenerator;
-import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
@@ -69,8 +63,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates.SPARQL_GROUP;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -1206,7 +1200,7 @@ public class OneShotSQLGeneratorEngine {
 			Function f = (Function) term;
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
-				COL_TYPE type = TYPE_FACTORY.getDatatype(p.toString());
+				COL_TYPE type = TYPE_FACTORY.getDatatype(p.getName());
 				return jdbcTypeMapper.getSQLType(type);
 			}
 			// Return varchar for unknown

@@ -1,14 +1,15 @@
 package it.unibz.inf.ontop.spec.ontology.owlapi;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.owlapi.model.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class OWLAPITranslatorHelper {
 
@@ -52,7 +53,7 @@ public class OWLAPITranslatorHelper {
 			c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), object.getLang());
 		}
 		else {
-			Predicate.COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
+			Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(object.getDatatype().toStringID());
 			c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), type);
 		}
 		URIConstant c1 = getIndividual(ax.getSubject());
@@ -175,7 +176,7 @@ public class OWLAPITranslatorHelper {
 
 					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), owlLiteral.getLang());
 				} else {
-					Predicate.COL_TYPE type = OWLTypeMapper.getType(owlLiteral.getDatatype());
+					Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(owlLiteral.getDatatype().toStringID());
 					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), type);
 				}
 
