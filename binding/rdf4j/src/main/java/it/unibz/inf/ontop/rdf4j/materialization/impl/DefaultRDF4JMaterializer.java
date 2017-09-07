@@ -230,7 +230,7 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 		public Statement next() throws QueryEvaluationException {
 			try {
 				return RDF4JHelper.createStatement(graphResultSet.next());
-			} catch (OntopQueryAnsweringException | OntopConnectionException e) {
+			} catch (OntopQueryAnsweringException e) {
 				throw new QueryEvaluationException(e);
 			}
 		}
