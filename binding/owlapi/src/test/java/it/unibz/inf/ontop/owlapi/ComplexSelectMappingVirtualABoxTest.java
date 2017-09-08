@@ -20,10 +20,8 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -135,6 +133,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableDefaultDatatypeInference(true)
 				.enableTestMode()
 				.build();
         OntopOWLReasoner reasoner = factory.createReasoner(config);
@@ -199,7 +198,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U4 ?z . }";
 
         String val = runTests();
-        assertEquals("\"ualue1\"", val);
+        assertEquals("\"ualue1\"^^xsd:string", val);
     }
 
     @Test

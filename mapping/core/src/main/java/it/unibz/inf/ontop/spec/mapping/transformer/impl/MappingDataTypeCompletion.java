@@ -29,13 +29,10 @@ import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
@@ -92,16 +89,7 @@ public class MappingDataTypeCompletion {
                 // NO-OP for already assigned datatypes, or object properties, or bnodes
             }
             else if (function.isOperation()) {
-                Predicate.COL_TYPE type = treatUnknownDatatype();
-
-                for (int i = 0; i < function.getArity(); i++) {
-
-                    Term newTerm = TERM_FACTORY.getTypedTerm(function.getTerm(i), type);
-                    log.info("Datatype "+type+" for the value " + function.getTerm(i) + " of the property " + predicate + " has been " +
-                            "inferred " +
-                            "from the database");
-                    atom.setTerm(position, newTerm);
-                }
+                // NO-OP an exception or a default datatype will be assigned later
             } else {
                 throw new IllegalArgumentException("Unsupported subtype of: " + Function.class.getSimpleName());
             }
@@ -122,47 +110,34 @@ public class MappingDataTypeCompletion {
         }
     }
 
-    /**
-     * Infers inductively the datatypes of (evaluated) operations, from their operands.
-     * After execution, only the outermost operation is assigned a type.
-     */
-    private void insertOperationDatatyping(Term term, Function atom, int position) {
+   /*
+   * Following r2rml standard we do not infer the datatype for operation but we return the default value string
+    */
+    private void insertOperationDatatyping(Term term, Function atom, int position) throws UnknownDatatypeException {
 
         if (term instanceof Function) {
             Function castTerm = (Function) term;
+
             if (castTerm.isOperation()) {
-                Optional<TermType> inferredType = TermTypeInferenceTools.inferType(castTerm);
-                if(inferredType.isPresent()){
-                    // delete explicit datatypes of the operands
-                    deleteExplicitTypes(term, atom, position);
-                    // insert the datatype of the evaluated operation
-                    atom.setTerm(
-                            position,
-                            TERM_FACTORY.getTypedTerm(
-                                    term,
-                                    inferredType.get().getColType()
-                            ));
-                }else {
-                    throw new IllegalStateException("A type should be inferred for operation " + castTerm);
+
+                if(defaultDatatypeInferred)
+                {
+
+                    atom.setTerm(position, TERM_FACTORY.getTypedTerm(term, Predicate.COL_TYPE.STRING));
+                }
+                else
+                {
+                    throw new UnknownDatatypeException("Impossible to determine the expected datatype for the operation "+ castTerm+"\n" +
+                            "Possible solutions: \n" +
+                            "- Add an explicit datatype in the mapping \n" +
+                            "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +
+                            " and we will infer the default datatype (xsd:string)"
+                    );
                 }
             }
         }
     }
 
-    private void deleteExplicitTypes(Term term, Function atom, int position) {
-        if(term instanceof Function){
-            Function castTerm = (Function) term;
-            IntStream.range(0, castTerm.getArity())
-                    .forEach(i -> deleteExplicitTypes(
-                            castTerm.getTerm(i),
-                            castTerm,
-                            i
-                    ));
-            if(castTerm.isDataTypeFunction()){
-                atom.setTerm(position, castTerm.getTerm(0));
-            }
-        }
-    }
 
     /**
      * returns COL_TYPE for one of the datatype ids
@@ -191,15 +166,14 @@ public class MappingDataTypeCompletion {
         if(defaultDatatypeInferred)
             return colType.orElse(Predicate.COL_TYPE.STRING) ;
         else {
-            return colType.orElseThrow(() -> new UnknownDatatypeException("Variable"));
+            return colType.orElseThrow(() -> new UnknownDatatypeException("Impossible to determine the expected datatype for the column "+ variable+"\n" +
+                    "Possible solutions: \n" +
+                    "- Add an explicit datatype in the mapping \n" +
+                    "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +
+                    " and we will infer the default datatype (xsd:string)"));
+
         }
 
-    }
-
-    private Predicate.COL_TYPE treatUnknownDatatype() throws UnknownDatatypeException {
-         if(defaultDatatypeInferred)
-             return Predicate.COL_TYPE.STRING ;
-         throw new UnknownDatatypeException("Operation");
     }
 
     private static class IndexedPosition {
