@@ -161,8 +161,16 @@ public class MappingDataTypeCompletion {
                 .getFunctionSymbol());
         RelationDefinition td = metadata.getRelation(tableId);
         Attribute attribute = td.getAttribute(ip.pos);
+        Optional<Predicate.COL_TYPE>  colType;
+        //we want to assign the default value or throw an exception when the type of the attribute is missing (case of view)
+        if (attribute.getType() == 0){
 
-        Optional<Predicate.COL_TYPE> colType = metadata.getColType(attribute);
+            colType = Optional.empty();
+        }
+        else{
+            colType = metadata.getColType(attribute);
+        }
+
         if(defaultDatatypeInferred)
             return colType.orElse(Predicate.COL_TYPE.STRING) ;
         else {
