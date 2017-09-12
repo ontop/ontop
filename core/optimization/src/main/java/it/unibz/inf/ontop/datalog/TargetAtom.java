@@ -13,6 +13,4 @@ public interface TargetAtom {
 
     DistinctVariableOnlyDataAtom getProjectionAtom();
     ImmutableSubstitution<ImmutableTerm> getSubstitution();
-
-    TargetAtom rename(InjectiveVar2VarSubstitution renamingSubstitution);
 }
