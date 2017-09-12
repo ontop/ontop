@@ -24,7 +24,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static com.sun.tools.doclint.Entity.tau;
 import static it.unibz.inf.ontop.iq.node.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
