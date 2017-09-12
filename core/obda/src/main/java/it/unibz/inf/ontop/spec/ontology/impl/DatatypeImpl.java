@@ -35,7 +35,7 @@ public class DatatypeImpl implements Datatype {
 	public static final  Datatype rdfsLiteral; 
 	
 	static {
-	    rdfsLiteral = new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL));
+	    rdfsLiteral = new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.RDFS_LITERAL));
 	}
 	
 	DatatypeImpl(Predicate p) {

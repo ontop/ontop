@@ -37,7 +37,7 @@ public interface Predicate {
 		OBJECT (1, "OBJECT"),
 		BNODE (2, "BNODE"),
 		LITERAL (3, "LITERAL"),
-		LITERAL_LANG (-3, "LITERAL_LANG"), // not to be mapped from code // BC: Why not?
+		LANG_STRING(-3, "LANG_STRING"),
 		INTEGER (4, "INTEGER"),
 		DECIMAL (5, "DECIMAL"),
 		DOUBLE (6, "DOUBLE"),
@@ -55,14 +55,15 @@ public interface Predicate {
 		NON_POSITIVE_INTEGER (18, "NON_POSITIVE_INTEGER"),
 		INT (19, "INT"),
 		UNSIGNED_INT (20, "UNSIGNED_INT"),
-		DATETIME_STAMP (21, "DATETIME_STAMP");
+		DATETIME_STAMP (21, "DATETIME_STAMP"),
+		RDFS_LITERAL (22, "RDFS_LITERAL");
 
 		private static final ImmutableMap<Integer, COL_TYPE> CODE_TO_TYPE_MAP;
 		
 		static {
 			ImmutableMap.Builder<Integer, COL_TYPE> mapBuilder = ImmutableMap.builder();
 			for (COL_TYPE type : COL_TYPE.values()) {
-				// ignore UNSUPPORTED (but not LITERAL_LANG anymore)
+				// ignore UNSUPPORTED (but not LANG_STRING anymore)
 				if (type.code != -1)
 					mapBuilder.put(type.code, type);
 			}
@@ -80,7 +81,8 @@ public interface Predicate {
 		public static final ImmutableSet<COL_TYPE> LITERAL_TYPES = ImmutableSet.<COL_TYPE>builder()
 				.addAll(NUMERIC_TYPES)
 				.add(LITERAL)
-				.add(LITERAL_LANG)
+				.add(LANG_STRING)
+                .add(RDFS_LITERAL)
 				.add(STRING)
 				.add(BOOLEAN)
 				.add(DATETIME)

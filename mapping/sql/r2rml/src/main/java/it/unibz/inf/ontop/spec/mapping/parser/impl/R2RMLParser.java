@@ -24,7 +24,10 @@ import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -423,17 +426,6 @@ public class R2RMLParser {
 		}
 
 		return objectAtom;
-	}
-
-	@Deprecated
-	private Term getConstantObject(String objectString) {
-		if (objectString.startsWith("http:"))
-			return getURIFunction(objectString);
-		else { // literal
-			Constant constt = TERM_FACTORY.getConstantLiteral(objectString);
-			return TERM_FACTORY.getTypedTerm(constt, COL_TYPE.LITERAL);
-
-		}
 	}
 
 	@Deprecated

@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 
 import java.util.stream.Stream;
 
@@ -54,7 +54,7 @@ public class ValueConstantImpl implements ValueConstant {
 	protected ValueConstantImpl(String value, String language) {
 		this.value = value;
 		this.language = language;
-		this.type = COL_TYPE.LITERAL_LANG;
+		this.type = COL_TYPE.LANG_STRING;
 		this.string = getStringRepresentation();
 	}
 	
@@ -63,6 +63,7 @@ public class ValueConstantImpl implements ValueConstant {
 		
 		switch (type) {
 			case STRING:
+			case LITERAL:
             case DATE:
             case TIME:
             case YEAR:
@@ -77,8 +78,7 @@ public class ValueConstantImpl implements ValueConstant {
 			case BOOLEAN: 
 				sb.append(value); 
 				break;
-			case LITERAL:
-			case LITERAL_LANG:
+			case LANG_STRING:
 				sb.append("\"").append(value);
 				if (language != null && !language.isEmpty()) {
 					sb.append("@").append(language);

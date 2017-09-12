@@ -20,13 +20,12 @@ package it.unibz.inf.ontop.evaluator;
  * #L%
  */
 
+import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.impl.ExpressionNormalizerImpl;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.TermConstants;
-import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
@@ -36,8 +35,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 
 public class ExpressionEvaluator {
@@ -825,7 +824,7 @@ public class ExpressionEvaluator {
 				if (TYPE_FACTORY.isString(pred1) && TYPE_FACTORY.isString(pred2)) { // R: replaced incorrect check
 																		//  pred1 == TERM_FACTORY.getDataTypePredicateLiteral()
 																		// && pred2 == TERM_FACTORY.getDataTypePredicateLiteral())
-																	    // which does not work for LITERAL_LANG
+																	    // which does not work for LANG_STRING
 					/*
 					 * Special code to handle quality of Literals (plain, and
 					 * with language)

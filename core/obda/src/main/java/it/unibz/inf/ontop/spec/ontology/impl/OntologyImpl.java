@@ -159,7 +159,7 @@ public class OntologyImpl implements Ontology {
 		OWL2QLDatatypes = ImmutableMap.<String, Datatype>builder()
 				.put(xml + "PlainLiteral", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL))) // 	rdf:PlainLiteral
 				.put(xml + "XMLLiteral", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) //	rdf:XMLLiteral
-				.put(rdfs + "Literal", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL))) //		rdfs:Literal
+				.put(rdfs + "Literal", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.RDFS_LITERAL))) //		rdfs:Literal
 				.put(owl + "real", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.DECIMAL))) // 			owl:real
 				.put(owl + "rational", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.DECIMAL))) // 		owl:rational
 				.put(xsd + "decimal", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.DECIMAL))) // 	xsd:decimal

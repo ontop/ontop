@@ -2,15 +2,14 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
+import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.exception.IncompatibleTermException;
 
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +28,8 @@ public class TermTypeInferenceTools {
 
         // Child: Parent
         Map<COL_TYPE, COL_TYPE> datatypeHierarchy = ImmutableMap.<COL_TYPE, COL_TYPE>builder()
-                .put(LITERAL_LANG, LITERAL)
+                .put(LANG_STRING, LITERAL)
+                .put(RDFS_LITERAL, LITERAL)
                 .put(STRING, LITERAL)
                 .put(BOOLEAN, LITERAL)
                 .put(DATE, LITERAL)
@@ -98,7 +98,7 @@ public class TermTypeInferenceTools {
     private static final Optional<TermType> OPTIONAL_NULL_TERM_TYPE = Optional.of(TYPE_FACTORY.getTermType(NULL));
 
     private static final DatatypePredicate LITERAL_LANG_PREDICATE = TYPE_FACTORY
-            .getTypePredicate(LITERAL_LANG);
+            .getTypePredicate(LANG_STRING);
 
     /**
      * TODO: find a better name
@@ -174,7 +174,8 @@ public class TermTypeInferenceTools {
     protected static TermType castStringLangType(TermType termType) {
         switch (termType.getColType()) {
             case LITERAL:
-            case LITERAL_LANG:
+            case RDFS_LITERAL:
+            case LANG_STRING:
             case STRING:
                 return termType;
             default:

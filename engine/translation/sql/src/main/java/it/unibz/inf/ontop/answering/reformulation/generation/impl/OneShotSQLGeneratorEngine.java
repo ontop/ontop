@@ -1432,14 +1432,14 @@ public class OneShotSQLGeneratorEngine {
 		}
 		else {
 			lang = optionalTermType
-					.filter(t -> t.getColType() == LITERAL_LANG)
+					.filter(t -> t.getColType() == LANG_STRING)
 					.map(t -> t.getLanguageTagConstant()
 								.map(tag -> "'" + tag.getFullString() + "'")
 								.orElseGet(() -> t.getLanguageTagTerm()
 										.map(tag -> getSQLString(tag, index, false))
 										.orElseThrow(() -> new IllegalStateException(
 												"Inconsistent term type: the language tag must be defined " +
-														"for any LITERAL_LANG"))))
+														"for any LANG_STRING"))))
 					.orElse("NULL");
 		}
 		return String.format(LANG_STR, lang, langVariableName);
@@ -1473,7 +1473,7 @@ public class OneShotSQLGeneratorEngine {
 					/**
 					 * By default, we apply the "most" general COL_TYPE
 					 */
-					.orElse(LITERAL);
+					.orElse(STRING);
 
 			typeString = String.format("%d", colType.getQuestCode());
 		}
@@ -2103,34 +2103,35 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private String getSQLLexicalForm(ValueConstant constant) {
 		switch (constant.getType()) {
-		case BNODE:
-		case LITERAL:
-		case OBJECT:
-		case STRING:
-			return sqladapter.getSQLLexicalFormString(constant.getValue());
-		case BOOLEAN:
-			boolean v = XsdDatatypeConverter.parseXsdBoolean(constant.getValue());
-			return sqladapter.getSQLLexicalFormBoolean(v);
-		case DATETIME:
-			return sqladapter.getSQLLexicalFormDatetime(constant.getValue());
-		case DATETIME_STAMP:
-			return sqladapter.getSQLLexicalFormDatetimeStamp(constant.getValue());
-		case DECIMAL:
-		case DOUBLE:
-		case INTEGER:
-		case LONG:
-		case FLOAT:
-		case NON_POSITIVE_INTEGER:
-		case INT:
-		case UNSIGNED_INT:
-		case NEGATIVE_INTEGER:
-		case POSITIVE_INTEGER:
-		case NON_NEGATIVE_INTEGER:
-			return constant.getValue();
-		case NULL:
-			return "NULL";
-		default:
-			return "'" + constant.getValue() + "'";
+			case BNODE:
+			case LITERAL:
+			case OBJECT:
+			case STRING:
+			case RDFS_LITERAL:
+				return sqladapter.getSQLLexicalFormString(constant.getValue());
+			case BOOLEAN:
+				boolean v = XsdDatatypeConverter.parseXsdBoolean(constant.getValue());
+				return sqladapter.getSQLLexicalFormBoolean(v);
+			case DATETIME:
+				return sqladapter.getSQLLexicalFormDatetime(constant.getValue());
+			case DATETIME_STAMP:
+				return sqladapter.getSQLLexicalFormDatetimeStamp(constant.getValue());
+			case DECIMAL:
+			case DOUBLE:
+			case INTEGER:
+			case LONG:
+			case FLOAT:
+			case NON_POSITIVE_INTEGER:
+			case INT:
+			case UNSIGNED_INT:
+			case NEGATIVE_INTEGER:
+			case POSITIVE_INTEGER:
+			case NON_NEGATIVE_INTEGER:
+				return constant.getValue();
+			case NULL:
+				return "NULL";
+			default:
+				return "'" + constant.getValue() + "'";
 		}
 	}
 

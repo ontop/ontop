@@ -102,7 +102,7 @@ public class OWLAPIIndividualTranslator {
 		if (value == null) {
 			return null;
 		} 
-		else if (v.getType() == COL_TYPE.LITERAL_LANG) {
+		else if (v.getType() == COL_TYPE.LANG_STRING) {
 			return dataFactory.getOWLLiteral(value, v.getLanguage());
 		} 
 		else {

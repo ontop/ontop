@@ -142,11 +142,11 @@ public class JDBC2ConstantConverter {
                     }
                     return TERM_FACTORY.getConstantBNode(scopedLabel);
 
-                /**
-                 * TODO: the language tag should be reserved to LITERAL_LANG
-                 */
                 case LITERAL:
-                case LITERAL_LANG:
+                    return TERM_FACTORY.getConstantLiteral(stringValue);
+
+
+                case LANG_STRING:
                     // The constant is a literal, we need to find if its
                     // rdfs:Literal or a normal literal and construct it
                     // properly.

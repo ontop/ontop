@@ -177,6 +177,9 @@ public class OWLAPITranslatorHelper {
 					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), owlLiteral.getLang());
 				} else {
 					Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(owlLiteral.getDatatype().toStringID());
+					if(type==null){
+						return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral());
+					}
 					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), type);
 				}
 
