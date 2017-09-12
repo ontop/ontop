@@ -1800,13 +1800,14 @@ public class OneShotSQLGeneratorEngine {
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
 			if (hasIRIDictionary()) {
-				if (ct.getType() == OBJECT
-						|| ct.getType() == LITERAL) {
+				if (ct.getType() == OBJECT) {
 					int id = getUriid(ct.getValue());
 					if (id >= 0)
 						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
 						return String.valueOf(id);
 				}
+				if (ct.getType() == LITERAL)
+					throw new IllegalStateException("should not happen");
 			}
 			return getSQLLexicalForm(ct);
 		} else if (term instanceof URIConstant) {
@@ -2103,8 +2104,9 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private String getSQLLexicalForm(ValueConstant constant) {
 		switch (constant.getType()) {
-			case BNODE:
 			case LITERAL:
+				throw new IllegalStateException("should not happen");
+			case BNODE:
 			case OBJECT:
 			case STRING:
 			case RDFS_LITERAL:

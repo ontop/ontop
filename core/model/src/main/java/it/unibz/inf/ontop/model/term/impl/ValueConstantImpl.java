@@ -62,8 +62,9 @@ public class ValueConstantImpl implements ValueConstant {
 		StringBuilder sb = new StringBuilder();
 		
 		switch (type) {
-			case STRING:
 			case LITERAL:
+				throw new IllegalStateException("should not happen");
+			case STRING:
             case DATE:
             case TIME:
             case YEAR:

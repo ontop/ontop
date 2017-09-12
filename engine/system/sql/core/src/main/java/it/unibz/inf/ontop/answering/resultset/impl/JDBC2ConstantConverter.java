@@ -143,7 +143,7 @@ public class JDBC2ConstantConverter {
                     return TERM_FACTORY.getConstantBNode(scopedLabel);
 
                 case LITERAL:
-                    return TERM_FACTORY.getConstantLiteral(stringValue);
+                    throw new IllegalStateException("should not enter here");
 
 
                 case LANG_STRING:
@@ -213,6 +213,7 @@ public class JDBC2ConstantConverter {
 
                 default:
                     return TERM_FACTORY.getConstantLiteral(stringValue, type);
+
             }
         } catch (IllegalArgumentException e) {
             Throwable cause = e.getCause();

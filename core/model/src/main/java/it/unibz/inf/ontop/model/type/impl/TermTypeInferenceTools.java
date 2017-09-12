@@ -173,13 +173,11 @@ public class TermTypeInferenceTools {
 
     protected static TermType castStringLangType(TermType termType) {
         switch (termType.getColType()) {
-            case LITERAL:
-            case RDFS_LITERAL:
             case LANG_STRING:
             case STRING:
                 return termType;
             default:
-                return TYPE_FACTORY.getTermType(LITERAL);
+                return TYPE_FACTORY.getTermType(STRING);
         }
     }
 }
