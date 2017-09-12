@@ -3,7 +3,7 @@ description = 'ontop-rdf4j'
 dependencies {
     compile project(':ontop-engine:ontop-system:ontop-system-core')
 
-    compile group: 'net.sourceforge.owlapi', name: 'owlapi-apibinding', version: '4.2.8'
+    compile group: 'net.sourceforge.owlapi', name: 'owlapi-apibinding', version: rootProject.ext.owlapiVersion
 
     compile group: 'org.eclipse.rdf4j', name: 'rdf4j-repository-api', version: rootProject.ext.rdf4jVersion
     compile group: 'org.eclipse.rdf4j', name: 'rdf4j-queryresultio-api', version: rootProject.ext.rdf4jVersion
@@ -17,8 +17,8 @@ dependencies {
     compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-n3', version: rootProject.ext.rdf4jVersion
     compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-ntriples', version: rootProject.ext.rdf4jVersion
 
-    compile group: 'eu.optique-project', name: 'r2rml-api-core', version: '0.6.0'
-    compile group: 'eu.optique-project', name: 'r2rml-api-rdf4j-binding', version: '0.6.0'
+    compile group: 'eu.optique-project', name: 'r2rml-api-core', version: rootProject.ext.r2rmlApiVersion
+    compile group: 'eu.optique-project', name: 'r2rml-api-rdf4j-binding', version: rootProject.ext.r2rmlApiVersion
 
     testCompile group: 'ch.qos.logback', name: 'logback-classic', version: rootProject.ext.logbackVersion
     testCompile group: 'ch.qos.logback', name: 'logback-core', version: rootProject.ext.logbackVersion

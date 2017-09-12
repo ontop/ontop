@@ -1,14 +1,15 @@
 description = 'ontop-owlapi'
 
 dependencies {
+    compile project(':ontop-engine:ontop-system:ontop-system-owlapi')
+
     compile group: 'ch.qos.logback', name: 'logback-classic', version: rootProject.ext.logbackVersion
     compile group: 'ch.qos.logback', name: 'logback-core', version: rootProject.ext.logbackVersion
 
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.13'
 
-    compile project(':ontop-engine:ontop-system:ontop-system-owlapi')
-    compile group: 'net.sourceforge.owlapi', name: 'owlapi-api', version: '4.2.8'
-    compile group: 'net.sourceforge.owlapi', name: 'owlapi-apibinding', version: '4.2.8'
+    compile group: 'net.sourceforge.owlapi', name: 'owlapi-api', version: rootProject.ext.owlapiVersion
+    compile group: 'net.sourceforge.owlapi', name: 'owlapi-apibinding', version: rootProject.ext.owlapiVersion
     compile group: 'org.eclipse.rdf4j', name: 'rdf4j-queryparser-sparql', version: rootProject.ext.rdf4jVersion
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
 

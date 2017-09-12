@@ -2,12 +2,12 @@
 description = 'ontop-docker-tests'
 dependencies {
     compile group: 'junit', name: 'junit', version:'4.12'
-    compile group: 'ch.qos.logback', name: 'logback-classic', version:'1.1.3'
-    compile group: 'ch.qos.logback', name: 'logback-core', version:'1.1.3'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: rootProject.ext.logbackVersion
+    compile group: 'ch.qos.logback', name: 'logback-core', version: rootProject.ext.logbackVersion
   compile project(':ontop-engine:ontop-system:ontop-system-sql:ontop-system-sql-owlapi')
   compile project(':ontop-binding:ontop-rdf4j')
   compile project(':ontop-binding:ontop-owlapi')
-    compile group: 'net.sourceforge.owlapi', name: 'owlapi-api', version:'4.2.8'
+    compile group: 'net.sourceforge.owlapi', name: 'owlapi-api', version:rootProject.ext.owlapiVersion
     compile group: 'org.postgresql', name: 'postgresql', version:'42.0.0'
     compile group: 'mysql', name: 'mysql-connector-java', version:'5.1.35'
     compile group: 'com.microsoft.sqlserver', name: 'sqljdbc4', version:'4.0.2206.100'

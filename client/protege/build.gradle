@@ -1,12 +1,6 @@
 description = 'ontop-protege'
+
 dependencies {
-    compile group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.0.15'
-    compile group: 'com.opencsv', name: 'opencsv', version: '3.2'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-queryalgebra-evaluation', version: rootProject.ext.rdf4jVersion
-    compile group: 'org.apache.httpcomponents', name: 'httpclient-osgi', version: '4.5.2'
-    compile group: 'org.apache.httpcomponents', name: 'httpcore-osgi', version: '4.4.4'
-    compile group: 'org.apache.httpcomponents', name: 'httpcore-nio', version: '4.4.4'
     compile project(':ontop-core:ontop-model')
     compile project(':ontop-core:ontop-optimization')
     compile project(':ontop-core:ontop-obda-core')
@@ -27,10 +21,18 @@ dependencies {
     compile project(':ontop-engine:ontop-system:ontop-system-sql:ontop-system-sql-owlapi')
     compile project(':ontop-binding:ontop-owlapi')
     compile project(':ontop-binding:ontop-rdf4j')
+
+    compile group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.0.15'
+    compile group: 'com.opencsv', name: 'opencsv', version: '3.2'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-queryalgebra-evaluation', version: rootProject.ext.rdf4jVersion
+    compile group: 'org.apache.httpcomponents', name: 'httpclient-osgi', version: '4.5.2'
+    compile group: 'org.apache.httpcomponents', name: 'httpcore-osgi', version: '4.4.4'
+    compile group: 'org.apache.httpcomponents', name: 'httpcore-nio', version: '4.4.4'
     compile group: 'org.javabits.jgrapht', name: 'jgrapht-core', version: '0.9.3'
-    compile group: 'eu.optique-project', name: 'r2rml-api-core', version: '0.6.0'
-    compile group: 'eu.optique-project', name: 'r2rml-api-rdf4j-binding', version: '0.6.0'
-    compile group: 'eu.optique-project', name: 'r2rml-api-jena-binding', version: '0.6.0'
+    compile group: 'eu.optique-project', name: 'r2rml-api-core', version: rootProject.ext.r2rmlApiVersion
+    compile group: 'eu.optique-project', name: 'r2rml-api-rdf4j-binding', version: rootProject.ext.r2rmlApiVersion
+    compile group: 'eu.optique-project', name: 'r2rml-api-jena-binding', version: rootProject.ext.r2rmlApiVersion
     compile group: 'org.apache.commons', name: 'commons-rdf-jena', version: '0.3.0-incubating'
     compile group: 'org.apache.jena', name: 'jena-core', version: '3.1.1'
     compile group: 'org.apache.jena', name: 'jena-iri', version: '3.1.1'
@@ -82,7 +84,7 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-rdf-api', version: '0.3.0-incubating'
     compile group: 'org.apache.commons', name: 'commons-rdf-rdf4j', version: '0.3.0-incubating'
     compile group: 'org.apache.commons', name: 'commons-rdf-simple', version: '0.3.0-incubating'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+
     compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.13'
     compileOnly group: 'ch.qos.logback', name: 'logback-classic', version: rootProject.ext.logbackVersion
     compileOnly group: 'ch.qos.logback', name: 'logback-core', version: rootProject.ext.logbackVersion
@@ -90,4 +92,6 @@ dependencies {
     compileOnly group: 'org.apache.felix', name: 'org.apache.felix.main', version: '4.4.1'
     compileOnly group: 'edu.stanford.protege', name: 'protege-editor-core', version: '5.2.0'
     compileOnly group: 'edu.stanford.protege', name: 'protege-editor-owl', version: '5.2.0'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }

@@ -5,7 +5,7 @@ dependencies {
     compile group: 'ch.qos.logback', name: 'logback-core', version: rootProject.ext.logbackVersion
     compile project(':ontop-binding:ontop-rdf4j')
     compile project(':ontop-test:ontop-semantic-index')
-    compile group: 'net.sourceforge.owlapi', name: 'owlapi-api', version: '4.2.8'
+    compile group: 'net.sourceforge.owlapi', name: 'owlapi-api', version: rootProject.ext.owlapiVersion
     compile group: 'com.h2database', name: 'h2', version: '1.4.190'
     compile group: 'org.eclipse.rdf4j', name: 'rdf4j-runtime', version: rootProject.ext.rdf4jVersion
     compile group: 'org.eclipse.rdf4j', name: 'rdf4j-util', version: rootProject.ext.rdf4jVersion
