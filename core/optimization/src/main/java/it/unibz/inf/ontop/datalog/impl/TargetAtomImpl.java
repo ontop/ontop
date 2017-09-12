@@ -1,10 +1,10 @@
-package it.unibz.inf.ontop.iq.mapping.impl;
+package it.unibz.inf.ontop.datalog.impl;
 
+import it.unibz.inf.ontop.datalog.TargetAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.iq.mapping.TargetAtom;
 
 public class TargetAtomImpl implements TargetAtom {
     private final DistinctVariableOnlyDataAtom atom;
