@@ -3,13 +3,13 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
@@ -30,12 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.AbstractMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.sun.tools.doclint.Entity.tau;
 import static it.unibz.inf.ontop.iq.node.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
@@ -81,6 +80,27 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.substitution = substitution;
         this.optionalModifiers = optionalQueryModifiers;
         this.nullabilityEvaluator = nullabilityEvaluator;
+
+        validate();
+    }
+
+    private void validate() {
+        // The substitution domain must be a subset of the projectedVariables
+        if (!projectedVariables.containsAll(substitution.getDomain())) {
+            throw new InvalidQueryNodeException("ConstructionNode: all the domain variables " +
+                    "of the substitution must be projected.\n" + toString());
+        }
+
+        // Substitution to non-projected variables is incorrect
+        if (substitution.getImmutableMap().values().stream()
+                .filter(v -> v instanceof Variable)
+                .map(v -> (Variable) v)
+                .anyMatch(v -> !projectedVariables.contains(v))) {
+            throw new InvalidQueryNodeException(
+                    "ConstructionNode: substituting a variable " +
+                            "by a non-projected variable is incorrect.\n"
+                + toString());
+        }
     }
 
     /**
@@ -93,6 +113,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.substitution = SUBSTITUTION_FACTORY.getSubstitution();
         this.optionalModifiers = Optional.empty();
+
+        validate();
     }
 
     @AssistedInject
@@ -103,6 +125,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.substitution = substitution;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.optionalModifiers = Optional.empty();
+
+        validate();
     }
 
     @Override
@@ -448,82 +472,23 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             ImmutableSubstitution<? extends ImmutableTerm> formerTheta,
             ImmutableSet<Variable> formerV, ImmutableSet<Variable> newV) throws QueryNodeSubstitutionException {
 
-        Var2VarSubstitution tauR = tau.getVar2VarFragment();
-        // Non-variable term
-        ImmutableSubstitution<NonVariableTerm> tauO = extractTauO(tau);
-
-        Var2VarSubstitution tauEq = extractTauEq(tauR);
-
-        ImmutableSubstitution<? extends ImmutableTerm> tauC = tauO.unionHeterogeneous(tauEq)
-                .orElseThrow(() -> new IllegalStateException("Bug: dom(tauG) must be disjoint with dom(tauEq)"));
-
-
         ImmutableSubstitution<ImmutableTerm> eta = ImmutableUnificationTools.computeMGUS(formerTheta, tau)
                 .orElseThrow(() -> new QueryNodeSubstitutionException("The descending substitution " + tau
                         + " is incompatible with " + this));
 
-        ImmutableSubstitution<ImmutableTerm> etaB = extractEtaB(eta, formerV, newV, tauC);
+        ImmutableSubstitution<ImmutableTerm> newTheta = extractNewTheta(eta, newV);
 
-        ImmutableSubstitution<ImmutableTerm> newTheta = tauR.applyToSubstitution(etaB)
-                .orElseThrow(() -> new IllegalStateException("Bug: tauR does not rename etaB safely as excepted"));
-
-        ImmutableSubstitution<? extends ImmutableTerm> delta = computeDelta(formerTheta, newTheta, eta, tauR, tauEq);
+        ImmutableSubstitution<? extends ImmutableTerm> delta = computeDelta(formerTheta, newTheta, eta, formerV);
 
         return new NewSubstitutionPair(newTheta, delta);
     }
 
-    @SuppressWarnings("unchecked")
-    private static ImmutableSubstitution<NonVariableTerm> extractTauO(ImmutableSubstitution<? extends ImmutableTerm> tau) {
-        ImmutableMap<Variable, NonVariableTerm> newMap = tau.getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue() instanceof NonVariableTerm)
-                .map(e -> (Map.Entry<Variable, NonVariableTerm>) e)
-                .collect(ImmutableCollectors.toMap());
-
-        return SUBSTITUTION_FACTORY.getSubstitution(newMap);
-    }
-
-    /**
-     * TODO: explain
-     */
-    private static Var2VarSubstitution extractTauEq(Var2VarSubstitution tauR) {
-        int domainVariableCount = tauR.getDomain().size();
-        if (domainVariableCount <= 1) {
-            return SUBSTITUTION_FACTORY.getVar2VarSubstitution(ImmutableMap.of());
-        }
-
-        ImmutableMultimap<Variable, Variable> inverseMultimap = tauR.getImmutableMap().entrySet().stream()
-                // Inverse
-                .map(e -> (Map.Entry<Variable, Variable>) new AbstractMap.SimpleImmutableEntry<>(e.getValue(), e.getKey()))
-                .collect(ImmutableCollectors.toMultimap());
-
-        ImmutableMap<Variable, Variable> newMap = inverseMultimap.asMap().values().stream()
-                // TODO: explain
-                .filter(vars -> vars.size() >= 1)
-                //
-                .flatMap(vars -> {
-                    List<Variable> sortedVariables = vars.stream()
-                            .sorted()
-                            .collect(Collectors.toList());
-                    Variable largerVariable = sortedVariables.get(sortedVariables.size() - 1);
-                    return sortedVariables.stream()
-                            .limit(sortedVariables.size() - 1)
-                            .map(v -> (Map.Entry<Variable, Variable>) new AbstractMap.SimpleEntry<>(v, largerVariable));
-                })
-                .collect(ImmutableCollectors.toMap());
-
-        return SUBSTITUTION_FACTORY.getVar2VarSubstitution(newMap);
-    }
-
-    private static ImmutableSubstitution<ImmutableTerm> extractEtaB(ImmutableSubstitution<ImmutableTerm> eta,
-                                                                    ImmutableSet<Variable> formerV,
-                                                                    ImmutableSet<Variable> newV,
-                                                                    ImmutableSubstitution<? extends ImmutableTerm> tauC) {
-
-        ImmutableSet<Variable> tauCDomain = tauC.getDomain();
+    private static ImmutableSubstitution<ImmutableTerm> extractNewTheta(ImmutableSubstitution<ImmutableTerm> eta,
+                                                                        ImmutableSet<Variable> newV) {
 
         ImmutableMap<Variable, ImmutableTerm> newMap = eta.getImmutableMap().entrySet().stream()
-                .filter(e -> formerV.contains(e.getKey()) || newV.contains(e.getKey()))
-                .filter(e -> !tauCDomain.contains(e.getKey()))
+                .filter(e -> newV.contains(e.getKey()))
+                .filter(e -> (!(e.getValue() instanceof Variable)) || newV.contains(e.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
         return SUBSTITUTION_FACTORY.getSubstitution(newMap);
@@ -532,20 +497,11 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private static ImmutableSubstitution<? extends ImmutableTerm> computeDelta(
             ImmutableSubstitution<? extends ImmutableTerm> formerTheta,
             ImmutableSubstitution<? extends ImmutableTerm> newTheta,
-            ImmutableSubstitution<ImmutableTerm> eta, Var2VarSubstitution tauR,
-            Var2VarSubstitution tauEq) {
+            ImmutableSubstitution<ImmutableTerm> eta, ImmutableSet<Variable> formerV) {
 
-        ImmutableSet<Map.Entry<Variable, Variable>> tauEqEntries = tauEq.getImmutableMap().entrySet();
-        ImmutableSet<Variable> formerThetaDomain = formerTheta.getDomain();
-
-        @SuppressWarnings("SuspiciousMethodCalls")
-        ImmutableMap<Variable, ImmutableTerm> newMap = Stream.concat(
-                eta.getImmutableMap().entrySet().stream(),
-                tauR.getImmutableMap().entrySet().stream())
-                .filter(e -> !tauEqEntries.contains(e))
-                .filter(e -> !formerThetaDomain.contains(e.getKey()))
-                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), newTheta.apply(e.getValue())))
-                .distinct()
+        ImmutableMap<Variable, ImmutableTerm> newMap = eta.getImmutableMap().entrySet().stream()
+                .filter(e -> !formerTheta.isDefining(e.getKey()))
+                .filter(e -> (!newTheta.isDefining(e.getKey()) || formerV.contains(e.getKey())))
                 .collect(ImmutableCollectors.toMap());
 
         return SUBSTITUTION_FACTORY.getSubstitution(newMap);
