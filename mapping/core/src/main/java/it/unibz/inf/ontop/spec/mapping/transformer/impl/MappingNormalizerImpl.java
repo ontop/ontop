@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
@@ -65,7 +64,10 @@ public class MappingNormalizerImpl implements MappingNormalizer {
                                                                  IntermediateQuery query, int suffix) {
         Map<Variable, Variable> substitutionMap =
                 query.getKnownVariables().stream()
-                        .collect(Collectors.toMap(v -> v, v -> TERM_FACTORY.getVariable(v.getName()+"m"+suffix)));
+                        .collect(ImmutableCollectors.toMap(
+                                v -> v,
+                                v -> TERM_FACTORY.getVariable(v.getName()+"m"+suffix)
+                        ));
         QueryRenamer queryRenamer = transformerFactory.createRenamer(SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(substitutionMap));
         return queryRenamer.transform(query);
     }
