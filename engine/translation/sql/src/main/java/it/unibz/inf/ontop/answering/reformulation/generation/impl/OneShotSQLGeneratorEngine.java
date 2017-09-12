@@ -1806,8 +1806,10 @@ public class OneShotSQLGeneratorEngine {
 						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
 						return String.valueOf(id);
 				}
-				if (ct.getType() == LITERAL)
+				if (ct.getType() == LITERAL) {
+					//TODO: remove
 					throw new IllegalStateException("should not happen");
+				}
 			}
 			return getSQLLexicalForm(ct);
 		} else if (term instanceof URIConstant) {
@@ -2105,6 +2107,7 @@ public class OneShotSQLGeneratorEngine {
 	private String getSQLLexicalForm(ValueConstant constant) {
 		switch (constant.getType()) {
 			case LITERAL:
+				//TODO:remove
 				throw new IllegalStateException("should not happen");
 			case BNODE:
 			case OBJECT:

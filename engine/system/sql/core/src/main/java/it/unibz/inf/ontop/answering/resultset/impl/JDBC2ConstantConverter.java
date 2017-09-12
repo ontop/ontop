@@ -143,6 +143,7 @@ public class JDBC2ConstantConverter {
                     return TERM_FACTORY.getConstantBNode(scopedLabel);
 
                 case LITERAL:
+                    //TODO:remove
                     throw new IllegalStateException("should not enter here");
 
 

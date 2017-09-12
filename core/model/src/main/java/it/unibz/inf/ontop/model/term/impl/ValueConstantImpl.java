@@ -63,7 +63,6 @@ public class ValueConstantImpl implements ValueConstant {
 		
 		switch (type) {
 			case LITERAL:
-				throw new IllegalStateException("should not happen");
 			case STRING:
             case DATE:
             case TIME:
