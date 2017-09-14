@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Test;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,10 +182,10 @@ public abstract class AbstractBindTestWithFunctions {
 
     protected List<String> getRoundExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0, 43.0\"");
-        expectedValues.add("\"0.0, 23.0\"");
-        expectedValues.add("\"0.0, 34.0\"");
-        expectedValues.add("\"0.0, 10.0\"");
+        expectedValues.add("\"0.0, 43.0\"^^xsd:string");
+        expectedValues.add("\"0.0, 23.0\"^^xsd:string");
+        expectedValues.add("\"0.0, 34.0\"^^xsd:string");
+        expectedValues.add("\"0.0, 10.0\"^^xsd:string");
         return expectedValues;
     }
 
@@ -334,8 +335,8 @@ public abstract class AbstractBindTestWithFunctions {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The%20Semantic%20Web\"");
-        expectedValues.add("\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"");
+        expectedValues.add("\"The%20Semantic%20Web\"^^xsd:string");
+        expectedValues.add("\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
     }
 
@@ -433,11 +434,11 @@ public abstract class AbstractBindTestWithFunctions {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial SPARQL TUTORIAL\"");
-        expectedValues.add("\"The Semantic Web THE SEMANTIC WEB\"");
-        expectedValues.add("\"Crime and Punishment CRIME AND PUNISHMENT\"");
+        expectedValues.add("\"SPARQL Tutorial SPARQL TUTORIAL\"^^xsd:string");
+        expectedValues.add("\"The Semantic Web THE SEMANTIC WEB\"^^xsd:string");
+        expectedValues.add("\"Crime and Punishment CRIME AND PUNISHMENT\"^^xsd:string");
         expectedValues.add("\"The Logic Book: Introduction, Second Edition " +
-                "The Logic Book: Introduction, Second Edition\"".toUpperCase());
+                "The Logic Book: Introduction, Second Edition\"".toUpperCase()+"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
 
     }
@@ -457,11 +458,11 @@ public abstract class AbstractBindTestWithFunctions {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial sparql tutorial\"");
-        expectedValues.add("\"The Semantic Web the semantic web\"");
-        expectedValues.add("\"Crime and Punishment crime and punishment\"");
+        expectedValues.add("\"SPARQL Tutorial sparql tutorial\"^^xsd:string");
+        expectedValues.add("\"The Semantic Web the semantic web\"^^xsd:string");
+        expectedValues.add("\"Crime and Punishment crime and punishment\"^^xsd:string");
         expectedValues.add("\"The Logic Book: Introduction, Second Edition " +
-                "The Logic Book: Introduction, Second Edition\"".toLowerCase());
+                "The Logic Book: Introduction, Second Edition\"".toLowerCase()+"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
 
     }
@@ -812,13 +813,14 @@ public abstract class AbstractBindTestWithFunctions {
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
                 OWLObject ind1 = bindingSet.getOWLObject("w");
+                String value = ToStringRenderer.getInstance().getRendering(ind1);
                 // log.debug(ind1.toString());
                 if (ind1 != null) {
-                    returnedValues.add(ind1.toString());
+                    returnedValues.add(value);
                 } else {
                     returnedValues.add(null);
                 }
-                System.out.println(ind1);
+                System.out.println(value);
                 i++;
             }
         } catch (Exception e) {

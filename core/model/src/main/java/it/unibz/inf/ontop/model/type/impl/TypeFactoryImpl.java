@@ -14,7 +14,6 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.*;
@@ -32,10 +31,9 @@ public class TypeFactoryImpl implements TypeFactory {
 
 	
 	// special case of literals with the specified language
-	private final DatatypePredicate RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING.toString(),
-									new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.STRING });
+	private final DatatypePredicate RDF_LANG_STRING;
 	
-	private final DatatypePredicate RDFS_LITERAL, XSD_STRING;
+	private final DatatypePredicate  XSD_STRING;
 //			 , RDFS_PLAIN_LITERAL;
 	private final DatatypePredicate XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
 	private final DatatypePredicate XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
@@ -56,9 +54,6 @@ public class TypeFactoryImpl implements TypeFactory {
 
 	private TypeFactoryImpl() {
 		ValueFactory factory = SimpleValueFactory.getInstance();
-//		IRI plainLiteral = factory.createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral");
-//		RDFS_PLAIN_LITERAL = registerType(plainLiteral, COL_TYPE.STRING); // 7 " http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral"
-		RDFS_LITERAL = registerType(RDFS.LITERAL, COL_TYPE.RDFS_LITERAL); // 3 "http://www.w3.org/2000/01/rdf-schema#Literal"
 		XSD_INTEGER = registerType(XMLSchema.INTEGER, COL_TYPE.INTEGER);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
 		XSD_DECIMAL = registerType(XMLSchema.DECIMAL, COL_TYPE.DECIMAL);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
 		XSD_DOUBLE = registerType(XMLSchema.DOUBLE, COL_TYPE.DOUBLE);  // 6 "http://www.w3.org/2001/XMLSchema#double"
@@ -79,6 +74,7 @@ public class TypeFactoryImpl implements TypeFactory {
 		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
 		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // 19 "http://www.w3.org/2001/XMLSchema#int"
 		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
+		RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING.toString(), new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.STRING });
 		registerType(RDF.LANGSTRING, COL_TYPE.LANG_STRING, RDF_LANG_STRING);
 	}
 
@@ -129,10 +125,10 @@ public class TypeFactoryImpl implements TypeFactory {
 		return p == XSD_DOUBLE || p == XSD_FLOAT || p == XSD_DECIMAL;
 	}
 	
-	@Override 
-	public boolean isLiteral(Predicate p) {
-		return p == RDFS_LITERAL ;
-	}
+//	@Override
+//	public boolean isLiteral(Predicate p) {
+//		return p == RDFS_LITERAL ;
+//	}
 	
 	@Override 
 	public boolean isString(Predicate p) {

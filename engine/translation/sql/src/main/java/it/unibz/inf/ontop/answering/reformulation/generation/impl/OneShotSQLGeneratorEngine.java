@@ -1591,9 +1591,9 @@ public class OneShotSQLGeneratorEngine {
 			 */
 			if (ov.getTerms().size() > 1) {
 				int size = ov.getTerms().size();
-				if (TYPE_FACTORY.isLiteral(pred)) {
-					size--;
-				}
+//				if (TYPE_FACTORY.isLiteral(pred)) {
+//					size--;
+//				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {
 					Term currentTerm = ov.getTerms().get(termIndex);
 					String repl = "";

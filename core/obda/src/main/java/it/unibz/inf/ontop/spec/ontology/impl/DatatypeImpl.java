@@ -22,9 +22,9 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
 import it.unibz.inf.ontop.spec.ontology.Datatype;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 public class DatatypeImpl implements Datatype {
 	
@@ -35,7 +35,7 @@ public class DatatypeImpl implements Datatype {
 	public static final  Datatype rdfsLiteral; 
 	
 	static {
-	    rdfsLiteral = new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.RDFS_LITERAL));
+	    rdfsLiteral = new DatatypeImpl(  new DatatypePredicateImpl(RDFS.LITERAL.getLocalName(), COL_TYPE.LITERAL));
 	}
 	
 	DatatypeImpl(Predicate p) {

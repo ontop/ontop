@@ -2,9 +2,21 @@ package it.unibz.inf.ontop.spec.mapping.validation;
 
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.Optional;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 public class UnknownDatatypeMappingTest {
 
@@ -27,18 +39,62 @@ public class UnknownDatatypeMappingTest {
         TEST_MANAGER.close();
     }
 
-    @Test(expected = UnknownDatatypeException.class)
-    public void testFailing() throws OBDASpecificationException {
-        TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_unknown_function.obda");
+    @Test
+    public void testUpperFunction() throws OBDASpecificationException {
+        OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_unknown_function.obda");
+        checkDatatype(spec.getSaturatedMapping(), Predicate.COL_TYPE.STRING);
+
     }
 
     @Test(expected = UnknownDatatypeException.class)
     public void testMappingUnknownStringFunction() throws OBDASpecificationException {
-        TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_unknown_function2.obda");
+        TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_view_function.obda");
+    }
+
+    @Test
+    public void testMappingFunction() throws OBDASpecificationException {
+        OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_function.obda");
+        checkDatatype(spec.getSaturatedMapping(), Predicate.COL_TYPE.STRING);
+    }
+
+    @Test
+    public void testMappingTargetFunction() throws OBDASpecificationException {
+        OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_target_function.obda");
+        checkDatatype(spec.getSaturatedMapping(), Predicate.COL_TYPE.STRING);
+    }
+
+    @Test
+    public void testMappingIntFunction() throws OBDASpecificationException {
+        OBDASpecification spec =TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_int_function.obda");
+        checkDatatype(spec.getSaturatedMapping(), Predicate.COL_TYPE.STRING);
     }
 
     @Test(expected = UnknownDatatypeException.class)
-    public void testMappingFunction() throws OBDASpecificationException {
-        TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_function.obda");
+    public void testMappingToCharFunction() throws OBDASpecificationException {
+        TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_tochar_function.obda");
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testMappingRDFSLiteralFunction() throws OBDASpecificationException {
+        TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_rdfsliteral.obda");
+    }
+
+    private void checkDatatype(Mapping mapping, Predicate.COL_TYPE expectedColType) {
+        Optional<Predicate> optionalDatatype = mapping.getPredicates().stream()
+                .map(mapping::getDefinition)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .flatMap(query -> query.getRootConstructionNode().getSubstitution().getImmutableMap().values().stream())
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .map(Function::getFunctionSymbol)
+                .filter(p -> p instanceof DatatypePredicate)
+                .findFirst();
+
+        assertTrue("A datatype was expected", optionalDatatype.isPresent());
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        Predicate datatype = optionalDatatype.get();
+
+        assertEquals(TYPE_FACTORY.getTypePredicate(expectedColType), datatype);
     }
 }

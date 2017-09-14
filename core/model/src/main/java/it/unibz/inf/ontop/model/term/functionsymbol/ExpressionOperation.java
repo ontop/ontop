@@ -138,8 +138,6 @@ public enum ExpressionOperation implements OperationPredicate {
 				Optional.ofNullable(arg3), Optional.ofNullable(arg4));
 	}
 
-
-
 	private final String name;
 	private final TermTypeInferenceRule termTypeInferenceRule;
 	// Immutable

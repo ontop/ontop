@@ -1,14 +1,13 @@
 package it.unibz.inf.ontop.model.type;
 
-import java.util.List;
-import java.util.Optional;
-
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import org.eclipse.rdf4j.model.IRI;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import java.util.List;
+import java.util.Optional;
 
 public interface TypeFactory {
 
@@ -29,7 +28,7 @@ public interface TypeFactory {
 	
 	boolean isFloat(Predicate p);
 	
-	boolean isLiteral(Predicate p);
+//	boolean isLiteral(Predicate p);
 	
 	boolean isString(Predicate p);
 	
