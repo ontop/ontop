@@ -428,8 +428,7 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(joinNode, joinNode2);
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(
-                        X, generateURI1(C)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(C)));
         initialQueryBuilder.addChild(joinNode2, constructionNode2);
         initialQueryBuilder.addChild(constructionNode2, DATA_NODE_3);
 
