@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -16,6 +17,7 @@ import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
@@ -474,19 +476,50 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .orElseThrow(() -> new QueryNodeSubstitutionException("The descending substitution " + tau
                         + " is incompatible with " + this));
 
-        ImmutableSubstitution<ImmutableTerm> newTheta = extractNewTheta(eta, newV);
+        // Due to the current implementation of MGUS, the normalization should have no effect
+        // (already in a normal form). Here for safety.
+        ImmutableSubstitution<ImmutableTerm> normalizedEta = normalizeEta(eta, newV);
+        ImmutableSubstitution<ImmutableTerm> newTheta = extractNewTheta(normalizedEta, newV);
 
-        ImmutableSubstitution<? extends ImmutableTerm> delta = computeDelta(formerTheta, newTheta, eta, formerV);
+        ImmutableSubstitution<? extends ImmutableTerm> delta = computeDelta(formerTheta, newTheta, normalizedEta, formerV);
 
         return new NewSubstitutionPair(newTheta, delta);
     }
 
-    private static ImmutableSubstitution<ImmutableTerm> extractNewTheta(ImmutableSubstitution<ImmutableTerm> eta,
+    /*
+     * Normalizes eta so as to avoid projected variables to be substituted by non-projected variables.
+     *
+     * This normalization can be understood as a way to select a MGU (eta) among a set of equivalent MGUs.
+     * Such a "selection" is done a posteriori.
+     *
+     */
+    private ImmutableSubstitution<ImmutableTerm> normalizeEta(ImmutableSubstitution<ImmutableTerm> eta,
+                                                              ImmutableSet<Variable> newV) {
+        ImmutableMultimap<Variable, Variable> renamingMultimap = eta.getImmutableMap().entrySet().stream()
+                .filter(e -> newV.contains(e.getKey())
+                        && (e.getValue() instanceof Variable)
+                        && (!newV.contains(e.getValue())))
+                .collect(ImmutableCollectors.toMultimap(
+                        e -> (Variable) e.getValue(),
+                        Map.Entry::getKey));
+
+        if (renamingMultimap.isEmpty())
+            return eta;
+
+        ImmutableMap<Variable, Variable> omegaMap = renamingMultimap.asMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().iterator().next()));
+        InjectiveVar2VarSubstitution omega = SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(omegaMap);
+
+        return omega.composeWith(eta);
+    }
+
+    private static ImmutableSubstitution<ImmutableTerm> extractNewTheta(ImmutableSubstitution<ImmutableTerm> normalizedEta,
                                                                         ImmutableSet<Variable> newV) {
 
-        ImmutableMap<Variable, ImmutableTerm> newMap = eta.getImmutableMap().entrySet().stream()
+        ImmutableMap<Variable, ImmutableTerm> newMap = normalizedEta.getImmutableMap().entrySet().stream()
                 .filter(e -> newV.contains(e.getKey()))
-                .filter(e -> (!(e.getValue() instanceof Variable)) || newV.contains(e.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
         return SUBSTITUTION_FACTORY.getSubstitution(newMap);

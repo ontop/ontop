@@ -49,7 +49,8 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
             T convertedTargetTerm = applyToTerm(originalEntry.getValue());
 
             // Safe because the local substitution is injective
-            substitutionMapBuilder.put(convertedVariable, convertedTargetTerm);
+            if (!convertedTargetTerm.equals(convertedVariable))
+                substitutionMapBuilder.put(convertedVariable, convertedTargetTerm);
         }
 
         return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
