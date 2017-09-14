@@ -29,7 +29,6 @@ public class TermTypeInferenceTools {
         // Child: Parent
         Map<COL_TYPE, COL_TYPE> datatypeHierarchy = ImmutableMap.<COL_TYPE, COL_TYPE>builder()
                 .put(LANG_STRING, LITERAL)
-                .put(RDFS_LITERAL, LITERAL)
                 .put(STRING, LITERAL)
                 .put(BOOLEAN, LITERAL)
                 .put(DATE, LITERAL)

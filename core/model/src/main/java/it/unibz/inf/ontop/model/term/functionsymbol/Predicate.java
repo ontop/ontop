@@ -55,8 +55,7 @@ public interface Predicate {
 		NON_POSITIVE_INTEGER (18, "NON_POSITIVE_INTEGER"),
 		INT (19, "INT"),
 		UNSIGNED_INT (20, "UNSIGNED_INT"),
-		DATETIME_STAMP (21, "DATETIME_STAMP"),
-		RDFS_LITERAL (22, "RDFS_LITERAL");
+		DATETIME_STAMP (21, "DATETIME_STAMP");
 
 		private static final ImmutableMap<Integer, COL_TYPE> CODE_TO_TYPE_MAP;
 		
@@ -82,7 +81,6 @@ public interface Predicate {
 				.addAll(NUMERIC_TYPES)
 				.add(LITERAL)
 				.add(LANG_STRING)
-                .add(RDFS_LITERAL)
 				.add(STRING)
 				.add(BOOLEAN)
 				.add(DATETIME)

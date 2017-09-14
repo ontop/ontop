@@ -2112,7 +2112,6 @@ public class OneShotSQLGeneratorEngine {
 			case BNODE:
 			case OBJECT:
 			case STRING:
-			case RDFS_LITERAL:
 				return sqladapter.getSQLLexicalFormString(constant.getValue());
 			case BOOLEAN:
 				boolean v = XsdDatatypeConverter.parseXsdBoolean(constant.getValue());

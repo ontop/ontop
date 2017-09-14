@@ -82,9 +82,9 @@ public class DatalogProgramSyntaxFactory {
 	public static Function uri(Term... terms){
 		return TERM_FACTORY.getUriTemplate(terms);
 	}
-	
-	public static Function rdfsLiteral(Term term){
-		return TERM_FACTORY.getTypedTerm(term, Predicate.COL_TYPE.RDFS_LITERAL);
+
+	public static Function literal(Term term){
+		return TERM_FACTORY.getTypedTerm(term, Predicate.COL_TYPE.STRING);
 	}
 	
 	public static Function and(Term... terms){
