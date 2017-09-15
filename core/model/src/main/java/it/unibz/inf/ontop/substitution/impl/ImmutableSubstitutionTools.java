@@ -4,6 +4,7 @@ import java.util.AbstractMap;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
@@ -18,6 +19,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
 
 /**
@@ -254,5 +256,30 @@ public class ImmutableSubstitutionTools {
                 .map(v -> new AbstractMap.SimpleEntry<Variable, Constant>(v, TermConstants.NULL))
                 .collect(ImmutableCollectors.toMap());
         return new ImmutableSubstitutionImpl<>(map);
+    }
+
+    /**
+     * Prevents priority variables to be renamed into non-priority variables.
+     */
+    public static ImmutableSubstitution<? extends ImmutableTerm> prioritizeRenamings(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, ImmutableSet<Variable> priorityVariables) {
+        ImmutableMultimap<Variable, Variable> renamingMultimap = substitution.getImmutableMap().entrySet().stream()
+                .filter(e -> priorityVariables.contains(e.getKey())
+                        && (e.getValue() instanceof Variable)
+                        && (!priorityVariables.contains(e.getValue())))
+                .collect(ImmutableCollectors.toMultimap(
+                        e -> (Variable) e.getValue(),
+                        Map.Entry::getKey));
+
+        if (renamingMultimap.isEmpty())
+            return substitution;
+
+        ImmutableMap<Variable, Variable> renamingMap = renamingMultimap.asMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().iterator().next()));
+        InjectiveVar2VarSubstitution renamingSubstitution = SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(renamingMap);
+
+        return renamingSubstitution.composeWith(substitution);
     }
 }

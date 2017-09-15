@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
@@ -478,7 +479,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
         // Due to the current implementation of MGUS, the normalization should have no effect
         // (already in a normal form). Here for safety.
-        ImmutableSubstitution<ImmutableTerm> normalizedEta = normalizeEta(eta, newV);
+        ImmutableSubstitution<? extends ImmutableTerm> normalizedEta = normalizeEta(eta, newV);
         ImmutableSubstitution<ImmutableTerm> newTheta = extractNewTheta(normalizedEta, newV);
 
         ImmutableSubstitution<? extends ImmutableTerm> delta = computeDelta(formerTheta, newTheta, normalizedEta, formerV);
@@ -493,34 +494,19 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      * Such a "selection" is done a posteriori.
      *
      */
-    private ImmutableSubstitution<ImmutableTerm> normalizeEta(ImmutableSubstitution<ImmutableTerm> eta,
+    private ImmutableSubstitution<? extends ImmutableTerm> normalizeEta(ImmutableSubstitution<ImmutableTerm> eta,
                                                               ImmutableSet<Variable> newV) {
-        ImmutableMultimap<Variable, Variable> renamingMultimap = eta.getImmutableMap().entrySet().stream()
-                .filter(e -> newV.contains(e.getKey())
-                        && (e.getValue() instanceof Variable)
-                        && (!newV.contains(e.getValue())))
-                .collect(ImmutableCollectors.toMultimap(
-                        e -> (Variable) e.getValue(),
-                        Map.Entry::getKey));
-
-        if (renamingMultimap.isEmpty())
-            return eta;
-
-        ImmutableMap<Variable, Variable> omegaMap = renamingMultimap.asMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> e.getValue().iterator().next()));
-        InjectiveVar2VarSubstitution omega = SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(omegaMap);
-
-        return omega.composeWith(eta);
+        return ImmutableSubstitutionTools.prioritizeRenamings(eta, newV);
     }
 
-    private static ImmutableSubstitution<ImmutableTerm> extractNewTheta(ImmutableSubstitution<ImmutableTerm> normalizedEta,
-                                                                        ImmutableSet<Variable> newV) {
+    private static ImmutableSubstitution<ImmutableTerm> extractNewTheta(
+            ImmutableSubstitution<? extends ImmutableTerm> normalizedEta, ImmutableSet<Variable> newV) {
 
         ImmutableMap<Variable, ImmutableTerm> newMap = normalizedEta.getImmutableMap().entrySet().stream()
                 .filter(e -> newV.contains(e.getKey()))
-                .collect(ImmutableCollectors.toMap());
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue));
 
         return SUBSTITUTION_FACTORY.getSubstitution(newMap);
     }
@@ -528,12 +514,14 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private static ImmutableSubstitution<? extends ImmutableTerm> computeDelta(
             ImmutableSubstitution<? extends ImmutableTerm> formerTheta,
             ImmutableSubstitution<? extends ImmutableTerm> newTheta,
-            ImmutableSubstitution<ImmutableTerm> eta, ImmutableSet<Variable> formerV) {
+            ImmutableSubstitution<? extends ImmutableTerm> eta, ImmutableSet<Variable> formerV) {
 
         ImmutableMap<Variable, ImmutableTerm> newMap = eta.getImmutableMap().entrySet().stream()
                 .filter(e -> !formerTheta.isDefining(e.getKey()))
                 .filter(e -> (!newTheta.isDefining(e.getKey()) || formerV.contains(e.getKey())))
-                .collect(ImmutableCollectors.toMap());
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue));
 
         return SUBSTITUTION_FACTORY.getSubstitution(newMap);
     }
