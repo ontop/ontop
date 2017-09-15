@@ -95,8 +95,8 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 	
 	@Override
-	public COL_TYPE getDatatype(String uri) {
-		return mapURItoCOLTYPE.get(uri);
+	public Optional<COL_TYPE> getDatatype(String uri) {
+		return Optional.ofNullable(mapURItoCOLTYPE.get(uri));
 	}
 	
 	@Override

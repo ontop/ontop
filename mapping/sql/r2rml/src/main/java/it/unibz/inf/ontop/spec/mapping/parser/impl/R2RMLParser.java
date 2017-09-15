@@ -317,25 +317,23 @@ public class R2RMLParser {
 
 					// we check if it is a typed literal
 					else if (datatypeConstant != null) {
-						Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(datatypeConstant.getIRIString());
-						if (type == null) {
+						Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(datatypeConstant.getIRIString());
+						if (!type.isPresent()) {
 							// throw new RuntimeException("Unsupported datatype: " +
 							// datatype.toString());
 							logger.warn("Unsupported datatype will not be converted: "
 									+ datatypeConstant.toString());
 						} else {
-							objectAtom = TERM_FACTORY.getImmutableTypedTerm(constantLiteral, type);
+							objectAtom = TERM_FACTORY.getImmutableTypedTerm(constantLiteral, type.get());
 						}
 					}
 					else {
 
-						objectAtom = TERM_FACTORY.getImmutableTypedTerm(
-								constantLiteral,
-								COL_TYPE.LITERAL); // .RDFS_LITERAL;
+						objectAtom = constantLiteral;
+								 // .RDFS_LITERAL;
 					}
                 } else if (constantObj instanceof IRI){
-                    objectAtom = TERM_FACTORY.getImmutableTypedTerm(
-                    		TERM_FACTORY.getConstantLiteral( ((IRI) constantObj).getIRIString()), COL_TYPE.LITERAL);
+                    objectAtom = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral( ((IRI) constantObj).getIRIString()));
 
                 }
 			}
@@ -408,20 +406,18 @@ public class R2RMLParser {
 
 		if (lan != null) {
 			objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, lan);
-		}else if ((typ.equals(R2RMLVocabulary.literal)) && (concat)){
-			objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, COL_TYPE.LITERAL);
 		}
 
 		// we check if it is a typed literal
 		if (datatype != null) {
-			Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(datatype.toString());
-			if (type == null) {
+			Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(datatype.toString());
+			if (!type.isPresent()) {
 				// throw new RuntimeException("Unsupported datatype: " +
 				// datatype.toString());
 				logger.warn("Unsupported datatype will not be converted: "
 						+ datatype.toString());
 			} else {
-				objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, type);
+				objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, type.get());
 			}
 		}
 

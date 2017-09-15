@@ -224,7 +224,7 @@ public class ExpressionEvaluator {
 	private Term evalOperation(Function term) {
 
 		Predicate pred = term.getFunctionSymbol();
-		ExpressionOperation expressionOperation = ExpressionOperation.valueOf(pred.getName());
+		ExpressionOperation expressionOperation = ExpressionOperation.valueOf(pred.toString());
 		switch(expressionOperation){
 			
 			case ADD:
@@ -481,9 +481,9 @@ public class ExpressionEvaluator {
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(constantValue);
-		if (type != null) {
-			Predicate p = TYPE_FACTORY.getTypePredicate(type);
+		Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(constantValue);
+		if (type.isPresent()) {
+			Predicate p = TYPE_FACTORY.getTypePredicate(type.get());
 			return isNumeric(p);
 		}
 		return false;	

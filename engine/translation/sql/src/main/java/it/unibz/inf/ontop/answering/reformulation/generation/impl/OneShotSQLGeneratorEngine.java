@@ -1200,7 +1200,7 @@ public class OneShotSQLGeneratorEngine {
 			Function f = (Function) term;
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
-				COL_TYPE type = TYPE_FACTORY.getDatatype(p.getName());
+				COL_TYPE type = TYPE_FACTORY.getDatatype(p.getName()).get();
 				return jdbcTypeMapper.getSQLType(type);
 			}
 			// Return varchar for unknown
@@ -1800,16 +1800,13 @@ public class OneShotSQLGeneratorEngine {
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
 			if (hasIRIDictionary()) {
-				if (ct.getType() == OBJECT) {
+				if (ct.getType() == OBJECT || ct.getType() == STRING) {
 					int id = getUriid(ct.getValue());
 					if (id >= 0)
 						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
 						return String.valueOf(id);
 				}
-				if (ct.getType() == LITERAL) {
-					//TODO: remove
-					throw new IllegalStateException("should not happen");
-				}
+
 			}
 			return getSQLLexicalForm(ct);
 		} else if (term instanceof URIConstant) {
@@ -2106,9 +2103,6 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private String getSQLLexicalForm(ValueConstant constant) {
 		switch (constant.getType()) {
-			case LITERAL:
-				//TODO:remove
-				throw new IllegalStateException("should not happen");
 			case BNODE:
 			case OBJECT:
 			case STRING:

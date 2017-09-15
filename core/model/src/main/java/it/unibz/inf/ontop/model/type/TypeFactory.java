@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface TypeFactory {
 
 	@Deprecated
-	COL_TYPE getDatatype(String uri);
+	Optional<COL_TYPE> getDatatype(String uri);
 	
 	COL_TYPE getDatatype(IRI uri);
 

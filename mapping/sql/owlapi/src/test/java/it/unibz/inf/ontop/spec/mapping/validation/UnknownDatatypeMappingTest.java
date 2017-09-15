@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.validation;
 
+import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.model.term.Function;
@@ -74,7 +75,7 @@ public class UnknownDatatypeMappingTest {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_tochar_function.obda");
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = InvalidMappingExceptionWithIndicator.class)
     public void testMappingRDFSLiteralFunction() throws OBDASpecificationException {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_rdfsliteral.obda");
     }

@@ -27,19 +27,21 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
-import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
@@ -182,11 +184,11 @@ public class OntopMaterializerTest {
 		ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
 		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(person, personTemplate));
 		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(fn, personTemplate,
-				TERM_FACTORY.getImmutableTypedTerm(TERM_FACTORY.getVariable("fn"), Predicate.COL_TYPE.LITERAL)));
+				TERM_FACTORY.getImmutableTypedTerm(TERM_FACTORY.getVariable("fn"), Predicate.COL_TYPE.STRING)));
 		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(ln, personTemplate,
-				TERM_FACTORY.getImmutableTypedTerm( TERM_FACTORY.getVariable("ln"), Predicate.COL_TYPE.LITERAL)));
+				TERM_FACTORY.getImmutableTypedTerm( TERM_FACTORY.getVariable("ln"), Predicate.COL_TYPE.STRING)));
 		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(age, personTemplate,
-				TERM_FACTORY.getImmutableTypedTerm( TERM_FACTORY.getVariable("age"), Predicate.COL_TYPE.LITERAL)));
+				TERM_FACTORY.getImmutableTypedTerm( TERM_FACTORY.getVariable("age"), Predicate.COL_TYPE.STRING)));
 		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(hasschool, personTemplate, schoolTemplate));
 		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(school, schoolTemplate));
 

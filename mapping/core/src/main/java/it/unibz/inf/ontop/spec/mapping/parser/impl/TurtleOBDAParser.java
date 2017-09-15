@@ -2,11 +2,11 @@
 
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.term.*;
 import org.antlr.runtime.BitSet;
 import org.antlr.runtime.*;
 
@@ -15,9 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 
 @SuppressWarnings("all")
 public class TurtleOBDAParser extends Parser {
@@ -1575,11 +1573,11 @@ public class TurtleOBDAParser extends Parser {
 					    } else {
 					        throw new IllegalArgumentException("resource25 should be an URI");
 					    }
-					    Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(functionName);
-					    if (type == null)  
+					    Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(functionName);
+					    if (!type.isPresent())
 					 	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
 					    
-					      value = TERM_FACTORY.getTypedTerm(var, type);
+					      value = TERM_FACTORY.getTypedTerm(var, type.get());
 
 						
 					     
@@ -2057,11 +2055,11 @@ public class TurtleOBDAParser extends Parser {
 			          if (resource38 instanceof Function){
 			          	    String functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
 
-			                    Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(functionName);
-			                    if (type == null) {
+			                    Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(functionName);
+			                    if (!type.isPresent()) {
 			                      throw new RuntimeException("Unsupported datatype: " + functionName);
 			                    }
-			                    value = TERM_FACTORY.getTypedTerm(stringValue, type);
+			                    value = TERM_FACTORY.getTypedTerm(stringValue, type.get());
 			                    }
 			           else {
 			          value = TERM_FACTORY.getTypedTerm(stringValue, COL_TYPE.STRING);
