@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -244,6 +245,9 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
          */
         for (Datatype declaredDatatype : datatypeMap.get(predicateIRI)) {
 
+            if(declaredDatatype.getPredicate().getName().equals(DatatypeImpl.rdfsLiteral.getPredicate().getName())){
+                break;
+            }
             // TODO: throw a better exception
             COL_TYPE internalType = TYPE_FACTORY.getInternalType((DatatypePredicate) declaredDatatype.getPredicate())
                     .orElseThrow(() -> new RuntimeException("Unsupported datatype declared in the ontology: "
