@@ -47,6 +47,11 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     /**
      * Blocks an ascending substitution by inserting a construction node.
+     *
+     * Note that expects that the substitution does not rename a projected variable
+     * into a non-projected one (this would produce an invalid construction node).
+     * That is the responsibility of the SubstitutionPropagationExecutor
+     * to prevent such bindings from appearing.
      */
     @Override
     public SubstitutionResults<UnionNode> applyAscendingSubstitution(

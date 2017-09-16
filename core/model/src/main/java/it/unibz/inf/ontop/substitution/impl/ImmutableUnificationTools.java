@@ -77,7 +77,7 @@ public class ImmutableUnificationTools {
                 if (!optionalUnifier.isPresent()) {
                     throw new UnificationException();
                 }
-                /**
+                /*
                  * TODO: explain
                  */
                 else {
@@ -96,15 +96,15 @@ public class ImmutableUnificationTools {
             return new ImmutableSubstitutionImpl<>(ImmutableMap.of(leftVariable, rightTerm));
         }
 
-        public boolean canBeRemoved() {
+        boolean canBeRemoved() {
             return canBeRemoved;
         }
 
-        public Variable getLeftVariable() {
+        Variable getLeftVariable() {
             return leftVariable;
         }
 
-        public ImmutableTerm getRightTerm() {
+        ImmutableTerm getRightTerm() {
             return rightTerm;
         }
 
@@ -124,7 +124,7 @@ public class ImmutableUnificationTools {
         if (mutableSubstitution == null) {
             return Optional.empty();
         }
-        return Optional.of(ImmutableSubstitutionTools.convertSubstitution(mutableSubstitution));
+        return Optional.of(ImmutableSubstitutionTools.convertMutableSubstitution(mutableSubstitution));
     }
 
     public static Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
@@ -198,7 +198,7 @@ public class ImmutableUnificationTools {
      */
     public static Optional<ImmutableSubstitution<ImmutableTerm>> computeDirectedMGU(ImmutableTerm sourceTerm,
                                                                                     ImmutableTerm targetTerm) {
-        /**
+        /*
          * Variable
          */
         if (sourceTerm instanceof Variable) {
@@ -217,7 +217,7 @@ public class ImmutableUnificationTools {
             return Optional.of(substitution);
         }
 
-        /**
+        /*
          * Functional term
          */
         else if (sourceTerm instanceof ImmutableFunctionalTerm) {
@@ -244,7 +244,7 @@ public class ImmutableUnificationTools {
                 return Optional.empty();
             }
         }
-        /**
+        /*
          * Constant
          */
         else if(sourceTerm instanceof Constant) {
@@ -271,7 +271,7 @@ public class ImmutableUnificationTools {
      */
     private static Optional<ImmutableSubstitution<ImmutableTerm>> computeDirectedMGUOfTwoFunctionalTerms(
             ImmutableFunctionalTerm sourceTerm, ImmutableFunctionalTerm targetTerm) {
-        /**
+        /*
          * Function symbol equality
          */
         if (!sourceTerm.getFunctionSymbol().equals(
@@ -289,13 +289,13 @@ public class ImmutableUnificationTools {
 
         final ImmutableList.Builder<TermPair> pairBuilder = ImmutableList.builder();
         for (int i=0; i < childNb; i++) {
-            /**
+            /*
              * Recursive
              */
             Optional<ImmutableSubstitution<ImmutableTerm>> optionalChildTermUnifier =
                     computeDirectedMGU(sourceChildren.get(i), targetChildren.get(i));
 
-            /**
+            /*
              * If the unification of one pair of sub-terms is not possible,
              * no global unification is possible.
              */
@@ -303,7 +303,7 @@ public class ImmutableUnificationTools {
                 return Optional.empty();
             }
 
-            /**
+            /*
              * Adds all its pairs
              */
             pairBuilder.addAll(convertIntoPairs(optionalChildTermUnifier.get()));
@@ -318,14 +318,14 @@ public class ImmutableUnificationTools {
      */
     private static Optional<ImmutableSubstitution<ImmutableTerm>> unifyPairs(ImmutableList<TermPair> originalPairs) {
 
-        /**
+        /*
          * Some pairs will be removed, some others will be added.
          */
         List<TermPair> allPairs = new LinkedList<>(originalPairs);
         Queue<TermPair> pairsToVisit = new LinkedList<>(originalPairs);
 
         try {
-            /**
+            /*
              * TODO: explain
              */
             while (!pairsToVisit.isEmpty()) {
@@ -336,7 +336,7 @@ public class ImmutableUnificationTools {
                 ImmutableSubstitution<ImmutableTerm> substitution = currentPair.getSubstitution();
 
                 List<TermPair> additionalPairs = new ArrayList<>();
-                /**
+                /*
                  * TODO: explain
                  */
                 Iterator<TermPair> it = allPairs.iterator();

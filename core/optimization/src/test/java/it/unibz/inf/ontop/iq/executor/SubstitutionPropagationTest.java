@@ -1470,6 +1470,48 @@ public class SubstitutionPropagationTest {
         propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
     }
 
+    /**
+     * Makes sure the substitution propagation is blocked by the first ancestor construction node.
+     */
+    @Test
+    public void testEqualityLiftingNonProjected6() throws EmptyQueryException {
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, B);
+
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        initialQueryBuilder.init(projectionAtom, rootNode);
+
+        ConstructionNode intermediateConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B));
+        initialQueryBuilder.addChild(rootNode, intermediateConstructionNode);
+
+        ConstructionNode lastConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B, C),
+                SUBSTITUTION_FACTORY.getSubstitution(A, C, B, C));
+        initialQueryBuilder.addChild(intermediateConstructionNode, lastConstructionNode);
+
+        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, C, F));
+        initialQueryBuilder.addChild(lastConstructionNode, rightDataNode);
+
+        IntermediateQuery initialQuery = initialQueryBuilder.build();
+
+        IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
+        expectedQueryBuilder.init(projectionAtom, rootNode);
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B),
+                SUBSTITUTION_FACTORY.getSubstitution(B, A));
+        expectedQueryBuilder.addChild(rootNode, newConstructionNode);
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, A, F));
+        expectedQueryBuilder.addChild(newConstructionNode, newRightDataNode);
+
+
+        SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
+                new SubstitutionPropagationProposalImpl<>(lastConstructionNode, lastConstructionNode.getSubstitution());
+
+        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+    }
+
 
     private static NodeCentricOptimizationResults<? extends QueryNode> propagateAndCompare(
             IntermediateQuery query, IntermediateQuery expectedQuery,

@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -17,7 +16,6 @@ import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.model.term.TermConstants;
@@ -228,6 +226,11 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      * This substitution is obtained by composition and then cleaned (only defines the projected variables)
      *
      * Stops the propagation.
+     *
+     * Note that expects that the substitution does not rename a projected variable
+     * into a non-projected one (this would produce an invalid construction node).
+     * That is the responsibility of the SubstitutionPropagationExecutor
+     * to prevent such bindings from appearing.
      */
     @Override
     public SubstitutionResults<ConstructionNode> applyAscendingSubstitution(
@@ -244,7 +247,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
         ImmutableSubstitution<ImmutableTerm> compositeSubstitution = substitutionToApply.composeWith(localSubstitution);
 
-        /**
+        /*
          * Cleans the composite substitution by removing non-projected variables
          */
 
@@ -260,7 +263,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
                 newSubstitution, getOptionalModifiers(), nullabilityEvaluator);
 
-        /**
+        /*
          * Stops to propagate the substitution
          */
         return new SubstitutionResultsImpl<>(newConstructionNode);
@@ -496,7 +499,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     private ImmutableSubstitution<? extends ImmutableTerm> normalizeEta(ImmutableSubstitution<ImmutableTerm> eta,
                                                               ImmutableSet<Variable> newV) {
-        return ImmutableSubstitutionTools.prioritizeRenamings(eta, newV);
+        return ImmutableSubstitutionTools.prioritizeRenaming(eta, newV);
     }
 
     private static ImmutableSubstitution<ImmutableTerm> extractNewTheta(

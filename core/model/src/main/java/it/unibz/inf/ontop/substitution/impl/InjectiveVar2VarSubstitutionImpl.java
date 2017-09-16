@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.substitution.impl;
 
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -26,7 +28,7 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
          * Injectivity constraint
          */
         if (!isEmpty) {
-            if (!ImmutableSubstitutionTools.isInjective(substitutionMap)) {
+            if (!isInjective(substitutionMap)) {
                 throw new IllegalArgumentException("Non-injective map given: " + substitutionMap);
             }
         }
@@ -65,7 +67,7 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
                 .collect(ImmutableCollectors.toMap());
 
         return Optional.of(newMap)
-                .filter(ImmutableSubstitutionTools::isInjective)
+                .filter(InjectiveVar2VarSubstitutionImpl::isInjective)
                 .map(map -> (InjectiveVar2VarSubstitution) new InjectiveVar2VarSubstitutionImpl(map));
     }
 
@@ -78,5 +80,10 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> applyToSubstitution(
             ImmutableSubstitution<T> substitution) {
         return Optional.of(applyRenaming(substitution));
+    }
+
+    private static boolean isInjective(Map<Variable, ? extends VariableOrGroundTerm> substitutionMap) {
+        ImmutableSet<VariableOrGroundTerm> valueSet = ImmutableSet.copyOf(substitutionMap.values());
+        return valueSet.size() == substitutionMap.keySet().size();
     }
 }

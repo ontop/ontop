@@ -132,7 +132,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
                 .orElseThrow(() -> new InvalidIntermediateQueryException(
                         "All the non-root nodes must be an ExplicitVariableProjectionNode ancestor"));
 
-        return ImmutableSubstitutionTools.prioritizeRenamings(substitution, closestProjectionAncestor.getVariables());
+        return ImmutableSubstitutionTools.prioritizeRenaming(substitution, closestProjectionAncestor.getVariables());
     }
 
     /**
