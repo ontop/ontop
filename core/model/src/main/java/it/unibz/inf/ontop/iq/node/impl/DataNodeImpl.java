@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
+import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -58,7 +58,7 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
 
         DataAtom newAtom = substitution.applyToDataAtom(dataNode.getProjectionAtom());
         T newNode = (T) dataNode.newAtom(newAtom);
-        return new SubstitutionResultsImpl<>(newNode, substitution);
+        return DefaultSubstitutionResults.newNode(newNode, substitution);
     }
 
     @Override

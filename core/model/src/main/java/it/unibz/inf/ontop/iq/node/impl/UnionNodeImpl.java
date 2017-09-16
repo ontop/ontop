@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
+import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
-import static it.unibz.inf.ontop.iq.node.SubstitutionResults.LocalAction.NO_CHANGE;
 
 public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
@@ -64,7 +63,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
                 substitution.reduceDomainToIntersectionWith(projectedVariables);
 
         if (reducedSubstitution.isEmpty()) {
-            return new SubstitutionResultsImpl<>(NO_CHANGE);
+            return DefaultSubstitutionResults.noChange();
         }
         /**
          * Asks for inserting a construction node between the child node and this node.
@@ -73,7 +72,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
         else {
             ConstructionNode newParentOfChildNode = query.getFactory().createConstructionNode(projectedVariables,
                     (ImmutableSubstitution<ImmutableTerm>) reducedSubstitution);
-            return new SubstitutionResultsImpl<>(newParentOfChildNode, childNode);
+            return DefaultSubstitutionResults.insertConstructionNode(newParentOfChildNode, childNode);
         }
     }
 
@@ -87,14 +86,14 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
          * Stops the substitution if does not affect the projected variables
          */
         if (newProjectedVariables.equals(projectedVariables)) {
-            return new SubstitutionResultsImpl<>(NO_CHANGE);
+            return DefaultSubstitutionResults.noChange();
         }
         /**
          * Otherwise, updates the projected variables and propagates the substitution down.
          */
         else {
             UnionNode newNode = new UnionNodeImpl(newProjectedVariables);
-            return new SubstitutionResultsImpl<>(newNode, substitution);
+            return DefaultSubstitutionResults.newNode(newNode, substitution);
         }
     }
 

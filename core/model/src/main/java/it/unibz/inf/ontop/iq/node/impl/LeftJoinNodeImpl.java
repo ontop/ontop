@@ -6,7 +6,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
+import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
@@ -126,7 +126,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          */
         return computeAndEvaluateNewCondition(substitution, optionalNewEqualities)
                 .map(ev -> applyEvaluation(query, ev, newSubstitution, Optional.of(leftVariables), Provenance.FROM_RIGHT))
-                .orElseGet(() -> new SubstitutionResultsImpl<>(this, newSubstitution));
+                .orElseGet(() -> DefaultSubstitutionResults.newNode(this, newSubstitution));
     }
 
     private SubstitutionResults<LeftJoinNode> applyAscendingSubstitutionFromLeft(
@@ -152,7 +152,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          */
         return computeAndEvaluateNewCondition(substitution, Optional.empty())
                 .map(ev -> applyEvaluation(query, ev, substitution, Optional.of(rightVariables), Provenance.FROM_LEFT))
-                .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
+                .orElseGet(() -> DefaultSubstitutionResults.newNode(this, substitution));
     }
 
 
@@ -163,9 +163,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return getOptionalFilterCondition()
                 .map(cond -> transformBooleanExpression(substitution, cond))
                 .map(ev -> applyEvaluation(query, ev, substitution, Optional.empty(), Provenance.FROM_ABOVE))
-                .orElseGet(() -> new SubstitutionResultsImpl<>(
-                        SubstitutionResults.LocalAction.NO_CHANGE,
-                        Optional.of(substitution)));
+                .orElseGet(() -> DefaultSubstitutionResults.noChange(substitution));
     }
 
     @Override
@@ -197,7 +195,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         }
         else {
             LeftJoinNode newNode = changeOptionalFilterCondition(evaluationResult.getOptionalExpression());
-            return new SubstitutionResultsImpl<>(newNode, substitution);
+            return DefaultSubstitutionResults.newNode(newNode, substitution);
         }
     }
 
@@ -220,7 +218,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 break;
         }
 
-        return new SubstitutionResultsImpl<>(newSubstitution, Optional.of(LEFT));
+        return DefaultSubstitutionResults.replaceByChild(newSubstitution, LEFT);
     }
 
 

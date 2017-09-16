@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
+import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.node.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
@@ -266,7 +265,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         /*
          * Stops to propagate the substitution
          */
-        return new SubstitutionResultsImpl<>(newConstructionNode);
+        return DefaultSubstitutionResults.newNode(newConstructionNode);
     }
 
     /**
@@ -346,7 +345,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             newSubstitutions = traverseConstructionNode(relevantSubstitution, substitution, projectedVariables,
                     newProjectedVariables);
         } catch (QueryNodeSubstitutionException e) {
-            return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
+            return DefaultSubstitutionResults.declareAsEmpty();
         }
 
         ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate = newSubstitutions.propagatedSubstitution;
@@ -361,9 +360,9 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          */
         if (newSubstitutions.bindings.isEmpty() && !newOptionalModifiers.isPresent()) {
             if(query.getChildren(this).isEmpty()){
-                return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.DECLARE_AS_TRUE);
+                return DefaultSubstitutionResults.declareAsTrue();
             }
-            return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.REPLACE_BY_CHILD, Optional.of(substitutionToPropagate));
+            return DefaultSubstitutionResults.replaceByUniqueChild(substitutionToPropagate);
         }
 
         /**
@@ -373,7 +372,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
                     newSubstitutions.bindings, newOptionalModifiers, nullabilityEvaluator);
 
-            return new SubstitutionResultsImpl<>(newConstructionNode, substitutionToPropagate);
+            return DefaultSubstitutionResults.newNode(newConstructionNode, substitutionToPropagate);
         }
     }
 
