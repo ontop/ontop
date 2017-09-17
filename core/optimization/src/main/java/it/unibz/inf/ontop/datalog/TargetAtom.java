@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.iq.mapping;
+package it.unibz.inf.ontop.datalog;
 
 
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -13,6 +13,4 @@ public interface TargetAtom {
 
     DistinctVariableOnlyDataAtom getProjectionAtom();
     ImmutableSubstitution<ImmutableTerm> getSubstitution();
-
-    TargetAtom rename(InjectiveVar2VarSubstitution renamingSubstitution);
 }

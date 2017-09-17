@@ -24,8 +24,6 @@ import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlA
 import it.unibz.inf.ontop.exception.OntopTranslationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;

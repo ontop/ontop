@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.impl.DatalogProgram2QueryConverterImpl;
-import it.unibz.inf.ontop.iq.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Constant;
