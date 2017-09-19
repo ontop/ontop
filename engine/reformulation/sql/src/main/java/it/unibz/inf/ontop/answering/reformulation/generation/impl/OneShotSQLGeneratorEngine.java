@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopTranslationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
-import it.unibz.inf.ontop.injection.OntopTranslationSQLSettings;
+import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
@@ -47,7 +47,6 @@ import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.DB2SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.datalog.impl.IntermediateQuery2DatalogTranslatorImpl;
 import it.unibz.inf.ontop.utils.EncodeForURI;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
@@ -132,7 +131,7 @@ public class OneShotSQLGeneratorEngine {
 
 	OneShotSQLGeneratorEngine(DBMetadata metadata,
 							  IRIDictionary iriDictionary,
-							  OntopTranslationSQLSettings settings,
+							  OntopReformulationSQLSettings settings,
 							  JdbcTypeMapper jdbcTypeMapper,
 							  IntermediateQuery2DatalogTranslator iq2DatalogTranslator) {
 

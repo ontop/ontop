@@ -2,16 +2,16 @@ package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
-import it.unibz.inf.ontop.injection.OntopTranslationSettings;
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 
 import java.util.Properties;
 
-public class OntopTranslationSettingsImpl extends OntopOBDASettingsImpl implements OntopTranslationSettings {
+public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implements OntopReformulationSettings {
 
-    private static final String DEFAULT_FILE = "translation-default.properties";
+    private static final String DEFAULT_FILE = "reformulation-default.properties";
     private final OntopOptimizationSettings optimizationSettings;
 
-    OntopTranslationSettingsImpl(Properties userProperties) {
+    OntopReformulationSettingsImpl(Properties userProperties) {
         super(loadProperties(userProperties));
         optimizationSettings = new OntopOptimizationSettingsImpl(copyProperties());
     }

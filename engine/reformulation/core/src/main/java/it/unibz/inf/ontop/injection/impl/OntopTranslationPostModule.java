@@ -20,9 +20,9 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
  */
 public class OntopTranslationPostModule extends OntopAbstractModule {
 
-    private final OntopTranslationSettings settings;
+    private final OntopReformulationSettings settings;
 
-    protected OntopTranslationPostModule(OntopTranslationSettings settings) {
+    protected OntopTranslationPostModule(OntopReformulationSettings settings) {
         super(settings);
         this.settings = settings;
     }

@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerato
 import it.unibz.inf.ontop.datalog.IntermediateQuery2DatalogTranslator;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopTranslationException;
-import it.unibz.inf.ontop.injection.OntopTranslationSQLSettings;
+import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
@@ -31,7 +31,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
     @AssistedInject
     private LegacySQLGenerator(@Assisted DBMetadata metadata,
                                @Nullable IRIDictionary iriDictionary,
-                               OntopTranslationSQLSettings settings,
+                               OntopReformulationSQLSettings settings,
                                IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
                                JdbcTypeMapper jdbcTypeMapper) {
         originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper, iq2DatalogTranslator);

@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
-import it.unibz.inf.ontop.injection.OntopTranslationConfiguration;
-import it.unibz.inf.ontop.injection.OntopTranslationSettings;
+import it.unibz.inf.ontop.injection.OntopReformulationConfiguration;
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
@@ -16,13 +16,13 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.*;
 
 
-public class OntopTranslationConfigurationImpl extends OntopOBDAConfigurationImpl implements OntopTranslationConfiguration {
+public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationImpl implements OntopReformulationConfiguration {
 
     private final OntopOptimizationConfigurationImpl optimizationConfiguration;
-    private final OntopTranslationSettings settings;
+    private final OntopReformulationSettings settings;
     private final OntopTranslationOptions options;
 
-    OntopTranslationConfigurationImpl(OntopTranslationSettings settings, OntopTranslationOptions options) {
+    OntopReformulationConfigurationImpl(OntopReformulationSettings settings, OntopTranslationOptions options) {
         super(settings, options.obdaOptions);
         this.settings = settings;
         this.options = options;
@@ -52,7 +52,7 @@ public class OntopTranslationConfigurationImpl extends OntopOBDAConfigurationImp
     }
 
     @Override
-    public OntopTranslationSettings getSettings() {
+    public OntopReformulationSettings getSettings() {
         return settings;
     }
 
@@ -74,7 +74,7 @@ public class OntopTranslationConfigurationImpl extends OntopOBDAConfigurationImp
         }
     }
 
-    static class DefaultOntopTranslationBuilderFragment<B extends OntopTranslationConfiguration.Builder<B>>
+    static class DefaultOntopTranslationBuilderFragment<B extends OntopReformulationConfiguration.Builder<B>>
             implements OntopTranslationBuilderFragment<B> {
 
         private final B builder;
@@ -108,8 +108,8 @@ public class OntopTranslationConfigurationImpl extends OntopOBDAConfigurationImp
         Properties generateProperties() {
             Properties p = new Properties();
 
-            encodeIRISafely.ifPresent(e -> p.put(OntopTranslationSettings.SQL_GENERATE_REPLACE, e));
-            existentialReasoning.ifPresent(r -> p.put(OntopTranslationSettings.EXISTENTIAL_REASONING, r));
+            encodeIRISafely.ifPresent(e -> p.put(OntopReformulationSettings.SQL_GENERATE_REPLACE, e));
+            existentialReasoning.ifPresent(r -> p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, r));
 
             return p;
         }
@@ -120,9 +120,9 @@ public class OntopTranslationConfigurationImpl extends OntopOBDAConfigurationImp
         }
     }
 
-    static abstract class OntopTranslationBuilderMixin<B extends OntopTranslationConfiguration.Builder<B>>
+    static abstract class OntopTranslationBuilderMixin<B extends OntopReformulationConfiguration.Builder<B>>
             extends OntopOBDAConfigurationBuilderMixin<B>
-            implements OntopTranslationConfiguration.Builder<B> {
+            implements OntopReformulationConfiguration.Builder<B> {
 
         private final DefaultOntopTranslationBuilderFragment<B> localBuilderFragment;
         private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;

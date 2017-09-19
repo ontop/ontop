@@ -1,28 +1,28 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.inject.Module;
-import it.unibz.inf.ontop.injection.OntopTranslationSQLConfiguration;
-import it.unibz.inf.ontop.injection.OntopTranslationSQLSettings;
+import it.unibz.inf.ontop.injection.OntopReformulationSQLConfiguration;
+import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.OntopSQLOptions;
 
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class OntopTranslationSQLConfigurationImpl extends OntopTranslationConfigurationImpl
-        implements OntopTranslationSQLConfiguration {
+public class OntopReformulationSQLConfigurationImpl extends OntopReformulationConfigurationImpl
+        implements OntopReformulationSQLConfiguration {
 
-    private final OntopTranslationSQLSettings settings;
+    private final OntopReformulationSQLSettings settings;
     private final OntopSQLCoreConfigurationImpl sqlConfiguration;
 
-    OntopTranslationSQLConfigurationImpl(OntopTranslationSQLSettings settings,
-                                         OntopTranslationSQLOptions options) {
+    OntopReformulationSQLConfigurationImpl(OntopReformulationSQLSettings settings,
+                                           OntopTranslationSQLOptions options) {
         super(settings, options.qaOptions);
         this.settings = settings;
         this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions);
     }
 
     @Override
-    public OntopTranslationSQLSettings getSettings() {
+    public OntopReformulationSQLSettings getSettings() {
         return settings;
     }
 
@@ -46,7 +46,7 @@ public class OntopTranslationSQLConfigurationImpl extends OntopTranslationConfig
         }
     }
 
-    static class DefaultOntopTranslationSQLBuilderFragment<B extends OntopTranslationSQLConfiguration.Builder<B>>
+    static class DefaultOntopTranslationSQLBuilderFragment<B extends OntopReformulationSQLConfiguration.Builder<B>>
         implements OntopQueryAnsweringSQLBuilderFragment<B> {
 
         private final B builder;

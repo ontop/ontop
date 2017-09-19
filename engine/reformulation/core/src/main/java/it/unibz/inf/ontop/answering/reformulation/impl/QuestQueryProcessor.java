@@ -20,7 +20,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopTranslationException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
-import it.unibz.inf.ontop.injection.OntopTranslationSettings;
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -59,7 +59,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final ExecutorRegistry executorRegistry;
 	private final DatalogProgram2QueryConverter datalogConverter;
-	private final OntopTranslationSettings settings;
+	private final OntopReformulationSettings settings;
 	private final DBMetadata dbMetadata;
 	private final JoinLikeOptimizer joinLikeOptimizer;
 	private final InputQueryTranslator inputQueryTranslator;
@@ -68,7 +68,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								@Assisted ExecutorRegistry executorRegistry,
 								QueryCache queryCache,
-								BindingLiftOptimizer bindingLiftOptimizer, OntopTranslationSettings settings,
+								BindingLiftOptimizer bindingLiftOptimizer, OntopReformulationSettings settings,
 								DatalogProgram2QueryConverter datalogConverter,
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,

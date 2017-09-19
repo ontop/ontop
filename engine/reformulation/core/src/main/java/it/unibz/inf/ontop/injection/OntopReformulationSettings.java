@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
 
-public interface OntopTranslationSettings extends OntopOBDASettings, OntopOptimizationSettings {
+public interface OntopReformulationSettings extends OntopOBDASettings, OntopOptimizationSettings {
 
     boolean isExistentialReasoningEnabled();
 

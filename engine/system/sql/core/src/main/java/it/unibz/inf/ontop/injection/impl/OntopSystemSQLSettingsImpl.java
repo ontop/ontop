@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import java.util.Properties;
 
 
-public class OntopSystemSQLSettingsImpl extends OntopTranslationSQLSettingsImpl implements OntopSystemSQLSettings {
+public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImpl implements OntopSystemSQLSettings {
 
     private static final String DEFAULT_FILE = "system-sql-default.properties";
     private final OntopSystemSettings systemSettings;

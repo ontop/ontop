@@ -6,10 +6,10 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public interface OntopTranslationConfiguration extends OntopOBDAConfiguration, OntopOptimizationConfiguration {
+public interface OntopReformulationConfiguration extends OntopOBDAConfiguration, OntopOptimizationConfiguration {
 
     @Override
-    OntopTranslationSettings getSettings();
+    OntopReformulationSettings getSettings();
 
     Optional<IRIDictionary> getIRIDictionary();
 
@@ -32,7 +32,7 @@ public interface OntopTranslationConfiguration extends OntopOBDAConfiguration, O
             OntopOptimizationConfiguration.Builder<B> {
 
         @Override
-        OntopTranslationConfiguration build();
+        OntopReformulationConfiguration build();
     }
 
 }

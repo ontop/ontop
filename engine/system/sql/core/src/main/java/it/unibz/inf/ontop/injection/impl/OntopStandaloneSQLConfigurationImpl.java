@@ -7,9 +7,9 @@ import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopSystemSQLConfigurationImpl.OntopSystemSQLOptions;
-import it.unibz.inf.ontop.injection.impl.OntopTranslationConfigurationImpl.DefaultOntopTranslationBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopTranslationSQLConfigurationImpl.DefaultOntopTranslationSQLBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopTranslationSQLConfigurationImpl.OntopTranslationSQLOptions;
+import it.unibz.inf.ontop.injection.impl.OntopReformulationConfigurationImpl.DefaultOntopTranslationBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.DefaultOntopTranslationSQLBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.OntopTranslationSQLOptions;
 import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -120,7 +120,7 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
 
         final OntopStandaloneSQLOptions generateStandaloneSQLOptions() {
             OntopMappingSQLAllOptions sqlMappingOptions = generateMappingSQLAllOptions();
-            OntopTranslationConfigurationImpl.OntopTranslationOptions translationOptions =
+            OntopReformulationConfigurationImpl.OntopTranslationOptions translationOptions =
                     this.translationFragmentBuilder.generateTranslationOptions(
                         sqlMappingOptions.mappingSQLOptions.mappingOptions.obdaOptions,
                         sqlMappingOptions.mappingSQLOptions.mappingOptions.optimizationOptions);

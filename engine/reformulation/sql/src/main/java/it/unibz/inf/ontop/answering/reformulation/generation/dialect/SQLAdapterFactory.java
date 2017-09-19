@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect;
 
 
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.*;
-import it.unibz.inf.ontop.injection.OntopTranslationSQLSettings;
+import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ public class SQLAdapterFactory {
 
 	private static Logger log = LoggerFactory.getLogger(SQLAdapterFactory.class);
 
-	public static SQLDialectAdapter getSQLDialectAdapter(String className, String databaseName, OntopTranslationSQLSettings preferences) {
+	public static SQLDialectAdapter getSQLDialectAdapter(String className, String databaseName, OntopReformulationSQLSettings preferences) {
 
 		switch (className) {
 			case "org.postgresql.Driver":

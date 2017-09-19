@@ -1,18 +1,18 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import it.unibz.inf.ontop.injection.OntopTranslationSQLSettings;
+import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 
 import java.util.Optional;
 import java.util.Properties;
 
-public class OntopTranslationSQLSettingsImpl extends OntopTranslationSettingsImpl
-        implements OntopTranslationSQLSettings {
+public class OntopReformulationSQLSettingsImpl extends OntopReformulationSettingsImpl
+        implements OntopReformulationSQLSettings {
 
-    private static final String DEFAULT_FILE = "translation-sql-default.properties";
+    private static final String DEFAULT_FILE = "reformulation-sql-default.properties";
     private final OntopSQLCoreSettings sqlSettings;
 
-    OntopTranslationSQLSettingsImpl(Properties userProperties) {
+    OntopReformulationSQLSettingsImpl(Properties userProperties) {
         super(loadProperties(userProperties));
         sqlSettings = new OntopSQLCoreSettingsImpl(copyProperties());
     }
@@ -25,7 +25,7 @@ public class OntopTranslationSQLSettingsImpl extends OntopTranslationSettingsImp
     }
 
     static Properties loadDefaultQASQLProperties() {
-        return loadDefaultPropertiesFromFile(OntopTranslationSQLSettings.class, DEFAULT_FILE);
+        return loadDefaultPropertiesFromFile(OntopReformulationSQLSettings.class, DEFAULT_FILE);
     }
 
     @Override
