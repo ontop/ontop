@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 /**
  * "Abstract" class (loadSpecification() not implemented)
  */
-public class OntopSystemSQLConfigurationImpl extends OntopTranslationSQLConfigurationImpl
+public class OntopSystemSQLConfigurationImpl extends OntopReformulationSQLConfigurationImpl
         implements OntopSystemSQLConfiguration {
 
     private final OntopSystemSQLSettings settings;

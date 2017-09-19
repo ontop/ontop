@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
 
-public interface OntopSystemSQLSettings extends OntopSystemSettings, OntopTranslationSQLSettings {
+public interface OntopSystemSQLSettings extends OntopSystemSettings, OntopReformulationSQLSettings {
 
     //--------------------------
     // Connection configuration

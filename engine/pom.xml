@@ -12,7 +12,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>translation</module>
+        <module>reformulation</module>
         <module>system</module>
     </modules>
 

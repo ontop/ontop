@@ -18,7 +18,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-translation-sql</artifactId>
+            <artifactId>ontop-reformulation-sql</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
