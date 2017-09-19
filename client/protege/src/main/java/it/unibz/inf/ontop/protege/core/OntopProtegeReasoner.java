@@ -198,7 +198,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     @Nonnull
     @Override
     public NodeSet<OWLObjectPropertyExpression> getSuperObjectProperties(@Nonnull OWLObjectPropertyExpression pe, boolean direct) {
-        return reasoner.getSubObjectProperties(pe, direct);
+        return reasoner.getSuperObjectProperties(pe, direct);
     }
 
     @Nonnull
@@ -252,7 +252,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     @Nonnull
     @Override
     public NodeSet<OWLDataProperty> getSuperDataProperties(@Nonnull OWLDataProperty pe, boolean direct) {
-        return reasoner.getSubDataProperties(pe,direct);
+        return reasoner.getSuperDataProperties(pe,direct);
     }
 
     @Nonnull
