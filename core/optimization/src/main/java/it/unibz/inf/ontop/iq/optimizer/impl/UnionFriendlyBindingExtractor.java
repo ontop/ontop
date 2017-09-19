@@ -31,24 +31,34 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
     private static class PartialExtraction {
 
 
-        Stream<Map.Entry<Variable, ImmutableTerm>> mergedBindings;
+//        Stream<Map.Entry<Variable, ImmutableTerm>> mergedBindings;
+        ImmutableMap<Variable, ImmutableTerm> mergedBindings;
 
         ImmutableSet<Variable> mergedVariables;
 
-        private Stream<Map.Entry<Variable, ImmutableTerm>> getMergedBindings() {
-            return mergedBindings;
-        }
+//        private Stream<Map.Entry<Variable, ImmutableTerm>> getMergedBindings() {
+//            return mergedBindings;
+//        }
 
+        private Stream<Map.Entry<Variable, ImmutableTerm>> getMergedBindings() {
+            return mergedBindings.entrySet().stream();
+        }
         private ImmutableSet<Variable> getMergedVariables() {
             return mergedVariables;
         }
 
         private PartialExtraction(Stream<Map.Entry<Variable, ImmutableTerm>> mergedBindings, ImmutableSet<Variable> mergedVariables) {
 
-            this.mergedBindings = mergedBindings;
+            this.mergedBindings = mergedBindings.collect(ImmutableCollectors.toMap());
             this.mergedVariables =  mergedVariables;
 
         }
+//        private PartialExtraction(Stream<Map.Entry<Variable, ImmutableTerm>> mergedBindings, ImmutableSet<Variable> mergedVariables) {
+//
+//            this.mergedBindings = mergedBindings;
+//            this.mergedVariables =  mergedVariables;
+//
+//        }
     }
 
     @Override

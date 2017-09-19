@@ -6,7 +6,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
+import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
-import static it.unibz.inf.ontop.iq.node.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
-import static it.unibz.inf.ontop.iq.node.SubstitutionResults.LocalAction.NO_CHANGE;
 
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
@@ -73,7 +71,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             QueryNode childNode, IntermediateQuery query) {
 
         if (substitution.isEmpty()) {
-            return new SubstitutionResultsImpl<>(NO_CHANGE);
+            return DefaultSubstitutionResults.noChange();
         }
 
         ImmutableSet<Variable> nullVariables = substitution.getImmutableMap().entrySet().stream()
@@ -86,18 +84,18 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .flatMap(c -> query.getVariables(c).stream())
                 .collect(ImmutableCollectors.toSet());
 
-        /**
+        /*
          * If there is an implicit equality involving one null variables, the join is empty.
          */
         if (otherNodesProjectedVariables.stream()
                 .anyMatch(nullVariables::contains)) {
             // Reject
-            return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
+            return DefaultSubstitutionResults.declareAsEmpty();
         }
 
         return computeAndEvaluateNewCondition(substitution, Optional.empty())
                 .map(ev -> applyEvaluation(ev, substitution))
-                .orElseGet(() -> new SubstitutionResultsImpl<>(NO_CHANGE, Optional.of(substitution)));
+                .orElseGet(() -> DefaultSubstitutionResults.noChange(substitution));
     }
 
     @Override
@@ -107,7 +105,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return getOptionalFilterCondition()
                 .map(cond -> transformBooleanExpression(substitution, cond))
                 .map(ev -> applyEvaluation(ev, substitution))
-                .orElseGet(() -> new SubstitutionResultsImpl<>(NO_CHANGE, Optional.of(substitution)));
+                .orElseGet(() -> DefaultSubstitutionResults.noChange(substitution));
     }
 
     @Override
@@ -141,11 +139,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     private SubstitutionResults<InnerJoinNode> applyEvaluation(ExpressionEvaluator.EvaluationResult evaluationResult,
                                                                ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         if (evaluationResult.isEffectiveFalse()) {
-            return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
+            return DefaultSubstitutionResults.declareAsEmpty();
         }
         else {
             InnerJoinNode newNode = changeOptionalFilterCondition(evaluationResult.getOptionalExpression());
-            return new SubstitutionResultsImpl<>(newNode, substitution);
+            return DefaultSubstitutionResults.newNode(newNode, substitution);
         }
     }
 

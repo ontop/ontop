@@ -6,6 +6,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
+import it.unibz.inf.ontop.datalog.IntermediateQuery2DatalogTranslator;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopTranslationException;
 import it.unibz.inf.ontop.injection.OntopTranslationSQLSettings;
@@ -29,9 +30,11 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
 
     @AssistedInject
     private LegacySQLGenerator(@Assisted DBMetadata metadata,
-                               @Nullable IRIDictionary iriDictionary, OntopTranslationSQLSettings settings,
+                               @Nullable IRIDictionary iriDictionary,
+                               OntopTranslationSQLSettings settings,
+                               IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
                                JdbcTypeMapper jdbcTypeMapper) {
-        originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper);
+        originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper, iq2DatalogTranslator);
     }
 
     @Override

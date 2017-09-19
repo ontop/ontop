@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.iq.node.SubstitutionResults;
 
 import static it.unibz.inf.ontop.iq.node.SubstitutionResults.LocalAction.*;
 
-public class SubstitutionResultsImpl<T extends QueryNode> implements SubstitutionResults<T> {
+public class DefaultSubstitutionResults<T extends QueryNode> implements SubstitutionResults<T> {
     private final LocalAction localAction;
     private final Optional<T> optionalNewNode;
     private final Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalSubstitution;
@@ -23,8 +23,8 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
     /**
      * No change or replace by unique child
      */
-    public SubstitutionResultsImpl(LocalAction localAction,
-                                   Optional<ImmutableSubstitution<? extends ImmutableTerm>> optionalSubstitution) {
+    private DefaultSubstitutionResults(LocalAction localAction,
+                                       ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         switch (localAction) {
             case NO_CHANGE:
             case REPLACE_BY_CHILD:
@@ -37,19 +37,19 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
         }
         this.localAction = localAction;
         this.optionalNewNode = Optional.empty();
-        this.optionalSubstitution = optionalSubstitution.filter(s -> !s.isEmpty());
+        this.optionalSubstitution = Optional.of(substitution).filter(s -> !s.isEmpty());
         this.optionalReplacingChildPosition = Optional.empty();
         this.optionalNewParentOfChildNode = Optional.empty();
         this.optionalDescendantNode = Optional.empty();
     }
 
     /**
-     * No change, replace by unique child or emptiness declaration.
+     * No change, replace by unique child or true/emptiness declaration.
      *
      * No substitution.
      *
      */
-    public SubstitutionResultsImpl(LocalAction localAction) {
+    private DefaultSubstitutionResults(LocalAction localAction) {
         switch (localAction) {
             case NO_CHANGE:
             case REPLACE_BY_CHILD:
@@ -71,8 +71,8 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
     /**
      * NEW_NODE and substitution to propagate
      */
-    public SubstitutionResultsImpl(T newNode,
-                                   ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+    private DefaultSubstitutionResults(T newNode,
+                                       ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         this.localAction = NEW_NODE;
         this.optionalNewNode = Optional.of(newNode);
         this.optionalSubstitution = Optional.of(substitution).filter(s -> !s.isEmpty());
@@ -84,7 +84,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
     /**
      * NEW_NODE and no substitution to propagate
      */
-    public SubstitutionResultsImpl(T newNode) {
+    private DefaultSubstitutionResults(T newNode) {
         this.localAction = NEW_NODE;
         this.optionalNewNode = Optional.of(newNode);
         this.optionalSubstitution = Optional.empty();
@@ -97,12 +97,12 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
      * When the node is not needed anymore.
      * May happen for instance for a GroupNode.
      */
-    public SubstitutionResultsImpl(ImmutableSubstitution<? extends ImmutableTerm> substitution,
-                                   Optional<ArgumentPosition> optionalReplacingChildPosition) {
+    private DefaultSubstitutionResults(ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                                       ArgumentPosition replacingChildPosition) {
         this.localAction = REPLACE_BY_CHILD;
         this.optionalNewNode = Optional.empty();
         this.optionalSubstitution = Optional.of(substitution);
-        this.optionalReplacingChildPosition = optionalReplacingChildPosition;
+        this.optionalReplacingChildPosition = Optional.of(replacingChildPosition);
         this.optionalNewParentOfChildNode = Optional.empty();
         this.optionalDescendantNode = Optional.empty();
     }
@@ -110,13 +110,81 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
     /**
      * Proposes to add a Construction Node between the child node and the focus node.
      */
-    public SubstitutionResultsImpl(ConstructionNode newParentOfChildNode, QueryNode descendantNode) {
+    private DefaultSubstitutionResults(ConstructionNode newParentOfChildNode, QueryNode descendantNode) {
         this.localAction = INSERT_CONSTRUCTION_NODE;
         this.optionalNewNode = Optional.empty();
         this.optionalSubstitution = Optional.empty();
         this.optionalReplacingChildPosition = Optional.empty();
         this.optionalNewParentOfChildNode = Optional.of(newParentOfChildNode);
         this.optionalDescendantNode = Optional.of(descendantNode);
+    }
+
+    /**
+     * Replace by unique child
+     */
+    public static <T extends QueryNode> SubstitutionResults<T> replaceByUniqueChild(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        return new DefaultSubstitutionResults<>(REPLACE_BY_CHILD, substitution);
+    }
+
+    /**
+     * Replace by unique child
+     */
+    public static <T extends QueryNode> SubstitutionResults<T> replaceByChild(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, ArgumentPosition replacingChildPosition) {
+        return new DefaultSubstitutionResults<>(substitution, replacingChildPosition);
+    }
+
+    /**
+     * Declare as empty
+     */
+    public static <T extends QueryNode> SubstitutionResults<T> declareAsEmpty() {
+        return new DefaultSubstitutionResults<>(DECLARE_AS_EMPTY);
+    }
+
+    /**
+     * Declare as true
+     */
+    public static <T extends QueryNode> SubstitutionResults<T> declareAsTrue() {
+        return new DefaultSubstitutionResults<>(DECLARE_AS_TRUE);
+    }
+
+    /**
+     * No change and stop
+     */
+    public static <T extends QueryNode> SubstitutionResults<T> noChange() {
+        return new DefaultSubstitutionResults<>(NO_CHANGE);
+    }
+
+    /**
+     * No local change but continue the propagation
+     */
+    public static <T extends QueryNode> SubstitutionResults<T> noChange(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        return new DefaultSubstitutionResults<>(NO_CHANGE, substitution);
+    }
+
+    /**
+     * New node
+     */
+    public static <T extends QueryNode> SubstitutionResults<T> newNode(T newNode) {
+        return new DefaultSubstitutionResults<>(newNode);
+    }
+
+    /**
+     * New node and continue the substitution
+     */
+    public static <T extends QueryNode> SubstitutionResults<T> newNode(
+            T newNode, ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        return new DefaultSubstitutionResults<>(newNode, substitution);
+    }
+
+    /**
+     * Proposes to add a Construction Node between the child node and the focus node.
+     */
+    public static <T extends QueryNode> SubstitutionResults<T> insertConstructionNode(
+            ConstructionNode newParentOfChildNode, QueryNode childNode) {
+        return new DefaultSubstitutionResults<>(newParentOfChildNode, childNode);
     }
 
     @Override
