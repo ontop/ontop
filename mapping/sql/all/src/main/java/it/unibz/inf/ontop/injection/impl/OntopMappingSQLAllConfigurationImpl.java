@@ -38,7 +38,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
     }
 
     @Override
-    public OBDASpecification loadSpecification() throws OBDASpecificationException {
+    protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
         return loadSpecification(Optional::empty);
     }
 
@@ -54,12 +54,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
 
     @Override
     public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
-        return loadPPMapping(Optional::empty);
-    }
-
-    Optional<SQLPPMapping> loadPPMapping(OntologySupplier ontologySupplier)
-            throws MappingIOException, InvalidMappingException, DuplicateMappingException {
-        return loadPPMapping(ontologySupplier,
+        return loadPPMapping(
                 () -> options.mappingFile,
                 () -> options.mappingReader,
                 () -> options.mappingGraph);

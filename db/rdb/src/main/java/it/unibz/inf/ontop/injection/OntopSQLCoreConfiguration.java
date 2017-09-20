@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl;
 
-public interface OntopSQLCoreConfiguration extends OntopOBDAConfiguration {
+public interface OntopSQLCoreConfiguration extends OntopModelConfiguration {
 
     @Override
     OntopSQLCoreSettings getSettings();
@@ -20,7 +20,7 @@ public interface OntopSQLCoreConfiguration extends OntopOBDAConfiguration {
         B jdbcDriver(String jdbcDriver);
     }
 
-    interface Builder<B extends Builder<B>> extends OntopSQLBuilderFragment<B>, OntopOBDAConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OntopSQLBuilderFragment<B>, OntopModelConfiguration.Builder<B> {
         @Override
         OntopSQLCoreConfiguration build();
     }

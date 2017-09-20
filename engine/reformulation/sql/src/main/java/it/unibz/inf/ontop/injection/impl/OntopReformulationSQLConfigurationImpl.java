@@ -15,7 +15,18 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
     private final OntopSQLCoreConfigurationImpl sqlConfiguration;
 
     OntopReformulationSQLConfigurationImpl(OntopReformulationSQLSettings settings,
-                                           OntopTranslationSQLOptions options) {
+                                           OntopReformulationSQLOptions options,
+                                           SpecificationLoader specificationLoader) {
+        super(settings, options.qaOptions, specificationLoader);
+        this.settings = settings;
+        this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions);
+    }
+
+    /**
+     * Assumes the OBDA specification to be already assigned
+     */
+    OntopReformulationSQLConfigurationImpl(OntopReformulationSQLSettings settings,
+                                           OntopReformulationSQLOptions options) {
         super(settings, options.qaOptions);
         this.settings = settings;
         this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions);
@@ -31,33 +42,33 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
                 Stream.concat(
                         super.buildGuiceModules(),
                         sqlConfiguration.buildGuiceModules()),
-                Stream.of(new OntopTranslationSQLModule(this),
-                        new OntopTranslationPostModule(getSettings())));
+                Stream.of(new OntopReformulationSQLModule(this),
+                        new OntopReformulationPostModule(getSettings())));
     }
 
-    static class OntopTranslationSQLOptions {
+    static class OntopReformulationSQLOptions {
 
-        final OntopTranslationOptions qaOptions;
+        final OntopReformulationOptions qaOptions;
         final OntopSQLOptions sqlOptions;
 
-        private OntopTranslationSQLOptions(OntopTranslationOptions qaOptions, OntopSQLOptions sqlOptions) {
+        private OntopReformulationSQLOptions(OntopReformulationOptions qaOptions, OntopSQLOptions sqlOptions) {
             this.qaOptions = qaOptions;
             this.sqlOptions = sqlOptions;
         }
     }
 
-    static class DefaultOntopTranslationSQLBuilderFragment<B extends OntopReformulationSQLConfiguration.Builder<B>>
-        implements OntopQueryAnsweringSQLBuilderFragment<B> {
+    static class DefaultOntopReformulationSQLBuilderFragment<B extends OntopReformulationSQLConfiguration.Builder<B>>
+        implements OntopReformulationSQLBuilderFragment<B> {
 
         private final B builder;
 
-        DefaultOntopTranslationSQLBuilderFragment(B builder) {
+        DefaultOntopReformulationSQLBuilderFragment(B builder) {
             this.builder = builder;
         }
 
-        OntopTranslationSQLOptions generateSQLTranslationOptions(OntopTranslationOptions qaOptions,
-                                                                 OntopSQLOptions sqlOptions) {
-            return new OntopTranslationSQLOptions(qaOptions, sqlOptions);
+        OntopReformulationSQLOptions generateSQLReformulationOptions(OntopReformulationOptions qaOptions,
+                                                                     OntopSQLOptions sqlOptions) {
+            return new OntopReformulationSQLOptions(qaOptions, sqlOptions);
         }
 
         Properties generateProperties() {

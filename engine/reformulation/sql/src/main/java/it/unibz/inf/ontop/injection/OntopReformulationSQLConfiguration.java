@@ -6,11 +6,11 @@ public interface OntopReformulationSQLConfiguration extends OntopReformulationCo
     @Override
     OntopReformulationSQLSettings getSettings();
 
-    interface OntopQueryAnsweringSQLBuilderFragment<B extends OntopReformulationSQLConfiguration.Builder<B>> {
+    interface OntopReformulationSQLBuilderFragment<B extends OntopReformulationSQLConfiguration.Builder<B>> {
     }
 
     interface Builder<B extends OntopReformulationSQLConfiguration.Builder<B>>
-            extends OntopReformulationSQLConfiguration.OntopQueryAnsweringSQLBuilderFragment<B>,
+            extends OntopReformulationSQLBuilderFragment<B>,
             OntopReformulationConfiguration.Builder<B>, OntopSQLCoreConfiguration.Builder<B> {
 
         @Override

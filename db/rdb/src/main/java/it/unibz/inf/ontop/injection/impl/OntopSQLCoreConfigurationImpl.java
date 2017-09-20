@@ -1,21 +1,29 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
-public class OntopSQLCoreConfigurationImpl extends OntopOBDAConfigurationImpl
+public class OntopSQLCoreConfigurationImpl extends OntopModelConfigurationImpl
         implements OntopSQLCoreConfiguration {
 
     private final OntopSQLCoreSettings settings;
 
     protected OntopSQLCoreConfigurationImpl(OntopSQLCoreSettings settings, OntopSQLOptions options) {
-        super(settings, options.obdaOptions);
+        super(settings, options.modelOptions);
+        this.settings = settings;
+    }
+
+    protected OntopSQLCoreConfigurationImpl(OntopSQLCoreSettings settings, OntopSQLOptions sqlOptions,
+                                         Supplier<Injector> injectorSupplier) {
+        super(settings, sqlOptions.modelOptions, injectorSupplier);
         this.settings = settings;
     }
 
@@ -33,10 +41,10 @@ public class OntopSQLCoreConfigurationImpl extends OntopOBDAConfigurationImpl
 
     protected static class OntopSQLOptions {
 
-        public final OntopOBDAOptions obdaOptions;
+        public final OntopModelConfigurationOptions modelOptions;
 
-        private OntopSQLOptions(OntopOBDAOptions obdaOptions) {
-            this.obdaOptions = obdaOptions;
+        private OntopSQLOptions(OntopModelConfigurationOptions modelOptions) {
+            this.modelOptions = modelOptions;
         }
     }
 
@@ -96,14 +104,14 @@ public class OntopSQLCoreConfigurationImpl extends OntopOBDAConfigurationImpl
             return properties;
         }
 
-        final OntopSQLOptions generateSQLOptions(OntopOBDAOptions obdaOptions) {
-            return new OntopSQLOptions(obdaOptions);
+        final OntopSQLOptions generateSQLOptions(OntopModelConfigurationOptions modelOptions) {
+            return new OntopSQLOptions(modelOptions);
         }
 
     }
 
     protected abstract static class OntopSQLBuilderMixin<B extends OntopSQLCoreConfiguration.Builder<B>>
-            extends OntopOBDAConfigurationImpl.OntopOBDAConfigurationBuilderMixin<B>
+            extends DefaultOntopModelBuilderFragment<B>
             implements OntopSQLCoreConfiguration.Builder<B> {
 
         private final DefaultOntopSQLBuilderFragment<B> sqlBuilderFragment;
@@ -145,7 +153,7 @@ public class OntopSQLCoreConfigurationImpl extends OntopOBDAConfigurationImpl
         }
 
         OntopSQLOptions generateSQLOptions() {
-            return sqlBuilderFragment.generateSQLOptions(generateOBDAOptions());
+            return sqlBuilderFragment.generateSQLOptions(generateModelOptions());
         }
     }
 

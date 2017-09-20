@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection;
 
 
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -13,8 +14,10 @@ public interface OntopReformulationConfiguration extends OntopOBDAConfiguration,
 
     Optional<IRIDictionary> getIRIDictionary();
 
+    InputQueryFactory getInputQueryFactory();
 
-    interface OntopTranslationBuilderFragment<B extends Builder<B>> {
+
+    interface OntopReformulationBuilderFragment<B extends Builder<B>> {
         /**
          * In the case of SQL, inserts REPLACE functions in the generated query
          */
@@ -28,7 +31,7 @@ public interface OntopReformulationConfiguration extends OntopOBDAConfiguration,
         B iriDictionary(@Nonnull IRIDictionary iriDictionary);
     }
 
-    interface Builder<B extends Builder<B>> extends OntopTranslationBuilderFragment<B>, OntopOBDAConfiguration.Builder<B>,
+    interface Builder<B extends Builder<B>> extends OntopReformulationBuilderFragment<B>, OntopOBDAConfiguration.Builder<B>,
             OntopOptimizationConfiguration.Builder<B> {
 
         @Override

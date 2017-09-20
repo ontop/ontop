@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public interface OntopMappingConfiguration extends OntopOBDASpecificationConfiguration, OntopOptimizationConfiguration {
+public interface OntopMappingConfiguration extends OntopOBDAConfiguration, OntopOptimizationConfiguration {
 
     Optional<TMappingExclusionConfig> getTmappingExclusions();
 
