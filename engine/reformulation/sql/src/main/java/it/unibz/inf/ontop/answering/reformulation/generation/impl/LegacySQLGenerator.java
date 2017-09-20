@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.datalog.IntermediateQuery2DatalogTranslator;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.exception.OntopTranslationException;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
@@ -39,7 +39,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
 
     @Override
     public ExecutableQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature)
-            throws OntopTranslationException {
+            throws OntopReformulationException {
         return originalEngine.clone()
                 .generateSourceQuery(query, signature);
     }

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
+import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
@@ -18,7 +19,7 @@ import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
-import it.unibz.inf.ontop.exception.OntopTranslationException;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.injection.TranslationFactory;
@@ -63,6 +64,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final DBMetadata dbMetadata;
 	private final JoinLikeOptimizer joinLikeOptimizer;
 	private final InputQueryTranslator inputQueryTranslator;
+	private final InputQueryFactory inputQueryFactory;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -72,10 +74,12 @@ public class QuestQueryProcessor implements QueryReformulator {
 								DatalogProgram2QueryConverter datalogConverter,
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
-								JoinLikeOptimizer joinLikeOptimizer) {
+								JoinLikeOptimizer joinLikeOptimizer,
+								InputQueryFactory inputQueryFactory) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
+		this.inputQueryFactory = inputQueryFactory;
 		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = LinearInclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
@@ -151,7 +155,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 	@Override
 	public ExecutableQuery reformulateIntoNativeQuery(InputQuery inputQuery)
-			throws OntopTranslationException {
+			throws OntopReformulationException {
 
 		ExecutableQuery cachedQuery = queryCache.get(inputQuery);
 		if (cachedQuery != null)
@@ -238,7 +242,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 			//unfoldingTime = System.currentTimeMillis() - startTime;
 		}
-		catch (OntopTranslationException e) {
+		catch (OntopReformulationException e) {
 			throw e;
 		}
 		/*
@@ -247,13 +251,13 @@ public class QuestQueryProcessor implements QueryReformulator {
 		 */
 		catch (Exception e) {
 			log.warn("Unexpected exception: " + e.getMessage(), e);
-			throw new OntopTranslationException(e);
+			throw new OntopReformulationException(e);
 			//throw new OntopReformulationException("Error rewriting and unfolding into SQL\n" + e.getMessage());
 		}
 	}
 
 	private ExecutableQuery generateExecutableQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
-			throws OntopTranslationException {
+			throws OntopReformulationException {
 		log.debug("Producing the native query string...");
 
 		ExecutableQuery executableQuery = datasourceQueryGenerator.generateSourceQuery(intermediateQuery, signature);
@@ -268,9 +272,14 @@ public class QuestQueryProcessor implements QueryReformulator {
 	 * Returns the final rewriting of the given query
 	 */
 	@Override
-	public String getRewritingRendering(InputQuery query) throws OntopTranslationException {
+	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
 		DatalogProgram program = translateAndPreProcess(query);
 		DatalogProgram rewriting = rewriter.rewrite(program);
 		return DatalogProgramRenderer.encode(rewriting);
+	}
+
+	@Override
+	public InputQueryFactory getInputQueryFactory() {
+		return inputQueryFactory;
 	}
 }

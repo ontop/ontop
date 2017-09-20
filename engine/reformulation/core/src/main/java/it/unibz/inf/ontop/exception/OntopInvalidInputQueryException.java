@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.exception;
 
-public class OntopInvalidInputQueryException extends OntopTranslationException {
+public class OntopInvalidInputQueryException extends OntopReformulationException {
 
     public OntopInvalidInputQueryException(String message) {
         super(message);

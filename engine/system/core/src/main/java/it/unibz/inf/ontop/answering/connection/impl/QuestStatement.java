@@ -191,7 +191,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 */
 	@Override
 	public <R extends OBDAResultSet> R execute(InputQuery<R> inputQuery) throws OntopConnectionException,
-            OntopTranslationException, OntopQueryEvaluationException, OntopResultConversionException {
+            OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
 		if (inputQuery instanceof SelectQuery) {
 			return (R) executeInThread((SelectQuery) inputQuery, this::executeSelectQuery);
 		}
@@ -214,7 +214,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 *  ---> should be converted into 1 CONSTRUCT query
 	 */
 	private SimpleGraphResultSet executeDescribeQuery(DescribeQuery inputQuery)
-			throws OntopTranslationException, OntopResultConversionException, OntopConnectionException,
+			throws OntopReformulationException, OntopResultConversionException, OntopConnectionException,
 			OntopQueryEvaluationException {
 
 		ImmutableSet<String> constants = extractDescribeQueryConstants(inputQuery);
@@ -254,14 +254,14 @@ public abstract class QuestStatement implements OntopStatement {
 			}
 			// Exception is re-cast because not due to the initial input query
 		} catch (OntopInvalidInputQueryException e) {
-			throw new OntopTranslationException(e);
+			throw new OntopReformulationException(e);
 		}
 		return describeResultSet;
 	}
 
 	private ImmutableSet<String> extractDescribeQueryConstants(DescribeQuery inputQuery)
 			throws OntopQueryEvaluationException, OntopConnectionException,
-            OntopTranslationException, OntopResultConversionException {
+            OntopReformulationException, OntopResultConversionException {
 		String inputQueryString = inputQuery.getInputString();
 
 		// create list of URI constants we want to describe
@@ -284,7 +284,7 @@ public abstract class QuestStatement implements OntopStatement {
 				return constantSetBuilder.build();
 				// Exception is re-cast because not due to the initial input query
 			} catch (OntopInvalidInputQueryException e) {
-				throw new OntopTranslationException(e);
+				throw new OntopReformulationException(e);
 			}
 		}
 		else if (SPARQLQueryUtility.isURIDescribe(inputQueryString)) {
@@ -293,7 +293,7 @@ public abstract class QuestStatement implements OntopStatement {
 			try {
 				return ImmutableSet.of(SPARQLQueryUtility.getDescribeURI(inputQueryString));
 			} catch (MalformedQueryException e) {
-				throw new OntopTranslationException(e);
+				throw new OntopReformulationException(e);
 			}
 		}
 		else
@@ -306,7 +306,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 * query type SELECT, ASK, CONSTRUCT, or DESCRIBE
 	 */
 	private <R extends OBDAResultSet, Q extends InputQuery<R>> R executeInThread(Q inputQuery, Evaluator<R, Q> evaluator)
-			throws OntopTranslationException, OntopQueryEvaluationException {
+			throws OntopReformulationException, OntopQueryEvaluationException {
 
 		log.debug("Executing SPARQL query: \n{}", inputQuery);
 
@@ -325,8 +325,8 @@ public abstract class QuestStatement implements OntopStatement {
 		}
 		if (executionthread.errorStatus()) {
 			Exception ex = executionthread.getException();
-			if (ex instanceof OntopTranslationException) {
-				throw (OntopTranslationException) ex;
+			if (ex instanceof OntopReformulationException) {
+				throw (OntopReformulationException) ex;
 			}
 			else if (ex instanceof OntopQueryEvaluationException) {
 				throw (OntopQueryEvaluationException) ex;
@@ -362,13 +362,13 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	@Override
-	public String getRewritingRendering(InputQuery query) throws OntopTranslationException {
+	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
 		return engine.getRewritingRendering(query);
 	}
 
 
 	@Override
-	public ExecutableQuery getExecutableQuery(InputQuery inputQuery) throws OntopTranslationException {
+	public ExecutableQuery getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException {
 			return engine.reformulateIntoNativeQuery(inputQuery);
 	}
 

@@ -2,9 +2,11 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.injection.ReformulationFactory;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopReformulationConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
@@ -98,6 +100,14 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
     }
 
     @Override
+    public QueryReformulator loadQueryReformulator() throws OBDASpecificationException {
+        ReformulationFactory reformulationFactory = getInjector().getInstance(ReformulationFactory.class);
+        OBDASpecification obdaSpecification = loadSpecification();
+
+        return reformulationFactory.create(obdaSpecification, getExecutorRegistry());
+    }
+
+    @Override
     public InputQueryFactory getInputQueryFactory() {
         return getInjector()
                 .getInstance(InputQueryFactory.class);
@@ -156,8 +166,8 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
             return p;
         }
 
-        final OntopReformulationOptions generateTranslationOptions(OntopOBDAOptions obdaOptions,
-                                                                   OntopOptimizationOptions optimizationOptions) {
+        final OntopReformulationOptions generateReformulationOptions(OntopOBDAOptions obdaOptions,
+                                                                     OntopOptimizationOptions optimizationOptions) {
             return new OntopReformulationOptions(iriDictionary, obdaOptions, optimizationOptions);
         }
     }
@@ -197,13 +207,16 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
             return properties;
         }
 
-        OntopReformulationOptions generateRuntimeOptions() {
+        OntopReformulationOptions generateReformulationOptions() {
             OntopOBDAOptions obdaOptions = generateOBDAOptions();
-            return localBuilderFragment.generateTranslationOptions(obdaOptions,
+            return localBuilderFragment.generateReformulationOptions(obdaOptions,
                     optimizationBuilderFragment.generateOptimizationOptions(obdaOptions.modelOptions));
         }
     }
 
+    /**
+     * Exception
+     */
     private static class MissingOBDASpecificationObjectException extends OntopInternalBugException {
 
         private MissingOBDASpecificationObjectException() {

@@ -1,8 +1,11 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.inject.Module;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.injection.OntopReformulationConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.DefaultOntopSQLBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.OntopSQLOptions;
 
 import java.util.Properties;
@@ -17,7 +20,7 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
     OntopReformulationSQLConfigurationImpl(OntopReformulationSQLSettings settings,
                                            OntopReformulationSQLOptions options,
                                            SpecificationLoader specificationLoader) {
-        super(settings, options.qaOptions, specificationLoader);
+        super(settings, options.reformulationOptions, specificationLoader);
         this.settings = settings;
         this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions);
     }
@@ -27,7 +30,7 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
      */
     OntopReformulationSQLConfigurationImpl(OntopReformulationSQLSettings settings,
                                            OntopReformulationSQLOptions options) {
-        super(settings, options.qaOptions);
+        super(settings, options.reformulationOptions);
         this.settings = settings;
         this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions);
     }
@@ -48,11 +51,11 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
 
     static class OntopReformulationSQLOptions {
 
-        final OntopReformulationOptions qaOptions;
+        final OntopReformulationOptions reformulationOptions;
         final OntopSQLOptions sqlOptions;
 
-        private OntopReformulationSQLOptions(OntopReformulationOptions qaOptions, OntopSQLOptions sqlOptions) {
-            this.qaOptions = qaOptions;
+        private OntopReformulationSQLOptions(OntopReformulationOptions reformulationOptions, OntopSQLOptions sqlOptions) {
+            this.reformulationOptions = reformulationOptions;
             this.sqlOptions = sqlOptions;
         }
     }
@@ -73,6 +76,79 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
 
         Properties generateProperties() {
             return new Properties();
+        }
+    }
+
+    static abstract class OntopReformulationSQLBuilderMixin<B extends OntopReformulationSQLConfiguration.Builder<B>>
+            extends OntopReformulationBuilderMixin<B>
+            implements OntopReformulationSQLConfiguration.Builder<B> {
+
+        private final DefaultOntopReformulationSQLBuilderFragment<B> localBuilderFragment;
+        private final DefaultOntopSQLBuilderFragment<B> sqlBuilderFragment;
+
+        OntopReformulationSQLBuilderMixin() {
+            B builder = (B) this;
+            localBuilderFragment = new DefaultOntopReformulationSQLBuilderFragment<>(builder);
+            sqlBuilderFragment = new DefaultOntopSQLBuilderFragment<>(builder);
+        }
+
+        @Override
+        protected Properties generateProperties() {
+            Properties properties = super.generateProperties();
+            properties.putAll(sqlBuilderFragment.generateProperties());
+            properties.putAll(localBuilderFragment.generateProperties());
+            return properties;
+        }
+
+        OntopReformulationSQLOptions generateSQLReformulationOptions() {
+            OntopReformulationOptions reformulationOptions = generateReformulationOptions();
+            OntopSQLOptions sqlOptions = sqlBuilderFragment.generateSQLOptions(
+                    reformulationOptions.obdaOptions.modelOptions);
+
+            return new OntopReformulationSQLOptions(reformulationOptions, sqlOptions);
+        }
+
+        @Override
+        public B jdbcName(String dbName) {
+            return sqlBuilderFragment.jdbcName(dbName);
+        }
+
+        @Override
+        public B jdbcUrl(String jdbcUrl) {
+            return sqlBuilderFragment.jdbcUrl(jdbcUrl);
+        }
+
+        @Override
+        public B jdbcUser(String username) {
+            return sqlBuilderFragment.jdbcUser(username);
+        }
+
+        @Override
+        public B jdbcPassword(String password) {
+            return sqlBuilderFragment.jdbcPassword(password);
+        }
+
+        @Override
+        public B jdbcDriver(String jdbcDriver) {
+            return sqlBuilderFragment.jdbcDriver(jdbcDriver);
+        }
+    }
+
+    /**
+     * Requires the OBDA specification to be already assigned
+     */
+    public static class BuilderImpl<B extends OntopReformulationSQLConfiguration.Builder<B>>
+        extends OntopReformulationSQLBuilderMixin<B> {
+
+        @Override
+        public OntopReformulationSQLConfiguration build() {
+            if (!isOBDASpecificationAssigned())
+                throw new InvalidOntopConfigurationException("An OBDA specification must be assigned " +
+                        "to directly instantiate such a OntopReformulationSQLConfiguration");
+
+            OntopReformulationSQLSettings settings = new OntopReformulationSQLSettingsImpl(generateProperties());
+            OntopReformulationSQLOptions options = generateSQLReformulationOptions();
+            return new OntopReformulationSQLConfigurationImpl(settings, options);
         }
     }
 

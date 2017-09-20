@@ -3,7 +3,9 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
@@ -41,6 +43,11 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
     @Override
     public Optional<IRIDictionary> getIRIDictionary() {
         return systemConfiguration.getIRIDictionary();
+    }
+
+    @Override
+    public QueryReformulator loadQueryReformulator() throws OBDASpecificationException {
+        return systemConfiguration.loadQueryReformulator();
     }
 
     @Override
@@ -129,7 +136,7 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
         final OntopStandaloneSQLOptions generateStandaloneSQLOptions() {
             OntopMappingSQLAllOptions sqlMappingOptions = generateMappingSQLAllOptions();
             OntopReformulationConfigurationImpl.OntopReformulationOptions translationOptions =
-                    this.translationFragmentBuilder.generateTranslationOptions(
+                    this.translationFragmentBuilder.generateReformulationOptions(
                         sqlMappingOptions.mappingSQLOptions.mappingOptions.obdaOptions,
                         sqlMappingOptions.mappingSQLOptions.mappingOptions.optimizationOptions);
 
