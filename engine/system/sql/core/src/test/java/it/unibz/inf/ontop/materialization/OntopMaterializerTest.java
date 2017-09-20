@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.owlrefplatform.core.abox;
+package it.unibz.inf.ontop.materialization;
 
 /*
  * #%L
