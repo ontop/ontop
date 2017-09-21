@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
 
+import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,8 +66,7 @@ public class JDBCConnector implements DBConnector {
                 return true;
             }
             if (settings.isPermanentDBConnectionEnabled()) {
-                localConnection = DriverManager.getConnection(settings.getJdbcUrl(),
-                        settings.getJdbcUser(), settings.getJdbcPassword());
+                localConnection = LocalJDBCConnectionUtils.createConnection(settings);
                 return localConnection != null;
             }
         } catch (SQLException e) {
