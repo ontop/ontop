@@ -22,10 +22,14 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test
@@ -64,7 +68,7 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 			reasoner.dispose();
 		}
 	}
-	
+
 	private void executeQueryAssertResults(String query, OWLStatement st) throws Exception {
 		TupleOWLResultSet rs = st.executeSelectQuery(query);
 
@@ -84,6 +88,7 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 		assertEquals("<http://myproject.org/odbs#eventpaper1>", answer2.toString());
 	}
 
+	@Test
 	public void testConcat() throws Exception {
 
         String query1 = "PREFIX : <http://myproject.org/odbs#> SELECT ?x ?y\n" +

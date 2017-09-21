@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.docker.postgres;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 
 /**
@@ -42,6 +43,7 @@ public class QuotedAliasTableTest extends AbstractVirtualModeTest {
 	 * Test OBDA table
 	 * @throws Exception
 	 */
+	@Test
 	public void test() throws Exception {
 		String query = "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#> SELECT DISTINCT ?x WHERE {"
 				+ "?x a npdv:CompanyReserve . "

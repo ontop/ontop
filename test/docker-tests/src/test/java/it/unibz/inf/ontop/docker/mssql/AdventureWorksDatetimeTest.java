@@ -20,17 +20,13 @@ package it.unibz.inf.ontop.docker.mssql;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /***
  * Tests that SQL Server returns the datetimes correctly
@@ -48,32 +44,6 @@ public class AdventureWorksDatetimeTest extends AbstractVirtualModeTest {
 	public AdventureWorksDatetimeTest() {
 		super(owlFile, obdaFile, propertiesFile);
 	}
-
-	private String runTests(String query) throws Exception {
-		OWLStatement st = conn.createStatement();
-		String retval="";
-		try {
-			TupleOWLResultSet rs = st.executeSelectQuery(query);
-//			while(rs.hasNext()) {
-				rs.hasNext();
-				OWLObject ind1 = rs.next().getOWLObject("y");
-				retval = ind1.toString();
-//			}
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			conn.close();
-
-		}
-		return retval;
-	}
-
 
 
     /**

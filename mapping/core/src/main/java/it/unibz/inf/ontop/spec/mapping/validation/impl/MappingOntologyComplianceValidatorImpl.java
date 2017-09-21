@@ -251,7 +251,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             // TODO: throw a better exception
             COL_TYPE internalType = TYPE_FACTORY.getInternalType((DatatypePredicate) declaredDatatype.getPredicate())
                     .orElseThrow(() -> new RuntimeException("Unsupported datatype declared in the ontology: "
-                            + declaredDatatype.getPredicate().getName() + "\n TODO: find a better exception"));
+                            + declaredDatatype.getPredicate().getName() + ""));
 
             if (!tripleObjectType.isCompatibleWith(internalType)) {
 

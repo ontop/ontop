@@ -4,7 +4,6 @@ package it.unibz.inf.ontop.docker.postgres;
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +29,6 @@ public class AnnotationTest extends AbstractVirtualModeTest {
     }
 
 
-    @Ignore
     @Test
     public void testAnnotationInOntology() throws Exception {
 

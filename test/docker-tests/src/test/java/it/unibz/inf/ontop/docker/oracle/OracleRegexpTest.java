@@ -25,7 +25,10 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLIndividual;
+
+import static org.junit.Assert.*;
 
 
 /***
@@ -63,6 +66,7 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 	 * Tests the use of SPARQL like
 	 * @throws Exception
 	 */
+	@Test
 	public void testSparql2OracleRegex() throws Exception {
 		OWLStatement st = null;
 		try {

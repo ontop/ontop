@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.docker.oracle;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 /**
  * Test to check if the sql parser supports regex correctly when written with oracle syntax. 
@@ -41,6 +42,7 @@ public class RegexOracleSQLTest extends AbstractVirtualModeTest {
 	 * select id, street, number, city, state, country from address where  regexp_like(city, 'b.+z', 'i')
 	 * @throws Exception
 	 */
+	@Test
 	public void testOracleRegexLike() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :BolzanoAddress}";
 		countResults(query, 2);
@@ -51,6 +53,7 @@ public class RegexOracleSQLTest extends AbstractVirtualModeTest {
 	 * select "ID", "NAME", "LASTNAME", "DATEOFBIRTH", "SSN" from "BROKER" where regexp_like("NAME", 'J.+a')
 	 * @throws Exception
 	 */
+	@Test
 	public void testOracleRegexLikeUppercase() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :PhysicalPerson}";
 		countResults(query, 1);

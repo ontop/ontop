@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 
 /**
@@ -19,6 +20,7 @@ public class ConcatMappingTest extends AbstractVirtualModeTest {
         super(owlFile, obdaFile, propertiesFile);
     }
 
+    @Test
     public void testConcatQuery() throws Exception {
         String queryBind = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>  \n" +
                 "\n" +

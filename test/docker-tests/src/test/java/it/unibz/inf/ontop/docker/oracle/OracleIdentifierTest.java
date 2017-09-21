@@ -21,8 +21,9 @@ package it.unibz.inf.ontop.docker.oracle;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /***
  * Tests that oracle identifiers for tables and columns are treated

@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.docker.db2;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 /**
  * Test if the datatypes are assigned correctly.
@@ -40,24 +41,23 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     }
 
 
-    //we need xsd:string to work correctly 
+    //we need xsd:string to work correctly
+    @Test
 	public void testQuotedLiteral() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?street WHERE {?x a :Address; :inStreet ?street; :inCity \"Bolzano\".}";
 
 		countResults(query1, 2 );
 	}
 
-    
+    @Test
     public void testDatatypeString() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?street WHERE {?x a :Address; :inStreet ?street; :inCity \"Bolzano\"^^xsd:string .}";
 
         countResults(query1, 2 );
     }
-    
-    
 
-
-    //we need xsd:string to work correctly 
+    //we need xsd:string to work correctly
+    @Test
     public void testAddressesQuotedLiteral() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n" +
                 "SELECT DISTINCT * WHERE {      \n" +
@@ -74,12 +74,14 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     }
 
     //in db2 there is no boolean type we refer to it in the database with a smallint 1 for true and a smallint 0 for false
+    @Test
     public void testBooleanDatatype() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\"^^xsd:integer . }";
 
         countResults(query1, 5 );
     }
-    
+
+    @Test
     public void testBooleanInteger() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares 1 . }";
 
@@ -87,6 +89,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     }
 
     //in db2 there is no boolean datatype, it is substitute with smallint
+    @Test
     public void testBoolean() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares TRUE . }";
 
@@ -94,18 +97,21 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     }
 
     //in db2 there is no boolean datatype, it is substitute with smallint
+    @Test
     public void testBooleanTrueDatatype() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\"^^xsd:boolean . }";
 
         countResults(query1, 0 );
     }
-    
+
+    @Test
     public void testFilterBoolean() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?amount WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares ?type. FILTER ( ?type = 1 ). }";
 
         countResults(query1, 5 );
     }
-    
+
+    @Test
     public void testNotFilterBoolean() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?amount WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares ?type. FILTER ( ?type != 1 ). }";
 
@@ -113,6 +119,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     }
     
     //a quoted integer is treated as a literal
+    @Test
     public void testQuotedInteger() throws Exception {
 
           String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\" . }";
@@ -122,6 +129,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
 
 
     //a quoted datatype is treated as a literal
+    @Test
     public void testDatatype() throws Exception {
 
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Transaction; :transactionID ?id; :transactionDate \"2008-04-02T00:00:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime> . }";
@@ -130,6 +138,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     }
 
     //a quoted datatype is treated as a literal
+    @Test
     public void testQuotedDatatype() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Transaction; :transactionID ?id; :transactionDate \"2008-04-02T00:00:00\" . }";
 
@@ -137,6 +146,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     }
 
     //a quoted datatype is treated as a literal
+    @Test
     public void testDatatypeTimezone() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Transaction; :transactionID ?id; :transactionDate \"2008-04-02T00:00:00+06:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime> . }";
 

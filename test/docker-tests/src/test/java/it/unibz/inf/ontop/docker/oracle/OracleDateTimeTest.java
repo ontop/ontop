@@ -27,9 +27,12 @@ import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.*;
 
 public class OracleDateTimeTest extends AbstractVirtualModeTest {
 
@@ -63,6 +66,7 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void testDateTime() throws Exception {
 		OWLStatement st = null;
 		try {
