@@ -54,8 +54,8 @@ public class OWLAPITranslatorUtility {
 	 */
 	
 	public static Ontology translateImportsClosure(OWLOntology ontology) {
-		Set<OWLOntology> clousure = ontology.getOWLOntologyManager().getImportsClosure(ontology);
-		return mergeTranslateOntologies(clousure);		
+		Set<OWLOntology> closure = ontology.getOWLOntologyManager().getImportsClosure(ontology);
+		return mergeTranslateOntologies(closure);
 	}
 	
 	/***
