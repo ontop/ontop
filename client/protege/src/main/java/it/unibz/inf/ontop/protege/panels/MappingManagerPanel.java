@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLCredentialConfiguration;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
@@ -517,7 +517,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
                 SQLPPTriplesMap o = (SQLPPTriplesMap) path.get(i);
                 String id = o.getId();
                 outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
-                OntopSQLCoreConfiguration config = OntopSQLCoreConfiguration.defaultBuilder()
+                OntopSQLCredentialConfiguration config = OntopSQLCredentialConfiguration.defaultBuilder()
                         .properties(DataSource2PropertiesConvertor.convert(selectedSource))
                         .build();
                 validator = new SQLSourceQueryValidator(config.getSettings(), o.getSourceQuery());

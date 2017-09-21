@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCredentialConfigurationImpl.OntopSQLCredentialOptions;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
@@ -140,11 +141,12 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
                         sqlMappingOptions.mappingSQLOptions.mappingOptions.obdaOptions,
                         sqlMappingOptions.mappingSQLOptions.mappingOptions.optimizationOptions);
 
-            OntopReformulationSQLOptions sqlTranslationOptions = sqlTranslationFragmentBuilder.generateSQLReformulationOptions(
-                    translationOptions,
-                    sqlMappingOptions.mappingSQLOptions.sqlOptions);
+            OntopSQLCredentialOptions sqlOptions = sqlMappingOptions.mappingSQLOptions.sqlOptions;
 
-            OntopSystemSQLOptions systemSQLOptions = new OntopSystemSQLOptions(sqlTranslationOptions);
+            OntopReformulationSQLOptions sqlTranslationOptions = sqlTranslationFragmentBuilder.generateSQLReformulationOptions(
+                    translationOptions, sqlOptions.sqlCoreOptions);
+
+            OntopSystemSQLOptions systemSQLOptions = new OntopSystemSQLOptions(sqlTranslationOptions, sqlOptions);
 
             return new OntopStandaloneSQLOptions(systemSQLOptions, sqlMappingOptions);
         }

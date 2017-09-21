@@ -84,7 +84,7 @@ public class DirectMappingEngine {
 	private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final SpecificationFactory specificationFactory;
 	private final SQLPPMappingFactory ppMappingFactory;
-	private final OntopSQLCoreSettings settings;
+	private final OntopSQLCredentialSettings settings;
 
     private String baseIRI;
 	private int currentMappingIndex = 1;
@@ -101,7 +101,7 @@ public class DirectMappingEngine {
 	}
 
 	@Inject
-	private DirectMappingEngine(OntopSQLCoreSettings settings, MappingVocabularyExtractor vocabularyExtractor,
+	private DirectMappingEngine(OntopSQLCredentialSettings settings, MappingVocabularyExtractor vocabularyExtractor,
 								SpecificationFactory specificationFactory,
                                 SQLPPMappingFactory ppMappingFactory) {
 		this.specificationFactory = specificationFactory;

@@ -2,10 +2,11 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
-import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCredentialConfigurationImpl.DefaultOntopSQLCredentialBuilderFragment;
 
+import java.util.Properties;
 import java.util.stream.Stream;
 
 
@@ -41,12 +42,15 @@ public class OntopSystemSQLConfigurationImpl extends OntopReformulationSQLConfig
 
     static class OntopSystemSQLOptions {
         final OntopReformulationSQLOptions sqlTranslationOptions;
+        final OntopSQLCredentialConfigurationImpl.OntopSQLCredentialOptions sqlOptions;
 
         /**
          * TODO: make it private when there will be a OntopSystemSQLBuilderFragment
          */
-        OntopSystemSQLOptions(OntopReformulationSQLOptions sqlTranslationOptions) {
+        OntopSystemSQLOptions(OntopReformulationSQLOptions sqlTranslationOptions,
+                              OntopSQLCredentialConfigurationImpl.OntopSQLCredentialOptions ontopSQLCredentialOptions) {
             this.sqlTranslationOptions = sqlTranslationOptions;
+            this.sqlOptions = ontopSQLCredentialOptions;
         }
     }
 
@@ -54,8 +58,35 @@ public class OntopSystemSQLConfigurationImpl extends OntopReformulationSQLConfig
             extends OntopReformulationSQLBuilderMixin<B>
             implements OntopSystemSQLConfiguration.Builder<B> {
 
+        private final DefaultOntopSQLCredentialBuilderFragment<B> sqlBuilderFragment;
+
+        OntopSystemSQLBuilderMixin() {
+            B builder = (B) this;
+            sqlBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<B>(builder);
+        }
+
+        @Override
+        protected Properties generateProperties() {
+            Properties properties = super.generateProperties();
+            properties.putAll(sqlBuilderFragment.generateProperties());
+            return properties;
+        }
+
+        @Override
+        public B jdbcUser(String username) {
+            return sqlBuilderFragment.jdbcUser(username);
+        }
+
+        @Override
+        public B jdbcPassword(String password) {
+            return sqlBuilderFragment.jdbcPassword(password);
+        }
+
         final OntopSystemSQLOptions generateSystemSQLOptions() {
-            return new OntopSystemSQLOptions(generateSQLReformulationOptions());
+            OntopReformulationSQLOptions reformulationOptions = generateSQLReformulationOptions();
+
+            return new OntopSystemSQLOptions(reformulationOptions, sqlBuilderFragment.generateSQLCredentialOptions(
+                    reformulationOptions.sqlOptions));
         }
     }
 

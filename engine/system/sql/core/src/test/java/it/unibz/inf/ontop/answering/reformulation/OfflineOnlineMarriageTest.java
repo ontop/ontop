@@ -105,8 +105,6 @@ public class OfflineOnlineMarriageTest {
         OntopReformulationSQLConfiguration reformulationConfiguration = OntopReformulationSQLConfiguration.defaultBuilder()
                 .obdaSpecification(obdaSpecification)
                 .jdbcUrl(JDBC_URL)
-                .jdbcUser("fake")
-                .jdbcPassword("fake")
                 .enableTestMode()
                 .build();
 

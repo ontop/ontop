@@ -12,15 +12,13 @@ public interface OntopSQLCoreConfiguration extends OntopModelConfiguration {
         return new OntopSQLCoreConfigurationImpl.BuilderImpl<>();
     }
 
-    interface OntopSQLBuilderFragment<B extends Builder<B>> {
+    interface OntopSQLCoreBuilderFragment<B extends Builder<B>> {
         B jdbcName(String dbName);
         B jdbcUrl(String jdbcUrl);
-        B jdbcUser(String username);
-        B jdbcPassword(String password);
         B jdbcDriver(String jdbcDriver);
     }
 
-    interface Builder<B extends Builder<B>> extends OntopSQLBuilderFragment<B>, OntopModelConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OntopSQLCoreBuilderFragment<B>, OntopModelConfiguration.Builder<B> {
         @Override
         OntopSQLCoreConfiguration build();
     }

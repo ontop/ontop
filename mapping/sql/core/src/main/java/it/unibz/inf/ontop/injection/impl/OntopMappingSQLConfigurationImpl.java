@@ -7,8 +7,9 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.DefaultOntopSQLBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.OntopSQLOptions;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.DefaultOntopSQLCoreBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCredentialConfigurationImpl.DefaultOntopSQLCredentialBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCredentialConfigurationImpl.OntopSQLCredentialOptions;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
@@ -32,15 +33,13 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
 
     private final OntopMappingSQLSettings settings;
     private final OntopMappingSQLOptions options;
-    private final OntopSQLCoreConfigurationImpl sqlConfiguration;
+    private final OntopSQLCredentialConfigurationImpl sqlConfiguration;
 
-    OntopMappingSQLConfigurationImpl(OntopMappingSQLSettings settings,
-                                        OntopMappingSQLOptions options) {
+    OntopMappingSQLConfigurationImpl(OntopMappingSQLSettings settings, OntopMappingSQLOptions options) {
         super(settings, options.mappingOptions);
         this.settings = settings;
         this.options = options;
-        this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions,
-                this::getInjector);
+        this.sqlConfiguration = new OntopSQLCredentialConfigurationImpl(settings, options.sqlOptions, this::getInjector);
     }
 
     boolean isInputMappingDefined() {
@@ -152,11 +151,11 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
      *
      */
     public static class OntopMappingSQLOptions {
-        final OntopSQLOptions sqlOptions;
+        final OntopSQLCredentialOptions sqlOptions;
         final OntopMappingOptions mappingOptions;
         final Optional<SQLPPMapping> ppMapping;
 
-        private OntopMappingSQLOptions(Optional<SQLPPMapping> ppMapping, OntopSQLOptions sqlOptions,
+        private OntopMappingSQLOptions(Optional<SQLPPMapping> ppMapping, OntopSQLCredentialOptions sqlOptions,
                                        OntopMappingOptions mappingOptions) {
             this.sqlOptions = sqlOptions;
             this.mappingOptions = mappingOptions;
@@ -197,7 +196,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
         }
 
 
-        final OntopMappingSQLOptions generateMappingSQLOptions(OntopSQLOptions sqlOptions,
+        final OntopMappingSQLOptions generateMappingSQLOptions(OntopSQLCredentialOptions sqlOptions,
                                                                OntopMappingOptions mappingOptions) {
             return new OntopMappingSQLOptions(ppMapping, sqlOptions, mappingOptions);
         }
@@ -212,14 +211,16 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
             implements OntopMappingSQLConfiguration.Builder<B> {
 
         private final DefaultMappingSQLBuilderFragment<B> localBuilderFragment;
-        private final DefaultOntopSQLBuilderFragment<B> sqlBuilderFragment;
+        private final DefaultOntopSQLCoreBuilderFragment<B> sqlCoreBuilderFragment;
+        private final DefaultOntopSQLCredentialBuilderFragment<B> sqlCredentialBuilderFragment;
 
         protected OntopMappingSQLBuilderMixin() {
             B builder = (B) this;
             localBuilderFragment = new DefaultMappingSQLBuilderFragment<>(builder,
                     this::isMappingDefined,
                     this::declareMappingDefined);
-            sqlBuilderFragment = new DefaultOntopSQLBuilderFragment<>(builder);
+            sqlCoreBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>(builder);
+            sqlCredentialBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>(builder);
         }
 
         @Override
@@ -231,41 +232,43 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
         protected Properties generateProperties() {
             Properties properties = super.generateProperties();
             properties.putAll(localBuilderFragment.generateProperties());
-            properties.putAll(sqlBuilderFragment.generateProperties());
+            properties.putAll(sqlCoreBuilderFragment.generateProperties());
+            properties.putAll(sqlCredentialBuilderFragment.generateProperties());
             return properties;
         }
 
         final OntopMappingSQLOptions generateMappingSQLOptions() {
             OntopOBDAConfigurationImpl.OntopOBDAOptions obdaOptions = generateOBDAOptions();
 
-            return localBuilderFragment.generateMappingSQLOptions(
-                    sqlBuilderFragment.generateSQLOptions(obdaOptions.modelOptions),
-                    generateMappingOptions(obdaOptions));
+            OntopSQLCredentialOptions sqlOptions = sqlCredentialBuilderFragment.generateSQLCredentialOptions(
+                    sqlCoreBuilderFragment.generateSQLCoreOptions(obdaOptions.modelOptions));
+
+            return localBuilderFragment.generateMappingSQLOptions(sqlOptions, generateMappingOptions(obdaOptions));
         }
 
         @Override
         public B jdbcName(String dbName) {
-            return sqlBuilderFragment.jdbcName(dbName);
+            return sqlCoreBuilderFragment.jdbcName(dbName);
         }
 
         @Override
         public B jdbcUrl(String jdbcUrl) {
-            return sqlBuilderFragment.jdbcUrl(jdbcUrl);
+            return sqlCoreBuilderFragment.jdbcUrl(jdbcUrl);
         }
 
         @Override
         public B jdbcUser(String username) {
-            return sqlBuilderFragment.jdbcUser(username);
+            return sqlCredentialBuilderFragment.jdbcUser(username);
         }
 
         @Override
         public B jdbcPassword(String password) {
-            return sqlBuilderFragment.jdbcPassword(password);
+            return sqlCredentialBuilderFragment.jdbcPassword(password);
         }
 
         @Override
         public B jdbcDriver(String jdbcDriver) {
-            return sqlBuilderFragment.jdbcDriver(jdbcDriver);
+            return sqlCoreBuilderFragment.jdbcDriver(jdbcDriver);
         }
     }
 

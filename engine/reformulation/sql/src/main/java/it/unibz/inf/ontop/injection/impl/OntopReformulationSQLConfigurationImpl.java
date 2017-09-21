@@ -2,11 +2,10 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
-import it.unibz.inf.ontop.injection.OntopReformulationConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
-import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.DefaultOntopSQLBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.OntopSQLOptions;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.DefaultOntopSQLCoreBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.OntopSQLCoreOptions;
 
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -52,9 +51,9 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
     static class OntopReformulationSQLOptions {
 
         final OntopReformulationOptions reformulationOptions;
-        final OntopSQLOptions sqlOptions;
+        final OntopSQLCoreOptions sqlOptions;
 
-        private OntopReformulationSQLOptions(OntopReformulationOptions reformulationOptions, OntopSQLOptions sqlOptions) {
+        private OntopReformulationSQLOptions(OntopReformulationOptions reformulationOptions, OntopSQLCoreOptions sqlOptions) {
             this.reformulationOptions = reformulationOptions;
             this.sqlOptions = sqlOptions;
         }
@@ -70,7 +69,7 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
         }
 
         OntopReformulationSQLOptions generateSQLReformulationOptions(OntopReformulationOptions qaOptions,
-                                                                     OntopSQLOptions sqlOptions) {
+                                                                     OntopSQLCoreOptions sqlOptions) {
             return new OntopReformulationSQLOptions(qaOptions, sqlOptions);
         }
 
@@ -84,12 +83,12 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
             implements OntopReformulationSQLConfiguration.Builder<B> {
 
         private final DefaultOntopReformulationSQLBuilderFragment<B> localBuilderFragment;
-        private final DefaultOntopSQLBuilderFragment<B> sqlBuilderFragment;
+        private final DefaultOntopSQLCoreBuilderFragment<B> sqlBuilderFragment;
 
         OntopReformulationSQLBuilderMixin() {
             B builder = (B) this;
             localBuilderFragment = new DefaultOntopReformulationSQLBuilderFragment<>(builder);
-            sqlBuilderFragment = new DefaultOntopSQLBuilderFragment<>(builder);
+            sqlBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>(builder);
         }
 
         @Override
@@ -102,7 +101,7 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
 
         OntopReformulationSQLOptions generateSQLReformulationOptions() {
             OntopReformulationOptions reformulationOptions = generateReformulationOptions();
-            OntopSQLOptions sqlOptions = sqlBuilderFragment.generateSQLOptions(
+            OntopSQLCoreOptions sqlOptions = sqlBuilderFragment.generateSQLCoreOptions(
                     reformulationOptions.obdaOptions.modelOptions);
 
             return new OntopReformulationSQLOptions(reformulationOptions, sqlOptions);
@@ -116,16 +115,6 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
         @Override
         public B jdbcUrl(String jdbcUrl) {
             return sqlBuilderFragment.jdbcUrl(jdbcUrl);
-        }
-
-        @Override
-        public B jdbcUser(String username) {
-            return sqlBuilderFragment.jdbcUser(username);
-        }
-
-        @Override
-        public B jdbcPassword(String password) {
-            return sqlBuilderFragment.jdbcPassword(password);
         }
 
         @Override

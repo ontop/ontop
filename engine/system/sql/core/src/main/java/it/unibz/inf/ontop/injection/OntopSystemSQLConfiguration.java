@@ -3,7 +3,8 @@ package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.injection.impl.OntopSystemSQLConfigurationImpl;
 
-public interface OntopSystemSQLConfiguration extends OntopSystemConfiguration, OntopReformulationSQLConfiguration {
+public interface OntopSystemSQLConfiguration extends OntopSystemConfiguration, OntopReformulationSQLConfiguration,
+        OntopSQLCredentialConfiguration {
 
     @Override
     OntopSystemSQLSettings getSettings();
@@ -15,7 +16,8 @@ public interface OntopSystemSQLConfiguration extends OntopSystemConfiguration, O
         return new OntopSystemSQLConfigurationImpl.BuilderImpl<>();
     }
 
-    interface Builder<B extends Builder<B>> extends OntopReformulationSQLConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OntopReformulationSQLConfiguration.Builder<B>,
+            OntopSQLCredentialConfiguration.Builder<B> {
 
         @Override
         OntopSystemSQLConfiguration build();

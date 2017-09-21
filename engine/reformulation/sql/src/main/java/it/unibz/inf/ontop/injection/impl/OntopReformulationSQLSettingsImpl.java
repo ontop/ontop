@@ -39,16 +39,6 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
     }
 
     @Override
-    public String getJdbcUser() {
-        return sqlSettings.getJdbcUser();
-    }
-
-    @Override
-    public String getJdbcPassword() {
-        return sqlSettings.getJdbcPassword();
-    }
-
-    @Override
     public Optional<String> getJdbcDriver() {
         return sqlSettings.getJdbcDriver();
     }
