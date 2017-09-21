@@ -63,6 +63,18 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
         String result = runQueryAndReturnStringOfLiteralX(query1);
         assertEquals("\"10:12:10\"^^xsd:time", result );
     }
+
+    public void testDatatypeTimeTz() throws Exception {
+
+        String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?s ?x\n" +
+                "WHERE {\n" +
+                "   ?s a :Row; :hasTime ?x\n" +
+                "   FILTER ( ?x = \"10:12:10+01:00\"^^xsd:time ) .\n" +
+                "}";
+
+        String result = runQueryAndReturnStringOfLiteralX(query1);
+        assertEquals("\"10:12:10+01:00\"^^xsd:time", result );
+    }
 	
     public void testDatatypeYear() throws Exception {
         String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?s ?x\n" +

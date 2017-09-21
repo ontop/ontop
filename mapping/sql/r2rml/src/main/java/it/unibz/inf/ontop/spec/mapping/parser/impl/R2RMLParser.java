@@ -604,7 +604,7 @@ public class R2RMLParser {
 			// pred = TYPE_FACTORY.getTypePredicate(); //
 			// the URI template is always on the first position in the term list
 			// terms.add(0, uriTemplate);
-			return TERM_FACTORY.getImmutableTypedTerm(uriTemplate, COL_TYPE.LITERAL);
+			return TERM_FACTORY.getImmutableTypedTerm(uriTemplate, COL_TYPE.STRING);
 		case 4://concat
 			ImmutableFunctionalTerm f = TERM_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
             for(int j=2;j<terms.size();j++){

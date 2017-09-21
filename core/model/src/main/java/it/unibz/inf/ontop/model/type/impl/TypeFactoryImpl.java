@@ -34,7 +34,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final DatatypePredicate RDF_LANG_STRING;
 	
 	private final DatatypePredicate  XSD_STRING;
-//			 , RDFS_PLAIN_LITERAL;
+//	private final DatatypePredicate RDFS_LITERAL;
 	private final DatatypePredicate XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
 	private final DatatypePredicate XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
 	private final DatatypePredicate XSD_INT, XSD_UNSIGNED_INT, XSD_LONG;
@@ -53,13 +53,13 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final Map<COL_TYPE, TermType> termTypeCache = new ConcurrentHashMap<>();
 
 	private TypeFactoryImpl() {
-		ValueFactory factory = SimpleValueFactory.getInstance();
+
 		XSD_INTEGER = registerType(XMLSchema.INTEGER, COL_TYPE.INTEGER);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
 		XSD_DECIMAL = registerType(XMLSchema.DECIMAL, COL_TYPE.DECIMAL);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
 		XSD_DOUBLE = registerType(XMLSchema.DOUBLE, COL_TYPE.DOUBLE);  // 6 "http://www.w3.org/2001/XMLSchema#double"
 		XSD_STRING = registerType(XMLSchema.STRING, COL_TYPE.STRING);  // 7 "http://www.w3.org/2001/XMLSchema#string"
 		XSD_DATETIME = registerType(XMLSchema.DATETIME, COL_TYPE.DATETIME); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
-
+		ValueFactory factory = SimpleValueFactory.getInstance();
 		IRI datetimestamp = factory.createIRI("http://www.w3.org/2001/XMLSchema#dateTimeStamp"); // value datetime stamp is missing in XMLSchema
 		XSD_DATETIME_STAMP = registerType(datetimestamp, COL_TYPE.DATETIME_STAMP);
 		XSD_BOOLEAN = registerType(XMLSchema.BOOLEAN, COL_TYPE.BOOLEAN);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
@@ -76,6 +76,8 @@ public class TypeFactoryImpl implements TypeFactory {
 		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
 		RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING.toString(), new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.STRING });
 		registerType(RDF.LANGSTRING, COL_TYPE.LANG_STRING, RDF_LANG_STRING);
+//		RDFS_LITERAL = new DatatypePredicateImpl(RDFS.LITERAL.toString(), new COL_TYPE[] { COL_TYPE.LITERAL });
+//		registerUnsupportedType(RDFS.LITERAL, COL_TYPE.LITERAL, RDFS_LITERAL);
 	}
 
 	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE type) {
@@ -91,6 +93,14 @@ public class TypeFactoryImpl implements TypeFactory {
 		mapCOLTYPEtoURI.put(type, uri);
 		mapCOLTYPEtoPredicate.put(type, predicate);
 		predicateList.add(predicate);
+		return predicate;
+	}
+
+	//datatype supported only for ontology and r2rml mapping conversion. Not acceted in obda file
+	private DatatypePredicate registerUnsupportedType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE type,
+										   DatatypePredicate predicate) {
+		String sURI = uri.toString();
+		mapURItoCOLTYPE.put(sURI, type);
 		return predicate;
 	}
 	

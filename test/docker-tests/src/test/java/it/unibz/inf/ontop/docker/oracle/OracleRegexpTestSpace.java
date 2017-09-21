@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.docker.oracle;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLIndividual;
 
@@ -35,7 +35,7 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 
 	static final String owlFile = "/oracle/regex/oracle-regexp.owl";
 	static final String obdaFile = "/oracle/regex/oracle-regexp.obda";
-	static final String propertyFile = "/oracle/oracle.properties";
+	static final String propertyFile = "/oracle/regex/oracle-regexp.properties";
 
 	public OracleRegexpTestSpace() {
 		super(owlFile, obdaFile, propertyFile);

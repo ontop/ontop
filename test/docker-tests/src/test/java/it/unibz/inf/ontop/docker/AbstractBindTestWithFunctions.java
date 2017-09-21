@@ -242,7 +242,7 @@ public abstract class AbstractBindTestWithFunctions {
                 hexString.append(hex);
             }
 
-            expectedValues.add(String.format("\"%s\"",hexString.toString()));
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
         } catch(Exception ex){
             throw new RuntimeException(ex);
         }
@@ -813,14 +813,16 @@ public abstract class AbstractBindTestWithFunctions {
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
                 OWLObject ind1 = bindingSet.getOWLObject("w");
-                String value = ToStringRenderer.getInstance().getRendering(ind1);
+
                 // log.debug(ind1.toString());
+
                 if (ind1 != null) {
+                    String value = ToStringRenderer.getInstance().getRendering(ind1);
                     returnedValues.add(value);
+                    System.out.println(value);
                 } else {
                     returnedValues.add(null);
                 }
-                System.out.println(value);
                 i++;
             }
         } catch (Exception e) {

@@ -27,6 +27,7 @@ public class JDBC2ConstantConverter {
     private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
     private static ImmutableMap<System, ImmutableList<DateFormat>> system2DateFormats = buildDateFormatMap();
+    private static ImmutableMap<System, ImmutableList<FastDateFormat>> system2TimeFormats = buildTimeFormatMap();
 
     private AtomicInteger bnodeCounter;
     private IRIDictionary iriDictionary;
@@ -40,6 +41,7 @@ public class JDBC2ConstantConverter {
         symbol.setDecimalSeparator('.');
         formatter.setDecimalFormatSymbols(symbol);
         system2DateFormats = buildDateFormatMap();
+        system2TimeFormats = buildTimeFormatMap();
     }
 
 
@@ -80,6 +82,18 @@ public class JDBC2ConstantConverter {
                         .add(new SimpleDateFormat(("'T'HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone with 'T'
                         .add(new SimpleDateFormat(("HH:mm:ss"), Locale.ENGLISH)) // ISO time without 'T'
                         .add(new SimpleDateFormat(("HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone without 'T'
+                        .build()
+        );
+    }
+
+    private static ImmutableMap<System,ImmutableList<FastDateFormat>> buildTimeFormatMap() {
+        return ImmutableMap.of(
+
+                DEFAULT, ImmutableList.<FastDateFormat>builder()
+                        .add(DateFormatUtils.ISO_TIME_FORMAT) // ISO time with 'T'
+                        .add(DateFormatUtils.ISO_TIME_TIME_ZONE_FORMAT) // ISO timezone with 'T'
+                        .add(DateFormatUtils.ISO_TIME_NO_T_FORMAT) // ISO time without 'T'
+                        .add(DateFormatUtils.ISO_TIME_NO_T_TIME_ZONE_FORMAT) // ISO timezone without 'T'
                         .build()
         );
     }
@@ -146,7 +160,6 @@ public class JDBC2ConstantConverter {
                     //TODO:remove
                     throw new IllegalStateException("should not enter here");
 
-
                 case LANG_STRING:
                     // The constant is a literal, we need to find if its
                     // rdfs:Literal or a normal literal and construct it
@@ -208,8 +221,8 @@ public class JDBC2ConstantConverter {
                     return TERM_FACTORY.getConstantLiteral(stringValue, Predicate.COL_TYPE.DATE);
 
                 case TIME:
-                    FastDateFormat timef = DateFormatUtils.ISO_TIME_NO_T_TIME_ZONE_FORMAT;
-                    stringValue = timef.format(convertToJavaDate(value));
+
+                    stringValue = convertToTime(value);
                     return TERM_FACTORY.getConstantLiteral(stringValue, Predicate.COL_TYPE.TIME);
 
                 default:
@@ -263,6 +276,35 @@ public class JDBC2ConstantConverter {
             }
         }
         return dateValue;
+
+    }
+
+    private String convertToTime(Object value) throws OntopResultConversionException {
+
+        Date dateValue=null;
+        String stringValue = String.valueOf(value);
+        for (FastDateFormat format : system2TimeFormats.get(DEFAULT)) {
+            try {
+                dateValue = format.parse(stringValue);
+                if (format.equals(DateFormatUtils.ISO_TIME_FORMAT)){
+                    FastDateFormat timef = DateFormatUtils.ISO_TIME_NO_T_FORMAT;
+                    stringValue = timef.format(dateValue);
+                }
+                else if (format.equals(DateFormatUtils.ISO_TIME_TIME_ZONE_FORMAT)){
+                    FastDateFormat timef = DateFormatUtils.ISO_TIME_NO_T_TIME_ZONE_FORMAT;
+                    stringValue = timef.format(dateValue);
+                }
+                stringValue = format.format(dateValue);
+                break;
+            } catch (ParseException e) {
+                // continue with the next try
+            }
+        }
+        if (dateValue == null) {
+            throw new OntopResultConversionException("unparseable datetime: " + stringValue);
+        }
+
+        return stringValue;
 
     }
 

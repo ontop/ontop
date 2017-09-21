@@ -359,7 +359,7 @@ public class TurtleOBDAParser extends Parser {
 	                			             if(pred instanceof Function) {
 	                							 ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
 	                							 if (object instanceof Variable) {
-	                								 predicate = TERM_FACTORY.getPredicate(pr.getValue(), 2);
+	                								 predicate = TERM_FACTORY.getDataPropertyPredicate(pr.getValue());
 	                							 } else {
 	                								 if (object instanceof Function) {
 	                									 if (((Function) object).getFunctionSymbol() instanceof URITemplatePredicate) {
