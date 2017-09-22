@@ -33,7 +33,7 @@ public interface OBDAStatement extends AutoCloseable {
 
 //	InputQuery parseInputQuery(String inputQueryString) throws OntopInvalidInputQueryException;
 
-	<R extends OBDAResultSet> R execute(InputQuery<R> inputQuery) throws OntopTranslationException, OntopQueryEvaluationException,
+	<R extends OBDAResultSet> R execute(InputQuery<R> inputQuery) throws OntopReformulationException, OntopQueryEvaluationException,
 	OntopConnectionException, OntopResultConversionException;
 //
 //	default OBDAResultSet execute(String inputQueryString) throws OntopReformulationException, OntopQueryEvaluationException,

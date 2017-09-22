@@ -96,6 +96,11 @@ public class SQLConnection implements OntopConnection {
 	}
 
 	@Override
+	public InputQueryFactory getInputQueryFactory() {
+		return queryProcessor.getInputQueryFactory();
+	}
+
+	@Override
 	public void commit() throws OntopConnectionException {
 		try {
 			conn.commit();

@@ -4,11 +4,11 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 
-public class OntopTranslationSQLModule extends OntopAbstractModule {
+public class OntopReformulationSQLModule extends OntopAbstractModule {
 
     private final OntopReformulationSQLSettings settings;
 
-    protected OntopTranslationSQLModule(OntopReformulationSQLConfiguration configuration) {
+    protected OntopReformulationSQLModule(OntopReformulationSQLConfiguration configuration) {
         super(configuration.getSettings());
         settings = configuration.getSettings();
     }

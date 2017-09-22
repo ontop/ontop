@@ -18,11 +18,11 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
  * POST-module: to be loaded after that all the dependencies of concrete implementations have been defined
  *
  */
-public class OntopTranslationPostModule extends OntopAbstractModule {
+public class OntopReformulationPostModule extends OntopAbstractModule {
 
     private final OntopReformulationSettings settings;
 
-    protected OntopTranslationPostModule(OntopReformulationSettings settings) {
+    protected OntopReformulationPostModule(OntopReformulationSettings settings) {
         super(settings);
         this.settings = settings;
     }

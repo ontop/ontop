@@ -7,13 +7,14 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.DefaultOntopSQLCoreBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCredentialConfigurationImpl.DefaultOntopSQLCredentialBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCredentialConfigurationImpl.OntopSQLCredentialOptions;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
-import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl.OntopMappingOptions;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
-import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -28,19 +29,17 @@ import java.util.Properties;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationImpl implements OntopMappingSQLConfiguration {
+public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationImpl implements OntopMappingSQLConfiguration {
 
     private final OntopMappingSQLSettings settings;
     private final OntopMappingSQLOptions options;
-    private final OntopMappingConfigurationImpl mappingConfiguration;
+    private final OntopSQLCredentialConfigurationImpl sqlConfiguration;
 
-    OntopMappingSQLConfigurationImpl(OntopMappingSQLSettings settings,
-                                        OntopMappingSQLOptions options) {
-        super(settings, options.sqlOptions);
+    OntopMappingSQLConfigurationImpl(OntopMappingSQLSettings settings, OntopMappingSQLOptions options) {
+        super(settings, options.mappingOptions);
         this.settings = settings;
         this.options = options;
-        this.mappingConfiguration = new OntopMappingConfigurationImpl(settings, options.mappingOptions,
-                this::getInjector);
+        this.sqlConfiguration = new OntopSQLCredentialConfigurationImpl(settings, options.sqlOptions, this::getInjector);
     }
 
     boolean isInputMappingDefined() {
@@ -55,15 +54,10 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(Stream.concat(
                     super.buildGuiceModules(),
-                    mappingConfiguration.buildGuiceModules()),
+                    sqlConfiguration.buildGuiceModules()),
                 Stream.of(
                         new OntopMappingSQLModule(this),
                         new OntopMappingPostModule(getSettings())));
-    }
-
-    @Override
-    public Optional<TMappingExclusionConfig> getTmappingExclusions() {
-        return mappingConfiguration.getTmappingExclusions();
     }
 
     @Override
@@ -72,20 +66,23 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
     }
 
     /**
-     * To be overloaded
+     * Can be overloaded
+     *
+     * With this default implementation, can load a given pre-processed mapping
+     *
      */
     @Override
-    public OBDASpecification loadSpecification() throws OBDASpecificationException {
+    protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
         return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
-                                                  Supplier<Optional<File>> mappingFileSupplier,
-                                                  Supplier<Optional<Reader>> mappingReaderSupplier,
-                                                  Supplier<Optional<Graph>> mappingGraphSupplier,
-                                                  Supplier<Optional<File>> constraintFileSupplier)
+                                        Supplier<Optional<File>> mappingFileSupplier,
+                                        Supplier<Optional<Reader>> mappingReaderSupplier,
+                                        Supplier<Optional<Graph>> mappingGraphSupplier,
+                                        Supplier<Optional<File>> constraintFileSupplier)
             throws OBDASpecificationException {
-        return mappingConfiguration.loadSpecification(
+        return loadSpecification(
                 ontologySupplier,
                 () -> options.ppMapping.map(m -> (PreProcessedMapping) m),
                 mappingFileSupplier,
@@ -98,14 +95,13 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
 
     @Override
     public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
-        return loadPPMapping(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
+        return loadPPMapping(Optional::empty, Optional::empty, Optional::empty);
     }
 
     /**
      * TODO: also consider the other steps
      */
-    Optional<SQLPPMapping> loadPPMapping(OntologySupplier ontologySupplier,
-                                         Supplier<Optional<File>> mappingFileSupplier,
+    Optional<SQLPPMapping> loadPPMapping(Supplier<Optional<File>> mappingFileSupplier,
                                          Supplier<Optional<Reader>> mappingReaderSupplier,
                                          Supplier<Optional<Graph>> mappingGraphSupplier)
             throws MappingIOException, InvalidMappingException, DuplicateMappingException {
@@ -142,7 +138,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
         ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
                 internalExecutorMapBuilder = ImmutableMap.builder();
         internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
-        internalExecutorMapBuilder.putAll(mappingConfiguration.generateOptimizationConfigurationMap());
+        internalExecutorMapBuilder.putAll(sqlConfiguration.generateOptimizationConfigurationMap());
 
         return internalExecutorMapBuilder.build();
     }
@@ -155,11 +151,11 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
      *
      */
     public static class OntopMappingSQLOptions {
-        final OntopSQLOptions sqlOptions;
+        final OntopSQLCredentialOptions sqlOptions;
         final OntopMappingOptions mappingOptions;
         final Optional<SQLPPMapping> ppMapping;
 
-        private OntopMappingSQLOptions(Optional<SQLPPMapping> ppMapping, OntopSQLOptions sqlOptions,
+        private OntopMappingSQLOptions(Optional<SQLPPMapping> ppMapping, OntopSQLCredentialOptions sqlOptions,
                                        OntopMappingOptions mappingOptions) {
             this.sqlOptions = sqlOptions;
             this.mappingOptions = mappingOptions;
@@ -200,7 +196,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
         }
 
 
-        final OntopMappingSQLOptions generateMappingSQLOptions(OntopSQLOptions sqlOptions,
+        final OntopMappingSQLOptions generateMappingSQLOptions(OntopSQLCredentialOptions sqlOptions,
                                                                OntopMappingOptions mappingOptions) {
             return new OntopMappingSQLOptions(ppMapping, sqlOptions, mappingOptions);
         }
@@ -215,14 +211,16 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
             implements OntopMappingSQLConfiguration.Builder<B> {
 
         private final DefaultMappingSQLBuilderFragment<B> localBuilderFragment;
-        private final DefaultOntopSQLBuilderFragment<B> sqlBuilderFragment;
+        private final DefaultOntopSQLCoreBuilderFragment<B> sqlCoreBuilderFragment;
+        private final DefaultOntopSQLCredentialBuilderFragment<B> sqlCredentialBuilderFragment;
 
         protected OntopMappingSQLBuilderMixin() {
             B builder = (B) this;
             localBuilderFragment = new DefaultMappingSQLBuilderFragment<>(builder,
                     this::isMappingDefined,
                     this::declareMappingDefined);
-            sqlBuilderFragment = new DefaultOntopSQLBuilderFragment<>(builder);
+            sqlCoreBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>(builder);
+            sqlCredentialBuilderFragment = new DefaultOntopSQLCredentialBuilderFragment<>(builder);
         }
 
         @Override
@@ -234,41 +232,43 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
         protected Properties generateProperties() {
             Properties properties = super.generateProperties();
             properties.putAll(localBuilderFragment.generateProperties());
-            properties.putAll(sqlBuilderFragment.generateProperties());
+            properties.putAll(sqlCoreBuilderFragment.generateProperties());
+            properties.putAll(sqlCredentialBuilderFragment.generateProperties());
             return properties;
         }
 
         final OntopMappingSQLOptions generateMappingSQLOptions() {
-            OntopOBDAOptions obdaOptions = generateOBDAOptions();
+            OntopOBDAConfigurationImpl.OntopOBDAOptions obdaOptions = generateOBDAOptions();
 
-            return localBuilderFragment.generateMappingSQLOptions(
-                    sqlBuilderFragment.generateSQLOptions(obdaOptions),
-                    generateMappingOptions(obdaOptions));
+            OntopSQLCredentialOptions sqlOptions = sqlCredentialBuilderFragment.generateSQLCredentialOptions(
+                    sqlCoreBuilderFragment.generateSQLCoreOptions(obdaOptions.modelOptions));
+
+            return localBuilderFragment.generateMappingSQLOptions(sqlOptions, generateMappingOptions(obdaOptions));
         }
 
         @Override
         public B jdbcName(String dbName) {
-            return sqlBuilderFragment.jdbcName(dbName);
+            return sqlCoreBuilderFragment.jdbcName(dbName);
         }
 
         @Override
         public B jdbcUrl(String jdbcUrl) {
-            return sqlBuilderFragment.jdbcUrl(jdbcUrl);
+            return sqlCoreBuilderFragment.jdbcUrl(jdbcUrl);
         }
 
         @Override
         public B jdbcUser(String username) {
-            return sqlBuilderFragment.jdbcUser(username);
+            return sqlCredentialBuilderFragment.jdbcUser(username);
         }
 
         @Override
         public B jdbcPassword(String password) {
-            return sqlBuilderFragment.jdbcPassword(password);
+            return sqlCredentialBuilderFragment.jdbcPassword(password);
         }
 
         @Override
         public B jdbcDriver(String jdbcDriver) {
-            return sqlBuilderFragment.jdbcDriver(jdbcDriver);
+            return sqlCoreBuilderFragment.jdbcDriver(jdbcDriver);
         }
     }
 

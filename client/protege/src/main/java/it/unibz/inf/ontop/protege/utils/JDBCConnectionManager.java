@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,7 @@ public class JDBCConnectionManager {
 		return instance;
 	}
 
-	public Connection createConnection(OntopSQLCoreSettings settings) throws SQLException {
+	public Connection createConnection(OntopSQLCredentialSettings settings) throws SQLException {
 		return createConnection(settings.getJdbcUrl(), settings.getJdbcUser(),
 				settings.getJdbcPassword());
 	}
@@ -152,7 +152,7 @@ public class JDBCConnectionManager {
 		}
 	}
 
-	public Connection getConnection(OntopSQLCoreSettings settings) throws SQLException {
+	public Connection getConnection(OntopSQLCredentialSettings settings) throws SQLException {
 		return getConnection(settings.getJdbcUrl(), settings.getJdbcUser(),
 				settings.getJdbcPassword());
 	}

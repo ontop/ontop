@@ -26,7 +26,7 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.OntopTranslationException;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
@@ -261,7 +261,7 @@ public class OneShotSQLGeneratorEngine {
 	 *
 	 */
 	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
-			throws OntopTranslationException {
+			throws OntopReformulationException {
 
 		IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
 
@@ -378,7 +378,7 @@ public class OneShotSQLGeneratorEngine {
 	private String generateQuery(List<String> signature,
 								 Multimap<Predicate, CQIE> ruleIndex,
 								 List<Predicate> predicatesInBottomUp,
-								 List<Predicate> extensionalPredicates) throws OntopTranslationException {
+								 List<Predicate> extensionalPredicates) throws OntopReformulationException {
 
 		int numPreds = predicatesInBottomUp.size();
 		int i = 0;

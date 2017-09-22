@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
-public interface OntopSystemConfiguration extends OntopReformulationConfiguration, OntopOBDASpecificationConfiguration {
+public interface OntopSystemConfiguration extends OntopReformulationConfiguration {
 
     @Override
     OntopSystemSettings getSettings();
@@ -28,7 +28,7 @@ public interface OntopSystemConfiguration extends OntopReformulationConfiguratio
 
     interface Builder<B extends Builder<B>>
             extends OntopSystemBuilderFragment<B>,
-            OntopReformulationConfiguration.Builder<B>, OntopOBDASpecificationConfiguration.Builder<B> {
+            OntopReformulationConfiguration.Builder<B> {
 
         @Override
         OntopSystemConfiguration build();

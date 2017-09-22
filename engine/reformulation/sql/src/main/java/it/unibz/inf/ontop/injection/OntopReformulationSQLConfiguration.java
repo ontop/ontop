@@ -1,16 +1,25 @@
 package it.unibz.inf.ontop.injection;
 
 
+import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl;
+
 public interface OntopReformulationSQLConfiguration extends OntopReformulationConfiguration, OntopSQLCoreConfiguration {
 
     @Override
     OntopReformulationSQLSettings getSettings();
 
-    interface OntopQueryAnsweringSQLBuilderFragment<B extends OntopReformulationSQLConfiguration.Builder<B>> {
+    /**
+     * This builder will require a OBDA specification to be directly assigned
+     */
+    static OntopReformulationSQLConfiguration.Builder<? extends Builder> defaultBuilder() {
+        return new OntopReformulationSQLConfigurationImpl.BuilderImpl<>();
+    }
+
+    interface OntopReformulationSQLBuilderFragment<B extends OntopReformulationSQLConfiguration.Builder<B>> {
     }
 
     interface Builder<B extends OntopReformulationSQLConfiguration.Builder<B>>
-            extends OntopReformulationSQLConfiguration.OntopQueryAnsweringSQLBuilderFragment<B>,
+            extends OntopReformulationSQLBuilderFragment<B>,
             OntopReformulationConfiguration.Builder<B>, OntopSQLCoreConfiguration.Builder<B> {
 
         @Override

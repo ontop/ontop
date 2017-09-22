@@ -3,13 +3,17 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
+import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCredentialConfigurationImpl.OntopSQLCredentialOptions;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopSystemSQLConfigurationImpl.OntopSystemSQLOptions;
-import it.unibz.inf.ontop.injection.impl.OntopReformulationConfigurationImpl.DefaultOntopTranslationBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.DefaultOntopTranslationSQLBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.OntopTranslationSQLOptions;
+import it.unibz.inf.ontop.injection.impl.OntopReformulationConfigurationImpl.DefaultOntopReformulationBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.DefaultOntopReformulationSQLBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.OntopReformulationSQLOptions;
 import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -28,7 +32,8 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
     OntopStandaloneSQLConfigurationImpl(OntopStandaloneSQLSettings settings, OntopStandaloneSQLOptions options) {
         super(settings, options.mappingOptions);
         this.settings = settings;
-        systemConfiguration = new OntopSystemSQLConfigurationImpl(settings, options.systemOptions);
+        systemConfiguration = new OntopSystemSQLConfigurationImpl(settings, options.systemOptions,
+                this::loadOBDASpecification);
     }
 
     @Override
@@ -39,6 +44,17 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
     @Override
     public Optional<IRIDictionary> getIRIDictionary() {
         return systemConfiguration.getIRIDictionary();
+    }
+
+    @Override
+    public QueryReformulator loadQueryReformulator() throws OBDASpecificationException {
+        return systemConfiguration.loadQueryReformulator();
+    }
+
+    @Override
+    public InputQueryFactory getInputQueryFactory() {
+        return getInjector()
+                .getInstance(InputQueryFactory.class);
     }
 
     @Override
@@ -78,14 +94,14 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
             extends OntopMappingSQLAllBuilderMixin<B>
             implements OntopStandaloneSQLConfiguration.Builder<B> {
 
-        private final DefaultOntopTranslationSQLBuilderFragment<B> sqlTranslationFragmentBuilder;
-        private final DefaultOntopTranslationBuilderFragment<B> translationFragmentBuilder;
+        private final DefaultOntopReformulationSQLBuilderFragment<B> sqlTranslationFragmentBuilder;
+        private final DefaultOntopReformulationBuilderFragment<B> translationFragmentBuilder;
         private final DefaultOntopSystemBuilderFragment<B> systemFragmentBuilder;
 
         OntopStandaloneSQLBuilderMixin() {
             B builder = (B) this;
-            this.sqlTranslationFragmentBuilder = new DefaultOntopTranslationSQLBuilderFragment<>(builder);
-            this.translationFragmentBuilder = new DefaultOntopTranslationBuilderFragment<>(builder);
+            this.sqlTranslationFragmentBuilder = new DefaultOntopReformulationSQLBuilderFragment<>(builder);
+            this.translationFragmentBuilder = new DefaultOntopReformulationBuilderFragment<>(builder);
             this.systemFragmentBuilder = new DefaultOntopSystemBuilderFragment<>(builder);
         }
 
@@ -120,16 +136,17 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
 
         final OntopStandaloneSQLOptions generateStandaloneSQLOptions() {
             OntopMappingSQLAllOptions sqlMappingOptions = generateMappingSQLAllOptions();
-            OntopReformulationConfigurationImpl.OntopTranslationOptions translationOptions =
-                    this.translationFragmentBuilder.generateTranslationOptions(
+            OntopReformulationConfigurationImpl.OntopReformulationOptions translationOptions =
+                    this.translationFragmentBuilder.generateReformulationOptions(
                         sqlMappingOptions.mappingSQLOptions.mappingOptions.obdaOptions,
                         sqlMappingOptions.mappingSQLOptions.mappingOptions.optimizationOptions);
 
-            OntopTranslationSQLOptions sqlTranslationOptions = sqlTranslationFragmentBuilder.generateSQLTranslationOptions(
-                    translationOptions,
-                    sqlMappingOptions.mappingSQLOptions.sqlOptions);
+            OntopSQLCredentialOptions sqlOptions = sqlMappingOptions.mappingSQLOptions.sqlOptions;
 
-            OntopSystemSQLOptions systemSQLOptions = new OntopSystemSQLOptions(sqlTranslationOptions);
+            OntopReformulationSQLOptions sqlTranslationOptions = sqlTranslationFragmentBuilder.generateSQLReformulationOptions(
+                    translationOptions, sqlOptions.sqlCoreOptions);
+
+            OntopSystemSQLOptions systemSQLOptions = new OntopSystemSQLOptions(sqlTranslationOptions, sqlOptions);
 
             return new OntopStandaloneSQLOptions(systemSQLOptions, sqlMappingOptions);
         }

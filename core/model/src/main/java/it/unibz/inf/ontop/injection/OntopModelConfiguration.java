@@ -22,6 +22,8 @@ public interface OntopModelConfiguration {
 
     void validate() throws InvalidOntopConfigurationException;
 
+    IntermediateQueryFactory getIQFactory();
+
     /**
      * Default builder
      */

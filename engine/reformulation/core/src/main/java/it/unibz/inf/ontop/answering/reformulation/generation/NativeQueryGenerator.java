@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation;
 import java.io.Serializable;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.OntopTranslationException;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 
@@ -39,7 +39,7 @@ public interface NativeQueryGenerator extends Serializable {
 	 *
 	 */
 	ExecutableQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature)
-			throws OntopTranslationException;
+			throws OntopReformulationException;
 
 	ExecutableQuery generateEmptyQuery(ImmutableList<String> signature);
 }

@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.OntopTranslationException;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 
 public interface QueryRewriter {
 
-	DatalogProgram rewrite(DatalogProgram input) throws OntopTranslationException;
+	DatalogProgram rewrite(DatalogProgram input) throws OntopReformulationException;
 
 	/***
 	 * Sets the ontology and the ABox dependencies that this rewriter should 

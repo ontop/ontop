@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
@@ -114,6 +115,11 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
      */
     @Override
     public void validate() throws InvalidOntopConfigurationException {
+    }
+
+    @Override
+    public IntermediateQueryFactory getIQFactory() {
+        return getInjector().getInstance(IntermediateQueryFactory.class);
     }
 
     @Override

@@ -2,8 +2,11 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopOBDAConfiguration;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 
 import java.util.Optional;
 import java.util.Properties;
@@ -11,7 +14,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
-public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl implements OntopOBDAConfiguration {
+public abstract class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl implements OntopOBDAConfiguration {
 
     private final OntopOBDASettings settings;
     private final OntopOBDAOptions options;
@@ -33,19 +36,37 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
         return settings;
     }
 
+    @Override
+    public final OBDASpecification loadSpecification() throws OBDASpecificationException {
+        if (options.optionalSpecification.isPresent())
+            return options.optionalSpecification.get();
+
+        return loadOBDASpecification();
+    }
+
+    protected abstract OBDASpecification loadOBDASpecification() throws OBDASpecificationException;
+
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(
                 super.buildGuiceModules(),
                 Stream.of(new OntopOBDAModule(this)));
     }
 
+    @Override
+    public SpecificationFactory getSpecificationFactory() {
+        return getInjector().getInstance(SpecificationFactory.class);
+    }
+
 
     static class OntopOBDAOptions {
 
         final OntopModelConfigurationOptions modelOptions;
+        final Optional<OBDASpecification> optionalSpecification;
 
-        private OntopOBDAOptions(OntopModelConfigurationOptions modelOptions) {
+        private OntopOBDAOptions(OntopModelConfigurationOptions modelOptions,
+                                 Optional<OBDASpecification> optionalSpecification) {
             this.modelOptions = modelOptions;
+            this.optionalSpecification = optionalSpecification;
         }
     }
 
@@ -53,10 +74,20 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
             implements OntopOBDABuilderFragment<B> {
 
         private final B builder;
+        private final Runnable declareSpecificationCB;
         private Optional<Boolean> sameAsMappings = Optional.empty();
+        private Optional<OBDASpecification> specification = Optional.empty();
 
-        DefaultOntopOBDABuilderFragment(B builder) {
+        DefaultOntopOBDABuilderFragment(B builder, Runnable declareSpecificationCB) {
             this.builder = builder;
+            this.declareSpecificationCB = declareSpecificationCB;
+        }
+
+        @Override
+        public B obdaSpecification(OBDASpecification specification) {
+            declareSpecificationCB.run();
+            this.specification = Optional.of(specification);
+            return builder;
         }
 
         @Override
@@ -73,7 +104,14 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
         }
 
         final OntopOBDAOptions generateOBDAOptions(OntopModelConfigurationOptions modelOptions) {
-            return new OntopOBDAOptions(modelOptions);
+            return new OntopOBDAOptions(modelOptions, specification);
+        }
+
+        /**
+         * Returns true if the user assigned a OBDA specification object
+         */
+        boolean isOBDASpecificationAssigned() {
+            return specification.isPresent();
         }
 
     }
@@ -85,16 +123,22 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
         private final DefaultOntopOBDABuilderFragment<B> localBuilderFragment;
 
         OntopOBDAConfigurationBuilderMixin() {
-            localBuilderFragment = new DefaultOntopOBDABuilderFragment<>((B) this);
+            localBuilderFragment = new DefaultOntopOBDABuilderFragment<>(
+                    (B) this, this::declareOBDASpecificationAssigned);
         }
 
-        final OntopOBDAOptions generateOBDAOptions() {
-            return localBuilderFragment.generateOBDAOptions(generateModelOptions());
+        @Override
+        public B obdaSpecification(OBDASpecification specification) {
+            return localBuilderFragment.obdaSpecification(specification);
         }
 
         @Override
         public B sameAsMappings(boolean enable) {
             return localBuilderFragment.sameAsMappings(enable);
+        }
+
+        final OntopOBDAOptions generateOBDAOptions() {
+            return localBuilderFragment.generateOBDAOptions(generateModelOptions());
         }
 
         @Override
@@ -103,22 +147,19 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
             properties.putAll(localBuilderFragment.generateProperties());
             return properties;
         }
-    }
 
-
-    public static class BuilderImpl<B extends OntopOBDAConfiguration.Builder<B>>
-            extends OntopOBDAConfigurationBuilderMixin<B> {
-
-        @Override
-        public OntopOBDAConfiguration build() {
-            Properties properties = generateProperties();
-            OntopOBDASettings settings = new OntopOBDASettingsImpl(properties);
-
-            OntopOBDAOptions options = generateOBDAOptions();
-
-            return new OntopOBDAConfigurationImpl(settings, options);
+        /**
+         * Hook: can be overloaded
+         */
+        void declareOBDASpecificationAssigned() {
         }
 
+        /**
+         * Returns true if the user assigned a OBDA specification object
+         */
+        boolean isOBDASpecificationAssigned() {
+            return localBuilderFragment.isOBDASpecificationAssigned();
+        }
     }
 
 }

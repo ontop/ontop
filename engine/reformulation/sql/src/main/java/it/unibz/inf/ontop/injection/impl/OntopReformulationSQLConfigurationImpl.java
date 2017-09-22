@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.inject.Module;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
-import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.OntopSQLOptions;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.DefaultOntopSQLCoreBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.OntopSQLCoreOptions;
 
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -15,8 +17,19 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
     private final OntopSQLCoreConfigurationImpl sqlConfiguration;
 
     OntopReformulationSQLConfigurationImpl(OntopReformulationSQLSettings settings,
-                                           OntopTranslationSQLOptions options) {
-        super(settings, options.qaOptions);
+                                           OntopReformulationSQLOptions options,
+                                           SpecificationLoader specificationLoader) {
+        super(settings, options.reformulationOptions, specificationLoader);
+        this.settings = settings;
+        this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions);
+    }
+
+    /**
+     * Assumes the OBDA specification to be already assigned
+     */
+    OntopReformulationSQLConfigurationImpl(OntopReformulationSQLSettings settings,
+                                           OntopReformulationSQLOptions options) {
+        super(settings, options.reformulationOptions);
         this.settings = settings;
         this.sqlConfiguration = new OntopSQLCoreConfigurationImpl(settings, options.sqlOptions);
     }
@@ -31,37 +44,100 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
                 Stream.concat(
                         super.buildGuiceModules(),
                         sqlConfiguration.buildGuiceModules()),
-                Stream.of(new OntopTranslationSQLModule(this),
-                        new OntopTranslationPostModule(getSettings())));
+                Stream.of(new OntopReformulationSQLModule(this),
+                        new OntopReformulationPostModule(getSettings())));
     }
 
-    static class OntopTranslationSQLOptions {
+    static class OntopReformulationSQLOptions {
 
-        final OntopTranslationOptions qaOptions;
-        final OntopSQLOptions sqlOptions;
+        final OntopReformulationOptions reformulationOptions;
+        final OntopSQLCoreOptions sqlOptions;
 
-        private OntopTranslationSQLOptions(OntopTranslationOptions qaOptions, OntopSQLOptions sqlOptions) {
-            this.qaOptions = qaOptions;
+        private OntopReformulationSQLOptions(OntopReformulationOptions reformulationOptions, OntopSQLCoreOptions sqlOptions) {
+            this.reformulationOptions = reformulationOptions;
             this.sqlOptions = sqlOptions;
         }
     }
 
-    static class DefaultOntopTranslationSQLBuilderFragment<B extends OntopReformulationSQLConfiguration.Builder<B>>
-        implements OntopQueryAnsweringSQLBuilderFragment<B> {
+    static class DefaultOntopReformulationSQLBuilderFragment<B extends OntopReformulationSQLConfiguration.Builder<B>>
+        implements OntopReformulationSQLBuilderFragment<B> {
 
         private final B builder;
 
-        DefaultOntopTranslationSQLBuilderFragment(B builder) {
+        DefaultOntopReformulationSQLBuilderFragment(B builder) {
             this.builder = builder;
         }
 
-        OntopTranslationSQLOptions generateSQLTranslationOptions(OntopTranslationOptions qaOptions,
-                                                                 OntopSQLOptions sqlOptions) {
-            return new OntopTranslationSQLOptions(qaOptions, sqlOptions);
+        OntopReformulationSQLOptions generateSQLReformulationOptions(OntopReformulationOptions qaOptions,
+                                                                     OntopSQLCoreOptions sqlOptions) {
+            return new OntopReformulationSQLOptions(qaOptions, sqlOptions);
         }
 
         Properties generateProperties() {
             return new Properties();
+        }
+    }
+
+    static abstract class OntopReformulationSQLBuilderMixin<B extends OntopReformulationSQLConfiguration.Builder<B>>
+            extends OntopReformulationBuilderMixin<B>
+            implements OntopReformulationSQLConfiguration.Builder<B> {
+
+        private final DefaultOntopReformulationSQLBuilderFragment<B> localBuilderFragment;
+        private final DefaultOntopSQLCoreBuilderFragment<B> sqlBuilderFragment;
+
+        OntopReformulationSQLBuilderMixin() {
+            B builder = (B) this;
+            localBuilderFragment = new DefaultOntopReformulationSQLBuilderFragment<>(builder);
+            sqlBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>(builder);
+        }
+
+        @Override
+        protected Properties generateProperties() {
+            Properties properties = super.generateProperties();
+            properties.putAll(sqlBuilderFragment.generateProperties());
+            properties.putAll(localBuilderFragment.generateProperties());
+            return properties;
+        }
+
+        OntopReformulationSQLOptions generateSQLReformulationOptions() {
+            OntopReformulationOptions reformulationOptions = generateReformulationOptions();
+            OntopSQLCoreOptions sqlOptions = sqlBuilderFragment.generateSQLCoreOptions(
+                    reformulationOptions.obdaOptions.modelOptions);
+
+            return new OntopReformulationSQLOptions(reformulationOptions, sqlOptions);
+        }
+
+        @Override
+        public B jdbcName(String dbName) {
+            return sqlBuilderFragment.jdbcName(dbName);
+        }
+
+        @Override
+        public B jdbcUrl(String jdbcUrl) {
+            return sqlBuilderFragment.jdbcUrl(jdbcUrl);
+        }
+
+        @Override
+        public B jdbcDriver(String jdbcDriver) {
+            return sqlBuilderFragment.jdbcDriver(jdbcDriver);
+        }
+    }
+
+    /**
+     * Requires the OBDA specification to be already assigned
+     */
+    public static class BuilderImpl<B extends OntopReformulationSQLConfiguration.Builder<B>>
+        extends OntopReformulationSQLBuilderMixin<B> {
+
+        @Override
+        public OntopReformulationSQLConfiguration build() {
+            if (!isOBDASpecificationAssigned())
+                throw new InvalidOntopConfigurationException("An OBDA specification must be assigned " +
+                        "to directly instantiate such a OntopReformulationSQLConfiguration");
+
+            OntopReformulationSQLSettings settings = new OntopReformulationSQLSettingsImpl(generateProperties());
+            OntopReformulationSQLOptions options = generateSQLReformulationOptions();
+            return new OntopReformulationSQLConfigurationImpl(settings, options);
         }
     }
 
