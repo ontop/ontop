@@ -35,6 +35,7 @@ import com.google.common.io.Resources;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -225,8 +226,8 @@ public class RDB2RDFTest {
 		PROPERTIES = new Properties();
 
 		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_NAME, "h2");
-		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_USER, DB_USER);
-		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_PASSWORD, DB_PASSWORD);
+		PROPERTIES.setProperty(OntopSQLCredentialSettings.JDBC_USER, DB_USER);
+		PROPERTIES.setProperty(OntopSQLCredentialSettings.JDBC_PASSWORD, DB_PASSWORD);
 		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_URL, JDBC_URL);
 		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, JDBC_DRIVER);
 		PROPERTIES.setProperty(OntopMappingSettings.BASE_IRI, BASE_IRI);
