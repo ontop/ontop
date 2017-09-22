@@ -37,12 +37,12 @@ import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
+import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Stream;
@@ -223,10 +223,7 @@ public class DirectMappingEngine {
 		if (ppMapping == null) {
 			throw new IllegalArgumentException("Model should not be null");
 		}
-		try (Connection conn = DriverManager.getConnection(
-				settings.getJdbcUrl(),
-				settings.getJdbcUser(),
-				settings.getJdbcPassword())) {
+		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
 			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn);
 			// this operation is EXPENSIVE
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
