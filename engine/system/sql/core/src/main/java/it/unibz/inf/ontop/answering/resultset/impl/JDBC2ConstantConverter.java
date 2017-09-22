@@ -156,10 +156,6 @@ public class JDBC2ConstantConverter {
                     }
                     return TERM_FACTORY.getConstantBNode(scopedLabel);
 
-                case LITERAL:
-                    //TODO:remove
-                    throw new IllegalStateException("should not enter here");
-
                 case LANG_STRING:
                     // The constant is a literal, we need to find if its
                     // rdfs:Literal or a normal literal and construct it
