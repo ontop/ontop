@@ -110,7 +110,8 @@ public class TermTypeInferenceTools {
             return Optional.of(TYPE_FACTORY.getTermType(type1));
         }
         else {
-            return Optional.ofNullable(TYPE_FACTORY.getTermType(DATATYPE_DENOMINATORS.get(type1, type2)));
+            return Optional.ofNullable(DATATYPE_DENOMINATORS.get(type1, type2))
+                    .map(TYPE_FACTORY::getTermType);
         }
     }
 
