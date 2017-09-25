@@ -20,7 +20,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 public abstract class AbstractTermTypeInferenceRule implements TermTypeInferenceRule {
 
     @Override
-    public Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<Predicate.COL_TYPE>> expectedBaseTypes)
+    public Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<TermType>> expectedBaseTypes)
             throws IncompatibleTermException {
 
         ImmutableList<Optional<TermType>> argumentTypes = ImmutableList.copyOf(
@@ -33,24 +33,24 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
 
     @Override
     public Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> argumentTypes,
-                                                  ImmutableList<Optional<Predicate.COL_TYPE>> expectedBaseTypes)
+                                                  ImmutableList<Optional<TermType>> expectedBaseTypes)
             throws IncompatibleTermException {
 
-        /**
+        /*
          * TODO: restore inequality test between the arities
          */
         if (expectedBaseTypes.size() < argumentTypes.size()) {
             throw new IllegalArgumentException("Arity mismatch between " + argumentTypes + " and " + expectedBaseTypes);
         }
 
-        /**
+        /*
          * Checks the argument types
          */
         IntStream.range(0, argumentTypes.size())
                 .forEach(i -> argumentTypes.get(i)
                         .ifPresent(t -> expectedBaseTypes.get(i).ifPresent(expectedBaseType -> {
                             if (!t.isCompatibleWith(expectedBaseType)) {
-                                throw new IncompatibleTermException(TYPE_FACTORY.getTermType(expectedBaseType), t);
+                                throw new IncompatibleTermException(expectedBaseType, t);
                             }
                         })));
         doAdditionalChecks(argumentTypes);

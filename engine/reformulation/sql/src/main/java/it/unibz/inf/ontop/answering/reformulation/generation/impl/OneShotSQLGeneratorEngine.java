@@ -1440,14 +1440,8 @@ public class OneShotSQLGeneratorEngine {
 		}
 		else {
 			lang = optionalTermType
-					.filter(t -> t.getColType() == LITERAL_LANG)
-					.map(t -> t.getLanguageTagConstant()
-								.map(tag -> "'" + tag.getFullString() + "'")
-								.orElseGet(() -> t.getLanguageTagTerm()
-										.map(tag -> getSQLString(tag, index, false))
-										.orElseThrow(() -> new IllegalStateException(
-												"Inconsistent term type: the language tag must be defined " +
-														"for any LITERAL_LANG"))))
+					.flatMap(TermType::getLanguageTagTerm)
+					.map(tag -> getSQLString(tag, index, false))
 					.orElse("NULL");
 		}
 		return String.format(LANG_STR, lang, langVariableName);

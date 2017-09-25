@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 
 import java.util.Optional;
@@ -31,5 +32,5 @@ public interface OperationPredicate extends BuiltinPredicate {
      */
     TermTypeInferenceRule getTermTypeInferenceRule();
 
-    ImmutableList<Optional<COL_TYPE>> getArgumentTypes();
+    ImmutableList<Optional<TermType>> getArgumentTypes();
 }

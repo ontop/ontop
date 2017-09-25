@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import java.util.Map;
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
 
@@ -103,14 +104,14 @@ public class TermTypeInferenceTools {
     /**
      * TODO: find a better name
      */
-    public static Optional<COL_TYPE> getCommonDenominatorType(COL_TYPE type1, COL_TYPE type2) {
+    public static Optional<TermType> getCommonDenominatorType(COL_TYPE type1, COL_TYPE type2) {
         if (type1 == null) {
-            return Optional.ofNullable(type2);
+            return Optional.ofNullable(TYPE_FACTORY.getTermType(type2));
         } else if (type2 == null) {
-            return Optional.of(type1);
+            return Optional.of(TYPE_FACTORY.getTermType(type1));
         }
         else {
-            return Optional.ofNullable(DATATYPE_DENOMINATORS.get(type1, type2));
+            return Optional.ofNullable(TYPE_FACTORY.getTermType(DATATYPE_DENOMINATORS.get(type1, type2)));
         }
     }
 

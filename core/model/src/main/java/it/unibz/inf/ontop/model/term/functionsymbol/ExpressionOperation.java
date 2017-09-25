@@ -1,10 +1,14 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public enum ExpressionOperation implements OperationPredicate {
 
@@ -109,33 +113,39 @@ public enum ExpressionOperation implements OperationPredicate {
     ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argTypes = ImmutableList.of();
+		this.argColTypes = ImmutableList.of();
+		this.argTypes = convertArgTypes(argColTypes);
 	}
+
 	// unary operations
     ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argTypes = ImmutableList.of(Optional.ofNullable(arg1));
+		this.argColTypes = ImmutableList.of(Optional.ofNullable(arg1));
+		this.argTypes = convertArgTypes(argColTypes);
 	}
 	// binary operations
     ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1, COL_TYPE arg2) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2));
+		this.argColTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2));
+		this.argTypes = convertArgTypes(argColTypes);
 	}
 	// ternary operations
     ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1, COL_TYPE arg2, COL_TYPE arg3) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2), Optional.ofNullable(arg3));
+		this.argColTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2), Optional.ofNullable(arg3));
+		this.argTypes = convertArgTypes(argColTypes);
 	}
 	// Quad operations
 	ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1, COL_TYPE arg2,
 						COL_TYPE arg3, COL_TYPE arg4) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2),
+		this.argColTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2),
 				Optional.ofNullable(arg3), Optional.ofNullable(arg4));
+		this.argTypes = convertArgTypes(argColTypes);
 	}
 
 
@@ -143,7 +153,8 @@ public enum ExpressionOperation implements OperationPredicate {
 	private final String name;
 	private final TermTypeInferenceRule termTypeInferenceRule;
 	// Immutable
-	private final ImmutableList<Optional<COL_TYPE>> argTypes;
+	private final ImmutableList<Optional<COL_TYPE>> argColTypes;
+	private final ImmutableList<Optional<TermType>> argTypes;
 	
 	@Override
 	public String getName() {
@@ -152,17 +163,17 @@ public enum ExpressionOperation implements OperationPredicate {
 
 	@Override
 	public int getArity() {
-		return argTypes.size();
+		return argColTypes.size();
 	}
 
 	@Override
 	public COL_TYPE getType(int column) {
-		return argTypes.get(column).orElse(null);
+		return argColTypes.get(column).orElse(null);
 	}
 
 	@Override
 	public COL_TYPE[] getTypes() {
-		return (COL_TYPE[]) argTypes.toArray();
+		return (COL_TYPE[]) argColTypes.toArray();
 	}
 
 	@Override
@@ -205,7 +216,13 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public ImmutableList<Optional<COL_TYPE>> getArgumentTypes() {
+	public ImmutableList<Optional<TermType>> getArgumentTypes() {
 		return argTypes;
+	}
+
+	private static ImmutableList<Optional<TermType>> convertArgTypes(ImmutableList<Optional<COL_TYPE>> argColTypes) {
+		return argColTypes.stream()
+				.map(o -> o.map(TYPE_FACTORY::getTermType))
+				.collect(ImmutableCollectors.toList());
 	}
 }

@@ -17,7 +17,7 @@ public interface TypeFactory {
 	
 	COL_TYPE getDatatype(IRI uri);
 
-	Optional<COL_TYPE> getInternalType(DatatypePredicate predicate);
+	Optional<TermType> getInternalType(DatatypePredicate predicate);
 	
 	IRI getDatatypeURI(COL_TYPE type);
 
@@ -36,7 +36,6 @@ public interface TypeFactory {
 	List<Predicate> getDatatypePredicates();
 
 	TermType getTermType(COL_TYPE type);
-	TermType getTermType(String languageTagString);
 	TermType getTermType(Term languageTagTerm);
 
 }

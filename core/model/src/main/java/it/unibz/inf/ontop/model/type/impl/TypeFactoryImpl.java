@@ -140,8 +140,10 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public Optional<COL_TYPE> getInternalType(DatatypePredicate predicate) {
-		return Optional.ofNullable(mapURItoCOLTYPE.get(predicate.getName()));
+	public Optional<TermType> getInternalType(DatatypePredicate predicate) {
+		// TODO: refactor (don't use col_type anymore)
+		return Optional.ofNullable(mapURItoCOLTYPE.get(predicate.getName()))
+				.map(this::getTermType);
 	}
 
 //	public final Predicate[] QUEST_DATATYPE_PREDICATES = new Predicate[] {
@@ -184,15 +186,8 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public TermType getTermType(String languageTagString) {
-		return new TermTypeImpl(getLanguageTag(languageTagString));
-	}
-
-	@Override
 	public TermType getTermType(Term languageTagTerm) {
-		return languageTagTerm instanceof Constant
-				? getTermType(((Constant) languageTagTerm).getValue())
-				: new TermTypeImpl(languageTagTerm);
+		return new TermTypeImpl(languageTagTerm);
 	}
 
 }

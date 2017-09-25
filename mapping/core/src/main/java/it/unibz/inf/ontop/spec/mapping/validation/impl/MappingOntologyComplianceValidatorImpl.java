@@ -119,13 +119,11 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                 else if (functionSymbol instanceof DatatypePredicate) {
                     DatatypePredicate datatypeConstructionFunctionSymbol = (DatatypePredicate) functionSymbol;
 
-                    COL_TYPE internalDatatype = TYPE_FACTORY.getInternalType(datatypeConstructionFunctionSymbol)
+                    TermType internalDatatype = TYPE_FACTORY.getInternalType(datatypeConstructionFunctionSymbol)
                             .orElseThrow(() -> new RuntimeException("Unsupported datatype: " + functionSymbol
                                     + "\n TODO: throw a better exception"));
 
-                    return internalDatatype == LITERAL_LANG
-                            ? Optional.of(TYPE_FACTORY.getTermType(generateFreshVariable()))
-                            : Optional.of(TYPE_FACTORY.getTermType(internalDatatype));
+                    return Optional.of(internalDatatype);
                 }
                 else {
                     throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
@@ -244,7 +242,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         for (Datatype declaredDatatype : datatypeMap.get(predicateIRI)) {
 
             // TODO: throw a better exception
-            COL_TYPE internalType = TYPE_FACTORY.getInternalType((DatatypePredicate) declaredDatatype.getPredicate())
+            TermType internalType = TYPE_FACTORY.getInternalType((DatatypePredicate) declaredDatatype.getPredicate())
                     .orElseThrow(() -> new RuntimeException("Unsupported datatype declared in the ontology: "
                             + declaredDatatype.getPredicate().getName() + "\n TODO: find a better exception"));
 

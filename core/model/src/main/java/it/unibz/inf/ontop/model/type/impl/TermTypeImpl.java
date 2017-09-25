@@ -1,16 +1,18 @@
 package it.unibz.inf.ontop.model.type.impl;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.LanguageTag;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.LITERAL;
 import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.LITERAL_LANG;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.STRING;
 
 /**
  * TODO: integrate into a factory
@@ -18,23 +20,13 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.LI
 public class TermTypeImpl implements TermType {
 
     private final Predicate.COL_TYPE colType;
-    private final Optional<LanguageTag> optionalLangTagConstant;
     private final Optional<Term> optionalLangTagTerm;
     private static final Optional<TermType> OPTIONAL_LITERAL_TERM_TYPE = Optional.of(
             TYPE_FACTORY.getTermType(LITERAL));
+    private final Optional<LanguageTag> optionalLangTagConstant;
 
     /**
-     * Only for langString WHEN the languageTag is constant.
-     *
-     */
-    protected TermTypeImpl(LanguageTag languageTag) {
-        this.colType = LITERAL_LANG;
-        this.optionalLangTagConstant = Optional.of(languageTag);
-        this.optionalLangTagTerm = Optional.empty();
-    }
-
-    /**
-     * Only for langString WHEN the languageTag is a NON-CONSTANT term.
+     * Only for langString.
      *
      * It may indeed appear that the languageTag is not known
      * at query reformulation time because this information
@@ -42,24 +34,15 @@ public class TermTypeImpl implements TermType {
      *
      */
     protected TermTypeImpl(Term languageTagTerm) {
-        if (languageTagTerm instanceof Constant) {
-            throw new IllegalArgumentException("Used the other constructor if languageTerm is constant");
-        }
         this.colType = LITERAL_LANG;
-        this.optionalLangTagConstant = Optional.empty();
         this.optionalLangTagTerm = Optional.of(languageTagTerm);
+        this.optionalLangTagConstant = extractLanguageTagConstant(languageTagTerm);
     }
 
-    /**
-     * Do not use this construction for LITERAL_LANG!.
-     */
     protected TermTypeImpl(Predicate.COL_TYPE colType) {
-        if (colType == LITERAL_LANG) {
-            throw new IllegalArgumentException("A Literal lang must have a language tag (constant or variable)!");
-        }
         this.colType = colType;
-        this.optionalLangTagConstant = Optional.empty();
         this.optionalLangTagTerm = Optional.empty();
+        this.optionalLangTagConstant = Optional.empty();
     }
 
     @Override
@@ -68,26 +51,29 @@ public class TermTypeImpl implements TermType {
     }
 
     @Override
-    public Optional<LanguageTag> getLanguageTagConstant() {
-        return optionalLangTagConstant;
-    }
-
-    @Override
     public Optional<Term> getLanguageTagTerm() {
         return optionalLangTagTerm;
     }
 
     @Override
-    public boolean isCompatibleWith(Predicate.COL_TYPE moreGeneralType) {
-        return TermTypeInferenceTools.getCommonDenominatorType(colType, moreGeneralType)
-                .map(t -> t == moreGeneralType)
+    public boolean isFullyDefined() {
+        return (colType != LITERAL_LANG) || optionalLangTagTerm.isPresent();
+    }
+
+    /**
+     * TODO: refactor
+     */
+    @Override
+    public boolean isCompatibleWith(TermType moreGeneralType) {
+        return TermTypeInferenceTools.getCommonDenominatorType(colType, moreGeneralType.getColType())
+                .map(moreGeneralType::equals)
                 .orElse(false);
     }
 
     @Override
     public Optional<TermType> getCommonDenominator(TermType otherTermType) {
 
-        /**
+        /*
          * TODO: explain
          */
         if (colType == LITERAL_LANG && otherTermType.getColType() == LITERAL_LANG) {
@@ -95,14 +81,15 @@ public class TermTypeImpl implements TermType {
             if (optionalLangTagConstant.isPresent()) {
                 LanguageTag langTag = optionalLangTagConstant.get();
 
-                Optional<LanguageTag> newOptionalLangTag = otherTermType.getLanguageTagConstant()
+                Optional<LanguageTag> newOptionalLangTag = otherTermType.getLanguageTagTerm()
+                        .flatMap(TermTypeImpl::extractLanguageTagConstant)
                         .flatMap(langTag::getCommonDenominator);
 
                 if (newOptionalLangTag.isPresent()) {
                     LanguageTag newLangTag = newOptionalLangTag.get();
                     return Optional.of(newLangTag.equals(langTag)
                             ? this
-                            : new TermTypeImpl(newOptionalLangTag.get()));
+                            : new TermTypeImpl(TERM_FACTORY.getConstantLiteral(newLangTag.getFullString(), STRING)));
                 }
             }
             else if (optionalLangTagTerm.isPresent()) {
@@ -117,27 +104,31 @@ public class TermTypeImpl implements TermType {
             return OPTIONAL_LITERAL_TERM_TYPE;
         }
         else {
-            return TermTypeInferenceTools.getCommonDenominatorType(colType, otherTermType.getColType())
-                    .map(TermTypeImpl::new);
+            return TermTypeInferenceTools.getCommonDenominatorType(colType, otherTermType.getColType());
         }
+    }
+
+    private static Optional<LanguageTag> extractLanguageTagConstant(Term term) {
+        return Optional.of(term)
+                .filter(t -> t instanceof Constant)
+                .map(c -> (Constant) c)
+                .map(c -> new LanguageTagImpl(c.getValue()));
     }
 
     @Override
     public int hashCode() {
-        return colType.hashCode() + optionalLangTagConstant.hashCode();
+        return colType.hashCode() + optionalLangTagTerm.hashCode();
     }
 
+    /**
+     * TODO: refactor
+     */
     @Override
     public boolean equals(Object other) {
         return Optional.ofNullable(other)
                 .filter(o -> (o instanceof TermType))
                 .map(o -> (TermType) o)
                 .filter(o -> colType == o.getColType())
-                .filter(o -> optionalLangTagConstant
-                        .map(tag1 -> o.getLanguageTagConstant()
-                                .map(tag1::equals)
-                                .orElse(false))
-                        .orElseGet(() -> !o.getLanguageTagConstant().isPresent()))
                 .filter(o -> optionalLangTagTerm
                         .map(tag1 -> o.getLanguageTagTerm()
                                 .map(tag1::equals)
@@ -148,9 +139,7 @@ public class TermTypeImpl implements TermType {
 
     @Override
     public String toString() {
-        String tagSuffix = optionalLangTagConstant.isPresent()
-                ? "@" + optionalLangTagConstant.get().toString()
-                : optionalLangTagTerm.isPresent()
+        String tagSuffix = optionalLangTagTerm.isPresent()
                     ? "@" +  optionalLangTagTerm.get().toString()
                     : "";
 
