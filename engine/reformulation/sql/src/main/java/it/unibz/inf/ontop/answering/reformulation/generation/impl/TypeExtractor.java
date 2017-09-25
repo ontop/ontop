@@ -3,12 +3,10 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Expression;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -75,6 +73,7 @@ public class TypeExtractor {
                         rule -> rule,
                         // Value mapper
                         rule -> rule.getHead().getTerms().stream()
+                                .map(ImmutabilityTools::convertIntoImmutableTerm)
                                 .map(TermTypeInferenceTools::inferType)
                                 .collect(ImmutableCollectors.toList())
                 ));
@@ -268,7 +267,7 @@ public class TypeExtractor {
             throw new IllegalStateException("Unbounded variable: " + variable);
         }
         else if (term instanceof Expression) {
-            Expression expression = (Expression) term;
+            ImmutableExpression expression = (ImmutableExpression) ImmutabilityTools.convertIntoImmutableTerm(term);
             ImmutableList<Optional<TermType>> argumentTypes = expression.getTerms().stream()
                     .map(t -> getCastTypeFromSubRule(t, bodyDataAtoms, alreadyKnownCastTypes))
                     .map(Optional::of)

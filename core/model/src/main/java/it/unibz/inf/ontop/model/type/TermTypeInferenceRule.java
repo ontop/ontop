@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.type;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
-import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +16,7 @@ public interface TermTypeInferenceRule {
      * TODO: explain
      *
      */
-    Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<TermType>> expectedBaseTypes)
+    Optional<TermType> inferType(List<? extends ImmutableTerm> terms, ImmutableList<Optional<TermType>> expectedBaseTypes)
             throws IncompatibleTermException;
 
     /**

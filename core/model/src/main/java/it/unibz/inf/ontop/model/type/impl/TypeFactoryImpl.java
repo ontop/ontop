@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.type.LanguageTag;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -186,7 +185,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public TermType getTermType(Term languageTagTerm) {
+	public TermType getTermType(ImmutableTerm languageTagTerm) {
 		return new TermTypeImpl(languageTagTerm);
 	}
 

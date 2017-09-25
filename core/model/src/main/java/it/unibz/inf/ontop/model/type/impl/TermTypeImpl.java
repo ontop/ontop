@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.LanguageTag;
-import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.Optional;
@@ -20,7 +20,7 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.ST
 public class TermTypeImpl implements TermType {
 
     private final Predicate.COL_TYPE colType;
-    private final Optional<Term> optionalLangTagTerm;
+    private final Optional<ImmutableTerm> optionalLangTagTerm;
     private static final Optional<TermType> OPTIONAL_LITERAL_TERM_TYPE = Optional.of(
             TYPE_FACTORY.getTermType(LITERAL));
     private final Optional<LanguageTag> optionalLangTagConstant;
@@ -33,7 +33,7 @@ public class TermTypeImpl implements TermType {
      * is stored in a DB column.
      *
      */
-    protected TermTypeImpl(Term languageTagTerm) {
+    protected TermTypeImpl(ImmutableTerm languageTagTerm) {
         this.colType = LITERAL_LANG;
         this.optionalLangTagTerm = Optional.of(languageTagTerm);
         this.optionalLangTagConstant = extractLanguageTagConstant(languageTagTerm);
@@ -51,7 +51,7 @@ public class TermTypeImpl implements TermType {
     }
 
     @Override
-    public Optional<Term> getLanguageTagTerm() {
+    public Optional<ImmutableTerm> getLanguageTagTerm() {
         return optionalLangTagTerm;
     }
 
@@ -93,7 +93,7 @@ public class TermTypeImpl implements TermType {
                 }
             }
             else if (optionalLangTagTerm.isPresent()) {
-                Term langTagTerm = optionalLangTagTerm.get();
+                ImmutableTerm langTagTerm = optionalLangTagTerm.get();
                 if (otherTermType.getLanguageTagTerm()
                         .filter(langTagTerm::equals)
                         .isPresent()) {
@@ -108,7 +108,7 @@ public class TermTypeImpl implements TermType {
         }
     }
 
-    private static Optional<LanguageTag> extractLanguageTagConstant(Term term) {
+    private static Optional<LanguageTag> extractLanguageTagConstant(ImmutableTerm term) {
         return Optional.of(term)
                 .filter(t -> t instanceof Constant)
                 .map(c -> (Constant) c)

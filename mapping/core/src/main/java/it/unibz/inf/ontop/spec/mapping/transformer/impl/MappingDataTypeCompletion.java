@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import org.slf4j.Logger;
@@ -117,8 +118,10 @@ public class MappingDataTypeCompletion {
      */
     private void insertOperationDatatyping(Term term, Function atom, int position) {
 
-        if (term instanceof Function) {
-            Function castTerm = (Function) term;
+        ImmutableTerm immutableTerm = ImmutabilityTools.convertIntoImmutableTerm(term);
+
+        if (immutableTerm instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm castTerm = (ImmutableFunctionalTerm) immutableTerm;
             if (castTerm.isOperation()) {
                 Optional<TermType> inferredType = TermTypeInferenceTools.inferType(castTerm);
                 if(inferredType.isPresent()){

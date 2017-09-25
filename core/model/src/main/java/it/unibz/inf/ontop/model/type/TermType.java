@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model.type;
 
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Term;
 
 import java.util.Optional;
 
@@ -18,7 +18,7 @@ public interface TermType {
     @Deprecated
     Predicate.COL_TYPE getColType();
 
-    Optional<Term> getLanguageTagTerm();
+    Optional<ImmutableTerm> getLanguageTagTerm();
 
     /**
      * Returns false for a rdf:langString without a language tag.

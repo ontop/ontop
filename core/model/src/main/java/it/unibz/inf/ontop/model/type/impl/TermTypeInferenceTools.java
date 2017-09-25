@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import java.util.Map;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
 
@@ -118,26 +117,26 @@ public class TermTypeInferenceTools {
     /**
      * TODO: simplify this method
      */
-    public static Optional<TermType> inferType(Term term) throws IncompatibleTermException {
-        if(term instanceof Function){
-            Function f = (Function)term;
+    public static Optional<TermType> inferType(ImmutableTerm term) throws IncompatibleTermException {
+        if(term instanceof ImmutableFunctionalTerm){
+            ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) term;
             Predicate typePred = f.getFunctionSymbol();
 
-            /**
+            /*
              * TODO: generalize this
              */
-            if(f instanceof Expression) {
-                return ((Expression) f).getOptionalTermType();
+            if(f instanceof ImmutableExpression) {
+                return ((ImmutableExpression) f).getOptionalTermType();
             }
             else if (f.isDataTypeFunction()){
-                /**
+                /*
                  * Special case: langString
                  */
                 if (typePred.equals(LITERAL_LANG_PREDICATE)) {
                     if (f.getTerms().size() != 2) {
                         throw new IllegalStateException("A lang literal function should have two arguments");
                     }
-                    Term secondArgument = f.getTerms().get(1);
+                    ImmutableTerm secondArgument = f.getArguments().get(1);
                     return Optional.of(TYPE_FACTORY.getTermType(secondArgument));
                 }
                 return Optional.of(TYPE_FACTORY.getTermType(f.getFunctionSymbol().getType(0)));

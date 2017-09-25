@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
@@ -12,15 +11,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
 /**
  * TODO: explain
  */
 public abstract class AbstractTermTypeInferenceRule implements TermTypeInferenceRule {
 
     @Override
-    public Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<TermType>> expectedBaseTypes)
+    public Optional<TermType> inferType(List<? extends ImmutableTerm> terms, ImmutableList<Optional<TermType>> expectedBaseTypes)
             throws IncompatibleTermException {
 
         ImmutableList<Optional<TermType>> argumentTypes = ImmutableList.copyOf(
