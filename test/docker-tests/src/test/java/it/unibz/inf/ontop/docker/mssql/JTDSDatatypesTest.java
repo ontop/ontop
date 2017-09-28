@@ -50,7 +50,7 @@ public class JTDSDatatypesTest extends AbstractVirtualModeTest {
 		String query =  "PREFIX : <http://knova.ru/adventureWorks.owl#>\n" +
 				"SELECT DISTINCT ?s ?x { ?s :SpecialOffer_ModifiedDate ?x }";
 		String val = runQueryAndReturnStringOfLiteralX(query);
-		assertEquals("\"2005-05-02T00:00:00.0\"^^xsd:dateTime", val);
+		assertEquals("\"2005-05-02T00:00:00\"^^xsd:dateTime", val);
 	}
 
 

@@ -11,9 +11,19 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.net.URISyntaxException;
-import java.sql.Timestamp;
-import java.text.*;
-import java.util.*;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.*;
@@ -26,62 +36,70 @@ public class JDBC2ConstantConverter {
 
     private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
-    private static ImmutableMap<System, ImmutableList<DateFormat>> system2DateFormats = buildDateFormatMap();
-    private static ImmutableMap<System, ImmutableList<FastDateFormat>> system2TimeFormats = buildTimeFormatMap();
+    private static ImmutableMap<System, ImmutableList<DateTimeFormatter>> system2DateTimeFormatter;
+    private static ImmutableMap<System, ImmutableList<DateTimeFormatter>> system2TimeFormatter;
 
     private AtomicInteger bnodeCounter;
     private IRIDictionary iriDictionary;
 
     private final Map<String, String> bnodeMap;
 
-    private final System system;
+    private final System systemDB;
 
     static {
         DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
         symbol.setDecimalSeparator('.');
         formatter.setDecimalFormatSymbols(symbol);
-        system2DateFormats = buildDateFormatMap();
-        system2TimeFormats = buildTimeFormatMap();
+        system2DateTimeFormatter = buildDateTimeFormatterMap();
+        system2TimeFormatter = buildTimeFormatterMap();
     }
 
-
-    private static ImmutableMap<System,ImmutableList<DateFormat>> buildDateFormatMap() {
+    //java 8 date format
+    private static ImmutableMap<System,ImmutableList<DateTimeFormatter>> buildDateTimeFormatterMap() {
         return ImmutableMap.of(
 
-                DEFAULT, ImmutableList.<DateFormat>builder()
-                        .add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH)) // ISO with 'T'
-                        .add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)) // ISO without 'T'
-                        .add(new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)) // ISO without time
-                        .add(new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH)) // another common case
-                        .add(new SimpleDateFormat(("'T'HH:mm:ss"), Locale.ENGLISH)) // ISO time with 'T'
-                        .add(new SimpleDateFormat(("'T'HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone with 'T'
-                        .add(new SimpleDateFormat(("HH:mm:ss"), Locale.ENGLISH)) // ISO time without 'T'
-                        .add(new SimpleDateFormat(("HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone without 'T'
+                DEFAULT, ImmutableList.<DateTimeFormatter>builder()
+                        .add(DateTimeFormatter.ISO_LOCAL_DATE_TIME) // ISO with 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) // ISO without 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")) // ISO without 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.n")) // ISO without 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssx")) // ISO without 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZZZZZ")) // ISO without 'T'
+                        .add(DateTimeFormatter.ISO_DATE) // ISO with or without time
+                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy").toFormatter()) // another common case
                         .build(),
-                ORACLE, ImmutableList.<DateFormat>builder()
-                        //For ORACLE driver 12.1.0.2 (TODO: check earlier versions)
-                        .add(new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSSSSS aa XXX", Locale.ENGLISH))
-                        //TODO: check whether the following formats are necessary
-                        .add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH))
-                        .add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH))
-                        .add(new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH))
-                        .add(new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH))
-                        .add(new SimpleDateFormat(("'T'HH:mm:ss"), Locale.ENGLISH)) // ISO time with 'T'
-                        .add(new SimpleDateFormat(("'T'HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone with 'T'
-                        .add(new SimpleDateFormat(("HH:mm:ss"), Locale.ENGLISH)) // ISO time without 'T'
-                        .add(new SimpleDateFormat(("HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone without 'T'
+                ORACLE, ImmutableList.<DateTimeFormatter>builder()
+                        .add(DateTimeFormatter.ofPattern("dd-MMM-yy HH:mm:ss,n a Z"))
+                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy HH:mm:ss,n").toFormatter())
+                        .add(DateTimeFormatter.ISO_LOCAL_DATE_TIME) // ISO with 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) // ISO without 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")) // ISO without 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.n")) // ISO without 'T'
+                        .add(DateTimeFormatter.ISO_DATE) // ISO with or without time
+                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy").toFormatter()) // another common case
                         .build(),
-                MSSQL, ImmutableList.<DateFormat>builder()
-                        .add(new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.ENGLISH))
-                        //TODO: check whether the following formats are necessary
-                        .add(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH))
-                        .add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH))
-                        .add(new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH))
-                        .add(new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH))
-                        .add(new SimpleDateFormat(("'T'HH:mm:ss"), Locale.ENGLISH)) // ISO time with 'T'
-                        .add(new SimpleDateFormat(("'T'HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone with 'T'
-                        .add(new SimpleDateFormat(("HH:mm:ss"), Locale.ENGLISH)) // ISO time without 'T'
-                        .add(new SimpleDateFormat(("HH:mm:ssZZ"), Locale.ENGLISH)) // ISO timezone without 'T'
+                MSSQL, ImmutableList.<DateTimeFormatter>builder()
+                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("MMM dd yyyy hh:mma").toFormatter())
+                        .add(DateTimeFormatter.ISO_LOCAL_DATE_TIME) // ISO with 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) // ISO without 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")) // ISO without 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.n")) // ISO without 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssx")) // ISO without 'T'
+                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZZZZZ")) // ISO without 'T'
+                        .add(DateTimeFormatter.ISO_DATE) // ISO with or without time
+                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy").toFormatter()) // another common case
+                        .build()
+        );
+    }
+
+    private static ImmutableMap<System,ImmutableList<DateTimeFormatter>> buildTimeFormatterMap() {
+        return ImmutableMap.of(
+
+                DEFAULT, ImmutableList.<DateTimeFormatter>builder()
+                        .add(DateTimeFormatter.ofPattern("'T'HH:mm:ss")) // ISO time with 'T'
+                        .add(DateTimeFormatter.ofPattern("'T'HH:mm:ssZ")) // ISO timezone with 'T'
+                        .add(DateTimeFormatter.ofPattern("HH:mm:ssx"))
+                        .add(DateTimeFormatter.ISO_TIME) // ISO time or timezone without 'T'
                         .build()
         );
     }
@@ -101,7 +119,7 @@ public class JDBC2ConstantConverter {
     public JDBC2ConstantConverter(DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) {
         this.iriDictionary = iriDictionary.orElse(null);
         String vendor = dbMetadata.getDriverName();
-        system = identifySystem(vendor);
+        systemDB = identifySystem(vendor);
         this.bnodeCounter = new AtomicInteger();
         bnodeMap = new HashMap<>(1000);
     }
@@ -199,27 +217,20 @@ public class JDBC2ConstantConverter {
                     return TERM_FACTORY.getConstantLiteral(integerString, type);
 
                 case DATETIME:
-                    Timestamp ts = new Timestamp(convertToJavaDate(value).getTime());
-                    return TERM_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'),Predicate.COL_TYPE.DATETIME
+
+                    return TERM_FACTORY.getConstantLiteral( DateTimeFormatter.ISO_DATE_TIME.format(convertToJavaDate(value)),Predicate.COL_TYPE.DATETIME
                     );
 
                 case DATETIME_STAMP:
-                    Timestamp ts1 = new Timestamp(convertToJavaDate(value).getTime());
-                return TERM_FACTORY.getConstantLiteral(
-                        ts1.toString().replaceFirst(" ", "T").replaceAll(" ", ""),
-                        Predicate.COL_TYPE.DATETIME_STAMP
+                    return TERM_FACTORY.getConstantLiteral( DateTimeFormatter.ISO_DATE_TIME.format(convertToJavaDate(value)),Predicate.COL_TYPE.DATETIME_STAMP
                 );
 
                 case DATE:
-                    FastDateFormat datef = DateFormatUtils.ISO_DATE_FORMAT;
-                    stringValue = datef.format(convertToJavaDate(value));
-
-                    return TERM_FACTORY.getConstantLiteral(stringValue, Predicate.COL_TYPE.DATE);
+                    return TERM_FACTORY.getConstantLiteral( DateTimeFormatter.ISO_DATE.format(convertToJavaDate(value)),Predicate.COL_TYPE.DATE);
 
                 case TIME:
 
-                    stringValue = convertToTime(value);
-                    return TERM_FACTORY.getConstantLiteral(stringValue, Predicate.COL_TYPE.TIME);
+                    return TERM_FACTORY.getConstantLiteral(DateTimeFormatter.ISO_TIME.format(convertToTime(value)), Predicate.COL_TYPE.TIME);
 
                 default:
                     return TERM_FACTORY.getConstantLiteral(stringValue, type);
@@ -249,20 +260,21 @@ public class JDBC2ConstantConverter {
         }
     }
 
-    private Date convertToJavaDate(Object value) throws OntopResultConversionException {
-        Date dateValue = null;
+    private TemporalAccessor convertToJavaDate(Object value) throws OntopResultConversionException {
+        TemporalAccessor dateValue = null;
 
-        if (value instanceof Date) {
-            // If JDBC gives us proper Java object, we are good
-            dateValue = (Date) value;
+        if (value instanceof Date ) {
+            // If JDBC gives us proper Java object, we simply return the formatted version of the datatype
+            dateValue = LocalDateTime.ofInstant(((Date) value).toInstant(),(ZoneId.systemDefault()));
         } else {
             // Otherwise, we need to deal with possible String representation of datetime
             String stringValue = String.valueOf(value);
-            for (DateFormat format : system2DateFormats.get(system)) {
+            for (DateTimeFormatter format : system2DateTimeFormatter.get(systemDB)) {
                 try {
                     dateValue = format.parse(stringValue);
+                    //TODO:distinguish for offset
                     break;
-                } catch (ParseException e) {
+                } catch (DateTimeParseException e) {
                     // continue with the next try
                 }
             }
@@ -275,32 +287,30 @@ public class JDBC2ConstantConverter {
 
     }
 
-    private String convertToTime(Object value) throws OntopResultConversionException {
+    private TemporalAccessor convertToTime(Object value) throws OntopResultConversionException {
+        TemporalAccessor timeValue = null;
 
-        Date dateValue=null;
-        String stringValue = String.valueOf(value);
-        for (FastDateFormat format : system2TimeFormats.get(DEFAULT)) {
-            try {
-                dateValue = format.parse(stringValue);
-                if (format.equals(DateFormatUtils.ISO_TIME_FORMAT)){
-                    FastDateFormat timef = DateFormatUtils.ISO_TIME_NO_T_FORMAT;
-                    stringValue = timef.format(dateValue);
+        if (value instanceof Date ) {
+            // If JDBC gives us proper Java object, we simply return the formatted version of the datatype
+            timeValue = LocalTime.from(((Date) value).toInstant().atZone(ZoneId.systemDefault()));
+        } else {
+            // Otherwise, we need to deal with possible String representation of datetime
+            String stringValue = String.valueOf(value);
+            for (DateTimeFormatter format : system2TimeFormatter.get(DEFAULT)) {
+                try {
+                    timeValue = format.parse(stringValue);
+
+                    break;
+                } catch (DateTimeParseException e) {
+                    // continue with the next try
                 }
-                else if (format.equals(DateFormatUtils.ISO_TIME_TIME_ZONE_FORMAT)){
-                    FastDateFormat timef = DateFormatUtils.ISO_TIME_NO_T_TIME_ZONE_FORMAT;
-                    stringValue = timef.format(dateValue);
-                }
-                stringValue = format.format(dateValue);
-                break;
-            } catch (ParseException e) {
-                // continue with the next try
+            }
+
+            if (timeValue == null) {
+                throw new OntopResultConversionException("unparseable time: " + stringValue);
             }
         }
-        if (dateValue == null) {
-            throw new OntopResultConversionException("unparseable datetime: " + stringValue);
-        }
-
-        return stringValue;
+        return timeValue;
 
     }
 
