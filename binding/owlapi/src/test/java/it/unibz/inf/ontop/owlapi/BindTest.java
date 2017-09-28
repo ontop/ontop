@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
-import it.unibz.inf.ontop.exception.OntopTranslationException;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
@@ -476,7 +476,7 @@ public class BindTest {
 
     //CAST function not supported
     //The builtin function http://www.w3.org/2001/XMLSchema#string is not supported yet!
-    @Test(expected = OntopTranslationException.class)
+    @Test(expected = OntopReformulationException.class)
     public void testBindWithCast() throws Throwable {
 
 		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"

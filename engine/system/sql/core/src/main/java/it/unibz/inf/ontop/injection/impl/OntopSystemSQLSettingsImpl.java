@@ -1,19 +1,22 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 
 import java.util.Properties;
 
 
-public class OntopSystemSQLSettingsImpl extends OntopTranslationSQLSettingsImpl implements OntopSystemSQLSettings {
+public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImpl implements OntopSystemSQLSettings {
 
     private static final String DEFAULT_FILE = "system-sql-default.properties";
     private final OntopSystemSettings systemSettings;
+    private final OntopSQLCredentialSettings sqlCredentialSettings;
 
     OntopSystemSQLSettingsImpl(Properties userProperties) {
         super(loadProperties(userProperties));
         systemSettings = new OntopSystemSettingsImpl(copyProperties());
+        sqlCredentialSettings = new OntopSQLCredentialSettingsImpl(copyProperties());
     }
 
     private static Properties loadProperties(Properties userProperties) {
@@ -61,5 +64,15 @@ public class OntopSystemSQLSettingsImpl extends OntopTranslationSQLSettingsImpl 
     @Override
     public boolean isPermanentDBConnectionEnabled() {
         return systemSettings.isPermanentDBConnectionEnabled();
+    }
+
+    @Override
+    public String getJdbcUser() {
+        return sqlCredentialSettings.getJdbcUser();
+    }
+
+    @Override
+    public String getJdbcPassword() {
+        return sqlCredentialSettings.getJdbcPassword();
     }
 }

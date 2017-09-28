@@ -135,7 +135,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	}
 
 	private GraphOWLResultSet executeGraph(GraphSPARQLQuery query)
-			throws OntopQueryEvaluationException, OntopConnectionException, OntopTranslationException,
+			throws OntopQueryEvaluationException, OntopConnectionException, OntopReformulationException,
 			OntopResultConversionException {
 
 		SimpleGraphResultSet resultSet = st.execute(query);
@@ -226,7 +226,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	public ExecutableQuery getExecutableQuery(String query) throws OntopOWLException {
 		try {
 			return st.getExecutableQuery(parseQueryString(query));
-		} catch (OntopTranslationException e) {
+		} catch (OntopReformulationException e) {
 			throw new OntopOWLException(e);
 		}
 	}

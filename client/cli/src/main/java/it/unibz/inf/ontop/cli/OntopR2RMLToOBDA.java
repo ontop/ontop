@@ -6,6 +6,7 @@ import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.google.common.base.Strings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -38,8 +39,8 @@ public class OntopR2RMLToOBDA implements OntopCommand {
             Properties p = new Properties();
             p.put(OntopSQLCoreSettings.JDBC_NAME, "h2");
             p.put(OntopSQLCoreSettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
-            p.put(OntopSQLCoreSettings.JDBC_USER, "username");
-            p.put(OntopSQLCoreSettings.JDBC_PASSWORD, "password");
+            p.put(OntopSQLCredentialSettings.JDBC_USER, "username");
+            p.put(OntopSQLCredentialSettings.JDBC_PASSWORD, "password");
             p.put(OntopSQLCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
             OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()

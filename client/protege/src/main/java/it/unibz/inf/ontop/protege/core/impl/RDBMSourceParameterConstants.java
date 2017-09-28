@@ -21,12 +21,13 @@ package it.unibz.inf.ontop.protege.core.impl;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 
 public class RDBMSourceParameterConstants {
 
-	public static final String	DATABASE_USERNAME			= OntopSQLCoreSettings.JDBC_USER;
+	public static final String	DATABASE_USERNAME			= OntopSQLCredentialSettings.JDBC_USER;
 	
-	public static final String	DATABASE_PASSWORD			= OntopSQLCoreSettings.JDBC_PASSWORD;
+	public static final String	DATABASE_PASSWORD			= OntopSQLCredentialSettings.JDBC_PASSWORD;
 	
 	public static final String	DATABASE_DRIVER				= OntopSQLCoreSettings.JDBC_DRIVER;
 	

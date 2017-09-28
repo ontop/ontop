@@ -80,7 +80,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
      * However, the expected usage is to use the other method loadSpecification(...).
      */
     @Override
-    public OBDASpecification loadSpecification() throws OBDASpecificationException {
+    protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
         return loadSpecification(
                 Optional::empty,
                 Optional::empty,
@@ -184,6 +184,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             implements OntopMappingBuilderFragment<B> {
 
         private final B builder;
+        private final Runnable declareDBMetadataCB;
         private Optional<Boolean> obtainFullMetadata = Optional.empty();
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
         private Optional<Boolean> completeDBMetadata = Optional.empty();
@@ -191,9 +192,9 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         private Optional<DBMetadata> dbMetadata = Optional.empty();
         private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
 
-
-        DefaultOntopMappingBuilderFragment(B builder) {
+        DefaultOntopMappingBuilderFragment(B builder, Runnable declareDBMetadataCB) {
             this.builder = builder;
+            this.declareDBMetadataCB = declareDBMetadataCB;
         }
 
         @Override
@@ -222,6 +223,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         @Override
         public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
+            declareDBMetadataCB.run();
             this.dbMetadata = Optional.of(dbMetadata);
             return builder;
         }
@@ -256,11 +258,15 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         private final DefaultOntopMappingBuilderFragment<B> mappingBuilderFragment;
         private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
         private boolean isMappingDefined;
+        private boolean isDBMetadataDefined;
 
         OntopMappingBuilderMixin() {
             B builder = (B) this;
-            this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>(builder);
+            this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>(builder,
+                    this::declareDBMetadataDefined);
             this.optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
+            this.isMappingDefined = false;
+            this.isDBMetadataDefined = false;
         }
 
         @Override
@@ -317,10 +323,34 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             return properties;
         }
 
+        final void declareDBMetadataDefined() {
+            if (isOBDASpecificationAssigned()) {
+                throw new InvalidOntopConfigurationException("The OBDA specification has already been assigned");
+            }
+            isDBMetadataDefined = true;
+        }
+
+        @Override
+        void declareOBDASpecificationAssigned() {
+            super.declareOBDASpecificationAssigned();
+
+            if (isDBMetadataDefined) {
+                throw new InvalidOntopConfigurationException("DBMetadata is already defined, " +
+                        "cannot assign the OBDA specification");
+            }
+            if (isMappingDefined()) {
+                throw new InvalidOntopConfigurationException("The mapping is already defined, " +
+                        "cannot assign the OBDA specification");
+            }
+        }
+
         /**
          * Allows to detect double mapping definition (error).
          */
         protected final void declareMappingDefined() {
+            if (isOBDASpecificationAssigned())
+                throw new InvalidOntopConfigurationException("The OBDA specification has already been assigned");
+
             if (isMappingDefined)
                 throw new InvalidOntopConfigurationException("The mapping is already defined");
             isMappingDefined = true;
@@ -329,7 +359,6 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         protected final boolean isMappingDefined() {
             return isMappingDefined;
         }
-
     }
 
     public static class BuilderImpl<B extends OntopMappingConfiguration.Builder<B>>

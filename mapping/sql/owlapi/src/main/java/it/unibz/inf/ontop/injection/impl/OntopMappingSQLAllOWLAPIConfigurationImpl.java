@@ -26,7 +26,7 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
     }
 
     @Override
-    public OBDASpecification loadSpecification() throws OBDASpecificationException {
+    protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
         return loadSpecification(mappingOWLConfiguration::loadOntology);
     }
     @Override
@@ -84,6 +84,8 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
         }
 
         void declareOntologyDefined() {
+            if (isOBDASpecificationAssigned())
+                throw new InvalidOntopConfigurationException("The OBDA specification has already been assigned");
             if (isOntologyDefined) {
                 throw new InvalidOntopConfigurationException("Ontology already defined!");
             }

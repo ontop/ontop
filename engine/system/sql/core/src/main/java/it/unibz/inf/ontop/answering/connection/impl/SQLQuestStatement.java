@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.answering.connection.impl;
 
 import java.util.Optional;
 
-import it.unibz.inf.ontop.answering.connection.impl.QuestStatement;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
@@ -124,7 +123,7 @@ public class SQLQuestStatement extends QuestStatement {
      * Returns the number of tuples returned by the query
      */
     @Override
-    public int getTupleCount(InputQuery inputQuery) throws OntopTranslationException, OntopQueryEvaluationException {
+    public int getTupleCount(InputQuery inputQuery) throws OntopReformulationException, OntopQueryEvaluationException {
         SQLExecutableQuery targetQuery = checkAndConvertTargetQuery(getExecutableQuery(inputQuery));
         String sql = targetQuery.getSQL();
         String newsql = "SELECT count(*) FROM (" + sql + ") t1";
