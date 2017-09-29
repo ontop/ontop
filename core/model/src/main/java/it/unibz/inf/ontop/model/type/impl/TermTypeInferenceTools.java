@@ -103,16 +103,11 @@ public class TermTypeInferenceTools {
     /**
      * TODO: find a better name
      */
-    public static Optional<TermType> getCommonDenominatorType(COL_TYPE type1, COL_TYPE type2) {
-        if (type1 == null) {
-            return Optional.ofNullable(TYPE_FACTORY.getTermType(type2));
-        } else if (type2 == null) {
-            return Optional.of(TYPE_FACTORY.getTermType(type1));
-        }
-        else {
-            return Optional.ofNullable(DATATYPE_DENOMINATORS.get(type1, type2))
-                    .map(TYPE_FACTORY::getTermType);
-        }
+    public static TermType getCommonDenominatorType(COL_TYPE type1, COL_TYPE type2) {
+        COL_TYPE colType = Optional.ofNullable(DATATYPE_DENOMINATORS.get(type1, type2))
+                .orElse(LITERAL);
+
+        return TYPE_FACTORY.getTermType(colType);
     }
 
     /**
@@ -138,7 +133,10 @@ public class TermTypeInferenceTools {
                         throw new IllegalStateException("A lang literal function should have two arguments");
                     }
                     ImmutableTerm secondArgument = f.getArguments().get(1);
-                    return Optional.of(TYPE_FACTORY.getTermType(secondArgument));
+                    if (!(secondArgument instanceof Constant))
+                        // TODO: return a proper exception (internal bug)
+                        throw new IllegalStateException("A lang literal function must have a constant language tag");
+                    return Optional.of(TYPE_FACTORY.getTermType(((Constant)secondArgument).getValue()));
                 }
                 return Optional.of(TYPE_FACTORY.getTermType(f.getFunctionSymbol().getType(0)));
 
@@ -172,6 +170,7 @@ public class TermTypeInferenceTools {
         }
     }
 
+    @Deprecated
     protected static TermType castStringLangType(TermType termType) {
         switch (termType.getColType()) {
             case LITERAL:

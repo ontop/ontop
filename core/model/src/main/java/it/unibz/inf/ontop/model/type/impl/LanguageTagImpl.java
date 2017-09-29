@@ -12,6 +12,8 @@ public class LanguageTagImpl implements LanguageTag {
     private final String fullString;
 
     protected LanguageTagImpl(String fullString){
+        if (fullString.isEmpty())
+            throw new IllegalArgumentException("A language tag cannot be empty");
         this.fullString = fullString;
 
         try {

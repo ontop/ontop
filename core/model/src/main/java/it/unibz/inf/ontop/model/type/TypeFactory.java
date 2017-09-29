@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.type;
 import java.util.List;
 import java.util.Optional;
 
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import org.eclipse.rdf4j.model.IRI;
@@ -35,7 +34,13 @@ public interface TypeFactory {
 	
 	List<Predicate> getDatatypePredicates();
 
+	/**
+	 * TODO: refactor it
+	 */
 	TermType getTermType(COL_TYPE type);
-	TermType getTermType(ImmutableTerm languageTagTerm);
+	RDFDatatype getTermType(String languageTag);
+
+	RDFTermType getIRITermType();
+
 
 }

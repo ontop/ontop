@@ -39,6 +39,7 @@ import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
@@ -1440,8 +1441,10 @@ public class OneShotSQLGeneratorEngine {
 		}
 		else {
 			lang = optionalTermType
-					.flatMap(TermType::getLanguageTagTerm)
-					.map(tag -> getSQLString(tag, index, false))
+					.filter(t -> t instanceof RDFDatatype)
+					.map(t -> (RDFDatatype)t)
+					.flatMap(RDFDatatype::getLanguageTag)
+					.map(tag -> sqladapter.getSQLLexicalFormString(tag.getFullString()))
 					.orElse("NULL");
 		}
 		return String.format(LANG_STR, lang, langVariableName);

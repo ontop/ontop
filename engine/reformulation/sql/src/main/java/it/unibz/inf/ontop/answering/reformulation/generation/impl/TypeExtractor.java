@@ -290,13 +290,11 @@ public class TypeExtractor {
      * [INTEGER, LITERAL] -> LITERAL
      * [INTEGER, INTEGER] -> INTEGER
      *
+     * TODO: refactor
+     *
      */
     private static TermType unifyCastTypes(TermType type1, TermType type2) {
-        return type1.getCommonDenominator(type2)
-                /**
-                 * Every head argument must have a TermType. By default,
-                 * we cast it as a LITERAL (VARCHAR)
-                 */
-                .orElse(LITERAL_TYPE);
+        // TODO: the common denominator is not the right mechanism for casting
+        return type1.getCommonDenominator(type2);
     }
 }

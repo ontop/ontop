@@ -1,11 +1,8 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
-import it.unibz.inf.ontop.model.type.LanguageTag;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
@@ -49,7 +46,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final List<Predicate> predicateList = new LinkedList<>();
 
 	// Only builds these TermTypes once.
-	private final Map<COL_TYPE, TermType> termTypeCache = new ConcurrentHashMap<>();
+	private final Map<COL_TYPE, RDFTermType> termTypeCache = new ConcurrentHashMap<>();
 
 	private TypeFactoryImpl() {
 		RDFS_LITERAL = registerType(RDFS.LITERAL, COL_TYPE.LITERAL); // 3 "http://www.w3.org/2000/01/rdf-schema#Literal"
@@ -171,22 +168,47 @@ public class TypeFactoryImpl implements TypeFactory {
 		return new LanguageTagImpl(languageTagString);
 	}
 
+	/**
+	 * TODO: refactor (temporary)
+	 */
 	@Override
-	public TermType getTermType(COL_TYPE type) {
-		TermType cachedType = termTypeCache.get(type);
+	public RDFTermType getTermType(COL_TYPE type) {
+		RDFTermType cachedType = termTypeCache.get(type);
 		if (cachedType != null) {
 			return cachedType;
 		}
 		else {
-			TermType termType = new TermTypeImpl(type);
+			RDFTermType termType = buildRDFType(type);
 			termTypeCache.put(type, termType);
 			return termType;
 		}
 	}
 
+	/**
+	 * TODO: refactor
+	 */
+	private static RDFTermType buildRDFType(COL_TYPE type) {
+		switch(type) {
+			case UNSUPPORTED:
+				throw new UnsupportedOperationException("Unsupported COL_TYPE is not supported");
+			case OBJECT:
+			case BNODE:
+				return new ObjectRDFTermImpl(type);
+			case LITERAL_LANG:
+				throw new IllegalArgumentException("Cannot build a langString type without a term");
+			default:
+				return new RegularRDFDatatype(type);
+		}
+	}
+
 	@Override
-	public TermType getTermType(ImmutableTerm languageTagTerm) {
-		return new TermTypeImpl(languageTagTerm);
+	public RDFDatatype getTermType(String languageTagString) {
+		return new LangDatatype(new LanguageTagImpl(languageTagString));
+	}
+
+	@Override
+	public RDFTermType getIRITermType() {
+		return getTermType(COL_TYPE.OBJECT);
 	}
 
 }
