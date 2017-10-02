@@ -24,8 +24,11 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class ValueConstantImpl implements ValueConstant {
 
@@ -35,6 +38,7 @@ public class ValueConstantImpl implements ValueConstant {
 	private final String language;
 	private final Predicate.COL_TYPE type;
 	private final String string;
+	private final TermType termType;
 
 	/**
 	 * The default constructor.
@@ -49,6 +53,7 @@ public class ValueConstantImpl implements ValueConstant {
 		this.language = null;
 		this.type = type;
 		this.string = getStringRepresentation();
+		this.termType = TYPE_FACTORY.getTermType(type);
 	}
 
 	protected ValueConstantImpl(String value, String language) {
@@ -56,6 +61,7 @@ public class ValueConstantImpl implements ValueConstant {
 		this.language = language;
 		this.type = COL_TYPE.LITERAL_LANG;
 		this.string = getStringRepresentation();
+		this.termType = TYPE_FACTORY.getTermType(language);
 	}
 	
 	private String getStringRepresentation() {
@@ -134,6 +140,11 @@ public class ValueConstantImpl implements ValueConstant {
 	@Override
 	public Predicate.COL_TYPE getType() {
 		return type;
+	}
+
+	@Override
+	public TermType getTermType() {
+		return termType;
 	}
 
 	@Override

@@ -23,8 +23,11 @@ package it.unibz.inf.ontop.model.term.impl;
 import it.unibz.inf.ontop.model.term.BNode;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 /**
  * Implementation for BNodes.
@@ -94,6 +97,11 @@ public class BNodeConstantImpl implements BNode {
 	@Override
 	public Predicate.COL_TYPE getType() {
 		return Predicate.COL_TYPE.BNODE;
+	}
+
+	@Override
+	public TermType getTermType() {
+		return TYPE_FACTORY.getTermType(Predicate.COL_TYPE.BNODE);
 	}
 
 }

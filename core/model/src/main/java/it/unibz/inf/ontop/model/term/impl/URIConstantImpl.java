@@ -23,8 +23,11 @@ package it.unibz.inf.ontop.model.term.impl;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 
 /**
@@ -84,6 +87,11 @@ public class URIConstantImpl implements URIConstant {
 	@Override
 	public COL_TYPE getType() {
 		return COL_TYPE.OBJECT;
+	}
+
+	@Override
+	public TermType getTermType() {
+		return TYPE_FACTORY.getTermType(COL_TYPE.OBJECT);
 	}
 
 
