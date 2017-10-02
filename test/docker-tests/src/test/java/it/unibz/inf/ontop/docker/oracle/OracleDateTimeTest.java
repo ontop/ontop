@@ -78,7 +78,7 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 				String date = runTest(st, query, true);
 				log.debug(date);
 				
-				assertEquals("\"2010-02-18T00:02:00\"^^xsd:dateTime", date);
+				assertEquals("\"2010-02-18T10:02:30\"^^xsd:dateTime", date);
 			
 		} catch (Exception e) {
 			throw e;
