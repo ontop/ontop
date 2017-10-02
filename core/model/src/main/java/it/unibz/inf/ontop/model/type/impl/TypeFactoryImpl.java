@@ -139,6 +139,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	public Optional<TermType> getInternalType(DatatypePredicate predicate) {
 		// TODO: refactor (don't use col_type anymore)
 		return Optional.ofNullable(mapURItoCOLTYPE.get(predicate.getName()))
+				.filter(c -> c != COL_TYPE.LITERAL_LANG)
 				.map(this::getTermType);
 	}
 

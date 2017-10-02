@@ -8,6 +8,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
@@ -23,6 +24,7 @@ import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.Map;
 import java.util.Optional;
@@ -97,6 +99,8 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      *
      * Return nothing if the property is rdf:type (class instance assertion)
      *
+     * TODO: refactor it!
+     *
      */
     private Optional<TermType> extractTripleObjectType(IntermediateQuery mappingAssertion)
             throws TripleObjectTypeInferenceException {
@@ -111,7 +115,8 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                     .orElseThrow(() -> new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
                             "Not defined in the root construction node (expected for a mapping assertion)"));
             if (constructionTerm instanceof ImmutableFunctionalTerm) {
-                Predicate functionSymbol = ((ImmutableFunctionalTerm) constructionTerm).getFunctionSymbol();
+                ImmutableFunctionalTerm constructionFunctionalTerm = ((ImmutableFunctionalTerm) constructionTerm);
+                Predicate functionSymbol = constructionFunctionalTerm.getFunctionSymbol();
                 if ((functionSymbol instanceof BNodePredicate)
                         || (functionSymbol instanceof URITemplatePredicate)) {
                     return Optional.of(TYPE_FACTORY.getTermType(OBJECT));
@@ -119,11 +124,16 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                 else if (functionSymbol instanceof DatatypePredicate) {
                     DatatypePredicate datatypeConstructionFunctionSymbol = (DatatypePredicate) functionSymbol;
 
-                    TermType internalDatatype = TYPE_FACTORY.getInternalType(datatypeConstructionFunctionSymbol)
-                            .orElseThrow(() -> new RuntimeException("Unsupported datatype: " + functionSymbol
-                                    + "\n TODO: throw a better exception"));
+                    if (datatypeConstructionFunctionSymbol.getName().equals(RDF.LANGSTRING.stringValue())) {
+                        return Optional.of(extractLangTermType(constructionFunctionalTerm));
+                    }
+                    else {
+                        TermType internalDatatype = TYPE_FACTORY.getInternalType(datatypeConstructionFunctionSymbol)
+                                .orElseThrow(() -> new RuntimeException("Unsupported datatype: " + functionSymbol
+                                        + "\n TODO: throw a better exception"));
 
-                    return Optional.of(internalDatatype);
+                        return Optional.of(internalDatatype);
+                    }
                 }
                 else {
                     throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
@@ -147,6 +157,18 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
          */
         else
             return Optional.empty();
+    }
+
+    private TermType extractLangTermType(ImmutableFunctionalTerm constructionFunctionalTerm) {
+        ImmutableList<? extends ImmutableTerm> arguments = constructionFunctionalTerm.getArguments();
+        ImmutableTerm langTerm = arguments.get(1);
+
+        if (!(langTerm instanceof Constant)) {
+            // TODO: throw a proper exception
+            throw new IllegalStateException("A langString must have a constant language tag: "
+                    + constructionFunctionalTerm);
+        }
+        return TYPE_FACTORY.getTermType(((Constant) langTerm).getValue());
     }
 
     private Optional<Variable> extractTripleObjectVariable(IntermediateQuery mappingAssertion)

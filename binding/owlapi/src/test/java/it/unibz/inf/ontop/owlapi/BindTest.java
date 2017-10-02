@@ -464,8 +464,8 @@ public class BindTest {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"goodSPARQL Tutorial\"");
-        expectedValues.add("\"badThe Semantic Web\"");
+        expectedValues.add("\"goodSPARQL Tutorial\"@en");
+        expectedValues.add("\"badThe Semantic Web\"@en");
         checkReturnedValues(queryBind, expectedValues);
 
 
