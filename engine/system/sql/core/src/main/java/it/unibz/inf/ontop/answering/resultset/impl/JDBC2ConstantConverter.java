@@ -7,8 +7,6 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
@@ -36,6 +34,7 @@ public class JDBC2ConstantConverter {
 
     private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
+    private static ImmutableList<DateTimeFormatter> defaultDateTimeFormatter;
     private static ImmutableMap<System, ImmutableList<DateTimeFormatter>> system2DateTimeFormatter;
     private static ImmutableMap<System, ImmutableList<DateTimeFormatter>> system2TimeFormatter;
 
@@ -50,71 +49,51 @@ public class JDBC2ConstantConverter {
         DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
         symbol.setDecimalSeparator('.');
         formatter.setDecimalFormatSymbols(symbol);
+        defaultDateTimeFormatter = buildDefaultDateTimeFormatter();
         system2DateTimeFormatter = buildDateTimeFormatterMap();
-        system2TimeFormatter = buildTimeFormatterMap();
+        system2TimeFormatter = buildDefaultTimeFormatterMap();
     }
 
     //java 8 date format
+    //default possible date time format
+    private static ImmutableList<DateTimeFormatter> buildDefaultDateTimeFormatter() {
+
+        return ImmutableList.<DateTimeFormatter>builder()
+                    .add(DateTimeFormatter.ISO_LOCAL_DATE_TIME) // ISO with 'T'
+                    .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.n][.S][ZZZZZ]")) // ISO without 'T'
+                    .add(DateTimeFormatter.ISO_DATE) // ISO with or without time
+                    .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy[ HH:mm:ss]").toFormatter()) // another common case
+                    .build();
+    }
+
+    //special cases on different systems
     private static ImmutableMap<System,ImmutableList<DateTimeFormatter>> buildDateTimeFormatterMap() {
         return ImmutableMap.of(
 
                 DEFAULT, ImmutableList.<DateTimeFormatter>builder()
-                        .add(DateTimeFormatter.ISO_LOCAL_DATE_TIME) // ISO with 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) // ISO without 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")) // ISO without 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.n")) // ISO without 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssx")) // ISO without 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZZZZZ")) // ISO without 'T'
-                        .add(DateTimeFormatter.ISO_DATE) // ISO with or without time
-                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy").toFormatter()) // another common case
+                        .addAll(defaultDateTimeFormatter) // another common case
                         .build(),
                 ORACLE, ImmutableList.<DateTimeFormatter>builder()
-                        .add(DateTimeFormatter.ofPattern("dd-MMM-yy HH:mm:ss,n a Z"))
-                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy HH:mm:ss,n").toFormatter())
-                        .add(DateTimeFormatter.ISO_LOCAL_DATE_TIME) // ISO with 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) // ISO without 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")) // ISO without 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.n")) // ISO without 'T'
-                        .add(DateTimeFormatter.ISO_DATE) // ISO with or without time
-                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy").toFormatter()) // another common case
+                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy[ HH:mm:ss[,n][ a][Z]]").toFormatter())
+                        .addAll(defaultDateTimeFormatter)
                         .build(),
                 MSSQL, ImmutableList.<DateTimeFormatter>builder()
-                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("MMM dd yyyy hh:mma").toFormatter())
-                        .add(DateTimeFormatter.ISO_LOCAL_DATE_TIME) // ISO with 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) // ISO without 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")) // ISO without 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.n")) // ISO without 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssx")) // ISO without 'T'
-                        .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZZZZZ")) // ISO without 'T'
-                        .add(DateTimeFormatter.ISO_DATE) // ISO with or without time
-                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy").toFormatter()) // another common case
+                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("MMM dd yyyy[ hh:mm[a]]").toFormatter())
+                        .addAll(defaultDateTimeFormatter)
                         .build()
         );
     }
 
-    private static ImmutableMap<System,ImmutableList<DateTimeFormatter>> buildTimeFormatterMap() {
+    private static ImmutableMap<System,ImmutableList<DateTimeFormatter>> buildDefaultTimeFormatterMap() {
         return ImmutableMap.of(
 
                 DEFAULT, ImmutableList.<DateTimeFormatter>builder()
-                        .add(DateTimeFormatter.ofPattern("'T'HH:mm:ss")) // ISO time with 'T'
-                        .add(DateTimeFormatter.ofPattern("'T'HH:mm:ssZ")) // ISO timezone with 'T'
-                        .add(DateTimeFormatter.ofPattern("HH:mm:ssx"))
+                        .add(DateTimeFormatter.ofPattern("['T']HH:mm:ss[Z][x]")) // ISO timezone with 'T'
                         .add(DateTimeFormatter.ISO_TIME) // ISO time or timezone without 'T'
                         .build()
         );
     }
 
-    private static ImmutableMap<System,ImmutableList<FastDateFormat>> buildTimeFormatMap() {
-        return ImmutableMap.of(
-
-                DEFAULT, ImmutableList.<FastDateFormat>builder()
-                        .add(DateFormatUtils.ISO_TIME_FORMAT) // ISO time with 'T'
-                        .add(DateFormatUtils.ISO_TIME_TIME_ZONE_FORMAT) // ISO timezone with 'T'
-                        .add(DateFormatUtils.ISO_TIME_NO_T_FORMAT) // ISO time without 'T'
-                        .add(DateFormatUtils.ISO_TIME_NO_T_TIME_ZONE_FORMAT) // ISO timezone without 'T'
-                        .build()
-        );
-    }
 
     public JDBC2ConstantConverter(DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) {
         this.iriDictionary = iriDictionary.orElse(null);
@@ -272,7 +251,7 @@ public class JDBC2ConstantConverter {
             for (DateTimeFormatter format : system2DateTimeFormatter.get(systemDB)) {
                 try {
                     dateValue = format.parse(stringValue);
-                    //TODO:distinguish for offset
+
                     break;
                 } catch (DateTimeParseException e) {
                     // continue with the next try
