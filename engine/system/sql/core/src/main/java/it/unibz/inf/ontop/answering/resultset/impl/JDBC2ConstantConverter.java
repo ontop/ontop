@@ -11,9 +11,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -60,7 +58,8 @@ public class JDBC2ConstantConverter {
 
         return ImmutableList.<DateTimeFormatter>builder()
                     .add(DateTimeFormatter.ISO_LOCAL_DATE_TIME) // ISO with 'T'
-                    .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.n][.S][Z][x]")) // ISO without 'T'
+                    .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[[.SSSSSSSSS][.SSSSSSS][.SSSSSS][.SSS][.SS][.S][XXXXX][XXXX][x]")) // ISO without 'T'
+//               new DateTimeFormatterBuilder().parseLenient().appendPattern("yyyy-MM-dd HH:mm:ss[XXXXX][XXXX][x]").appendFraction(ChronoField.MICRO_OF_SECOND, 0, 9, true)
                     .add(DateTimeFormatter.ISO_DATE) // ISO with or without time
                     .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy[ HH:mm:ss]").toFormatter()) // another common case
                     .build();
@@ -74,7 +73,7 @@ public class JDBC2ConstantConverter {
                         .addAll(defaultDateTimeFormatter) // another common case
                         .build(),
                 ORACLE, ImmutableList.<DateTimeFormatter>builder()
-                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy[ HH:mm:ss[,n][ a][ ZZZZZ]]").toFormatter())
+                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy[ HH:mm:ss[,n][ a][ ZZZZZ][ VV]]").toFormatter())
                         .addAll(defaultDateTimeFormatter)
                         .build(),
                 MSSQL, ImmutableList.<DateTimeFormatter>builder()
@@ -250,7 +249,7 @@ public class JDBC2ConstantConverter {
             String stringValue = String.valueOf(value);
             for (DateTimeFormatter format : system2DateTimeFormatter.get(systemDB)) {
                 try {
-                    dateValue = format.parse(stringValue);
+                    dateValue = format.parseBest(stringValue, OffsetDateTime::from, LocalDateTime::from, LocalDate::from);
 
                     break;
                 } catch (DateTimeParseException e) {
@@ -277,7 +276,7 @@ public class JDBC2ConstantConverter {
             String stringValue = String.valueOf(value);
             for (DateTimeFormatter format : system2TimeFormatter.get(DEFAULT)) {
                 try {
-                    timeValue = format.parse(stringValue);
+                    timeValue = format.parseBest(stringValue, OffsetTime::from, LocalTime::from);
 
                     break;
                 } catch (DateTimeParseException e) {
