@@ -276,6 +276,9 @@ public class TypeExtractor {
             return expression.getOptionalTermType(argumentTypes)
                     .orElseThrow(() -> new IllegalStateException("No type could be inferred for " + term));
         }
+        else if (term instanceof Constant) {
+            return ((Constant) term).getTermType();
+        }
         else {
             throw new IllegalStateException("The type should already be for a non-variable - non-expression term (was " + term + ")");
         }
