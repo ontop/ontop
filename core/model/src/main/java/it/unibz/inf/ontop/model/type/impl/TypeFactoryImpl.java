@@ -190,8 +190,6 @@ public class TypeFactoryImpl implements TypeFactory {
 	 */
 	private static RDFTermType buildRDFType(COL_TYPE type) {
 		switch(type) {
-			case UNSUPPORTED:
-				throw new UnsupportedOperationException("Unsupported COL_TYPE is not supported");
 			case OBJECT:
 			case BNODE:
 				return new ObjectRDFTermImpl(type);
