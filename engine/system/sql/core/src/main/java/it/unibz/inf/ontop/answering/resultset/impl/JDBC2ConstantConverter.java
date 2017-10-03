@@ -60,7 +60,7 @@ public class JDBC2ConstantConverter {
 
         return ImmutableList.<DateTimeFormatter>builder()
                     .add(DateTimeFormatter.ISO_LOCAL_DATE_TIME) // ISO with 'T'
-                    .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.n][.S][ZZZZZ]")) // ISO without 'T'
+                    .add(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.n][.S][Z][x]")) // ISO without 'T'
                     .add(DateTimeFormatter.ISO_DATE) // ISO with or without time
                     .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy[ HH:mm:ss]").toFormatter()) // another common case
                     .build();
@@ -74,7 +74,7 @@ public class JDBC2ConstantConverter {
                         .addAll(defaultDateTimeFormatter) // another common case
                         .build(),
                 ORACLE, ImmutableList.<DateTimeFormatter>builder()
-                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy[ HH:mm:ss[,n][ a][Z]]").toFormatter())
+                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy[ HH:mm:ss[,n][ a][ ZZZZZ]]").toFormatter())
                         .addAll(defaultDateTimeFormatter)
                         .build(),
                 MSSQL, ImmutableList.<DateTimeFormatter>builder()

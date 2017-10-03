@@ -46,7 +46,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.CHAR, "CHAR");
 		SqlDatatypes.put(Types.VARCHAR, "VARCHAR(4000)");
 		SqlDatatypes.put(Types.CLOB, "CLOB");
-		SqlDatatypes.put(Types.TIMESTAMP, "TIMESTAMP");
+		SqlDatatypes.put(Types.TIMESTAMP, "VARCHAR(4000)");
 		SqlDatatypes.put(Types.INTEGER, "INTEGER");
 		SqlDatatypes.put(Types.BIGINT, "NUMBER(19)");
 		SqlDatatypes.put(Types.REAL, "NUMBER");
