@@ -1,17 +1,20 @@
 package it.unibz.inf.ontop.si.repository.impl;
 
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.LanguageTag;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class SemanticIndexViewsManager {
 
@@ -32,13 +35,18 @@ public class SemanticIndexViewsManager {
 		return Collections.unmodifiableList(classViews);
 	}
 
-	public SemanticIndexView getView(COL_TYPE type) {
+	public SemanticIndexView getView(TermType type) {
 		SemanticIndexViewID viewId = new SemanticIndexViewID(type);
 		return views.get(viewId);
 	}
 	
-	public SemanticIndexView getView(COL_TYPE type1, COL_TYPE type2) {
+	public SemanticIndexView getView(TermType type1, TermType type2) {
 		SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
+		/*
+		 * For language tags (need to know the concrete one)
+		 */
+		if (!views.containsKey(viewId))
+			initProperty(type1, type2);
 		return views.get(viewId);
 	}
 	
@@ -46,8 +54,11 @@ public class SemanticIndexViewsManager {
 	
 	private static final COL_TYPE[] objectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE };
 
+	/**
+	 * NB: LITERAL_LANG is not part of this array (cannot become a TermType without a language tag)
+	 */
 	private static final COL_TYPE[] typesAndObjectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE, 
-		COL_TYPE.LITERAL, COL_TYPE.LITERAL_LANG, COL_TYPE.BOOLEAN, 
+		COL_TYPE.LITERAL, COL_TYPE.BOOLEAN,
 		COL_TYPE.DATETIME, COL_TYPE.DATETIME_STAMP, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
 		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
 		COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER, COL_TYPE.FLOAT,  COL_TYPE.LONG, 
@@ -55,9 +66,11 @@ public class SemanticIndexViewsManager {
 	
 	private final void init() {
 		
-		for (COL_TYPE type1 : objectTypes) {
+		for (COL_TYPE colType1 : objectTypes) {
 
-			String value =  (type1 == COL_TYPE.BNODE) ? "TRUE" : "FALSE";
+			TermType type1 = TYPE_FACTORY.getTermType(colType1);
+
+			String value =  (colType1 == COL_TYPE.BNODE) ? "TRUE" : "FALSE";
 			String filter = "ISBNODE = " + value + " AND ";
 			
 			{
@@ -71,43 +84,53 @@ public class SemanticIndexViewsManager {
 			}
 			
 			
-			for (COL_TYPE type2 : typesAndObjectTypes) {
-				String select, insert;
-				
-				switch (type2) {
-					case OBJECT:
-						select = RDBMSSIRepositoryManager.attributeTable.get(type2).getSELECT(filter + "ISBNODE2 = FALSE AND ");
-						insert = RDBMSSIRepositoryManager.attributeTable.get(type2).getINSERT("?, ?, ?, " + value + ", FALSE");
-						break;
-					case BNODE:
-						select = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).getSELECT(filter + "ISBNODE2 = TRUE AND ");
-						insert = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).getINSERT("?, ?, ?, " + value + ", TRUE");
-						break;
-					case LITERAL:
-						select = RDBMSSIRepositoryManager.attributeTable.get(type2).getSELECT("LANG IS NULL AND " + filter);
-						insert = RDBMSSIRepositoryManager.attributeTable.get(type2).getINSERT("?, ?, ?, NULL, " + value);
-						break;
-					case LITERAL_LANG:
+			for (COL_TYPE colType2 : typesAndObjectTypes) {
+				initProperty(type1, TYPE_FACTORY.getTermType(colType2));
+			}
+		}		
+	}
+
+	private void initProperty(TermType type1, TermType type2) {
+		String value =  (type1.getColType() == COL_TYPE.BNODE) ? "TRUE" : "FALSE";
+		String filter = "ISBNODE = " + value + " AND ";
+
+		String select, insert;
+		COL_TYPE colType2 = type2.getColType();
+
+		switch (colType2) {
+			case OBJECT:
+				select = RDBMSSIRepositoryManager.attributeTable.get(colType2).getSELECT(filter + "ISBNODE2 = FALSE AND ");
+				insert = RDBMSSIRepositoryManager.attributeTable.get(colType2).getINSERT("?, ?, ?, " + value + ", FALSE");
+				break;
+			case BNODE:
+				select = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).getSELECT(filter + "ISBNODE2 = TRUE AND ");
+				insert = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).getINSERT("?, ?, ?, " + value + ", TRUE");
+				break;
+			case LITERAL:
+				select = RDBMSSIRepositoryManager.attributeTable.get(colType2).getSELECT("LANG IS NULL AND " + filter);
+				insert = RDBMSSIRepositoryManager.attributeTable.get(colType2).getINSERT("?, ?, ?, NULL, " + value);
+				break;
+			case LITERAL_LANG:
 						/*
 						 * If the mapping is for something of type Literal we need to add IS
 						 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
 						 * redundant since we have another stage in Quest where we add IS NOT
 						 * NULL for every variable in the head of a mapping.
 						 */
-						select = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).getSELECT("LANG IS NOT NULL AND " + filter);
-						insert = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).getINSERT("?, ?, ?, ?, " + value);
-						break;
-					default:
-						select = RDBMSSIRepositoryManager.attributeTable.get(type2).getSELECT(filter);
-						insert = RDBMSSIRepositoryManager.attributeTable.get(type2).getINSERT("?, ?, ?, " + value);
-				}
+				LanguageTag languageTag = ((RDFDatatype) type2).getLanguageTag().get();
+				select = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).getSELECT("LANG = '"
+						+ languageTag.getFullString() +  "' AND " + filter);
+				insert = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).getINSERT("?, ?, ?, ?, " + value);
+				break;
+			default:
+				select = RDBMSSIRepositoryManager.attributeTable.get(colType2).getSELECT(filter);
+				insert = RDBMSSIRepositoryManager.attributeTable.get(colType2).getINSERT("?, ?, ?, " + value);
+		}
 
-				SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
-				SemanticIndexView view = new SemanticIndexView(viewId, select, insert);
-				views.put(view.getId(), view);					
-				propertyViews.add(view);
-			}
-		}		
+		SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
+		SemanticIndexView view = new SemanticIndexView(viewId, select, insert);
+		views.put(view.getId(), view);
+		propertyViews.add(view);
 	}
 	
 	
@@ -162,53 +185,21 @@ public class SemanticIndexViewsManager {
 						// class view (only type1 is relevant)
 						stm.setInt(1, 0); // SITable.CLASS.ordinal()
 						stm.setInt(2, idx);
-						stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
+						stm.setInt(3, COLTYPEtoInt(viewId.getType1().getColType()));
 						stm.setInt(4, OBJ_TYPE_BNode);
 					}
 					else {
 						// property view
 						stm.setInt(1, COLTYPEtoSITable.get(viewId.getType2()));
 						stm.setInt(2, idx);
-						stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
-						stm.setInt(4, COLTYPEtoInt(viewId.getType2()));
+						stm.setInt(3, COLTYPEtoInt(viewId.getType1().getColType()));
+						stm.setInt(4, COLTYPEtoInt(viewId.getType2().getColType()));
 					}
 					
 					stm.addBatch();
 				}
 			}
 			stm.executeBatch();
-		}
-	}
-
-	/**
-	 * Restoring the emptiness index from the database
-	 * @throws SQLException 
-	 */
-	
-	public void load(Connection conn) throws SQLException {
-		
-		try (Statement st = conn.createStatement()) {
-			ResultSet res = st.executeQuery(RDBMSSIRepositoryManager.emptinessIndexTable.getSELECT());
-			while (res.next()) {
-				int sitable = res.getInt(1);
-				int type1 = res.getInt(3);
-				int type2 = res.getInt(4);
-				int idx = res.getInt(2);
-				
-				COL_TYPE coltype = SITableToCOLTYPE[sitable];
-				SemanticIndexView view;
-				if (coltype == null) {
-					// class view
-					view = getView(IntToCOLTYPE(type1));
-				}
-				else {
-					// property view
-					if (coltype ==  COL_TYPE.OBJECT)
-						coltype = IntToCOLTYPE(type2);
-					view = getView(IntToCOLTYPE(type1), coltype);
-				}
-				view.addIndex(idx);
-			}
 		}
 	}
 		

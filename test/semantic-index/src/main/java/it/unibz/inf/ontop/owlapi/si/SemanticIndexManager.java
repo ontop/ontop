@@ -66,12 +66,6 @@ public class SemanticIndexManager {
 		log.debug("TBox has been processed. Ready to ");
 	}
 
-	public void restoreRepository() throws SQLException {
-		dataRepository.loadMetadata(conn);
-
-		log.debug("Semantic Index metadata was found and restored from the DB");
-	}
-
 	public void setupRepository(boolean drop) throws SQLException {
 
 		if (drop) {

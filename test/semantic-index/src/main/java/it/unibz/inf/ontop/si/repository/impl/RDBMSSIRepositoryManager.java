@@ -22,6 +22,9 @@ package it.unibz.inf.ontop.si.repository.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
+import it.unibz.inf.ontop.model.type.LanguageTag;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -42,10 +45,8 @@ import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.sql.ResultSet;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -513,7 +514,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		int idx = cacheSI.getEntry(ope).getIndex();
 		
 
-		SemanticIndexView view = views.getView(o1.getType(), o2.getType());
+		SemanticIndexView view = views.getView(o1.getTermType(), o2.getTermType());
 		
 		PreparedStatement stm = stmMap.get(view.getId());
 		if (stm == null) {
@@ -545,11 +546,10 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		int uri_id = getObjectConstantUriId(subject, uriidStm);
 
 		ValueConstant object = ax.getValue();
-		COL_TYPE objectType = object.getType();
 
 		// ROMAN (28 June 2016): quite fragile because objectType is UNSUPPORTED for SHORT, BYTE, etc.
 		//                       a a workaround, obtain the URI ID first, without triggering an exception here
-		SemanticIndexView view =  views.getView(subject.getType(), objectType);
+		SemanticIndexView view =  views.getView(subject.getTermType(), object.getTermType());
 		PreparedStatement stm = stmMap.get(view.getId());
 		if (stm == null) {
 			stm = conn.prepareStatement(view.getINSERT());
@@ -560,7 +560,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		
 		String value = object.getValue();
 		
-		switch (objectType) {
+		switch (object.getType()) {
 			case LITERAL:  // 0
 				stm.setString(2, value);
 				break;  
@@ -628,7 +628,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 
 		ObjectConstant c1 = ax.getIndividual();
 
-		SemanticIndexView view =  views.getView(c1.getType());
+		SemanticIndexView view =  views.getView(c1.getTermType());
 	
 		PreparedStatement stm = stmMap.get(view.getId());
 		if (stm == null) {
@@ -784,83 +784,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			throw new RuntimeException("INTERVALS " + intervals + " FOR " + iri + "(" + type + ") DO NOT CONTAIN " + range.getIndex());
 
 		range.addRange(intervals);	
-	}
-	
-	@Override
-	public void loadMetadata(Connection conn) throws SQLException {
-		log.debug("Loading semantic index metadata from the database *");
-
-		cacheSI = new SemanticIndexCache(reasonerDag);	
-		views = new SemanticIndexViewsManager();
-
-		// Fetching the index data 
-		Statement st = conn.createStatement();
-		ResultSet res = st.executeQuery(indexTable.getSELECT() + " ORDER BY IDX");
-		while (res.next()) {
-			String iri = res.getString(1);
-			if (iri.startsWith("file:/"))  // ROMAN: what exactly is this?!
-				continue;
-			
-			int idx = res.getInt(2);
-			int type = res.getInt(3);
-			setIndex(iri, type, idx);
-		}
-		res.close();
-
-		
-		// compute the maximum object property index 
-		// (all data property indexes must be above)
-		int maxObjectPropertyIndex = 0;
-		for (Entry<ObjectPropertyExpression, SemanticIndexRange> entry : cacheSI.getObjectPropertyIndexEntries()) {
-			maxObjectPropertyIndex = Math.max(maxObjectPropertyIndex, entry.getValue().getIndex());
-		}
-		
-		
-		// Fetching the intervals data, note that a given String can have one or
-		// more intervals (a set) hence we need to go through several rows to
-		// collect all of them. To do this we sort the table by URI (to get all
-		// the intervals for a given String in sequence), then we collect all the
-		// intervals row by row until we change URI, at that switch we store the
-		// interval
-
-		res = st.executeQuery(intervalTable.getSELECT() + " ORDER BY URI, ENTITY_TYPE");
-
-		List<Interval> currentSet = null;
-		int previousType = 0;
-		String previousString = null;
-		while (res.next()) {
-			String iri = res.getString(1);
-			if (iri.startsWith("file:/"))   // ROMAN: what is this?
-				continue;
-
-			int type = res.getInt(4);
-
-			if (previousString == null) { // very first row
-				currentSet = new LinkedList<>();
-				previousType = type;
-				previousString = iri;
-			}
-
-			if ((!iri.equals(previousString) || previousType != type)) {
-				 // we switched URI or type, time to store the collected
-				 // intervals and clear the set
-				setIntervals(previousString, previousType, currentSet, maxObjectPropertyIndex);
-
-				currentSet = new LinkedList<>();
-				previousType = type;
-				previousString = iri;
-			}
-
-			int low = res.getInt(2);
-			int high = res.getInt(3);
-			currentSet.add(new Interval(low, high));
-		}
-
-		setIntervals(previousString, previousType, currentSet, maxObjectPropertyIndex);
-
-		res.close();
-
-		views.load(conn);
 	}
 
 	
@@ -1026,7 +949,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	}
 
 	
-	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, COL_TYPE type) {
+	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, TermType type) {
 
 		Variable X = TERM_FACTORY.getVariable("X");
 
@@ -1034,10 +957,11 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		//Function head = TERM_FACTORY.getFunction(headPredicate, X);
 
 		ImmutableFunctionalTerm subjectTerm;
-		if (type == COL_TYPE.OBJECT) 
+		COL_TYPE colType = type.getColType();
+		if (colType == COL_TYPE.OBJECT)
 			subjectTerm = TERM_FACTORY.getImmutableUriTemplate(X);
 		else {
-			assert (type == COL_TYPE.BNODE); 
+			assert (colType == COL_TYPE.BNODE);
 			subjectTerm = TERM_FACTORY.getImmutableBNodeTemplate(X);
 		}
 
@@ -1046,7 +970,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	}
 	
 	
-	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
+	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, TermType type1, TermType type2) {
 
 		Variable X = TERM_FACTORY.getVariable("X");
 		Variable Y = TERM_FACTORY.getVariable("Y");
@@ -1054,24 +978,29 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		//Predicate headPredicate = TERM_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
 		//Function head = TERM_FACTORY.getFunction(headPredicate, X, Y);
 
+		COL_TYPE colType1 = type1.getColType();
+		COL_TYPE colType2 = type2.getColType();
+
 		ImmutableFunctionalTerm subjectTerm;
-		if (type1 == COL_TYPE.OBJECT) 
+		if (colType1 == COL_TYPE.OBJECT)
 			subjectTerm = TERM_FACTORY.getImmutableUriTemplate(X);
 		else {
-			assert (type1 == COL_TYPE.BNODE); 
+			assert (colType1 == COL_TYPE.BNODE);
 			subjectTerm = TERM_FACTORY.getImmutableBNodeTemplate(X);
 		}
 		
 		ImmutableFunctionalTerm objectTerm;
-		switch (type2) {
+		switch (colType2) {
 			case BNODE:
 				objectTerm = TERM_FACTORY.getImmutableBNodeTemplate(Y);
 				break;
 			case OBJECT:
 				objectTerm = TERM_FACTORY.getImmutableUriTemplate(Y);
 				break;
-			case LITERAL_LANG:	
-				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, TERM_FACTORY.getVariable("Z"));
+			case LITERAL_LANG:
+				LanguageTag languageTag = ((RDFDatatype)type2).getLanguageTag().get();
+				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, TERM_FACTORY.getConstantLiteral(
+						languageTag.getFullString()));
 				break;
 			case DATE:
 			case TIME:
@@ -1079,7 +1008,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 				// R: these three types were not covered by the old switch
 				throw new RuntimeException("Unsuported type: " + type2);
 			default:
-				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, type2);
+				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, colType2);
 		}
 
 		ImmutableFunctionalTerm body = TERM_FACTORY.getImmutableFunctionalTerm(predicate, subjectTerm, objectTerm);
