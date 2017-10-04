@@ -24,7 +24,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
 import it.unibz.inf.ontop.spec.ontology.*;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 import java.util.*;
 
@@ -157,9 +159,9 @@ public class OntologyImpl implements Ontology {
 	static {
 		
 		OWL2QLDatatypes = ImmutableMap.<String, Datatype>builder()
-				.put(xml + "PlainLiteral", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL))) // 	rdf:PlainLiteral
+				.put(xml + "PlainLiteral", new DatatypeImpl( new DatatypePredicateImpl(RDFS.LITERAL.stringValue(), COL_TYPE.LITERAL))) // 	rdf:PlainLiteral
 				.put(xml + "XMLLiteral", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) //	rdf:XMLLiteral
-				.put(rdfs + "Literal", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL))) //		rdfs:Literal
+				.put(rdfs + "Literal", new DatatypeImpl(new DatatypePredicateImpl(RDFS.LITERAL.stringValue(), COL_TYPE.LITERAL))) //		rdfs:Literal
 				.put(owl + "real", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.DECIMAL))) // 			owl:real
 				.put(owl + "rational", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.DECIMAL))) // 		owl:rational
 				.put(xsd + "decimal", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.DECIMAL))) // 	xsd:decimal

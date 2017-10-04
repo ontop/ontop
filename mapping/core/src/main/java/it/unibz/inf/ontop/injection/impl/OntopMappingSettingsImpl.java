@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 
 import java.util.Properties;
@@ -36,6 +35,11 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
     @Override
     public boolean isProvidedDBMetadataCompletionEnabled() {
         return getRequiredBoolean(COMPLETE_PROVIDED_METADATA);
+    }
+
+    @Override
+    public boolean isDefaultDatatypeInferred() {
+        return getRequiredBoolean(INFER_DEFAULT_DATATYPE);
     }
 
     @Override

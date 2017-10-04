@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.postgres;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 /**
  * Test case for the IMDB database see wiki Example_MovieOntology
@@ -18,11 +19,12 @@ public class ImdbTestPostgres extends AbstractVirtualModeTest {
         super(owlFile, obdaFile, propertyFile);
     }
 
-
+    @Test
     public void testIMDBSeries() throws Exception {
         runQueries("src/test/resources/imdb/movieontology.q");
     }
 
+    @Test
     public void testOneQuery() throws Exception {
 
         String query = "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
@@ -51,6 +53,7 @@ public class ImdbTestPostgres extends AbstractVirtualModeTest {
         countResults(query2, 15175);
     }
 
+    @Test
     public void testCompanyLocationQuery() throws Exception {
 
         String query = "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
@@ -66,6 +69,7 @@ public class ImdbTestPostgres extends AbstractVirtualModeTest {
         countResults(query, 7738);
     }
 
+    @Test
     public void testIndividuals() throws Exception {
         String query = "PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>\n" +
                 "SELECT DISTINCT $z \n" +

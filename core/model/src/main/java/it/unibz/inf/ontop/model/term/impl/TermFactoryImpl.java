@@ -22,15 +22,15 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TypeFactoryImpl;
 
-import java.util.*;
+import java.util.List;
 
 public class TermFactoryImpl implements TermFactory {
 
@@ -107,7 +107,7 @@ public class TermFactoryImpl implements TermFactory {
 	
 	@Override
 	public ValueConstant getConstantLiteral(String value) {
-		return new ValueConstantImpl(value, COL_TYPE.LITERAL);
+		return new ValueConstantImpl(value, COL_TYPE.STRING);
 	}
 
 	@Override
@@ -131,14 +131,14 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Function getTypedTerm(Term value, Term language) {
-		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LITERAL_LANG);
+		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LANG_STRING);
 		return getFunction(pred, value, language);
 	}
 
 	@Override
 	public Function getTypedTerm(Term value, String language) {
 		Term lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.STRING);
-		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LITERAL_LANG);
+		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LANG_STRING);
 		return getFunction(pred, value, lang);
 	}
 
@@ -153,21 +153,15 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, ImmutableTerm language) {
-		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LITERAL_LANG);
+		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LANG_STRING);
 		return getImmutableFunctionalTerm(pred, value, language);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language) {
 		ValueConstant lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.STRING);
-		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LITERAL_LANG);
+		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LANG_STRING);
 		return getImmutableFunctionalTerm(pred, value, lang);
-	}
-	
-	@Override
-	public ValueConstant getConstantFreshLiteral() {
-		// TODO: a bit more elaborate name is needed to avoid conflicts
-		return new ValueConstantImpl("f" + (counter++), COL_TYPE.LITERAL);
 	}
 
 	@Override

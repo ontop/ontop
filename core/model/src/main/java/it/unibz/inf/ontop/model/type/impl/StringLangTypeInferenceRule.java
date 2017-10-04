@@ -10,6 +10,7 @@ import java.util.Optional;
  */
 public class StringLangTypeInferenceRule extends UnifierTermTypeInferenceRule {
 
+
     protected Optional<TermType> postprocessInferredType(Optional<TermType> optionalTermType) {
         return optionalTermType.map(TermTypeInferenceTools::castStringLangType);
     }

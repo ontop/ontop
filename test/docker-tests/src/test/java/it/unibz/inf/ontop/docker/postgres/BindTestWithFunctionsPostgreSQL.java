@@ -76,10 +76,10 @@ public class BindTestWithFunctionsPostgreSQL extends AbstractBindTestWithFunctio
     @Override
     protected List<String> getRoundExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0, 43\"");
-        expectedValues.add("\"0, 23\"");
-        expectedValues.add("\"0, 34\"");
-        expectedValues.add("\"0, 10\"");
+        expectedValues.add("\"0, 43\"^^xsd:string");
+        expectedValues.add("\"0, 23\"^^xsd:string");
+        expectedValues.add("\"0, 34\"^^xsd:string");
+        expectedValues.add("\"0, 10\"^^xsd:string");
         return expectedValues;
     }
 

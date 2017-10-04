@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.answering.reformulation.input.AskQuery;
+import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
@@ -12,12 +12,11 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.utils.querymanager.QueryController;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
-import junit.framework.TestCase;
+import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
+import org.junit.Before;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +25,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 /**
  * Common initialization for many tests
  */
-public abstract class AbstractVirtualModeTest extends TestCase {
+public abstract class AbstractVirtualModeTest {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final String owlFileName;
@@ -45,7 +46,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         this.propertyFileName = this.getClass().getResource(propertyFile).toString();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         // Creating a new instance of the reasoner
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();

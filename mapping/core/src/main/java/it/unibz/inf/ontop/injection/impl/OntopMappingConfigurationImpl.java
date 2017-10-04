@@ -4,21 +4,21 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.MissingInputMappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
-import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
+import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
-import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
+import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
+import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;
@@ -188,6 +188,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         private Optional<Boolean> obtainFullMetadata = Optional.empty();
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
         private Optional<Boolean> completeDBMetadata = Optional.empty();
+        private Optional<Boolean> inferDefaultDatatype =  Optional.empty();
         private Optional<DBMetadata> dbMetadata = Optional.empty();
         private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
 
@@ -227,6 +228,12 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             return builder;
         }
 
+        @Override
+        public B enableDefaultDatatypeInference(boolean inferDefaultDatatype) {
+            this.inferDefaultDatatype = Optional.of(inferDefaultDatatype);
+            return builder;
+        }
+
         final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions,
                                                          OntopOptimizationOptions optimizationOptions) {
             return new OntopMappingOptions(dbMetadata, excludeFromTMappings, obdaOptions, optimizationOptions);
@@ -237,6 +244,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             obtainFullMetadata.ifPresent(m -> properties.put(OntopMappingSettings.OBTAIN_FULL_METADATA, m));
             queryingAnnotationsInOntology.ifPresent(b -> properties.put(OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS, b));
             completeDBMetadata.ifPresent(b -> properties.put(OntopMappingSettings.COMPLETE_PROVIDED_METADATA, b));
+            inferDefaultDatatype.ifPresent(b -> properties.put(OntopMappingSettings.INFER_DEFAULT_DATATYPE, b));
+
             return properties;
         }
 
@@ -278,6 +287,11 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         @Override
         public B enableProvidedDBMetadataCompletion(boolean dbMetadataCompletion) {
             return mappingBuilderFragment.enableProvidedDBMetadataCompletion(dbMetadataCompletion);
+        }
+
+        @Override
+        public B enableDefaultDatatypeInference(boolean inferDefaultDatatype) {
+            return mappingBuilderFragment.enableDefaultDatatypeInference(inferDefaultDatatype);
         }
 
         @Override

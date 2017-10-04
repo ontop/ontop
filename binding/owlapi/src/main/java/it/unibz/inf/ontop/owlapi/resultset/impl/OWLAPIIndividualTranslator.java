@@ -22,15 +22,17 @@ package it.unibz.inf.ontop.owlapi.resultset.impl;
 
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLTypeMapper;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.spec.ontology.AnnotationAssertion;
 import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyAssertion;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
+import uk.ac.manchester.cs.owl.owlapi.OWLDatatypeImpl;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+
 
 /***
  * Translates a ontop ABox assertion into an OWLIndividualAxiom. Used in the
@@ -100,11 +102,11 @@ public class OWLAPIIndividualTranslator {
 		if (value == null) {
 			return null;
 		} 
-		else if (v.getType() == COL_TYPE.LITERAL_LANG) {
+		else if (v.getType() == COL_TYPE.LANG_STRING) {
 			return dataFactory.getOWLLiteral(value, v.getLanguage());
 		} 
 		else {
-			OWL2Datatype datatype = OWLTypeMapper.getOWLType(v.getType());
+			OWLDatatype datatype = new OWLDatatypeImpl(IRI.create(TYPE_FACTORY.getDatatypeURI(v.getType()).stringValue()));
 			if (datatype != null)
 				return dataFactory.getOWLLiteral(value, datatype);
 			else 

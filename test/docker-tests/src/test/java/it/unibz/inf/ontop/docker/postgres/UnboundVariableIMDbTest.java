@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.postgres;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 
 /**
@@ -20,7 +21,7 @@ public class UnboundVariableIMDbTest extends AbstractVirtualModeTest {
 		super(owlfile, obdafile, propertyfile);
 	}
 
-
+	@Test
 	public void testIMDBSeries() throws Exception {
 		String query = "PREFIX : <http://www.seriology.org/seriology#> SELECT DISTINCT ?p WHERE { ?p a :Series . } LIMIT 10";
 		countResults(query, 10);

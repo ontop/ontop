@@ -18,13 +18,6 @@
  * #L%
  */
 
-import java.io.*;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.*;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -32,29 +25,22 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
-import it.unibz.inf.ontop.exception.*;
+import it.unibz.inf.ontop.exception.MappingBootstrappingException;
+import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.rio.RDFHandler;
-import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.eclipse.rdf4j.model.Statement;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelUtil;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.GraphQuery;
@@ -62,14 +48,24 @@ import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.*;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
@@ -278,7 +274,8 @@ public class RDB2RDFTest {
 
 	Builder<? extends Builder> createStandardConfigurationBuilder() {
 		  return OntopSQLOWLAPIConfiguration.defaultBuilder()
-				 .properties(PROPERTIES);
+				 .properties(PROPERTIES)
+				  .enableDefaultDatatypeInference(true);
 	}
 
 	Builder<? extends Builder> createInMemoryBuilder() {
@@ -288,6 +285,7 @@ public class RDB2RDFTest {
 				.jdbcDriver(JDBC_DRIVER)
 				.jdbcUser(DB_USER)
 				.jdbcPassword(DB_PASSWORD)
+				.enableDefaultDatatypeInference(true)
 				.enableTestMode();
 	}
 
@@ -335,7 +333,7 @@ public class RDB2RDFTest {
 		assumeTrue(!IGNORE.contains(name));
 
 		try {
-			runTestWithoutIgnores();
+ 			runTestWithoutIgnores();
 		}
 		catch (Throwable e) {
 			FAILURES.add('"' + name + '"');

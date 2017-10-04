@@ -1208,7 +1208,7 @@ public class OneShotSQLGeneratorEngine {
 			Function f = (Function) term;
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
-				COL_TYPE type = TYPE_FACTORY.getDatatype(p.toString());
+				COL_TYPE type = TYPE_FACTORY.getDatatype(p.getName()).get();
 				return jdbcTypeMapper.getSQLType(type);
 			}
 			// Return varchar for unknown
@@ -1440,14 +1440,14 @@ public class OneShotSQLGeneratorEngine {
 		}
 		else {
 			lang = optionalTermType
-					.filter(t -> t.getColType() == LITERAL_LANG)
+					.filter(t -> t.getColType() == LANG_STRING)
 					.map(t -> t.getLanguageTagConstant()
 								.map(tag -> "'" + tag.getFullString() + "'")
 								.orElseGet(() -> t.getLanguageTagTerm()
 										.map(tag -> getSQLString(tag, index, false))
 										.orElseThrow(() -> new IllegalStateException(
 												"Inconsistent term type: the language tag must be defined " +
-														"for any LITERAL_LANG"))))
+														"for any LANG_STRING"))))
 					.orElse("NULL");
 		}
 		return String.format(LANG_STR, lang, langVariableName);
@@ -1481,7 +1481,7 @@ public class OneShotSQLGeneratorEngine {
 					/**
 					 * By default, we apply the "most" general COL_TYPE
 					 */
-					.orElse(LITERAL);
+					.orElse(STRING);
 
 			typeString = String.format("%d", colType.getQuestCode());
 		}
@@ -1599,9 +1599,9 @@ public class OneShotSQLGeneratorEngine {
 			 */
 			if (ov.getTerms().size() > 1) {
 				int size = ov.getTerms().size();
-				if (TYPE_FACTORY.isLiteral(pred)) {
-					size--;
-				}
+//				if (TYPE_FACTORY.isLiteral(pred)) {
+//					size--;
+//				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {
 					Term currentTerm = ov.getTerms().get(termIndex);
 					String repl = "";
@@ -1808,8 +1808,7 @@ public class OneShotSQLGeneratorEngine {
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
 			if (hasIRIDictionary()) {
-				if (ct.getType() == OBJECT
-						|| ct.getType() == LITERAL) {
+				if (ct.getType() == OBJECT || ct.getType() == STRING) {
 					int id = getUriid(ct.getValue());
 					if (id >= 0)
 						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
@@ -2111,34 +2110,33 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private String getSQLLexicalForm(ValueConstant constant) {
 		switch (constant.getType()) {
-		case BNODE:
-		case LITERAL:
-		case OBJECT:
-		case STRING:
-			return sqladapter.getSQLLexicalFormString(constant.getValue());
-		case BOOLEAN:
-			boolean v = XsdDatatypeConverter.parseXsdBoolean(constant.getValue());
-			return sqladapter.getSQLLexicalFormBoolean(v);
-		case DATETIME:
-			return sqladapter.getSQLLexicalFormDatetime(constant.getValue());
-		case DATETIME_STAMP:
-			return sqladapter.getSQLLexicalFormDatetimeStamp(constant.getValue());
-		case DECIMAL:
-		case DOUBLE:
-		case INTEGER:
-		case LONG:
-		case FLOAT:
-		case NON_POSITIVE_INTEGER:
-		case INT:
-		case UNSIGNED_INT:
-		case NEGATIVE_INTEGER:
-		case POSITIVE_INTEGER:
-		case NON_NEGATIVE_INTEGER:
-			return constant.getValue();
-		case NULL:
-			return "NULL";
-		default:
-			return "'" + constant.getValue() + "'";
+			case BNODE:
+			case OBJECT:
+			case STRING:
+				return sqladapter.getSQLLexicalFormString(constant.getValue());
+			case BOOLEAN:
+				boolean v = XsdDatatypeConverter.parseXsdBoolean(constant.getValue());
+				return sqladapter.getSQLLexicalFormBoolean(v);
+			case DATETIME:
+				return sqladapter.getSQLLexicalFormDatetime(constant.getValue());
+			case DATETIME_STAMP:
+				return sqladapter.getSQLLexicalFormDatetimeStamp(constant.getValue());
+			case DECIMAL:
+			case DOUBLE:
+			case INTEGER:
+			case LONG:
+			case FLOAT:
+			case NON_POSITIVE_INTEGER:
+			case INT:
+			case UNSIGNED_INT:
+			case NEGATIVE_INTEGER:
+			case POSITIVE_INTEGER:
+			case NON_NEGATIVE_INTEGER:
+				return constant.getValue();
+			case NULL:
+				return "NULL";
+			default:
+				return "'" + constant.getValue() + "'";
 		}
 	}
 

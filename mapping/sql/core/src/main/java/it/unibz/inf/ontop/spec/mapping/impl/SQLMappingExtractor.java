@@ -117,7 +117,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                                   OBDASpecInput specInput, Optional<Ontology> optionalOntology,
                                                   Optional<TBoxReasoner> optionalSaturatedTBox,
                                                   ExecutorRegistry executorRegistry)
-            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException {
+            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
 
         RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);

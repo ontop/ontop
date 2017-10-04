@@ -22,6 +22,9 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /***
  * Tests that mysql identifiers for tables and columns are treated
@@ -41,23 +44,25 @@ public class MySQLIdentifierTest extends AbstractVirtualModeTest {
 	 * Test use of lowercase column identifiers (also in target)
 	 * @throws Exception
 	 */
+	@Test
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
 		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
 	}
+	@Test
 	public void testUppercaseAlias() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
 		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-a>", val);
 	}
-	
+	@Test
 	public void testLowercaseNoAlias() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
 		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-a>", val);
 	}
-	
+	@Test
 	public void testLowercaseQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
 		String val = runQueryAndReturnStringOfIndividualX(query);

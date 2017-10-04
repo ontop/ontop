@@ -24,7 +24,10 @@ import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -314,25 +317,23 @@ public class R2RMLParser {
 
 					// we check if it is a typed literal
 					else if (datatypeConstant != null) {
-						Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(datatypeConstant.getIRIString());
-						if (type == null) {
+						Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(datatypeConstant.getIRIString());
+						if (!type.isPresent()) {
 							// throw new RuntimeException("Unsupported datatype: " +
 							// datatype.toString());
 							logger.warn("Unsupported datatype will not be converted: "
 									+ datatypeConstant.toString());
 						} else {
-							objectAtom = TERM_FACTORY.getImmutableTypedTerm(constantLiteral, type);
+							objectAtom = TERM_FACTORY.getImmutableTypedTerm(constantLiteral, type.get());
 						}
 					}
 					else {
 
-						objectAtom = TERM_FACTORY.getImmutableTypedTerm(
-								constantLiteral,
-								COL_TYPE.LITERAL); // .RDFS_LITERAL;
+						objectAtom = constantLiteral;
+								 // .RDFS_LITERAL;
 					}
                 } else if (constantObj instanceof IRI){
-                    objectAtom = TERM_FACTORY.getImmutableTypedTerm(
-                    		TERM_FACTORY.getConstantLiteral( ((IRI) constantObj).getIRIString()), COL_TYPE.LITERAL);
+                    objectAtom = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral( ((IRI) constantObj).getIRIString()));
 
                 }
 			}
@@ -405,35 +406,22 @@ public class R2RMLParser {
 
 		if (lan != null) {
 			objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, lan);
-		}else if ((typ.equals(R2RMLVocabulary.literal)) && (concat)){
-			objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, COL_TYPE.LITERAL);
 		}
 
 		// we check if it is a typed literal
 		if (datatype != null) {
-			Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(datatype.toString());
-			if (type == null) {
+			Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(datatype.toString());
+			if (!type.isPresent()) {
 				// throw new RuntimeException("Unsupported datatype: " +
 				// datatype.toString());
 				logger.warn("Unsupported datatype will not be converted: "
 						+ datatype.toString());
 			} else {
-				objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, type);
+				objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, type.get());
 			}
 		}
 
 		return objectAtom;
-	}
-
-	@Deprecated
-	private Term getConstantObject(String objectString) {
-		if (objectString.startsWith("http:"))
-			return getURIFunction(objectString);
-		else { // literal
-			Constant constt = TERM_FACTORY.getConstantLiteral(objectString);
-			return TERM_FACTORY.getTypedTerm(constt, COL_TYPE.LITERAL);
-
-		}
 	}
 
 	@Deprecated
@@ -613,10 +601,10 @@ public class R2RMLParser {
 			// simple LITERAL
 		case 3:
 			uriTemplate = terms.remove(0);
-			// pred = TYPE_FACTORY.getTypePredicate(); // OBDAVocabulary.RDFS_LITERAL;
+			// pred = TYPE_FACTORY.getTypePredicate(); //
 			// the URI template is always on the first position in the term list
 			// terms.add(0, uriTemplate);
-			return TERM_FACTORY.getImmutableTypedTerm(uriTemplate, COL_TYPE.LITERAL);
+			return TERM_FACTORY.getImmutableTypedTerm(uriTemplate, COL_TYPE.STRING);
 		case 4://concat
 			ImmutableFunctionalTerm f = TERM_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
             for(int j=2;j<terms.size();j++){
