@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
@@ -402,12 +402,12 @@ public class SelectQueryParserTest {
     }
 
     private Function dataAtomOf(String predicate, String var1, String var2) {
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(predicate, new Predicate.COL_TYPE[]{ null, null }),
+        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(predicate, new COL_TYPE[]{ null, null }),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 
     private Function dataAtomOf(String predicate, String var1, String var2, String var3, String var4) {
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(predicate, new Predicate.COL_TYPE[]{ null, null, null, null }),
+        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(predicate, new COL_TYPE[]{ null, null, null, null }),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2), TERM_FACTORY.getVariable(var3), TERM_FACTORY.getVariable(var4)));
     }
 

@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import org.antlr.runtime.BitSet;
@@ -1575,7 +1575,7 @@ public class TurtleOBDAParser extends Parser {
 					    } else {
 					        throw new IllegalArgumentException("resource25 should be an URI");
 					    }
-					    Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(functionName);
+					    COL_TYPE type = TYPE_FACTORY.getDatatype(functionName);
 					    if (type == null)  
 					 	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
 					    
@@ -2057,7 +2057,7 @@ public class TurtleOBDAParser extends Parser {
 			          if (resource38 instanceof Function){
 			          	    String functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
 
-			                    Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(functionName);
+			                    COL_TYPE type = TYPE_FACTORY.getDatatype(functionName);
 			                    if (type == null) {
 			                      throw new RuntimeException("Unsupported datatype: " + functionName);
 			                    }

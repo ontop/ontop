@@ -14,9 +14,9 @@ import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
@@ -120,8 +120,8 @@ public class NavigationAfterRemovingEmptyNodeTest {
 
         InnerJoinNode unsatisfiedJoinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ,
-                DATA_FACTORY.getConstantLiteral("2", Predicate.COL_TYPE.INTEGER),
-                DATA_FACTORY.getConstantLiteral("3", Predicate.COL_TYPE.INTEGER)));
+                DATA_FACTORY.getConstantLiteral("2", COL_TYPE.INTEGER),
+                DATA_FACTORY.getConstantLiteral("3", COL_TYPE.INTEGER)));
         initialQueryBuilder.addChild(unionNode, unsatisfiedJoinNode);
         initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_1);
         initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_2);

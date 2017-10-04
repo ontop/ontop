@@ -7,8 +7,8 @@ import it.unibz.inf.ontop.model.type.TermType;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.LITERAL_LANG;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.STRING;
+import static it.unibz.inf.ontop.model.type.COL_TYPE.LITERAL_LANG;
+import static it.unibz.inf.ontop.model.type.COL_TYPE.STRING;
 
 public class LangDatatype extends AbstractRDFDatatype {
 

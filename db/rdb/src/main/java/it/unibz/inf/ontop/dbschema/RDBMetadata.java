@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ public class RDBMetadata extends BasicDBMetadata {
 	}
 
 	@Override
-	public Optional<Predicate.COL_TYPE> getColType(Attribute attribute) {
+	public Optional<COL_TYPE> getColType(Attribute attribute) {
 		return Optional.of(jdbcTypeMapper.getPredicate(attribute.getType()));
 	}
 

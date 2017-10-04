@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.evaluator;
 
 import it.unibz.inf.ontop.evaluator.impl.ExpressionNormalizerImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.TermConstants;
@@ -456,7 +456,7 @@ public class ExpressionEvaluator {
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(constantValue);
+		COL_TYPE type = TYPE_FACTORY.getDatatype(constantValue);
 		if (type != null) {
 			Predicate p = TYPE_FACTORY.getTypePredicate(type);
 			return isNumeric(p);

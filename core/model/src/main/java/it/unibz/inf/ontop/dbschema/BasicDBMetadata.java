@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.dbschema.impl.AbstractDBMetadata;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +125,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     }
 
     @Override
-    public Optional<Predicate.COL_TYPE> getColType(Attribute attribute) {
+    public Optional<COL_TYPE> getColType(Attribute attribute) {
         throw new RuntimeException("This method should not be called");
     }
 

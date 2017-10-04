@@ -24,10 +24,10 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.utils.EncodeForURI;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
@@ -132,7 +132,7 @@ public class DirectMappingAxiomProducer {
 
 		//DataType Atoms
 		for (Attribute att : table.getAttributes()) {
-			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
+			COL_TYPE type = typeMapper.getPredicate(att.getType());
 			Variable objV = df.getVariable(att.getID().getName());
 			ImmutableTerm obj = df.getImmutableTypedTerm(objV, type);
 			

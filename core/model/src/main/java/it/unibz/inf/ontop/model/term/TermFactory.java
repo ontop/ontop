@@ -26,7 +26,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 
 public interface TermFactory {
 
@@ -216,7 +216,7 @@ public interface TermFactory {
 	 *            the type of the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getConstantLiteral(String value, Predicate.COL_TYPE type);
+	public ValueConstant getConstantLiteral(String value, COL_TYPE type);
 
 
 	/**
@@ -238,11 +238,11 @@ public interface TermFactory {
 
 	public Function getTypedTerm(Term value, String language);
 	public Function getTypedTerm(Term value, Term language);
-	public Function getTypedTerm(Term value, Predicate.COL_TYPE type);
+	public Function getTypedTerm(Term value, COL_TYPE type);
 
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language);
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, ImmutableTerm language);
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, Predicate.COL_TYPE type);
+	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, COL_TYPE type);
 	
 	/**
 	 * Construct a {@link ValueConstant} object with a system-assigned name

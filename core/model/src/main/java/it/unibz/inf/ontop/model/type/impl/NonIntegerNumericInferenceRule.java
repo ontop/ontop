@@ -5,8 +5,8 @@ import it.unibz.inf.ontop.model.type.TermType;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER_TYPES;
+import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER;
+import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER_TYPES;
 
 /**
  * Cannot infer COL_TYPE.INTEGER (will put COL_TYPE.DECIMAL instead)

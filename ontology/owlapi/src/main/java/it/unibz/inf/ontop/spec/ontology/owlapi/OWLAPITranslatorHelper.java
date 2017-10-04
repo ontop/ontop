@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.spec.ontology.owlapi;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.owlapi.model.*;
@@ -52,7 +52,7 @@ public class OWLAPITranslatorHelper {
 			c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), object.getLang());
 		}
 		else {
-			Predicate.COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
+			COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
 			c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), type);
 		}
 		URIConstant c1 = getIndividual(ax.getSubject());
@@ -175,7 +175,7 @@ public class OWLAPITranslatorHelper {
 
 					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), owlLiteral.getLang());
 				} else {
-					Predicate.COL_TYPE type = OWLTypeMapper.getType(owlLiteral.getDatatype());
+					COL_TYPE type = OWLTypeMapper.getType(owlLiteral.getDatatype());
 					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), type);
 				}
 

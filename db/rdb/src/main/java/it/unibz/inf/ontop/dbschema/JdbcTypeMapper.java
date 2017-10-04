@@ -21,8 +21,7 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 
 import java.sql.Types;
 import java.util.HashMap;
@@ -91,15 +90,15 @@ public class JdbcTypeMapper {
 		return INSTANCE;
 	}
 
-	public Predicate.COL_TYPE getPredicate(int sqlType) {
-		Predicate.COL_TYPE type = sqlToQuest.get(sqlType);
+	public COL_TYPE getPredicate(int sqlType) {
+		COL_TYPE type = sqlToQuest.get(sqlType);
 		if (type == null)
 			type = COL_TYPE.STRING; //treat them as simple literal
 
 		return type;
 	}
 
-	public int getSQLType(Predicate.COL_TYPE type) {
+	public int getSQLType(COL_TYPE type) {
 		if (type != null) {
 			Integer sqlType = datatypeMap.get(type);
 			if (sqlType != null)

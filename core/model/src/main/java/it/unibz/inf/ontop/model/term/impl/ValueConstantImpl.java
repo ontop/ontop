@@ -20,9 +20,8 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TermType;
 
@@ -36,7 +35,7 @@ public class ValueConstantImpl implements ValueConstant {
 
 	private final String value;
 	private final String language;
-	private final Predicate.COL_TYPE type;
+	private final COL_TYPE type;
 	private final String string;
 	private final TermType termType;
 
@@ -48,7 +47,7 @@ public class ValueConstantImpl implements ValueConstant {
 	 * @param type
 	 *            the constant type.
 	 */
-	protected ValueConstantImpl(String value, Predicate.COL_TYPE type) {
+	protected ValueConstantImpl(String value, COL_TYPE type) {
 		this.value = value;
 		this.language = null;
 		this.type = type;
@@ -138,7 +137,7 @@ public class ValueConstantImpl implements ValueConstant {
 	}
 
 	@Override
-	public Predicate.COL_TYPE getType() {
+	public COL_TYPE getType() {
 		return type;
 	}
 

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.spec.ontology.owlapi;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
@@ -44,13 +43,13 @@ public class OWLTypeMapper {
 		COLTYPEtoOWL.put(COL_TYPE.YEAR, OWL2Datatype.RDF_PLAIN_LITERAL);
 	}
 	
-	private static void registerType(OWL2Datatype owlType, Predicate.COL_TYPE type) {
+	private static void registerType(OWL2Datatype owlType, COL_TYPE type) {
 		OWLtoCOLTYPE.put(owlType, type); 
 		COLTYPEtoOWL.put(type, owlType);  	
 	}
 	
 	// OWLAPI3TranslatorDLLiteA only
-	public static Predicate.COL_TYPE getType(OWL2Datatype owlDatatype) throws OWLAPITranslatorOWL2QL.TranslationException {
+	public static COL_TYPE getType(OWL2Datatype owlDatatype) throws OWLAPITranslatorOWL2QL.TranslationException {
 		if (owlDatatype == null) 
 			return COL_TYPE.LITERAL;
 		
@@ -62,7 +61,7 @@ public class OWLTypeMapper {
 
 	// OWLAPI3TranslatorDLLiteA only
 	@Deprecated
-	public static Predicate.COL_TYPE getType(OWLDatatype owlDatatype) throws OWLAPITranslatorOWL2QL.TranslationException {
+	public static COL_TYPE getType(OWLDatatype owlDatatype) throws OWLAPITranslatorOWL2QL.TranslationException {
 		if (owlDatatype == null) 
 			return COL_TYPE.LITERAL;
 		

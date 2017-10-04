@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.model.type.impl;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.Optional;
@@ -12,14 +12,14 @@ import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools.getCommo
  */
 public class AbstractTermType implements TermType {
 
-    private final Predicate.COL_TYPE colType;
+    private final COL_TYPE colType;
 
-    protected AbstractTermType(Predicate.COL_TYPE colType) {
+    protected AbstractTermType(COL_TYPE colType) {
         this.colType = colType;
     }
 
     @Override
-    public Predicate.COL_TYPE getColType() {
+    public COL_TYPE getColType() {
         return colType;
     }
 

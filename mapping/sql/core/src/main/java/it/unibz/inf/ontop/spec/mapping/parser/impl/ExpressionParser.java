@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
@@ -12,6 +11,7 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -725,12 +725,12 @@ public class ExpressionParser {
 
         @Override
         public void visit(DoubleValue expression) {
-            process(expression.toString(), Predicate.COL_TYPE.DOUBLE);
+            process(expression.toString(), COL_TYPE.DOUBLE);
         }
 
         @Override
         public void visit(LongValue expression) {
-            process(expression.getStringValue(), Predicate.COL_TYPE.LONG);
+            process(expression.getStringValue(), COL_TYPE.LONG);
         }
 
         @Override
@@ -740,22 +740,22 @@ public class ExpressionParser {
 
         @Override
         public void visit(StringValue expression) {
-            process(expression.getValue(), Predicate.COL_TYPE.STRING);
+            process(expression.getValue(), COL_TYPE.STRING);
         }
 
         @Override
         public void visit(DateValue expression) {
-            process(expression.getValue().toString(), Predicate.COL_TYPE.DATE);
+            process(expression.getValue().toString(), COL_TYPE.DATE);
         }
 
         @Override
         public void visit(TimeValue expression) {
-            process(expression.getValue().toString(), Predicate.COL_TYPE.TIME);
+            process(expression.getValue().toString(), COL_TYPE.TIME);
         }
 
         @Override
         public void visit(TimestampValue expression) {
-            process(expression.getValue().toString(), Predicate.COL_TYPE.DATETIME);
+            process(expression.getValue().toString(), COL_TYPE.DATETIME);
         }
 
         @Override
@@ -764,7 +764,7 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("Temporal INTERVALs are not supported yet", expression);
         }
 
-        private void process(String value, Predicate.COL_TYPE datatype) {
+        private void process(String value, COL_TYPE datatype) {
             result = TERM_FACTORY.getConstantLiteral(value, datatype);
         }
 
@@ -1178,7 +1178,7 @@ public class ExpressionParser {
                 flags = TERM_FACTORY.getConstantLiteral(""); // the 4th argument is flags
                 break;
             case 4:
-                if (((ValueConstant)terms.get(3)).getType() == Predicate.COL_TYPE.STRING) {
+                if (((ValueConstant)terms.get(3)).getType() == COL_TYPE.STRING) {
                     // PostgreSQL
                     flags =  terms.get(3);
                     // check that flags is either ig or g
@@ -1188,8 +1188,8 @@ public class ExpressionParser {
                 break;
             case 6:
                 // Oracle
-                if (!terms.get(3).equals(TERM_FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.LONG))
-                        || !terms.get(4).equals(TERM_FACTORY.getConstantLiteral("0", Predicate.COL_TYPE.LONG)))
+                if (!terms.get(3).equals(TERM_FACTORY.getConstantLiteral("1", COL_TYPE.LONG))
+                        || !terms.get(4).equals(TERM_FACTORY.getConstantLiteral("0", COL_TYPE.LONG)))
                     throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
 
                 // check that the flags is a combination of imx

@@ -31,7 +31,7 @@ import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import it.unibz.inf.ontop.model.term.Constant;
@@ -463,7 +463,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				}
 				else if (o instanceof URI) {
 					// term rdf:type uri .
-					Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype((IRI)o);
+					COL_TYPE type = TYPE_FACTORY.getDatatype((IRI)o);
 					if (type != null) // datatype
 						atom = TERM_FACTORY.getFunction(TYPE_FACTORY.getTypePredicate(type), sTerm);
 					else // class

@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
@@ -156,7 +156,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	
 	
 	@Override
-	public DatatypePredicate getTypePredicate(Predicate.COL_TYPE type) {
+	public DatatypePredicate getTypePredicate(COL_TYPE type) {
 		return mapCOLTYPEtoPredicate.get(type);
 		
 		//case OBJECT:   // different uses

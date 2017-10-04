@@ -9,9 +9,9 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.NUMERIC_TYPES;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER_TYPES;
+import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER;
+import static it.unibz.inf.ontop.model.type.COL_TYPE.NUMERIC_TYPES;
+import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER_TYPES;
 
 
 public class NumericTermTypeInferenceRule extends UnifierTermTypeInferenceRule {

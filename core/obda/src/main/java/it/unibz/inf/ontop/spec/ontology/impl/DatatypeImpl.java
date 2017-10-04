@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  */
 
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.spec.ontology.Datatype;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;

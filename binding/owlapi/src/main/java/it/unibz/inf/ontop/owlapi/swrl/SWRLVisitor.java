@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -247,7 +248,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	public void visit(SWRLIndividualArgument node) {
 	
 		//get the id without the quotes <>
-		terms.add(TERM_FACTORY.getConstantLiteral(node.getIndividual().toStringID(), Predicate.COL_TYPE.STRING));
+		terms.add(TERM_FACTORY.getConstantLiteral(node.getIndividual().toStringID(), COL_TYPE.STRING));
 	}
 
 	@Override
@@ -260,11 +261,11 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		else if(literal.hasLang())
 			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), literal.getLang()));
 		else if (literal.isDouble())
-			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DOUBLE));
+			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), COL_TYPE.DOUBLE));
 		else if (literal.isFloat())
-			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DECIMAL));
+			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), COL_TYPE.DECIMAL));
 		else if (literal.isInteger())
-			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.INTEGER));
+			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), COL_TYPE.INTEGER));
 		else 
 			TERM_FACTORY.getConstantLiteral(literal.getLiteral());
 	}

@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.model.term;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.TermType;
 
 /**
@@ -30,7 +30,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 public interface Constant extends NonFunctionalTerm, GroundTerm {
 
 	@Deprecated
-	public Predicate.COL_TYPE getType();
+	public COL_TYPE getType();
 
 	TermType getTermType();
 

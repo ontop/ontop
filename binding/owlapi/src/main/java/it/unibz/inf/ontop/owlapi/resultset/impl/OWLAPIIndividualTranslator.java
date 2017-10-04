@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.spec.ontology.owlapi.OWLTypeMapper;
 import it.unibz.inf.ontop.spec.ontology.AnnotationAssertion;
 import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyAssertion;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;

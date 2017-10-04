@@ -5,9 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.ExpressionParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpressionAttributes;
@@ -45,7 +45,7 @@ public class RelationalExpressionTest {
         y = TERM_FACTORY.getVariable("y");
 
         f1 = TERM_FACTORY.getFunction(
-                TERM_FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
+                TERM_FACTORY.getPredicate("P", new COL_TYPE[] { null, null }),
                 ImmutableList.of(x, y));
 
         table1 = MDFAC.createRelationID(null, "P");
@@ -67,7 +67,7 @@ public class RelationalExpressionTest {
         v = TERM_FACTORY.getVariable("v");
 
         f2 = TERM_FACTORY.getFunction(
-                TERM_FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
+                TERM_FACTORY.getPredicate("Q", new COL_TYPE[] { null, null }),
                 ImmutableList.of(u, v));
 
         RelationID table2 = MDFAC.createRelationID(null, "Q");
@@ -90,7 +90,7 @@ public class RelationalExpressionTest {
         Variable z = TERM_FACTORY.getVariable("v");
 
         Function f3 = TERM_FACTORY.getFunction(
-                TERM_FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
+                TERM_FACTORY.getPredicate("Q", new COL_TYPE[] { null, null }),
                 ImmutableList.of(w, z));
 
         RelationID table3 = MDFAC.createRelationID(null, "R");

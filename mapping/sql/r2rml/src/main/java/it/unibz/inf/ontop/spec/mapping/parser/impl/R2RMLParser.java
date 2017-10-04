@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
 import org.apache.commons.rdf.api.*;
 import org.eclipse.rdf4j.model.Resource;
@@ -314,7 +314,7 @@ public class R2RMLParser {
 
 					// we check if it is a typed literal
 					else if (datatypeConstant != null) {
-						Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(datatypeConstant.getIRIString());
+						COL_TYPE type = TYPE_FACTORY.getDatatype(datatypeConstant.getIRIString());
 						if (type == null) {
 							// throw new RuntimeException("Unsupported datatype: " +
 							// datatype.toString());
@@ -411,7 +411,7 @@ public class R2RMLParser {
 
 		// we check if it is a typed literal
 		if (datatype != null) {
-			Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(datatype.toString());
+			COL_TYPE type = TYPE_FACTORY.getDatatype(datatype.toString());
 			if (type == null) {
 				// throw new RuntimeException("Unsupported datatype: " +
 				// datatype.toString());

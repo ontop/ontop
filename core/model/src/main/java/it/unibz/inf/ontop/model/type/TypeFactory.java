@@ -7,8 +7,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import org.eclipse.rdf4j.model.IRI;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-
 public interface TypeFactory {
 
 	@Deprecated

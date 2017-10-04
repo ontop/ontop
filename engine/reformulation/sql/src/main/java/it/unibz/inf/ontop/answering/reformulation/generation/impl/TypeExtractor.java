@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -21,7 +22,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.LITERAL;
+import static it.unibz.inf.ontop.model.type.COL_TYPE.LITERAL;
 
 
 
@@ -35,10 +36,10 @@ public class TypeExtractor {
 
     public static class TypeResults {
         private final ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap;
-        private final ImmutableMap<Predicate, ImmutableList<Predicate.COL_TYPE>> castTypeMap;
+        private final ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap;
 
         private TypeResults(ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
-                           ImmutableMap<Predicate, ImmutableList<Predicate.COL_TYPE>> castTypeMap) {
+                           ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap) {
             this.termTypeMap = termTypeMap;
             this.castTypeMap = castTypeMap;
         }
@@ -47,7 +48,7 @@ public class TypeExtractor {
             return termTypeMap;
         }
 
-        public ImmutableMap<Predicate, ImmutableList<Predicate.COL_TYPE>> getCastTypeMap() {
+        public ImmutableMap<Predicate, ImmutableList<COL_TYPE>> getCastTypeMap() {
             return castTypeMap;
         }
     }
@@ -82,7 +83,7 @@ public class TypeExtractor {
     /**
      * Infers cast types for each predicate in the bottom up order
      */
-    private static ImmutableMap<Predicate,ImmutableList<Predicate.COL_TYPE>> extractCastTypeMap(
+    private static ImmutableMap<Predicate,ImmutableList<COL_TYPE>> extractCastTypeMap(
             Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesInBottomUp,
             ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap, DBMetadata metadata) {
 
@@ -133,7 +134,7 @@ public class TypeExtractor {
                             Attribute attribute = td.get().getAttribute(i+1);
 
                             //get type from metadata
-                            Predicate.COL_TYPE type = JdbcTypeMapper.getInstance().getPredicate(attribute.getType());
+                            COL_TYPE type = JdbcTypeMapper.getInstance().getPredicate(attribute.getType());
                             defaultTypeBuilder.add(TYPE_FACTORY.getTermType(type));
                         }
                         else{
@@ -201,8 +202,8 @@ public class TypeExtractor {
 
     }
 
-    private static Predicate.COL_TYPE getCastType(TermType termType) {
-        Predicate.COL_TYPE type = termType.getColType();
+    private static COL_TYPE getCastType(TermType termType) {
+        COL_TYPE type = termType.getColType();
         switch (type) {
             case OBJECT:
             case BNODE:

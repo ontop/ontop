@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import org.slf4j.Logger;
@@ -98,7 +99,7 @@ public class MappingDataTypeCompletion {
         } else if (term instanceof Variable) {
             Variable variable = (Variable) term;
             Term newTerm;
-            Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
+            COL_TYPE type = getDataType(termOccurenceIndex, variable);
             newTerm = TERM_FACTORY.getTypedTerm(variable, type);
             log.info("Datatype "+type+" for the value " + variable + " of the property " + predicate + " has been " +
                     "inferred " +
@@ -163,7 +164,7 @@ public class MappingDataTypeCompletion {
      * @param variable
      * @return
      */
-    private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) {
+    private COL_TYPE getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) {
 
 
         List<IndexedPosition> list = termOccurenceIndex.get(variable.getName());
@@ -181,7 +182,7 @@ public class MappingDataTypeCompletion {
 
         return metadata.getColType(attribute)
                 // Default datatype : XSD_STRING
-                .orElse(Predicate.COL_TYPE.STRING);
+                .orElse(COL_TYPE.STRING);
     }
 
     private static class IndexedPosition {

@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.Optional;
@@ -25,7 +25,7 @@ public class PredefinedTermTypeInferenceRule extends AbstractTermTypeInferenceRu
     /**
      * Do not use this construction if you know the language tag!
      */
-    public PredefinedTermTypeInferenceRule(Predicate.COL_TYPE predefinedColType) {
+    public PredefinedTermTypeInferenceRule(COL_TYPE predefinedColType) {
         this(TYPE_FACTORY.getTermType(predefinedColType));
     }
 

@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
@@ -109,7 +109,7 @@ public class JDBC2ConstantConverter {
             stringValue = String.valueOf(value);
 
             int t = cell.getTypeValue();
-            Predicate.COL_TYPE type = Predicate.COL_TYPE.getQuestType(t);
+            COL_TYPE type = COL_TYPE.getQuestType(t);
             if (type == null)
                 throw new OntopResultConversionException("typeCode unknown: " + t);
 
@@ -186,7 +186,7 @@ public class JDBC2ConstantConverter {
                 case DATETIME:
                     return TERM_FACTORY.getConstantLiteral(
                             convertDatetimeString(value),
-                            Predicate.COL_TYPE.DATETIME
+                            COL_TYPE.DATETIME
                     );
 
                 case DATETIME_STAMP:
@@ -195,7 +195,7 @@ public class JDBC2ConstantConverter {
                             stringValue;
                 return TERM_FACTORY.getConstantLiteral(
                         stringValue.replaceFirst(" ", "T").replaceAll(" ", ""),
-                        Predicate.COL_TYPE.DATETIME_STAMP
+                        COL_TYPE.DATETIME_STAMP
                 );
 
                 case DATE:
@@ -208,10 +208,10 @@ public class JDBC2ConstantConverter {
                             throw new OntopResultConversionException(e);
                         }
                     }
-                    return TERM_FACTORY.getConstantLiteral(stringValue, Predicate.COL_TYPE.DATE);
+                    return TERM_FACTORY.getConstantLiteral(stringValue, COL_TYPE.DATE);
 
                 case TIME:
-                    return TERM_FACTORY.getConstantLiteral(stringValue.replace(' ', 'T'), Predicate.COL_TYPE.TIME);
+                    return TERM_FACTORY.getConstantLiteral(stringValue.replace(' ', 'T'), COL_TYPE.TIME);
 
                 default:
                     return TERM_FACTORY.getConstantLiteral(stringValue, type);

@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
@@ -84,7 +85,7 @@ public class DatalogProgramSyntaxFactory {
 	}
 	
 	public static Function rdfsLiteral(Term term){
-		return TERM_FACTORY.getTypedTerm(term, Predicate.COL_TYPE.LITERAL);
+		return TERM_FACTORY.getTypedTerm(term, COL_TYPE.LITERAL);
 	}
 	
 	public static Function and(Term... terms){

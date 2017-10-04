@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.atom;
 
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 
 /**
  * TODO: explain

@@ -19,7 +19,7 @@ import org.junit.Test;
 import java.sql.Types;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER;
+import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;

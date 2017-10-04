@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TypeFactoryImpl;
@@ -81,7 +81,7 @@ public class TermFactoryImpl implements TermFactory {
 	//defining annotation property we still don't know if the values that it will assume, will be an object or a data property
 	@Override
 	public Predicate getAnnotationPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[]{Predicate.COL_TYPE.OBJECT, Predicate.COL_TYPE.NULL});
+		return new PredicateImpl(name, 2, new COL_TYPE[]{COL_TYPE.OBJECT, COL_TYPE.NULL});
 	}
 
 	@Override
