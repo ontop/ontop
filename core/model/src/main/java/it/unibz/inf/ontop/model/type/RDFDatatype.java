@@ -8,5 +8,7 @@ public interface RDFDatatype extends RDFTermType {
 
     Optional<LanguageTag> getLanguageTag();
 
-    boolean isCompatibleWith(IRI baseDatatypeIri);
+    boolean isA(IRI baseDatatypeIri);
+
+    IRI getIRI();
 }

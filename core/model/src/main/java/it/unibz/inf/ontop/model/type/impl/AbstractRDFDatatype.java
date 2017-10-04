@@ -2,16 +2,34 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 import org.eclipse.rdf4j.model.IRI;
 
-public abstract class AbstractRDFDatatype extends AbstractTermType implements RDFDatatype {
+public abstract class AbstractRDFDatatype extends RDFTermTypeImpl implements RDFDatatype {
 
-    protected AbstractRDFDatatype(COL_TYPE colType) {
-        super(colType);
+    private final IRI datatypeIRI;
+
+    protected AbstractRDFDatatype(COL_TYPE colType, TermTypeAncestry parentAncestry, boolean isAbstract,
+                                  IRI datatypeIRI) {
+        super(colType, parentAncestry, isAbstract);
+        this.datatypeIRI = datatypeIRI;
+    }
+
+    protected AbstractRDFDatatype(IRI datatypeIRI, TermTypeAncestry parentAncestry, boolean isAbstract) {
+        super(datatypeIRI.toString(), parentAncestry, isAbstract);
+        this.datatypeIRI = datatypeIRI;
     }
 
     @Override
-    public boolean isCompatibleWith(IRI baseDatatypeIri) {
-        throw new RuntimeException("TODO: implement isCompatibleWith(IRI)");
+    public boolean isA(IRI baseDatatypeIri) {
+        return getAncestry().getTermTypes()
+                .filter(t -> t instanceof  RDFDatatype)
+                .map(t -> ((RDFDatatype)t).getIRI())
+                .anyMatch(baseDatatypeIri::equals);
+    }
+
+    @Override
+    public IRI getIRI() {
+        return datatypeIRI;
     }
 }

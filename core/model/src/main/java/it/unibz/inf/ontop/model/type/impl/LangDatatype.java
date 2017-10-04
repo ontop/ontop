@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.model.type.impl;
 import it.unibz.inf.ontop.model.type.LanguageTag;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeAncestry;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.Optional;
 
@@ -13,10 +15,16 @@ import static it.unibz.inf.ontop.model.type.COL_TYPE.STRING;
 public class LangDatatype extends AbstractRDFDatatype {
 
     private final LanguageTag langTag;
+    private final TermTypeAncestry parentAncestry;
 
-    protected LangDatatype(LanguageTag langTag) {
-        super(LITERAL_LANG);
+    private LangDatatype(LanguageTag langTag, TermTypeAncestry parentAncestry) {
+        super(LITERAL_LANG, parentAncestry, false, RDF.LANGSTRING);
         this.langTag = langTag;
+        this.parentAncestry = parentAncestry;
+    }
+
+    static RDFDatatype createLangDatatype(LanguageTag langTag, TermTypeAncestry parentAncestry) {
+        return new LangDatatype(langTag, parentAncestry);
     }
 
 
@@ -44,24 +52,20 @@ public class LangDatatype extends AbstractRDFDatatype {
         return langTag.getCommonDenominator(otherLanguageTag)
                 .map(newLangTag -> newLangTag.equals(langTag)
                         ? (TermType) this
-                        : new LangDatatype(newLangTag))
+                        : new LangDatatype(newLangTag, parentAncestry))
                 // Incompatible lang tags --> common denominator is xsd:string
                 .orElseGet(() -> TYPE_FACTORY.getTermType(STRING));
     }
 
-    /**
-     * TODO: refactor
-     */
     @Override
     public boolean equals(Object other) {
-        // Should check if it is a language tag
-        if (!super.equals(other))
-            return false;
-
-        RDFDatatype otherType = (RDFDatatype) other;
-        return otherType.getLanguageTag()
-                .filter(langTag::equals)
-                .isPresent();
+        if (other instanceof RDFDatatype) {
+            RDFDatatype otherType = (RDFDatatype) other;
+            return otherType.getLanguageTag()
+                    .filter(langTag::equals)
+                    .isPresent();
+        }
+        return false;
     }
 
     @Override

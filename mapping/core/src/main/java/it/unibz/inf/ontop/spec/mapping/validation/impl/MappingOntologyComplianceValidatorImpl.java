@@ -266,7 +266,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                     .orElseThrow(() -> new RuntimeException("Unsupported datatype declared in the ontology: "
                             + declaredDatatype.getPredicate().getName() + "\n TODO: find a better exception"));
 
-            if (!tripleObjectType.isCompatibleWith(internalType)) {
+            if (!tripleObjectType.isA(internalType)) {
 
                 throw new MappingOntologyMismatchException(
                         predicateIRI +

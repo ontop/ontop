@@ -46,7 +46,7 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
         IntStream.range(0, argumentTypes.size())
                 .forEach(i -> argumentTypes.get(i)
                         .ifPresent(t -> expectedBaseTypes.get(i).ifPresent(expectedBaseType -> {
-                            if (!t.isCompatibleWith(expectedBaseType)) {
+                            if (!t.isA(expectedBaseType)) {
                                 throw new IncompatibleTermException(expectedBaseType, t);
                             }
                         })));

@@ -67,7 +67,7 @@ public class LanguageTagTest {
         TermType type2 = TYPE_FACTORY.getTermType(STRING);
 
         TermType commonDenominator = type1.getCommonDenominator(type2);
-        assertEquals(commonDenominator.getColType(), LITERAL);
+        assertEquals(STRING, commonDenominator.getColType());
     }
 
     @Test
