@@ -74,6 +74,8 @@ public class UnionLiftExecutorImpl implements UnionLiftExecutor {
                 return query.getOptionalPosition(currentAncestor, currentChild)
                         .orElseThrow(() -> new IllegalStateException("The child of a LJ must have a position") );
             }
+            optionalCurrentAncestor = query.getParent(currentAncestor);
+            currentChild = currentAncestor;
         }
         throw new InvalidQueryOptimizationProposalException("The focus must be a descendant of the target node");
     }
