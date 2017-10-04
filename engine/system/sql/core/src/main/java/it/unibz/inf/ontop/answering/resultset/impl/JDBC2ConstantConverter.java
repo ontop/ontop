@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import org.apache.commons.lang3.time.DateUtils;
 
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
@@ -16,10 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.*;
@@ -243,7 +241,9 @@ public class JDBC2ConstantConverter {
 
         if (value instanceof Date ) {
             // If JDBC gives us proper Java object, we simply return the formatted version of the datatype
-            dateValue = LocalDateTime.ofInstant(((Date) value).toInstant(),(ZoneId.systemDefault()));
+            Calendar calendar = DateUtils.toCalendar(((Date) value));
+            TimeZone timeZone = calendar.getTimeZone();
+            dateValue = OffsetDateTime.from(calendar.toInstant().atZone(timeZone.toZoneId()));
         } else {
             // Otherwise, we need to deal with possible String representation of datetime
             String stringValue = String.valueOf(value);
@@ -270,7 +270,9 @@ public class JDBC2ConstantConverter {
 
         if (value instanceof Date ) {
             // If JDBC gives us proper Java object, we simply return the formatted version of the datatype
-            timeValue = LocalTime.from(((Date) value).toInstant().atZone(ZoneId.systemDefault()));
+            Calendar calendar = DateUtils.toCalendar(((Date) value));
+            TimeZone timeZone = calendar.getTimeZone();
+            timeValue = OffsetTime.from(calendar.toInstant().atZone(timeZone.toZoneId()));
         } else {
             // Otherwise, we need to deal with possible String representation of datetime
             String stringValue = String.valueOf(value);
