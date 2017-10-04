@@ -174,14 +174,35 @@ public class MappingDataTypeCompletion {
         RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom
                 .getFunctionSymbol());
         RelationDefinition td = metadata.getRelation(tableId);
-        Attribute attribute = td.getAttribute(ip.pos);
+        
+        // fabad (4 Oct 2017) Quick fix if there are constants in arguments.
+        // Calculate the attribute position taking account on how many constants
+        // are before the attribute in the list.
+        int attributePos = this.getAttributePos(ip, variable);
+        Attribute attribute = td.getAttribute(attributePos);
 
         return metadata.getColType(attribute)
                 // Default datatype : XSD_STRING
                 .orElse(Predicate.COL_TYPE.STRING);
     }
 
-    private static class IndexedPosition {
+    private int getAttributePos(IndexedPosition ip, Variable variable) {
+    	int constBeforeAttribute = 0;
+		for(Term term : ip.atom.getTerms()){
+			if(term.equals(variable)){
+				break;
+			}
+			
+			if(term instanceof ValueConstant){
+				constBeforeAttribute++;
+			}
+		}
+		
+
+		return ip.pos + constBeforeAttribute;
+	}
+
+	private static class IndexedPosition {
         final Function atom;
         final int pos;
 
@@ -228,4 +249,5 @@ public class MappingDataTypeCompletion {
     }
 
 }
+
 
