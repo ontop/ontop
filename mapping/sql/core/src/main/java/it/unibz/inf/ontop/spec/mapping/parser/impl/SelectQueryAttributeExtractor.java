@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
@@ -41,6 +42,10 @@ public class SelectQueryAttributeExtractor {
     private final QuotedIDFactory idfac;
 
     private static final Pattern AS = Pattern.compile("\\sAS\\s", Pattern.CASE_INSENSITIVE);
+    private static final Pattern BRACKETS = Pattern.compile("\\([^\\(\\)]*\\)");
+    private static final Pattern COL_SEP = Pattern.compile(",");
+    private static final Pattern SELECT = Pattern.compile("\\A[\\s]*SELECT\\s", Pattern.CASE_INSENSITIVE);
+    private static final Pattern FROM = Pattern.compile("\\sFROM\\s", Pattern.CASE_INSENSITIVE);
 
     private final SelectQueryAttributeExtractor2 sqae;
 
@@ -64,21 +69,25 @@ public class SelectQueryAttributeExtractor {
 
             // COULD NOT PARSE - do a rough approximation
 
-            int start = sql.toLowerCase().indexOf("select") + "select".length();
-            // might be a good idea to surround FROM with whitespaces
-            int end = sql.toLowerCase().indexOf("from");
-            if (end == -1)
-                throw new InvalidSelectQueryException("Error parsing SQL query: Couldn't find FROM clause", sql);
+            Matcher startMatcher = SELECT.matcher(sql);
+            if (!startMatcher.find())
+                throw new InvalidSelectQueryException("Error parsing SQL query: Couldn't find SELECT clause", sql);
+            int start = startMatcher.start() + "select".length();
 
-            String projection = sql.substring(start, end).trim();
+            Matcher endMatcher = FROM.matcher(sql);
+            if (!endMatcher.find())
+                throw new InvalidSelectQueryException("Error parsing SQL query: Couldn't find FROM clause", sql);
+            int end = endMatcher.start();
+
+            String projection = sql.substring(start, end);
 
             // remove all brackets
-            while (projection.matches("\\([^\\(]*\\)"))
-                projection = projection.replaceAll("\\([^\\(]*\\)", "");
+            for (Matcher matcher = BRACKETS.matcher(projection); matcher.find(); matcher = BRACKETS.matcher(projection))
+                projection = matcher.replaceAll("");
 
-            for (String col : projection.split(",")) {
-                // TODO: AS should be treated as optional
-                String[] components = AS.split(col);
+            for (String column : COL_SEP.split(projection)) {
+                String[] components = AS.split(column);
+                // components = { column } if there is no AS
                 String columnName = components[components.length - 1].trim();
 
                 // ROMAN (25 Jan 2017): do not understand the purpose
@@ -88,8 +97,7 @@ public class SelectQueryAttributeExtractor {
 
                 // get only the column name (but not the qualifier table name)
                 // eg: table.column -> column
-                if (columnName.contains("."))
-                    columnName = columnName.substring(columnName.lastIndexOf(".") + 1);
+                columnName = columnName.substring(columnName.lastIndexOf(".") + 1);
 
                 QuotedID attribute = idfac.createAttributeID(columnName);
                 attributes.add(attribute);
@@ -98,5 +106,4 @@ public class SelectQueryAttributeExtractor {
             return attributes.build();
         }
     }
-
 }
