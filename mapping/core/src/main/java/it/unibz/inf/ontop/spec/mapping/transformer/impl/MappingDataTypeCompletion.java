@@ -175,32 +175,13 @@ public class MappingDataTypeCompletion {
                 .getFunctionSymbol());
         RelationDefinition td = metadata.getRelation(tableId);
         
-        // fabad (4 Oct 2017) Quick fix if there are constants in arguments.
-        // Calculate the attribute position taking account on how many constants
-        // are before the attribute in the list.
-        int attributePos = this.getAttributePos(ip, variable);
-        Attribute attribute = td.getAttribute(attributePos);
+        
+        Attribute attribute = td.getAttribute(ip.pos);
 
         return metadata.getColType(attribute)
                 // Default datatype : XSD_STRING
                 .orElse(Predicate.COL_TYPE.STRING);
     }
-
-    private int getAttributePos(IndexedPosition ip, Variable variable) {
-    	int constBeforeAttribute = 0;
-		for(Term term : ip.atom.getTerms()){
-			if(term.equals(variable)){
-				break;
-			}
-			
-			if(term instanceof ValueConstant){
-				constBeforeAttribute++;
-			}
-		}
-		
-
-		return ip.pos + constBeforeAttribute;
-	}
 
 	private static class IndexedPosition {
         final Function atom;
@@ -225,7 +206,7 @@ public class MappingDataTypeCompletion {
                         aux = new LinkedList<>();
                     aux.add(new IndexedPosition(a, i));
                     termOccurenceIndex.put(var.getName(), aux);
-                    i++; // increase the position index for the next variable
+                    
                 } else if (t instanceof FunctionalTermImpl) {
                     // NO-OP
                 } else if (t instanceof ValueConstant) {
@@ -233,6 +214,11 @@ public class MappingDataTypeCompletion {
                 } else if (t instanceof URIConstant) {
                     // NO-OP
                 }
+                // fabad (4 Oct 2017) Quick fix if there are constants in arguments.
+                // Increase i in all cases. If there are terms that are not variables
+                // and i is not incremented then indexedPosition.pos contains a wrong
+                // index that may points to terms that are not variables.
+                i++; // increase the position index for the next variable
             }
         }
         return termOccurenceIndex;
@@ -249,5 +235,4 @@ public class MappingDataTypeCompletion {
     }
 
 }
-
 
