@@ -41,6 +41,8 @@ public class SelectQueryAttributeExtractor {
     private final QuotedIDFactory idfac;
 
     private static final Pattern AS = Pattern.compile("\\sAS\\s", Pattern.CASE_INSENSITIVE);
+    
+    private static final Pattern SQL_FUNCTION = Pattern.compile("\\w+\\s*\\(.*\\)\\s*as", Pattern.CASE_INSENSITIVE);
 
     private final SelectQueryAttributeExtractor2 sqae;
 
@@ -75,6 +77,15 @@ public class SelectQueryAttributeExtractor {
             // remove all brackets
             while (projection.matches("\\([^\\(]*\\)"))
                 projection = projection.replaceAll("\\([^\\(]*\\)", "");
+            
+            // fabad (3 Oct 2017): Remove functions from the projection
+            // in order to avoid parser errors because of commas inside
+            // the function parameters.
+            // For example:
+            // to_char(ALMAES001.INIT_DATE,'YYYY-MM-DD') AS INIT_DATE => INIT_DATE.
+            // It is mandatory to rename the result of the function with "AS" clause.
+            // In other case the parser error occurs.
+            projection = SQL_FUNCTION.matcher(projection).replaceAll("");
 
             for (String col : projection.split(",")) {
                 // TODO: AS should be treated as optional
@@ -100,3 +111,4 @@ public class SelectQueryAttributeExtractor {
     }
 
 }
+
