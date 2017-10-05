@@ -55,6 +55,7 @@ public class TypeFactoryImpl implements TypeFactory {
 
 	private final TermType rootTermType;
 	private final RDFTermType rootRDFTermType;
+	private final UnboundRDFTermType unboundRDFTermType;
 	private final RDFTermType iriTermType, blankNodeTermType;
 	private final RDFDatatype rdfsLiteralDatatype;
 	private final RDFDatatype numericDatatype, owlRealDatatype, owlRationalDatatype, xsdDecimalDatatype;
@@ -93,6 +94,10 @@ public class TypeFactoryImpl implements TypeFactory {
 
 		rootTermType = TermTypeImpl.createOriginTermType();
 		rootRDFTermType = RDFTermTypeImpl.createRDFTermRoot(rootTermType.getAncestry());
+
+		unboundRDFTermType = UnboundRDFTermTypeImpl.createUnboundRDFTermType(rootRDFTermType.getAncestry());
+		termTypeCache.put(COL_TYPE.NULL, unboundRDFTermType);
+
 
 		// TODO: create an intermediate term type (for all IRI/B-nodes)
 		iriTermType = new IRITermType(rootRDFTermType.getAncestry());
