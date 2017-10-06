@@ -19,6 +19,11 @@ public class IncompatibleTermException extends RuntimeException {
                 + ", actual: " + actualTermType);
     }
 
+    public IncompatibleTermException(String exception, TermType actualTermType) {
+        super("Incompatible type inferred " + ": expected: " + exception
+                + ", actual: " + actualTermType);
+    }
+
     /**
      * Incompatibility detected in an expression
      */

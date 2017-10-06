@@ -262,6 +262,8 @@ public class ExpressionEvaluator {
 				return evalDatatype(term);
 			case SPARQL_LANG:
 				return evalLang(term);
+			case IS_NUMERIC:
+				return evalIsNumeric(term);
 			case IS_LITERAL:
 				return evalIsLiteral(term);
 			case IS_IRI:
@@ -324,6 +326,21 @@ public class ExpressionEvaluator {
 
 		}
 
+	}
+
+	/*
+	 * Expression evaluator for isNumeric() function
+	 */
+
+	private Term evalIsNumeric(Function term) {
+		Term innerTerm = term.getTerm(0);
+		if (innerTerm instanceof Function) {
+			Function function = (Function) innerTerm;
+			return TERM_FACTORY.getBooleanConstant(function.isDataTypeFunction() && isNumeric(function.getFunctionSymbol()));
+		}
+		else {
+			return term;
+		}
 	}
 
 	/*

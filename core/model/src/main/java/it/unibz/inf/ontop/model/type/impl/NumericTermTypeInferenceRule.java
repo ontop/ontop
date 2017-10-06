@@ -2,16 +2,14 @@ package it.unibz.inf.ontop.model.type.impl;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.NUMERIC_TYPES;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER_TYPES;
+import static it.unibz.inf.ontop.model.type.COL_TYPE.*;
 
 
 public class NumericTermTypeInferenceRule extends UnifierTermTypeInferenceRule {
@@ -26,8 +24,8 @@ public class NumericTermTypeInferenceRule extends UnifierTermTypeInferenceRule {
                     if(!argumentTypes.get(i)
                             .map(t -> NUMERIC_TYPES.contains(t.getColType()))
                             .orElse(true)) {
-                        // TODO: refactor the exception
-                        throw new IncompatibleTermException(null, argumentTypes.get(i).get());
+
+                        throw new IncompatibleTermException("numeric term", argumentTypes.get(i).get());
                     }
                 });
     }
