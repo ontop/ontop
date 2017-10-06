@@ -21,26 +21,22 @@ package it.unibz.inf.ontop.answering.reformulation.input.translation.impl;
  */
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.datalog.InternalSparqlQuery;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.InternalSparqlQuery;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.term.TermConstants;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.EncodeForURI;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.URI;
@@ -609,6 +605,9 @@ public class SparqlAlgebraToDatalogTranslator {
 
             if (expr instanceof Not) {
                 return TERM_FACTORY.getFunctionNOT(term);
+            }
+            else if (expr instanceof IsNumeric) {
+                return TERM_FACTORY.getFunction(ExpressionOperation.IS_NUMERIC, term);
             }
             else if (expr instanceof IsLiteral) {
                 return TERM_FACTORY.getFunction(ExpressionOperation.IS_LITERAL, term);
