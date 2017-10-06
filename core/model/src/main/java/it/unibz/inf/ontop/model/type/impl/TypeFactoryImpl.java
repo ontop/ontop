@@ -162,6 +162,7 @@ public class TypeFactoryImpl implements TypeFactory {
 		termTypeCache.put(COL_TYPE.STRING, xsdStringDatatype);
 
 		defaultUnsupportedDatatype = UnsupportedRDFDatatype.createUnsupportedDatatype(rdfsLiteralDatatype.getAncestry());
+		termTypeCache.put(COL_TYPE.UNSUPPORTED, defaultUnsupportedDatatype);
 
 		xsdTimeDatatype = createSimpleRDFDatatype(XMLSchema.TIME, rdfsLiteralDatatype.getAncestry(), COL_TYPE.TIME);
 		termTypeCache.put(COL_TYPE.TIME, xsdTimeDatatype);
