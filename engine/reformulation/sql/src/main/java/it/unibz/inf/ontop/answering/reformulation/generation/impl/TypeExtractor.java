@@ -3,11 +3,8 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Expression;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
@@ -276,6 +273,9 @@ public class TypeExtractor {
 
             return expression.getOptionalTermType(argumentTypes)
                     .orElseThrow(() -> new IllegalStateException("No type could be inferred for " + term));
+        }
+        else if (term instanceof Constant) {
+            return TYPE_FACTORY.getTermType(((Constant) term).getType());
         }
         else {
             throw new IllegalStateException("The type should already be for a non-variable - non-expression term (was " + term + ")");
