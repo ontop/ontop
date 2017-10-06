@@ -199,7 +199,7 @@ public class OneShotSQLGeneratorEngine {
 				.put(ExpressionOperation.ADD, "%s + %s")
 				.put(ExpressionOperation.SUBTRACT, "%s - %s")
 				.put(ExpressionOperation.MULTIPLY, "%s * %s")
-				.put(ExpressionOperation.DIVIDE, "%s / %s")
+				.put(ExpressionOperation.DIVIDE, "(1.0 * %s) / %s")
 				.put(ExpressionOperation.ABS, "ABS(%s)")
 				.put(ExpressionOperation.CEIL, sqladapter.ceil())
 				.put(ExpressionOperation.FLOOR, "FLOOR(%s)")

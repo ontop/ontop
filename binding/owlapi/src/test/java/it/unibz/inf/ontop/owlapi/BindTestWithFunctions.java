@@ -745,6 +745,25 @@ public class BindTestWithFunctions {
 
         runTests(queryBind);
     }
+    
+    @Test
+    public void testDivide() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND ((?p / 2) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"21.5\"^^xsd:decimal");
+        expectedValues.add("\"11.5\"^^xsd:decimal");
+        expectedValues.add("\"17\"^^xsd:decimal");
+        expectedValues.add("\"5\"^^xsd:decimal");
+        checkReturnedValues(queryBind, expectedValues);
+    }
 
 //    @Test timezone is not supported in h2
     public void testTZ() throws Exception {
