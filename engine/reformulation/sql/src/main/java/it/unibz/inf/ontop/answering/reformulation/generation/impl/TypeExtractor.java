@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -282,9 +283,14 @@ public class TypeExtractor {
         else if (term instanceof Constant) {
             return ((Constant) term).getTermType();
         }
-        else {
-            throw new IllegalStateException("The type should already be for a non-variable - non-expression term (was " + term + ")");
+        else if (term instanceof Function) {
+            Predicate functionSymbol = ((Function) term).getFunctionSymbol();
+            if (functionSymbol instanceof DatatypePredicate)
+                // TODO: replace this
+                return TYPE_FACTORY.getTermType(functionSymbol.getTypes()[0]);
         }
+
+        throw new IllegalStateException("Could not determine the type of " + term);
     }
 
     /**
