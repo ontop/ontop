@@ -28,11 +28,6 @@ import it.unibz.inf.ontop.model.type.COL_TYPE;
  *
  */
 public interface Predicate {
-
-	;
-
-  
-  
     
 	/**
 	 * Get the name of the predicate. In practice, the predicate name is

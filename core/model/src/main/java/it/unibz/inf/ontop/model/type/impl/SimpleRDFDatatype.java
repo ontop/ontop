@@ -16,7 +16,7 @@ public class SimpleRDFDatatype extends AbstractRDFDatatype {
     protected SimpleRDFDatatype(COL_TYPE colType, TermTypeAncestry parentAncestry, boolean isAbstract,
                                 IRI datatypeIRI) {
         super(colType, parentAncestry, isAbstract, datatypeIRI);
-        if (colType == COL_TYPE.LITERAL_LANG)
+        if (colType == COL_TYPE.LANG_STRING)
             throw new IllegalArgumentException("A lang string is must have a language tag");
     }
 

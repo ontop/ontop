@@ -22,9 +22,7 @@ import org.junit.Test;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.*;
@@ -474,19 +472,19 @@ public class ExpressionEvaluatorTest {
 
     private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, Constant argument2) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL_LANG),
+                TYPE_FACTORY.getTypePredicate(COL_TYPE.LANG_STRING),
                 argument1, argument2);
     }
     private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, VariableOrGroundTerm argument2) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL_LANG),
+                TYPE_FACTORY.getTypePredicate(COL_TYPE.LANG_STRING),
                 argument1, argument2);
     }
 
 
     private ImmutableFunctionalTerm generateLiteral(Constant argument1) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL),
+                TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING),
                 argument1);
     }
 

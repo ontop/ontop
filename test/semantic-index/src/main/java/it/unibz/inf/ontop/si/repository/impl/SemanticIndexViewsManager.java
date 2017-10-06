@@ -57,7 +57,7 @@ public class SemanticIndexViewsManager {
 	/**
 	 * NB: LITERAL_LANG is not part of this array (cannot become a TermType without a language tag)
 	 */
-	private static final COL_TYPE[] typesAndObjectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE, 
+	private static final COL_TYPE[] typesAndObjectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE,
 		COL_TYPE.LITERAL, COL_TYPE.BOOLEAN,
 		COL_TYPE.DATETIME, COL_TYPE.DATETIME_STAMP, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
 		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
@@ -87,7 +87,7 @@ public class SemanticIndexViewsManager {
 			for (COL_TYPE colType2 : typesAndObjectTypes) {
 				initProperty(type1, TYPE_FACTORY.getTermType(colType2));
 			}
-		}		
+		}
 	}
 
 	private void initProperty(TermType type1, TermType type2) {
@@ -110,7 +110,7 @@ public class SemanticIndexViewsManager {
 				select = RDBMSSIRepositoryManager.attributeTable.get(colType2).getSELECT("LANG IS NULL AND " + filter);
 				insert = RDBMSSIRepositoryManager.attributeTable.get(colType2).getINSERT("?, ?, ?, NULL, " + value);
 				break;
-			case LITERAL_LANG:
+			case LANG_STRING:
 						/*
 						 * If the mapping is for something of type Literal we need to add IS
 						 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
@@ -143,7 +143,7 @@ public class SemanticIndexViewsManager {
 		COL_TYPE.LONG, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.DATETIME, 
 		COL_TYPE.INT, COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, 
 		COL_TYPE.NON_NEGATIVE_INTEGER, COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER,
-		COL_TYPE.FLOAT, COL_TYPE.BOOLEAN, COL_TYPE.DATETIME_STAMP, COL_TYPE.LITERAL_LANG
+		COL_TYPE.FLOAT, COL_TYPE.BOOLEAN, COL_TYPE.DATETIME_STAMP, COL_TYPE.LANG_STRING
 	};
 	
 	private static final Map<COL_TYPE, Integer> COLTYPEtoSITable = new HashMap<>();
@@ -202,5 +202,5 @@ public class SemanticIndexViewsManager {
 			stm.executeBatch();
 		}
 	}
-		
+
 }

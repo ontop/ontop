@@ -10,7 +10,7 @@ public enum COL_TYPE {
     OBJECT(1, "OBJECT"),
     BNODE(2, "BNODE"),
     LITERAL(3, "LITERAL"),
-    LITERAL_LANG(-3, "LITERAL_LANG"), // not to be mapped from code // BC: Why not?
+    LANG_STRING(-3, "LANG_STRING"), // not to be mapped from code // BC: Why not?
     INTEGER(4, "INTEGER"),
     DECIMAL(5, "DECIMAL"),
     DOUBLE(6, "DOUBLE"),
@@ -53,7 +53,7 @@ public enum COL_TYPE {
     public static final ImmutableSet<COL_TYPE> LITERAL_TYPES = ImmutableSet.<COL_TYPE>builder()
             .addAll(NUMERIC_TYPES)
             .add(LITERAL)
-            .add(LITERAL_LANG)
+            .add(LANG_STRING)
             .add(STRING)
             .add(BOOLEAN)
             .add(DATETIME)

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.docker.failing.local;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import org.junit.Ignore;
+import org.junit.Test;
 
 @Ignore("Local test")
 public class SAPHANATest extends AbstractVirtualModeTest {
@@ -14,6 +15,7 @@ public class SAPHANATest extends AbstractVirtualModeTest {
         super(owlfile, obdafile, propertyfile);
     }
 
+    @Test
     public void testSAP() throws Exception {
             /* 
             * Get the book information that is stored in the database 

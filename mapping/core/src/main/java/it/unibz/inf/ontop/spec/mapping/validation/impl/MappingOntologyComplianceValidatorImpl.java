@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
+import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
@@ -261,10 +262,13 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
          */
         for (Datatype declaredDatatype : datatypeMap.get(predicateIRI)) {
 
+            if(declaredDatatype.getPredicate().getName().equals(DatatypeImpl.rdfsLiteral.getPredicate().getName())){
+                break;
+            }
             // TODO: throw a better exception
             TermType internalType = TYPE_FACTORY.getInternalType((DatatypePredicate) declaredDatatype.getPredicate())
                     .orElseThrow(() -> new RuntimeException("Unsupported datatype declared in the ontology: "
-                            + declaredDatatype.getPredicate().getName() + "\n TODO: find a better exception"));
+                            + declaredDatatype.getPredicate().getName()));
 
             if (!tripleObjectType.isA(internalType)) {
 

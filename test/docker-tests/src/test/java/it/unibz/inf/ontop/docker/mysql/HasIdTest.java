@@ -1,10 +1,13 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
+
+import static org.junit.Assert.*;
 
 
 /**
@@ -27,6 +30,7 @@ public class HasIdTest extends AbstractVirtualModeTest {
         return st.executeSelectQuery(query);
     }
 
+    @Test
     public void test() throws OWLException {
         TupleOWLResultSet  results = runLocalQuery("PREFIX : <http://example.com/vocab#>" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +

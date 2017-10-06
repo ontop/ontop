@@ -21,6 +21,9 @@ package it.unibz.inf.ontop.docker.postgres;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /***
  * Tests that oracle identifiers for tables and columns are treated
@@ -41,12 +44,14 @@ public class PostgresIdentifierTest extends AbstractVirtualModeTest {
 	 * Test use of quoted mixed case table name
 	 * @throws Exception
 	 */
+	@Test
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
 		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
 	}
-	
+
+	@Test
 	public void testUppercaseAlias() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
 		String val = runQueryAndReturnStringOfIndividualX(query);
@@ -58,6 +63,7 @@ public class PostgresIdentifierTest extends AbstractVirtualModeTest {
 	 * Tests use of quoted uppercase alias in view definition (unsupported sql function in mapping source)
 	 * @throws Exception
 	 */
+	@Test
 	public void testUppercaseUnquotedView() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
 		String val = runQueryAndReturnStringOfIndividualX(query);
@@ -68,6 +74,7 @@ public class PostgresIdentifierTest extends AbstractVirtualModeTest {
 	 * Tests use of quoted uppercase alias in view definition (unsupported sql function in mapping source)
 	 * @throws Exception
 	 */
+	@Test
 	public void testUppercaseQuotedView() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
 		String val = runQueryAndReturnStringOfIndividualX(query);

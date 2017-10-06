@@ -9,7 +9,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.LITERAL_LANG;
+import static it.unibz.inf.ontop.model.type.COL_TYPE.LANG_STRING;
 import static it.unibz.inf.ontop.model.type.COL_TYPE.STRING;
 
 public class LangDatatype extends AbstractRDFDatatype {
@@ -18,7 +18,7 @@ public class LangDatatype extends AbstractRDFDatatype {
     private final TermTypeAncestry parentAncestry;
 
     private LangDatatype(LanguageTag langTag, TermTypeAncestry parentAncestry) {
-        super(LITERAL_LANG, parentAncestry, false, RDF.LANGSTRING);
+        super(LANG_STRING, parentAncestry, false, RDF.LANGSTRING);
         this.langTag = langTag;
         this.parentAncestry = parentAncestry;
     }

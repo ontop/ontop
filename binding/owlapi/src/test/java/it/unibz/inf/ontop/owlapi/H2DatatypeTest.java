@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -136,7 +134,7 @@ public class H2DatatypeTest {
                 "   FILTER ( ?x = \"2013-03-18\"^^xsd:date ) .\n" +
                 "}";
 		String val = runQueryReturnLiteral(query);
-		assertEquals("\"2013-03-18\"", val);
+		assertEquals("\"2013-03-18\"^^xsd:date", val);
 	}
 
 

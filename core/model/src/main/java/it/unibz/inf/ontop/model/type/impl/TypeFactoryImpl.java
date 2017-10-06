@@ -1,15 +1,13 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
-import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -24,8 +22,7 @@ import static it.unibz.inf.ontop.model.type.impl.SimpleRDFDatatype.createSimpleR
 public class TypeFactoryImpl implements TypeFactory {
 	
 	// special case of literals with the specified language
-	private final DatatypePredicate RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING.toString(),
-									new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.STRING });
+	private final DatatypePredicate RDF_LANG_STRING;
 
 
 	private static final IRI ONTOP_NUMERIC = SimpleValueFactory.getInstance().createIRI("urn:it:unibz:inf:ontop:internal:numeric");
@@ -33,8 +30,9 @@ public class TypeFactoryImpl implements TypeFactory {
 	private static final IRI OWL_RATIONAL =  SimpleValueFactory.getInstance().createIRI(OWL.NAMESPACE, "rational");
 
 	private static final TypeFactory INSTANCE = new TypeFactoryImpl();
-	
-	private final DatatypePredicate RDFS_LITERAL, XSD_STRING;
+
+	private final DatatypePredicate  XSD_STRING;
+//	private final DatatypePredicate RDFS_LITERAL;
 	private final DatatypePredicate XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
 	private final DatatypePredicate XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
 	private final DatatypePredicate XSD_INT, XSD_UNSIGNED_INT, XSD_LONG;
@@ -69,13 +67,13 @@ public class TypeFactoryImpl implements TypeFactory {
 
 
 	private TypeFactoryImpl() {
-		RDFS_LITERAL = registerType(RDFS.LITERAL, COL_TYPE.LITERAL); // 3 "http://www.w3.org/2000/01/rdf-schema#Literal"
+
 		XSD_INTEGER = registerType(XMLSchema.INTEGER, COL_TYPE.INTEGER);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
 		XSD_DECIMAL = registerType(XMLSchema.DECIMAL, COL_TYPE.DECIMAL);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
 		XSD_DOUBLE = registerType(XMLSchema.DOUBLE, COL_TYPE.DOUBLE);  // 6 "http://www.w3.org/2001/XMLSchema#double"
 		XSD_STRING = registerType(XMLSchema.STRING, COL_TYPE.STRING);  // 7 "http://www.w3.org/2001/XMLSchema#string"
 		XSD_DATETIME = registerType(XMLSchema.DATETIME, COL_TYPE.DATETIME); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
-		ValueFactory factory = new ValueFactoryImpl();
+		ValueFactory factory = SimpleValueFactory.getInstance();
 		IRI datetimestamp = factory.createIRI("http://www.w3.org/2001/XMLSchema#dateTimeStamp"); // value datetime stamp is missing in XMLSchema
 		XSD_DATETIME_STAMP = registerType(datetimestamp, COL_TYPE.DATETIME_STAMP);
 		XSD_BOOLEAN = registerType(XMLSchema.BOOLEAN, COL_TYPE.BOOLEAN);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
@@ -90,7 +88,8 @@ public class TypeFactoryImpl implements TypeFactory {
 		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
 		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // 19 "http://www.w3.org/2001/XMLSchema#int"
 		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
-		registerType(RDF.LANGSTRING, COL_TYPE.LITERAL_LANG, RDF_LANG_STRING);
+		RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING.toString(), new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.STRING });
+		registerType(RDF.LANGSTRING, COL_TYPE.LANG_STRING, RDF_LANG_STRING);
 
 		rootTermType = TermTypeImpl.createOriginTermType();
 		rootRDFTermType = RDFTermTypeImpl.createRDFTermRoot(rootTermType.getAncestry());
@@ -197,10 +196,18 @@ public class TypeFactoryImpl implements TypeFactory {
 		predicateList.add(predicate);
 		return predicate;
 	}
-	
+
+	//datatype supported only for ontology and r2rml mapping conversion. Not acceted in obda file
+	private DatatypePredicate registerUnsupportedType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE type,
+										   DatatypePredicate predicate) {
+		String sURI = uri.toString();
+		mapURItoCOLTYPE.put(sURI, type);
+		return predicate;
+	}
+
 	@Override
-	public COL_TYPE getDatatype(String uri) {
-		return mapURItoCOLTYPE.get(uri);
+	public Optional<COL_TYPE> getDatatype(String uri) {
+		return Optional.ofNullable(mapURItoCOLTYPE.get(uri));
 	}
 	
 	@Override
@@ -229,10 +236,10 @@ public class TypeFactoryImpl implements TypeFactory {
 		return p == XSD_DOUBLE || p == XSD_FLOAT || p == XSD_DECIMAL;
 	}
 	
-	@Override 
-	public boolean isLiteral(Predicate p) {
-		return p == RDFS_LITERAL ;
-	}
+//	@Override
+//	public boolean isLiteral(Predicate p) {
+//		return p == RDFS_LITERAL ;
+//	}
 	
 	@Override 
 	public boolean isString(Predicate p) {
@@ -248,7 +255,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	public Optional<TermType> getInternalType(DatatypePredicate predicate) {
 		// TODO: refactor (don't use col_type anymore)
 		return Optional.ofNullable(mapURItoCOLTYPE.get(predicate.getName()))
-				.filter(c -> c != COL_TYPE.LITERAL_LANG)
+				.filter(c -> c != COL_TYPE.LANG_STRING)
 				.map(this::getTermType);
 	}
 	

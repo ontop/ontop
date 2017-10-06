@@ -564,7 +564,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			case LITERAL:  // 0
 				stm.setString(2, value);
 				break;  
-			case LITERAL_LANG:  // -3
+			case LANG_STRING:  // -3
 				stm.setString(2, value);
 				stm.setString(4, object.getLanguage());
 				break;  
@@ -997,7 +997,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			case OBJECT:
 				objectTerm = TERM_FACTORY.getImmutableUriTemplate(Y);
 				break;
-			case LITERAL_LANG:
+			case LANG_STRING:
 				LanguageTag languageTag = ((RDFDatatype)type2).getLanguageTag().get();
 				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, TERM_FACTORY.getConstantLiteral(
 						languageTag.getFullString()));

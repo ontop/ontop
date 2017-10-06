@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.docker.postgres;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 /**
  * Tests the usage of a FQDN in the target of a mapping that will be converted in a sub-view
@@ -18,7 +19,7 @@ public class FqdnInTargetTest extends AbstractVirtualModeTest
 		super(owlfile, obdafile, propertiesfile);
 	}
 
-
+	@Test
     public void testIMDBSeries() throws Exception {
 		String query1 = "PREFIX : <http://www.seriology.org/seriology#> SELECT DISTINCT ?p WHERE { ?p a :Series . } LIMIT 10";
 		countResults(query1, 10);

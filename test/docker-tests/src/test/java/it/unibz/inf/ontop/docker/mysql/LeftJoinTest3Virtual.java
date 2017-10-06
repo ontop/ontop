@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.docker.mysql;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 
 /**
@@ -38,7 +39,7 @@ public class LeftJoinTest3Virtual extends AbstractVirtualModeTest {
 		super(owlfile, obdafile, propertyfile);
 	}
 
-
+	@Test
 	public void testLeftJoin() throws Exception {
 		String query_multi1 = "PREFIX : <http://www.example.org/test#> "
 				+ "SELECT DISTINCT * "

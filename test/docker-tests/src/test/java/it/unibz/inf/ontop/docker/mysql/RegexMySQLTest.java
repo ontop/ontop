@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 /**
  * Test to check if the sql parser supports regex correctly when written with mysql syntax. 
@@ -42,6 +43,7 @@ public class RegexMySQLTest extends AbstractVirtualModeTest {
 	 * select id, street, number, city, state, country from address where city regexp 'b.+z'
 	 * @throws Exception
 	 */
+	@Test
 	public void testRegexLike() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :BolzanoAddress}";
 		countResults(query, 2);
@@ -52,6 +54,7 @@ public class RegexMySQLTest extends AbstractVirtualModeTest {
 	 * select "id", "name", "lastname", "dateofbirth", "ssn" from "broker" where "name" regexp binary 'J.+a'
 	 * @throws Exception
 	 */
+	@Test
 	public void testRegexLikeUppercase() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :PhysicalPerson}";
 		countResults(query, 1);

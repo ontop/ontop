@@ -21,7 +21,7 @@ public class TermTypeInferenceTools {
     private static final Optional<TermType> OPTIONAL_NULL_TERM_TYPE = Optional.of(TYPE_FACTORY.getTermType(NULL));
 
     private static final DatatypePredicate LITERAL_LANG_PREDICATE = TYPE_FACTORY
-            .getTypePredicate(LITERAL_LANG);
+            .getTypePredicate(LANG_STRING);
 
     /**
      * TODO: simplify this method
@@ -86,12 +86,11 @@ public class TermTypeInferenceTools {
     @Deprecated
     protected static TermType castStringLangType(TermType termType) {
         switch (termType.getColType()) {
-            case LITERAL:
-            case LITERAL_LANG:
+            case LANG_STRING:
             case STRING:
                 return termType;
             default:
-                return TYPE_FACTORY.getTermType(LITERAL);
+                return TYPE_FACTORY.getTermType(STRING);
         }
     }
 }

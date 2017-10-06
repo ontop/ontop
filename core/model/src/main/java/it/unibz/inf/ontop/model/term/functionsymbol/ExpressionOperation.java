@@ -56,7 +56,7 @@ public enum ExpressionOperation implements OperationPredicate {
 	SUBSTR3("SUBSTR", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.INTEGER, COL_TYPE.INTEGER),
 	STRBEFORE("STRBEFORE", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	STRAFTER("STRAFTER", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	REPLACE("REPLACE", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	REPLACE("REPLACE", TermTypeInferenceRules.STRING_LANG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	CONCAT("CONCAT", TermTypeInferenceRules.STRING_LANG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	ENCODE_FOR_URI("ENCODE_FOR_URI", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
 
@@ -148,8 +148,6 @@ public enum ExpressionOperation implements OperationPredicate {
 				Optional.ofNullable(arg3), Optional.ofNullable(arg4));
 		this.argTypes = convertArgTypes(argColTypes);
 	}
-
-
 
 	private final String name;
 	private final TermTypeInferenceRule termTypeInferenceRule;
