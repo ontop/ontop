@@ -203,15 +203,17 @@ public class TypeExtractor {
     }
 
     private static COL_TYPE getCastType(TermType termType) {
-        COL_TYPE type = termType.getColType();
-        switch (type) {
-            case OBJECT:
-            case BNODE:
-            case NULL:
-                return LITERAL;
-            default:
-                return type;
-        }
+        return termType.getOptionalColType()
+                .map(type -> {switch (type) {
+                    case OBJECT:
+                    case BNODE:
+                    case NULL:
+                        return LITERAL;
+                    default:
+                        return type;
+                }})
+                //UGLY! For casting as a string
+        .orElse(LITERAL);
     }
 
     /**

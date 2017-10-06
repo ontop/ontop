@@ -412,7 +412,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
     private static class UndeterminedTripleObjectType extends OntopInternalBugException {
         UndeterminedTripleObjectType(String predicateName, TermType tripleObjectType) {
-            super("Internal bug: undetermined type (" + tripleObjectType.getColType() + ") for " + predicateName);
+            super("Internal bug: undetermined type (" + tripleObjectType + ") for " + predicateName);
         }
     }
 
