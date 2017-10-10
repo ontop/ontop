@@ -9,44 +9,30 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.stream.Stream;
 
 
-public class TermTypeAncestryImpl implements TermTypeAncestry {
-
-    private final ImmutableList<TermType> types;
-
-    private TermTypeAncestryImpl(ImmutableList<TermType> types) {
-        this.types = types;
-    }
+public class TermTypeAncestryImpl extends TermTypeHierarchyImpl<TermType> implements TermTypeAncestry {
 
     /**
      * ONLY for the TermType origin (which must be unique)!
      */
     protected TermTypeAncestryImpl(TermType origin) {
-        this.types = ImmutableList.of(origin);
+        this(ImmutableList.of(origin));
     }
 
-    @Override
-    public Stream<TermType> getTermTypes() {
-        return types.stream();
+    private TermTypeAncestryImpl(ImmutableList<TermType> newAncestors) {
+        super(newAncestors);
     }
 
     @Override
     public TermType getClosestCommonAncestor(TermTypeAncestry otherAncestry) {
-        return otherAncestry.getTermTypes()
-                .filter(types::contains)
-                .findFirst()
+        return getClosestCommonTermType(otherAncestry)
                 .orElseThrow(DifferentTermTypeOriginException::new);
     }
 
     @Override
     public TermTypeAncestry newAncestry(TermType childType) {
-        ImmutableList<TermType> newAncestors = Stream.concat(Stream.of(childType), types.stream())
+        ImmutableList<TermType> newAncestors = Stream.concat(Stream.of(childType), getTermTypes())
                 .collect(ImmutableCollectors.toList());
         return new TermTypeAncestryImpl(newAncestors);
-    }
-
-    @Override
-    public boolean contains(TermType termType) {
-        return types.contains(termType);
     }
 
     /**

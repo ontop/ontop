@@ -16,6 +16,9 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static it.unibz.inf.ontop.model.type.impl.AbstractNumericRDFDatatype.createAbstractNumericTermType;
+import static it.unibz.inf.ontop.model.type.impl.ConcreteNumericRDFDatatypeImpl.createConcreteNumericTermType;
+import static it.unibz.inf.ontop.model.type.impl.ConcreteNumericRDFDatatypeImpl.createTopConcreteNumericTermType;
 import static it.unibz.inf.ontop.model.type.impl.SimpleRDFDatatype.createSimpleRDFDatatype;
 
 @Singleton
@@ -56,12 +59,13 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final UnboundRDFTermType unboundRDFTermType;
 	private final RDFTermType iriTermType, blankNodeTermType;
 	private final RDFDatatype rdfsLiteralDatatype;
-	private final RDFDatatype numericDatatype, owlRealDatatype, owlRationalDatatype, xsdDecimalDatatype;
-	private final RDFDatatype xsdDoubleDatatype, xsdFloatDatatype;
-	private final RDFDatatype xsdIntegerDatatype, xsdLongDatatype, xsdIntDatatype, xsdShortDatatype, xsdByteDatatype;
-	private final RDFDatatype xsdNonPositiveIntegerDatatype, xsdNegativeIntegerDatatype;
-	private final RDFDatatype xsdNonNegativeIntegerDatatype, xsdPositiveIntegerDatatype;
-	private final RDFDatatype xsdUnsignedLongDatatype, xsdUnsignedIntDatatype, xsdUnsignedShortDatatype, xsdUnsignedByteDatatype;
+	private final NumericRDFDatatype numericDatatype, owlRealDatatype;
+	private final ConcreteNumericRDFDatatype owlRationalDatatype, xsdDecimalDatatype;
+	private final ConcreteNumericRDFDatatype xsdDoubleDatatype, xsdFloatDatatype;
+	private final ConcreteNumericRDFDatatype xsdIntegerDatatype, xsdLongDatatype, xsdIntDatatype, xsdShortDatatype, xsdByteDatatype;
+	private final ConcreteNumericRDFDatatype xsdNonPositiveIntegerDatatype, xsdNegativeIntegerDatatype;
+	private final ConcreteNumericRDFDatatype xsdNonNegativeIntegerDatatype, xsdPositiveIntegerDatatype;
+	private final ConcreteNumericRDFDatatype xsdUnsignedLongDatatype, xsdUnsignedIntDatatype, xsdUnsignedShortDatatype, xsdUnsignedByteDatatype;
 	private final RDFDatatype defaultUnsupportedDatatype, xsdStringDatatype, xsdBooleanDatatype;
 	private final RDFDatatype xsdTimeDatatype, xsdDateDatatype, xsdDatetimeDatatype, xsdDatetimeStampDatatype, xsdGYearDatatype;
 
@@ -107,50 +111,50 @@ public class TypeFactoryImpl implements TypeFactory {
 		rdfsLiteralDatatype = createSimpleRDFDatatype(RDFS.LITERAL, rootRDFTermType.getAncestry(), true, COL_TYPE.LITERAL);
 		termTypeCache.put(COL_TYPE.LITERAL, rdfsLiteralDatatype);
 
-		numericDatatype = NumericRDFDatatype.createNumericTermType(ONTOP_NUMERIC, rdfsLiteralDatatype.getAncestry(), true);
+		numericDatatype = createAbstractNumericTermType(ONTOP_NUMERIC, rdfsLiteralDatatype.getAncestry());
 
-		xsdDoubleDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.DOUBLE, numericDatatype.getAncestry(), COL_TYPE.DOUBLE);
+		xsdDoubleDatatype = createTopConcreteNumericTermType(XMLSchema.DOUBLE, numericDatatype, COL_TYPE.DOUBLE);
 		termTypeCache.put(COL_TYPE.DOUBLE, xsdDoubleDatatype);
-		xsdFloatDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.FLOAT, numericDatatype.getAncestry(), COL_TYPE.FLOAT);
+		// Type promotion: an xsd:float can be promoted into a xsd:double
+		xsdFloatDatatype = createConcreteNumericTermType(XMLSchema.FLOAT, numericDatatype.getAncestry(),
+				xsdDoubleDatatype.getPromotionSubstitutionHierarchy(), COL_TYPE.FLOAT, true);
 		termTypeCache.put(COL_TYPE.FLOAT, xsdFloatDatatype);
 
-		owlRealDatatype = NumericRDFDatatype.createNumericTermType(OWL_REAL, numericDatatype.getAncestry(), true);
-		owlRationalDatatype = NumericRDFDatatype.createNumericTermType(OWL_RATIONAL, owlRealDatatype.getAncestry(), false);
-		xsdDecimalDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.DECIMAL, owlRationalDatatype.getAncestry(), COL_TYPE.DECIMAL);
+		owlRealDatatype = createAbstractNumericTermType(OWL_REAL, numericDatatype.getAncestry());
+		// Type promotion: an owl:rational can be promoted into a xsd:float
+		owlRationalDatatype = createConcreteNumericTermType(OWL_RATIONAL, owlRealDatatype.getAncestry(),
+				xsdFloatDatatype.getPromotionSubstitutionHierarchy(), true);
+		xsdDecimalDatatype = createConcreteNumericTermType(XMLSchema.DECIMAL, owlRationalDatatype, COL_TYPE.DECIMAL, true);
 		termTypeCache.put(COL_TYPE.DECIMAL, xsdDecimalDatatype);
-		xsdIntegerDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.INTEGER, xsdDecimalDatatype.getAncestry(), COL_TYPE.INTEGER);
+		xsdIntegerDatatype = createConcreteNumericTermType(XMLSchema.INTEGER, xsdDecimalDatatype, COL_TYPE.INTEGER, true);
 		termTypeCache.put(COL_TYPE.INTEGER, xsdIntegerDatatype);
 
-		xsdNonPositiveIntegerDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.NON_POSITIVE_INTEGER,
-				xsdIntegerDatatype.getAncestry(), COL_TYPE.NON_POSITIVE_INTEGER);
+		xsdNonPositiveIntegerDatatype = createConcreteNumericTermType(XMLSchema.NON_POSITIVE_INTEGER,
+				xsdIntegerDatatype, COL_TYPE.NON_POSITIVE_INTEGER, false);
 		termTypeCache.put(COL_TYPE.NON_POSITIVE_INTEGER, xsdNonPositiveIntegerDatatype);
-		xsdNegativeIntegerDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.NEGATIVE_INTEGER,
-				xsdNonPositiveIntegerDatatype.getAncestry(), COL_TYPE.NEGATIVE_INTEGER);
+		xsdNegativeIntegerDatatype = createConcreteNumericTermType(XMLSchema.NEGATIVE_INTEGER,
+				xsdNonPositiveIntegerDatatype, COL_TYPE.NEGATIVE_INTEGER, false);
 		termTypeCache.put(COL_TYPE.NEGATIVE_INTEGER, xsdNegativeIntegerDatatype);
 
-		xsdLongDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.LONG, xsdIntegerDatatype.getAncestry(), COL_TYPE.LONG);
+		xsdLongDatatype = createConcreteNumericTermType(XMLSchema.LONG, xsdIntegerDatatype, COL_TYPE.LONG, false);
 		termTypeCache.put(COL_TYPE.LONG, xsdLongDatatype);
-		xsdIntDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.INT, xsdLongDatatype.getAncestry(), COL_TYPE.INT);
+		xsdIntDatatype = createConcreteNumericTermType(XMLSchema.INT, xsdLongDatatype, COL_TYPE.INT, false);
 		termTypeCache.put(COL_TYPE.INT, xsdIntDatatype);
-		xsdShortDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.SHORT, xsdIntDatatype.getAncestry(), false);
-		xsdByteDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.BYTE, xsdShortDatatype.getAncestry(), false);
+		xsdShortDatatype = createConcreteNumericTermType(XMLSchema.SHORT, xsdIntDatatype, false);
+		xsdByteDatatype = createConcreteNumericTermType(XMLSchema.BYTE, xsdShortDatatype, false);
 
-		xsdNonNegativeIntegerDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.NON_NEGATIVE_INTEGER,
-				xsdIntegerDatatype.getAncestry(), COL_TYPE.NON_NEGATIVE_INTEGER);
+		xsdNonNegativeIntegerDatatype = createConcreteNumericTermType(XMLSchema.NON_NEGATIVE_INTEGER,
+				xsdIntegerDatatype, COL_TYPE.NON_NEGATIVE_INTEGER, false);
 		termTypeCache.put(COL_TYPE.NON_NEGATIVE_INTEGER, xsdNonNegativeIntegerDatatype);
 
-		xsdUnsignedLongDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.UNSIGNED_LONG,
-				xsdIntegerDatatype.getAncestry(), false);
-		xsdUnsignedIntDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.UNSIGNED_INT,
-				xsdUnsignedLongDatatype.getAncestry(), COL_TYPE.UNSIGNED_INT);
+		xsdUnsignedLongDatatype = createConcreteNumericTermType(XMLSchema.UNSIGNED_LONG, xsdIntegerDatatype, false);
+		xsdUnsignedIntDatatype = createConcreteNumericTermType(XMLSchema.UNSIGNED_INT, xsdUnsignedLongDatatype, COL_TYPE.UNSIGNED_INT, false);
 		termTypeCache.put(COL_TYPE.UNSIGNED_INT, xsdUnsignedIntDatatype);
-		xsdUnsignedShortDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.UNSIGNED_SHORT,
-				xsdUnsignedIntDatatype.getAncestry(), false);
-		xsdUnsignedByteDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.UNSIGNED_BYTE,
-				xsdUnsignedShortDatatype.getAncestry(), false);
+		xsdUnsignedShortDatatype = createConcreteNumericTermType(XMLSchema.UNSIGNED_SHORT, xsdUnsignedIntDatatype, false);
+		xsdUnsignedByteDatatype = createConcreteNumericTermType(XMLSchema.UNSIGNED_BYTE, xsdUnsignedShortDatatype, false);
 
-		xsdPositiveIntegerDatatype = NumericRDFDatatype.createNumericTermType(XMLSchema.POSITIVE_INTEGER,
-				xsdNonNegativeIntegerDatatype.getAncestry(), COL_TYPE.POSITIVE_INTEGER);
+		xsdPositiveIntegerDatatype = createConcreteNumericTermType(XMLSchema.POSITIVE_INTEGER,
+				xsdNonNegativeIntegerDatatype, COL_TYPE.POSITIVE_INTEGER, false);
 		termTypeCache.put(COL_TYPE.POSITIVE_INTEGER, xsdPositiveIntegerDatatype);
 
 		xsdBooleanDatatype = createSimpleRDFDatatype(XMLSchema.BOOLEAN,
