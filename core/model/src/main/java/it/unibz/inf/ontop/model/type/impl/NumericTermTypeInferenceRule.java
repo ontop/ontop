@@ -3,16 +3,14 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.model.type.ConcreteNumericRDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.*;
 
-
-public class NumericTermTypeInferenceRule extends UnifierTermTypeInferenceRule {
+public class NumericTermTypeInferenceRule extends AbstractTermTypeInferenceRule {
 
     /**
      * Checks that all the terms are numeric
@@ -22,20 +20,26 @@ public class NumericTermTypeInferenceRule extends UnifierTermTypeInferenceRule {
         IntStream.range(0, argumentTypes.size())
                 .forEach(i ->  {
                     if(!argumentTypes.get(i)
-                            .map(t -> NUMERIC_TYPES.contains(t.getColType()))
+                            .map(t -> t instanceof ConcreteNumericRDFDatatype)
                             .orElse(true)) {
 
-                        throw new IncompatibleTermException("numeric term", argumentTypes.get(i).get());
+                        throw new IncompatibleTermException("concrete numeric term", argumentTypes.get(i).get());
                     }
                 });
     }
 
     /**
-     * Only base numeric types (double, float, decimal and integer) can be returned by numeric functions and operators
+     * We only infer a type when all the types of the arguments are known.
      */
     @Override
-    protected Optional<TermType> postprocessInferredType(Optional<TermType> optionalTermType) {
-        return optionalTermType
-                .map(t -> INTEGER_TYPES.contains(t.getColType()) ? TYPE_FACTORY.getTermType(INTEGER) : t);
+    protected Optional<TermType> reduceInferredTypes(ImmutableList<Optional<TermType>> argumentTypes) {
+        if (argumentTypes.stream().allMatch(Optional::isPresent)) {
+            return argumentTypes.stream()
+                    .map(Optional::get)
+                    .map(t -> (ConcreteNumericRDFDatatype) t)
+                    .reduce(ConcreteNumericRDFDatatype::getCommonPropagatedOrSubstitutedType)
+                    .map(t -> (TermType) t);
+        }
+        return Optional.empty();
     }
 }

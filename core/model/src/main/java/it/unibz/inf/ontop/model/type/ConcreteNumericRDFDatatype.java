@@ -8,4 +8,6 @@ public interface ConcreteNumericRDFDatatype extends NumericRDFDatatype {
      *
      */
     TypePropagationSubstitutionHierarchy getPromotionSubstitutionHierarchy();
+
+    ConcreteNumericRDFDatatype getCommonPropagatedOrSubstitutedType(ConcreteNumericRDFDatatype otherType);
 }

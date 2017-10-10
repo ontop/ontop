@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.model.type.impl;
 import it.unibz.inf.ontop.model.type.*;
 import org.eclipse.rdf4j.model.IRI;
 
+import java.util.Optional;
+
 
 public class ConcreteNumericRDFDatatypeImpl extends SimpleRDFDatatype implements ConcreteNumericRDFDatatype {
 
@@ -34,6 +36,19 @@ public class ConcreteNumericRDFDatatypeImpl extends SimpleRDFDatatype implements
     @Override
     public TypePropagationSubstitutionHierarchy getPromotionSubstitutionHierarchy() {
         return promotedHierarchy;
+    }
+
+    @Override
+    public ConcreteNumericRDFDatatype getCommonPropagatedOrSubstitutedType(ConcreteNumericRDFDatatype otherType){
+        if (equals(otherType))
+            return this;
+        if (promotedHierarchy.contains(otherType))
+            return otherType;
+
+        TypePropagationSubstitutionHierarchy otherHierarchy = otherType.getPromotionSubstitutionHierarchy();
+        if (otherHierarchy.contains(this))
+            return this;
+        return promotedHierarchy.getClosestCommonType(otherHierarchy);
     }
 
     static ConcreteNumericRDFDatatype createTopConcreteNumericTermType(IRI datatypeIRI,

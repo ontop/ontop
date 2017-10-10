@@ -10,7 +10,10 @@ import java.util.Optional;
  */
 public interface TypePropagationSubstitutionHierarchy extends TermTypeHierarchy<ConcreteNumericRDFDatatype> {
 
-    Optional<ConcreteNumericRDFDatatype> getClosestCommonType(TypePropagationSubstitutionHierarchy otherHierarchy);
+    /**
+     * All the concrete numeric types are expected to be convertible into xsd:double.
+     */
+    ConcreteNumericRDFDatatype getClosestCommonType(TypePropagationSubstitutionHierarchy otherHierarchy);
 
     /**
      * Builds a new hierarchy
