@@ -140,7 +140,7 @@ public class TypeFactoryImpl implements TypeFactory {
 		xsdNonNegativeIntegerDatatype = createConcreteNumericTermType(XMLSchema.NON_NEGATIVE_INTEGER,
 				xsdIntegerDatatype, COL_TYPE.NON_NEGATIVE_INTEGER, false);
 		termTypeColTypeCache.put(COL_TYPE.NON_NEGATIVE_INTEGER, xsdNonNegativeIntegerDatatype);
-		registerDatatype(xsdNegativeIntegerDatatype);
+		registerDatatype(xsdNonNegativeIntegerDatatype);
 
 		xsdUnsignedLongDatatype = createConcreteNumericTermType(XMLSchema.UNSIGNED_LONG, xsdIntegerDatatype, false);
 		registerDatatype(xsdUnsignedLongDatatype);
