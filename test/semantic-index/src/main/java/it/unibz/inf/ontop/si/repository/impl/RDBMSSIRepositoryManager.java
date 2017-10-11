@@ -560,7 +560,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		
 		String value = object.getValue();
 		
-		switch (object.getType()) {
+		switch (object.getType().getColType()) {
 			case LITERAL:  // 0
 				stm.setString(2, value);
 				break;  
@@ -1008,7 +1008,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 				// R: these three types were not covered by the old switch
 				throw new RuntimeException("Unsuported type: " + type2);
 			default:
-				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, colType2);
+				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, type2);
 		}
 
 		ImmutableFunctionalTerm body = TERM_FACTORY.getImmutableFunctionalTerm(predicate, subjectTerm, objectTerm);
