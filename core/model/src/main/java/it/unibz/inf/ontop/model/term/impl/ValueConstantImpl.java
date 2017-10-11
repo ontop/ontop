@@ -60,7 +60,7 @@ public class ValueConstantImpl implements ValueConstant {
 		this.language = language;
 		this.type = COL_TYPE.LANG_STRING;
 		this.string = getStringRepresentation();
-		this.termType = TYPE_FACTORY.getTermType(language);
+		this.termType = TYPE_FACTORY.getLangTermType(language);
 	}
 	
 	private String getStringRepresentation() {

@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.Optional;
 
@@ -54,7 +55,7 @@ public class LangDatatype extends AbstractRDFDatatype {
                         ? (TermType) this
                         : new LangDatatype(newLangTag, parentAncestry))
                 // Incompatible lang tags --> common denominator is xsd:string
-                .orElseGet(() -> TYPE_FACTORY.getTermType(STRING));
+                .orElseGet(TYPE_FACTORY::getXsdStringDatatype);
     }
 
     @Override

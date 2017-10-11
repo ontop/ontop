@@ -16,9 +16,9 @@ import static it.unibz.inf.ontop.model.type.COL_TYPE.*;
 
 public class TermTypeInferenceTools {
 
-    private static final Optional<TermType> OPTIONAL_OBJECT_TERM_TYPE = Optional.of(TYPE_FACTORY.getTermType(OBJECT));
-    private static final Optional<TermType> OPTIONAL_BNODE_TERM_TYPE = Optional.of(TYPE_FACTORY.getTermType(BNODE));
-    private static final Optional<TermType> OPTIONAL_NULL_TERM_TYPE = Optional.of(TYPE_FACTORY.getTermType(NULL));
+    private static final Optional<TermType> OPTIONAL_OBJECT_TERM_TYPE = Optional.of(TYPE_FACTORY.getIRITermType());
+    private static final Optional<TermType> OPTIONAL_BNODE_TERM_TYPE = Optional.of(TYPE_FACTORY.getBlankNodeType());
+    private static final Optional<TermType> OPTIONAL_UNBOUND_TERM_TYPE = Optional.of(TYPE_FACTORY.getUnboundTermType());
 
     private static final DatatypePredicate LITERAL_LANG_PREDICATE = TYPE_FACTORY
             .getTypePredicate(LANG_STRING);
@@ -49,7 +49,7 @@ public class TermTypeInferenceTools {
                     if (!(secondArgument instanceof Constant))
                         // TODO: return a proper exception (internal bug)
                         throw new IllegalStateException("A lang literal function must have a constant language tag");
-                    return Optional.of(TYPE_FACTORY.getTermType(((Constant)secondArgument).getValue()));
+                    return Optional.of(TYPE_FACTORY.getLangTermType(((Constant)secondArgument).getValue()));
                 }
                 return Optional.of(TYPE_FACTORY.getTermType(f.getFunctionSymbol().getType(0)));
 
@@ -70,7 +70,7 @@ public class TermTypeInferenceTools {
              * COL_TYPE of NULL should be NULL!
              */
             if (term == TermConstants.NULL) {
-                return OPTIONAL_NULL_TERM_TYPE;
+                return OPTIONAL_UNBOUND_TERM_TYPE;
             }
             else {
                 return Optional.of(TYPE_FACTORY.getTermType(((ValueConstant) term).getType()));
@@ -83,6 +83,9 @@ public class TermTypeInferenceTools {
         }
     }
 
+    /**
+     * TODO: get rid of it
+     */
     @Deprecated
     protected static TermType castStringLangType(TermType termType) {
         switch (termType.getColType()) {
@@ -90,7 +93,7 @@ public class TermTypeInferenceTools {
             case STRING:
                 return termType;
             default:
-                return TYPE_FACTORY.getTermType(STRING);
+                return TYPE_FACTORY.getXsdStringDatatype();
         }
     }
 }

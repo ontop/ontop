@@ -101,7 +101,7 @@ public class BNodeConstantImpl implements BNode {
 
 	@Override
 	public TermType getTermType() {
-		return TYPE_FACTORY.getTermType(COL_TYPE.BNODE);
+		return TYPE_FACTORY.getBlankNodeType();
 	}
 
 }

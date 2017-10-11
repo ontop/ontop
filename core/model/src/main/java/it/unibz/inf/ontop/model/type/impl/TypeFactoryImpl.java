@@ -51,13 +51,14 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final List<Predicate> predicateList = new LinkedList<>();
 
 	// Only builds these TermTypes once.
-	private final Map<COL_TYPE, RDFTermType> termTypeCache = new ConcurrentHashMap<>();
+	private final Map<COL_TYPE, RDFTermType> termTypeColTypeCache = new ConcurrentHashMap<>();
+	private final Map<IRI, RDFDatatype> datatypeCache = new ConcurrentHashMap<>();
 	private final Map<String, RDFDatatype> langTypeCache = new ConcurrentHashMap<>();
 
 	private final TermType rootTermType;
 	private final RDFTermType rootRDFTermType;
 	private final UnboundRDFTermType unboundRDFTermType;
-	private final RDFTermType iriTermType, blankNodeTermType;
+	private final ObjectRDFType iriTermType, blankNodeTermType;
 	private final RDFDatatype rdfsLiteralDatatype;
 	private final NumericRDFDatatype numericDatatype, owlRealDatatype;
 	private final ConcreteNumericRDFDatatype owlRationalDatatype, xsdDecimalDatatype;
@@ -99,86 +100,120 @@ public class TypeFactoryImpl implements TypeFactory {
 		rootRDFTermType = RDFTermTypeImpl.createRDFTermRoot(rootTermType.getAncestry());
 
 		unboundRDFTermType = UnboundRDFTermTypeImpl.createUnboundRDFTermType(rootRDFTermType.getAncestry());
-		termTypeCache.put(COL_TYPE.NULL, unboundRDFTermType);
+		termTypeColTypeCache.put(COL_TYPE.NULL, unboundRDFTermType);
 
 
 		// TODO: create an intermediate term type (for all IRI/B-nodes)
 		iriTermType = new IRITermType(rootRDFTermType.getAncestry());
-		termTypeCache.put(COL_TYPE.OBJECT, iriTermType);
+		termTypeColTypeCache.put(COL_TYPE.OBJECT, iriTermType);
 		blankNodeTermType = new BlankNodeTermType(rootRDFTermType.getAncestry());
-		termTypeCache.put(COL_TYPE.BNODE, blankNodeTermType);
+		termTypeColTypeCache.put(COL_TYPE.BNODE, blankNodeTermType);
 
 		rdfsLiteralDatatype = createSimpleRDFDatatype(RDFS.LITERAL, rootRDFTermType.getAncestry(), true, COL_TYPE.LITERAL);
-		termTypeCache.put(COL_TYPE.LITERAL, rdfsLiteralDatatype);
+		termTypeColTypeCache.put(COL_TYPE.LITERAL, rdfsLiteralDatatype);
+		registerDatatype(rdfsLiteralDatatype);
+		datatypeCache.put(rdfsLiteralDatatype.getIRI(), rdfsLiteralDatatype);
 
 		numericDatatype = createAbstractNumericTermType(ONTOP_NUMERIC, rdfsLiteralDatatype.getAncestry());
+		registerDatatype(numericDatatype);
 
 		xsdDoubleDatatype = createTopConcreteNumericTermType(XMLSchema.DOUBLE, numericDatatype, COL_TYPE.DOUBLE);
-		termTypeCache.put(COL_TYPE.DOUBLE, xsdDoubleDatatype);
+		termTypeColTypeCache.put(COL_TYPE.DOUBLE, xsdDoubleDatatype);
+		registerDatatype(xsdDoubleDatatype);
+
 		// Type promotion: an xsd:float can be promoted into a xsd:double
 		xsdFloatDatatype = createConcreteNumericTermType(XMLSchema.FLOAT, numericDatatype.getAncestry(),
 				xsdDoubleDatatype.getPromotionSubstitutionHierarchy(), COL_TYPE.FLOAT, true);
-		termTypeCache.put(COL_TYPE.FLOAT, xsdFloatDatatype);
+		termTypeColTypeCache.put(COL_TYPE.FLOAT, xsdFloatDatatype);
+		registerDatatype(xsdFloatDatatype);
 
 		owlRealDatatype = createAbstractNumericTermType(OWL_REAL, numericDatatype.getAncestry());
+		registerDatatype(owlRealDatatype);
 		// Type promotion: an owl:rational can be promoted into a xsd:float
 		owlRationalDatatype = createConcreteNumericTermType(OWL_RATIONAL, owlRealDatatype.getAncestry(),
 				xsdFloatDatatype.getPromotionSubstitutionHierarchy(), true);
+		registerDatatype(owlRationalDatatype);
 		xsdDecimalDatatype = createConcreteNumericTermType(XMLSchema.DECIMAL, owlRationalDatatype, COL_TYPE.DECIMAL, true);
-		termTypeCache.put(COL_TYPE.DECIMAL, xsdDecimalDatatype);
+		termTypeColTypeCache.put(COL_TYPE.DECIMAL, xsdDecimalDatatype);
+		registerDatatype(xsdDecimalDatatype);
 		xsdIntegerDatatype = createConcreteNumericTermType(XMLSchema.INTEGER, xsdDecimalDatatype, COL_TYPE.INTEGER, true);
-		termTypeCache.put(COL_TYPE.INTEGER, xsdIntegerDatatype);
+		termTypeColTypeCache.put(COL_TYPE.INTEGER, xsdIntegerDatatype);
+		registerDatatype(xsdIntegerDatatype);
 
 		xsdNonPositiveIntegerDatatype = createConcreteNumericTermType(XMLSchema.NON_POSITIVE_INTEGER,
 				xsdIntegerDatatype, COL_TYPE.NON_POSITIVE_INTEGER, false);
-		termTypeCache.put(COL_TYPE.NON_POSITIVE_INTEGER, xsdNonPositiveIntegerDatatype);
+		termTypeColTypeCache.put(COL_TYPE.NON_POSITIVE_INTEGER, xsdNonPositiveIntegerDatatype);
+		registerDatatype(xsdNonPositiveIntegerDatatype);
 		xsdNegativeIntegerDatatype = createConcreteNumericTermType(XMLSchema.NEGATIVE_INTEGER,
 				xsdNonPositiveIntegerDatatype, COL_TYPE.NEGATIVE_INTEGER, false);
-		termTypeCache.put(COL_TYPE.NEGATIVE_INTEGER, xsdNegativeIntegerDatatype);
+		termTypeColTypeCache.put(COL_TYPE.NEGATIVE_INTEGER, xsdNegativeIntegerDatatype);
+		registerDatatype(xsdNegativeIntegerDatatype);
 
 		xsdLongDatatype = createConcreteNumericTermType(XMLSchema.LONG, xsdIntegerDatatype, COL_TYPE.LONG, false);
-		termTypeCache.put(COL_TYPE.LONG, xsdLongDatatype);
+		termTypeColTypeCache.put(COL_TYPE.LONG, xsdLongDatatype);
+		registerDatatype(xsdLongDatatype);
 		xsdIntDatatype = createConcreteNumericTermType(XMLSchema.INT, xsdLongDatatype, COL_TYPE.INT, false);
-		termTypeCache.put(COL_TYPE.INT, xsdIntDatatype);
+		termTypeColTypeCache.put(COL_TYPE.INT, xsdIntDatatype);
+		registerDatatype(xsdIntDatatype);
 		xsdShortDatatype = createConcreteNumericTermType(XMLSchema.SHORT, xsdIntDatatype, false);
+		registerDatatype(xsdShortDatatype);
 		xsdByteDatatype = createConcreteNumericTermType(XMLSchema.BYTE, xsdShortDatatype, false);
+		registerDatatype(xsdByteDatatype);
 
 		xsdNonNegativeIntegerDatatype = createConcreteNumericTermType(XMLSchema.NON_NEGATIVE_INTEGER,
 				xsdIntegerDatatype, COL_TYPE.NON_NEGATIVE_INTEGER, false);
-		termTypeCache.put(COL_TYPE.NON_NEGATIVE_INTEGER, xsdNonNegativeIntegerDatatype);
+		termTypeColTypeCache.put(COL_TYPE.NON_NEGATIVE_INTEGER, xsdNonNegativeIntegerDatatype);
+		registerDatatype(xsdNegativeIntegerDatatype);
 
 		xsdUnsignedLongDatatype = createConcreteNumericTermType(XMLSchema.UNSIGNED_LONG, xsdIntegerDatatype, false);
+		registerDatatype(xsdUnsignedLongDatatype);
 		xsdUnsignedIntDatatype = createConcreteNumericTermType(XMLSchema.UNSIGNED_INT, xsdUnsignedLongDatatype, COL_TYPE.UNSIGNED_INT, false);
-		termTypeCache.put(COL_TYPE.UNSIGNED_INT, xsdUnsignedIntDatatype);
+		termTypeColTypeCache.put(COL_TYPE.UNSIGNED_INT, xsdUnsignedIntDatatype);
+		registerDatatype(xsdUnsignedIntDatatype);
+
 		xsdUnsignedShortDatatype = createConcreteNumericTermType(XMLSchema.UNSIGNED_SHORT, xsdUnsignedIntDatatype, false);
+		registerDatatype(xsdUnsignedShortDatatype);
 		xsdUnsignedByteDatatype = createConcreteNumericTermType(XMLSchema.UNSIGNED_BYTE, xsdUnsignedShortDatatype, false);
+		registerDatatype(xsdUnsignedByteDatatype);
 
 		xsdPositiveIntegerDatatype = createConcreteNumericTermType(XMLSchema.POSITIVE_INTEGER,
 				xsdNonNegativeIntegerDatatype, COL_TYPE.POSITIVE_INTEGER, false);
-		termTypeCache.put(COL_TYPE.POSITIVE_INTEGER, xsdPositiveIntegerDatatype);
+		termTypeColTypeCache.put(COL_TYPE.POSITIVE_INTEGER, xsdPositiveIntegerDatatype);
+		registerDatatype(xsdPositiveIntegerDatatype);
 
 		xsdBooleanDatatype = createSimpleRDFDatatype(XMLSchema.BOOLEAN,
 				rdfsLiteralDatatype.getAncestry(), COL_TYPE.BOOLEAN);
-		termTypeCache.put(COL_TYPE.BOOLEAN, xsdBooleanDatatype);
+		termTypeColTypeCache.put(COL_TYPE.BOOLEAN, xsdBooleanDatatype);
+		registerDatatype(xsdBooleanDatatype);
 
 		xsdStringDatatype = createSimpleRDFDatatype(XMLSchema.STRING, rdfsLiteralDatatype.getAncestry(),
 				COL_TYPE.STRING);
-		termTypeCache.put(COL_TYPE.STRING, xsdStringDatatype);
+		termTypeColTypeCache.put(COL_TYPE.STRING, xsdStringDatatype);
+		registerDatatype(xsdStringDatatype);
 
 		defaultUnsupportedDatatype = UnsupportedRDFDatatype.createUnsupportedDatatype(rdfsLiteralDatatype.getAncestry());
-		termTypeCache.put(COL_TYPE.UNSUPPORTED, defaultUnsupportedDatatype);
+		termTypeColTypeCache.put(COL_TYPE.UNSUPPORTED, defaultUnsupportedDatatype);;
 
 		xsdTimeDatatype = createSimpleRDFDatatype(XMLSchema.TIME, rdfsLiteralDatatype.getAncestry(), COL_TYPE.TIME);
-		termTypeCache.put(COL_TYPE.TIME, xsdTimeDatatype);
+		termTypeColTypeCache.put(COL_TYPE.TIME, xsdTimeDatatype);
+		registerDatatype(xsdTimeDatatype);
 		xsdDateDatatype = createSimpleRDFDatatype(XMLSchema.DATE, rdfsLiteralDatatype.getAncestry(), COL_TYPE.DATE);
-		termTypeCache.put(COL_TYPE.DATE, xsdDateDatatype);
+		termTypeColTypeCache.put(COL_TYPE.DATE, xsdDateDatatype);
+		registerDatatype(xsdDateDatatype);
 		xsdDatetimeDatatype = createSimpleRDFDatatype(XMLSchema.DATETIME, rdfsLiteralDatatype.getAncestry(), COL_TYPE.DATETIME);
-		termTypeCache.put(COL_TYPE.DATETIME, xsdDatetimeDatatype);
+		termTypeColTypeCache.put(COL_TYPE.DATETIME, xsdDatetimeDatatype);
+		registerDatatype(xsdDatetimeDatatype);
 		xsdDatetimeStampDatatype = createSimpleRDFDatatype(datetimestamp, xsdDatetimeDatatype.getAncestry(),
-				COL_TYPE.DATETIME_STAMP);
-		termTypeCache.put(COL_TYPE.DATETIME_STAMP, xsdDatetimeStampDatatype);
+				COL_TYPE.DATETIME_STAMP);;
+		termTypeColTypeCache.put(COL_TYPE.DATETIME_STAMP, xsdDatetimeStampDatatype);
+		registerDatatype(xsdDatetimeStampDatatype);
 		xsdGYearDatatype = createSimpleRDFDatatype(XMLSchema.GYEAR, rdfsLiteralDatatype.getAncestry(), COL_TYPE.YEAR);
-		termTypeCache.put(COL_TYPE.YEAR, xsdGYearDatatype);
+		termTypeColTypeCache.put(COL_TYPE.YEAR, xsdGYearDatatype);
+		registerDatatype(xsdGYearDatatype);
+	}
+
+	private void registerDatatype(RDFDatatype datatype) {
+		datatypeCache.put(datatype.getIRI(), datatype);
 	}
 
 
@@ -280,7 +315,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	 */
 	@Override
 	public RDFTermType getTermType(COL_TYPE type) {
-		RDFTermType cachedType = termTypeCache.get(type);
+		RDFTermType cachedType = termTypeColTypeCache.get(type);
 		if (cachedType == null) {
 			throw new RuntimeException("TODO: support " + type);
 		}
@@ -288,7 +323,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public RDFDatatype getTermType(String languageTagString) {
+	public RDFDatatype getLangTermType(String languageTagString) {
 		return langTypeCache
 				.computeIfAbsent(languageTagString,
 						k -> LangDatatype.createLangDatatype(
@@ -296,8 +331,26 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public RDFTermType getIRITermType() {
-		return getTermType(COL_TYPE.OBJECT);
+	public RDFDatatype getRDFDatatype(IRI iri) {
+		RDFDatatype datatype = datatypeCache.get(iri);
+		if (datatype == null)
+			throw new RuntimeException("TODO: support arbitrary datatypes such as " + iri);
+		return datatype;
+	}
+
+	@Override
+	public ObjectRDFType getIRITermType() {
+		return iriTermType;
+	}
+
+	@Override
+	public ObjectRDFType getBlankNodeType() {
+		return blankNodeTermType;
+	}
+
+	@Override
+	public UnboundRDFTermType getUnboundTermType() {
+		return unboundRDFTermType;
 	}
 
 }

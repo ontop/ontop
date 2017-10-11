@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.Optional;
@@ -13,10 +14,13 @@ import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER;
  */
 public class NonIntegerNumericInferenceRule extends NumericTermTypeInferenceRule {
 
+    private final RDFDatatype integerDatatype = TYPE_FACTORY.getXsdIntegerDatatype();
+    private final RDFDatatype decimalDatatype = TYPE_FACTORY.getXsdDecimalDatatype();
+
     @Override
     protected Optional<TermType> postprocessInferredType(Optional<TermType> optionalTermType) {
         // No need to call super.postprocessInferredType()
         return optionalTermType
-                .map(t -> t.equals(TYPE_FACTORY.getTermType(INTEGER)) ? TYPE_FACTORY.getTermType(DECIMAL) : t);
+                .map(t -> t.equals(integerDatatype) ? decimalDatatype : t);
     }
 }

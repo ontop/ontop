@@ -118,7 +118,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                 Predicate functionSymbol = constructionFunctionalTerm.getFunctionSymbol();
                 if ((functionSymbol instanceof BNodePredicate)
                         || (functionSymbol instanceof URITemplatePredicate)) {
-                    return Optional.of(TYPE_FACTORY.getTermType(OBJECT));
+                    return Optional.of(TYPE_FACTORY.getIRITermType());
                 }
                 else if (functionSymbol instanceof DatatypePredicate) {
                     DatatypePredicate datatypeConstructionFunctionSymbol = (DatatypePredicate) functionSymbol;
@@ -167,7 +167,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             throw new IllegalStateException("A langString must have a constant language tag: "
                     + constructionFunctionalTerm);
         }
-        return TYPE_FACTORY.getTermType(((Constant) langTerm).getValue());
+        return TYPE_FACTORY.getLangTermType(((Constant) langTerm).getValue());
     }
 
     private Optional<Variable> extractTripleObjectVariable(IntermediateQuery mappingAssertion)
