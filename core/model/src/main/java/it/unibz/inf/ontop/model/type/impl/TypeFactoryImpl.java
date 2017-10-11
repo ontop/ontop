@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -34,7 +35,7 @@ public class TypeFactoryImpl implements TypeFactory {
 
 	private static final TypeFactory INSTANCE = new TypeFactoryImpl();
 
-	private final DatatypePredicate  XSD_STRING;
+	private final DatatypePredicate XSD_STRING;
 //	private final DatatypePredicate RDFS_LITERAL;
 	private final DatatypePredicate XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
 	private final DatatypePredicate XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
@@ -44,10 +45,8 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final DatatypePredicate XSD_DATETIME, XSD_DATETIME_STAMP;
 	private final DatatypePredicate XSD_BOOLEAN;
 	private final DatatypePredicate XSD_DATE, XSD_TIME, XSD_YEAR;
-	
-	private final Map<String, COL_TYPE> mapURItoCOLTYPE = new HashMap<>();
-	private final Map<COL_TYPE, IRI> mapCOLTYPEtoURI = new HashMap<>();
-	private final Map<COL_TYPE, DatatypePredicate> mapCOLTYPEtoPredicate = new HashMap<>();
+
+	private final Map<TermType, DatatypePredicate> mapTypetoPredicate = new HashMap<>();
 	private final List<Predicate> predicateList = new LinkedList<>();
 
 	// Only builds these TermTypes once.
@@ -69,32 +68,11 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final ConcreteNumericRDFDatatype xsdUnsignedLongDatatype, xsdUnsignedIntDatatype, xsdUnsignedShortDatatype, xsdUnsignedByteDatatype;
 	private final RDFDatatype defaultUnsupportedDatatype, xsdStringDatatype, xsdBooleanDatatype;
 	private final RDFDatatype xsdTimeDatatype, xsdDateDatatype, xsdDatetimeDatatype, xsdDatetimeStampDatatype, xsdGYearDatatype;
+	private final ValueFactory iriFactory = SimpleValueFactory.getInstance();
 
 
 	private TypeFactoryImpl() {
-
-		XSD_INTEGER = registerType(XMLSchema.INTEGER, COL_TYPE.INTEGER);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
-		XSD_DECIMAL = registerType(XMLSchema.DECIMAL, COL_TYPE.DECIMAL);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
-		XSD_DOUBLE = registerType(XMLSchema.DOUBLE, COL_TYPE.DOUBLE);  // 6 "http://www.w3.org/2001/XMLSchema#double"
-		XSD_STRING = registerType(XMLSchema.STRING, COL_TYPE.STRING);  // 7 "http://www.w3.org/2001/XMLSchema#string"
-		XSD_DATETIME = registerType(XMLSchema.DATETIME, COL_TYPE.DATETIME); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
-		ValueFactory factory = SimpleValueFactory.getInstance();
-		IRI datetimestamp = factory.createIRI("http://www.w3.org/2001/XMLSchema#dateTimeStamp"); // value datetime stamp is missing in XMLSchema
-		XSD_DATETIME_STAMP = registerType(datetimestamp, COL_TYPE.DATETIME_STAMP);
-		XSD_BOOLEAN = registerType(XMLSchema.BOOLEAN, COL_TYPE.BOOLEAN);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
-		XSD_DATE = registerType(XMLSchema.DATE, COL_TYPE.DATE);  // 10 "http://www.w3.org/2001/XMLSchema#date";
-		XSD_TIME = registerType(XMLSchema.TIME, COL_TYPE.TIME);  // 11 "http://www.w3.org/2001/XMLSchema#time";
-		XSD_YEAR = registerType(XMLSchema.GYEAR, COL_TYPE.YEAR);  // 12 "http://www.w3.org/2001/XMLSchema#gYear";
-		XSD_LONG = registerType(XMLSchema.LONG, COL_TYPE.LONG);  // 13 "http://www.w3.org/2001/XMLSchema#long"
-		XSD_FLOAT = registerType(XMLSchema.FLOAT, COL_TYPE.FLOAT); // 14 "http://www.w3.org/2001/XMLSchema#float"
-		XSD_NEGATIVE_INTEGER = registerType(XMLSchema.NEGATIVE_INTEGER, COL_TYPE.NEGATIVE_INTEGER); // 15 "http://www.w3.org/2001/XMLSchema#negativeInteger";
-		XSD_NON_NEGATIVE_INTEGER = registerType(XMLSchema.NON_NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER); // 16 "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
-		XSD_POSITIVE_INTEGER = registerType(XMLSchema.POSITIVE_INTEGER, COL_TYPE.POSITIVE_INTEGER); // 17 "http://www.w3.org/2001/XMLSchema#positiveInteger"
-		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
-		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // 19 "http://www.w3.org/2001/XMLSchema#int"
-		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
-		RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING.toString(), new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.STRING });
-		registerType(RDF.LANGSTRING, COL_TYPE.LANG_STRING, RDF_LANG_STRING);
+		IRI datetimestamp = iriFactory.createIRI("http://www.w3.org/2001/XMLSchema#dateTimeStamp"); // value datetime stamp is missing in XMLSchema
 
 		rootTermType = TermTypeImpl.createOriginTermType();
 		rootRDFTermType = RDFTermTypeImpl.createRDFTermRoot(rootTermType.getAncestry());
@@ -112,7 +90,6 @@ public class TypeFactoryImpl implements TypeFactory {
 		rdfsLiteralDatatype = createSimpleRDFDatatype(RDFS.LITERAL, rootRDFTermType.getAncestry(), true, COL_TYPE.LITERAL);
 		termTypeColTypeCache.put(COL_TYPE.LITERAL, rdfsLiteralDatatype);
 		registerDatatype(rdfsLiteralDatatype);
-		datatypeCache.put(rdfsLiteralDatatype.getIRI(), rdfsLiteralDatatype);
 
 		numericDatatype = createAbstractNumericTermType(ONTOP_NUMERIC, rdfsLiteralDatatype.getAncestry());
 		registerDatatype(numericDatatype);
@@ -210,6 +187,28 @@ public class TypeFactoryImpl implements TypeFactory {
 		xsdGYearDatatype = createSimpleRDFDatatype(XMLSchema.GYEAR, rdfsLiteralDatatype.getAncestry(), COL_TYPE.YEAR);
 		termTypeColTypeCache.put(COL_TYPE.YEAR, xsdGYearDatatype);
 		registerDatatype(xsdGYearDatatype);
+
+		XSD_INTEGER = registerType(XMLSchema.INTEGER, COL_TYPE.INTEGER);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
+		XSD_DECIMAL = registerType(XMLSchema.DECIMAL, COL_TYPE.DECIMAL);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
+		XSD_DOUBLE = registerType(XMLSchema.DOUBLE, COL_TYPE.DOUBLE);  // 6 "http://www.w3.org/2001/XMLSchema#double"
+		XSD_STRING = registerType(XMLSchema.STRING, COL_TYPE.STRING);  // 7 "http://www.w3.org/2001/XMLSchema#string"
+		XSD_DATETIME = registerType(XMLSchema.DATETIME, COL_TYPE.DATETIME); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
+		XSD_DATETIME_STAMP = registerType(datetimestamp, COL_TYPE.DATETIME_STAMP);
+		XSD_BOOLEAN = registerType(XMLSchema.BOOLEAN, COL_TYPE.BOOLEAN);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
+		XSD_DATE = registerType(XMLSchema.DATE, COL_TYPE.DATE);  // 10 "http://www.w3.org/2001/XMLSchema#date";
+		XSD_TIME = registerType(XMLSchema.TIME, COL_TYPE.TIME);  // 11 "http://www.w3.org/2001/XMLSchema#time";
+		XSD_YEAR = registerType(XMLSchema.GYEAR, COL_TYPE.YEAR);  // 12 "http://www.w3.org/2001/XMLSchema#gYear";
+		XSD_LONG = registerType(XMLSchema.LONG, COL_TYPE.LONG);  // 13 "http://www.w3.org/2001/XMLSchema#long"
+		XSD_FLOAT = registerType(XMLSchema.FLOAT, COL_TYPE.FLOAT); // 14 "http://www.w3.org/2001/XMLSchema#float"
+		XSD_NEGATIVE_INTEGER = registerType(XMLSchema.NEGATIVE_INTEGER, COL_TYPE.NEGATIVE_INTEGER); // 15 "http://www.w3.org/2001/XMLSchema#negativeInteger";
+		XSD_NON_NEGATIVE_INTEGER = registerType(XMLSchema.NON_NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER); // 16 "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
+		XSD_POSITIVE_INTEGER = registerType(XMLSchema.POSITIVE_INTEGER, COL_TYPE.POSITIVE_INTEGER); // 17 "http://www.w3.org/2001/XMLSchema#positiveInteger"
+		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
+		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // 19 "http://www.w3.org/2001/XMLSchema#int"
+		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
+
+		RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING, new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.STRING });
+		predicateList.add(RDF_LANG_STRING);
 	}
 
 	private void registerDatatype(RDFDatatype datatype) {
@@ -221,45 +220,28 @@ public class TypeFactoryImpl implements TypeFactory {
 		return INSTANCE;
 	}
 
-	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE type) {
-		String sURI = uri.toString();
-		DatatypePredicate predicate = new DatatypePredicateImpl(sURI, type);
-		return registerType(uri, type, predicate);
+	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE colType) {
+		DatatypePredicate predicate = new DatatypePredicateImpl(uri, colType);
+		return registerType(uri, getTermType(colType), predicate);
 	}
 
-	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE type,
+	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, TermType type,
 										   DatatypePredicate predicate) {
-		String sURI = uri.toString();
-		mapURItoCOLTYPE.put(sURI, type);
-		mapCOLTYPEtoURI.put(type, uri);
-		mapCOLTYPEtoPredicate.put(type, predicate);
+		mapTypetoPredicate.put(type, predicate);
 		predicateList.add(predicate);
 		return predicate;
 	}
 
-	//datatype supported only for ontology and r2rml mapping conversion. Not acceted in obda file
-	private DatatypePredicate registerUnsupportedType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE type,
-										   DatatypePredicate predicate) {
-		String sURI = uri.toString();
-		mapURItoCOLTYPE.put(sURI, type);
-		return predicate;
+	@Override
+	public Optional<RDFDatatype> getOptionalDatatype(String uri) {
+		return getOptionalDatatype(iriFactory.createIRI(uri));
 	}
 
 	@Override
-	public Optional<COL_TYPE> getDatatype(String uri) {
-		return Optional.ofNullable(mapURItoCOLTYPE.get(uri));
+	public Optional<RDFDatatype> getOptionalDatatype(IRI iri) {
+		return Optional.ofNullable(datatypeCache.get(iri));
 	}
-	
-	@Override
-	public COL_TYPE getDatatype(IRI uri) {
-		return mapURItoCOLTYPE.get(uri.stringValue());
-	}
-	
-	@Override
-	public IRI getDatatypeURI(COL_TYPE type) {
-		return mapCOLTYPEtoURI.get(type);
-	}
-	
+
 	@Override
 	public boolean isBoolean(Predicate pred) {
 		return pred == XSD_BOOLEAN;
@@ -287,26 +269,35 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public List<Predicate> getDatatypePredicates() {
-		return Collections.unmodifiableList(predicateList);
+	public ImmutableList<Predicate> getDatatypePredicates() {
+		return ImmutableList.copyOf(predicateList);
 	}
 
 	@Override
 	public Optional<TermType> getInternalType(DatatypePredicate predicate) {
-		// TODO: refactor (don't use col_type anymore)
-		return Optional.ofNullable(mapURItoCOLTYPE.get(predicate.getName()))
-				.filter(c -> c != COL_TYPE.LANG_STRING)
-				.map(this::getTermType);
+		return Optional.ofNullable(datatypeCache.get(iriFactory.createIRI(predicate.getName())));
 	}
 	
 	
 	@Override
 	public DatatypePredicate getTypePredicate(COL_TYPE type) {
-		return mapCOLTYPEtoPredicate.get(type);
+		if (type == COL_TYPE.LANG_STRING)
+			return RDF_LANG_STRING;
+		return mapTypetoPredicate.get(getTermType(type));
 		
 		//case OBJECT:   // different uses
 		//	return getUriTemplatePredicate(1);
 		//case BNODE:    // different uses			
+		//	return getBNodeTemplatePredicate(1);
+	}
+
+	@Override
+	public DatatypePredicate getTypePredicate(TermType type) {
+		return mapTypetoPredicate.get(type);
+
+		//case OBJECT:   // different uses
+		//	return getUriTemplatePredicate(1);
+		//case BNODE:    // different uses
 		//	return getBNodeTemplatePredicate(1);
 	}
 
@@ -331,8 +322,8 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public RDFDatatype getRDFDatatype(IRI iri) {
-		RDFDatatype datatype = datatypeCache.get(iri);
+	public RDFDatatype getDatatype(IRI iri) {
+		RDFDatatype datatype = datatypeCache.get	(iri);
 		if (datatype == null)
 			throw new RuntimeException("TODO: support arbitrary datatypes such as " + iri);
 		return datatype;
@@ -351,6 +342,11 @@ public class TypeFactoryImpl implements TypeFactory {
 	@Override
 	public UnboundRDFTermType getUnboundTermType() {
 		return unboundRDFTermType;
+	}
+
+	@Override
+	public RDFDatatype getUnsupportedDatatype() {
+		return defaultUnsupportedDatatype;
 	}
 
 }

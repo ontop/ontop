@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.ontology.owlapi;
 import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.owlapi.model.*;
@@ -55,7 +55,7 @@ public class OWLAPITranslatorHelper {
 			c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), object.getLang());
 		}
 		else {
-			Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(object.getDatatype().toStringID());
+			Optional<RDFDatatype> type = TYPE_FACTORY.getOptionalDatatype(object.getDatatype().getIRI().toString());
 			if(type.isPresent()){
 				c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), type.get());
 			}
@@ -183,7 +183,7 @@ public class OWLAPITranslatorHelper {
 
 					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), owlLiteral.getLang());
 				} else {
-					Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(owlLiteral.getDatatype().toStringID());
+					Optional<RDFDatatype> type = TYPE_FACTORY.getOptionalDatatype(owlLiteral.getDatatype().toStringID());
 					if(!type.isPresent()){
 						return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral());
 					}

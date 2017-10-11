@@ -281,7 +281,7 @@ public class TypeExtractor {
                     .orElseThrow(() -> new IllegalStateException("No type could be inferred for " + term));
         }
         else if (term instanceof Constant) {
-            return ((Constant) term).getTermType();
+            return ((Constant) term).getType();
         }
         else if (term instanceof Function) {
             Predicate functionSymbol = ((Function) term).getFunctionSymbol();

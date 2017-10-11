@@ -19,6 +19,9 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  * #L%
  */
 
+import org.eclipse.rdf4j.model.IRI;
+
 public interface DatatypePredicate extends BuiltinPredicate {
-	// NO-OP
+
+	IRI getIRI();
 }

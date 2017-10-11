@@ -27,6 +27,8 @@ import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
@@ -168,7 +170,7 @@ public class ExpressionEvaluator {
 					if (!newterm.equals(old))
 						if (newterm == TermConstants.FALSE) {
 							//
-							terms.set(i, TERM_FACTORY.getTypedTerm(TermConstants.FALSE, COL_TYPE.BOOLEAN));
+							terms.set(i, TERM_FACTORY.getTypedTerm(TermConstants.FALSE, TYPE_FACTORY.getXsdBooleanDatatype()));
 						} else if (newterm == TermConstants.TRUE) {
 							//remove
 							terms.remove(i);
@@ -395,18 +397,18 @@ public class ExpressionEvaluator {
 			if (function.isDataTypeFunction()) {
 				if (TYPE_FACTORY.isString(predicate) ) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
 					return TERM_FACTORY.getTypedTerm(
-							TERM_FACTORY.getVariable(parameter.toString()), COL_TYPE.STRING);
+							TERM_FACTORY.getVariable(parameter.toString()), TYPE_FACTORY.getXsdStringDatatype());
 				} 
 
 				else {
 					return TERM_FACTORY.getTypedTerm(
 							TERM_FACTORY.getFunctionCast(TERM_FACTORY.getVariable(parameter.toString()),
-									TERM_FACTORY.getConstantLiteral(TYPE_FACTORY.getDatatypeURI(COL_TYPE.STRING).stringValue())),
-										COL_TYPE.STRING);
+									TERM_FACTORY.getConstantLiteral(TYPE_FACTORY.getXsdStringDatatype().getIRI().stringValue())),
+										TYPE_FACTORY.getXsdStringDatatype());
 				}
 			} 
 			else if (predicate instanceof URITemplatePredicate) {
-				return TERM_FACTORY.getTypedTerm(function.clone(), COL_TYPE.STRING);
+				return TERM_FACTORY.getTypedTerm(function.clone(), TYPE_FACTORY.getXsdStringDatatype());
 			} 
 			else if (predicate instanceof BNodePredicate) {
 				return TermConstants.NULL;
@@ -439,7 +441,7 @@ public class ExpressionEvaluator {
 			return null;
 		} 
 		else if (function.isAlgebraFunction()) {
-			return TERM_FACTORY.getUriTemplateForDatatype(TYPE_FACTORY.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
+			return TERM_FACTORY.getUriTemplateForDatatype(TYPE_FACTORY.getXsdBooleanDatatype().getIRI().stringValue());
 		} 
 		else if (predicate == ExpressionOperation.ADD || predicate == ExpressionOperation.SUBTRACT || 
 				predicate == ExpressionOperation.MULTIPLY || predicate == ExpressionOperation.DIVIDE)
@@ -466,7 +468,7 @@ public class ExpressionEvaluator {
 		}
 		else if (function.isOperation()) {
 			//return boolean uri
-			return TERM_FACTORY.getUriTemplateForDatatype(TYPE_FACTORY.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
+			return TERM_FACTORY.getUriTemplateForDatatype(TYPE_FACTORY.getXsdBooleanDatatype().getIRI().stringValue());
 		}
 		return null;
 	}
@@ -478,10 +480,10 @@ public class ExpressionEvaluator {
 		} 
 		else if (term instanceof Constant) {
 			Constant constant = (Constant) term;
-			COL_TYPE type = constant.getType();
+			TermType type = constant.getType();
 			Predicate pred = TYPE_FACTORY.getTypePredicate(type);
 			if (pred == null)
-				pred = TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING); // .XSD_STRING;
+				pred = TYPE_FACTORY.getTypePredicate(TYPE_FACTORY.getXsdStringDatatype()); // .XSD_STRING;
 			return pred;
 		} 
 		else {
@@ -499,7 +501,7 @@ public class ExpressionEvaluator {
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(constantValue);
+		Optional<RDFDatatype> type = TYPE_FACTORY.getOptionalDatatype(constantValue);
 		if (type.isPresent()) {
 			Predicate p = TYPE_FACTORY.getTypePredicate(type.get());
 			return isNumeric(p);
@@ -514,7 +516,7 @@ public class ExpressionEvaluator {
 		Term innerTerm = term.getTerm(0);
 
 		// Create a default return constant: blank language with literal type.
-		Term emptyconstant = TERM_FACTORY.getTypedTerm(TERM_FACTORY.getConstantLiteral("", COL_TYPE.STRING), COL_TYPE.STRING);
+		Term emptyconstant = TERM_FACTORY.getTypedTerm(TERM_FACTORY.getConstantLiteral("", TYPE_FACTORY.getXsdStringDatatype()), TYPE_FACTORY.getXsdStringDatatype());
 
         if (innerTerm instanceof Variable) {
             return term;
@@ -541,11 +543,12 @@ public class ExpressionEvaluator {
 		else { // rdfs:Literal(text, lang)
 			Term parameter = function.getTerm(1);
 			if (parameter instanceof Variable) {
-				return TERM_FACTORY.getTypedTerm(parameter.clone(), COL_TYPE.STRING);
+				return TERM_FACTORY.getTypedTerm(parameter.clone(), TYPE_FACTORY.getXsdStringDatatype());
 			} 
 			else if (parameter instanceof Constant) {
 				return TERM_FACTORY.getTypedTerm(
-						TERM_FACTORY.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.STRING), COL_TYPE.STRING);
+						TERM_FACTORY.getConstantLiteral(((Constant) parameter).getValue(),TYPE_FACTORY.getXsdStringDatatype()),
+						TYPE_FACTORY.getXsdStringDatatype());
 			}
 		}
 		return term;

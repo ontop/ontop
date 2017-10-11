@@ -12,6 +12,7 @@ import java.util.List;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 
 /**
@@ -85,7 +86,7 @@ public class DatalogProgramSyntaxFactory {
 	}
 
 	public static Function literal(Term term){
-		return TERM_FACTORY.getTypedTerm(term, COL_TYPE.STRING);
+		return TERM_FACTORY.getTypedTerm(term, TYPE_FACTORY.getXsdStringDatatype());
 	}
 	
 	public static Function and(Term... terms){

@@ -1189,7 +1189,7 @@ public class BindingLiftTest {
         queryBuilder.addChild(rightChildUnion, DATA_NODE_3 );
 
         ConstructionNode otherNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateInt(DATA_FACTORY.getConstantLiteral("2", INTEGER)) )));
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateInt(DATA_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype())) )));
 
         queryBuilder.addChild(joinNode, otherNode);
 
@@ -1199,7 +1199,8 @@ public class BindingLiftTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateInt(A), Y, generateInt(DATA_FACTORY.getConstantLiteral("2", INTEGER)))));
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateInt(A), Y, generateInt(
+                        DATA_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype())))));
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
 
         expectedQueryBuilder.addChild(expectedRootNode, DATA_NODE_1);

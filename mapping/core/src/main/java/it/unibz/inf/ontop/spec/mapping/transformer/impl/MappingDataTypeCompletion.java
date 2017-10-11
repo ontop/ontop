@@ -30,7 +30,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import org.slf4j.Logger;
@@ -40,6 +39,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 
 public class MappingDataTypeCompletion {
@@ -103,7 +103,7 @@ public class MappingDataTypeCompletion {
         } else if (term instanceof Variable) {
             Variable variable = (Variable) term;
             Term newTerm;
-            COL_TYPE type = getDataType(termOccurenceIndex, variable);
+            TermType type = getDataType(termOccurenceIndex, variable);
             newTerm = TERM_FACTORY.getTypedTerm(variable, type);
             log.info("Datatype "+type+" for the value " + variable + " of the property " + predicate + " has been " +
                     "inferred " +
@@ -137,7 +137,7 @@ public class MappingDataTypeCompletion {
                             position,
                             TERM_FACTORY.getTypedTerm(
                                     term,
-                                    inferredType.get().getColType()
+                                    inferredType.get()
                             ));
                 }
                 else
@@ -146,7 +146,7 @@ public class MappingDataTypeCompletion {
 
                     if (defaultDatatypeInferred) {
 
-                        atom.setTerm(position, TERM_FACTORY.getTypedTerm(term, COL_TYPE.STRING));
+                        atom.setTerm(position, TERM_FACTORY.getTypedTerm(term, TYPE_FACTORY.getXsdStringDatatype()));
                     } else {
                         throw new UnknownDatatypeException("Impossible to determine the expected datatype for the operation " + castTerm + "\n" +
                                 "Possible solutions: \n" +
@@ -182,7 +182,7 @@ public class MappingDataTypeCompletion {
      * @param variable
      * @return
      */
-    private COL_TYPE getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) throws UnknownDatatypeException {
+    private TermType getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) throws UnknownDatatypeException {
 
 
         List<IndexedPosition> list = termOccurenceIndex.get(variable.getName());
@@ -197,20 +197,21 @@ public class MappingDataTypeCompletion {
                 .getFunctionSymbol());
         RelationDefinition td = metadata.getRelation(tableId);
         Attribute attribute = td.getAttribute(ip.pos);
-        Optional<COL_TYPE>  colType;
+        Optional<TermType>  type;
         //we want to assign the default value or throw an exception when the type of the attribute is missing (case of view)
         if (attribute.getType() == 0){
 
-            colType = Optional.empty();
+            type = Optional.empty();
         }
         else{
-            colType = metadata.getColType(attribute);
+            type = metadata.getColType(attribute)
+                .map(TYPE_FACTORY::getTermType);
         }
 
         if(defaultDatatypeInferred)
-            return colType.orElse(COL_TYPE.STRING) ;
+            return type.orElse(TYPE_FACTORY.getXsdStringDatatype()) ;
         else {
-            return colType.orElseThrow(() -> new UnknownDatatypeException("Impossible to determine the expected datatype for the column "+ variable+"\n" +
+            return type.orElseThrow(() -> new UnknownDatatypeException("Impossible to determine the expected datatype for the column "+ variable+"\n" +
                     "Possible solutions: \n" +
                     "- Add an explicit datatype in the mapping \n" +
                     "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +

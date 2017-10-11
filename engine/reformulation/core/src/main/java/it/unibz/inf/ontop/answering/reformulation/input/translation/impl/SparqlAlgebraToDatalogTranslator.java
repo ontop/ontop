@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.utils.EncodeForURI;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
@@ -459,11 +460,11 @@ public class SparqlAlgebraToDatalogTranslator {
 				}
 				else if (o instanceof URI) {
 					// term rdf:type uri .
-					COL_TYPE type = TYPE_FACTORY.getDatatype((IRI)o);
-					if (type != null) // datatype
-						atom = TERM_FACTORY.getFunction(TYPE_FACTORY.getTypePredicate(type), sTerm);
-					else // class
-						atom = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate(o.stringValue()), sTerm);
+                    atom = TYPE_FACTORY.getOptionalDatatype((IRI) o)
+                            // datatype
+                            .map(rdfDatatype -> TERM_FACTORY.getFunction(TYPE_FACTORY.getTypePredicate(rdfDatatype), sTerm))
+                            // class
+                            .orElseGet(() -> TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate(o.stringValue()), sTerm));
 				}
 				else
 					throw new OntopUnsupportedInputQueryException("Unsupported query syntax");
@@ -504,15 +505,16 @@ public class SparqlAlgebraToDatalogTranslator {
         Optional<String> lang = literal.getLanguage();
 
         if (lang.isPresent()) {
-            return TERM_FACTORY.getTypedTerm(TERM_FACTORY.getConstantLiteral(value, COL_TYPE.STRING), lang.get());
+            // TODO: use a string lexical type instead
+            return TERM_FACTORY.getTypedTerm(TERM_FACTORY.getConstantLiteral(value, TYPE_FACTORY.getXsdStringDatatype()), lang.get());
 
         } else {
-            COL_TYPE type;
+            RDFDatatype type;
              /*
               * default data type is xsd:string
               */
             if (typeURI == null) {
-                type = COL_TYPE.STRING;
+                type = TYPE_FACTORY.getXsdStringDatatype();
             } else {
                 type = TYPE_FACTORY.getDatatype(typeURI);
             }
@@ -552,7 +554,9 @@ public class SparqlAlgebraToDatalogTranslator {
             if (id < 0 && unknownUrisToTemplates)  // URI is not found and need to wrap it in a template
                 return TERM_FACTORY.getUriTemplateForDatatype(uri);
             else
-                return TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
+                // TODO: use a lexical term type instead
+                return TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(String.valueOf(id),
+                        TYPE_FACTORY.getXsdIntegerDatatype()));
         }
         else {
             Function constantFunction = uriTemplateMatcher.generateURIFunction(uri);

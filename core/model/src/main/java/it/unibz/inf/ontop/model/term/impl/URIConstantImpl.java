@@ -85,12 +85,7 @@ public class URIConstantImpl implements URIConstant {
 	}
 
 	@Override
-	public COL_TYPE getType() {
-		return COL_TYPE.OBJECT;
-	}
-
-	@Override
-	public TermType getTermType() {
+	public TermType getType() {
 		return TYPE_FACTORY.getIRITermType();
 	}
 

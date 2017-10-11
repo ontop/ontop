@@ -42,6 +42,7 @@ import java.util.Set;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class DatalogNormalizer {
 
@@ -205,8 +206,9 @@ public class DatalogNormalizer {
 				booleanAtoms += 1;
 		}
 		if (isLeftJoin && booleanAtoms == 0) {
-			Function trivialEquality = TERM_FACTORY.getFunctionEQ(TERM_FACTORY.getConstantLiteral("1", COL_TYPE.INTEGER),
-					TERM_FACTORY.getConstantLiteral("1", COL_TYPE.INTEGER));
+			Function trivialEquality = TERM_FACTORY.getFunctionEQ(TERM_FACTORY.getConstantLiteral("1",
+					TYPE_FACTORY.getXsdIntegerDatatype()),
+					TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype()));
 			leftJoin.getTerms().add(trivialEquality);
 		}
 	}

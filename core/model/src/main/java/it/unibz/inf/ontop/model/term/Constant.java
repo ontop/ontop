@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.model.term;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.TermType;
 
 /**
@@ -29,10 +28,7 @@ import it.unibz.inf.ontop.model.type.TermType;
  */
 public interface Constant extends NonFunctionalTerm, GroundTerm {
 
-	@Deprecated
-	public COL_TYPE getType();
-
-	TermType getTermType();
+	TermType getType();
 
 	// TODO: eliminate getValue from this interface
 	

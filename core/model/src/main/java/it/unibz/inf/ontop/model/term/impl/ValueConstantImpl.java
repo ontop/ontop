@@ -23,8 +23,11 @@ package it.unibz.inf.ontop.model.term.impl;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 
+import javax.annotation.Nonnull;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
@@ -35,7 +38,6 @@ public class ValueConstantImpl implements ValueConstant {
 
 	private final String value;
 	private final String language;
-	private final COL_TYPE type;
 	private final String string;
 	private final TermType termType;
 
@@ -47,53 +49,65 @@ public class ValueConstantImpl implements ValueConstant {
 	 * @param type
 	 *            the constant type.
 	 */
-	protected ValueConstantImpl(String value, COL_TYPE type) {
+	protected ValueConstantImpl(String value, @Nonnull TermType type) {
 		this.value = value;
 		this.language = null;
-		this.type = type;
+		this.termType = type;
 		this.string = getStringRepresentation();
-		this.termType = TYPE_FACTORY.getTermType(type);
 	}
 
 	protected ValueConstantImpl(String value, String language) {
 		this.value = value;
 		this.language = language;
-		this.type = COL_TYPE.LANG_STRING;
-		this.string = getStringRepresentation();
 		this.termType = TYPE_FACTORY.getLangTermType(language);
+		this.string = getStringRepresentation();
 	}
-	
+
+	/**
+	 * TODO: refactor it
+	 */
 	private String getStringRepresentation() {
+		COL_TYPE colType = termType.getOptionalColType()
+				.orElseGet(() -> Optional.of(termType)
+						.filter(t -> t instanceof RDFDatatype)
+						.map(t -> (RDFDatatype) t)
+						.filter(t -> t.getLanguageTag().isPresent())
+						.map(t -> COL_TYPE.LANG_STRING)
+						.orElse(COL_TYPE.UNSUPPORTED));
+		return getStringRepresentation(colType);
+	}
+
+	private String getStringRepresentation(COL_TYPE colType) {
 		StringBuilder sb = new StringBuilder();
-		
-		switch (type) {
+
+		switch (colType) {
 			case LITERAL:
 			case STRING:
-            case DATE:
-            case TIME:
-            case YEAR:
+			case DATE:
+			case TIME:
+			case YEAR:
 			case DATETIME:
 			case DATETIME_STAMP:
-				sb.append("\"").append(value).append("\""); 
+				sb.append("\"").append(value).append("\"");
 				break;
 			case INTEGER:
-            case LONG:
+			case LONG:
 			case DECIMAL:
 			case DOUBLE:
-			case BOOLEAN: 
-				sb.append(value); 
+			case BOOLEAN:
+				sb.append(value);
 				break;
 			case LANG_STRING:
 				sb.append("\"").append(value);
 				if (language != null && !language.isEmpty()) {
 					sb.append("@").append(language);
 				}
-				sb.append("\""); 
+				sb.append("\"");
 				break;
 			default:
 				sb.append(value);
 		}
-		return sb.toString();	
+		return sb.toString();
 	}
 
 	
@@ -137,12 +151,7 @@ public class ValueConstantImpl implements ValueConstant {
 	}
 
 	@Override
-	public COL_TYPE getType() {
-		return type;
-	}
-
-	@Override
-	public TermType getTermType() {
+	public TermType getType() {
 		return termType;
 	}
 

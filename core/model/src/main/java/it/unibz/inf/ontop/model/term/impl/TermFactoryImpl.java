@@ -27,10 +27,13 @@ import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TypeFactoryImpl;
 
 import java.util.List;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class TermFactoryImpl implements TermFactory {
 
@@ -107,16 +110,22 @@ public class TermFactoryImpl implements TermFactory {
 	
 	@Override
 	public ValueConstant getConstantLiteral(String value) {
-		return new ValueConstantImpl(value, COL_TYPE.STRING);
+		return new ValueConstantImpl(value, TYPE_FACTORY.getXsdStringDatatype());
 	}
 
 	@Override
-	public ValueConstant getConstantLiteral(String value, COL_TYPE type) {
+	public ValueConstant getConstantLiteral(String value, TermType type) {
 		return new ValueConstantImpl(value, type);
 	}
 
+	@Deprecated
 	@Override
-	public Function getTypedTerm(Term value, COL_TYPE type) {
+	public ValueConstant getConstantLiteral(String value, COL_TYPE colType) {
+		return getConstantLiteral(value, TYPE_FACTORY.getTermType(colType));
+	}
+
+	@Override
+	public Function getTypedTerm(Term value, TermType type) {
 		Predicate pred = typeFactory.getTypePredicate(type);
 		if (pred == null)
 			throw new RuntimeException("Unknown data type!");
@@ -137,13 +146,13 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Function getTypedTerm(Term value, String language) {
-		Term lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.STRING);
+		Term lang = getConstantLiteral(language.toLowerCase(), TYPE_FACTORY.getXsdStringDatatype());
 		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LANG_STRING);
 		return getFunction(pred, value, lang);
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, COL_TYPE type) {
+	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, TermType type) {
 		Predicate pred = typeFactory.getTypePredicate(type);
 		if (pred == null)
 			throw new RuntimeException("Unknown data type!");
@@ -159,7 +168,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language) {
-		ValueConstant lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.STRING);
+		ValueConstant lang = getConstantLiteral(language.toLowerCase(), TYPE_FACTORY.getXsdStringDatatype());
 		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LANG_STRING);
 		return getImmutableFunctionalTerm(pred, value, lang);
 	}

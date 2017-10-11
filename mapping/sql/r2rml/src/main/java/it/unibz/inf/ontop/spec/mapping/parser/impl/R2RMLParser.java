@@ -26,13 +26,10 @@ import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
-import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import org.apache.commons.rdf.api.*;
 import org.eclipse.rdf4j.model.Resource;
 import org.slf4j.Logger;
@@ -174,7 +171,7 @@ public class R2RMLParser {
 
 		// process termType declaration
 		// subj = sMap.getTermMapType().toString();
-		// sMap.getTermType(Object.class);
+		// sMap.getType(Object.class);
 		// if (subj != null) {
 		//
 		//
@@ -317,7 +314,7 @@ public class R2RMLParser {
 
 					// we check if it is a typed literal
 					else if (datatypeConstant != null) {
-						Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(datatypeConstant.getIRIString());
+						Optional<RDFDatatype> type = TYPE_FACTORY.getOptionalDatatype(datatypeConstant.getIRIString());
 						if (!type.isPresent()) {
 							// throw new RuntimeException("Unsupported datatype: " +
 							// datatype.toString());
@@ -410,7 +407,7 @@ public class R2RMLParser {
 
 		// we check if it is a typed literal
 		if (datatype != null) {
-			Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(datatype.toString());
+			Optional<RDFDatatype> type = TYPE_FACTORY.getOptionalDatatype(datatype.toString());
 			if (!type.isPresent()) {
 				// throw new RuntimeException("Unsupported datatype: " +
 				// datatype.toString());
@@ -422,26 +419,6 @@ public class R2RMLParser {
 		}
 
 		return objectAtom;
-	}
-
-	@Deprecated
-	private Term getExplicitTypedObject(String string) {
-
-		Term typedObject = null;
-		String[] strings = string.split("<");
-		if (strings.length > 1) {
-			String consts = strings[0];
-			consts = consts.substring(0, consts.length() - 2);
-			consts = trim(consts);
-			String type = strings[1];
-			if (type.endsWith(">"))
-				type = type.substring(0, type.length() - 1);
-
-			DatatypePredicate predicate = new DatatypePredicateImpl(type, COL_TYPE.OBJECT);
-			Term constant = TERM_FACTORY.getConstantLiteral(consts);
-			typedObject = TERM_FACTORY.getFunction(predicate, constant);
-		}
-		return typedObject;
 	}
 
 	@Deprecated
@@ -604,7 +581,7 @@ public class R2RMLParser {
 			// pred = TYPE_FACTORY.getTypePredicate(); //
 			// the URI template is always on the first position in the term list
 			// terms.add(0, uriTemplate);
-			return TERM_FACTORY.getImmutableTypedTerm(uriTemplate, COL_TYPE.STRING);
+			return TERM_FACTORY.getImmutableTypedTerm(uriTemplate, TYPE_FACTORY.getXsdStringDatatype());
 		case 4://concat
 			ImmutableFunctionalTerm f = TERM_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
             for(int j=2;j<terms.size();j++){

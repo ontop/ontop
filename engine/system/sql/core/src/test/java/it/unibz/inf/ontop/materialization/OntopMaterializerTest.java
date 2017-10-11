@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
@@ -58,6 +59,7 @@ import java.sql.Statement;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static org.junit.Assert.assertEquals;
 
 public class OntopMaterializerTest {
@@ -181,14 +183,16 @@ public class OntopMaterializerTest {
 				TERM_FACTORY.getConstantLiteral("{}"),
 				TERM_FACTORY.getVariable("schooluri"));
 
+		RDFDatatype stringDatatype = TYPE_FACTORY.getXsdStringDatatype();
+
 		ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
 		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(person, personTemplate));
 		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(fn, personTemplate,
-				TERM_FACTORY.getImmutableTypedTerm(TERM_FACTORY.getVariable("fn"), COL_TYPE.STRING)));
+				TERM_FACTORY.getImmutableTypedTerm(TERM_FACTORY.getVariable("fn"), stringDatatype)));
 		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(ln, personTemplate,
-				TERM_FACTORY.getImmutableTypedTerm( TERM_FACTORY.getVariable("ln"), COL_TYPE.STRING)));
+				TERM_FACTORY.getImmutableTypedTerm( TERM_FACTORY.getVariable("ln"), stringDatatype)));
 		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(age, personTemplate,
-				TERM_FACTORY.getImmutableTypedTerm( TERM_FACTORY.getVariable("age"), COL_TYPE.STRING)));
+				TERM_FACTORY.getImmutableTypedTerm( TERM_FACTORY.getVariable("age"), stringDatatype)));
 		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(hasschool, personTemplate, schoolTemplate));
 		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(school, schoolTemplate));
 

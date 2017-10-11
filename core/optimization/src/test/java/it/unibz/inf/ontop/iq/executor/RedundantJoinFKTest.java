@@ -19,6 +19,7 @@ import org.junit.Test;
 import java.sql.Types;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.assertTrue;
 
@@ -43,7 +44,7 @@ public class RedundantJoinFKTest {
     private final static Variable E = DATA_FACTORY.getVariable("E");
     private final static Variable F = DATA_FACTORY.getVariable("F");
 
-    private static Constant ONE = DATA_FACTORY.getConstantLiteral("1", INTEGER);
+    private static Constant ONE = DATA_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
 
     private final static ImmutableExpression EXPRESSION = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, B, ONE);

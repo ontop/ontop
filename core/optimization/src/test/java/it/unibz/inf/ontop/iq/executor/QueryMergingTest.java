@@ -72,10 +72,10 @@ public class QueryMergingTest {
     private static Constant URI_TEMPLATE_STR_1 = DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static Constant URI_TEMPLATE_STR_2 = DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
     private static Constant URI_TEMPLATE_STR_3 = DATA_FACTORY.getConstantLiteral("http://example.org/ds3/{}/{}");
-    private static Constant ONE = DATA_FACTORY.getConstantLiteral("1", INTEGER);
-    private static Constant TWO = DATA_FACTORY.getConstantLiteral("2", INTEGER);
-    private static DatatypePredicate XSD_INTEGER = TYPE_FACTORY.getTypePredicate(INTEGER);
-    private static Constant THREE = DATA_FACTORY.getConstantLiteral("3", INTEGER);
+    private static Constant ONE = DATA_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static Constant TWO = DATA_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static DatatypePredicate XSD_INTEGER = TYPE_FACTORY.getTypePredicate(TYPE_FACTORY.getXsdIntegerDatatype());
+    private static Constant THREE = DATA_FACTORY.getConstantLiteral("3", TYPE_FACTORY.getXsdIntegerDatatype());
     private static GroundTerm INT_OF_THREE = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, THREE);
     private static GroundTerm INT_OF_ONE = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, ONE);
     private static GroundTerm INT_OF_TWO = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, TWO);
@@ -1077,7 +1077,7 @@ public class QueryMergingTest {
 
         queryBuilder.init(ANS0_ATOM, rootNode);
         IntensionalDataNode intensionalDataNode = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(P3_PREDICATE,
-                DATA_FACTORY.getConstantLiteral("1", INTEGER)));
+                DATA_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype())));
         queryBuilder.addChild(rootNode, intensionalDataNode);
         IntermediateQuery mainQuery = queryBuilder.build();
 
@@ -1089,7 +1089,7 @@ public class QueryMergingTest {
         IntermediateQueryBuilder mappingBuilder = createQueryBuilder(EMPTY_METADATA);
         ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(
-                        ImmutableMap.of(X, DATA_FACTORY.getConstantLiteral("1", INTEGER))),
+                        ImmutableMap.of(X, DATA_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype()))),
                 Optional.empty());
         mappingBuilder.init(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P3_PREDICATE, X), mappingRootNode);
         IntermediateQuery mapping = mappingBuilder.build();

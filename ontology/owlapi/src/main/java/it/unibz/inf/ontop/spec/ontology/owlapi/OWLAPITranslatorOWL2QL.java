@@ -868,7 +868,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 				
 				ClassExpression ce2 = getDataSomeValuesFrom(someexp.getProperty(), someexp.getFiller());
 				//if ((ce2 instanceof DataSomeValuesFrom) && 
-				//		!((DataSomeValuesFrom)ce2).getDatatype().equals(DatatypeImpl.rdfsLiteral))
+				//		!((DataSomeValuesFrom)ce2).getOptionalDatatype().equals(DatatypeImpl.rdfsLiteral))
 				//	System.err.println("CI WITH QDD: " + ce1 + " <= " + ce2);
 
 				dl_onto.addSubClassOfAxiom(ce1, ce2);

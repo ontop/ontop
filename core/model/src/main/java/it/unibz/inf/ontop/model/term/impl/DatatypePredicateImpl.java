@@ -22,24 +22,27 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
+import org.eclipse.rdf4j.model.IRI;
 
 //import com.hp.hpl.jena.iri.IRI;
 
 public class DatatypePredicateImpl extends PredicateImpl implements DatatypePredicate {
 
 	private static final long serialVersionUID = -6678449661465775977L;
+	private final IRI iri;
 
 	/**
 	 * Constructs a datatype predicate with one term. This is a usual construct
 	 * where the type of the term represents the datatype itself.
 	 * 
-	 * @param name
-	 * 			The predicate name.
+	 * @param iri
+	 * 			The predicate IRI.
 	 * @param type
 	 * 			The datatype that the term holds.
 	 */
-	public DatatypePredicateImpl(String name, COL_TYPE type) {
-		super(name, 1, new COL_TYPE[] { type });
+	public DatatypePredicateImpl(IRI iri, COL_TYPE type) {
+		super(iri.stringValue(), 1, new COL_TYPE[] { type });
+		this.iri = iri;
 	}
 	
 	/**
@@ -48,17 +51,23 @@ public class DatatypePredicateImpl extends PredicateImpl implements DatatypePred
 	 * An example for using this constructor is the rdfs:Literal(value, lang).
 	 * The predicate uses the second term to put the language tag.
 	 * 
-	 * @param name
-	 * 			The predicate name.
+	 * @param iri
+	 * 			The predicate IRI.
 	 * @param types
 	 * 			The datatypes that each term holds.
 	 */
-	public DatatypePredicateImpl(String name, COL_TYPE[] types) {
-		super(name, types.length, types);
+	public DatatypePredicateImpl(IRI iri, COL_TYPE[] types) {
+		super(iri.stringValue(), types.length, types);
+		this.iri = iri;
 	}
 	
 	@Override
 	public DatatypePredicateImpl clone() {
 		return this;
+	}
+
+	@Override
+	public IRI getIRI() {
+		return iri;
 	}
 }

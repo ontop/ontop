@@ -14,6 +14,7 @@ import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 
 /**
@@ -248,7 +249,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	public void visit(SWRLIndividualArgument node) {
 	
 		//get the id without the quotes <>
-		terms.add(TERM_FACTORY.getConstantLiteral(node.getIndividual().toStringID(), COL_TYPE.STRING));
+		terms.add(TERM_FACTORY.getConstantLiteral(node.getIndividual().toStringID(), TYPE_FACTORY.getXsdStringDatatype()));
 	}
 
 	@Override
@@ -261,11 +262,11 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		else if(literal.hasLang())
 			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), literal.getLang()));
 		else if (literal.isDouble())
-			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), COL_TYPE.DOUBLE));
+			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), TYPE_FACTORY.getXsdDoubleDatatype()));
 		else if (literal.isFloat())
-			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), COL_TYPE.DECIMAL));
+			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), TYPE_FACTORY.getXsdDecimalDatatype()));
 		else if (literal.isInteger())
-			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), COL_TYPE.INTEGER));
+			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), TYPE_FACTORY.getXsdIntegerDatatype()));
 		else 
 			TERM_FACTORY.getConstantLiteral(literal.getLiteral());
 	}

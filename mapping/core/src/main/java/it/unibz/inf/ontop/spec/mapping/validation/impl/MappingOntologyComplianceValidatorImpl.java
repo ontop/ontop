@@ -33,7 +33,6 @@ import java.util.stream.StreamSupport;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.OBJECT;
 
 
 @Singleton

@@ -33,6 +33,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 
 /**
@@ -765,7 +766,7 @@ public class ExpressionParser {
         }
 
         private void process(String value, COL_TYPE datatype) {
-            result = TERM_FACTORY.getConstantLiteral(value, datatype);
+            result = TERM_FACTORY.getConstantLiteral(value, TYPE_FACTORY.getTermType(datatype));
         }
 
 
@@ -1178,7 +1179,7 @@ public class ExpressionParser {
                 flags = TERM_FACTORY.getConstantLiteral(""); // the 4th argument is flags
                 break;
             case 4:
-                if (((ValueConstant)terms.get(3)).getType() == COL_TYPE.STRING) {
+                if (((ValueConstant)terms.get(3)).getType().equals(TYPE_FACTORY.getTermType(COL_TYPE.STRING))) {
                     // PostgreSQL
                     flags =  terms.get(3);
                     // check that flags is either ig or g
@@ -1188,8 +1189,8 @@ public class ExpressionParser {
                 break;
             case 6:
                 // Oracle
-                if (!terms.get(3).equals(TERM_FACTORY.getConstantLiteral("1", COL_TYPE.LONG))
-                        || !terms.get(4).equals(TERM_FACTORY.getConstantLiteral("0", COL_TYPE.LONG)))
+                if (!terms.get(3).equals(TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getTermType(COL_TYPE.LONG)))
+                        || !terms.get(4).equals(TERM_FACTORY.getConstantLiteral("0", TYPE_FACTORY.getTermType(COL_TYPE.LONG))))
                     throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
 
                 // check that the flags is a combination of imx

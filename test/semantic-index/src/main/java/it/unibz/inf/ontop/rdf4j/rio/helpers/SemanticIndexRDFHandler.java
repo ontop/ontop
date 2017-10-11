@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.AssertionFactory;
@@ -150,15 +150,15 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 					ValueConstant c2;
 					if (!lang.isPresent()) {
 						IRI datatype = l.getDatatype();
-						COL_TYPE type;
+						RDFDatatype type;
 						
 						if (datatype == null) {
-							type = COL_TYPE.LITERAL;
+							type = TYPE_FACTORY.getXsdStringDatatype();
 						} 
 						else {
 							type = TYPE_FACTORY.getDatatype(datatype);
 							if (type == null)
-								type = COL_TYPE.UNSUPPORTED;
+								type = TYPE_FACTORY.getUnsupportedDatatype();
 						}			
 						
 						c2 = TERM_FACTORY.getConstantLiteral(l.getLabel(), type);

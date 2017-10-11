@@ -41,11 +41,8 @@ import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -1203,12 +1200,17 @@ public class OneShotSQLGeneratorEngine {
 	// return variable SQL data type
 	private int getVariableDataType(Term term, QueryAliasIndex idx) {
 
+		/*
+		 * TODO: refactor!
+		 */
 		if (term instanceof Function){
 			Function f = (Function) term;
-			if (f.isDataTypeFunction()) {
-				Predicate p = f.getFunctionSymbol();
-				COL_TYPE type = TYPE_FACTORY.getDatatype(p.getName()).get();
-				return jdbcTypeMapper.getSQLType(type);
+			Predicate p = f.getFunctionSymbol();
+			if (f instanceof DatatypePredicate) {
+
+				// NB: what about a langString. TODO: make a clear distinction between lexical values and RDF terms
+				RDFDatatype type = TYPE_FACTORY.getDatatype(((DatatypePredicate)p).getIRI());
+				return jdbcTypeMapper.getSQLType(type.getColType());
 			}
 			// Return varchar for unknown
 			return Types.VARCHAR;
@@ -1803,7 +1805,7 @@ public class OneShotSQLGeneratorEngine {
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
 			if (hasIRIDictionary()) {
-				if (ct.getType() == OBJECT || ct.getType() == STRING) {
+				if (ct.getType().getColType() == OBJECT || ct.getType().getColType() == STRING) {
 					int id = getUriid(ct.getValue());
 					if (id >= 0)
 						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
@@ -2104,7 +2106,7 @@ public class OneShotSQLGeneratorEngine {
 	 * @return
 	 */
 	private String getSQLLexicalForm(ValueConstant constant) {
-		switch (constant.getType()) {
+		switch (constant.getType().getColType()) {
 			case BNODE:
 			case OBJECT:
 			case STRING:

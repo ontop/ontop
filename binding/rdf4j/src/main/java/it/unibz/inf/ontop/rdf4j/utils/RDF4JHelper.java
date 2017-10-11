@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.rdf4j.utils;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.BNode;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.spec.ontology.*;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -24,27 +26,25 @@ public class RDF4JHelper {
             return null;
 			//throw new IllegalArgumentException("Invalid constant as subject!" + obj);
 	}
-	
+
+	/**
+	 * TODO: could we have a RDF sub-class of ValueConstant?
+	 */
 	public static Literal getLiteral(ValueConstant literal)
 	{
         Objects.requireNonNull(literal);
+		TermType type = literal.getType();
+		if (!(type instanceof RDFDatatype))
+			// TODO: throw a proper exception
+			throw new IllegalStateException("A ValueConstant given to OWLAPI must have a RDF datatype");
+		RDFDatatype datatype = (RDFDatatype) type;
 
-        switch (literal.getType()) {
-            case OBJECT:
-            case LITERAL:
-            case STRING:
-                // creates xsd:string
-                return fact.createLiteral(literal.getValue());
-            case LANG_STRING:
-                // creates xsd:langString
-                return fact.createLiteral(literal.getValue(), literal.getLanguage());
-            default:
-                IRI datatype = TYPE_FACTORY.getDatatypeURI(literal.getType());
-                if (datatype == null)
-                    throw new RuntimeException(
-                            "Found unknown TYPE for constant: " + literal + " with COL_TYPE=" + literal.getType());
-                return fact.createLiteral(literal.getValue(), datatype);
-        }
+		if (datatype.getLanguageTag().isPresent()) {
+			return fact.createLiteral(literal.getValue(), literal.getLanguage());
+		}
+		else {
+			return fact.createLiteral(literal.getValue(), datatype.getIRI());
+		}
 	}
 
     public static Value getValue(Constant c) {

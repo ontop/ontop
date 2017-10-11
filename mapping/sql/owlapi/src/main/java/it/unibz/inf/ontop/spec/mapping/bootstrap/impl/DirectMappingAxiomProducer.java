@@ -35,6 +35,8 @@ import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import java.util.*;
 import java.util.Map.Entry;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+
 public class DirectMappingAxiomProducer {
 
 	private final String baseIRI;
@@ -134,7 +136,7 @@ public class DirectMappingAxiomProducer {
 		for (Attribute att : table.getAttributes()) {
 			COL_TYPE type = typeMapper.getPredicate(att.getType());
 			Variable objV = df.getVariable(att.getID().getName());
-			ImmutableTerm obj = df.getImmutableTypedTerm(objV, type);
+			ImmutableTerm obj = df.getImmutableTypedTerm(objV, TYPE_FACTORY.getTermType(type));
 			
 			atoms.add(df.getImmutableFunctionalTerm(df.getDataPropertyPredicate(getLiteralPropertyIRI(att)), sub, obj));
 		}

@@ -41,6 +41,7 @@ import org.junit.Test;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 @SuppressWarnings("deprecation")
 public class DatalogToSparqlTranslatorTest {
@@ -748,11 +749,11 @@ public class DatalogToSparqlTranslatorTest {
 	private static Constant c5;
 	
 	static {
-		c1 = TERM_FACTORY.getConstantLiteral("John", COL_TYPE.STRING);
-		c2 = TERM_FACTORY.getConstantLiteral("Smith", COL_TYPE.STRING);
-		c3 = TERM_FACTORY.getConstantLiteral("25", COL_TYPE.INTEGER);
-		c4 = TERM_FACTORY.getConstantLiteral("48.50", COL_TYPE.DECIMAL);
-		c5 = TERM_FACTORY.getConstantLiteral("2012-03-20 00:00:00", COL_TYPE.DATETIME);
+		c1 = TERM_FACTORY.getConstantLiteral("John", TYPE_FACTORY.getXsdStringDatatype());
+		c2 = TERM_FACTORY.getConstantLiteral("Smith", TYPE_FACTORY.getXsdStringDatatype());
+		c3 = TERM_FACTORY.getConstantLiteral("25", TYPE_FACTORY.getXsdIntegerDatatype());
+		c4 = TERM_FACTORY.getConstantLiteral("48.50", TYPE_FACTORY.getXsdDecimalDatatype());
+		c5 = TERM_FACTORY.getConstantLiteral("2012-03-20 00:00:00", TYPE_FACTORY.getXsdDatetimeDatatype());
 	}
 	
 	private static Function student;

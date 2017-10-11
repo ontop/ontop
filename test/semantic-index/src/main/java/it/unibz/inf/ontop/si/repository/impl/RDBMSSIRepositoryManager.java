@@ -514,7 +514,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		int idx = cacheSI.getEntry(ope).getIndex();
 		
 
-		SemanticIndexView view = views.getView(o1.getTermType(), o2.getTermType());
+		SemanticIndexView view = views.getView(o1.getType(), o2.getType());
 		
 		PreparedStatement stm = stmMap.get(view.getId());
 		if (stm == null) {
@@ -549,7 +549,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 
 		// ROMAN (28 June 2016): quite fragile because objectType is UNSUPPORTED for SHORT, BYTE, etc.
 		//                       a a workaround, obtain the URI ID first, without triggering an exception here
-		SemanticIndexView view =  views.getView(subject.getTermType(), object.getTermType());
+		SemanticIndexView view =  views.getView(subject.getType(), object.getType());
 		PreparedStatement stm = stmMap.get(view.getId());
 		if (stm == null) {
 			stm = conn.prepareStatement(view.getINSERT());
@@ -628,7 +628,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 
 		ObjectConstant c1 = ax.getIndividual();
 
-		SemanticIndexView view =  views.getView(c1.getTermType());
+		SemanticIndexView view =  views.getView(c1.getType());
 	
 		PreparedStatement stm = stmMap.get(view.getId());
 		if (stm == null) {

@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER;
 import static it.unibz.inf.ontop.datalog.impl.DatalogConversionTools.convertFromDatalogDataAtom;
 import static org.junit.Assert.assertEquals;
@@ -27,7 +28,7 @@ public class Datalog2IQConversionTest {
 
     private static final Variable X = DATA_FACTORY.getVariable("x");
     private static final Variable Y = DATA_FACTORY.getVariable("y");
-    private static final Constant TWO = DATA_FACTORY.getConstantLiteral("2", INTEGER);
+    private static final Constant TWO = DATA_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
     private static final Function URI_TEMPLATE = DATA_FACTORY.getUriTemplate(
             DATA_FACTORY.getConstantLiteral("http://example.org/"),
             DATA_FACTORY.getVariable("z"));

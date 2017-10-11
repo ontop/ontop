@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.model.type.COL_TYPE;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -120,8 +121,8 @@ public class NavigationAfterRemovingEmptyNodeTest {
 
         InnerJoinNode unsatisfiedJoinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ,
-                DATA_FACTORY.getConstantLiteral("2", COL_TYPE.INTEGER),
-                DATA_FACTORY.getConstantLiteral("3", COL_TYPE.INTEGER)));
+                DATA_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype()),
+                DATA_FACTORY.getConstantLiteral("3", TYPE_FACTORY.getXsdIntegerDatatype())));
         initialQueryBuilder.addChild(unionNode, unsatisfiedJoinNode);
         initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_1);
         initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_2);

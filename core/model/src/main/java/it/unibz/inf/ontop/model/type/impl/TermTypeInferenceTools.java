@@ -73,7 +73,7 @@ public class TermTypeInferenceTools {
                 return OPTIONAL_UNBOUND_TERM_TYPE;
             }
             else {
-                return Optional.of(TYPE_FACTORY.getTermType(((ValueConstant) term).getType()));
+                return Optional.of(((ValueConstant) term).getType());
             }
         } else if(term instanceof URIConstant){
             return OPTIONAL_OBJECT_TERM_TYPE;

@@ -26,7 +26,7 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.*;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -63,8 +63,8 @@ public class SubstitutionPropagationTest {
     private static final Variable L = DATA_FACTORY.getVariable("l");
     private static final Variable M = DATA_FACTORY.getVariable("m");
     private static final Variable N = DATA_FACTORY.getVariable("n");
-    private static final ValueConstant ONE = DATA_FACTORY.getConstantLiteral("1", INTEGER);
-    private static final ValueConstant TWO = DATA_FACTORY.getConstantLiteral("2", INTEGER);
+    private static final ValueConstant ONE = DATA_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static final ValueConstant TWO = DATA_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
 
 
     private static final URITemplatePredicate URI1_PREDICATE =  new URITemplatePredicateImpl(2);
