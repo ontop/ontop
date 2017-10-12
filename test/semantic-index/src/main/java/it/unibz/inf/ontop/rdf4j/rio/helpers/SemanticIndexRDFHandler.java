@@ -156,9 +156,8 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 							type = TYPE_FACTORY.getXsdStringDatatype();
 						} 
 						else {
-							type = TYPE_FACTORY.getDatatype(datatype);
-							if (type == null)
-								type = TYPE_FACTORY.getUnsupportedDatatype();
+							type = TYPE_FACTORY.getOptionalDatatype(datatype)
+									.orElseGet(TYPE_FACTORY::getUnsupportedDatatype);
 						}			
 						
 						c2 = TERM_FACTORY.getConstantLiteral(l.getLabel(), type);

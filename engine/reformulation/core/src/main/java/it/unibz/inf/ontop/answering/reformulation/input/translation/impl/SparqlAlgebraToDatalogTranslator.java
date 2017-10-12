@@ -516,7 +516,9 @@ public class SparqlAlgebraToDatalogTranslator {
             if (typeURI == null) {
                 type = TYPE_FACTORY.getXsdStringDatatype();
             } else {
-                type = TYPE_FACTORY.getDatatype(typeURI);
+                // TODO: support arbitrary datatypes
+                type = TYPE_FACTORY.getOptionalDatatype(typeURI)
+                        .orElse(null);
             }
 
             if (type == null)
