@@ -155,7 +155,7 @@ public class TermFactoryImpl implements TermFactory {
 	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, TermType type) {
 		Predicate pred = typeFactory.getTypePredicate(type);
 		if (pred == null)
-			throw new RuntimeException("Unknown data type!");
+			throw new RuntimeException("Unknown data type: " + type);
 
 		return getImmutableFunctionalTerm(pred, value);
 	}
