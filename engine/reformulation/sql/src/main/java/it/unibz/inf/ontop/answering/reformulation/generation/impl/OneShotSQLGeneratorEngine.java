@@ -1206,7 +1206,7 @@ public class OneShotSQLGeneratorEngine {
 		if (term instanceof Function){
 			Function f = (Function) term;
 			Predicate p = f.getFunctionSymbol();
-			if (f instanceof DatatypePredicate) {
+			if (p instanceof DatatypePredicate) {
 
 				// NB: what about a langString. TODO: make a clear distinction between lexical values and RDF terms
 				RDFDatatype type = TYPE_FACTORY.getDatatype(((DatatypePredicate)p).getIRI());
