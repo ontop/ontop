@@ -61,15 +61,15 @@ public interface Predicate {
 
 	boolean isClass();
 
-	boolean isObjectProperty();
+	/**
+	 * NB: not exclusive with couldBeADataProperty (e.g., see annotation properties)
+	 */
+	boolean couldBeAnObjectProperty();
 
-	boolean isAnnotationProperty();
-
-	boolean isDataProperty();
-
-	boolean isSameAsProperty();
-
-	boolean isCanonicalIRIProperty();
+	/**
+	 * NB: not exclusive with couldBeAnObjectProperty (e.g., see annotation properties)
+	 */
+	boolean couldBeADataProperty();
 
 	boolean isTriplePredicate();
 

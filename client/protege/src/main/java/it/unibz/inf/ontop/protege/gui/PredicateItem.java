@@ -67,11 +67,11 @@ public class PredicateItem {
 	}
 	
 	public boolean isDataPropertyPredicate() {
-		return predicate.isDataProperty();
+		return predicate.couldBeADataProperty();
 	}
 	
 	public boolean isObjectPropertyPredicate() {
-		return predicate.isObjectProperty();
+		return predicate.couldBeAnObjectProperty();
 	}
 	
 	public PrefixManager getPrefixManager() {

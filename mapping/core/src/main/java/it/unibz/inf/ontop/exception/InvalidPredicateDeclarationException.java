@@ -54,9 +54,9 @@ public class InvalidPredicateDeclarationException extends MappingException {
                 case UNKNOWN_PREDICATE:
                     if (predicate.isClass()) {
                         sb.append(String.format("Line %d, Column %d: %s (unknown class)\n", lineNumber, columnNumber, predicate.getName()));
-                    } else if (predicate.isObjectProperty()) {
+                    } else if (predicate.couldBeAnObjectProperty()) {
                         sb.append(String.format("Line %d, Column %d: %s (unknown object property)\n", lineNumber, columnNumber, predicate.getName()));
-                    } else if (predicate.isDataProperty()) {
+                    } else if (predicate.couldBeADataProperty()) {
                         sb.append(String.format("Line %d, Column %d: %s (unknown data property)\n", lineNumber, columnNumber, predicate.getName()));
                     }
                     break; // case break

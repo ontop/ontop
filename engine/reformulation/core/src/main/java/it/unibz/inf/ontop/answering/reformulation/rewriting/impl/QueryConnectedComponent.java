@@ -218,7 +218,7 @@ public class QueryConnectedComponent {
 		for (Function a: cqie.getBody()) {
 			Predicate p = a.getFunctionSymbol();
 			if (a.isDataFunction() && !p.isTriplePredicate()) { // if DL predicates 
-			//if (p.isClass() || p.isObjectProperty() || p.isDataProperty()) { // if DL predicate (throws NullPointerException)
+			//if (p.isClass() || p.couldBeAnObjectProperty() || p.couldBeADataProperty()) { // if DL predicate (throws NullPointerException)
 				Term t0 = a.getTerm(0);				
 				if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {
 					// proper DL edge between two distinct terms

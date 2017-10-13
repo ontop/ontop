@@ -183,32 +183,17 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public boolean isObjectProperty() {
+	public boolean couldBeAnObjectProperty() {
 		return false;
 	}
 
 	@Override
-	public boolean isDataProperty() {
+	public boolean couldBeADataProperty() {
 		return false;
 	}
 
 	@Override
 	public boolean isTriplePredicate() {
-		return false;
-	}
-	
-	@Override
-	public boolean isAnnotationProperty() {
-		return false;
-	}
-
-	@Override
-	public boolean isSameAsProperty() {
-		return false;
-	}
-
-	@Override
-	public boolean isCanonicalIRIProperty() {
 		return false;
 	}
 

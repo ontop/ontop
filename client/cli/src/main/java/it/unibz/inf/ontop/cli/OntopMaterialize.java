@@ -177,7 +177,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         if (predicate.isClass()){
             typePred = "C";
         }
-        else if (predicate.isDataProperty()) {
+        else if (predicate.couldBeADataProperty()) {
             typePred = "DP";
         }
         else{

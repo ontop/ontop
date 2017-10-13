@@ -89,7 +89,7 @@ public class VocabularyValidator {
 			if (equivalent != null && !equivalent.equals(c))
 				return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
 		} 
-		else if (/*p.isObjectProperty()*/ (p.getArity() == 2) && voc.containsObjectProperty(p.getName())) {
+		else if (/*p.couldBeAnObjectProperty()*/ (p.getArity() == 2) && voc.containsObjectProperty(p.getName())) {
 			ObjectPropertyExpression ope = voc.getObjectProperty(p.getName());
 			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyDAG().getCanonicalForm(ope);
 			if (equivalent != null && !equivalent.equals(ope)) {
@@ -99,7 +99,7 @@ public class VocabularyValidator {
 					return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
 			}
 		}
-		else if (/*p.isDataProperty()*/ (p.getArity() == 2)  && voc.containsDataProperty(p.getName())) {
+		else if (/*p.couldBeADataProperty()*/ (p.getArity() == 2)  && voc.containsDataProperty(p.getName())) {
 			DataPropertyExpression dpe = voc.getDataProperty(p.getName());
 			DataPropertyExpression equivalent = reasoner.getDataPropertyDAG().getCanonicalForm(dpe);
 			if (equivalent != null && !equivalent.equals(dpe))

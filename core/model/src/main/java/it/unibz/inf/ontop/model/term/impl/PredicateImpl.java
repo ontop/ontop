@@ -23,14 +23,14 @@ package it.unibz.inf.ontop.model.term.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import javax.annotation.Nonnull;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.IriConstants.CANONICAL_IRI;
-import static it.unibz.inf.ontop.model.IriConstants.SAME_AS;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class PredicateImpl implements Predicate {
 
@@ -102,33 +102,40 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public boolean isClass() {
-		return (arity == 1 && getColType(0) == COL_TYPE.OBJECT);
+		return arity == 1
+				&& isRDFObject(getExpectedBaseType(0));
 	}
 
 	@Override
-	public boolean isObjectProperty() {
-		return (arity == 2 && getColType(0) == COL_TYPE.OBJECT && getColType(1) == COL_TYPE.OBJECT);
+	public boolean couldBeAnObjectProperty() {
+		// IRI/BNode constraint on the subject
+		if ((arity != 2) || (!isRDFObject(getExpectedBaseType(0))))
+			return false;
+
+		TermType secondBaseType = getExpectedBaseType(1);
+
+		// IRI/BNode constraint
+		return isRDFObject(secondBaseType)
+				// Or accepting any RDF term
+				|| secondBaseType.equals(TYPE_FACTORY.getAbstractRDFTermType());
 	}
 
 	@Override
-	public boolean isAnnotationProperty() {
-		return (arity == 2 && getColType(0) == COL_TYPE.OBJECT && getColType(1) == COL_TYPE.NULL);
+	public boolean couldBeADataProperty() {
+		// IRI/BNode constraint on the subject
+		if ((arity != 2) || (!isRDFObject(getExpectedBaseType(0))))
+			return false;
+
+		TermType secondBaseType = getExpectedBaseType(1);
+
+		// Literal constraint
+		return secondBaseType.isA(TYPE_FACTORY.getAbstractRDFSLiteral())
+				// Or accepting any RDF term
+				|| secondBaseType.equals(TYPE_FACTORY.getAbstractRDFTermType());
 	}
 
-	@Override
-	@Deprecated
-	public boolean isDataProperty() {
-		return (arity == 2 && getColType(0) == COL_TYPE.OBJECT && getColType(1) == COL_TYPE.LITERAL);
-	}
-
-	@Override
-	public boolean isSameAsProperty() {
-		return (arity == 2 && name.equals(SAME_AS) && getColType(0) == COL_TYPE.OBJECT && getColType(1) == COL_TYPE.OBJECT);
-	}
-
-	@Override
-	public boolean isCanonicalIRIProperty() {
-		return (arity == 2 && name.equals(CANONICAL_IRI) && getColType(0) == COL_TYPE.OBJECT && getColType(1) == COL_TYPE.OBJECT);
+	private static boolean isRDFObject(TermType termType) {
+		return termType.isA(TYPE_FACTORY.getAbstractObjectRDFType());
 	}
 
 
@@ -136,22 +143,4 @@ public class PredicateImpl implements Predicate {
 	public boolean isTriplePredicate() {
 		return (arity == 3 && name.equals("triple"));
 	}
-
-//    @Override
-//    public boolean isAggregationPredicate() {
-//        // The arity is supposed to be one
-//        // but we prefer robustness to
-//        // ill-defined arities
-//
-//        switch(getName()) {
-//            case OBDAVocabulary.SPARQL_AVG_URI:
-//            case OBDAVocabulary.SPARQL_SUM_URI:
-//            case OBDAVocabulary.SPARQL_COUNT_URI:
-//            case OBDAVocabulary.SPARQL_MAX_URI:
-//            case OBDAVocabulary.SPARQL_MIN_URI:
-//                return true;
-//            default:
-//                return false;
-//        }
-//    }
 }

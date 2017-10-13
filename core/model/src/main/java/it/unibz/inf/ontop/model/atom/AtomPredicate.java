@@ -14,19 +14,10 @@ public interface AtomPredicate extends Predicate {
     boolean isClass();
 
     @Deprecated
-    boolean isObjectProperty();
+    boolean couldBeAnObjectProperty();
 
     @Deprecated
-    boolean isAnnotationProperty();
-
-    @Deprecated
-    boolean isDataProperty();
-
-    @Deprecated
-    boolean isSameAsProperty();
-
-    @Deprecated
-    boolean isCanonicalIRIProperty();
+    boolean couldBeADataProperty();
 
     @Deprecated
     boolean isTriplePredicate();

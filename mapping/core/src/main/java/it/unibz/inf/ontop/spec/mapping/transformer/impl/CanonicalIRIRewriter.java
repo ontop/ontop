@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Term;
@@ -77,7 +78,7 @@ public class CanonicalIRIRewriter {
 
             Predicate predicate = head.getFunctionSymbol();
 
-            if (predicate.isCanonicalIRIProperty()) {
+            if (isCanonicalIRI(predicate)) {
                 // we throw away this mapping
                 continue;
             }
@@ -128,6 +129,10 @@ public class CanonicalIRIRewriter {
 
     }
 
+    private static boolean isCanonicalIRI(Predicate predicate) {
+        return predicate.getName().equals(IriConstants.CANONICAL_IRI);
+    }
+
 
     //get the canonicalIRIs from the original mappings
     private void analyzeCanonicalIRIMappings(List<CQIE> rules) {
@@ -138,7 +143,7 @@ public class CanonicalIRIRewriter {
 
             Predicate predicate = head.getFunctionSymbol();
 
-            if (predicate.isCanonicalIRIProperty()) { // we check for ontop:is_canonical_iri
+            if (isCanonicalIRI(predicate)) { // we check for ontop:is_canonical_iri
 
                 //rename all the variables to avoid conflicts while merging the mappings
                 Set<Variable> variables = rule.getReferencedVariables();
