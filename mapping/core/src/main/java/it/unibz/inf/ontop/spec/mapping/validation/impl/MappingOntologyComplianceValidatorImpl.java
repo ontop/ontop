@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
@@ -83,7 +84,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
     private String extractPredicateIRI(IntermediateQuery mappingAssertion) {
         AtomPredicate projectionAtomPredicate = mappingAssertion.getProjectionAtom().getPredicate();
-        if (projectionAtomPredicate.equals(PredicateImpl.QUEST_TRIPLE_PRED))
+        if (projectionAtomPredicate.equals(ATOM_FACTORY.getTripleAtomPredicate()))
             throw new RuntimeException("TODO: extract the RDF predicate from a triple atom");
         else
             return projectionAtomPredicate.getName();

@@ -20,7 +20,9 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.TermType;
 
 /**
 * The Predicate class currently represents (1) first-order predicts, (2) function symbols, and
@@ -50,9 +52,12 @@ public interface Predicate {
 	 * 
 	 * @param column
 	 */
-    COL_TYPE getType(int column);
+	@Deprecated
+    COL_TYPE getColType(int column);
 
-	COL_TYPE[] getTypes();
+	TermType getExpectedBaseType(int index);
+
+	ImmutableList<TermType> getExpectedBaseArgumentTypes();
 
 	boolean isClass();
 
@@ -67,6 +72,7 @@ public interface Predicate {
 	boolean isCanonicalIRIProperty();
 
 	boolean isTriplePredicate();
+
 
 //  boolean isAggregationPredicate();
 }

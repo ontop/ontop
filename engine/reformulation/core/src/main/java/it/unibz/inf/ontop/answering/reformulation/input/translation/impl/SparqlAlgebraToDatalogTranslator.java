@@ -472,7 +472,9 @@ public class SparqlAlgebraToDatalogTranslator {
 			else {
 				// term uri term . (where uri is either an object or a datatype property)
 				Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
-				Predicate predicate = TERM_FACTORY.getPredicate(p.stringValue(), new COL_TYPE[] { null, null });
+				Predicate predicate = TERM_FACTORY.getPredicate(p.stringValue(), ImmutableList.of(
+				        TYPE_FACTORY.getAbstractObjectRDFType(),
+				        TYPE_FACTORY.getAbstractRDFTermType()));
 				atom = TERM_FACTORY.getFunction(predicate, sTerm, oTerm);
 			}
 		}

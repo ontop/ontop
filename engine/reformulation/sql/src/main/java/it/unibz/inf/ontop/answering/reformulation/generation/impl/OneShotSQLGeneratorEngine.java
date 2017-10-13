@@ -1838,7 +1838,7 @@ public class OneShotSQLGeneratorEngine {
 		int size = function.getTerms().size();
 
 		if (function.isDataTypeFunction()) {
-			if (functionSymbol.getType(0) == UNSUPPORTED) {
+			if (functionSymbol.getColType(0) == UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: "
 						+ function);
 			}

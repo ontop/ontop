@@ -43,11 +43,11 @@ public interface TermFactory {
 	@Deprecated
 	public Predicate getPredicate(String uri, int arity);
 
-	public Predicate getPredicate(String uri, COL_TYPE[] types);
+	public Predicate getPredicate(String uri, ImmutableList<TermType> types);
 
 	public Predicate getObjectPropertyPredicate(String name);
 
-	public Predicate getDataPropertyPredicate(String name, COL_TYPE type);
+	public Predicate getDataPropertyPredicate(String name, TermType type);
 
 	public Predicate getAnnotationPropertyPredicate(String name);
 

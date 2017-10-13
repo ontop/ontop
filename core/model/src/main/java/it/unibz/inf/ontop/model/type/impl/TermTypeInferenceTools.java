@@ -51,7 +51,7 @@ public class TermTypeInferenceTools {
                         throw new IllegalStateException("A lang literal function must have a constant language tag");
                     return Optional.of(TYPE_FACTORY.getLangTermType(((Constant)secondArgument).getValue()));
                 }
-                return Optional.of(TYPE_FACTORY.getTermType(f.getFunctionSymbol().getType(0)));
+                return Optional.of(TYPE_FACTORY.getTermType(f.getFunctionSymbol().getColType(0)));
 
             } else if (typePred instanceof URITemplatePredicate) {
                 return  OPTIONAL_OBJECT_TERM_TYPE;

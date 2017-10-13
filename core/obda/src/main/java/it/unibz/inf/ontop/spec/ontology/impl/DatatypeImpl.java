@@ -26,6 +26,10 @@ import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.spec.ontology.Datatype;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
+import javax.annotation.Nonnull;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+
 public class DatatypeImpl implements Datatype {
 	
 	private static final long serialVersionUID = -6228610469212615956L;
@@ -35,10 +39,10 @@ public class DatatypeImpl implements Datatype {
 	public static final  Datatype rdfsLiteral; 
 	
 	static {
-	    rdfsLiteral = new DatatypeImpl(  new DatatypePredicateImpl(RDFS.LITERAL, COL_TYPE.LITERAL));
+	    rdfsLiteral = new DatatypeImpl(  new DatatypePredicateImpl(RDFS.LITERAL, TYPE_FACTORY.getAbstractRDFSLiteral()));
 	}
 	
-	DatatypeImpl(Predicate p) {
+	DatatypeImpl(@Nonnull Predicate p) {
 		predicate = p;
 	}
 	

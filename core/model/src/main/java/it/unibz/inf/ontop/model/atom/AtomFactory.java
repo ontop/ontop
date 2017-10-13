@@ -36,6 +36,8 @@ public interface AtomFactory {
 
     Function getTripleAtom(Term subject, Term predicate, Term object);
 
+    AtomPredicate getTripleAtomPredicate();
+
     /**
      * TODO: create an abstraction of DataAtom (Atom) that accepts arbitrary ImmutableTerms as arguments
      * (not only Variable or ground terms)

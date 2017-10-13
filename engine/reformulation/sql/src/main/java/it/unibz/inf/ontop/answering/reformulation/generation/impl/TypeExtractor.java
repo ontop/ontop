@@ -286,8 +286,7 @@ public class TypeExtractor {
         else if (term instanceof Function) {
             Predicate functionSymbol = ((Function) term).getFunctionSymbol();
             if (functionSymbol instanceof DatatypePredicate)
-                // TODO: replace this
-                return TYPE_FACTORY.getTermType(functionSymbol.getTypes()[0]);
+                return functionSymbol.getExpectedBaseType(0);
         }
 
         throw new IllegalStateException("Could not determine the type of " + term);

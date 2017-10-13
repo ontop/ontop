@@ -34,7 +34,7 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
                     if (f.getArity() == 1)
                         ontologyVocabulary.createClass(f.getFunctionSymbol().getName());
                     else {
-                        COL_TYPE secondArgType = f.getFunctionSymbol().getType(1);
+                        COL_TYPE secondArgType = f.getFunctionSymbol().getColType(1);
                         if ((secondArgType != null) && secondArgType.equals(COL_TYPE.OBJECT))
                             ontologyVocabulary.createObjectProperty(f.getFunctionSymbol().getName());
                         else

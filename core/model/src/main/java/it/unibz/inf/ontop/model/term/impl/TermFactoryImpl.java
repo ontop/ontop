@@ -25,13 +25,13 @@ import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TypeFactoryImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
@@ -39,6 +39,9 @@ public class TermFactoryImpl implements TermFactory {
 
 	private static final long serialVersionUID = 1851116693137470887L;
 	private static final TermFactory INSTANCE = new TermFactoryImpl(TypeFactoryImpl.getInstance());
+	private static final ObjectRDFType OBJECT_RDF_TYPE = TYPE_FACTORY.getAbstractObjectRDFType();
+	private static final RDFTermType ROOT_RDF_TERM_TYPE = TYPE_FACTORY.getAbstractRDFTermType();
+	private static final TermType ROOT_TERM_TYPE = TYPE_FACTORY.getAbstractAtomicTermType();
 
 	private static int counter = 0;
 	private final TypeFactory typeFactory;
@@ -54,52 +57,54 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Deprecated
 	public PredicateImpl getPredicate(String name, int arity) {
-//		if (arity == 1) {
-//			return new PredicateImpl(name, arity, new COL_TYPE[] { COL_TYPE.OBJECT });
-//		} else {
-			return new PredicateImpl(name, arity, null);
+		ImmutableList<TermType> expectedArgumentTypes = IntStream.range(0, arity)
+				.boxed()
+				.map(i -> ROOT_TERM_TYPE)
+				.collect(ImmutableCollectors.toList());
+
+			return new PredicateImpl(name, arity, expectedArgumentTypes);
 //		}
 	}
 	
 	@Override
-	public Predicate getPredicate(String uri, COL_TYPE[] types) {
-		return new PredicateImpl(uri, types.length, types);
+	public Predicate getPredicate(String uri, ImmutableList<TermType> types) {
+		return new PredicateImpl(uri, types.size(), types);
 	}
 
 	@Override
 	public Predicate getObjectPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		return new PredicateImpl(name, 2, ImmutableList.of(OBJECT_RDF_TYPE, OBJECT_RDF_TYPE));
 	}
 
 	@Override
 	public Predicate getDataPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		return new PredicateImpl(name, 2, ImmutableList.of(OBJECT_RDF_TYPE, TYPE_FACTORY.getAbstractRDFSLiteral()));
 	}
 
 	@Override
-	public Predicate getDataPropertyPredicate(String name, COL_TYPE type) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, type }); // COL_TYPE.LITERAL
+	public Predicate getDataPropertyPredicate(String name, TermType type) {
+		return new PredicateImpl(name, 2, ImmutableList.of(OBJECT_RDF_TYPE, type)); // COL_TYPE.LITERAL
 	}
 
 	//defining annotation property we still don't know if the values that it will assume, will be an object or a data property
 	@Override
 	public Predicate getAnnotationPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[]{COL_TYPE.OBJECT, COL_TYPE.NULL});
+		return new PredicateImpl(name, 2, ImmutableList.of(OBJECT_RDF_TYPE, ROOT_RDF_TERM_TYPE));
 	}
 
 	@Override
 	public Predicate getClassPredicate(String name) {
-		return new PredicateImpl(name, 1, new COL_TYPE[] { COL_TYPE.OBJECT });
+		return new PredicateImpl(name, 1, ImmutableList.of(OBJECT_RDF_TYPE));
 	}
 
 	@Override
 	public Predicate getOWLSameAsPredicate() {
-		return new PredicateImpl(IriConstants.SAME_AS, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		return new PredicateImpl(IriConstants.SAME_AS, 2, ImmutableList.of(OBJECT_RDF_TYPE, OBJECT_RDF_TYPE));
 	}
 
 	@Override
 	public Predicate getOBDACanonicalIRI() {
-		return new PredicateImpl(IriConstants.CANONICAL_IRI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		return new PredicateImpl(IriConstants.CANONICAL_IRI, 2, ImmutableList.of(OBJECT_RDF_TYPE, OBJECT_RDF_TYPE));
 	}
 
 	@Override

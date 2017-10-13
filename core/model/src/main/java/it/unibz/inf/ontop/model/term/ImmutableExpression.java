@@ -39,7 +39,7 @@ public interface ImmutableExpression extends Expression, ImmutableFunctionalTerm
         try {
             OperationPredicate predicate = getFunctionSymbol();
             return predicate.getTermTypeInferenceRule().inferType(
-                    getArguments(), predicate.getArgumentTypes());
+                    getArguments(), predicate.getExpectedBaseArgumentTypes());
         } catch (IncompatibleTermException e) {
             throw new IncompatibleTermException(this, e);
         }
@@ -49,7 +49,7 @@ public interface ImmutableExpression extends Expression, ImmutableFunctionalTerm
         try {
             OperationPredicate predicate = getFunctionSymbol();
             return predicate.getTermTypeInferenceRule().inferTypeFromArgumentTypes(
-                    actualArgumentTypes, predicate.getArgumentTypes());
+                    actualArgumentTypes, predicate.getExpectedBaseArgumentTypes());
         } catch (IncompatibleTermException e) {
             throw new IncompatibleTermException(this, e);
         }

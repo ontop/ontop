@@ -68,10 +68,12 @@ public class OntopMaterializerTest {
 
 	private static final String PREFIX = "http://example.com/vocab#";
 
+	private static final RDFDatatype XSD_STRING_DT = TYPE_FACTORY.getXsdStringDatatype();
+
 	private static final Predicate person = TERM_FACTORY.getClassPredicate(PREFIX + "Person");
-	private static final Predicate fn = TERM_FACTORY.getDataPropertyPredicate(PREFIX + "fn", COL_TYPE.STRING);
-	private static final Predicate ln = TERM_FACTORY.getDataPropertyPredicate(PREFIX + "ln", COL_TYPE.STRING);
-	private static final Predicate age = TERM_FACTORY.getDataPropertyPredicate(PREFIX + "age", COL_TYPE.STRING);
+	private static final Predicate fn = TERM_FACTORY.getDataPropertyPredicate(PREFIX + "fn", XSD_STRING_DT);
+	private static final Predicate ln = TERM_FACTORY.getDataPropertyPredicate(PREFIX + "ln", XSD_STRING_DT);
+	private static final Predicate age = TERM_FACTORY.getDataPropertyPredicate(PREFIX + "age", XSD_STRING_DT);
 	private static final Predicate hasschool = TERM_FACTORY.getObjectPropertyPredicate(PREFIX + "hasschool");
 	private static final Predicate school = TERM_FACTORY.getClassPredicate(PREFIX + "School");
 

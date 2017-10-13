@@ -11,12 +11,6 @@ import it.unibz.inf.ontop.model.type.COL_TYPE;
 public interface AtomPredicate extends Predicate {
 
     @Deprecated
-    COL_TYPE getType(int column);
-
-    @Deprecated
-    COL_TYPE[] getTypes();
-
-    @Deprecated
     boolean isClass();
 
     @Deprecated

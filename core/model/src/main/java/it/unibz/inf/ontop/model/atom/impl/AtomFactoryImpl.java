@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
@@ -17,7 +16,10 @@ public class AtomFactoryImpl implements AtomFactory {
 
     private static final AtomFactory INSTANCE = new AtomFactoryImpl();
 
+    private final AtomPredicate triplePredicate;
+
     private AtomFactoryImpl() {
+        triplePredicate = getAtomPredicate("triple", 3);
     }
 
     public static AtomFactory getInstance() {
@@ -101,12 +103,18 @@ public class AtomFactoryImpl implements AtomFactory {
 
     @Override
     public Function getTripleAtom(Term subject, Term predicate, Term object) {
-        return TERM_FACTORY.getFunction(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
+        return TERM_FACTORY.getFunction(triplePredicate, subject, predicate, object);
     }
+
+    @Override
+    public AtomPredicate getTripleAtomPredicate() {
+        return triplePredicate;
+    }
+
 
     @Override
     public ImmutableFunctionalTerm getImmutableTripleAtom(ImmutableTerm subject, ImmutableTerm predicate,
                                                           ImmutableTerm object) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
+        return TERM_FACTORY.getImmutableFunctionalTerm(triplePredicate, subject, predicate, object);
     }
 }

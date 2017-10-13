@@ -24,7 +24,7 @@ import static it.unibz.inf.ontop.model.type.impl.SimpleRDFDatatype.createSimpleR
 
 @Singleton
 public class TypeFactoryImpl implements TypeFactory {
-	
+
 	// special case of literals with the specified language
 	private final DatatypePredicate RDF_LANG_STRING;
 
@@ -36,7 +36,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	private static final TypeFactory INSTANCE = new TypeFactoryImpl();
 
 	private final DatatypePredicate XSD_STRING;
-//	private final DatatypePredicate RDFS_LITERAL;
+	private final DatatypePredicate RDFS_LITERAL;
 	private final DatatypePredicate XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
 	private final DatatypePredicate XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
 	private final DatatypePredicate XSD_INT, XSD_UNSIGNED_INT, XSD_LONG;
@@ -57,7 +57,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final TermType rootTermType;
 	private final RDFTermType rootRDFTermType;
 	private final UnboundRDFTermType unboundRDFTermType;
-	private final ObjectRDFType iriTermType, blankNodeTermType;
+	private final ObjectRDFType objectRDFType, iriTermType, blankNodeTermType;
 	private final RDFDatatype rdfsLiteralDatatype;
 	private final NumericRDFDatatype numericDatatype, owlRealDatatype;
 	private final ConcreteNumericRDFDatatype owlRationalDatatype, xsdDecimalDatatype;
@@ -80,11 +80,10 @@ public class TypeFactoryImpl implements TypeFactory {
 		unboundRDFTermType = UnboundRDFTermTypeImpl.createUnboundRDFTermType(rootRDFTermType.getAncestry());
 		termTypeColTypeCache.put(COL_TYPE.NULL, unboundRDFTermType);
 
-
-		// TODO: create an intermediate term type (for all IRI/B-nodes)
-		iriTermType = new IRITermType(rootRDFTermType.getAncestry());
+		objectRDFType = AbstractObjectRDFType.createAbstractObjectRDFType(rootRDFTermType.getAncestry());
+		iriTermType = new IRITermType(objectRDFType.getAncestry());
 		termTypeColTypeCache.put(COL_TYPE.OBJECT, iriTermType);
-		blankNodeTermType = new BlankNodeTermType(rootRDFTermType.getAncestry());
+		blankNodeTermType = new BlankNodeTermType(objectRDFType.getAncestry());
 		termTypeColTypeCache.put(COL_TYPE.BNODE, blankNodeTermType);
 
 		rdfsLiteralDatatype = createSimpleRDFDatatype(RDFS.LITERAL, rootRDFTermType.getAncestry(), true, COL_TYPE.LITERAL);
@@ -188,26 +187,26 @@ public class TypeFactoryImpl implements TypeFactory {
 		termTypeColTypeCache.put(COL_TYPE.YEAR, xsdGYearDatatype);
 		registerDatatype(xsdGYearDatatype);
 
-		XSD_INTEGER = registerType(XMLSchema.INTEGER, COL_TYPE.INTEGER);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
-		XSD_DECIMAL = registerType(XMLSchema.DECIMAL, COL_TYPE.DECIMAL);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
-		XSD_DOUBLE = registerType(XMLSchema.DOUBLE, COL_TYPE.DOUBLE);  // 6 "http://www.w3.org/2001/XMLSchema#double"
-		XSD_STRING = registerType(XMLSchema.STRING, COL_TYPE.STRING);  // 7 "http://www.w3.org/2001/XMLSchema#string"
-		XSD_DATETIME = registerType(XMLSchema.DATETIME, COL_TYPE.DATETIME); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
-		XSD_DATETIME_STAMP = registerType(datetimestamp, COL_TYPE.DATETIME_STAMP);
-		XSD_BOOLEAN = registerType(XMLSchema.BOOLEAN, COL_TYPE.BOOLEAN);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
-		XSD_DATE = registerType(XMLSchema.DATE, COL_TYPE.DATE);  // 10 "http://www.w3.org/2001/XMLSchema#date";
-		XSD_TIME = registerType(XMLSchema.TIME, COL_TYPE.TIME);  // 11 "http://www.w3.org/2001/XMLSchema#time";
-		XSD_YEAR = registerType(XMLSchema.GYEAR, COL_TYPE.YEAR);  // 12 "http://www.w3.org/2001/XMLSchema#gYear";
-		XSD_LONG = registerType(XMLSchema.LONG, COL_TYPE.LONG);  // 13 "http://www.w3.org/2001/XMLSchema#long"
-		XSD_FLOAT = registerType(XMLSchema.FLOAT, COL_TYPE.FLOAT); // 14 "http://www.w3.org/2001/XMLSchema#float"
-		XSD_NEGATIVE_INTEGER = registerType(XMLSchema.NEGATIVE_INTEGER, COL_TYPE.NEGATIVE_INTEGER); // 15 "http://www.w3.org/2001/XMLSchema#negativeInteger";
-		XSD_NON_NEGATIVE_INTEGER = registerType(XMLSchema.NON_NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER); // 16 "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
-		XSD_POSITIVE_INTEGER = registerType(XMLSchema.POSITIVE_INTEGER, COL_TYPE.POSITIVE_INTEGER); // 17 "http://www.w3.org/2001/XMLSchema#positiveInteger"
-		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
-		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // 19 "http://www.w3.org/2001/XMLSchema#int"
-		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
-
-		RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING, new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.STRING });
+		XSD_INTEGER = registerType(XMLSchema.INTEGER, xsdIntegerDatatype);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
+		XSD_DECIMAL = registerType(XMLSchema.DECIMAL, xsdDecimalDatatype);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
+		XSD_DOUBLE = registerType(XMLSchema.DOUBLE, xsdDoubleDatatype);  // 6 "http://www.w3.org/2001/XMLSchema#double"
+		XSD_STRING = registerType(XMLSchema.STRING, xsdStringDatatype);  // 7 "http://www.w3.org/2001/XMLSchema#string"
+		XSD_DATETIME = registerType(XMLSchema.DATETIME, xsdDatetimeDatatype); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
+		XSD_DATETIME_STAMP = registerType(datetimestamp, xsdDatetimeStampDatatype);
+		XSD_BOOLEAN = registerType(XMLSchema.BOOLEAN, xsdBooleanDatatype);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
+		XSD_DATE = registerType(XMLSchema.DATE, xsdDateDatatype);  // 10 "http://www.w3.org/2001/XMLSchema#date";
+		XSD_TIME = registerType(XMLSchema.TIME, xsdTimeDatatype);  // 11 "http://www.w3.org/2001/XMLSchema#time";
+		XSD_YEAR = registerType(XMLSchema.GYEAR, xsdGYearDatatype);  // 12 "http://www.w3.org/2001/XMLSchema#gYear";
+		XSD_LONG = registerType(XMLSchema.LONG, xsdLongDatatype);  // 13 "http://www.w3.org/2001/XMLSchema#long"
+		XSD_FLOAT = registerType(XMLSchema.FLOAT,xsdFloatDatatype); // 14 "http://www.w3.org/2001/XMLSchema#float"
+		XSD_NEGATIVE_INTEGER = registerType(XMLSchema.NEGATIVE_INTEGER, xsdNegativeIntegerDatatype); // 15 "http://www.w3.org/2001/XMLSchema#negativeInteger";
+		XSD_NON_NEGATIVE_INTEGER = registerType(XMLSchema.NON_NEGATIVE_INTEGER, xsdNonNegativeIntegerDatatype); // 16 "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
+		XSD_POSITIVE_INTEGER = registerType(XMLSchema.POSITIVE_INTEGER, xsdPositiveIntegerDatatype); // 17 "http://www.w3.org/2001/XMLSchema#positiveInteger"
+		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, xsdNonPositiveIntegerDatatype); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
+		XSD_INT = registerType(XMLSchema.INT, xsdIntDatatype);  // 19 "http://www.w3.org/2001/XMLSchema#int"
+		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, xsdUnsignedIntDatatype);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
+		RDFS_LITERAL = registerType(RDFS.LITERAL, rdfsLiteralDatatype);
+		RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING, ImmutableList.of(xsdStringDatatype, xsdStringDatatype));
 		predicateList.add(RDF_LANG_STRING);
 	}
 
@@ -220,13 +219,8 @@ public class TypeFactoryImpl implements TypeFactory {
 		return INSTANCE;
 	}
 
-	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE colType) {
-		DatatypePredicate predicate = new DatatypePredicateImpl(uri, colType);
-		return registerType(uri, getTermType(colType), predicate);
-	}
-
-	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, TermType type,
-										   DatatypePredicate predicate) {
+	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, TermType type) {
+		DatatypePredicate predicate = new DatatypePredicateImpl(uri, type);
 		mapTypetoPredicate.put(type, predicate);
 		predicateList.add(predicate);
 		return predicate;
@@ -368,5 +362,10 @@ public class TypeFactoryImpl implements TypeFactory {
 	public RDFTermType getAbstractRDFTermType() {
 		return rootRDFTermType;
 	}
+
+    @Override
+    public ObjectRDFType getAbstractObjectRDFType() {
+		return objectRDFType;
+    }
 
 }

@@ -173,13 +173,8 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public COL_TYPE getType(int column) {
+	public COL_TYPE getColType(int column) {
 		return argColTypes.get(column).orElse(null);
-	}
-
-	@Override
-	public COL_TYPE[] getTypes() {
-		return (COL_TYPE[]) argColTypes.toArray();
 	}
 
 	@Override
@@ -222,7 +217,12 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public ImmutableList<TermType> getArgumentTypes() {
+	public TermType getExpectedBaseType(int index) {
+		return argTypes.get(index);
+	}
+
+	@Override
+	public ImmutableList<TermType> getExpectedBaseArgumentTypes() {
 		return argTypes;
 	}
 

@@ -139,7 +139,7 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
 
         ImmutableMultimap<Boolean, Predicate> category2TargetPred = mapping.getPredicates().stream()
                 .filter(p -> !(p.equals(sameAsAtomPredicate)))
-                .filter(p -> !p.getName().equals(PredicateImpl.QUEST_TRIPLE_PRED.getName()))
+                .filter(p -> !p.isTriplePredicate())
                 .filter(p -> isRewritingTarget(p, mapping, sameAsMappingIRIs))
                 .collect(ImmutableCollectors.toMultimap(
                         p -> isSubjectOnlyRewritingTarget(mapping, p),

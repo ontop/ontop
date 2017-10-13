@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.ExpressionParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpressionAttributes;
@@ -19,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -30,6 +32,7 @@ public class RelationalExpressionTest {
 
     private static DBMetadata METADATA = RDBMetadataExtractionTools.createDummyMetadata();
     private static QuotedIDFactory MDFAC = METADATA.getQuotedIDFactory();
+    private static TermType ROOT_TERM_TYPE = TYPE_FACTORY.getAbstractAtomicTermType();
 
     private Function f1, f2, eq;
     private Variable x, y, u, v;
@@ -45,7 +48,7 @@ public class RelationalExpressionTest {
         y = TERM_FACTORY.getVariable("y");
 
         f1 = TERM_FACTORY.getFunction(
-                TERM_FACTORY.getPredicate("P", new COL_TYPE[] { null, null }),
+                TERM_FACTORY.getPredicate("P", ImmutableList.of(ROOT_TERM_TYPE, ROOT_TERM_TYPE)),
                 ImmutableList.of(x, y));
 
         table1 = MDFAC.createRelationID(null, "P");
@@ -67,7 +70,7 @@ public class RelationalExpressionTest {
         v = TERM_FACTORY.getVariable("v");
 
         f2 = TERM_FACTORY.getFunction(
-                TERM_FACTORY.getPredicate("Q", new COL_TYPE[] { null, null }),
+                TERM_FACTORY.getPredicate("Q", ImmutableList.of(ROOT_TERM_TYPE, ROOT_TERM_TYPE)),
                 ImmutableList.of(u, v));
 
         RelationID table2 = MDFAC.createRelationID(null, "Q");
@@ -90,7 +93,7 @@ public class RelationalExpressionTest {
         Variable z = TERM_FACTORY.getVariable("v");
 
         Function f3 = TERM_FACTORY.getFunction(
-                TERM_FACTORY.getPredicate("Q", new COL_TYPE[] { null, null }),
+                TERM_FACTORY.getPredicate("Q", ImmutableList.of(ROOT_TERM_TYPE, ROOT_TERM_TYPE)),
                 ImmutableList.of(w, z));
 
         RelationID table3 = MDFAC.createRelationID(null, "R");

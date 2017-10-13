@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.type;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.impl.TypeFactoryImpl;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
@@ -59,6 +60,8 @@ public interface TypeFactory {
 	TermType getAbstractAtomicTermType();
 
 	RDFTermType getAbstractRDFTermType();
+
+	ObjectRDFType getAbstractObjectRDFType();
 
 	default RDFDatatype getXsdIntegerDatatype() {
 		return getDatatype(XMLSchema.INTEGER);

@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -40,6 +42,7 @@ public class SelectQueryParserTest {
     private static final String C2 = "C2";
     private static final String C3 = "C3";
     private static final String D1 = "D1";
+    private static final TermType ROOT_TERM_TYPE = TYPE_FACTORY.getAbstractAtomicTermType();
 
 
     @Test
@@ -402,12 +405,12 @@ public class SelectQueryParserTest {
     }
 
     private Function dataAtomOf(String predicate, String var1, String var2) {
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(predicate, new COL_TYPE[]{ null, null }),
+        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(predicate, ImmutableList.of(ROOT_TERM_TYPE, ROOT_TERM_TYPE)),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 
     private Function dataAtomOf(String predicate, String var1, String var2, String var3, String var4) {
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(predicate, new COL_TYPE[]{ null, null, null, null }),
+        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(predicate, ImmutableList.of(ROOT_TERM_TYPE, ROOT_TERM_TYPE)),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2), TERM_FACTORY.getVariable(var3), TERM_FACTORY.getVariable(var4)));
     }
 
