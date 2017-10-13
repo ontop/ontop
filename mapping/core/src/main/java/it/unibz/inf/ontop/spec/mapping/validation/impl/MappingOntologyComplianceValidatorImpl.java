@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValid
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 import java.util.Map;
 import java.util.Optional;
@@ -262,22 +263,22 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
          */
         for (Datatype declaredDatatype : datatypeMap.get(predicateIRI)) {
 
-            if(declaredDatatype.getPredicate().getName().equals(DatatypeImpl.rdfsLiteral.getPredicate().getName())){
+            if(declaredDatatype.getIRI().equals(RDFS.LITERAL)){
                 break;
             }
             // TODO: throw a better exception
-            TermType internalType = TYPE_FACTORY.getInternalType((DatatypePredicate) declaredDatatype.getPredicate())
+            TermType internalType = TYPE_FACTORY.getOptionalDatatype(declaredDatatype.getIRI())
                     .orElseThrow(() -> new RuntimeException("Unsupported datatype declared in the ontology: "
-                            + declaredDatatype.getPredicate().getName()));
+                            + declaredDatatype));
 
             if (!tripleObjectType.isA(internalType)) {
 
                 throw new MappingOntologyMismatchException(
                         predicateIRI +
                                 " is declared with datatype " +
-                                declaredDatatype.getPredicate().getName() +
+                                declaredDatatype +
                                 " in the ontology, but has datatype " +
-                                TYPE_FACTORY.getTypePredicate(tripleObjectType.getColType()).getName() +
+                                TYPE_FACTORY.getTypePredicate(tripleObjectType).getName() +
                                 " according to the following triplesMap (either declared in the triplesMap, or " +
                                 "inferred from its source):\n[\n" +
                                 provenance.getProvenanceInfo() +
@@ -389,7 +390,9 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     // if the answer is no, drop the Optional and throw an exception instead
     private Optional<Predicate> getPredicate(DataRangeExpression expression) {
         if (expression instanceof Datatype) {
-            return Optional.of(((Datatype) expression).getPredicate());
+            return TYPE_FACTORY.getOptionalDatatype(((Datatype) expression).getIRI())
+                    .flatMap(TYPE_FACTORY::getOptionalTypePredicate)
+                    .map(p -> (Predicate) p);
         }
         if (expression instanceof DataPropertyRangeExpression) {
             return Optional.of(((DataPropertyRangeExpression) expression).getProperty().getPredicate());

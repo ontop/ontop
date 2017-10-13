@@ -36,7 +36,6 @@ public class TypeFactoryImpl implements TypeFactory {
 	private static final TypeFactory INSTANCE = new TypeFactoryImpl();
 
 	private final DatatypePredicate XSD_STRING;
-	private final DatatypePredicate RDFS_LITERAL;
 	private final DatatypePredicate XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
 	private final DatatypePredicate XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
 	private final DatatypePredicate XSD_INT, XSD_UNSIGNED_INT, XSD_LONG;
@@ -205,7 +204,8 @@ public class TypeFactoryImpl implements TypeFactory {
 		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, xsdNonPositiveIntegerDatatype); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
 		XSD_INT = registerType(XMLSchema.INT, xsdIntDatatype);  // 19 "http://www.w3.org/2001/XMLSchema#int"
 		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, xsdUnsignedIntDatatype);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
-		RDFS_LITERAL = registerType(RDFS.LITERAL, rdfsLiteralDatatype);
+
+		// Limited registration
 		RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING, ImmutableList.of(xsdStringDatatype, xsdStringDatatype));
 		predicateList.add(RDF_LANG_STRING);
 	}
@@ -293,6 +293,11 @@ public class TypeFactoryImpl implements TypeFactory {
 		//	return getUriTemplatePredicate(1);
 		//case BNODE:    // different uses
 		//	return getBNodeTemplatePredicate(1);
+	}
+
+	@Override
+	public Optional<DatatypePredicate> getOptionalTypePredicate(TermType type) {
+		return Optional.ofNullable(mapTypetoPredicate.get(type));
 	}
 
 	/**

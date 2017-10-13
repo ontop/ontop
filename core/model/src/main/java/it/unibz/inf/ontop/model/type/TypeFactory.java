@@ -21,7 +21,10 @@ public interface TypeFactory {
 	@Deprecated
 	DatatypePredicate getTypePredicate(COL_TYPE type);
 
+	@Deprecated
 	DatatypePredicate getTypePredicate(TermType type);
+
+	Optional<DatatypePredicate> getOptionalTypePredicate(TermType type);
 		
 	boolean isBoolean(Predicate p);
 	
