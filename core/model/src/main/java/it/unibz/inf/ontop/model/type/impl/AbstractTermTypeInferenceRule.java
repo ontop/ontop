@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 public abstract class AbstractTermTypeInferenceRule implements TermTypeInferenceRule {
 
     @Override
-    public Optional<TermType> inferType(List<? extends ImmutableTerm> terms, ImmutableList<Optional<TermType>> expectedBaseTypes)
+    public Optional<TermType> inferType(List<? extends ImmutableTerm> terms, ImmutableList<TermType> expectedBaseTypes)
             throws IncompatibleTermException {
 
         ImmutableList<Optional<TermType>> argumentTypes = ImmutableList.copyOf(
@@ -30,7 +30,7 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
 
     @Override
     public Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> argumentTypes,
-                                                  ImmutableList<Optional<TermType>> expectedBaseTypes)
+                                                  ImmutableList<TermType> expectedBaseTypes)
             throws IncompatibleTermException {
 
         /*
@@ -45,11 +45,12 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
          */
         IntStream.range(0, argumentTypes.size())
                 .forEach(i -> argumentTypes.get(i)
-                        .ifPresent(t -> expectedBaseTypes.get(i).ifPresent(expectedBaseType -> {
+                        .ifPresent(t ->  {
+                            TermType expectedBaseType = expectedBaseTypes.get(i);
                             if (!t.isA(expectedBaseType)) {
                                 throw new IncompatibleTermException(expectedBaseType, t);
                             }
-                        })));
+                        }));
         doAdditionalChecks(argumentTypes);
 
         return postprocessInferredType(reduceInferredTypes(argumentTypes));

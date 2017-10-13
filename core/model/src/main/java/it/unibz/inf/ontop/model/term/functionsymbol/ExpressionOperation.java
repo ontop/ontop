@@ -7,154 +7,160 @@ import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.*;
 
 public enum ExpressionOperation implements OperationPredicate {
 
 	/* Numeric operations */
 
-	MINUS("minus", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null), // TODO (ROMAN): check -- never used
-	ADD("add", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null, null),
-	SUBTRACT("subtract", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null, null),
-	MULTIPLY("multiply", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null, null),
-	DIVIDE("divide", TermTypeInferenceRules.NON_INTEGER_NUMERIC_RULE, null, null),
-	ABS("abs", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null),
-	ROUND("round", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null),
-	CEIL("ceil", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null),
-	FLOOR("floor", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null),
+	MINUS("minus", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT), // TODO (ROMAN): check -- never used
+	ADD("add", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, ONTOP_NUMERIC_DT),
+	SUBTRACT("subtract", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, ONTOP_NUMERIC_DT),
+	MULTIPLY("multiply", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, ONTOP_NUMERIC_DT),
+	DIVIDE("divide", TermTypeInferenceRules.NON_INTEGER_NUMERIC_RULE, ONTOP_NUMERIC_DT, ONTOP_NUMERIC_DT),
+	ABS("abs", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT),
+	ROUND("round", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT),
+	CEIL("ceil", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT),
+	FLOOR("floor", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT),
 	RAND("RAND", TermTypeInferenceRules.PREDEFINED_DOUBLE_RULE),
 	
 	/* Boolean operations */
 
-	AND("AND", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null, null),
-	OR("OR", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null, null),
-	NOT("NOT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COL_TYPE.BOOLEAN),
+	AND("AND", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
+	OR("OR", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
+	NOT("NOT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT),
 	
-	EQ("EQ", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null, null),
-	NEQ("NEQ", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null, null),
-	GTE("GTE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null, null),
-	GT("GT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null, null),
-	LTE("LTE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null, null),
-	LT("LT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null, null),
+	EQ("EQ", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
+	NEQ("NEQ", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
+	/*
+	 * BC: is it defined for IRIs?
+	 */
+	GTE("GTE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	GT("GT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	LTE("LTE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	LT("LT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
 
-	IS_NULL("IS_NULL", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null),
-	IS_NOT_NULL("IS_NOT_NULL", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null),
-	IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null),
+	IS_NULL("IS_NULL", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
+	IS_NOT_NULL("IS_NOT_NULL", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
+	IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
 
-	STR_STARTS("STRSTARTS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	STR_ENDS("STRENDS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	CONTAINS("CONTAINS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	STR_STARTS("STRSTARTS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	STR_ENDS("STRENDS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	CONTAINS("CONTAINS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
 	
 	/* SPARQL String functions */
 
-	STRLEN("STRLEN", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, COL_TYPE.LITERAL),
-	UCASE("UCASE", TermTypeInferenceRules.STRING_LANG_RULE, COL_TYPE.LITERAL),
-	LCASE("LCASE", TermTypeInferenceRules.STRING_LANG_RULE, COL_TYPE.LITERAL),
-	SUBSTR2("SUBSTR", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.INTEGER),
-	SUBSTR3("SUBSTR", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.INTEGER, COL_TYPE.INTEGER),
-	STRBEFORE("STRBEFORE", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	STRAFTER("STRAFTER", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	REPLACE("REPLACE", TermTypeInferenceRules.STRING_LANG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	CONCAT("CONCAT", TermTypeInferenceRules.STRING_LANG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	ENCODE_FOR_URI("ENCODE_FOR_URI", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
+	STRLEN("STRLEN", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, RDFS_LITERAL_DT),
+	UCASE("UCASE", TermTypeInferenceRules.STRING_LANG_RULE, RDFS_LITERAL_DT),
+	LCASE("LCASE", TermTypeInferenceRules.STRING_LANG_RULE, RDFS_LITERAL_DT),
+	SUBSTR2("SUBSTR", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, RDFS_LITERAL_DT, XSD_INTEGER_DT),
+	SUBSTR3("SUBSTR", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, RDFS_LITERAL_DT, XSD_INTEGER_DT, XSD_INTEGER_DT),
+	STRBEFORE("STRBEFORE", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	STRAFTER("STRAFTER", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	REPLACE("REPLACE", TermTypeInferenceRules.STRING_LANG_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	CONCAT("CONCAT", TermTypeInferenceRules.STRING_LANG_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	ENCODE_FOR_URI("ENCODE_FOR_URI", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, RDFS_LITERAL_DT),
 
 	/* Hash functions */
 	
-	MD5("MD5", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
-	SHA1("SHA1", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
-	SHA512("SHA521", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
-	SHA256("SHA256", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
+	MD5("MD5", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, RDFS_LITERAL_DT),
+	SHA1("SHA1", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, RDFS_LITERAL_DT),
+	SHA512("SHA521", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, RDFS_LITERAL_DT),
+	SHA256("SHA256", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, RDFS_LITERAL_DT),
 
 	/* SPARQL Functions on Dates and Times */
 
 	NOW("NOW", TermTypeInferenceRules.PREDEFINED_DATETIME_RULE),
-	YEAR("YEAR", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, COL_TYPE.DATETIME),
-	DAY("DAY", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, COL_TYPE.DATETIME),
-	MONTH("MONTH", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, COL_TYPE.DATETIME),
-	HOURS("HOURS", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE,  COL_TYPE.DATETIME),
-	MINUTES("MINUTES", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, COL_TYPE.DATETIME),
-	SECONDS("SECONDS", TermTypeInferenceRules.PREDEFINED_DECIMAL_RULE, COL_TYPE.DATETIME),
-	TZ("TZ", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, COL_TYPE.DATETIME),
+	YEAR("YEAR", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_DATETIME_DT),
+	DAY("DAY", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_DATETIME_DT),
+	MONTH("MONTH", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_DATETIME_DT),
+	HOURS("HOURS", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE,  XSD_DATETIME_DT),
+	MINUTES("MINUTES", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_DATETIME_DT),
+	SECONDS("SECONDS", TermTypeInferenceRules.PREDEFINED_DECIMAL_RULE, XSD_DATETIME_DT),
+	TZ("TZ", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, XSD_DATETIME_DT),
 	
 	/* SPARQL built-in functions */
 
-	SPARQL_STR("str", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, null),
-	SPARQL_DATATYPE("datatype", TermTypeInferenceRules.PREDEFINED_OBJECT_RULE, COL_TYPE.LITERAL),
-	SPARQL_LANG("lang" , TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
+	// NB: str() not defined for blank nodes!!!!
+	SPARQL_STR("str", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, RDF_TERM_TYPE),
+	SPARQL_DATATYPE("datatype", TermTypeInferenceRules.PREDEFINED_OBJECT_RULE, RDFS_LITERAL_DT),
+	SPARQL_LANG("lang" , TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, RDFS_LITERAL_DT),
 	UUID("UUID", TermTypeInferenceRules.PREDEFINED_OBJECT_RULE),
 	STRUUID("STRUUID", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE),
 
 	/* SPARQL built-in predicates */
 
-	IS_NUMERIC("isNumeric", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null),
-	IS_LITERAL("isLiteral", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null),
-	IS_IRI("isIRI", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null),
-	IS_BLANK("isBlank", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null),
-	LANGMATCHES("LangMatches", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	REGEX("regex", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	IS_NUMERIC("isNumeric", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
+	IS_LITERAL("isLiteral", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
+	IS_IRI("isIRI", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
+	IS_BLANK("isBlank", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
+	LANGMATCHES("LangMatches", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	REGEX("regex", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
 	
 	// ROMAN (23 Dec 2015) THIS COMES ONLY FROM MAPPINGS
-	SQL_LIKE("like", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	SQL_LIKE("like", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
 
-	QUEST_CAST("cast", TermTypeInferenceRules.SECOND_ARG_RULE, null, null), // TODO: check
+	QUEST_CAST("cast", TermTypeInferenceRules.SECOND_ARG_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE), // TODO: refactor
 
 	/*
 	* Set functions (for aggregation)
+	* TODO: consider a non-atomic datatype
 	*/
 
-	AVG("AVG", TermTypeInferenceRules.NON_INTEGER_NUMERIC_RULE, null),
-	SUM("SUM", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null),
-	MAX("MAX", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null),
-	MIN("MIN", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null),
-	COUNT("COUNT", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, null);
+	AVG("AVG", TermTypeInferenceRules.NON_INTEGER_NUMERIC_RULE, RDF_TERM_TYPE),
+	SUM("SUM", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE),
+	MAX("MAX", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE),
+	MIN("MIN", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE),
+	COUNT("COUNT", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, RDF_TERM_TYPE);
 
 
 	// 0-ary operations
-    ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule) {
+    ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
+		this.argTypes = ImmutableList.of();
 		this.argColTypes = ImmutableList.of();
-		this.argTypes = convertArgTypes(argColTypes);
 	}
 
 	// unary operations
-    ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1) {
+    ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule, @Nonnull TermType arg1) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argColTypes = ImmutableList.of(Optional.ofNullable(arg1));
-		this.argTypes = convertArgTypes(argColTypes);
+		this.argTypes = ImmutableList.of(arg1);
+		this.argColTypes = convertArgTypes(argTypes);
 	}
 	// binary operations
-    ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1, COL_TYPE arg2) {
+    ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule, @Nonnull TermType arg1, @Nonnull TermType arg2) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argColTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2));
-		this.argTypes = convertArgTypes(argColTypes);
+		this.argTypes = ImmutableList.of(arg1, arg2);
+		this.argColTypes = convertArgTypes(argTypes);
 	}
 	// ternary operations
-    ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1, COL_TYPE arg2, COL_TYPE arg3) {
+    ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule, @Nonnull TermType arg1, @Nonnull TermType arg2,
+						@Nonnull TermType arg3) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argColTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2), Optional.ofNullable(arg3));
-		this.argTypes = convertArgTypes(argColTypes);
+		this.argTypes = ImmutableList.of(arg1, arg2, arg3);
+		this.argColTypes = convertArgTypes(argTypes);
 	}
 	// Quad operations
-	ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1, COL_TYPE arg2,
-						COL_TYPE arg3, COL_TYPE arg4) {
+	ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule, @Nonnull TermType arg1,
+						@Nonnull TermType arg2, @Nonnull TermType arg3, @Nonnull TermType arg4) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argColTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2),
-				Optional.ofNullable(arg3), Optional.ofNullable(arg4));
-		this.argTypes = convertArgTypes(argColTypes);
+		this.argTypes = ImmutableList.of(arg1, arg2, arg3, arg4);
+		this.argColTypes = convertArgTypes(argTypes);
 	}
 
 	private final String name;
 	private final TermTypeInferenceRule termTypeInferenceRule;
 	// Immutable
 	private final ImmutableList<Optional<COL_TYPE>> argColTypes;
-	private final ImmutableList<Optional<TermType>> argTypes;
+	private final ImmutableList<TermType> argTypes;
 	
 	@Override
 	public String getName() {
@@ -216,13 +222,13 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public ImmutableList<Optional<TermType>> getArgumentTypes() {
+	public ImmutableList<TermType> getArgumentTypes() {
 		return argTypes;
 	}
 
-	private static ImmutableList<Optional<TermType>> convertArgTypes(ImmutableList<Optional<COL_TYPE>> argColTypes) {
+	private static ImmutableList<Optional<COL_TYPE>> convertArgTypes(ImmutableList<TermType> argColTypes) {
 		return argColTypes.stream()
-				.map(o -> o.map(TYPE_FACTORY::getTermType))
+				.map(TermType::getOptionalColType)
 				.collect(ImmutableCollectors.toList());
 	}
 }

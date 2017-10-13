@@ -16,7 +16,7 @@ public interface TermTypeInferenceRule {
      * TODO: explain
      *
      */
-    Optional<TermType> inferType(List<? extends ImmutableTerm> terms, ImmutableList<Optional<TermType>> expectedBaseTypes)
+    Optional<TermType> inferType(List<? extends ImmutableTerm> terms, ImmutableList<TermType> expectedBaseTypes)
             throws IncompatibleTermException;
 
     /**
@@ -24,6 +24,6 @@ public interface TermTypeInferenceRule {
      *
      */
     Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> actualArgumentTypes,
-                                                  ImmutableList<Optional<TermType>> expectedBaseTypes)
+                                                  ImmutableList<TermType> expectedBaseTypes)
             throws IncompatibleTermException;
 }

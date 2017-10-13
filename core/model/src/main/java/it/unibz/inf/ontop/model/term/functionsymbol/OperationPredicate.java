@@ -32,5 +32,5 @@ public interface OperationPredicate extends BuiltinPredicate {
      */
     TermTypeInferenceRule getTermTypeInferenceRule();
 
-    ImmutableList<Optional<TermType>> getArgumentTypes();
+    ImmutableList<TermType> getArgumentTypes();
 }

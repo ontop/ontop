@@ -51,6 +51,15 @@ public interface TypeFactory {
 
 	UnboundRDFTermType getUnboundTermType();
 
+	RDFDatatype getUnsupportedDatatype();
+
+	RDFDatatype getAbstractOntopNumericDatatype();
+	RDFDatatype getAbstractRDFSLiteral();
+
+	TermType getAbstractAtomicTermType();
+
+	RDFTermType getAbstractRDFTermType();
+
 	default RDFDatatype getXsdIntegerDatatype() {
 		return getDatatype(XMLSchema.INTEGER);
 	}
@@ -78,6 +87,4 @@ public interface TypeFactory {
 	default RDFDatatype getXsdDatetimeDatatype() {
 		return getDatatype(XMLSchema.DATETIME);
 	}
-
-	RDFDatatype getUnsupportedDatatype();
 }

@@ -349,4 +349,24 @@ public class TypeFactoryImpl implements TypeFactory {
 		return defaultUnsupportedDatatype;
 	}
 
+	@Override
+	public RDFDatatype getAbstractOntopNumericDatatype() {
+		return numericDatatype;
+	}
+
+	@Override
+	public RDFDatatype getAbstractRDFSLiteral() {
+		return rdfsLiteralDatatype;
+	}
+
+	@Override
+	public TermType getAbstractAtomicTermType() {
+		return rootTermType;
+	}
+
+	@Override
+	public RDFTermType getAbstractRDFTermType() {
+		return rootRDFTermType;
+	}
+
 }
