@@ -515,7 +515,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 						// if (driver.equals("com.mysql.jdbc.Driver")) {
 						// st.setFetchSize(Integer.MIN_VALUE);
 						// }
-						st.setMaxRows(5);
+						st.setMaxRows(10);
 						result = st.executeQuery(txtSourceQuery.getText().trim());
 						latch.countDown();
 					} catch (Exception e) {
