@@ -86,6 +86,12 @@ public class ForeignKeyConstraint {
 		 */
 		
 		public Builder add(Attribute attribute, Attribute referencedAttribute) {
+			if (attribute == null) {
+				throw new IllegalArgumentException("Foreign Key column is missing in table " + relation);
+			}
+			if (referencedAttribute == null){
+				throw new IllegalArgumentException("Primary Key column is missing in table " + referencedRelation);
+			}
 			if (relation != attribute.getRelation())
 				throw new IllegalArgumentException("Foreign Key requires the same table in all attributes: " + relation + " -> " + referencedRelation + " (attribute " + attribute.getRelation().getID() + "." + attribute + ")");
 			
@@ -129,7 +135,7 @@ public class ForeignKeyConstraint {
 	 * 
 	 * @param name
 	 * @param attribute
-	 * @param referenced attribute
+	 * @param reference
 	 * @return
 	 */
 	public static ForeignKeyConstraint of(String name, Attribute attribute, Attribute reference) {
