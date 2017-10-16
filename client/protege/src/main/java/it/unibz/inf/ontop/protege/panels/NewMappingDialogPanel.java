@@ -22,24 +22,23 @@ package it.unibz.inf.ontop.protege.panels;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
-import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
+import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -507,7 +506,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 							IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) oldmodel;
 							rstm.close();
 						}
-						JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+//						JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 						Connection c = ConnectionTools.getConnection(dataSource);
 
 //						String driver = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
@@ -516,7 +515,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 						// if (driver.equals("com.mysql.jdbc.Driver")) {
 						// st.setFetchSize(Integer.MIN_VALUE);
 						// }
-
+						st.setMaxRows(5);
 						result = st.executeQuery(txtSourceQuery.getText().trim());
 						latch.countDown();
 					} catch (Exception e) {
