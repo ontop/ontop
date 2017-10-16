@@ -36,7 +36,7 @@
     </DataPropertyDomain>
     <DataPropertyRange>
         <DataProperty IRI="#name"/>
-        <Datatype abbreviatedIRI="rdf:PlainLiteral"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
     </DataPropertyRange>
    <Declaration>
         <DataProperty IRI="#position"/>
