@@ -14,6 +14,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,7 +43,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final DatatypePredicate XSD_DECIMAL;
 	private final DatatypePredicate XSD_DOUBLE, XSD_FLOAT;
 	private final DatatypePredicate XSD_DATETIME, XSD_DATETIME_STAMP;
-	private final DatatypePredicate XSD_BOOLEAN;
+	private final DatatypePredicate XSD_BOOLEAN, XSD_BASE64;
 	private final DatatypePredicate XSD_DATE, XSD_TIME, XSD_YEAR;
 
 	private final Map<TermType, DatatypePredicate> mapTypetoPredicate = new HashMap<>();
@@ -65,7 +66,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final ConcreteNumericRDFDatatype xsdNonPositiveIntegerDatatype, xsdNegativeIntegerDatatype;
 	private final ConcreteNumericRDFDatatype xsdNonNegativeIntegerDatatype, xsdPositiveIntegerDatatype;
 	private final ConcreteNumericRDFDatatype xsdUnsignedLongDatatype, xsdUnsignedIntDatatype, xsdUnsignedShortDatatype, xsdUnsignedByteDatatype;
-	private final RDFDatatype defaultUnsupportedDatatype, xsdStringDatatype, xsdBooleanDatatype;
+	private final RDFDatatype defaultUnsupportedDatatype, xsdStringDatatype, xsdBooleanDatatype, xsdBase64Datatype;
 	private final RDFDatatype xsdTimeDatatype, xsdDateDatatype, xsdDatetimeDatatype, xsdDatetimeStampDatatype, xsdGYearDatatype;
 	private final ValueFactory iriFactory = SimpleValueFactory.getInstance();
 
@@ -186,6 +187,9 @@ public class TypeFactoryImpl implements TypeFactory {
 		termTypeColTypeCache.put(COL_TYPE.YEAR, xsdGYearDatatype);
 		registerDatatype(xsdGYearDatatype);
 
+		xsdBase64Datatype = createSimpleRDFDatatype(XMLSchema.BASE64BINARY, rdfsLiteralDatatype.getAncestry(), false);
+		registerDatatype(xsdBase64Datatype);
+
 		XSD_INTEGER = registerType(XMLSchema.INTEGER, xsdIntegerDatatype);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
 		XSD_DECIMAL = registerType(XMLSchema.DECIMAL, xsdDecimalDatatype);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
 		XSD_DOUBLE = registerType(XMLSchema.DOUBLE, xsdDoubleDatatype);  // 6 "http://www.w3.org/2001/XMLSchema#double"
@@ -204,6 +208,8 @@ public class TypeFactoryImpl implements TypeFactory {
 		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, xsdNonPositiveIntegerDatatype); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
 		XSD_INT = registerType(XMLSchema.INT, xsdIntDatatype);  // 19 "http://www.w3.org/2001/XMLSchema#int"
 		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, xsdUnsignedIntDatatype);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
+
+		XSD_BASE64 = registerType(XMLSchema.BASE64BINARY, xsdBase64Datatype);
 
 		// Limited registration
 		RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING, ImmutableList.of(xsdStringDatatype, xsdStringDatatype));
@@ -304,7 +310,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	 * TODO: refactor (temporary)
 	 */
 	@Override
-	public RDFTermType getTermType(COL_TYPE type) {
+	public RDFTermType getTermType(@Nonnull COL_TYPE type) {
 		RDFTermType cachedType = termTypeColTypeCache.get(type);
 		if (cachedType == null) {
 			throw new RuntimeException("TODO: support " + type);

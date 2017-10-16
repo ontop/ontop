@@ -37,7 +37,7 @@ public class TermTypeInferenceTools {
             if(f instanceof ImmutableExpression) {
                 return ((ImmutableExpression) f).getOptionalTermType();
             }
-            else if (f.isDataTypeFunction()){
+            else if (typePred instanceof DatatypePredicate){
                 /*
                  * Special case: langString
                  */
@@ -51,7 +51,7 @@ public class TermTypeInferenceTools {
                         throw new IllegalStateException("A lang literal function must have a constant language tag");
                     return Optional.of(TYPE_FACTORY.getLangTermType(((Constant)secondArgument).getValue()));
                 }
-                return Optional.of(TYPE_FACTORY.getTermType(f.getFunctionSymbol().getColType(0)));
+                return TYPE_FACTORY.getInternalType((DatatypePredicate) typePred);
 
             } else if (typePred instanceof URITemplatePredicate) {
                 return  OPTIONAL_OBJECT_TERM_TYPE;
