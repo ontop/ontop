@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.impl.TypeFactoryImpl;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -168,9 +169,8 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language) {
-		RDFDatatype xsdString = TYPE_FACTORY.getXsdStringDatatype();
-		ValueConstant lang = getConstantLiteral(language.toLowerCase(), xsdString);
-		Predicate pred = typeFactory.getRequiredTypePredicate(xsdString);
+		ValueConstant lang = getConstantLiteral(language.toLowerCase(), XSD.STRING);
+		Predicate pred = typeFactory.getRequiredTypePredicate(RDF.LANGSTRING);
 		return getImmutableFunctionalTerm(pred, value, lang);
 	}
 
