@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.model.vocabulary.OntopInternal;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
@@ -13,6 +14,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
+
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -272,33 +274,30 @@ public class TypeFactoryImpl implements TypeFactory {
 	public Optional<TermType> getInternalType(DatatypePredicate predicate) {
 		return Optional.ofNullable(datatypeCache.get(rdfFactory.createIRI(predicate.getName())));
 	}
-	
-	
+
 	@Override
-	public DatatypePredicate getTypePredicate(COL_TYPE type) {
-		if (type == COL_TYPE.LANG_STRING)
-			return RDF_LANG_STRING;
-		return mapTypetoPredicate.get(getTermType(type));
-		
-		//case OBJECT:   // different uses
-		//	return getUriTemplatePredicate(1);
-		//case BNODE:    // different uses			
-		//	return getBNodeTemplatePredicate(1);
+	public DatatypePredicate getRequiredTypePredicate(TermType type) {
+		return getOptionalTypePredicate(type)
+				.orElseThrow(() -> new NoConstructorFunctionException(type));
 	}
 
 	@Override
-	public DatatypePredicate getTypePredicate(TermType type) {
-		return mapTypetoPredicate.get(type);
-
-		//case OBJECT:   // different uses
-		//	return getUriTemplatePredicate(1);
-		//case BNODE:    // different uses
-		//	return getBNodeTemplatePredicate(1);
+	public DatatypePredicate getRequiredTypePredicate(IRI datatypeIri) {
+		if (datatypeIri.equals(LANGSTRING))
+			return RDF_LANG_STRING;
+		return getRequiredTypePredicate(getDatatype(datatypeIri));
 	}
 
 	@Override
 	public Optional<DatatypePredicate> getOptionalTypePredicate(TermType type) {
-		return Optional.ofNullable(mapTypetoPredicate.get(type));
+		return  Optional.ofNullable(mapTypetoPredicate.get(type))
+				.map(Optional::of)
+				// Lang string
+				.orElseGet(() -> Optional.of(type)
+						.filter(t -> t instanceof RDFDatatype)
+						.map(t -> (RDFDatatype) t)
+						.filter(t -> t.getLanguageTag().isPresent())
+						.map(t -> RDF_LANG_STRING));
 	}
 
 	/**
@@ -374,4 +373,11 @@ public class TypeFactoryImpl implements TypeFactory {
 		return objectRDFType;
     }
 
+
+    private static class NoConstructorFunctionException extends OntopInternalBugException {
+
+		private NoConstructorFunctionException(TermType type) {
+			super("No construction function found for " + type);
+		}
+	}
 }

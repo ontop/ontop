@@ -24,8 +24,8 @@ package it.unibz.inf.ontop.model.term;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.TermType;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
 
@@ -219,8 +219,7 @@ public interface TermFactory {
 	 */
 	ValueConstant getConstantLiteral(String value, TermType type);
 
-	@Deprecated
-	ValueConstant getConstantLiteral(String value, COL_TYPE colType);
+	ValueConstant getConstantLiteral(String value, IRI type);
 
 
 	/**
@@ -245,7 +244,6 @@ public interface TermFactory {
 	public Function getTypedTerm(Term value, TermType type);
 
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language);
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, ImmutableTerm language);
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, TermType type);
 
 	/**

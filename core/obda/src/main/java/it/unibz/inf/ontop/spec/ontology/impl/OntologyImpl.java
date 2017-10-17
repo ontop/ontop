@@ -191,22 +191,22 @@ public class OntologyImpl implements Ontology {
 		DatatypeFactory dfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 		
 		builtinDatatypes = new HashSet<>();
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.LITERAL)); //  .RDFS_LITERAL);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.STRING)); // .XSD_STRING);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.INTEGER)); //OBDAVocabulary.XSD_INTEGER);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NEGATIVE_INTEGER)); // XSD_NEGATIVE_INTEGER);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.INT)); // OBDAVocabulary.XSD_INT);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NON_NEGATIVE_INTEGER)); //OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.UNSIGNED_INT)); // OBDAVocabulary.XSD_UNSIGNED_INT);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.POSITIVE_INTEGER)); //.XSD_POSITIVE_INTEGER);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NON_POSITIVE_INTEGER)); // OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.LONG)); // OBDAVocabulary.XSD_LONG);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DECIMAL)); // OBDAVocabulary.XSD_DECIMAL);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DOUBLE)); // OBDAVocabulary.XSD_DOUBLE);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.FLOAT)); // OBDAVocabulary.XSD_FLOAT);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DATETIME)); // OBDAVocabulary.XSD_DATETIME);
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.BOOLEAN)); // OBDAVocabulary.XSD_BOOLEAN
-		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DATETIME_STAMP)); // OBDAVocabulary.XSD_DATETIME_STAMP
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.LITERAL)); //  .RDFS_LITERAL);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.STRING)); // .XSD_STRING);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.INTEGER)); //OBDAVocabulary.XSD_INTEGER);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.NEGATIVE_INTEGER)); // XSD_NEGATIVE_INTEGER);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.INT)); // OBDAVocabulary.XSD_INT);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.NON_NEGATIVE_INTEGER)); //OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.UNSIGNED_INT)); // OBDAVocabulary.XSD_UNSIGNED_INT);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.POSITIVE_INTEGER)); //.XSD_POSITIVE_INTEGER);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.NON_POSITIVE_INTEGER)); // OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.LONG)); // OBDAVocabulary.XSD_LONG);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.DECIMAL)); // OBDAVocabulary.XSD_DECIMAL);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.DOUBLE)); // OBDAVocabulary.XSD_DOUBLE);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.FLOAT)); // OBDAVocabulary.XSD_FLOAT);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.DATETIME)); // OBDAVocabulary.XSD_DATETIME);
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.BOOLEAN)); // OBDAVocabulary.XSD_BOOLEAN
+		builtinDatatypes.add(dfac.getRequiredTypePredicate(COL_TYPE.DATETIME_STAMP)); // OBDAVocabulary.XSD_DATETIME_STAMP
 	}
 */	
 	

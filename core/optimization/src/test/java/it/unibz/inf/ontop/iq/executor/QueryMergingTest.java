@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
 
 import java.util.*;
@@ -22,7 +22,6 @@ import java.util.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER;
 import static it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -74,7 +73,7 @@ public class QueryMergingTest {
     private static Constant URI_TEMPLATE_STR_3 = DATA_FACTORY.getConstantLiteral("http://example.org/ds3/{}/{}");
     private static Constant ONE = DATA_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
     private static Constant TWO = DATA_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static DatatypePredicate XSD_INTEGER = TYPE_FACTORY.getTypePredicate(TYPE_FACTORY.getXsdIntegerDatatype());
+    private static DatatypePredicate XSD_INTEGER = TYPE_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getXsdIntegerDatatype());
     private static Constant THREE = DATA_FACTORY.getConstantLiteral("3", TYPE_FACTORY.getXsdIntegerDatatype());
     private static GroundTerm INT_OF_THREE = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, THREE);
     private static GroundTerm INT_OF_ONE = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, ONE);
@@ -1171,7 +1170,7 @@ public class QueryMergingTest {
 
     private static ImmutableFunctionalTerm generateString(VariableOrGroundTerm argument) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING), argument);
+                TYPE_FACTORY.getRequiredTypePredicate(XSD.STRING), argument);
     }
 }
 

@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 
 import java.util.Optional;
 
@@ -20,8 +21,7 @@ public class TermTypeInferenceTools {
     private static final Optional<TermType> OPTIONAL_BNODE_TERM_TYPE = Optional.of(TYPE_FACTORY.getBlankNodeType());
     private static final Optional<TermType> OPTIONAL_UNBOUND_TERM_TYPE = Optional.of(TYPE_FACTORY.getUnboundTermType());
 
-    private static final DatatypePredicate LITERAL_LANG_PREDICATE = TYPE_FACTORY
-            .getTypePredicate(LANG_STRING);
+    private static final DatatypePredicate LITERAL_LANG_PREDICATE = TYPE_FACTORY.getRequiredTypePredicate(RDF.LANGSTRING);
 
     /**
      * TODO: simplify this method

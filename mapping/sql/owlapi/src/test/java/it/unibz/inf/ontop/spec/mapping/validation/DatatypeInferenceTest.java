@@ -6,9 +6,10 @@ import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import org.apache.commons.rdf.api.IRI;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,45 +50,45 @@ public class DatatypeInferenceTest {
     @Test
     public void testRangeInferredDatatype() throws OBDASpecificationException {
         OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_range_datatype.obda");
-        checkDatatype(spec.getSaturatedMapping(), COL_TYPE.STRING);
+        checkDatatype(spec.getSaturatedMapping(), XSD.STRING);
     }
 
     @Test
     public void testNoRangeMappingDatatype() throws OBDASpecificationException {
         OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE,
                 DIR + "marriage_no_range_prop_mapping_datatype.obda");
-        checkDatatype(spec.getSaturatedMapping(), COL_TYPE.INTEGER);
+        checkDatatype(spec.getSaturatedMapping(), XSD.INTEGER);
     }
 
     @Test
     public void testNoRangeColtype() throws OBDASpecificationException {
         OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE,
                 DIR + "marriage_no_range_prop_coltype.obda");
-        checkDatatype(spec.getSaturatedMapping(), COL_TYPE.STRING);
+        checkDatatype(spec.getSaturatedMapping(), XSD.STRING);
     }
 
     @Test
     public void testUnknownMappingDatatype() throws OBDASpecificationException {
         OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE,
                 DIR + "marriage_unknown_prop_mapping_datatype.obda");
-        checkDatatype(spec.getSaturatedMapping(), COL_TYPE.INTEGER);
+        checkDatatype(spec.getSaturatedMapping(), XSD.INTEGER);
     }
 
     @Test
     public void testUnknownStringColtype() throws OBDASpecificationException {
         OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE,
                 DIR + "marriage_unknown_prop_coltype.obda");
-        checkDatatype(spec.getSaturatedMapping(), COL_TYPE.STRING);
+        checkDatatype(spec.getSaturatedMapping(), XSD.STRING);
     }
 
     @Test
     public void testUnknownIntegerColtype() throws OBDASpecificationException {
         OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE,
                 DIR + "marriage_unknown_prop_coltype_int.obda");
-        checkDatatype(spec.getSaturatedMapping(), COL_TYPE.INTEGER);
+        checkDatatype(spec.getSaturatedMapping(), XSD.INTEGER);
     }
 
-    private void checkDatatype(Mapping mapping, COL_TYPE expectedColType) {
+    private void checkDatatype(Mapping mapping, IRI expectedType) {
         Optional<Predicate> optionalDatatype = mapping.getPredicates().stream()
                 .map(mapping::getDefinition)
                 .filter(Optional::isPresent)
@@ -103,6 +104,6 @@ public class DatatypeInferenceTest {
         @SuppressWarnings("OptionalGetWithoutIsPresent")
         Predicate datatype = optionalDatatype.get();
 
-        assertEquals(TYPE_FACTORY.getTypePredicate(expectedColType), datatype);
+        assertEquals(TYPE_FACTORY.getRequiredTypePredicate(expectedType), datatype);
     }
 }

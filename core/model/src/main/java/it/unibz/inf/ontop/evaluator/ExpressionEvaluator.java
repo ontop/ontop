@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.evaluator;
 
 import it.unibz.inf.ontop.evaluator.impl.ExpressionNormalizerImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.TermConstants;
@@ -481,9 +480,9 @@ public class ExpressionEvaluator {
 		else if (term instanceof Constant) {
 			Constant constant = (Constant) term;
 			TermType type = constant.getType();
-			Predicate pred = TYPE_FACTORY.getTypePredicate(type);
+			Predicate pred = TYPE_FACTORY.getRequiredTypePredicate(type);
 			if (pred == null)
-				pred = TYPE_FACTORY.getTypePredicate(TYPE_FACTORY.getXsdStringDatatype()); // .XSD_STRING;
+				pred = TYPE_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getXsdStringDatatype()); // .XSD_STRING;
 			return pred;
 		} 
 		else {
@@ -492,7 +491,8 @@ public class ExpressionEvaluator {
 	}
 	
 	private boolean isDouble(Predicate pred) {
-		return (pred.equals(TYPE_FACTORY.getTypePredicate(COL_TYPE.DOUBLE)) || pred.equals(TYPE_FACTORY.getTypePredicate(COL_TYPE.FLOAT)));
+		return (pred.equals(TYPE_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getXsdDoubleDatatype()))
+				|| pred.equals(TYPE_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getXsdFloatDatatype())));
 	}
 	
 	private boolean isNumeric(Predicate pred) {
@@ -503,7 +503,7 @@ public class ExpressionEvaluator {
 		String constantValue = constant.getValue();
 		Optional<RDFDatatype> type = TYPE_FACTORY.getOptionalDatatype(constantValue);
 		if (type.isPresent()) {
-			Predicate p = TYPE_FACTORY.getTypePredicate(type.get());
+			Predicate p = TYPE_FACTORY.getRequiredTypePredicate(type.get());
 			return isNumeric(p);
 		}
 		return false;	

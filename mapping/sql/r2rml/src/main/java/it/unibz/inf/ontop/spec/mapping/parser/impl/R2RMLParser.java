@@ -578,7 +578,7 @@ public class R2RMLParser {
 			// simple LITERAL
 		case 3:
 			uriTemplate = terms.remove(0);
-			// pred = TYPE_FACTORY.getTypePredicate(); //
+			// pred = TYPE_FACTORY.getRequiredTypePredicate(); //
 			// the URI template is always on the first position in the term list
 			// terms.add(0, uriTemplate);
 			return TERM_FACTORY.getImmutableTypedTerm(uriTemplate, TYPE_FACTORY.getXsdStringDatatype());

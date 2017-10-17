@@ -15,7 +15,8 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -24,7 +25,6 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.*;
 import static org.junit.Assert.assertNotEquals;
 
@@ -472,25 +472,25 @@ public class ExpressionEvaluatorTest {
 
     private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, Constant argument2) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(COL_TYPE.LANG_STRING),
+                TYPE_FACTORY.getRequiredTypePredicate(RDF.LANGSTRING),
                 argument1, argument2);
     }
     private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, VariableOrGroundTerm argument2) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(COL_TYPE.LANG_STRING),
+                TYPE_FACTORY.getRequiredTypePredicate(RDF.LANGSTRING),
                 argument1, argument2);
     }
 
 
     private ImmutableFunctionalTerm generateLiteral(Constant argument1) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING),
+                TYPE_FACTORY.getRequiredTypePredicate(XSD.STRING),
                 argument1);
     }
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(INTEGER),
+                TYPE_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
                 argument);
     }
 }

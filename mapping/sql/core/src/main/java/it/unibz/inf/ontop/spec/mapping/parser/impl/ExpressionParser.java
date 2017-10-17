@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -25,6 +26,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Collection;
 import java.util.function.BiFunction;
@@ -726,12 +728,12 @@ public class ExpressionParser {
 
         @Override
         public void visit(DoubleValue expression) {
-            process(expression.toString(), COL_TYPE.DOUBLE);
+            process(expression.toString(), XSD.DOUBLE);
         }
 
         @Override
         public void visit(LongValue expression) {
-            process(expression.getStringValue(), COL_TYPE.LONG);
+            process(expression.getStringValue(), XSD.LONG);
         }
 
         @Override
@@ -741,22 +743,22 @@ public class ExpressionParser {
 
         @Override
         public void visit(StringValue expression) {
-            process(expression.getValue(), COL_TYPE.STRING);
+            process(expression.getValue(), XSD.STRING);
         }
 
         @Override
         public void visit(DateValue expression) {
-            process(expression.getValue().toString(), COL_TYPE.DATE);
+            process(expression.getValue().toString(), XSD.DATE);
         }
 
         @Override
         public void visit(TimeValue expression) {
-            process(expression.getValue().toString(), COL_TYPE.TIME);
+            process(expression.getValue().toString(), XSD.TIME);
         }
 
         @Override
         public void visit(TimestampValue expression) {
-            process(expression.getValue().toString(), COL_TYPE.DATETIME);
+            process(expression.getValue().toString(), XSD.DATETIME);
         }
 
         @Override
@@ -765,8 +767,8 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("Temporal INTERVALs are not supported yet", expression);
         }
 
-        private void process(String value, COL_TYPE datatype) {
-            result = TERM_FACTORY.getConstantLiteral(value, TYPE_FACTORY.getTermType(datatype));
+        private void process(String value, IRI datatype) {
+            result = TERM_FACTORY.getConstantLiteral(value, TYPE_FACTORY.getDatatype(datatype));
         }
 
 
@@ -1179,7 +1181,7 @@ public class ExpressionParser {
                 flags = TERM_FACTORY.getConstantLiteral(""); // the 4th argument is flags
                 break;
             case 4:
-                if (((ValueConstant)terms.get(3)).getType().equals(TYPE_FACTORY.getTermType(COL_TYPE.STRING))) {
+                if (((ValueConstant)terms.get(3)).getType().equals(TYPE_FACTORY.getDatatype(XSD.STRING))) {
                     // PostgreSQL
                     flags =  terms.get(3);
                     // check that flags is either ig or g
@@ -1189,8 +1191,8 @@ public class ExpressionParser {
                 break;
             case 6:
                 // Oracle
-                if (!terms.get(3).equals(TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getTermType(COL_TYPE.LONG)))
-                        || !terms.get(4).equals(TERM_FACTORY.getConstantLiteral("0", TYPE_FACTORY.getTermType(COL_TYPE.LONG))))
+                if (!terms.get(3).equals(TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getDatatype(XSD.LONG)))
+                        || !terms.get(4).equals(TERM_FACTORY.getConstantLiteral("0", TYPE_FACTORY.getDatatype(XSD.LONG))))
                     throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
 
                 // check that the flags is a combination of imx

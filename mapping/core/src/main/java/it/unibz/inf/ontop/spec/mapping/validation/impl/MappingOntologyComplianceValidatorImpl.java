@@ -289,7 +289,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                                 " is declared with datatype " +
                                 declaredDatatype +
                                 " in the ontology, but has datatype " +
-                                TYPE_FACTORY.getTypePredicate(tripleObjectType).getName() +
+                                TYPE_FACTORY.getRequiredTypePredicate(tripleObjectType).getName() +
                                 " according to the following triplesMap (either declared in the triplesMap, or " +
                                 "inferred from its source):\n[\n" +
                                 provenance.getProvenanceInfo() +

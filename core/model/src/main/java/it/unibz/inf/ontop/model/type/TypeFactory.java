@@ -17,11 +17,9 @@ public interface TypeFactory {
 
 	Optional<TermType> getInternalType(DatatypePredicate predicate);
 
-	@Deprecated
-	DatatypePredicate getTypePredicate(COL_TYPE type);
+	DatatypePredicate getRequiredTypePredicate(TermType type);
 
-	@Deprecated
-	DatatypePredicate getTypePredicate(TermType type);
+	DatatypePredicate getRequiredTypePredicate(IRI datatypeIri);
 
 	Optional<DatatypePredicate> getOptionalTypePredicate(TermType type);
 		

@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -796,7 +796,7 @@ public class BindTestWithFunctions {
         try {
             date = df.parse(value);
             Timestamp ts = new Timestamp(date.getTime());
-            System.out.println(TERM_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME));
+            System.out.println(TERM_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), XSD.DATETIME));
 
         } catch (ParseException pe) {
 

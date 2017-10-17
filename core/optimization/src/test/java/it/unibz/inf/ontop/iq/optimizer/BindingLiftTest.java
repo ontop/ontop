@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -25,7 +25,6 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.SPARQL_DATATYPE;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.INTEGER;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static junit.framework.TestCase.assertTrue;
@@ -579,13 +578,13 @@ public class BindingLiftTest {
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(INTEGER),
+                TYPE_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
                 argument);
     }
 
     private ImmutableFunctionalTerm generateString(VariableOrGroundTerm argument) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING),
+                TYPE_FACTORY.getRequiredTypePredicate(XSD.STRING),
                 argument);
     }
 

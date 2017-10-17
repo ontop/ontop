@@ -7,9 +7,10 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import org.apache.commons.rdf.api.IRI;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class UnknownDatatypeMappingTest {
     @Test
     public void testUpperFunction() throws OBDASpecificationException {
         OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_unknown_function.obda");
-        checkDatatype(spec.getSaturatedMapping(), COL_TYPE.STRING);
+        checkDatatype(spec.getSaturatedMapping(), XSD.STRING);
 
     }
 
@@ -56,19 +57,19 @@ public class UnknownDatatypeMappingTest {
     @Test
     public void testMappingFunction() throws OBDASpecificationException {
         OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_function.obda");
-        checkDatatype(spec.getSaturatedMapping(), COL_TYPE.STRING);
+        checkDatatype(spec.getSaturatedMapping(), XSD.STRING);
     }
 
     @Test
     public void testMappingTargetFunction() throws OBDASpecificationException {
         OBDASpecification spec = TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_target_function.obda");
-        checkDatatype(spec.getSaturatedMapping(), COL_TYPE.STRING);
+        checkDatatype(spec.getSaturatedMapping(), XSD.STRING);
     }
 
     @Test
     public void testMappingIntFunction() throws OBDASpecificationException {
         OBDASpecification spec =TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_int_function.obda");
-        checkDatatype(spec.getSaturatedMapping(), COL_TYPE.STRING);
+        checkDatatype(spec.getSaturatedMapping(), XSD.STRING);
     }
 
     @Test(expected = UnknownDatatypeException.class)
@@ -81,7 +82,7 @@ public class UnknownDatatypeMappingTest {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_rdfsliteral.obda");
     }
 
-    private void checkDatatype(Mapping mapping, COL_TYPE expectedColType) {
+    private void checkDatatype(Mapping mapping, IRI expectedType) {
         Optional<Predicate> optionalDatatype = mapping.getPredicates().stream()
                 .map(mapping::getDefinition)
                 .filter(Optional::isPresent)
@@ -97,6 +98,6 @@ public class UnknownDatatypeMappingTest {
         @SuppressWarnings("OptionalGetWithoutIsPresent")
         Predicate datatype = optionalDatatype.get();
 
-        assertEquals(TYPE_FACTORY.getTypePredicate(expectedColType), datatype);
+        assertEquals(TYPE_FACTORY.getRequiredTypePredicate(expectedType), datatype);
     }
 }

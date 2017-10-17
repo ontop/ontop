@@ -999,8 +999,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 				break;
 			case LANG_STRING:
 				LanguageTag languageTag = ((RDFDatatype)type2).getLanguageTag().get();
-				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, TERM_FACTORY.getConstantLiteral(
-						languageTag.getFullString()));
+				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, languageTag.getFullString());
 				break;
 			case DATE:
 			case TIME:
