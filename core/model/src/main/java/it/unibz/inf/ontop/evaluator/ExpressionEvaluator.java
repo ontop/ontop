@@ -403,7 +403,7 @@ public class ExpressionEvaluator {
 				else {
 					return TERM_FACTORY.getTypedTerm(
 							TERM_FACTORY.getFunctionCast(TERM_FACTORY.getVariable(parameter.toString()),
-									TERM_FACTORY.getConstantLiteral(TYPE_FACTORY.getXsdStringDatatype().getIRI().stringValue())),
+									TERM_FACTORY.getConstantLiteral(TYPE_FACTORY.getXsdStringDatatype().getIRI().getIRIString())),
 										TYPE_FACTORY.getXsdStringDatatype());
 				}
 			} 
@@ -441,7 +441,7 @@ public class ExpressionEvaluator {
 			return null;
 		} 
 		else if (function.isAlgebraFunction()) {
-			return TERM_FACTORY.getUriTemplateForDatatype(TYPE_FACTORY.getXsdBooleanDatatype().getIRI().stringValue());
+			return TERM_FACTORY.getUriTemplateForDatatype(TYPE_FACTORY.getXsdBooleanDatatype().getIRI().getIRIString());
 		} 
 		else if (predicate == ExpressionOperation.ADD || predicate == ExpressionOperation.SUBTRACT || 
 				predicate == ExpressionOperation.MULTIPLY || predicate == ExpressionOperation.DIVIDE)
@@ -468,7 +468,7 @@ public class ExpressionEvaluator {
 		}
 		else if (function.isOperation()) {
 			//return boolean uri
-			return TERM_FACTORY.getUriTemplateForDatatype(TYPE_FACTORY.getXsdBooleanDatatype().getIRI().stringValue());
+			return TERM_FACTORY.getUriTemplateForDatatype(TYPE_FACTORY.getXsdBooleanDatatype().getIRI().getIRIString());
 		}
 		return null;
 	}

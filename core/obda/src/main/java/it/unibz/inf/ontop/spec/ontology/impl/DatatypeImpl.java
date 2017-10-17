@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.ontology.Datatype;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
@@ -63,7 +63,7 @@ public class DatatypeImpl implements Datatype {
 	
 	@Override
 	public String toString() {
-		return iri.stringValue();
+		return iri.getIRIString();
 	}
 	
 }

@@ -19,7 +19,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  * #L%
  */
 
-import org.eclipse.rdf4j.model.IRI;
+import org.apache.commons.rdf.api.IRI;
 
 public interface DatatypePredicate extends BuiltinPredicate {
 

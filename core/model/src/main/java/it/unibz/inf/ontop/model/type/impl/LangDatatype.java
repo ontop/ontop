@@ -4,14 +4,12 @@ import it.unibz.inf.ontop.model.type.LanguageTag;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.type.COL_TYPE.LANG_STRING;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.STRING;
 
 public class LangDatatype extends AbstractRDFDatatype {
 

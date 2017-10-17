@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import it.unibz.inf.ontop.model.type.NumericRDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
-import org.eclipse.rdf4j.model.IRI;
+import org.apache.commons.rdf.api.IRI;
 
 public class AbstractNumericRDFDatatype extends SimpleRDFDatatype implements NumericRDFDatatype {
 

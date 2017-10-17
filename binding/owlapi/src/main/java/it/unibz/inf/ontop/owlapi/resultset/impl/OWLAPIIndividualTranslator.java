@@ -112,7 +112,7 @@ public class OWLAPIIndividualTranslator {
 			return dataFactory.getOWLLiteral(value, v.getLanguage());
 		} 
 		else {
-			OWLDatatype owlDatatype = new OWLDatatypeImpl(IRI.create(datatype.getIRI().stringValue()));
+			OWLDatatype owlDatatype = new OWLDatatypeImpl(IRI.create(datatype.getIRI().getIRIString()));
 			if (owlDatatype != null)
 				return dataFactory.getOWLLiteral(value, owlDatatype);
 			else 

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.model.type.impl;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
-import org.eclipse.rdf4j.model.IRI;
+import org.apache.commons.rdf.api.IRI;
 
 public abstract class AbstractRDFDatatype extends RDFTermTypeImpl implements RDFDatatype {
 

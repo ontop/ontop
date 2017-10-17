@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.model.term.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.type.TermType;
-import org.eclipse.rdf4j.model.IRI;
+import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
@@ -44,7 +44,7 @@ public class DatatypePredicateImpl extends PredicateImpl implements DatatypePred
 	 * 			The datatype that the term holds.
 	 */
 	public DatatypePredicateImpl(@Nonnull IRI iri, @Nonnull TermType type) {
-		super(iri.stringValue(), 1, ImmutableList.of(type));
+		super(iri.getIRIString(), 1, ImmutableList.of(type));
 		this.iri = iri;
 	}
 	
@@ -60,7 +60,7 @@ public class DatatypePredicateImpl extends PredicateImpl implements DatatypePred
 	 * 			The datatypes that each term holds.
 	 */
 	public DatatypePredicateImpl(@Nonnull IRI iri, @Nonnull  ImmutableList<TermType> types) {
-		super(iri.stringValue(), types.size(), types);
+		super(iri.getIRIString(), types.size(), types);
 		this.iri = iri;
 	}
 	

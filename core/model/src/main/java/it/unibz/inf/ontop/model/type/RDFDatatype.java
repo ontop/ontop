@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.model.type;
 
-import org.eclipse.rdf4j.model.IRI;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 

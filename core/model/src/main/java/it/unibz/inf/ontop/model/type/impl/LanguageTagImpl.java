@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.model.type.impl;
 
 
 import it.unibz.inf.ontop.model.type.LanguageTag;
-import org.eclipse.rdf4j.model.util.language.LanguageTagSyntaxException;
 
+import java.util.IllformedLocaleException;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 public class LanguageTagImpl implements LanguageTag {
@@ -12,17 +14,19 @@ public class LanguageTagImpl implements LanguageTag {
     private final String fullString;
 
     protected LanguageTagImpl(String fullString){
+        this.fullString = Objects.requireNonNull(fullString).toLowerCase(Locale.ENGLISH);
+
         if (fullString.isEmpty())
             throw new IllegalArgumentException("A language tag cannot be empty");
-        this.fullString = fullString;
 
         try {
-            org.eclipse.rdf4j.model.util.language.LanguageTag tag = new org.eclipse.rdf4j.model.util.language.LanguageTag(fullString);
-            prefix = tag.getLanguage().twoCharCode;
-            optionalSuffix = Optional.ofNullable(tag.getVariant());
-        }
-        catch (LanguageTagSyntaxException e) {
-            // TODO: find a better exception
+            Locale locale = new Locale.Builder().setLanguageTag(fullString).build();
+            this.prefix = locale.getLanguage();
+            this.optionalSuffix = Optional.of(locale.getCountry())
+                    .filter(v -> !v.isEmpty())
+                    .map(v -> v.toLowerCase(Locale.ENGLISH));
+
+        } catch (IllformedLocaleException ex) {
             throw new IllegalStateException("Invalid language tag found: " + fullString
                     + " (should have been detected before)");
         }

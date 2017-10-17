@@ -43,7 +43,7 @@ public class RDF4JHelper {
 			return fact.createLiteral(literal.getValue(), literal.getLanguage());
 		}
 		else {
-			return fact.createLiteral(literal.getValue(), datatype.getIRI());
+			return fact.createLiteral(literal.getValue(), fact.createIRI(datatype.getIRI().getIRIString()));
 		}
 	}
 

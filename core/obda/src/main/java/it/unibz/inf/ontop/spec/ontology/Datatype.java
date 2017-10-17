@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.spec.ontology;
  * #L%
  */
 
-import org.eclipse.rdf4j.model.IRI;
+import org.apache.commons.rdf.api.IRI;
 
 /**
  * Represents Datatype in OWL 2 Specification

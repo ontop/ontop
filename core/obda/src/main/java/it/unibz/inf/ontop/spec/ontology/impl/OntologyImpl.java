@@ -22,12 +22,12 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.ontology.*;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
 
@@ -150,36 +150,35 @@ public class OntologyImpl implements Ontology {
 	
 	public static final ImmutableMap<String, Datatype> OWL2QLDatatypes;
 	
-	private static final String xml  = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+	private static final String rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 	private static final String rdfs = "http://www.w3.org/2000/01/rdf-schema#";	
 	private static final String owl = "http://www.w3.org/2002/07/owl#";
 	private static final String xsd = "http://www.w3.org/2001/XMLSchema#";
 	
 	static {
-		ValueFactory iriFactory = SimpleValueFactory.getInstance();
 		
 		OWL2QLDatatypes = ImmutableMap.<String, Datatype>builder()
-				.put(xml + "PlainLiteral", new DatatypeImpl(iriFactory.createIRI(xml + "PlainLiteral"))) // 	rdf:PlainLiteral
-				.put(xml + "XMLLiteral", new DatatypeImpl(iriFactory.createIRI(xml + "XMLLiteral"))) //	rdf:XMLLiteral
+				.put(rdf + "PlainLiteral", new DatatypeImpl(RDF.PLAINLITERAL)) // 	rdf:PlainLiteral
+				.put(rdf + "XMLLiteral", new DatatypeImpl(RDF.XMLLITERAL)) //	rdf:XMLLiteral
 				.put(rdfs + "Literal", new DatatypeImpl(RDFS.LITERAL)) //		rdfs:Literal
-				.put(owl + "real", new DatatypeImpl(iriFactory.createIRI(owl + "real"))) // 			owl:real
-				.put(owl + "rational", new DatatypeImpl(iriFactory.createIRI(owl + "rational"))) // 		owl:rational
-				.put(xsd + "decimal", new DatatypeImpl(XMLSchema.DECIMAL)) // 	xsd:decimal
-				.put(xsd + "integer", new DatatypeImpl(XMLSchema.INTEGER)) // 	xsd:integer
-				.put(xsd + "nonNegativeInteger", new DatatypeImpl(XMLSchema.NON_NEGATIVE_INTEGER)) // 	xsd:nonNegativeInteger
-				.put(xsd + "string", new DatatypeImpl(XMLSchema.STRING)) // 	xsd:string
-				.put(xsd + "normalizedString", new DatatypeImpl(XMLSchema.NORMALIZEDSTRING)) // 	xsd:normalizedString
-				.put(xsd + "token", new DatatypeImpl(XMLSchema.TOKEN)) // 	xsd:token
-				.put(xsd + "Name", new DatatypeImpl(XMLSchema.NAME)) // 	xsd:Name
-				.put(xsd + "NCName", new DatatypeImpl(XMLSchema.NCNAME)) //	xsd:NCName
-				.put(xsd + "NMTOKEN", new DatatypeImpl(XMLSchema.NMTOKEN)) // 	xsd:NMTOKEN
-				.put(xsd + "hexBinary", new DatatypeImpl(XMLSchema.HEXBINARY)) // 	xsd:hexBinary
-				.put(xsd + "base64Binary", new DatatypeImpl(XMLSchema.BASE64BINARY)) // 	xsd:base64Binary
-				.put(xsd + "anyURI", new DatatypeImpl(XMLSchema.ANYURI)) // 	xsd:anyURI
-				.put(xsd + "dateTime", new DatatypeImpl(XMLSchema.DATETIME)) // 	xsd:dateTime
-				.put(xsd + "dateTimeStamp", new DatatypeImpl(iriFactory.createIRI(xsd + "dateTimeStamp"))) // 	xsd:dateTimeStamp
-				.put(xsd + "int", new DatatypeImpl(XMLSchema.INT)) // 	TEMPORARY FOR Q9 / FISHMARK
-				.put(xsd + "long", new DatatypeImpl(XMLSchema.LONG)) // 	TEMPORARY FOR OntologyTypesTest
+				.put(owl + "real", new DatatypeImpl(OWL.REAL)) // 			owl:real
+				.put(owl + "rational", new DatatypeImpl(OWL.RATIONAL)) // 		owl:rational
+				.put(xsd + "decimal", new DatatypeImpl(XSD.DECIMAL)) // 	xsd:decimal
+				.put(xsd + "integer", new DatatypeImpl(XSD.INTEGER)) // 	xsd:integer
+				.put(xsd + "nonNegativeInteger", new DatatypeImpl(XSD.NON_NEGATIVE_INTEGER)) // 	xsd:nonNegativeInteger
+				.put(xsd + "string", new DatatypeImpl(XSD.STRING)) // 	xsd:string
+				.put(xsd + "normalizedString", new DatatypeImpl(XSD.NORMALIZEDSTRING)) // 	xsd:normalizedString
+				.put(xsd + "token", new DatatypeImpl(XSD.TOKEN)) // 	xsd:token
+				.put(xsd + "Name", new DatatypeImpl(XSD.NAME)) // 	xsd:Name
+				.put(xsd + "NCName", new DatatypeImpl(XSD.NCNAME)) //	xsd:NCName
+				.put(xsd + "NMTOKEN", new DatatypeImpl(XSD.NMTOKEN)) // 	xsd:NMTOKEN
+				.put(xsd + "hexBinary", new DatatypeImpl(XSD.HEXBINARY)) // 	xsd:hexBinary
+				.put(xsd + "base64Binary", new DatatypeImpl(XSD.BASE64BINARY)) // 	xsd:base64Binary
+				.put(xsd + "anyURI", new DatatypeImpl(XSD.ANYURI)) // 	xsd:anyURI
+				.put(xsd + "dateTime", new DatatypeImpl(XSD.DATETIME)) // 	xsd:dateTime
+				.put(xsd + "dateTimeStamp", new DatatypeImpl(XSD.DATETIMESTAMP)) // 	xsd:dateTimeStamp
+				.put(xsd + "int", new DatatypeImpl(XSD.INT)) // 	TEMPORARY FOR Q9 / FISHMARK
+				.put(xsd + "long", new DatatypeImpl(XSD.LONG)) // 	TEMPORARY FOR OntologyTypesTest
 				.build();
 	}
 	
@@ -744,7 +743,7 @@ public class OntologyImpl implements Ontology {
 	
 	private void checkSignature(Datatype desc) {		
 		IRI iri = desc.getIRI();
-		if (!OWL2QLDatatypes.containsKey(iri.stringValue()))
+		if (!OWL2QLDatatypes.containsKey(iri.getIRIString()))
 			throw new IllegalArgumentException(DATATYPE_NOT_FOUND + iri);
 	}
 	

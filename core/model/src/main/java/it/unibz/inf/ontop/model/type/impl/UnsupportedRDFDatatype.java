@@ -4,19 +4,13 @@ package it.unibz.inf.ontop.model.type.impl;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import it.unibz.inf.ontop.model.vocabulary.OntopInternal;
+import org.apache.commons.rdf.api.IRI;
 
 public class UnsupportedRDFDatatype extends SimpleRDFDatatype {
 
-    /**
-     * TODO: remove it!
-     */
-    private static final IRI DEFAULT_ONTOP_UNSUPPORTED = SimpleValueFactory.getInstance().createIRI(
-            "urn:it:unibz:inf:ontop:internal:unsupported");
-
     private UnsupportedRDFDatatype(TermTypeAncestry parentAncestry) {
-        super(COL_TYPE.UNSUPPORTED, parentAncestry, false, DEFAULT_ONTOP_UNSUPPORTED);
+        super(COL_TYPE.UNSUPPORTED, parentAncestry, false, OntopInternal.UNSUPPORTED);
     }
 
     private UnsupportedRDFDatatype(TermTypeAncestry parentAncestry, IRI concreteIRI) {

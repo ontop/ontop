@@ -33,11 +33,11 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.utils.EncodeForURI;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.URI;
@@ -81,6 +81,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
     private final DatalogProgram program;
     private int predicateIdx = 0;
+    private final org.apache.commons.rdf.api.RDF rdfFactory;
 
     /**
 	 * 
@@ -94,6 +95,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		this.uriRef = iriDictionary;
 
         this.program = DATALOG_FACTORY.getDatalogProgram();
+        this.rdfFactory = new SimpleRDF();
     }
 
 	/**
@@ -458,9 +460,9 @@ public class SparqlAlgebraToDatalogTranslator {
                     Term oTerm = getTermForVariable(triple.getObjectVar(), variables);
 					atom = ATOM_FACTORY.getTripleAtom(sTerm, pTerm, oTerm);
 				}
-				else if (o instanceof URI) {
+				else if (o instanceof IRI) {
 					// term rdf:type uri .
-                    atom = TYPE_FACTORY.getOptionalDatatype((IRI) o)
+                    atom = TYPE_FACTORY.getOptionalDatatype(rdfFactory.createIRI(o.stringValue()))
                             // datatype
                             .map(rdfDatatype -> TERM_FACTORY.getFunction(TYPE_FACTORY.getTypePredicate(rdfDatatype), sTerm))
                             // class
@@ -501,7 +503,7 @@ public class SparqlAlgebraToDatalogTranslator {
         throw new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!");
     }
 
-    private static Term getTermForLiteral(Literal literal) throws OntopUnsupportedInputQueryException {
+    private Term getTermForLiteral(Literal literal) throws OntopUnsupportedInputQueryException {
         IRI typeURI = literal.getDatatype();
         String value = literal.getLabel();
         Optional<String> lang = literal.getLanguage();
@@ -519,7 +521,7 @@ public class SparqlAlgebraToDatalogTranslator {
                 type = TYPE_FACTORY.getXsdStringDatatype();
             } else {
                 // TODO: support arbitrary datatypes
-                type = TYPE_FACTORY.getOptionalDatatype(typeURI)
+                type = TYPE_FACTORY.getOptionalDatatype(rdfFactory.createIRI(typeURI.stringValue()))
                         .orElse(null);
             }
 

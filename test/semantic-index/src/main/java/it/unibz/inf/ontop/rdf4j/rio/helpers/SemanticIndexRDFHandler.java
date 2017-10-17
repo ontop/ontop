@@ -30,6 +30,8 @@ import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.AssertionFactory;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.spec.ontology.impl.AssertionFactoryImpl;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -52,6 +54,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
 	private static final AssertionFactory ASSERTION_FACTORY = AssertionFactoryImpl.getInstance();
+	private static final RDF RDF_FACTORY = new SimpleRDF();
 	private final SIRepositoryManager repositoryManager;
 	private final Connection connection;
 
@@ -156,7 +159,7 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 							type = TYPE_FACTORY.getXsdStringDatatype();
 						} 
 						else {
-							type = TYPE_FACTORY.getOptionalDatatype(datatype)
+							type = TYPE_FACTORY.getOptionalDatatype(RDF_FACTORY.createIRI(datatype.stringValue()))
 									.orElseGet(TYPE_FACTORY::getUnsupportedDatatype);
 						}			
 						

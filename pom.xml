@@ -387,6 +387,12 @@
                 <version>${commons-rdf.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-rdf-simple</artifactId>
+                <version>${commons-rdf.version}</version>
+            </dependency>
+
             <!-- OWL API -->
             <dependency>
                 <groupId>net.sourceforge.owlapi</groupId>

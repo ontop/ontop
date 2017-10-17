@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import it.unibz.inf.ontop.model.type.*;
-import org.eclipse.rdf4j.model.IRI;
-
-import java.util.Optional;
+import org.apache.commons.rdf.api.IRI;
 
 
 public class ConcreteNumericRDFDatatypeImpl extends SimpleRDFDatatype implements ConcreteNumericRDFDatatype {
@@ -11,8 +9,8 @@ public class ConcreteNumericRDFDatatypeImpl extends SimpleRDFDatatype implements
     private final TypePropagationSubstitutionHierarchy promotedHierarchy;
 
     private ConcreteNumericRDFDatatypeImpl(IRI datatypeIRI, TermTypeAncestry parentAncestry,
-                                             TypePropagationSubstitutionHierarchy promotedParentHierarchy,
-                                             COL_TYPE colType, boolean appendToPromotedHierarchy) {
+                                           TypePropagationSubstitutionHierarchy promotedParentHierarchy,
+                                           COL_TYPE colType, boolean appendToPromotedHierarchy) {
         super(colType, parentAncestry, false, datatypeIRI);
         promotedHierarchy = appendToPromotedHierarchy ?
                 promotedParentHierarchy.newHierarchy(this)

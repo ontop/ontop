@@ -4,8 +4,11 @@ package it.unibz.inf.ontop.model.type;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.Optional;
+
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.type.COL_TYPE.*;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -31,6 +34,38 @@ public class LanguageTagTest {
 
         assertEquals(commonDenominator, TYPE_FACTORY.getLangTermType("en-gb"));
         assertNotEquals(commonDenominator, TYPE_FACTORY.getLangTermType("en"));
+    }
+
+    @Test
+    public void testRegularLanguageTag() {
+        RDFDatatype type = TYPE_FACTORY.getLangTermType("en-gb");
+
+        Optional<LanguageTag> optionalLanguageTag = type.getLanguageTag();
+        assertTrue(optionalLanguageTag.isPresent());
+
+        LanguageTag langTag = optionalLanguageTag.get();
+        assertEquals("en-gb", langTag.getFullString());
+        assertEquals("en", langTag.getPrefix());
+
+        Optional<String> optionalSuffix = langTag.getOptionalSuffix();
+        assertTrue(optionalSuffix.isPresent());
+        assertEquals("gb", optionalSuffix.get());
+    }
+
+    @Test
+    public void testUpperCaseLanguageTag() {
+        RDFDatatype type = TYPE_FACTORY.getLangTermType("EN-GB");
+
+        Optional<LanguageTag> optionalLanguageTag = type.getLanguageTag();
+        assertTrue(optionalLanguageTag.isPresent());
+
+        LanguageTag langTag = optionalLanguageTag.get();
+        assertEquals("en-gb", langTag.getFullString());
+        assertEquals("en", langTag.getPrefix());
+
+        Optional<String> optionalSuffix = langTag.getOptionalSuffix();
+        assertTrue(optionalSuffix.isPresent());
+        assertEquals("gb", optionalSuffix.get());
     }
 
     @Test

@@ -292,7 +292,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private static final Comparator<Datatype> datatypeComparator = new Comparator<Datatype>() {
 		@Override
 		public int compare(Datatype o1, Datatype o2) {
-			return o1.getIRI().stringValue().compareTo(o2.getIRI().stringValue());
+			return o1.getIRI().getIRIString().compareTo(o2.getIRI().getIRIString());
 		}
 	};
 

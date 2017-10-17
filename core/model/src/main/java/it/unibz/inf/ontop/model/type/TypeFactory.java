@@ -3,9 +3,8 @@ package it.unibz.inf.ontop.model.type;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.impl.TypeFactoryImpl;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
@@ -67,30 +66,30 @@ public interface TypeFactory {
 	ObjectRDFType getAbstractObjectRDFType();
 
 	default RDFDatatype getXsdIntegerDatatype() {
-		return getDatatype(XMLSchema.INTEGER);
+		return getDatatype(XSD.INTEGER);
 	}
 
 	default RDFDatatype getXsdDecimalDatatype() {
-		return getDatatype(XMLSchema.DECIMAL);
+		return getDatatype(XSD.DECIMAL);
 	}
 
 	default RDFDatatype getXsdStringDatatype() {
-		return getDatatype(XMLSchema.STRING);
+		return getDatatype(XSD.STRING);
 	}
 
 	default RDFDatatype getXsdBooleanDatatype() {
-		return getDatatype(XMLSchema.BOOLEAN);
+		return getDatatype(XSD.BOOLEAN);
 	}
 
 	default RDFDatatype getXsdDoubleDatatype() {
-		return getDatatype(XMLSchema.DOUBLE);
+		return getDatatype(XSD.DOUBLE);
 	}
 
 	default RDFDatatype getXsdFloatDatatype() {
-		return getDatatype(XMLSchema.FLOAT);
+		return getDatatype(XSD.FLOAT);
 	}
 
 	default RDFDatatype getXsdDatetimeDatatype() {
-		return getDatatype(XMLSchema.DATETIME);
+		return getDatatype(XSD.DATETIME);
 	}
 }
