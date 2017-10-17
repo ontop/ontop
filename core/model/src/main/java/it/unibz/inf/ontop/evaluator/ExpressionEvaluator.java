@@ -847,9 +847,9 @@ public class ExpressionEvaluator {
 			Predicate pred1 = f1.getFunctionSymbol();
 			
 			if (f1.isDataTypeFunction()) {
-				if (pred1.getColType(0) == COL_TYPE.UNSUPPORTED) {
-					throw new RuntimeException("Unsupported type: " + pred1);
-				}
+//				if (pred1.getColType(0) == COL_TYPE.UNSUPPORTED) {
+//					throw new RuntimeException("Unsupported type: " + pred1);
+//				}
 			} 
 			else if (f1.isOperation()) {
 				return term;
@@ -861,9 +861,9 @@ public class ExpressionEvaluator {
 			if (eval2 instanceof Function) {
 				Function f2 = (Function) eval2;
 				Predicate pred2 = f2.getFunctionSymbol();
-				if (pred2.getColType(0) == COL_TYPE.UNSUPPORTED) {
-					throw new RuntimeException("Unsupported type: " + pred2);
-				}
+//				if (pred2.getColType(0) == COL_TYPE.UNSUPPORTED) {
+//					throw new RuntimeException("Unsupported type: " + pred2);
+//				}
 
 				/*
 				 * Evaluate both terms by comparing their datatypes

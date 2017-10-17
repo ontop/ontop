@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.TermType;
 
 /**
@@ -45,15 +44,6 @@ public interface Predicate {
 	 * @return an integer number.
 	 */
     int getArity();
-
-	/***
-	 * Returns the typing of the component given by component. Types can be
-	 * "Object" or "Literal", defined by the inner enumerator {@Code Predicate.COL_TYPE}
-	 * 
-	 * @param column
-	 */
-	@Deprecated
-    COL_TYPE getColType(int column);
 
 	TermType getExpectedBaseType(int index);
 

@@ -1,14 +1,11 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.*;
 
@@ -122,7 +119,6 @@ public enum ExpressionOperation implements OperationPredicate {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
 		this.argTypes = ImmutableList.of();
-		this.argColTypes = ImmutableList.of();
 	}
 
 	// unary operations
@@ -130,14 +126,12 @@ public enum ExpressionOperation implements OperationPredicate {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
 		this.argTypes = ImmutableList.of(arg1);
-		this.argColTypes = convertArgTypes(argTypes);
 	}
 	// binary operations
     ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule, @Nonnull TermType arg1, @Nonnull TermType arg2) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
 		this.argTypes = ImmutableList.of(arg1, arg2);
-		this.argColTypes = convertArgTypes(argTypes);
 	}
 	// ternary operations
     ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule, @Nonnull TermType arg1, @Nonnull TermType arg2,
@@ -145,7 +139,6 @@ public enum ExpressionOperation implements OperationPredicate {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
 		this.argTypes = ImmutableList.of(arg1, arg2, arg3);
-		this.argColTypes = convertArgTypes(argTypes);
 	}
 	// Quad operations
 	ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule, @Nonnull TermType arg1,
@@ -153,13 +146,10 @@ public enum ExpressionOperation implements OperationPredicate {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
 		this.argTypes = ImmutableList.of(arg1, arg2, arg3, arg4);
-		this.argColTypes = convertArgTypes(argTypes);
 	}
 
 	private final String name;
 	private final TermTypeInferenceRule termTypeInferenceRule;
-	// Immutable
-	private final ImmutableList<Optional<COL_TYPE>> argColTypes;
 	private final ImmutableList<TermType> argTypes;
 	
 	@Override
@@ -169,12 +159,7 @@ public enum ExpressionOperation implements OperationPredicate {
 
 	@Override
 	public int getArity() {
-		return argColTypes.size();
-	}
-
-	@Override
-	public COL_TYPE getColType(int column) {
-		return argColTypes.get(column).orElse(null);
+		return argTypes.size();
 	}
 
 	@Override
@@ -209,11 +194,5 @@ public enum ExpressionOperation implements OperationPredicate {
 	@Override
 	public ImmutableList<TermType> getExpectedBaseArgumentTypes() {
 		return argTypes;
-	}
-
-	private static ImmutableList<Optional<COL_TYPE>> convertArgTypes(ImmutableList<TermType> argColTypes) {
-		return argColTypes.stream()
-				.map(TermType::getOptionalColType)
-				.collect(ImmutableCollectors.toList());
 	}
 }

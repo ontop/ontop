@@ -22,13 +22,9 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
-import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import javax.annotation.Nonnull;
-
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
@@ -81,13 +77,6 @@ public class PredicateImpl implements Predicate {
 	@Override
 	public String toString() {
 		return name;
-	}
-
-	@Override
-	public COL_TYPE getColType(int column) {
-		return Optional.of(expectedBaseTypes.get(column))
-				.flatMap(TermType::getOptionalColType)
-				.orElse(null);
 	}
 
 	@Override
