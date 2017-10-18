@@ -9,9 +9,12 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import org.apache.commons.lang3.time.DateUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -161,19 +164,19 @@ public class JDBC2ConstantConverter {
                         return TERM_FACTORY.getConstantLiteral(stringValue, language);
 
                 case BOOLEAN:
-                    // TODO(xiao): more careful
-                    boolean bvalue = Boolean.valueOf(stringValue);
-                    //boolean bvalue = (Boolean)value;
+
+                    boolean bvalue = Boolean.parseBoolean(stringValue);
                     return TERM_FACTORY.getBooleanConstant(bvalue);
 
+                case FLOAT:
                 case DOUBLE:
-                    double d = Double.valueOf(stringValue);
-                    String s = formatter.format(d); // format name into correct double representation
-                    return TERM_FACTORY.getConstantLiteral(s, type);
+                    BigDecimal bigDecimal = new BigDecimal(stringValue);
+                    NumberFormat formatter = new DecimalFormat("0.0E0");
+                    formatter.setRoundingMode(RoundingMode.UNNECESSARY);
+                    formatter.setMaximumFractionDigits((bigDecimal.scale() > 0) ? bigDecimal.precision() : bigDecimal.scale());
+                    return  TERM_FACTORY.getConstantLiteral(formatter.format(bigDecimal),type);
 
                 case INT:
-                    return TERM_FACTORY.getConstantLiteral(stringValue, type);
-
                 case LONG:
                 case UNSIGNED_INT:
                     return TERM_FACTORY.getConstantLiteral(stringValue, type);
@@ -183,13 +186,12 @@ public class JDBC2ConstantConverter {
                 case NON_NEGATIVE_INTEGER:
                 case POSITIVE_INTEGER:
                 case NON_POSITIVE_INTEGER:
+
                     /**
                      * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
                      */
-                    int dotIndex = stringValue.indexOf(".");
-                    String integerString = dotIndex >= 0
-                            ? stringValue.substring(0, dotIndex)
-                            : stringValue;
+                    String integerString = String.valueOf(Integer.parseInt(stringValue));
+
                     return TERM_FACTORY.getConstantLiteral(integerString, type);
 
                 case DATETIME:

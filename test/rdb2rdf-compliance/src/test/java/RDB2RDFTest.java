@@ -41,7 +41,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.util.ModelUtil;
+import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.QueryLanguage;
@@ -373,7 +373,7 @@ public class RDB2RDFTest {
 				expected = stripNamedGraphs(Rio.parse(stream(outputFile), BASE_IRI, Rio.getParserFormatForFileName(outputFile).get()));
 			}
 
-			if (!ModelUtil.equals(expected, actual)) {
+			if (!Models.isomorphic(expected, actual)) {
 				String msg = failureMessage(expected, actual);
 				System.out.println(msg);
 
