@@ -413,7 +413,7 @@ public class BindTest {
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
                 + "   BIND (STRLEN(CONCAT(?title, \" \")) AS ?v)\n"
-                + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
+                + "   BIND (CONCAT(?title, \" \", str(?v)) AS ?w)\n"
                 + "}";
 
 

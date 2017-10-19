@@ -30,4 +30,8 @@ public class IncompatibleTermException extends RuntimeException {
     public IncompatibleTermException(Expression expression, IncompatibleTermException caughtException) {
         super("In " + expression + ": " + caughtException.getMessage());
     }
+
+    protected IncompatibleTermException(String message) {
+        super(message);
+    }
 }

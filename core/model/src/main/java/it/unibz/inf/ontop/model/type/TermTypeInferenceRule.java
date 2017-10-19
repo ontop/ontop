@@ -12,18 +12,11 @@ import java.util.Optional;
  */
 public interface TermTypeInferenceRule {
 
-    /**
-     * TODO: explain
-     *
-     */
-    Optional<TermType> inferType(List<? extends ImmutableTerm> terms, ImmutableList<TermType> expectedBaseTypes)
-            throws IncompatibleTermException;
 
     /**
      * TODO: explain
      *
      */
-    Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> actualArgumentTypes,
-                                                  ImmutableList<TermType> expectedBaseTypes)
+    Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> actualArgumentTypes)
             throws IncompatibleTermException;
 }

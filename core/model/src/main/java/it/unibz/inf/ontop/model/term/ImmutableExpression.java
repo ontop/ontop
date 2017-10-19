@@ -38,8 +38,7 @@ public interface ImmutableExpression extends Expression, ImmutableFunctionalTerm
     default Optional<TermType> getOptionalTermType() throws IncompatibleTermException {
         try {
             OperationPredicate predicate = getFunctionSymbol();
-            return predicate.getTermTypeInferenceRule().inferType(
-                    getArguments(), predicate.getExpectedBaseArgumentTypes());
+            return predicate.inferType(getArguments());
         } catch (IncompatibleTermException e) {
             throw new IncompatibleTermException(this, e);
         }
@@ -48,8 +47,7 @@ public interface ImmutableExpression extends Expression, ImmutableFunctionalTerm
     default Optional<TermType> getOptionalTermType(ImmutableList<Optional<TermType>> actualArgumentTypes) {
         try {
             OperationPredicate predicate = getFunctionSymbol();
-            return predicate.getTermTypeInferenceRule().inferTypeFromArgumentTypes(
-                    actualArgumentTypes, predicate.getExpectedBaseArgumentTypes());
+            return predicate.inferTypeFromArgumentTypes(actualArgumentTypes);
         } catch (IncompatibleTermException e) {
             throw new IncompatibleTermException(this, e);
         }

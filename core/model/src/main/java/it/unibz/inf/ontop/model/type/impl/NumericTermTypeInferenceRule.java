@@ -13,22 +13,6 @@ import java.util.stream.IntStream;
 public class NumericTermTypeInferenceRule extends AbstractTermTypeInferenceRule {
 
     /**
-     * Checks that all the terms are numeric
-     */
-    protected void doAdditionalChecks(ImmutableList<Optional<TermType>> argumentTypes)
-            throws IncompatibleTermException {
-        IntStream.range(0, argumentTypes.size())
-                .forEach(i ->  {
-                    if(!argumentTypes.get(i)
-                            .map(t -> t instanceof ConcreteNumericRDFDatatype)
-                            .orElse(true)) {
-
-                        throw new IncompatibleTermException("concrete numeric term", argumentTypes.get(i).get());
-                    }
-                });
-    }
-
-    /**
      * We only infer a type when all the types of the arguments are known.
      */
     @Override

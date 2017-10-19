@@ -214,7 +214,7 @@ public class BindTestWithFunctions {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (CONCAT(ROUND(?discount),', ',ROUND(?p)) AS ?w)\n"
+                + "   BIND (CONCAT(str(ROUND(?discount)),', ', str(ROUND(?p))) AS ?w)\n"
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();

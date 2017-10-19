@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.model.vocabulary.RDF;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.*;
 
 public class TermTypeInferenceTools {
 
@@ -80,20 +79,6 @@ public class TermTypeInferenceTools {
         }
         else {
             throw new IllegalStateException("Unexpected term: " + term);
-        }
-    }
-
-    /**
-     * TODO: get rid of it
-     */
-    @Deprecated
-    protected static TermType castStringLangType(TermType termType) {
-        switch (termType.getColType()) {
-            case LANG_STRING:
-            case STRING:
-                return termType;
-            default:
-                return TYPE_FACTORY.getXsdStringDatatype();
         }
     }
 }
