@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -154,7 +152,7 @@ public class H2ConstantTest {
                 "   ?x a :Company; :hasNetworth ?y\n" +
                 "}";
 		String val = runTests(query);
-		assertEquals("\"1234.6\"^^xsd:double", val);
+		assertEquals("\"1234.5678\"^^xsd:double", val);
 
 	}
 
