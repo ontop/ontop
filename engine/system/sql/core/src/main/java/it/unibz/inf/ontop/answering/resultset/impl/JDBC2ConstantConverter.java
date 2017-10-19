@@ -175,7 +175,7 @@ public class JDBC2ConstantConverter {
                     }
                     DecimalFormat formatter = new DecimalFormat("0.0E0");
                     formatter.setRoundingMode(RoundingMode.UNNECESSARY);
-                    formatter.setMaximumFractionDigits((bigDecimal.scale() > 0) ? bigDecimal.precision() : bigDecimal.precision() + bigDecimal.scale() *-1);
+                    formatter.setMaximumFractionDigits((bigDecimal.scale() > 0) ? bigDecimal.precision() -1 : bigDecimal.precision() -1 + bigDecimal.scale() *-1);
                     return  TERM_FACTORY.getConstantLiteral(formatter.format(bigDecimal),type);
 
                 case DECIMAL:
@@ -193,7 +193,7 @@ public class JDBC2ConstantConverter {
                     /**
                      * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
                      */
-                    String integerString = String.valueOf(Integer.parseInt(stringValue));
+                    String integerString = String.valueOf(Double.valueOf(stringValue).intValue());
 
                     return TERM_FACTORY.getConstantLiteral(integerString, type);
 
