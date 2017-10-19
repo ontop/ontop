@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -30,8 +29,6 @@ public class JDBC2ConstantConverter {
 
     enum System {ORACLE, MSSQL, DEFAULT}
 
-    private static final DecimalFormat formatter = new DecimalFormat("0.0E0");
-
     private static ImmutableList<DateTimeFormatter> defaultDateTimeFormatter;
     private static ImmutableMap<System, ImmutableList<DateTimeFormatter>> system2DateTimeFormatter;
     private static ImmutableMap<System, ImmutableList<DateTimeFormatter>> system2TimeFormatter;
@@ -44,9 +41,6 @@ public class JDBC2ConstantConverter {
     private final System systemDB;
 
     static {
-        DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
-        symbol.setDecimalSeparator('.');
-        formatter.setDecimalFormatSymbols(symbol);
         defaultDateTimeFormatter = buildDefaultDateTimeFormatter();
         system2DateTimeFormatter = buildDateTimeFormatterMap();
         system2TimeFormatter = buildDefaultTimeFormatterMap();
@@ -169,11 +163,22 @@ public class JDBC2ConstantConverter {
 
                 case FLOAT:
                 case DOUBLE:
-                    BigDecimal bigDecimal = new BigDecimal(stringValue);
+
+//                    It allows to consider the canonical representation. nan and infinite are catched.
+                    BigDecimal bigDecimal;
+                    try {
+                        bigDecimal = new BigDecimal (stringValue);
+
+                    }
+                    catch (NumberFormatException e){
+                        return TERM_FACTORY.getConstantLiteral(stringValue,type);
+                    }
+                    DecimalFormat formatter = new DecimalFormat("0.0E0");
                     formatter.setRoundingMode(RoundingMode.UNNECESSARY);
-                    formatter.setMaximumFractionDigits((bigDecimal.scale() > 0) ? bigDecimal.precision() : bigDecimal.scale());
+                    formatter.setMaximumFractionDigits((bigDecimal.scale() > 0) ? bigDecimal.precision() : bigDecimal.precision() + bigDecimal.scale() *-1);
                     return  TERM_FACTORY.getConstantLiteral(formatter.format(bigDecimal),type);
 
+                case DECIMAL:
                 case INT:
                 case LONG:
                 case UNSIGNED_INT:
