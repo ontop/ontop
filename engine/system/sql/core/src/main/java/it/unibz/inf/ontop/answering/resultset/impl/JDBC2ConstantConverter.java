@@ -14,7 +14,6 @@ import java.math.RoundingMode;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -31,7 +30,7 @@ public class JDBC2ConstantConverter {
 
     enum System {ORACLE, MSSQL, DEFAULT}
 
-    private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
+    private static final DecimalFormat formatter = new DecimalFormat("0.0E0");
 
     private static ImmutableList<DateTimeFormatter> defaultDateTimeFormatter;
     private static ImmutableMap<System, ImmutableList<DateTimeFormatter>> system2DateTimeFormatter;
@@ -171,7 +170,6 @@ public class JDBC2ConstantConverter {
                 case FLOAT:
                 case DOUBLE:
                     BigDecimal bigDecimal = new BigDecimal(stringValue);
-                    NumberFormat formatter = new DecimalFormat("0.0E0");
                     formatter.setRoundingMode(RoundingMode.UNNECESSARY);
                     formatter.setMaximumFractionDigits((bigDecimal.scale() > 0) ? bigDecimal.precision() : bigDecimal.scale());
                     return  TERM_FACTORY.getConstantLiteral(formatter.format(bigDecimal),type);
