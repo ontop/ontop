@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.model.type;
 
-import java.util.Optional;
-
 /**
  * TODO: explain
  *
@@ -14,9 +12,6 @@ public interface TermType {
      */
     @Deprecated
     COL_TYPE getColType();
-
-    @Deprecated
-    Optional<COL_TYPE> getOptionalColType();
 
     /**
      * Returns true if the TermType INSTANCE cannot be attached to a constant

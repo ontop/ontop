@@ -56,14 +56,6 @@ public class TermTypeImpl implements TermType {
         return colType;
     }
 
-    /**
-     * TODO: get rid of it
-     */
-    @Override
-    public Optional<COL_TYPE> getOptionalColType() {
-        return Optional.ofNullable(colType);
-    }
-
     @Override
     public final boolean isAbstract() {
         return isAbstract;

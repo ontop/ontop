@@ -8,13 +8,11 @@ import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +21,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.LITERAL;
 
 
 
@@ -32,7 +29,7 @@ import static it.unibz.inf.ontop.model.type.COL_TYPE.LITERAL;
  */
 public class TypeExtractor {
 
-    private static final TermType LITERAL_TYPE = TYPE_FACTORY.getTermType(LITERAL);
+    private static final TermType LITERAL_TYPE = TYPE_FACTORY.getAbstractRDFSLiteral();
 
 
     public static class TypeResults {
@@ -98,17 +95,7 @@ public class TypeExtractor {
             mutableCastMap.put(predicate, castTypes);
         }
 
-        /**
-         * Convert term types into cast column types
-         */
-        return mutableCastMap.entrySet().stream()
-                .map(e -> new SimpleEntry<>(
-                        e.getKey(),
-                        e.getValue().stream()
-                                .map(TypeExtractor::getCastType)
-                                .collect(ImmutableCollectors.toList())
-                        ))
-                .collect(ImmutableCollectors.toMap());
+        return ImmutableMap.copyOf(mutableCastMap);
     }
 
     /**
@@ -201,23 +188,6 @@ public class TypeExtractor {
 
         return indexedCastTypeBuilder.build();
 
-    }
-
-    /**
-     * TODO: get rid of it?
-     */
-    private static TermType getCastType(TermType termType) {
-        return termType.getOptionalColType()
-                .map(type -> {switch (type) {
-                    case OBJECT:
-                    case BNODE:
-                    case NULL:
-                        return TYPE_FACTORY.getAbstractRDFSLiteral();
-                    default:
-                        return termType;
-                }})
-                //UGLY! For casting as a string
-        .orElse(TYPE_FACTORY.getAbstractRDFSLiteral());
     }
 
     /**
