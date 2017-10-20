@@ -193,7 +193,7 @@ public class OBDAMappingTransformer {
 					tm.addPredicateObjectMap(pom);
 				} 
  				else if (object instanceof Function) { //we create a template
-					//check if uritemplate
+					//check if uritemplate we create a template, in case of datatype with single varible we create a column
  					Function o = (Function) object;
  					Predicate objectPred = o.getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {
@@ -218,33 +218,27 @@ public class OBDAMappingTransformer {
 						Term objectTerm = ((Function) object).getTerm(0);
 						
 						if (objectTerm instanceof Variable) {
-							//Now we add the template!!
-							String objectTemplate =  "{"+ ((Variable) objectTerm).getName() +"}" ;
-							//add template subject
-							//statements.add(rdf4j.createTriple(objNode, R2RMLVocabulary.template, rdf4j.createLiteral(objectTemplate)));
-							//obm.setTemplate(mfact.createTemplate(objectTemplate));
-							obm = mfact.createObjectMap(mfact.createTemplate(objectTemplate));
+
+							// column valued
+							obm = mfact.createObjectMap(((Variable) objectTerm).getName());
+							//set the datatype for the typed literal
 							obm.setTermType(R2RMLVocabulary.literal);
-							
-							
-							//check if it is not a plain literal
-							if(!objectPred.getName().equals(IriConstants.RDFS_LITERAL_URI)){
-								
-								//set the datatype for the typed literal								
-								obm.setDatatype(rdf4j.createIRI(objectPred.getName()));
-							}
-							else{
-								//check if the plain literal has a lang value
-								if(objectPred.getArity()==2){
-									
-									Term langTerm = ((Function) object).getTerm(1);
+
+							//check if literal with lang value
+							if(objectPred.getArity()==2){
+
+								Term langTerm = ((Function) objectTerm).getTerm(1);
 
 
-                                    if(langTerm instanceof Constant) {
-                                        obm.setLanguageTag(((Constant) langTerm).getValue());
-                                    }
+								if(langTerm instanceof Constant) {
+									obm.setLanguageTag(((Constant) langTerm).getValue());
 								}
 							}
+							else {
+								//set the datatype for the typed literal
+								obm.setDatatype(rdf4j.createIRI(objectPred.getName()));
+							}
+
 
 						} else if (objectTerm instanceof Constant) {
 							//statements.add(rdf4j.createTriple(objNode, R2RMLVocabulary.constant, rdf4j.createLiteral(((Constant) objectTerm).getValue())));
