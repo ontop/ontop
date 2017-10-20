@@ -20,6 +20,11 @@ package it.unibz.inf.ontop.model.term;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
+
 public interface ObjectConstant extends Constant {
+
+    @Override
+    ObjectRDFType getType();
 	
 }

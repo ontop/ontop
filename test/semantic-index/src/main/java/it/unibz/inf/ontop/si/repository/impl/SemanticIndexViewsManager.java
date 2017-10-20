@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.si.repository.impl;
 
-import it.unibz.inf.ontop.model.type.COL_TYPE;
-import it.unibz.inf.ontop.model.type.LanguageTag;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermType;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
+import org.apache.commons.rdf.api.IRI;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,42 +37,38 @@ public class SemanticIndexViewsManager {
 		return Collections.unmodifiableList(classViews);
 	}
 
-	public SemanticIndexView getView(TermType type) {
+	public SemanticIndexView getView(ObjectRDFType type) {
 		SemanticIndexViewID viewId = new SemanticIndexViewID(type);
 		return views.get(viewId);
 	}
 	
-	public SemanticIndexView getView(TermType type1, TermType type2) {
+	public SemanticIndexView getView(ObjectRDFType type1, RDFTermType type2) {
 		SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
 		/*
 		 * For language tags (need to know the concrete one)
 		 */
 		if (!views.containsKey(viewId))
-			initProperty(type1, type2);
+			if (type2 instanceof RDFDatatype)
+				initDataProperty(type1, (RDFDatatype) type2);
+			else
+				throw new UnexpectedRDFTermTypeException(type2);
 		return views.get(viewId);
 	}
 	
-	
-	
-	private static final COL_TYPE[] objectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE };
-
-	/**
-	 * NB: LITERAL_LANG is not part of this array (cannot become a TermType without a language tag)
-	 */
-	private static final COL_TYPE[] typesAndObjectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE,
-		COL_TYPE.LITERAL, COL_TYPE.BOOLEAN,
-		COL_TYPE.DATETIME, COL_TYPE.DATETIME_STAMP, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
-		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
-		COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER, COL_TYPE.FLOAT,  COL_TYPE.LONG, 
-		COL_TYPE.STRING };
-	
 	private final void init() {
-		
-		for (COL_TYPE colType1 : objectTypes) {
 
-			TermType type1 = TYPE_FACTORY.getTermType(colType1);
+		ImmutableList<ObjectRDFType> objectTypes = ImmutableList.of(TYPE_FACTORY.getIRITermType(),
+				TYPE_FACTORY.getBlankNodeType());
 
-			String value =  (colType1 == COL_TYPE.BNODE) ? "TRUE" : "FALSE";
+
+		IRI[] datatypeIRIs = { XSD.BOOLEAN, XSD.DATETIME, XSD.DATETIMESTAMP, XSD.DECIMAL, XSD.DOUBLE, XSD.INTEGER,
+				XSD.INT, XSD.UNSIGNED_INT, XSD.NEGATIVE_INTEGER, XSD.NON_NEGATIVE_INTEGER,
+				XSD.POSITIVE_INTEGER, XSD.NON_POSITIVE_INTEGER, XSD.FLOAT,  XSD.LONG,
+				XSD.STRING };
+
+		for (ObjectRDFType type1 : objectTypes) {
+
+			String value =  type1.isBlankNode() ? "TRUE" : "FALSE";
 			String filter = "ISBNODE = " + value + " AND ";
 			
 			{
@@ -82,51 +80,62 @@ public class SemanticIndexViewsManager {
 				views.put(view.getId(), view);		
 				classViews.add(view);
 			}
+
+			for (ObjectRDFType type2 : objectTypes) {
+				initObjectProperty(type1, type2);
+			}
 			
-			
-			for (COL_TYPE colType2 : typesAndObjectTypes) {
-				initProperty(type1, TYPE_FACTORY.getTermType(colType2));
+			for (IRI iriType2 : datatypeIRIs) {
+				initDataProperty(type1, TYPE_FACTORY.getDatatype(iriType2));
 			}
 		}
 	}
 
-	private void initProperty(TermType type1, TermType type2) {
-		String value =  (type1.getColType() == COL_TYPE.BNODE) ? "TRUE" : "FALSE";
+	private void initDataProperty(ObjectRDFType type1, RDFDatatype type2) {
+		String value =  type1.isBlankNode() ? "TRUE" : "FALSE";
 		String filter = "ISBNODE = " + value + " AND ";
 
 		String select, insert;
-		COL_TYPE colType2 = type2.getColType();
 
-		switch (colType2) {
-			case OBJECT:
-				select = RDBMSSIRepositoryManager.attributeTable.get(colType2).getSELECT(filter + "ISBNODE2 = FALSE AND ");
-				insert = RDBMSSIRepositoryManager.attributeTable.get(colType2).getINSERT("?, ?, ?, " + value + ", FALSE");
-				break;
-			case BNODE:
-				select = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).getSELECT(filter + "ISBNODE2 = TRUE AND ");
-				insert = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).getINSERT("?, ?, ?, " + value + ", TRUE");
-				break;
-			case LITERAL:
-				select = RDBMSSIRepositoryManager.attributeTable.get(colType2).getSELECT("LANG IS NULL AND " + filter);
-				insert = RDBMSSIRepositoryManager.attributeTable.get(colType2).getINSERT("?, ?, ?, NULL, " + value);
-				break;
-			case LANG_STRING:
-						/*
-						 * If the mapping is for something of type Literal we need to add IS
-						 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
-						 * redundant since we have another stage in Quest where we add IS NOT
-						 * NULL for every variable in the head of a mapping.
-						 */
-				LanguageTag languageTag = ((RDFDatatype) type2).getLanguageTag().get();
-				select = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).getSELECT("LANG = '"
-						+ languageTag.getFullString() +  "' AND " + filter);
-				insert = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).getINSERT("?, ?, ?, ?, " + value);
-				break;
-			default:
-				select = RDBMSSIRepositoryManager.attributeTable.get(colType2).getSELECT(filter);
-				insert = RDBMSSIRepositoryManager.attributeTable.get(colType2).getINSERT("?, ?, ?, " + value);
+		if (type2.getLanguageTag().isPresent()) {
+			/*
+			 * If the mapping is for something of type Literal we need to add IS
+			 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
+			 * redundant since we have another stage in Quest where we add IS NOT
+			 * NULL for every variable in the head of a mapping.
+			 */
+			LanguageTag languageTag = type2.getLanguageTag().get();
+			// Hack: use the RDFS Literal table to get the table description
+			RDBMSSIRepositoryManager.TableDescription tableDescription = RDBMSSIRepositoryManager.ATTRIBUTE_TABLE_MAP
+					.get(RDF.LANGSTRING);
+
+			select = tableDescription.getSELECT("LANG = '" + languageTag.getFullString() +  "' AND " + filter);
+			insert = tableDescription.getINSERT("?, ?, ?, ?, " + value);
+		}
+		else {
+			RDBMSSIRepositoryManager.TableDescription tableDescription = RDBMSSIRepositoryManager.ATTRIBUTE_TABLE_MAP
+					.get(type2.getIRI());
+
+			select = tableDescription.getSELECT(filter);
+			insert = tableDescription.getINSERT("?, ?, ?, " + value);
 		}
 
+		createViews(type1, type2, select, insert);
+	}
+
+	private void initObjectProperty(ObjectRDFType type1, ObjectRDFType type2) {
+		String value =  type1.isBlankNode() ? "TRUE" : "FALSE";
+		String filter = "ISBNODE = " + value + " AND ";
+
+		RDBMSSIRepositoryManager.TableDescription tableDescription = RDBMSSIRepositoryManager.ROLE_TABLE;
+
+		String select = tableDescription.getSELECT(filter + "ISBNODE2 = " + value + " AND ");
+		String insert = tableDescription.getINSERT("?, ?, ?, " + value + ", " + value);
+
+		createViews(type1, type2, select, insert);
+	}
+
+	private void createViews(ObjectRDFType type1, RDFTermType type2, String select, String insert) {
 		SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
 		SemanticIndexView view = new SemanticIndexView(viewId, select, insert);
 		views.put(view.getId(), view);
@@ -137,31 +146,30 @@ public class SemanticIndexViewsManager {
 	
 	// view id codes that are stored in DB (starts with 0)
 
-	private static final COL_TYPE[] SITableToCOLTYPE = { 
-		null, // Class SITable 
-		COL_TYPE.OBJECT, COL_TYPE.LITERAL, COL_TYPE.STRING, COL_TYPE.INTEGER,
-		COL_TYPE.LONG, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.DATETIME, 
-		COL_TYPE.INT, COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, 
-		COL_TYPE.NON_NEGATIVE_INTEGER, COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER,
-		COL_TYPE.FLOAT, COL_TYPE.BOOLEAN, COL_TYPE.DATETIME_STAMP, COL_TYPE.LANG_STRING
-	};
+	private static final IRI[] SITableToIRI = {
+		XSD.STRING, XSD.INTEGER,
+		XSD.LONG, XSD.DECIMAL, XSD.DOUBLE, XSD.DATETIME, 
+		XSD.INT, XSD.UNSIGNED_INT, XSD.NEGATIVE_INTEGER, 
+		XSD.NON_NEGATIVE_INTEGER, XSD.POSITIVE_INTEGER, XSD.NON_POSITIVE_INTEGER,
+		XSD.FLOAT, XSD.BOOLEAN, XSD.DATETIMESTAMP};
 	
-	private static final Map<COL_TYPE, Integer> COLTYPEtoSITable = new HashMap<>();
+	private static final Map<TermType, Integer> COLTYPEtoSITable = new HashMap<>();
 	
 	static {
 		// special case of COL_TYPE.OBJECT and COL_TYPE.BNODE (both are mapped to 1)
-		COLTYPEtoSITable.put(COL_TYPE.BNODE, 1);
+		COLTYPEtoSITable.put(TYPE_FACTORY.getBlankNodeType(), 1);
+		COLTYPEtoSITable.put(TYPE_FACTORY.getIRITermType(), 1);
 		// Class SITable has value 0 (skip it)
-		for (int i = 1; i < SITableToCOLTYPE.length; i++)
-			COLTYPEtoSITable.put(SITableToCOLTYPE[i], i);
+		for (int i = 2; i < SITableToIRI.length; i++)
+			COLTYPEtoSITable.put(TYPE_FACTORY.getDatatype(SITableToIRI[i]), i);
 	}
 	
 	// these two values distinguish between COL_TYPE.OBJECT and COL_TYPE.BNODE
 	private static final int OBJ_TYPE_URI = 0;
 	private static final int OBJ_TYPE_BNode = 1;
 	
-	private static int COLTYPEtoInt(COL_TYPE t) {
-		return (t == COL_TYPE.BNODE)  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
+	private static int COLTYPEtoInt(ObjectRDFType t) {
+		return t.isBlankNode()  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
 	}
 	
 	private static COL_TYPE IntToCOLTYPE(int t) {
@@ -185,21 +193,29 @@ public class SemanticIndexViewsManager {
 						// class view (only type1 is relevant)
 						stm.setInt(1, 0); // SITable.CLASS.ordinal()
 						stm.setInt(2, idx);
-						stm.setInt(3, COLTYPEtoInt(viewId.getType1().getColType()));
+						stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
 						stm.setInt(4, OBJ_TYPE_BNode);
 					}
 					else {
 						// property view
 						stm.setInt(1, COLTYPEtoSITable.get(viewId.getType2()));
 						stm.setInt(2, idx);
-						stm.setInt(3, COLTYPEtoInt(viewId.getType1().getColType()));
-						stm.setInt(4, COLTYPEtoInt(viewId.getType2().getColType()));
+						stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
+						stm.setInt(4, COLTYPEtoInt((ObjectRDFType) viewId.getType2()));
 					}
 					
 					stm.addBatch();
 				}
 			}
 			stm.executeBatch();
+		}
+	}
+
+
+	private static class UnexpectedRDFTermTypeException extends OntopInternalBugException {
+
+		private UnexpectedRDFTermTypeException(RDFTermType termType) {
+			super("Unexpected RDF term type used as property object: " + termType);
 		}
 	}
 

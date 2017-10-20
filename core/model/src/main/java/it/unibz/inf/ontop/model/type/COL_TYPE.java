@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.type;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 public enum COL_TYPE {
 
@@ -41,27 +40,6 @@ public enum COL_TYPE {
         }
         CODE_TO_TYPE_MAP = mapBuilder.build();
     }
-
-    public static final ImmutableSet<COL_TYPE> INTEGER_TYPES = ImmutableSet.of(
-            INTEGER, LONG, INT, NEGATIVE_INTEGER, NON_NEGATIVE_INTEGER, POSITIVE_INTEGER, NON_POSITIVE_INTEGER,
-            UNSIGNED_INT);
-
-    public static final ImmutableSet<COL_TYPE> NUMERIC_TYPES = ImmutableSet.of(
-            DOUBLE, FLOAT, DECIMAL, INTEGER, LONG, INT, NEGATIVE_INTEGER, NON_NEGATIVE_INTEGER,
-            POSITIVE_INTEGER, NON_POSITIVE_INTEGER, UNSIGNED_INT);
-
-    public static final ImmutableSet<COL_TYPE> LITERAL_TYPES = ImmutableSet.<COL_TYPE>builder()
-            .addAll(NUMERIC_TYPES)
-            .add(LITERAL)
-            .add(LANG_STRING)
-            .add(STRING)
-            .add(BOOLEAN)
-            .add(DATETIME)
-            .add(DATETIME_STAMP)
-            .add(YEAR)
-            .add(DATE)
-            .add(TIME)
-            .build();
 
     private final int code;
     private final String label;

@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.si.repository.impl;
 
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 
 /*
@@ -31,26 +33,27 @@ import it.unibz.inf.ontop.model.type.TermType;
 
 public class SemanticIndexViewID {
 	
-	private final TermType type1, type2;
+	private final ObjectRDFType type1;
+	private final RDFTermType type2;
 	private final int hashCode;
 
-	public SemanticIndexViewID(TermType type1, TermType type2) {
+	public SemanticIndexViewID(ObjectRDFType type1, RDFTermType type2) {
 		this.type1 = type1;
 		this.type2 = type2;
 		this.hashCode  = type2.hashCode() ^ (type1.hashCode() << 16);
 	}
 	
-	public SemanticIndexViewID(TermType type1) {
+	public SemanticIndexViewID(ObjectRDFType type1) {
 		this.type1 = type1;
 		this.type2 = null;
 		this.hashCode  = type1.hashCode();
 	}
 
-	public TermType getType1() {
+	public ObjectRDFType getType1() {
 		return type1;
 	}
 
-	public TermType getType2() {
+	public RDFTermType getType2() {
 		return type2;
 	}
 	

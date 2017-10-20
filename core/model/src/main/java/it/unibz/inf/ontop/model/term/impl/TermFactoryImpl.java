@@ -122,7 +122,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ValueConstant getConstantLiteral(String value, TermType type) {
+	public ValueConstant getConstantLiteral(String value, RDFDatatype type) {
 		return new ValueConstantImpl(value, type);
 	}
 

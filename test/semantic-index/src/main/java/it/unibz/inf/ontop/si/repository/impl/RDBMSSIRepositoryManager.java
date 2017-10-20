@@ -25,6 +25,8 @@ import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeCo
 import it.unibz.inf.ontop.model.type.LanguageTag;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -50,6 +52,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.Map.Entry;
 
+import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,101 +150,111 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 					        "\"IDX\"", "SMALLINT NOT NULL", 
 					        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X");
 	
-    final static Map<COL_TYPE ,TableDescription> attributeTable = new HashMap<>();
+    final static ImmutableList<TableDescription> attributeTables;
+    final static TableDescription ROLE_TABLE;
+	final static  ImmutableMap<IRI, TableDescription> ATTRIBUTE_TABLE_MAP;
 	
 	private static final class AttributeTableDescritpion {
-		final COL_TYPE type;
+		final IRI datatypeIRI;
 		final String tableName;
 		final String sqlTypeName;
 		final String indexName;
 		
-		public AttributeTableDescritpion(COL_TYPE type, String tableName, String sqlTypeName, String indexName) {
-			this.type = type;
+		public AttributeTableDescritpion(IRI datatypeIRI, String tableName, String sqlTypeName, String indexName) {
+			this.datatypeIRI = datatypeIRI;
 			this.tableName = tableName;
 			this.sqlTypeName = sqlTypeName;
 			this.indexName = indexName;
 		}
 	}
-	
+
 	static {
+		ImmutableList.Builder<TableDescription> attributeTableBuilder = ImmutableList.builder();
 				
 		classTable.indexOn("idxclassfull", "URI, IDX, ISBNODE");
 		classTable.indexOn("idxclassfull2", "URI, IDX");
 		
-		TableDescription roleTable = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION", 
+		ROLE_TABLE = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION",
 				ImmutableMap.of("\"URI1\"", "INTEGER NOT NULL", 
 						        "\"URI2\"", "INTEGER NOT NULL", 
 						        "\"IDX\"", "SMALLINT NOT NULL", 
 						        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE", 
 						        "ISBNODE2", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI1\" as X, \"URI2\" as Y");
-		attributeTable.put(COL_TYPE.OBJECT, roleTable);
 
-		roleTable.indexOn("idxrolefull1", "URI1, URI2, IDX, ISBNODE, ISBNODE2");
-		roleTable.indexOn("idxrolefull2",  "URI2, URI1, IDX, ISBNODE2, ISBNODE");
-		roleTable.indexOn("idxrolefull22", "URI1, URI2, IDX");
-	
-		
-		// COL_TYPE.LITERAL is special because of one extra attribute (LANG)
-		
-		TableDescription attributeTableLiteral = new TableDescription("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
-				ImmutableMap.of("\"URI\"", "INTEGER NOT NULL", 
-						        "VAL", "VARCHAR(1000) NOT NULL", 
-						        "\"IDX\"", "SMALLINT NOT NULL", 
-						        "LANG", "VARCHAR(20)", 
+		attributeTableBuilder.add(ROLE_TABLE);
+
+		ROLE_TABLE.indexOn("idxrolefull1", "URI1, URI2, IDX, ISBNODE, ISBNODE2");
+		ROLE_TABLE.indexOn("idxrolefull2",  "URI2, URI1, IDX, ISBNODE2, ISBNODE");
+		ROLE_TABLE.indexOn("idxrolefull22", "URI1, URI2, IDX");
+
+		ImmutableMap.Builder<IRI, TableDescription> datatypeTableMapBuilder = ImmutableMap.builder();
+		// LANG_STRING is special because of one extra attribute (LANG)
+
+		TableDescription LANG_STRING_TABLE = new TableDescription("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
+				ImmutableMap.of("\"URI\"", "INTEGER NOT NULL",
+						        "VAL", "VARCHAR(1000) NOT NULL",
+						        "\"IDX\"", "SMALLINT NOT NULL",
+						        "LANG", "VARCHAR(20)",
 						        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y, LANG as Z");
-		attributeTable.put(COL_TYPE.LITERAL, attributeTableLiteral);
+		attributeTableBuilder.add(LANG_STRING_TABLE);
+		datatypeTableMapBuilder.put(RDF.LANGSTRING, LANG_STRING_TABLE);
 			
-		attributeTableLiteral.indexOn("IDX_LITERAL_ATTRIBUTE" + "1", "URI");		
-		attributeTableLiteral.indexOn("IDX_LITERAL_ATTRIBUTE" + "2", "IDX");
-		attributeTableLiteral.indexOn("IDX_LITERAL_ATTRIBUTE" + "3", "VAL");				
+		LANG_STRING_TABLE.indexOn("IDX_LITERAL_ATTRIBUTE" + "1", "URI");
+		LANG_STRING_TABLE.indexOn("IDX_LITERAL_ATTRIBUTE" + "2", "IDX");
+		LANG_STRING_TABLE.indexOn("IDX_LITERAL_ATTRIBUTE" + "3", "VAL");
 
 		
 		// all other datatypes from COL_TYPE are treated similarly
+		List<AttributeTableDescritpion> attributeDescriptions = new ArrayList<>();
+
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 1
+				XSD.STRING, "QUEST_DATA_PROPERTY_STRING_ASSERTION", "VARCHAR(1000)", "IDX_STRING_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 2
+				XSD.INTEGER, "QUEST_DATA_PROPERTY_INTEGER_ASSERTION", "BIGINT", "IDX_INTEGER_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 3
+				XSD.INT, "QUEST_DATA_PROPERTY_INT_ASSERTION", "INTEGER", "XSD_INT_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 4
+				XSD.UNSIGNED_INT, "QUEST_DATA_PROPERTY_UNSIGNED_INT_ASSERTION", "INTEGER", "XSD_UNSIGNED_INT_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 5
+				XSD.NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NEGATIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NEGATIVE_INTEGER_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 6
+				XSD.NON_NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_NEGATIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NON_NEGATIVE_INTEGER_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 7
+				XSD.POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_POSITIVE_INTEGER_ASSERTION", "BIGINT", "XSD_POSITIVE_INTEGER_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 8
+				XSD.NON_POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_POSITIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NON_POSITIVE_INTEGER_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 9
+				XSD.LONG, "QUEST_DATA_PROPERTY_LONG_ASSERTION", "BIGINT", "IDX_LONG_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 10
+				XSD.DECIMAL, "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION", "DECIMAL", "IDX_DECIMAL_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 11
+				XSD.FLOAT, "QUEST_DATA_PROPERTY_FLOAT_ASSERTION", "DOUBLE PRECISION", "XSD_FLOAT_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 12
+				XSD.DOUBLE, "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION", "DOUBLE PRECISION", "IDX_DOUBLE_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 13
+				XSD.DATETIME, "QUEST_DATA_PROPERTY_DATETIME_ASSERTION", "TIMESTAMP", "IDX_DATETIME_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 14
+				XSD.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION", "BOOLEAN", "IDX_BOOLEAN_ATTRIBUTE"));
+		attributeDescriptions.add(new AttributeTableDescritpion(   // 15
+				XSD.DATETIMESTAMP, "QUEST_DATA_PROPERTY_DATETIMESTAMP_ASSERTION", "TIMESTAMP", "IDX_DATETIMESTAMP_ATTRIBUTE"));
 		
-		List<AttributeTableDescritpion> attributeDescritions = new ArrayList<>();
-		attributeDescritions.add(new AttributeTableDescritpion(   // 1
-				COL_TYPE.STRING, "QUEST_DATA_PROPERTY_STRING_ASSERTION", "VARCHAR(1000)", "IDX_STRING_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 2
-				COL_TYPE.INTEGER, "QUEST_DATA_PROPERTY_INTEGER_ASSERTION", "BIGINT", "IDX_INTEGER_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 3
-				COL_TYPE.INT, "QUEST_DATA_PROPERTY_INT_ASSERTION", "INTEGER", "XSD_INT_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 4
-				COL_TYPE.UNSIGNED_INT, "QUEST_DATA_PROPERTY_UNSIGNED_INT_ASSERTION", "INTEGER", "XSD_UNSIGNED_INT_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 5
-				COL_TYPE.NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NEGATIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NEGATIVE_INTEGER_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 6
-				COL_TYPE.NON_NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_NEGATIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NON_NEGATIVE_INTEGER_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 7
-				COL_TYPE.POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_POSITIVE_INTEGER_ASSERTION", "BIGINT", "XSD_POSITIVE_INTEGER_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 8
-				COL_TYPE.NON_POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_POSITIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NON_POSITIVE_INTEGER_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 9
-				COL_TYPE.LONG, "QUEST_DATA_PROPERTY_LONG_ASSERTION", "BIGINT", "IDX_LONG_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 10
-				COL_TYPE.DECIMAL, "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION", "DECIMAL", "IDX_DECIMAL_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 11
-				COL_TYPE.FLOAT, "QUEST_DATA_PROPERTY_FLOAT_ASSERTION", "DOUBLE PRECISION", "XSD_FLOAT_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 12
-				COL_TYPE.DOUBLE, "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION", "DOUBLE PRECISION", "IDX_DOUBLE_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 13
-				COL_TYPE.DATETIME, "QUEST_DATA_PROPERTY_DATETIME_ASSERTION", "TIMESTAMP", "IDX_DATETIME_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 14
-				COL_TYPE.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION", "BOOLEAN", "IDX_BOOLEAN_ATTRIBUTE"));
-		attributeDescritions.add(new AttributeTableDescritpion(   // 15
-				COL_TYPE.DATETIME_STAMP, "QUEST_DATA_PROPERTY_DATETIMESTAMP_ASSERTION", "TIMESTAMP", "IDX_DATETIMESTAMP_ATTRIBUTE"));
-		
-		for (AttributeTableDescritpion descrtiption : attributeDescritions) {
-			TableDescription table = new TableDescription(descrtiption.tableName,
+		for (AttributeTableDescritpion description : attributeDescriptions) {
+			TableDescription table = new TableDescription(description.tableName,
 					ImmutableMap.of("\"URI\"", "INTEGER NOT NULL", 
-							        "VAL", descrtiption.sqlTypeName, 
+							        "VAL", description.sqlTypeName,
 							        "\"IDX\"", "SMALLINT  NOT NULL", 
 							        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y");
-			attributeTable.put(descrtiption.type, table);
 			
-			table.indexOn(descrtiption.indexName + "1", "URI");		
-			table.indexOn(descrtiption.indexName + "2", "IDX");
-			table.indexOn(descrtiption.indexName + "3", "VAL");
+			table.indexOn(description.indexName + "1", "URI");
+			table.indexOn(description.indexName + "2", "IDX");
+			table.indexOn(description.indexName + "3", "VAL");
+
+			attributeTableBuilder.add(table);
+			datatypeTableMapBuilder.put(description.datatypeIRI, table);
 		}
+
+		attributeTables = attributeTableBuilder.build();
+		ATTRIBUTE_TABLE_MAP = datatypeTableMapBuilder.build();
 	}
 	
 	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
@@ -301,8 +314,8 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			st.addBatch(emptinessIndexTable.createCommand);
 
 			st.addBatch(classTable.createCommand);
-			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
-				st.addBatch(entry.getValue().createCommand);
+			for (TableDescription table : attributeTables)
+				st.addBatch(table.createCommand);
 			
 			st.executeBatch();			
 		}
@@ -314,16 +327,16 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		
 		try (Statement st = conn.createStatement()) {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", classTable.tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.OBJECT).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.LITERAL).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.STRING).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.INTEGER).tableName));
-            st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.LONG).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DECIMAL).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DOUBLE).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DATETIME).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.BOOLEAN).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DATETIME_STAMP).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ROLE_TABLE.tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(RDF.LANGSTRING).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.STRING).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.INTEGER).tableName));
+            st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.LONG).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.DECIMAL).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.DOUBLE).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.DATETIME).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.BOOLEAN).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", ATTRIBUTE_TABLE_MAP.get(XSD.DATETIMESTAMP).tableName));
 
 			return true; // everything is fine if we get to this point
 		} 
@@ -343,8 +356,8 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			st.addBatch(emptinessIndexTable.dropCommand);
 
 			st.addBatch(classTable.dropCommand);
-			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
-				st.addBatch(entry.getValue().dropCommand); 
+			for (TableDescription table : attributeTables)
+				st.addBatch(table.dropCommand);
 			
 			st.addBatch(uriIdTable.dropCommand);
 
@@ -1127,8 +1140,8 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	public void createIndexes(Connection conn) throws SQLException {
 		log.debug("Creating indexes");
 		try (Statement st = conn.createStatement()) {
-			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
-				for (String s : entry.getValue().createIndexCommands)
+			for (TableDescription table : attributeTables)
+				for (String s : table.createIndexCommands)
 					st.addBatch(s);
 						
 			for (String s : classTable.createIndexCommands)
@@ -1158,8 +1171,8 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			for (String s : classTable.dropIndexCommands)
 				st.addBatch(s);	
 
-			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
-				for (String s : entry.getValue().dropIndexCommands)
+			for (TableDescription table : attributeTables)
+				for (String s : table.dropIndexCommands)
 					st.addBatch(s);
 			
 			st.executeBatch();

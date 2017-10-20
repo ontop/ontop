@@ -689,8 +689,8 @@ public class SparqlAlgebraToDatalogTranslator {
                     Function f = (Function) term2;
                     if (f.isDataTypeFunction()) {
                         Term functionTerm = f.getTerm(0);
-                        if (functionTerm instanceof Constant) {
-                            Constant c = (Constant) functionTerm;
+                        if (functionTerm instanceof it.unibz.inf.ontop.model.term.ValueConstant) {
+                            it.unibz.inf.ontop.model.term.ValueConstant c = (it.unibz.inf.ontop.model.term.ValueConstant) functionTerm;
                             term2 = TERM_FACTORY.getFunction(f.getFunctionSymbol(),
                                     TERM_FACTORY.getConstantLiteral(c.getValue().toLowerCase(),
                                             c.getType()));

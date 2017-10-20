@@ -24,6 +24,7 @@ package it.unibz.inf.ontop.model.term;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import org.apache.commons.rdf.api.IRI;
 
@@ -217,7 +218,7 @@ public interface TermFactory {
 	 *            the type of the constant.
 	 * @return the value constant.
 	 */
-	ValueConstant getConstantLiteral(String value, TermType type);
+	ValueConstant getConstantLiteral(String value, RDFDatatype type);
 
 	ValueConstant getConstantLiteral(String value, IRI type);
 

@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.model.term;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+
 /**
  * Provides an interface for storing the value constant.
  */
@@ -39,4 +41,7 @@ public interface ValueConstant extends Constant {
 	 * @return
 	 */
 	public String getValue();
+
+	@Override
+	RDFDatatype getType();
 }

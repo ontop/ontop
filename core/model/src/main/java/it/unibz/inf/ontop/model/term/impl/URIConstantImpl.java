@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.model.term.impl;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.stream.Stream;
@@ -85,7 +86,7 @@ public class URIConstantImpl implements URIConstant {
 	}
 
 	@Override
-	public TermType getType() {
+	public ObjectRDFType getType() {
 		return TYPE_FACTORY.getIRITermType();
 	}
 

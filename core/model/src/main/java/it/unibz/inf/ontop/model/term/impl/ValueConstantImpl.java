@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import javax.annotation.Nonnull;
@@ -36,7 +37,7 @@ public class ValueConstantImpl implements ValueConstant {
 	private final String value;
 	private final String language;
 	private final String string;
-	private final TermType termType;
+	private final RDFDatatype termType;
 
 	/**
 	 * The default constructor.
@@ -46,7 +47,7 @@ public class ValueConstantImpl implements ValueConstant {
 	 * @param type
 	 *            the constant type.
 	 */
-	protected ValueConstantImpl(@Nonnull String value, @Nonnull TermType type) {
+	protected ValueConstantImpl(@Nonnull String value, @Nonnull RDFDatatype type) {
 		this.value = value;
 		this.language = null;
 		this.termType = type;
@@ -100,7 +101,7 @@ public class ValueConstantImpl implements ValueConstant {
 	}
 
 	@Override
-	public TermType getType() {
+	public RDFDatatype getType() {
 		return termType;
 	}
 

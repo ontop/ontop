@@ -23,6 +23,8 @@ package it.unibz.inf.ontop.model.term.impl;
 import it.unibz.inf.ontop.model.term.BNode;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.stream.Stream;
@@ -95,7 +97,7 @@ public class BNodeConstantImpl implements BNode {
 	}
 
 	@Override
-	public TermType getType() {
+	public ObjectRDFType getType() {
 		return TYPE_FACTORY.getBlankNodeType();
 	}
 
