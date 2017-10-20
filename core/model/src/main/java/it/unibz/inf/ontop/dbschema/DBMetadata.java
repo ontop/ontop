@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.TermType;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -74,7 +74,7 @@ public interface DBMetadata extends Serializable {
      */
     Collection<DatabaseRelationDefinition> getDatabaseRelations();
 
-    Optional<COL_TYPE> getColType(Attribute attribute);
+    Optional<TermType> getTermType(Attribute attribute);
 
     /**
      * After calling this method, the DBMetadata cannot be modified

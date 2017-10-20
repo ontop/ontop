@@ -392,7 +392,7 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = typeResults.getTermTypeMap();
-		ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap = typeResults.getCastTypeMap();
+		ImmutableMap<Predicate, ImmutableList<TermType>> castTypeMap = typeResults.getCastTypeMap();
 
 		/**
 		 * ANS i > 1
@@ -490,7 +490,7 @@ public class OneShotSQLGeneratorEngine {
 	 * @param termTypes
 	 */
 	public String generateQueryFromSingleRule(CQIE cq, List<String> signature,
-											  boolean isAns1, List<COL_TYPE> castDatatypes,
+											  boolean isAns1, List<TermType> castDatatypes,
 											  Map<Predicate, ParserViewDefinition> subQueryDefinitions,
 											  ImmutableList<Optional<TermType>> termTypes) {
 		QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions);
@@ -628,7 +628,7 @@ public class OneShotSQLGeneratorEngine {
 												Multimap<Predicate, CQIE> ruleIndex,
 												Map<Predicate, ParserViewDefinition> subQueryDefinitions,
 												ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
-												ImmutableList<COL_TYPE> castTypes) {
+												ImmutableList<TermType> castTypes) {
 
 		/* Creates BODY of the view query */
 
@@ -1210,7 +1210,7 @@ public class OneShotSQLGeneratorEngine {
 
 				// NB: what about a langString. TODO: make a clear distinction between lexical values and RDF terms
 				RDFDatatype type = TYPE_FACTORY.getDatatype(((DatatypePredicate)p).getIRI());
-				return jdbcTypeMapper.getSQLType(type.getColType());
+				return jdbcTypeMapper.getSQLType(type);
 			}
 			// Return varchar for unknown
 			return Types.VARCHAR;
@@ -1248,7 +1248,7 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private String getSelectClause(List<String> signature, CQIE query,
 								   QueryAliasIndex index, boolean distinct, boolean isAns1,
-								   List<COL_TYPE> castTypes, ImmutableList<Optional<TermType>> termTypes) {
+								   List<TermType> castTypes, ImmutableList<Optional<TermType>> termTypes) {
 		/*
 		 * If the head has size 0 this is a boolean query.
 		 */
@@ -1268,7 +1268,7 @@ public class OneShotSQLGeneratorEngine {
 		Iterator<Term> hit = headterms.iterator();
 		int hpos = 0;
 
-		Iterator<COL_TYPE> castTypeIter = castTypes.iterator();
+		Iterator<TermType> castTypeIter = castTypes.iterator();
 		Iterator<Optional<TermType>> termTypeIter = termTypes.iterator();
 
 		/**
@@ -1289,7 +1289,7 @@ public class OneShotSQLGeneratorEngine {
 			 * one datatype per column. If the sub-queries are producing results of different types,
 			 * them there will be a difference between the type in the main column and the RDF one.
 			 */
-			COL_TYPE castType = castTypeIter.next();
+			TermType castType = castTypeIter.next();
 
 			Optional<TermType> optionalTermType = termTypeIter.next();
 
@@ -1324,7 +1324,7 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 	private String getMainColumnForSELECT(Term ht, String signatureVarName,
-										  QueryAliasIndex index, COL_TYPE castDataType,
+										  QueryAliasIndex index, TermType castDataType,
 										  Set<String> sqlVariableNames) {
 
 		final String varName = sqladapter.nameTopVariable(signatureVarName, MAIN_COLUMN_SUFFIX, sqlVariableNames);

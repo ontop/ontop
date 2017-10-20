@@ -204,8 +204,7 @@ public class MappingDataTypeCompletion {
             type = Optional.empty();
         }
         else{
-            type = metadata.getColType(attribute)
-                .map(TYPE_FACTORY::getTermType);
+            type = metadata.getTermType(attribute);
         }
 
         if(defaultDatatypeInferred)

@@ -37,10 +37,10 @@ public class TypeExtractor {
 
     public static class TypeResults {
         private final ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap;
-        private final ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap;
+        private final ImmutableMap<Predicate, ImmutableList<TermType>> castTypeMap;
 
         private TypeResults(ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
-                           ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap) {
+                           ImmutableMap<Predicate, ImmutableList<TermType>> castTypeMap) {
             this.termTypeMap = termTypeMap;
             this.castTypeMap = castTypeMap;
         }
@@ -49,7 +49,7 @@ public class TypeExtractor {
             return termTypeMap;
         }
 
-        public ImmutableMap<Predicate, ImmutableList<COL_TYPE>> getCastTypeMap() {
+        public ImmutableMap<Predicate, ImmutableList<TermType>> getCastTypeMap() {
             return castTypeMap;
         }
     }
@@ -84,7 +84,7 @@ public class TypeExtractor {
     /**
      * Infers cast types for each predicate in the bottom up order
      */
-    private static ImmutableMap<Predicate,ImmutableList<COL_TYPE>> extractCastTypeMap(
+    private static ImmutableMap<Predicate,ImmutableList<TermType>> extractCastTypeMap(
             Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesInBottomUp,
             ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap, DBMetadata metadata) {
 
@@ -135,8 +135,8 @@ public class TypeExtractor {
                             Attribute attribute = td.get().getAttribute(i+1);
 
                             //get type from metadata
-                            COL_TYPE type = JdbcTypeMapper.getInstance().getPredicate(attribute.getType());
-                            defaultTypeBuilder.add(TYPE_FACTORY.getTermType(type));
+                            TermType type = JdbcTypeMapper.getInstance().getTermType(attribute.getType());
+                            defaultTypeBuilder.add(type);
                         }
                         else{
                             defaultTypeBuilder.add(LITERAL_TYPE);
@@ -203,18 +203,21 @@ public class TypeExtractor {
 
     }
 
-    private static COL_TYPE getCastType(TermType termType) {
+    /**
+     * TODO: get rid of it?
+     */
+    private static TermType getCastType(TermType termType) {
         return termType.getOptionalColType()
                 .map(type -> {switch (type) {
                     case OBJECT:
                     case BNODE:
                     case NULL:
-                        return LITERAL;
+                        return TYPE_FACTORY.getAbstractRDFSLiteral();
                     default:
-                        return type;
+                        return termType;
                 }})
                 //UGLY! For casting as a string
-        .orElse(LITERAL);
+        .orElse(TYPE_FACTORY.getAbstractRDFSLiteral());
     }
 
     /**

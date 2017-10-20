@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.EncodeForURI;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
@@ -35,7 +35,6 @@ import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class DirectMappingAxiomProducer {
 
@@ -134,9 +133,9 @@ public class DirectMappingAxiomProducer {
 
 		//DataType Atoms
 		for (Attribute att : table.getAttributes()) {
-			COL_TYPE type = typeMapper.getPredicate(att.getType());
+			TermType type = typeMapper.getTermType(att.getType());
 			Variable objV = df.getVariable(att.getID().getName());
-			ImmutableTerm obj = df.getImmutableTypedTerm(objV, TYPE_FACTORY.getTermType(type));
+			ImmutableTerm obj = df.getImmutableTypedTerm(objV, type);
 			
 			atoms.add(df.getImmutableFunctionalTerm(df.getDataPropertyPredicate(getLiteralPropertyIRI(att)), sub, obj));
 		}

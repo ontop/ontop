@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.*;
 
@@ -44,8 +44,8 @@ public class RDBMetadata extends BasicDBMetadata {
 	}
 
 	@Override
-	public Optional<COL_TYPE> getColType(Attribute attribute) {
-		return Optional.of(jdbcTypeMapper.getPredicate(attribute.getType()));
+	public Optional<TermType> getTermType(Attribute attribute) {
+		return Optional.of(jdbcTypeMapper.getTermType(attribute.getType()));
 	}
 
 	private RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,

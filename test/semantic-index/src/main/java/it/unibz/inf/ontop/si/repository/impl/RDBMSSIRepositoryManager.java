@@ -671,32 +671,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			
 		return uri_id;
 	}
-	
-
-
-
-	// Attribute datatype from TBox
-	/*
-	private COL_TYPE getAttributeType(Predicate attribute) {
-		DataPropertyExpression prop = ofac.createDataProperty(attribute.getName());
-		DataPropertyRangeExpression role = prop.getRange(); 
-		Equivalences<DataRangeExpression> roleNode = reasonerDag.getDataRangeDAG().getVertex(role);
-		Set<Equivalences<DataRangeExpression>> ancestors = reasonerDag.getDataRangeDAG().getSuper(roleNode);
-
-		for (Equivalences<DataRangeExpression> node : ancestors) {
-			for(DataRangeExpression desc: node)
-			{
-				if (desc instanceof Datatype) {
-					Datatype datatype = (Datatype) desc;
-					return datatype.getPredicate().getType(0); // TODO Put some
-																// check for
-																// multiple types
-				}
-			}
-		}
-		return COL_TYPE.LITERAL;
-	}
-	*/
 
 	
 	public final static int CLASS_TYPE = 1;
@@ -953,9 +927,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 
 		Variable X = TERM_FACTORY.getVariable("X");
 
-		//Predicate headPredicate = TERM_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
-		//Function head = TERM_FACTORY.getFunction(headPredicate, X);
-
 		ImmutableFunctionalTerm subjectTerm;
 		COL_TYPE colType = type.getColType();
 		if (colType == COL_TYPE.OBJECT)
@@ -974,9 +945,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 
 		Variable X = TERM_FACTORY.getVariable("X");
 		Variable Y = TERM_FACTORY.getVariable("Y");
-
-		//Predicate headPredicate = TERM_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
-		//Function head = TERM_FACTORY.getFunction(headPredicate, X, Y);
 
 		COL_TYPE colType1 = type1.getColType();
 		COL_TYPE colType2 = type2.getColType();
