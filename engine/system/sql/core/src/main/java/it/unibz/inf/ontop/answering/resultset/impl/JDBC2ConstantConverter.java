@@ -9,9 +9,10 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import org.apache.commons.lang3.time.DateUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -28,8 +29,6 @@ public class JDBC2ConstantConverter {
 
     enum System {ORACLE, MSSQL, DEFAULT}
 
-    private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
-
     private static ImmutableList<DateTimeFormatter> defaultDateTimeFormatter;
     private static ImmutableMap<System, ImmutableList<DateTimeFormatter>> system2DateTimeFormatter;
     private static ImmutableMap<System, ImmutableList<DateTimeFormatter>> system2TimeFormatter;
@@ -42,9 +41,6 @@ public class JDBC2ConstantConverter {
     private final System systemDB;
 
     static {
-        DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
-        symbol.setDecimalSeparator('.');
-        formatter.setDecimalFormatSymbols(symbol);
         defaultDateTimeFormatter = buildDefaultDateTimeFormatter();
         system2DateTimeFormatter = buildDateTimeFormatterMap();
         system2TimeFormatter = buildDefaultTimeFormatterMap();
@@ -161,19 +157,29 @@ public class JDBC2ConstantConverter {
                         return TERM_FACTORY.getConstantLiteral(stringValue, language);
 
                 case BOOLEAN:
-                    // TODO(xiao): more careful
-                    boolean bvalue = Boolean.valueOf(stringValue);
-                    //boolean bvalue = (Boolean)value;
+
+                    boolean bvalue = Boolean.parseBoolean(stringValue);
                     return TERM_FACTORY.getBooleanConstant(bvalue);
 
+                case FLOAT:
                 case DOUBLE:
-                    double d = Double.valueOf(stringValue);
-                    String s = formatter.format(d); // format name into correct double representation
-                    return TERM_FACTORY.getConstantLiteral(s, type);
 
+//                    It allows to consider the canonical representation. nan and infinite are catched.
+                    BigDecimal bigDecimal;
+                    try {
+                        bigDecimal = new BigDecimal (stringValue);
+
+                    }
+                    catch (NumberFormatException e){
+                        return TERM_FACTORY.getConstantLiteral(stringValue,type);
+                    }
+                    DecimalFormat formatter = new DecimalFormat("0.0E0");
+                    formatter.setRoundingMode(RoundingMode.UNNECESSARY);
+                    formatter.setMaximumFractionDigits((bigDecimal.scale() > 0) ? bigDecimal.precision() -1 : bigDecimal.precision() -1 + bigDecimal.scale() *-1);
+                    return  TERM_FACTORY.getConstantLiteral(formatter.format(bigDecimal),type);
+
+                case DECIMAL:
                 case INT:
-                    return TERM_FACTORY.getConstantLiteral(stringValue, type);
-
                 case LONG:
                 case UNSIGNED_INT:
                     return TERM_FACTORY.getConstantLiteral(stringValue, type);
@@ -183,13 +189,12 @@ public class JDBC2ConstantConverter {
                 case NON_NEGATIVE_INTEGER:
                 case POSITIVE_INTEGER:
                 case NON_POSITIVE_INTEGER:
+
                     /**
                      * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
                      */
-                    int dotIndex = stringValue.indexOf(".");
-                    String integerString = dotIndex >= 0
-                            ? stringValue.substring(0, dotIndex)
-                            : stringValue;
+                    String integerString = String.valueOf(Double.valueOf(stringValue).intValue());
+
                     return TERM_FACTORY.getConstantLiteral(integerString, type);
 
                 case DATETIME:
