@@ -124,13 +124,14 @@ public class SemanticIndexViewsManager {
 	}
 
 	private void initObjectProperty(ObjectRDFType type1, ObjectRDFType type2) {
-		String value =  type1.isBlankNode() ? "TRUE" : "FALSE";
-		String filter = "ISBNODE = " + value + " AND ";
+		String value1 =  type1.isBlankNode() ? "TRUE" : "FALSE";
+		String value2 =  type2.isBlankNode() ? "TRUE" : "FALSE";
+		String filter = "ISBNODE = " + value1 + " AND ";
 
 		RDBMSSIRepositoryManager.TableDescription tableDescription = RDBMSSIRepositoryManager.ROLE_TABLE;
 
-		String select = tableDescription.getSELECT(filter + "ISBNODE2 = " + value + " AND ");
-		String insert = tableDescription.getINSERT("?, ?, ?, " + value + ", " + value);
+		String select = tableDescription.getSELECT(filter + "ISBNODE2 = " + value2 + " AND ");
+		String insert = tableDescription.getINSERT("?, ?, ?, " + value1 + ", " + value2);
 
 		createViews(type1, type2, select, insert);
 	}
