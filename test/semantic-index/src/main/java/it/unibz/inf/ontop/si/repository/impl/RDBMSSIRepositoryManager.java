@@ -22,16 +22,13 @@ package it.unibz.inf.ontop.si.repository.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
-import it.unibz.inf.ontop.model.type.LanguageTag;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
@@ -936,16 +933,14 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	}
 
 	
-	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, TermType type) {
+	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, ObjectRDFType type) {
 
 		Variable X = TERM_FACTORY.getVariable("X");
 
 		ImmutableFunctionalTerm subjectTerm;
-		COL_TYPE colType = type.getColType();
-		if (colType == COL_TYPE.OBJECT)
+		if (!type.isBlankNode())
 			subjectTerm = TERM_FACTORY.getImmutableUriTemplate(X);
 		else {
-			assert (colType == COL_TYPE.BNODE);
 			subjectTerm = TERM_FACTORY.getImmutableBNodeTemplate(X);
 		}
 
@@ -954,41 +949,34 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	}
 	
 	
-	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, TermType type1, TermType type2) {
+	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, ObjectRDFType type1,
+																		RDFTermType type2) {
 
 		Variable X = TERM_FACTORY.getVariable("X");
 		Variable Y = TERM_FACTORY.getVariable("Y");
 
-		COL_TYPE colType1 = type1.getColType();
-		COL_TYPE colType2 = type2.getColType();
-
 		ImmutableFunctionalTerm subjectTerm;
-		if (colType1 == COL_TYPE.OBJECT)
+		if (!type1.isBlankNode())
 			subjectTerm = TERM_FACTORY.getImmutableUriTemplate(X);
 		else {
-			assert (colType1 == COL_TYPE.BNODE);
 			subjectTerm = TERM_FACTORY.getImmutableBNodeTemplate(X);
 		}
 		
 		ImmutableFunctionalTerm objectTerm;
-		switch (colType2) {
-			case BNODE:
-				objectTerm = TERM_FACTORY.getImmutableBNodeTemplate(Y);
-				break;
-			case OBJECT:
-				objectTerm = TERM_FACTORY.getImmutableUriTemplate(Y);
-				break;
-			case LANG_STRING:
-				LanguageTag languageTag = ((RDFDatatype)type2).getLanguageTag().get();
+		if (type2 instanceof ObjectRDFType) {
+			objectTerm = ((ObjectRDFType)type2).isBlankNode()
+					? TERM_FACTORY.getImmutableBNodeTemplate(Y)
+					: TERM_FACTORY.getImmutableUriTemplate(Y);
+		}
+		else {
+			RDFDatatype datatype = (RDFDatatype) type2;
+			if (datatype.getLanguageTag().isPresent()) {
+				LanguageTag languageTag = datatype.getLanguageTag().get();
 				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, languageTag.getFullString());
-				break;
-			case DATE:
-			case TIME:
-			case YEAR:
-				// R: these three types were not covered by the old switch
-				throw new RuntimeException("Unsuported type: " + type2);
-			default:
+			}
+			else {
 				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, type2);
+			}
 		}
 
 		ImmutableFunctionalTerm body = TERM_FACTORY.getImmutableFunctionalTerm(predicate, subjectTerm, objectTerm);
