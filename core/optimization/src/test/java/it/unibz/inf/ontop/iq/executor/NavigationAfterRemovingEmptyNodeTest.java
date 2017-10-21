@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;

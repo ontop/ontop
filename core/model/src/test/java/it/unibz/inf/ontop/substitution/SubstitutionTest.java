@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.*;

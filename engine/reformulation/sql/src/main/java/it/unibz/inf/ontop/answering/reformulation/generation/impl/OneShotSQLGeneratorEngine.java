@@ -42,10 +42,12 @@ import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.type.COL_TYPE;
+import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.EncodeForURI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
@@ -62,7 +64,7 @@ import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates.SPARQL_GROUP;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.*;
+import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.*;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -1474,8 +1476,8 @@ public class OneShotSQLGeneratorEngine {
 		}
 		else {
 			COL_TYPE colType = optionalTermType
-					.map(TermType::getColType)
-					/**
+					.flatMap(this::extractColType)
+					/*
 					 * By default, we apply the "most" general COL_TYPE
 					 */
 					.orElse(STRING);
@@ -1484,6 +1486,18 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		return String.format(TYPE_STR, typeString, varName);
+	}
+
+	private Optional<COL_TYPE> extractColType(TermType termType) {
+		if (termType instanceof ObjectRDFType) {
+			COL_TYPE colType = ((ObjectRDFType)termType).isBlankNode() ? BNODE : OBJECT;
+			return Optional.of(colType);
+		}
+		else if (termType instanceof RDFDatatype) {
+			return Optional.of(COL_TYPE.getColType(((RDFDatatype)termType).getIRI()));
+		}
+		else
+			return Optional.empty();
 	}
 
 	/**
@@ -1805,7 +1819,7 @@ public class OneShotSQLGeneratorEngine {
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
 			if (hasIRIDictionary()) {
-				if (ct.getType().getColType() == OBJECT || ct.getType().getColType() == STRING) {
+				if (ct.getType().isA(XSD.STRING)) {
 					int id = getUriid(ct.getValue());
 					if (id >= 0)
 						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
@@ -2107,7 +2121,7 @@ public class OneShotSQLGeneratorEngine {
 	 * @return
 	 */
 	private String getSQLLexicalForm(ValueConstant constant) {
-		switch (constant.getType().getColType()) {
+		switch (COL_TYPE.getColType(constant.getType().getIRI())) {
 			case BNODE:
 			case OBJECT:
 			case STRING:

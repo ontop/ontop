@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.vocabulary.RDF;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.type.COL_TYPE.LANG_STRING;
 
 public class LangDatatype extends AbstractRDFDatatype {
 
@@ -17,7 +16,7 @@ public class LangDatatype extends AbstractRDFDatatype {
     private final TermTypeAncestry parentAncestry;
 
     private LangDatatype(LanguageTag langTag, TermTypeAncestry parentAncestry) {
-        super(LANG_STRING, parentAncestry, false, RDF.LANGSTRING);
+        super(RDF.LANGSTRING, parentAncestry, false);
         this.langTag = langTag;
         this.parentAncestry = parentAncestry;
     }

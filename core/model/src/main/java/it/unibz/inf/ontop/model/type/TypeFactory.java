@@ -35,10 +35,6 @@ public interface TypeFactory {
 	
 	ImmutableList<Predicate> getDatatypePredicates();
 
-	/**
-	 * TODO: refactor it
-	 */
-	TermType getTermType(COL_TYPE type);
 	RDFDatatype getLangTermType(String languageTag);
 
 	/**

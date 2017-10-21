@@ -172,10 +172,6 @@ public class SemanticIndexViewsManager {
 	private static int COLTYPEtoInt(ObjectRDFType t) {
 		return t.isBlankNode()  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
 	}
-	
-	private static COL_TYPE IntToCOLTYPE(int t) {
-		return (t == OBJ_TYPE_BNode) ? COL_TYPE.BNODE : COL_TYPE.OBJECT;
-	}
 
 	
 	

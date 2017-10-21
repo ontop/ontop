@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.si.repository.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -570,7 +571,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		
 		String value = object.getValue();
 		
-		switch (object.getType().getColType()) {
+		switch (COL_TYPE.getColType(object.getType().getIRI())) {
 			case LITERAL:  // 0
 				stm.setString(2, value);
 				break;  
