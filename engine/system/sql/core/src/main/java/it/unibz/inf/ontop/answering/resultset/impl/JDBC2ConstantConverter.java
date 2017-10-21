@@ -153,9 +153,6 @@ public class JDBC2ConstantConverter {
                         bnodeMap.put(stringValue, scopedLabel);
                     }
                     return TERM_FACTORY.getConstantBNode(scopedLabel);
-
-                case LITERAL:
-                    throw new IllegalStateException("A constant cannot have an abstract datatype (rdfs:literal)");
                 case LANG_STRING:
                     // The constant is a literal, we need to find if its
                     // rdfs:Literal or a normal literal and construct it

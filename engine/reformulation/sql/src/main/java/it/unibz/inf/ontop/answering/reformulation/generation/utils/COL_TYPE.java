@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.answering.reformulation.generation.utils;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.vocabulary.OntopInternal;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
-import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
@@ -17,8 +16,6 @@ public enum COL_TYPE {
     NULL(0, "NULL", null),
     OBJECT(1, "OBJECT", null),
     BNODE(2, "BNODE", null),
-    // TODO: remove
-    LITERAL(3, "LITERAL", RDFS.LITERAL),
     LANG_STRING(-3, "LANG_STRING", RDF.LANGSTRING), // not to be mapped from code // BC: Why not?
     INTEGER(4, "INTEGER", XSD.INTEGER),
     DECIMAL(5, "DECIMAL", XSD.DECIMAL),
