@@ -10,9 +10,10 @@ import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.lang3.time.DateUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -30,8 +31,6 @@ public class JDBC2ConstantConverter {
 
     enum System {ORACLE, MSSQL, DEFAULT}
 
-    private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
-
     private static ImmutableList<DateTimeFormatter> defaultDateTimeFormatter;
     private static ImmutableMap<System, ImmutableList<DateTimeFormatter>> system2DateTimeFormatter;
     private static ImmutableMap<System, ImmutableList<DateTimeFormatter>> system2TimeFormatter;
@@ -44,9 +43,6 @@ public class JDBC2ConstantConverter {
     private final System systemDB;
 
     static {
-        DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
-        symbol.setDecimalSeparator('.');
-        formatter.setDecimalFormatSymbols(symbol);
         defaultDateTimeFormatter = buildDefaultDateTimeFormatter();
         system2DateTimeFormatter = buildDateTimeFormatterMap();
         system2TimeFormatter = buildDefaultTimeFormatterMap();
@@ -164,17 +160,16 @@ public class JDBC2ConstantConverter {
                         return TERM_FACTORY.getConstantLiteral(stringValue, language);
 
                 case BOOLEAN:
-                    // TODO(xiao): more careful
-                    boolean bvalue = Boolean.valueOf(stringValue);
-                    //boolean bvalue = (Boolean)value;
+
+                    boolean bvalue = Boolean.parseBoolean(stringValue);
                     return TERM_FACTORY.getBooleanConstant(bvalue);
 
                 case DECIMAL:
                     return TERM_FACTORY.getConstantLiteral(stringValue, XSD.DECIMAL);
+                case FLOAT:
+                    return TERM_FACTORY.getConstantLiteral(extractFloatingValue(stringValue), XSD.FLOAT);
                 case DOUBLE:
-                    double d = Double.valueOf(stringValue);
-                    String s = formatter.format(d); // format name into correct double representation
-                    return TERM_FACTORY.getConstantLiteral(s, XSD.DOUBLE);
+                    return TERM_FACTORY.getConstantLiteral(extractFloatingValue(stringValue), XSD.DOUBLE);
 
                 case INT:
                     return TERM_FACTORY.getConstantLiteral(stringValue, XSD.INT);
@@ -215,8 +210,6 @@ public class JDBC2ConstantConverter {
 
                 case YEAR:
                     return TERM_FACTORY.getConstantLiteral(stringValue, XSD.GYEAR);
-                case FLOAT:
-                    return TERM_FACTORY.getConstantLiteral(stringValue, XSD.FLOAT);
                 default:
                     throw new IllegalStateException("Unexpected colType: " + type);
 
@@ -245,14 +238,26 @@ public class JDBC2ConstantConverter {
         }
     }
 
+    private String extractFloatingValue(String stringValue) {
+        BigDecimal bigDecimal;
+        try {
+            bigDecimal = new BigDecimal (stringValue);
+
+        }
+        catch (NumberFormatException e){
+            return stringValue;
+        }
+        DecimalFormat formatter = new DecimalFormat("0.0E0");
+        formatter.setRoundingMode(RoundingMode.UNNECESSARY);
+        formatter.setMaximumFractionDigits((bigDecimal.scale() > 0) ? bigDecimal.precision() -1 : bigDecimal.precision() -1 + bigDecimal.scale() *-1);
+        return  formatter.format(bigDecimal);
+    }
+
+    /**
+     * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
+     */
     private String extractIntegerValue(String stringValue) {
-        /**
-         * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
-         */
-        int dotIndex = stringValue.indexOf(".");
-        return dotIndex >= 0
-                ? stringValue.substring(0, dotIndex)
-                : stringValue;
+        return String.valueOf(Double.valueOf(stringValue).intValue());
     }
 
     private TemporalAccessor convertToJavaDate(Object value) throws OntopResultConversionException {
