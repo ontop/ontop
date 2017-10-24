@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.owlapi;
 
-import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 public class NPDUnfolderTest extends TestCase {
 
     private final String owlfile = "src/test/resources/npd-v2-ql_a.owl";
-    private final String obdafile = "src/test/resources/npd-v2-ql_a.obda";
 
 
     /**

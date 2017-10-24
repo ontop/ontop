@@ -3650,7 +3650,7 @@ source		SELECT fldArea.dscNpdidDiscovery f_dscNpdidDiscovery, fldArea.dscHcType 
 
 mappingId	Mapping:00923:ForeignKey
 target		npd:wellbore/{wea_wlbNpdidWellbore} npdv:reclassedFromWellbore npd:wellbore/{wNOo_wlbNpdidWellbore} .
-source		SELECT wellbore_exploration_all.wlbNpdidWellbore wea_wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore wNOo_wlbNpdidWellbore FROM wellbore_exploration_all INNER JOIN wellbore_npdid_overview ON wellbore_exploration_all.wlbNpdidWellbore  = wellbore_npdid_overview.wlbNpdidWellbore
+source		SELECT wellbore_exploration_all.wlbNpdidWellbore wea_wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore wNOo_wlbNpdidWellbore FROM wellbore_exploration_all INNER JOIN wellbore_npdid_overview ON wellbore_exploration_all.wlbNpdidWellboreReclass  = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00924:ForeignKey
 target		npd:discovery/{d_dscNpdidDiscovery} npdv:includedInField npd:field/{f_fldNpdidField} .
@@ -3798,7 +3798,7 @@ source		SELECT wellbore_coordinates.wlbNpdidWellbore wc_wlbNpdidWellbore, wellbo
 
 mappingId	Mapping:00960:ForeignKey
 target		npd:wellbore/{wdl_wlbNpdidWellbore} npdv:reclassedFromWellbore npd:wellbore/{wNOo_wlbNpdidWellbore} .
-source		SELECT wellbore_development_all.wlbNpdidWellbore wdl_wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore wNOo_wlbNpdidWellbore FROM wellbore_development_all INNER JOIN wellbore_npdid_overview ON wellbore_development_all.wlbNpdidWellbore = wellbore_npdid_overview.wlbNpdidWellbore
+source		SELECT wellbore_development_all.wlbNpdidWellbore wdl_wlbNpdidWellbore, wellbore_npdid_overview.wlbNpdidWellbore wNOo_wlbNpdidWellbore FROM wellbore_development_all INNER JOIN wellbore_npdid_overview ON wellbore_development_all.wlbNpdidWellboreReclass = wellbore_npdid_overview.wlbNpdidWellbore
 
 mappingId	Mapping:00961:ForeignKey
 target		npd:discovery/{dA_dscNpdidDiscovery}/area/hctype/{dA_dscHcType} npdv:isGeometryOfFeature npd:discovery/{d_dscNpdidDiscovery} .
