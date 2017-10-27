@@ -294,6 +294,23 @@ public class TurtleSyntaxParserTest {
 		TestCase.assertTrue(result);
 	}
 
+
+	//Test for fully identified column
+	@Test
+	public void test_11_1(){
+		final boolean result = parse(":Person-{person.id} a  :Person ;  :age 25 .");
+		TestCase.assertFalse(result);
+
+	}
+
+	//Test for language tag from db
+	@Test
+	public void test_12_1(){
+		final boolean result = parse(":Person-{id} a :Person ; :firstName {name}@{lang} . ");
+		TestCase.assertTrue(result);
+
+	}
+
 	private boolean compareCQIE(String input, int countBody) {
 		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());
 		ImmutableList<ImmutableFunctionalTerm> mapping;
