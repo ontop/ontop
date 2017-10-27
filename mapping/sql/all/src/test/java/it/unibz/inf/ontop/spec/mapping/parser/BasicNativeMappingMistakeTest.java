@@ -37,9 +37,6 @@ public class BasicNativeMappingMistakeTest extends AbstractBasicMappingMistakeTe
         execute("/mistake/fqdn1.obda");
     }
 
-    /**
-     * Currently, does not complain but fixes the mistake
-     */
     @Test(expected = InvalidMappingException.class)
     public void testFQDNInTargetTerm2() throws OBDASpecificationException {
         execute("/mistake/fqdn2.obda");
