@@ -191,6 +191,9 @@ private List<FormatString> parse(String text) {
             toReturn.add(new FixedString(text.substring(i, m.start())));
          }
          String value = m.group(1);
+         if(value.contains(".")){
+         	throw new IllegalArgumentException("Fully qualified columns are not accepted.");
+         }
          toReturn.add(new ColumnString(value));
          i = m.end();
       }
