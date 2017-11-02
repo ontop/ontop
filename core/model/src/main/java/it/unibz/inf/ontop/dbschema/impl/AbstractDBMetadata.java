@@ -15,6 +15,12 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public abstract class AbstractDBMetadata implements DBMetadata {
 
+    private final Relation2Predicate relation2Predicate;
+
+    protected AbstractDBMetadata(Relation2Predicate relation2Predicate) {
+        this.relation2Predicate = relation2Predicate;
+    }
+
     @Override
     public ImmutableMultimap<AtomPredicate, CQIE> generateFKRules() {
         final boolean printouts = false;
@@ -62,8 +68,8 @@ public abstract class AbstractDBMetadata implements DBMetadata {
                 for (Map.Entry<Integer,Integer> swap : positionMatch.entrySet())
                     terms1.set(swap.getKey(), terms2.get(swap.getValue()));
 
-                Function head = Relation2Predicate.getAtom(def2, terms2);
-                Function body = Relation2Predicate.getAtom(def, terms1);
+                Function head = relation2Predicate.getAtom(def2, terms2);
+                Function body = relation2Predicate.getAtom(def, terms1);
 
                 CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
                 multimapBuilder.put(convertToAtomPredicate(body.getFunctionSymbol(), knownPredicateMap), rule);
@@ -78,4 +84,8 @@ public abstract class AbstractDBMetadata implements DBMetadata {
 
     protected abstract AtomPredicate convertToAtomPredicate(Predicate functionSymbol,
                                                             Map<Predicate, AtomPredicate> knownPredicateMap);
+
+    protected Relation2Predicate getRelation2Predicate() {
+        return relation2Predicate;
+    }
 }

@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.iq.optimizer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.JoinLikeNode;
@@ -19,6 +21,7 @@ import it.unibz.inf.ontop.iq.proposal.PullVariableOutOfSubTreeProposal;
 import it.unibz.inf.ontop.iq.proposal.PullVariableOutOfSubTreeResults;
 import it.unibz.inf.ontop.iq.proposal.impl.PullVariableOutOfDataNodeProposalImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.PullVariableOutOfSubTreeProposalImpl;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap;
@@ -26,13 +29,13 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.iq.optimizer.impl.QueryNodeNavigationTools.getDepthFirstNextNode;
 import static it.unibz.inf.ontop.iq.optimizer.impl.QueryNodeNavigationTools.getNextNodeAndQuery;
 
 /**
  * TODO: explain
  */
+@Singleton
 public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
 
     private static class ParentNextChild {
@@ -44,6 +47,14 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
             this.parent = parent;
         }
     }
+
+    private final SubstitutionFactory substitutionFactory;
+
+    @Inject
+    private PullOutVariableOptimizer(SubstitutionFactory substitutionFactory) {
+        this.substitutionFactory = substitutionFactory;
+    }
+
 
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) {
@@ -160,7 +171,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
             else {
                 variablesFromOtherSubTrees.addAll(substitutionMap.keySet());
 
-                InjectiveVar2VarSubstitution renamingSubstitution = SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(substitutionMap);
+                InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(substitutionMap);
 
                 PullVariableOutOfSubTreeProposal<JoinLikeNode> proposal = new PullVariableOutOfSubTreeProposalImpl<>(
                         currentJoinLikeNode, renamingSubstitution, childNode);

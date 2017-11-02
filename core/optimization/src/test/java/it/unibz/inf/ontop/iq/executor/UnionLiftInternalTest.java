@@ -24,8 +24,6 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static org.junit.Assert.assertTrue;
 
 public class UnionLiftInternalTest {

@@ -13,9 +13,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.datalog.impl.DatalogConversionTools.convertFromDatalogDataAtom;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
@@ -38,7 +36,7 @@ public class Datalog2IQConversionTest {
 
         Function datalogHead = DATA_FACTORY.getFunction(predicate,X,X,TWO, Y, URI_TEMPLATE);
 
-        TargetAtom targetAtom = convertFromDatalogDataAtom(datalogHead);
+        TargetAtom targetAtom = DATALOG_CONVERSION_TOOLS.convertFromDatalogDataAtom(datalogHead);
 
         DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
         ImmutableSubstitution<ImmutableTerm> bindings = targetAtom.getSubstitution();

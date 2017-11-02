@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.datalog.impl;
 
 import java.util.Optional;
 
+import com.google.inject.Inject;
 import fj.P2;
 import fj.data.List;
 import it.unibz.inf.ontop.datalog.CQIE;
@@ -32,6 +33,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
  * Note here List are from Functional Java, not java.util.List.
  */
 public class DatalogRule2QueryConverter {
+
 
     /**
      * TODO: explain
@@ -101,18 +103,24 @@ public class DatalogRule2QueryConverter {
     private static final Optional<ArgumentPosition> NO_POSITION = Optional.empty();
     private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
     private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);
+    private final DatalogConversionTools datalogTools;
+
+    @Inject
+    private DatalogRule2QueryConverter(DatalogConversionTools datalogTools) {
+        this.datalogTools = datalogTools;
+    }
 
     /**
      * TODO: describe
      */
-    public static IntermediateQuery convertDatalogRule(DBMetadata dbMetadata, CQIE datalogRule,
+    public IntermediateQuery convertDatalogRule(DBMetadata dbMetadata, CQIE datalogRule,
                                                        Collection<Predicate> tablePredicates,
                                                        Optional<ImmutableQueryModifiers> optionalModifiers,
                                                        IntermediateQueryFactory iqFactory,
                                                        ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
-        TargetAtom targetAtom = DatalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
+        TargetAtom targetAtom = datalogTools.convertFromDatalogDataAtom(datalogRule.getHead());
 
         DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
 
@@ -144,7 +152,7 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: explain
      */
-    private static IntermediateQuery createDefinition(DBMetadata dbMetadata, ConstructionNode rootNode,
+    private IntermediateQuery createDefinition(DBMetadata dbMetadata, ConstructionNode rootNode,
                                                       DistinctVariableOnlyDataAtom projectionAtom,
                                                       Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
@@ -240,7 +248,7 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: describe
      */
-    private static IntermediateQueryBuilder convertDataOrCompositeAtoms(final List<Function> atoms,
+    private IntermediateQueryBuilder convertDataOrCompositeAtoms(final List<Function> atoms,
                                                                         IntermediateQueryBuilder queryBuilder,
                                                                         final QueryNode parentNode,
                                                                         Optional<ArgumentPosition> optionalPosition,
@@ -278,10 +286,10 @@ public class DatalogRule2QueryConverter {
                 /*
                  * Creates the node
                  */
-                TargetAtom targetAtom = DatalogConversionTools.convertFromDatalogDataAtom(atom);
+                TargetAtom targetAtom = datalogTools.convertFromDatalogDataAtom(atom);
                 ImmutableSubstitution<ImmutableTerm> bindings = targetAtom.getSubstitution();
                 DataAtom dataAtom = bindings.applyToDataAtom(targetAtom.getProjectionAtom());
-                DataNode currentNode = DatalogConversionTools.createDataNode(queryBuilder.getFactory(),
+                DataNode currentNode = datalogTools.createDataNode(queryBuilder.getFactory(),
                         dataAtom, tablePredicates);
                 queryBuilder.addChild(parentNode, currentNode, optionalPosition);
             }
@@ -293,7 +301,7 @@ public class DatalogRule2QueryConverter {
         return queryBuilder;
     }
 
-    private static IntermediateQueryBuilder convertLeftJoinAtom(IntermediateQueryBuilder queryBuilder,
+    private IntermediateQueryBuilder convertLeftJoinAtom(IntermediateQueryBuilder queryBuilder,
                                                                 QueryNode parentNodeOfTheLJ,
                                                                 List<Function> subAtomsOfTheLJ,
                                                                 Optional<ArgumentPosition> optionalPosition,
@@ -331,7 +339,7 @@ public class DatalogRule2QueryConverter {
      * TODO: explain
      *
      */
-    private static IntermediateQueryBuilder convertJoinAtom(IntermediateQueryBuilder queryBuilder,
+    private IntermediateQueryBuilder convertJoinAtom(IntermediateQueryBuilder queryBuilder,
                                                             QueryNode parentNodeOfTheJoinNode,
                                                             List<Function> subAtomsOfTheJoin,
                                                             Optional<ArgumentPosition> optionalPosition,

@@ -2,19 +2,28 @@ package it.unibz.inf.ontop.iq.tools.impl;
 
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
-
+@Singleton
 public class VariableDefinitionExtractorImpl implements VariableDefinitionExtractor {
+
+    private final SubstitutionFactory substitutionFactory;
+
+    @Inject
+    private VariableDefinitionExtractorImpl(SubstitutionFactory substitutionFactory) {
+        this.substitutionFactory = substitutionFactory;
+    }
 
     /**
      * Given a query q, a variable x and a starting node n projecting x,
@@ -90,6 +99,6 @@ public class VariableDefinitionExtractorImpl implements VariableDefinitionExtrac
     private ImmutableTerm substitute(Variable initialVariable, Variable currentVariable, ImmutableTerm def) {
         return initialVariable.equals(currentVariable) ?
                 def :
-                SUBSTITUTION_FACTORY.getSubstitution(currentVariable, initialVariable).apply(def);
+                substitutionFactory.getSubstitution(currentVariable, initialVariable).apply(def);
     }
 }

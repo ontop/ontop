@@ -24,9 +24,8 @@ import it.unibz.inf.ontop.iq.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.ProposalResultsImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.iq.transform.node.impl.IdentityQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -34,8 +33,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 @Singleton
 public class QueryMergingExecutorImpl implements QueryMergingExecutor {
@@ -167,13 +164,16 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
 
 
     private final IntermediateQueryFactory iqFactory;
+    private final SubstitutionFactory substitutionFactory;
     private final QueryTransformerFactory transformerFactory;
 
     @Inject
     private QueryMergingExecutorImpl(IntermediateQueryFactory iqFactory,
-                                     QueryTransformerFactory transformerFactory) {
+                                     QueryTransformerFactory transformerFactory,
+                                     SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
         this.transformerFactory = transformerFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
 
@@ -230,7 +230,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
 
 
         VariableGenerator variableGenerator = new VariableGenerator(treeComponent.getKnownVariables());
-        InjectiveVar2VarSubstitution renamingSubstitution = SUBSTITUTION_FACTORY.generateNotConflictingRenaming(variableGenerator,
+        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(variableGenerator,
                 subQuery.getKnownVariables());
 
         IntermediateQuery renamedSubQuery;
@@ -293,17 +293,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
     }
 
 
-    private HomogeneousQueryNodeTransformer createRenamer(InjectiveVar2VarSubstitution renamingSubstitution) {
-        if (renamingSubstitution.isEmpty()) {
-            return new IdentityQueryNodeTransformer();
-        }
-        else {
-            return new QueryNodeRenamer(iqFactory, renamingSubstitution);
-        }
-    }
-
-
-    private static ImmutableSubstitution<VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,
+    private ImmutableSubstitution<VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,
                                                                                    DataAtom targetAtom) {
         if (!sourceAtom.getPredicate().equals(targetAtom.getPredicate())) {
             throw new IllegalStateException("Incompatible predicates");
@@ -317,7 +307,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                 (ImmutableList<VariableOrGroundTerm>) targetAtom.getArguments()).stream()
                 .collect(ImmutableCollectors.toMap());
 
-        return SUBSTITUTION_FACTORY.getSubstitution(newMap);
+        return substitutionFactory.getSubstitution(newMap);
     }
 
     /**

@@ -4,11 +4,18 @@ package it.unibz.inf.ontop.model.atom;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TermType;
 
 public interface AtomFactory {
 
+    @Deprecated
     AtomPredicate getAtomPredicate(String name, int arity);
+
+    AtomPredicate getAtomPredicate(String name, ImmutableList<TermType> expectedBaseTypes);
+
     AtomPredicate getAtomPredicate(Predicate datalogPredicate);
+
+    AtomPredicate getObjectPropertyPredicate(String name);
 
     /**
      * Beware: a DataAtom is immutable

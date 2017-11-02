@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -26,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.foldBooleanExpressions;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.DECLARE_AS_EMPTY;
@@ -46,22 +46,26 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
+    private final SubstitutionFactory substitutionFactory;
 
     @AssistedInject
     private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition,
-                             TermNullabilityEvaluator nullabilityEvaluator) {
+                             TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory) {
         super(optionalJoinCondition, nullabilityEvaluator);
+        this.substitutionFactory = substitutionFactory;
     }
 
     @AssistedInject
     private LeftJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
-                             TermNullabilityEvaluator nullabilityEvaluator) {
+                             TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory) {
         super(Optional.of(joiningCondition), nullabilityEvaluator);
+        this.substitutionFactory = substitutionFactory;
     }
 
     @AssistedInject
-    private LeftJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator) {
+    private LeftJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory) {
         super(Optional.empty(), nullabilityEvaluator);
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -71,7 +75,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public LeftJoinNode clone() {
-        return new LeftJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator());
+        return new LeftJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(), substitutionFactory);
     }
 
     @Override
@@ -81,7 +85,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
-        return new LeftJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator());
+        return new LeftJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator(), substitutionFactory);
     }
 
     @Override
@@ -109,7 +113,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .filter(e -> !leftVariables.contains(e.getKey()))
                 .map(e -> (Map.Entry<Variable, ImmutableTerm>)e)
                 .collect(ImmutableCollectors.toMap());
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = SUBSTITUTION_FACTORY.getSubstitution(newSubstitutionMap);
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(newSubstitutionMap);
 
         /**
          * New equalities (which could not be propagated)
@@ -243,7 +247,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         Stream<Map.Entry<Variable, ImmutableTerm>> alreadyExistingEntries = substitution.getImmutableMap().entrySet().stream()
                 .map(e -> (Map.Entry<Variable, ImmutableTerm>)e);
 
-        return SUBSTITUTION_FACTORY.getSubstitution(
+        return substitutionFactory.getSubstitution(
                 Stream.concat(nullEntries, alreadyExistingEntries)
                         .collect(ImmutableCollectors.toMap()));
 
@@ -269,7 +273,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .filter(e -> !newlyNullVariables.contains(e.getKey()))
                 .map(e -> (Map.Entry<Variable, ImmutableTerm>)e);
 
-        return SUBSTITUTION_FACTORY.getSubstitution(
+        return substitutionFactory.getSubstitution(
                 Stream.concat(nullEntries, otherEntries)
                         .collect(ImmutableCollectors.toMap()));
     }

@@ -22,6 +22,8 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.GroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 
 import java.util.*;
 
@@ -51,7 +53,10 @@ public class RedundantSelfLeftJoinExecutor
     }
 
     @Inject
-    private RedundantSelfLeftJoinExecutor(IntermediateQueryFactory iqFactory) {
+    private RedundantSelfLeftJoinExecutor(IntermediateQueryFactory iqFactory,
+                                          SubstitutionFactory substitutionFactory,
+                                          ImmutableUnificationTools unificationTools) {
+        super(substitutionFactory, unificationTools);
         this.iqFactory = iqFactory;
     }
 

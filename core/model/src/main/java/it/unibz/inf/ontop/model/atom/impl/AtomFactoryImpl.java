@@ -1,39 +1,59 @@
 package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import java.util.stream.IntStream;
+
 import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.areVariablesDistinct;
 import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.isVariableOnly;
 
 
 public class AtomFactoryImpl implements AtomFactory {
 
-    private static final AtomFactory INSTANCE = new AtomFactoryImpl();
-
     private final AtomPredicate triplePredicate;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
+    private final ObjectRDFType objectRDFType;
 
-    private AtomFactoryImpl() {
+    @Inject
+    private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory) {
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
         triplePredicate = getAtomPredicate("triple", 3);
-    }
-
-    public static AtomFactory getInstance() {
-        return INSTANCE;
+        objectRDFType = typeFactory.getAbstractObjectRDFType();
     }
 
     @Override
     public AtomPredicate getAtomPredicate(String name, int arity) {
-        return new AtomPredicateImpl(name, arity);
+        ImmutableList<TermType> defaultBaseTypes = IntStream.range(0, arity).boxed()
+                .map(i -> typeFactory.getAbstractRDFTermType())
+                .collect(ImmutableCollectors.toList());
+        return getAtomPredicate(name, defaultBaseTypes);
+    }
+
+    @Override
+    public AtomPredicate getAtomPredicate(String name, ImmutableList<TermType> expectedBaseTypes) {
+        return new AtomPredicateImpl(name, expectedBaseTypes.size(), expectedBaseTypes);
     }
 
     @Override
     public AtomPredicate getAtomPredicate(Predicate datalogPredicate) {
         return new AtomPredicateImpl(datalogPredicate);
+    }
+
+    @Override
+    public AtomPredicate getObjectPropertyPredicate(String name) {
+        return new AtomPredicateImpl(name, 2, ImmutableList.of(objectRDFType, objectRDFType));
     }
 
     @Override
@@ -103,7 +123,7 @@ public class AtomFactoryImpl implements AtomFactory {
 
     @Override
     public Function getTripleAtom(Term subject, Term predicate, Term object) {
-        return TERM_FACTORY.getFunction(triplePredicate, subject, predicate, object);
+        return termFactory.getFunction(triplePredicate, subject, predicate, object);
     }
 
     @Override
@@ -115,6 +135,6 @@ public class AtomFactoryImpl implements AtomFactory {
     @Override
     public ImmutableFunctionalTerm getImmutableTripleAtom(ImmutableTerm subject, ImmutableTerm predicate,
                                                           ImmutableTerm object) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(triplePredicate, subject, predicate, object);
+        return termFactory.getImmutableFunctionalTerm(triplePredicate, subject, predicate, object);
     }
 }

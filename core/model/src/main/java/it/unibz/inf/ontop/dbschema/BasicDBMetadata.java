@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.dbschema.impl.AbstractDBMetadata;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -13,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 
 public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
 
@@ -34,15 +33,19 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     private ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> uniqueConstraints;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadata.class);
+    private final AtomFactory atomFactory;
 
-    protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion, QuotedIDFactory idfac) {
+    protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
+                              QuotedIDFactory idfac, AtomFactory atomFactory, Relation2Predicate relation2Predicate) {
         this(driverName, driverVersion, databaseProductName, databaseVersion, idfac, new HashMap<>(), new HashMap<>(),
-                new LinkedList<>());
+                new LinkedList<>(), relation2Predicate, atomFactory);
     }
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                            QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
-                            Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables) {
+                              QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
+                              Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
+                              Relation2Predicate relation2Predicate, AtomFactory atomFactory) {
+        super(relation2Predicate);
         this.driverName = driverName;
         this.driverVersion = driverVersion;
         this.databaseProductName = databaseProductName;
@@ -51,6 +54,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
         this.tables = tables;
         this.relations = relations;
         this.listOfTables = listOfTables;
+        this.atomFactory = atomFactory;
         this.isStillMutable = true;
         this.uniqueConstraints = null;
     }
@@ -189,7 +193,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     private Stream<Map.Entry<AtomPredicate, ImmutableList<Integer>>> extractUniqueConstraintsFromRelation(
             DatabaseRelationDefinition relation, Map<Predicate, AtomPredicate> predicateCache) {
 
-        Predicate originalPredicate = Relation2Predicate.createPredicateFromRelation(relation);
+        Predicate originalPredicate = getRelation2Predicate().createPredicateFromRelation(relation);
         AtomPredicate atomPredicate = convertToAtomPredicate(originalPredicate, predicateCache);
 
         return relation.getUniqueConstraints().stream()
@@ -210,7 +214,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
             return predicateCache.get(originalPredicate);
         }
         else {
-            AtomPredicate atomPredicate = ATOM_FACTORY.getAtomPredicate(originalPredicate);
+            AtomPredicate atomPredicate = atomFactory.getAtomPredicate(originalPredicate);
             // Cache it
             predicateCache.put(originalPredicate, atomPredicate);
             return atomPredicate;
@@ -251,7 +255,8 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     @Override
     public BasicDBMetadata clone() {
         return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion, idfac,
-                new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables));
+                new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables), getRelation2Predicate(),
+                atomFactory);
     }
 
     protected boolean isStillMutable() {

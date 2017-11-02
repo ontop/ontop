@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.iq.executor.substitution;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.executor.substitution.LocalPropagationTools.SubstitutionApplicationResults;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
@@ -26,8 +28,16 @@ import static it.unibz.inf.ontop.iq.executor.substitution.LocalPropagationTools.
 /**
  * TODO: explain
  */
+@Singleton
 public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
         implements SubstitutionPropagationExecutor<N> {
+
+    private final ImmutableSubstitutionTools substitutionTools;
+
+    @Inject
+    private SubstitutionPropagationExecutorImpl(ImmutableSubstitutionTools substitutionTools) {
+        this.substitutionTools = substitutionTools;
+    }
 
     @Override
     public NodeCentricOptimizationResults<N> apply(SubstitutionPropagationProposal<N> proposal,
@@ -132,7 +142,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
                 .orElseThrow(() -> new InvalidIntermediateQueryException(
                         "All the non-root nodes must be an ExplicitVariableProjectionNode ancestor"));
 
-        return ImmutableSubstitutionTools.prioritizeRenaming(substitution, closestProjectionAncestor.getVariables());
+        return substitutionTools.prioritizeRenaming(substitution, closestProjectionAncestor.getVariables());
     }
 
     /**

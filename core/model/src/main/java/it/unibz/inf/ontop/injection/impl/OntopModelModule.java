@@ -8,12 +8,14 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.FilterNullableVariableQueryTransformer;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 
@@ -30,6 +32,8 @@ public class OntopModelModule extends OntopAbstractModule {
         // Core factories: Too central to be overloaded from the properties
         bind(TypeFactory.class).toInstance(TYPE_FACTORY);
         bind(TermFactory.class).toInstance(TERM_FACTORY);
+        bindFromSettings(AtomFactory.class);
+        bindFromSettings(SubstitutionFactory.class);
 
         bindFromSettings(IntermediateQueryValidator.class);
         bindFromSettings(TermNullabilityEvaluator.class);

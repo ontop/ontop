@@ -75,11 +75,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public Predicate getObjectPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, ImmutableList.of(OBJECT_RDF_TYPE, OBJECT_RDF_TYPE));
-	}
-
-	@Override
 	public Predicate getDataPropertyPredicate(String name) {
 		return new PredicateImpl(name, 2, ImmutableList.of(OBJECT_RDF_TYPE, TYPE_FACTORY.getAbstractRDFSLiteral()));
 	}

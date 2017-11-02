@@ -46,8 +46,6 @@ public interface TermFactory {
 
 	public Predicate getPredicate(String uri, ImmutableList<TermType> types);
 
-	public Predicate getObjectPropertyPredicate(String name);
-
 	public Predicate getDataPropertyPredicate(String name, TermType type);
 
 	public Predicate getAnnotationPropertyPredicate(String name);

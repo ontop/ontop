@@ -248,7 +248,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
                 // BC: let's accept it, templates for Bnodes should be supported
 
                 if (term1.equals(term2))
-                    return new NeutralSubstitution();
+                    return new SubstitutionImpl();
                 else
                     return null;
             }
@@ -272,7 +272,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
         // the unifier knows about this
         if  (t2 instanceof Variable) {
             if (t1.equals(t2))   // ROMAN: no need in isEqual(t1, t2) -- both are proper variables
-                return new NeutralSubstitution();
+                return new SubstitutionImpl();
             else
                 return new SingletonSubstitution(t1, t2);
         }

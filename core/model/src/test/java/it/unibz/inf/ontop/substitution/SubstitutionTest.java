@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
+import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
 public class SubstitutionTest {

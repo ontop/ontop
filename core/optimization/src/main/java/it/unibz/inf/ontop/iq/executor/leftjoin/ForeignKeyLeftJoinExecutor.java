@@ -31,10 +31,12 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
 
     private final IntermediateQueryFactory iqFactory;
+    private final Relation2Predicate relation2Predicate;
 
     @Inject
-    private ForeignKeyLeftJoinExecutor(IntermediateQueryFactory iqFactory) {
+    private ForeignKeyLeftJoinExecutor(IntermediateQueryFactory iqFactory, Relation2Predicate relation2Predicate) {
         this.iqFactory = iqFactory;
+        this.relation2Predicate = relation2Predicate;
     }
 
     /**
@@ -146,7 +148,7 @@ public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<Lef
 
     private DatabaseRelationDefinition getDatabaseRelation(DBMetadata dbMetadata, AtomPredicate predicate) {
 
-        RelationID relationId = Relation2Predicate.createRelationFromPredicateName(
+        RelationID relationId = relation2Predicate.createRelationFromPredicateName(
                 dbMetadata.getQuotedIDFactory(),
                 predicate);
 

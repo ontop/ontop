@@ -23,7 +23,6 @@ import org.junit.Test;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 import static junit.framework.TestCase.*;
 import static org.junit.Assert.assertNotEquals;

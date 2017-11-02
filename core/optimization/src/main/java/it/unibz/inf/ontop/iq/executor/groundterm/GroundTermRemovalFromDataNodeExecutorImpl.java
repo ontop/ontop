@@ -8,7 +8,9 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.iq.proposal.GroundTermRemovalFromDataNodeProposal;
@@ -17,16 +19,9 @@ import it.unibz.inf.ontop.iq.proposal.ProposalResults;
 import it.unibz.inf.ontop.iq.proposal.impl.ProposalResultsImpl;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.GroundTerm;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
 import java.util.Collection;
 import java.util.Map;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Turns constant values from a data node d into explicit equalities.
@@ -71,10 +66,15 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
 
 
     private final IntermediateQueryFactory iqFactory;
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
 
     @Inject
-    private GroundTermRemovalFromDataNodeExecutorImpl(IntermediateQueryFactory iqFactory) {
+    private GroundTermRemovalFromDataNodeExecutorImpl(IntermediateQueryFactory iqFactory,
+                                                      AtomFactory atomFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
     }
 
     /**
@@ -143,7 +143,7 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
         ImmutableList.Builder<ImmutableExpression> booleanExpressionBuilder = ImmutableList.builder();
 
         for (VariableGroundTermPair pair : pairs ) {
-            booleanExpressionBuilder.add(TERM_FACTORY.getImmutableExpression(
+            booleanExpressionBuilder.add(termFactory.getImmutableExpression(
                     ExpressionOperation.EQ, pair.variable, pair.groundTerm));
         }
         Optional<ImmutableExpression> optionalFoldExpression = ImmutabilityTools.foldBooleanExpressions(
@@ -182,7 +182,7 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
     }
 
     protected DataNode generateDataNode(DataNode formerDataNode, ImmutableList<VariableOrGroundTerm> arguments) {
-        DataAtom dataAtom = ATOM_FACTORY.getDataAtom(formerDataNode.getProjectionAtom().getPredicate(), arguments);
+        DataAtom dataAtom = atomFactory.getDataAtom(formerDataNode.getProjectionAtom().getPredicate(), arguments);
         if (formerDataNode instanceof ExtensionalDataNode) {
             return iqFactory.createExtensionalDataNode(dataAtom);
         }

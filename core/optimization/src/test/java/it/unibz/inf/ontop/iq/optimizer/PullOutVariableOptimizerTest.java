@@ -7,13 +7,11 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import org.junit.Test;
 
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 import static junit.framework.TestCase.assertTrue;
 
@@ -88,9 +86,8 @@ public class PullOutVariableOptimizerTest {
         IntermediateQuery query1 = queryBuilder1.build();
 
         System.out.println("\nBefore optimization: \n" +  query1);
-
-        PullOutVariableOptimizer pullOutVariableOptimizer = new PullOutVariableOptimizer();
-        IntermediateQuery optimizedQuery = pullOutVariableOptimizer.optimize(query1);
+        
+        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -132,9 +129,8 @@ public class PullOutVariableOptimizerTest {
         IntermediateQuery query1 = queryBuilder1.build();
 
         System.out.println("\nBefore optimization: \n" +  query1);
-
-        PullOutVariableOptimizer pullOutVariableOptimizer = new PullOutVariableOptimizer();
-        IntermediateQuery optimizedQuery = pullOutVariableOptimizer.optimize(query1);
+        
+        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -182,9 +178,8 @@ public class PullOutVariableOptimizerTest {
         IntermediateQuery query1 = queryBuilder1.build();
 
         System.out.println("\nBefore optimization: \n" +  query1);
-
-        PullOutVariableOptimizer pullOutVariableOptimizer = new PullOutVariableOptimizer();
-        IntermediateQuery optimizedQuery = pullOutVariableOptimizer.optimize(query1);
+        
+        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -234,9 +229,8 @@ public class PullOutVariableOptimizerTest {
         IntermediateQuery query1 = queryBuilder1.build();
 
         System.out.println("\nBefore optimization: \n" +  query1);
-
-        PullOutVariableOptimizer pullOutVariableOptimizer = new PullOutVariableOptimizer();
-        IntermediateQuery optimizedQuery = pullOutVariableOptimizer.optimize(query1);
+        
+        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -279,9 +273,8 @@ public class PullOutVariableOptimizerTest {
         IntermediateQuery query1 = queryBuilder1.build();
 
         System.out.println("\nBefore optimization: \n" +  query1);
-
-        PullOutVariableOptimizer pullOutVariableOptimizer = new PullOutVariableOptimizer();
-        IntermediateQuery optimizedQuery = pullOutVariableOptimizer.optimize(query1);
+        
+        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -332,9 +325,8 @@ public class PullOutVariableOptimizerTest {
         IntermediateQuery query1 = queryBuilder1.build();
 
         System.out.println("\nBefore optimization: \n" +  query1);
-
-        PullOutVariableOptimizer pullOutVariableOptimizer = new PullOutVariableOptimizer();
-        IntermediateQuery optimizedQuery = pullOutVariableOptimizer.optimize(query1);
+        
+        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -379,9 +371,8 @@ public class PullOutVariableOptimizerTest {
         IntermediateQuery query1 = queryBuilder1.build();
 
         System.out.println("\nBefore optimization: \n" +  query1);
-
-        PullOutVariableOptimizer pullOutVariableOptimizer = new PullOutVariableOptimizer();
-        IntermediateQuery optimizedQuery = pullOutVariableOptimizer.optimize(query1);
+        
+        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 

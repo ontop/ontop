@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.*;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

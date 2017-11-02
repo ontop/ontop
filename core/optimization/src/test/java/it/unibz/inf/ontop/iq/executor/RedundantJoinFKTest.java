@@ -18,8 +18,6 @@ import org.junit.Test;
 
 import java.sql.Types;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static junit.framework.TestCase.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -55,25 +53,25 @@ public class RedundantJoinFKTest {
         /**
          * build the FKs
          */
-        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata();
+        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1"));
         Attribute pk1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         table1Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        TABLE1_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1Def);
+        TABLE1_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table1Def);
 
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
         table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         Attribute table2Col2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Col2, pk1));
-        TABLE2_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table2Def);
+        TABLE2_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table2Def);
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE3"));
         Attribute pk2 = table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         Attribute pk3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
-        TABLE3_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table3Def);
+        TABLE3_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table3Def);
 
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE4"));
         table4Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
@@ -84,7 +82,7 @@ public class RedundantJoinFKTest {
                 .add(table4Col2, pk2)
                 .add(table4Col3, pk3)
                 .build("fk2-1"));
-        TABLE4_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table4Def);
+        TABLE4_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table4Def);
 
         dbMetadata.freeze();
 

@@ -9,16 +9,19 @@ import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.model.term.TermConstants.NULL;
 
 
 @Singleton
 public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
+    private final SubstitutionFactory substitutionFactory;
+
     @Inject
-    private TermNullabilityEvaluatorImpl() {
+    private TermNullabilityEvaluatorImpl(SubstitutionFactory substitutionFactory) {
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -40,7 +43,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
     @Override
     public boolean isFilteringNullValue(ImmutableExpression expression, Variable variable) {
-        ImmutableExpression nullCaseExpression = SUBSTITUTION_FACTORY.getSubstitution(variable, NULL)
+        ImmutableExpression nullCaseExpression = substitutionFactory.getSubstitution(variable, NULL)
                 .applyToBooleanExpression(expression);
 
         // TODO: inject the expression evaluator instead

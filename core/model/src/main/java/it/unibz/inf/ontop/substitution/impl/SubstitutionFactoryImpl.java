@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.substitution.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -17,15 +19,16 @@ import java.util.Map;
 
 public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
-    private static final SubstitutionFactory INSTANCE = new SubstitutionFactoryImpl();
+    private final AtomFactory atomFactory;
 
-    public static SubstitutionFactory getInstance() {
-        return INSTANCE;
+    @Inject
+    private SubstitutionFactoryImpl(AtomFactory atomFactory) {
+        this.atomFactory = atomFactory;
     }
 
     @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap) {
-        return new ImmutableSubstitutionImpl<>(newSubstitutionMap);
+        return new ImmutableSubstitutionImpl<>(newSubstitutionMap, atomFactory);
     }
 
     @Override
@@ -51,17 +54,17 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution() {
-        return new ImmutableSubstitutionImpl<>(ImmutableMap.of());
+        return new ImmutableSubstitutionImpl<>(ImmutableMap.of(), atomFactory);
     }
 
     @Override
     public Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
-        return new Var2VarSubstitutionImpl(substitutionMap);
+        return new Var2VarSubstitutionImpl(substitutionMap, atomFactory);
     }
 
     @Override
     public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Map<Variable, Variable> substitutionMap) {
-        return new InjectiveVar2VarSubstitutionImpl(substitutionMap);
+        return new InjectiveVar2VarSubstitutionImpl(substitutionMap, atomFactory);
     }
 
     /**

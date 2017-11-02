@@ -20,11 +20,7 @@ import org.junit.Test;
 import java.sql.Types;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.OptimizationTestingTools.DATA_FACTORY;
-import static it.unibz.inf.ontop.OptimizationTestingTools.IQ_FACTORY;
-import static it.unibz.inf.ontop.OptimizationTestingTools.createQueryBuilder;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
@@ -78,7 +74,7 @@ public class FunctionalDependencyTest {
     private static final DBMetadata METADATA;
 
     static{
-        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata();
+        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         /*
@@ -97,7 +93,7 @@ public class FunctionalDependencyTest {
                 .addDependent(col3T1)
                 .addDependent(col4T1)
                 .build());
-        TABLE1_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1Def);
+        TABLE1_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table1Def);
 
         /*
          * Table 2: non-composite unique constraint and regular field
@@ -107,7 +103,7 @@ public class FunctionalDependencyTest {
         Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
-        TABLE2_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table2Def);
+        TABLE2_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table2Def);
 
         /*
          * Table 3: PK + 2 independent non-unique functional constraints + 1 independent
@@ -129,7 +125,7 @@ public class FunctionalDependencyTest {
                 .addDeterminant(col4T3)
                 .addDependent(col5T3)
                 .build());
-        TABLE3_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table3Def);
+        TABLE3_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table3Def);
 
         /*
          * Table 4: PK + 2 non-unique functional constraints (one is nested) + 1 independent attribute
@@ -151,7 +147,7 @@ public class FunctionalDependencyTest {
                 .addDependent(col3T4)
                 .addDependent(col4T4)
                 .build());
-        TABLE4_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table4Def);
+        TABLE4_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table4Def);
 
         dbMetadata.freeze();
         METADATA = dbMetadata;

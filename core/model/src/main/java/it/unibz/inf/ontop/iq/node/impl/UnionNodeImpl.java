@@ -22,10 +22,13 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     private static final String UNION_NODE_STR = "UNION";
     private final ImmutableSet<Variable> projectedVariables;
+    private final ConstructionNodeTools constructionTools;
 
     @AssistedInject
-    private UnionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables) {
+    private UnionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
+                          ConstructionNodeTools constructionTools) {
         this.projectedVariables = projectedVariables;
+        this.constructionTools = constructionTools;
     }
 
     @Override
@@ -35,7 +38,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     @Override
     public UnionNode clone() {
-        return new UnionNodeImpl(projectedVariables);
+        return new UnionNodeImpl(projectedVariables, constructionTools);
     }
 
     @Override
@@ -79,7 +82,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     @Override
     public SubstitutionResults<UnionNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        ImmutableSet<Variable> newProjectedVariables = ConstructionNodeTools.computeNewProjectedVariables(substitution,
+        ImmutableSet<Variable> newProjectedVariables = constructionTools.computeNewProjectedVariables(substitution,
                 projectedVariables);
 
         /**
@@ -92,7 +95,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
          * Otherwise, updates the projected variables and propagates the substitution down.
          */
         else {
-            UnionNode newNode = new UnionNodeImpl(newProjectedVariables);
+            UnionNode newNode = new UnionNodeImpl(newProjectedVariables, constructionTools);
             return DefaultSubstitutionResults.newNode(newNode, substitution);
         }
     }

@@ -47,10 +47,6 @@ public class DatalogProgramSyntaxFactory {
 	public static Predicate predicate(String uri, int arity){
 		return TERM_FACTORY.getPredicate(uri, arity);
 	}
-	
-	public static Predicate objectProperty(String name){
-		return TERM_FACTORY.getObjectPropertyPredicate(name);
-	}
 
 	public static Predicate dataProperty(String name){
 		return TERM_FACTORY.getDataPropertyPredicate(name);

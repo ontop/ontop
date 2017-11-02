@@ -14,6 +14,8 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 
 import java.util.Optional;
 
@@ -24,8 +26,10 @@ import java.util.Optional;
 public class UCRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor {
 
     @Inject
-    private UCRedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory) {
-        super(iqFactory);
+    private UCRedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory,
+                                        SubstitutionFactory substitutionFactory,
+                                        ImmutableUnificationTools unificationTools) {
+        super(iqFactory, substitutionFactory, unificationTools);
     }
 
 

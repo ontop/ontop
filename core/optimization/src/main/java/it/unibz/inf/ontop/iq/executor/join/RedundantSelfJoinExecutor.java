@@ -15,6 +15,8 @@ import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 
 import java.util.Optional;
 
@@ -34,7 +36,10 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
     private static final int MAX_ITERATIONS = 100;
     private final IntermediateQueryFactory iqFactory;
 
-    protected RedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory) {
+    protected RedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory,
+                                        SubstitutionFactory substitutionFactory,
+                                        ImmutableUnificationTools unificationTools) {
+        super(substitutionFactory, unificationTools);
         this.iqFactory = iqFactory;
     }
 

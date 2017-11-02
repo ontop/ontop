@@ -4,15 +4,19 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.optimizer.BindingExtractor;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap;
@@ -20,12 +24,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 /**
  * Only deals with construction and union nodes
  */
+@Singleton
 public class UnionFriendlyBindingExtractor implements BindingExtractor {
 
     private static class PartialExtraction {
@@ -61,6 +64,15 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
 //        }
     }
 
+    private final SubstitutionFactory substitutionFactory;
+    private final TermFactory termFactory;
+
+    @Inject
+    private UnionFriendlyBindingExtractor(SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+        this.substitutionFactory = substitutionFactory;
+        this.termFactory = termFactory;
+    }
+
     @Override
     public Extraction extractInSubTree(IntermediateQuery query, QueryNode subTreeRootNode) {
 
@@ -71,7 +83,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
             @Override
             public Optional<ImmutableSubstitution<ImmutableTerm>> getOptionalSubstitution() {
                 return Optional.of(substitutionMap.getMergedBindings().collect(ImmutableCollectors.toMap())).filter(m -> !m.isEmpty())
-                        .map(SUBSTITUTION_FACTORY::getSubstitution);
+                        .map(substitutionFactory::getSubstitution);
             }
 
             @Override
@@ -204,7 +216,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
                     return Optional.empty();
                 }
             }
-            return Optional.of(TERM_FACTORY.getImmutableFunctionalTerm(functionalTerm1.getFunctionSymbol(),
+            return Optional.of(termFactory.getImmutableFunctionalTerm(functionalTerm1.getFunctionSymbol(),
                     argumentBuilder.build()));
         }
         else {

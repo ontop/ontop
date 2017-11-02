@@ -26,10 +26,13 @@ import java.util.stream.IntStream;
 public class ExtensionalDataNodeImpl extends DataNodeImpl implements ExtensionalDataNode {
 
     private static final String EXTENSIONAL_NODE_STR = "EXTENSIONAL";
+    private final Relation2Predicate relation2Predicate;
 
     @AssistedInject
-    private ExtensionalDataNodeImpl(@Assisted DataAtom atom) {
+    private ExtensionalDataNodeImpl(@Assisted DataAtom atom,
+                                    Relation2Predicate relation2Predicate) {
         super(atom);
+        this.relation2Predicate = relation2Predicate;
     }
 
     @Override
@@ -39,7 +42,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
 
     @Override
     public ExtensionalDataNode clone() {
-        return new ExtensionalDataNodeImpl(getProjectionAtom());
+        return new ExtensionalDataNodeImpl(getProjectionAtom(), relation2Predicate);
     }
 
     @Override
@@ -73,7 +76,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
         DBMetadata metadata = query.getDBMetadata();
         DataAtom atom = getProjectionAtom();
 
-        RelationID relationId = Relation2Predicate.createRelationFromPredicateName(
+        RelationID relationId = relation2Predicate.createRelationFromPredicateName(
                 metadata.getQuotedIDFactory(),
                 atom.getPredicate());
         DatabaseRelationDefinition relation = metadata.getDatabaseRelation(relationId);
@@ -106,6 +109,6 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
 
     @Override
     public ExtensionalDataNode newAtom(DataAtom newAtom) {
-        return new ExtensionalDataNodeImpl(newAtom);
+        return new ExtensionalDataNodeImpl(newAtom, relation2Predicate);
     }
 }

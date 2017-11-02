@@ -5,10 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.ConversionException;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.DistinctVariableDataAtom;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -20,7 +17,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
@@ -28,6 +24,12 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
  */
 public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm> extends LocallyImmutableSubstitutionImpl
         implements ImmutableSubstitution<T> {
+
+    private final AtomFactory atomFactory;
+
+    protected AbstractImmutableSubstitutionImpl(AtomFactory atomFactory) {
+        this.atomFactory = atomFactory;
+    }
 
     @Override
     public ImmutableTerm apply(ImmutableTerm term) {
@@ -110,7 +112,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             argBuilder.add((VariableOrGroundTerm)subTerm);
 
         }
-        return ATOM_FACTORY.getDataAtom(predicate, argBuilder.build());
+        return atomFactory.getDataAtom(predicate, argBuilder.build());
     }
 
     @Override
@@ -126,7 +128,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
          * Checks if new data atom can be converted into a DistinctVariableDataAtom
          */
         if (newDataAtom.getArguments().size() == newDataAtom.getVariables().size()) {
-            return ATOM_FACTORY.getDistinctVariableDataAtom(newDataAtom.getPredicate(),
+            return atomFactory.getDistinctVariableDataAtom(newDataAtom.getPredicate(),
                     (ImmutableList<Variable>)newDataAtom.getArguments());
         }
         else {
@@ -193,7 +195,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 substitutionMap.entrySet().stream()
                         // Clean out entries like t/t
                         .filter(entry -> !entry.getKey().equals(entry.getValue()))
-                        .collect(ImmutableCollectors.toMap()));
+                        .collect(ImmutableCollectors.toMap()), atomFactory);
     }
 
     /**
@@ -232,7 +234,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         Optional<ImmutableMap<Variable, T>> optionalMap = computeUnionMap(otherSubstitution);
         if (optionalMap.isPresent()) {
-            ImmutableSubstitution<T> unionSubstitution = new ImmutableSubstitutionImpl<>(optionalMap.get());
+            ImmutableSubstitution<T> unionSubstitution = new ImmutableSubstitutionImpl<>(optionalMap.get(), atomFactory);
             return Optional.of(unionSubstitution);
         }
         return Optional.empty();
@@ -264,7 +266,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
                             Map.Entry::getValue));
-            return Optional.of(new ImmutableSubstitutionImpl<>(newMap));
+            return Optional.of(new ImmutableSubstitutionImpl<>(newMap, atomFactory));
         }
     }
 
@@ -277,7 +279,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         for (Map.Entry<Variable, ? extends ImmutableTerm> otherEntry : otherSubstitutionMap.entrySet()) {
             mapBuilder.put(otherEntry.getKey(), apply(otherEntry.getValue()));
         }
-        return new ImmutableSubstitutionImpl<>(mapBuilder.build());
+        return new ImmutableSubstitutionImpl<>(mapBuilder.build(), atomFactory);
     }
 
     @Override
@@ -329,7 +331,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return this;
         }
         else {
-            Var2VarSubstitution renamingSubstitution = new Var2VarSubstitutionImpl(renamingMap);
+            Var2VarSubstitution renamingSubstitution = new Var2VarSubstitutionImpl(renamingMap, getAtomFactory());
 
             ImmutableMap<Variable, T> orientedMap = Stream.concat(
                     localMap.entrySet().stream()
@@ -360,7 +362,8 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return new ImmutableSubstitutionImpl(
                 this.getImmutableMap().entrySet().stream()
                         .filter(e -> restrictingDomain.contains(e.getKey()))
-                        .collect(ImmutableCollectors.toMap())
+                        .collect(ImmutableCollectors.toMap()),
+                atomFactory
         );
     }
 
@@ -408,6 +411,10 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         else {
             throw new IllegalArgumentException("Unexpected kind of term: " + term.getClass());
         }
+    }
+
+    protected AtomFactory getAtomFactory() {
+        return atomFactory;
     }
 
 }

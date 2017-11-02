@@ -21,8 +21,6 @@ import java.sql.Types;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static junit.framework.TestCase.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -65,7 +63,7 @@ public class LeftJoinOptimizationTest {
     private static final DBMetadata DB_METADATA;
 
     static {
-        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata();
+        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         /**
@@ -76,7 +74,7 @@ public class LeftJoinOptimizationTest {
         table1Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table1Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, true);
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Col1));
-        TABLE1_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1Def);
+        TABLE1_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table1Def);
 
         /**
          * Table 2: non-composite unique constraint and regular field
@@ -87,7 +85,7 @@ public class LeftJoinOptimizationTest {
         table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Col1));
         table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Col2, table1Col1));
-        TABLE2_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table2Def);
+        TABLE2_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table2Def);
 
         /**
          * Table 3: composite unique constraint over the first TWO columns
@@ -97,7 +95,7 @@ public class LeftJoinOptimizationTest {
         Attribute table3Col2 = table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Col1, table3Col2));
-        TABLE3_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table3Def);
+        TABLE3_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table3Def);
 
         /**
          * Table 1a: non-composite unique constraint and regular field
@@ -108,7 +106,7 @@ public class LeftJoinOptimizationTest {
         table1aDef.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table1aDef.addAttribute(idFactory.createAttributeID("col4"), Types.INTEGER, null, false);
         table1aDef.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1aCol1));
-        TABLE1a_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1aDef);
+        TABLE1a_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table1aDef);
 
         /**
          * Table 2a: non-composite unique constraint and regular field
@@ -122,7 +120,7 @@ public class LeftJoinOptimizationTest {
         fkBuilder.add(table2aCol2, table1aCol1);
         fkBuilder.add(table2aCol3, table1aCol2);
         table2aDef.addForeignKeyConstraint(fkBuilder.build("composite-fk"));
-        TABLE2a_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table2aDef);
+        TABLE2a_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table2aDef);
 
         dbMetadata.freeze();
         DB_METADATA = dbMetadata;

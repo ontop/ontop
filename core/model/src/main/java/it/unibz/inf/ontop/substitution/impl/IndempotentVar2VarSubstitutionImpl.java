@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.substitution.impl;
 
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.substitution.IndempotentVar2VarSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.impl.Var2VarSubstitutionImpl;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -10,8 +10,8 @@ import java.util.Set;
 
 public class IndempotentVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl implements IndempotentVar2VarSubstitution {
 
-    protected IndempotentVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
-        super(substitutionMap);
+    protected IndempotentVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap, AtomFactory atomFactory) {
+        super(substitutionMap, atomFactory);
 
         if (!isIndempotent(substitutionMap)) {
             throw new IllegalArgumentException("Not indempotent: " + substitutionMap);

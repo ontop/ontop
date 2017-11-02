@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
@@ -27,7 +28,6 @@ import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
@@ -66,10 +66,12 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
     }
 
     private final IntermediateQueryFactory iqFactory;
+    private final AtomFactory atomFactory;
 
     @Inject
-    private PullVariableOutOfDataNodeExecutorImpl(IntermediateQueryFactory iqFactory) {
+    private PullVariableOutOfDataNodeExecutorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory) {
         this.iqFactory = iqFactory;
+        this.atomFactory = atomFactory;
     }
 
     @Override
@@ -302,7 +304,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
                 newArgumentBuilder.add(formerArguments.get(i));
             }
         }
-        return ATOM_FACTORY.getDataAtom(formerAtom.getPredicate(), newArgumentBuilder.build());
+        return atomFactory.getDataAtom(formerAtom.getPredicate(), newArgumentBuilder.build());
     }
 
     /**

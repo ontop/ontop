@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
@@ -23,7 +24,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 public class SelfJoinLikeExecutor {
 
@@ -155,6 +155,15 @@ public class SelfJoinLikeExecutor {
     }
 
 
+    private final SubstitutionFactory substitutionFactory;
+    private final ImmutableUnificationTools unificationTools;
+
+    protected SelfJoinLikeExecutor(SubstitutionFactory substitutionFactory, ImmutableUnificationTools unificationTools) {
+        this.substitutionFactory = substitutionFactory;
+        this.unificationTools = unificationTools;
+    }
+
+
     protected static ImmutableMultimap<AtomPredicate, DataNode> extractDataNodes(ImmutableList<QueryNode> siblings) {
         ImmutableMultimap.Builder<AtomPredicate, DataNode> mapBuilder = ImmutableMultimap.builder();
         for (QueryNode node : siblings) {
@@ -171,7 +180,7 @@ public class SelfJoinLikeExecutor {
      *
      * creates proposal to unify redundant nodes
      */
-    protected static PredicateLevelProposal proposeForGroupingMap(
+    protected PredicateLevelProposal proposeForGroupingMap(
             ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap)
     throws AtomUnificationException {
 
@@ -218,7 +227,7 @@ public class SelfJoinLikeExecutor {
         }
     }
 
-    protected static Optional<ConcreteProposal> createConcreteProposal(
+    protected Optional<ConcreteProposal> createConcreteProposal(
             ImmutableList<PredicateLevelProposal> predicateProposals,
             ImmutableList<Variable> priorityVariables) {
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMergedSubstitution;
@@ -240,10 +249,10 @@ public class SelfJoinLikeExecutor {
     }
 
 
-    protected static ImmutableSubstitution<VariableOrGroundTerm> unifyRedundantNodes(
+    protected ImmutableSubstitution<VariableOrGroundTerm> unifyRedundantNodes(
             Collection<DataNode> redundantNodes) throws AtomUnificationException {
         // Non-final
-        ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution = SUBSTITUTION_FACTORY.getSubstitution();
+        ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution = substitutionFactory.getSubstitution();
 
         /*
          * Should normally not be called in this case.
@@ -266,7 +275,7 @@ public class SelfJoinLikeExecutor {
         return accumulatedSubstitution;
     }
 
-    protected static Optional<ImmutableSubstitution<VariableOrGroundTerm>> mergeSubstitutions(
+    protected Optional<ImmutableSubstitution<VariableOrGroundTerm>> mergeSubstitutions(
             ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions, ImmutableList<Variable> priorityVariables)
             throws AtomUnificationException {
 
@@ -276,7 +285,7 @@ public class SelfJoinLikeExecutor {
         for (ImmutableSubstitution<VariableOrGroundTerm> substitution : substitutions) {
             if (!substitution.isEmpty()) {
                 if (optionalAccumulatedSubstitution.isPresent()) {
-                    Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMGUS = ImmutableUnificationTools.computeAtomMGUS(
+                    Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMGUS = unificationTools.computeAtomMGUS(
                             optionalAccumulatedSubstitution.get(), substitution);
                     if (optionalMGUS.isPresent()) {
                         optionalAccumulatedSubstitution = optionalMGUS;
@@ -296,7 +305,7 @@ public class SelfJoinLikeExecutor {
                 .map(s -> s.orientate(priorityVariables));
     }
 
-    protected static ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> extractSubstitutions(
+    protected ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> extractSubstitutions(
             ImmutableCollection<PredicateLevelProposal> predicateProposals) {
         ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> substitutionListBuilder = ImmutableList.builder();
         for (PredicateLevelProposal proposal : predicateProposals) {
@@ -308,11 +317,11 @@ public class SelfJoinLikeExecutor {
     /**
      * TODO: explain
      */
-    private static ImmutableSubstitution<VariableOrGroundTerm> updateSubstitution(
+    private ImmutableSubstitution<VariableOrGroundTerm> updateSubstitution(
             final ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution,
             final DataAtom accumulatedAtom,  final DataAtom newAtom) throws AtomUnificationException {
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution =
-                ImmutableUnificationTools.computeAtomMGU(accumulatedAtom, newAtom);
+                unificationTools.computeAtomMGU(accumulatedAtom, newAtom);
 
         if (optionalSubstitution.isPresent()) {
             if (accumulatedSubstitution.isEmpty()) {
@@ -320,7 +329,7 @@ public class SelfJoinLikeExecutor {
             }
             else {
                 Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalAccumulatedSubstitution =
-                        ImmutableUnificationTools.computeAtomMGUS(accumulatedSubstitution, optionalSubstitution.get());
+                        unificationTools.computeAtomMGUS(accumulatedSubstitution, optionalSubstitution.get());
                 if (optionalAccumulatedSubstitution.isPresent()) {
                     return optionalAccumulatedSubstitution.get();
                 }

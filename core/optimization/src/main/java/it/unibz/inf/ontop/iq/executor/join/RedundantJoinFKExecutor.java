@@ -43,10 +43,12 @@ import java.util.stream.Stream;
 public class RedundantJoinFKExecutor implements InnerJoinExecutor {
 
     private final IntermediateQueryFactory iqFactory;
+    private final Relation2Predicate relation2Predicate;
 
     @Inject
-    private RedundantJoinFKExecutor(IntermediateQueryFactory iqFactory) {
+    private RedundantJoinFKExecutor(IntermediateQueryFactory iqFactory, Relation2Predicate relation2Predicate) {
         this.iqFactory = iqFactory;
+        this.relation2Predicate = relation2Predicate;
     }
 
     @Override
@@ -80,13 +82,13 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                                                                             InnerJoinNode joinNode,
                                                                             ImmutableSet<DataNode> nodesToRemove) {
 
-        /**
+        /*
          * First removes all the redundant nodes
          */
-        nodesToRemove.stream()
+        nodesToRemove
                 .forEach(treeComponent::removeSubTree);
 
-        /**
+        /*
          * Then replaces the join node if needed
          */
         switch (query.getChildren(joinNode).size()) {
@@ -98,7 +100,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                 if (joinNode.getOptionalFilterCondition().isPresent()) {
                     FilterNode newFilterNode = iqFactory.createFilterNode(joinNode.getOptionalFilterCondition().get());
                     treeComponent.replaceNode(joinNode, newFilterNode);
-                    /**
+                    /*
                      * NB: the filter node is not declared as the replacing node but the child is.
                      * Why? Because a JOIN with a filtering condition could decomposed into two different nodes.
                      */
@@ -228,7 +230,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
 
     private Optional<DatabaseRelationDefinition> getDatabaseRelationByName(DBMetadata dbMetadata, AtomPredicate predicate) {
 
-        RelationID relationId = Relation2Predicate.createRelationFromPredicateName(dbMetadata.getQuotedIDFactory(),
+        RelationID relationId = relation2Predicate.createRelationFromPredicateName(dbMetadata.getQuotedIDFactory(),
                 predicate);
 
         return Optional.ofNullable(dbMetadata.getRelation(relationId))

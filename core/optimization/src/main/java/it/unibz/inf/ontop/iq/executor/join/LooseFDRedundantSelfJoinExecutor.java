@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
@@ -23,7 +24,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.injection.OntopModelSettings.CardinalityPreservationMode.LOOSE;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 /**
  * Focuses on functional dependencies that are not unique constraints.
@@ -40,11 +40,20 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY
 public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor {
 
     private final OntopOptimizationSettings settings;
+    private final Relation2Predicate relation2Predicate;
+    private final SubstitutionFactory substitutionFactory;
+    private final ImmutableUnificationTools unificationTools;
 
     @Inject
-    private LooseFDRedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory, OntopOptimizationSettings settings) {
-        super(iqFactory);
+    private LooseFDRedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory, OntopOptimizationSettings settings,
+                                             Relation2Predicate relation2Predicate,
+                                             SubstitutionFactory substitutionFactory,
+                                             ImmutableUnificationTools unificationTools) {
+        super(iqFactory,substitutionFactory, unificationTools);
         this.settings = settings;
+        this.relation2Predicate = relation2Predicate;
+        this.substitutionFactory = substitutionFactory;
+        this.unificationTools = unificationTools;
     }
 
     @Override
@@ -57,7 +66,7 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
         if (initialNodes.size() < 2)
             return Optional.empty();
 
-        RelationID relationId = Relation2Predicate.createRelationFromPredicateName(
+        RelationID relationId = relation2Predicate.createRelationFromPredicateName(
                 dbMetadata.getQuotedIDFactory(), predicate);
         DatabaseRelationDefinition databaseRelation = dbMetadata.getDatabaseRelation(relationId);
 
@@ -204,18 +213,18 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
             /*
              * Throws an exception if the unification is not possible
              */
-            ImmutableSubstitution<VariableOrGroundTerm> termUnifier = ImmutableUnificationTools.computeDirectedMGU(
+            ImmutableSubstitution<VariableOrGroundTerm> termUnifier = unificationTools.computeDirectedMGU(
                     rightArgument, leftArgument)
                     .map(ImmutableSubstitution::getImmutableMap)
                     .map(map -> map.entrySet().stream()
                             .collect(ImmutableCollectors.toMap(
                                     Map.Entry::getKey,
                                     e -> ImmutabilityTools.convertIntoVariableOrGroundTerm(e.getValue()))))
-                    .map(SUBSTITUTION_FACTORY::getSubstitution)
+                    .map(substitutionFactory::getSubstitution)
                     .orElseThrow(AtomUnificationException::new);
 
             ImmutableSubstitution<VariableOrGroundTerm> candidateUnifier = currentUnifier.isPresent()
-                    ? ImmutableUnificationTools.computeAtomMGUS(currentUnifier.get(), termUnifier)
+                    ? unificationTools.computeAtomMGUS(currentUnifier.get(), termUnifier)
                             .orElseThrow(AtomUnificationException::new)
                     : termUnifier;
 

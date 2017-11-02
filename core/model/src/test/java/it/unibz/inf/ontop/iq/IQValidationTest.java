@@ -17,7 +17,6 @@ import org.junit.Test;
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 
 
 public class IQValidationTest {
@@ -25,20 +24,20 @@ public class IQValidationTest {
     private final static AtomPredicate TABLE2_PREDICATE = ATOM_FACTORY.getAtomPredicate("table1", 2);
     private final static AtomPredicate P3_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 3);
     private final static AtomPredicate ANS1_VAR1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final static Variable X = DATA_FACTORY.getVariable("x");
-    private final static Variable Y = DATA_FACTORY.getVariable("y");
-    private final static Variable Z = DATA_FACTORY.getVariable("z");
-    private final static Variable A = DATA_FACTORY.getVariable("a");
-    private final static Variable B = DATA_FACTORY.getVariable("b");
-    private final static Variable C = DATA_FACTORY.getVariable("c");
+    private final static Variable X = TERM_FACTORY.getVariable("x");
+    private final static Variable Y = TERM_FACTORY.getVariable("y");
+    private final static Variable Z = TERM_FACTORY.getVariable("z");
+    private final static Variable A = TERM_FACTORY.getVariable("a");
+    private final static Variable B = TERM_FACTORY.getVariable("b");
+    private final static Variable C = TERM_FACTORY.getVariable("c");
 
-    private final static ImmutableExpression EXPRESSION = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, X, Y);
 
     private final DBMetadata metadata;
 
     public IQValidationTest() {
-        metadata = DBMetadataTestingTools.createDummyMetadata();
+        metadata = createDummyMetadata();
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)

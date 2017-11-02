@@ -25,8 +25,6 @@ import java.sql.Types;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.foldBooleanExpressions;
 import static it.unibz.inf.ontop.model.term.TermConstants.NULL;
@@ -85,7 +83,7 @@ public class RedundantSelfJoinTest {
     private static Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
 
     static{
-        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata();
+        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         /**
@@ -96,7 +94,7 @@ public class RedundantSelfJoinTest {
         table1Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table1Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
-        TABLE1_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1Def);
+        TABLE1_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table1Def);
 
         /**
          * Table 2: non-composite unique constraint and regular field
@@ -106,7 +104,7 @@ public class RedundantSelfJoinTest {
         Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
-        TABLE2_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table2Def);
+        TABLE2_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table2Def);
 
         /**
          * Table 3: composite unique constraint over the first TWO columns
@@ -116,7 +114,7 @@ public class RedundantSelfJoinTest {
         Attribute col2T3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3, col2T3));
-        TABLE3_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table3Def);
+        TABLE3_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table3Def);
 
         /**
          * Table 4: unique constraint over the first column
@@ -125,7 +123,7 @@ public class RedundantSelfJoinTest {
         Attribute col1T4 = table4Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         table4Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
-        TABLE4_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table4Def);
+        TABLE4_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table4Def);
 
         /**
          * Table 5: unique constraint over the second column
@@ -134,7 +132,7 @@ public class RedundantSelfJoinTest {
         table5Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         Attribute col2T5 = table5Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table5Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T5));
-        TABLE5_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table5Def);
+        TABLE5_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table5Def);
 
         /**
          * Table 6: two atomic unique constraints over the first and third columns
@@ -147,7 +145,7 @@ public class RedundantSelfJoinTest {
         table6Def.addUniqueConstraint(new UniqueConstraint.Builder(table6Def)
                 .add(col3T6)
                 .build("table6-uc3", false));
-        TABLE6_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table6Def);
+        TABLE6_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table6Def);
 
         dbMetadata.freeze();
         METADATA = dbMetadata;
