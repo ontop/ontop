@@ -894,7 +894,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
+				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(classNode.getIri(), view.getId().getType1());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}

@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.owlapi.swrl;
 
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -84,9 +83,11 @@ public class SWRLTest extends TestCase {
 
 	private static SWRLAPITranslator createTranslator(OWLOntology ontology) {
 		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
-		AtomFactory atomFactory = defaultConfiguration.getAtomFactory();
 
-		return new SWRLAPITranslator(ontology, atomFactory);
+		DatalogFactory datalogFactory = defaultConfiguration.getInjector().getInstance(DatalogFactory.class);
+
+		return new SWRLAPITranslator(ontology, defaultConfiguration.getAtomFactory(), defaultConfiguration.getTermFactory(),
+				defaultConfiguration.getTypeFactory(), datalogFactory);
 	}
 	
 	@Test

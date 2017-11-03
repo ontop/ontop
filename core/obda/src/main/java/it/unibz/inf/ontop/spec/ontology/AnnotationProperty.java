@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.spec.ontology;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import org.apache.commons.rdf.api.IRI;
 
 /**
  * Represents AnnotationProperty from the OWL 2 Specification
@@ -33,13 +33,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
 public interface AnnotationProperty extends Description {
 
-    /**
-     * the name of the annotation property
-     *
-     * @return the predicate symbol that corresponds to the annotation property name
-     */
-
-    public Predicate getPredicate();
+    IRI getIRI();
 
 
     public String getName();

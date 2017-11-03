@@ -20,9 +20,6 @@ package it.unibz.inf.ontop.owlapi.validation;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -31,7 +28,6 @@ import it.unibz.inf.ontop.spec.ontology.OClass;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.model.OWLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,8 +189,7 @@ public class QuestOWLEmptyEntitiesChecker {
 			while (classIterator.hasNext()){
 				OClass next = classIterator.next();
 				if (!next.isTop() && !next.isBottom()) {
-					IRI iri = new SimpleRDF().createIRI(next.getPredicate().getName());
-					if (nextEmptyEntity(iri, 1)) {
+					if (nextEmptyEntity(next.getIRI(), 1)) {
 						nEmptyConcepts++;
 						return hasNext;
 					}
@@ -217,8 +212,7 @@ public class QuestOWLEmptyEntitiesChecker {
 			while (dataRoleIterator.hasNext()){
 				DataPropertyExpression next = dataRoleIterator.next();
 				if (!next.isTop() && !next.isBottom()) {
-					IRI iri = new SimpleRDF().createIRI(next.getPredicate().getName());
-					if (nextEmptyEntity(iri, 2)) {
+					if (nextEmptyEntity(next.getIRI(), 2)) {
 						nEmptyRoles++;
 						return hasNext;
 					}

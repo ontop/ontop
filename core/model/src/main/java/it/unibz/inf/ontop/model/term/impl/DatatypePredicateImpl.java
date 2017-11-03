@@ -31,7 +31,6 @@ import javax.annotation.Nonnull;
 
 public class DatatypePredicateImpl extends PredicateImpl implements DatatypePredicate {
 
-	private static final long serialVersionUID = -6678449661465775977L;
 	private final IRI iri;
 
 	/**

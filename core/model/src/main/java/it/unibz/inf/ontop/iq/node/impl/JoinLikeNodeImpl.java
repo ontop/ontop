@@ -3,7 +3,10 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multiset;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -11,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.JoinLikeNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -20,8 +24,10 @@ import java.util.stream.Stream;
 public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements JoinLikeNode {
 
     protected JoinLikeNodeImpl(Optional<ImmutableExpression> optionalJoinCondition,
-                               TermNullabilityEvaluator nullabilityEvaluator) {
-        super(optionalJoinCondition, nullabilityEvaluator);
+                               TermNullabilityEvaluator nullabilityEvaluator,
+                               TermFactory termFactory,
+                               TypeFactory typeFactory, DatalogTools datalogTools) {
+        super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools);
     }
 
     /**
@@ -43,7 +49,8 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                     .flatMap(e -> e.flattenAND().stream()));
 
         return newCondition
-                .map(cond -> new ExpressionEvaluator().evaluateExpression(cond));
+                .map(cond -> createExpressionEvaluator()
+                        .evaluateExpression(cond));
     }
 
     protected static ImmutableSet<Variable> union(ImmutableSet<Variable> set1, ImmutableSet<Variable> set2) {

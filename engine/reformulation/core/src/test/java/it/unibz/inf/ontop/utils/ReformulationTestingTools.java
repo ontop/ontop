@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
@@ -27,6 +28,7 @@ public class ReformulationTestingTools {
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
+    public static final DatalogFactory DATALOG_FACTORY;
     public static final Relation2Predicate RELATION_2_PREDICATE;
     public static final SpecificationFactory MAPPING_FACTORY;
     public static final MappingNormalizer MAPPING_NORMALIZER;
@@ -45,6 +47,7 @@ public class ReformulationTestingTools {
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
+        DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         RELATION_2_PREDICATE = injector.getInstance(Relation2Predicate.class);
         INCLUSION_DEPENDENCY_TOOLS = injector.getInstance(LinearInclusionDependencyTools.class);
 

@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
@@ -95,17 +96,20 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private final SpecificationFactory specificationFactory;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
 
     /**
      * Create an SQL Mapping Parser for generating an OBDA model.
      */
     @Inject
     private OntopNativeMappingParser(SpecificationFactory specificationFactory,
-                                     SQLPPMappingFactory ppMappingFactory, AtomFactory atomFactory, TermFactory termFactory) {
+                                     SQLPPMappingFactory ppMappingFactory, AtomFactory atomFactory, TermFactory termFactory,
+                                     TypeFactory typeFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
     }
 
     /**
@@ -406,7 +410,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
-        parsers.add(new TurtleOBDASyntaxParser(prefixes, atomFactory, termFactory));
+        parsers.add(new TurtleOBDASyntaxParser(prefixes, atomFactory, termFactory, typeFactory));
         return ImmutableList.copyOf(parsers);
     }
 }

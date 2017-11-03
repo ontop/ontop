@@ -3,22 +3,18 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Extracted by Roman Kontchakov on 30/06/2016.
@@ -31,11 +27,18 @@ public class SameAsRewriterImpl implements SameAsRewriter{
     private final Mapping saturatedMapping;
     private int bnode; //count for bnode created in sameAsmap
     private int rules;
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
+    private final DatalogFactory datalogFactory;
 
     @AssistedInject
-    private SameAsRewriterImpl(@Assisted Mapping saturatedMapping, MappingSameAsPredicateExtractor predicateExtractor) {
+    private SameAsRewriterImpl(@Assisted Mapping saturatedMapping, MappingSameAsPredicateExtractor predicateExtractor,
+                               AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory) {
         this.predicateExtractor = predicateExtractor;
         this.saturatedMapping = saturatedMapping;
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
+        this.datalogFactory = datalogFactory;
         bnode = 0;
         rules = 0;
     }
@@ -44,7 +47,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
     public DatalogProgram getSameAsRewriting(DatalogProgram pr) {
 
         MappingSameAsPredicateExtractor.Result targetPredicates = predicateExtractor.extract(saturatedMapping);
-        DatalogProgram result = DATALOG_FACTORY.getDatalogProgram(pr.getQueryModifiers());
+        DatalogProgram result = datalogFactory.getDatalogProgram(pr.getQueryModifiers());
 
         for (CQIE q: pr.getRules()) {
             List<Function> body = new ArrayList<>(q.getBody().size());
@@ -52,7 +55,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
                 Function ap = addSameAs(a, result, "sameAs" + (rules++), targetPredicates);
                 body.add(ap);
             }
-            result.appendRule(DATALOG_FACTORY.getCQIE(q.getHead(), body));
+            result.appendRule(datalogFactory.getCQIE(q.getHead(), body));
         }
         return result;
     }
@@ -97,9 +100,9 @@ public class SameAsRewriterImpl implements SameAsRewriter{
     }
 
     private CQIE createRule(DatalogProgram pr, String headName, List<Term> headParameters, Function... body) {
-        Predicate pred = TERM_FACTORY.getPredicate(headName, headParameters.size());
-        Function head = TERM_FACTORY.getFunction(pred, headParameters);
-        CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
+        Predicate pred = termFactory.getPredicate(headName, headParameters.size());
+        Function head = termFactory.getFunction(pred, headParameters);
+        CQIE rule = datalogFactory.getCQIE(head, body);
         pr.appendRule(rule);
         return rule;
     }
@@ -125,17 +128,17 @@ public class SameAsRewriterImpl implements SameAsRewriter{
 
         //create an unbound  hasProperty (anon-x1, anon-y1)
 
-        Function unboundleftAtom = TERM_FACTORY.getFunction(leftAtom.getFunctionSymbol());
+        Function unboundleftAtom = termFactory.getFunction(leftAtom.getFunctionSymbol());
         unboundleftAtom.updateTerms(leftAtom.getTerms());
-        unboundleftAtom.setTerm(0, TERM_FACTORY.getVariable("anon-"+bnode+ leftAtom.getTerm(0)));
-        unboundleftAtom.setTerm(1, TERM_FACTORY.getVariable("anon-"+bnode +leftAtom.getTerm(1)));
+        unboundleftAtom.setTerm(0, termFactory.getVariable("anon-"+bnode+ leftAtom.getTerm(0)));
+        unboundleftAtom.setTerm(1, termFactory.getVariable("anon-"+bnode +leftAtom.getTerm(1)));
 
         //create statement pattern for same as create owl:sameAs(anon-y1, y)
         //it will be the right atom of the join
-        Predicate sameAs = TERM_FACTORY.getOWLSameAsPredicate();
+        Predicate sameAs = atomFactory.getOWLSameAsPredicate();
         Term sTerm2 = unboundleftAtom.getTerm(1);
         Term oTerm2 = leftAtom.getTerm(1);
-        Function rightAtomJoin2 = TERM_FACTORY.getFunction(sameAs, sTerm2, oTerm2);
+        Function rightAtomJoin2 = termFactory.getFunction(sameAs, sTerm2, oTerm2);
 
         //create join rule
         List<Term> varListJoin2 = getUnion(getVariables(unboundleftAtom), getVariables(rightAtomJoin2));
@@ -151,7 +154,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
 
         Term sTerm = leftAtom.getTerm(0);
         Term oTerm = unboundleftAtom.getTerm(0);
-        Function leftAtomJoin = TERM_FACTORY.getFunction(sameAs, sTerm, oTerm);
+        Function leftAtomJoin = termFactory.getFunction(sameAs, sTerm, oTerm);
 
         //create join rule
         List<Term> varListJoin = getUnion(getVariables(leftAtomJoin), getVariables(joinRight));
@@ -182,7 +185,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         }
         CQIE rightRule = createRule(pr, newHeadName, rightTermList, rightAtom);
 
-        return TERM_FACTORY.getFunction(rightRule.getHead().getFunctionSymbol(), varListUnion);
+        return termFactory.getFunction(rightRule.getHead().getFunctionSymbol(), varListUnion);
     }
 
     private Function createJoinWithSameAsOnLeft(Function leftAtom, DatalogProgram pr, String newHeadName) {
@@ -191,17 +194,17 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         //given a data property as hasProperty (x, y)
         //create the left atom hasProperty (anon-x, y)
 
-        Function leftAtomJoin =  TERM_FACTORY.getFunction(leftAtom.getFunctionSymbol());
+        Function leftAtomJoin =  termFactory.getFunction(leftAtom.getFunctionSymbol());
         leftAtomJoin.updateTerms(leftAtom.getTerms());
-        leftAtomJoin.setTerm(0, TERM_FACTORY.getVariable("anon-" +bnode +leftAtom.getTerm(0)));
+        leftAtomJoin.setTerm(0, termFactory.getVariable("anon-" +bnode +leftAtom.getTerm(0)));
 
         //given a data property ex hasProperty (x, y)
         //create statement pattern for same as create owl:sameAs( anon-x, y)
         //it will be the right atom of the join
-        Predicate predicate = TERM_FACTORY.getOWLSameAsPredicate();
+        Predicate predicate = atomFactory.getOWLSameAsPredicate();
         Term sTerm = leftAtom.getTerm(0);
-        Term oTerm = TERM_FACTORY.getVariable("anon-"+ bnode +leftAtom.getTerm(0));
-        Function rightAtomJoin = TERM_FACTORY.getFunction(predicate, sTerm, oTerm);
+        Term oTerm = termFactory.getVariable("anon-"+ bnode +leftAtom.getTerm(0));
+        Function rightAtomJoin = termFactory.getFunction(predicate, sTerm, oTerm);
 
         //create join rule
         List<Term> varListJoin = getUnion(getVariables(leftAtomJoin), getVariables(rightAtomJoin));
@@ -217,17 +220,17 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         //given a data property as hasProperty (x, y)
         //create the left atom hasProperty (x, anon-y)
 
-        Function leftAtomJoin2 =  TERM_FACTORY.getFunction(leftAtom.getFunctionSymbol());
+        Function leftAtomJoin2 =  termFactory.getFunction(leftAtom.getFunctionSymbol());
         leftAtomJoin2.updateTerms(leftAtom.getTerms());
-        leftAtomJoin2.setTerm(1, TERM_FACTORY.getVariable("anon-"+bnode +leftAtom.getTerm(1)));
+        leftAtomJoin2.setTerm(1, termFactory.getVariable("anon-"+bnode +leftAtom.getTerm(1)));
 
         //create statement pattern for same as create owl:sameAs(anon-y, y)
         //it will be the right atom of the join
 
-        Predicate predicate = TERM_FACTORY.getOWLSameAsPredicate();
-        Term sTerm2 = TERM_FACTORY.getVariable("anon-"+ bnode +leftAtom.getTerm(1));
+        Predicate predicate = atomFactory.getOWLSameAsPredicate();
+        Term sTerm2 = termFactory.getVariable("anon-"+ bnode +leftAtom.getTerm(1));
         Term oTerm2 = leftAtom.getTerm(1);
-        Function rightAtomJoin2 = TERM_FACTORY.getFunction(predicate, sTerm2, oTerm2);
+        Function rightAtomJoin2 = termFactory.getFunction(predicate, sTerm2, oTerm2);
 
         //create join rule
         List<Term> varListJoin2 = getUnion(getVariables(leftAtomJoin2), getVariables(rightAtomJoin2));

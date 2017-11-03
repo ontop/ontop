@@ -97,7 +97,8 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 	}
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
-		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm.getPrefixMap(), ATOM_FACTORY, TERM_FACTORY);
+		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm.getPrefixMap(), ATOM_FACTORY, TERM_FACTORY,
+				TYPE_FACTORY);
 		ImmutableList<ImmutableFunctionalTerm> target = targetParser.parse(targetString).stream()
 				.map(TERM_FACTORY::getImmutableFunctionalTerm)
 				.collect(ImmutableCollectors.toList());

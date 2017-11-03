@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
@@ -82,6 +83,7 @@ public class OBDAModel {
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final Relation2Predicate relation2Predicate;
+    private TypeFactory typeFactory;
 
     public OBDAModel(SpecificationFactory specificationFactory,
                      SQLPPMappingFactory ppMappingFactory,
@@ -474,5 +476,9 @@ public class OBDAModel {
 
     public Relation2Predicate getRelation2Predicate() {
         return relation2Predicate;
+    }
+
+    public TypeFactory getTypeFactory() {
+        return typeFactory;
     }
 }

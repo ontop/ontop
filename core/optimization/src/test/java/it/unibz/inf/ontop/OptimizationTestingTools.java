@@ -2,7 +2,9 @@ package it.unibz.inf.ontop;
 
 
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.impl.DatalogConversionTools;
+import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
@@ -31,10 +33,13 @@ public class OptimizationTestingTools {
     public static final BindingLiftOptimizer BINDING_LIFT_OPTIMIZER;
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
+    public static final TermFactory TERM_FACTORY;
+    public static final DatalogFactory DATALOG_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final Relation2Predicate RELATION_2_PREDICATE;
     public static final PullOutVariableOptimizer PULL_OUT_VARIABLE_OPTIMIZER;
     public static final DatalogConversionTools DATALOG_CONVERSION_TOOLS;
+    public static final DatalogTools DATALOG_TOOLS;
 
     static {
 
@@ -50,6 +55,9 @@ public class OptimizationTestingTools {
         BINDING_LIFT_OPTIMIZER = injector.getInstance(BindingLiftOptimizer.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
+        TERM_FACTORY = injector.getInstance(TermFactory.class);
+        DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
+        DATALOG_TOOLS = injector.getInstance(DatalogTools.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         RELATION_2_PREDICATE = injector.getInstance(Relation2Predicate.class);
         EMPTY_METADATA = DBMetadataTestingTools.createDummyMetadata(ATOM_FACTORY,

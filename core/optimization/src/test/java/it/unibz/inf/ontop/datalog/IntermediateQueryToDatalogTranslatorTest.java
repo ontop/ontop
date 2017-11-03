@@ -42,10 +42,10 @@ public class IntermediateQueryToDatalogTranslatorTest {
     private static Predicate P2_DATALOG_PREDICATE;
 
     static {
-        ANS1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("ans1");
-        ANSSQ1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("ansSQ1");
-        P1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("p1");
-        P2_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("p2");
+        ANS1_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate("ans1");
+        ANSSQ1_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate("ansSQ1");
+        P1_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate("p1");
+        P2_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate("p2");
     }
 
     @Test

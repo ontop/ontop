@@ -20,20 +20,17 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.OClass;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class ClassImpl implements OClass {
 
 	private static final long serialVersionUID = -4930755519806785384L;
 	private static final RDF RDF_FACTORY = new SimpleRDF();
 
-	private final Predicate predicate;
+	private final IRI iri;
 	private final String name;
 	private final boolean isNothing, isThing;
 
@@ -44,15 +41,10 @@ public class ClassImpl implements OClass {
     public static final OClass owlNothing = new ClassImpl(owlNothingIRI); 
     	
 	ClassImpl(String name) {
-		this.predicate = TERM_FACTORY.getClassPredicate(name);
+		this.iri = RDF_FACTORY.createIRI(name);
 		this.name = name;
 		this.isNothing = name.equals(owlNothingIRI);
 		this.isThing = name.equals(owlThingIRI);
-	}
-
-	@Override
-	public Predicate getPredicate() {
-		return predicate;
 	}
 
 	@Override
@@ -62,7 +54,7 @@ public class ClassImpl implements OClass {
 
 	@Override
 	public IRI getIRI() {
-		return RDF_FACTORY.createIRI(name);
+		return iri;
 	}
 
 	@Override

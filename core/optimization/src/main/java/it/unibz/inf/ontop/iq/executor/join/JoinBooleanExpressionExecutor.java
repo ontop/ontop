@@ -31,10 +31,12 @@ import static it.unibz.inf.ontop.iq.executor.join.JoinExtractionUtils.*;
 public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
 
     private final IntermediateQueryFactory iqFactory;
+    private final JoinExtractionUtils joinExtractionUtils;
 
     @Inject
-    private JoinBooleanExpressionExecutor(IntermediateQueryFactory iqFactory) {
+    private JoinBooleanExpressionExecutor(IntermediateQueryFactory iqFactory, JoinExtractionUtils joinExtractionUtils) {
         this.iqFactory = iqFactory;
+        this.joinExtractionUtils = joinExtractionUtils;
     }
 
     /**
@@ -53,9 +55,9 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
 
         Optional<ImmutableExpression> optionalAggregatedFilterCondition;
         try {
-            optionalAggregatedFilterCondition = extractFoldAndOptimizeBooleanExpressions(filterOrJoinNodes);
+            optionalAggregatedFilterCondition = joinExtractionUtils.extractFoldAndOptimizeBooleanExpressions(filterOrJoinNodes);
         }
-        /**
+        /*
          * The filter condition cannot be satisfied --> the join node and its sub-tree is thus removed from the tree.
          * Returns no join node.
          */
@@ -73,12 +75,12 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
                     cleaningResults.getOptionalClosestAncestor());
         }
 
-        /**
+        /*
          * If something has changed
          */
         if ((filterOrJoinNodes.size() > 1)
                 || (!optionalAggregatedFilterCondition.equals(originalTopJoinNode.getOptionalFilterCondition()))) {
-            /**
+            /*
              * Optimized join node
              */
             InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(optionalAggregatedFilterCondition);

@@ -183,21 +183,6 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public boolean isClass() {
-		return false;
-	}
-
-	@Override
-	public boolean couldBeAnObjectProperty() {
-		return false;
-	}
-
-	@Override
-	public boolean couldBeADataProperty() {
-		return false;
-	}
-
-	@Override
 	public boolean isTriplePredicate() {
 		return false;
 	}

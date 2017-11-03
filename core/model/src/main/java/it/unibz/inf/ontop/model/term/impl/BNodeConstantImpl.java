@@ -23,10 +23,9 @@ package it.unibz.inf.ontop.model.term.impl;
 import it.unibz.inf.ontop.model.term.BNode;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 /**
  * Implementation for BNodes.
@@ -38,16 +37,15 @@ public class BNodeConstantImpl implements BNode {
 	private final String name;
 
 	private final int identifier;
+	private final ObjectRDFType type;
 
 	/**
 	 * The default constructor.
-	 * 
-	 * @param uri
-	 *            URI from a term.
 	 */
-	protected BNodeConstantImpl(String name) {
+	protected BNodeConstantImpl(String name, TypeFactory typeFactory) {
 		this.name = name;
 		this.identifier = name.hashCode();
+		this.type = typeFactory.getBlankNodeType();
 	}
 
 	@Override
@@ -95,7 +93,7 @@ public class BNodeConstantImpl implements BNode {
 
 	@Override
 	public ObjectRDFType getType() {
-		return TYPE_FACTORY.getBlankNodeType();
+		return type;
 	}
 
 }

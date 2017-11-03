@@ -84,7 +84,7 @@ public class RDF4JHelper {
 
 	private static Statement createStatement(DataPropertyAssertion assertion) {
 		return fact.createStatement(getResource(assertion.getSubject()),
-				createURI(assertion.getProperty().getPredicate().getName()),
+				createURI(assertion.getProperty().getIRI().getIRIString()),
 				getLiteral(assertion.getValue())
 		);
 	}
@@ -94,11 +94,11 @@ public class RDF4JHelper {
 
 		if (constant instanceof ValueConstant) {
 			return fact.createStatement(getResource(assertion.getSubject()),
-					createURI(assertion.getProperty().getPredicate().getName()),
+					createURI(assertion.getProperty().getIRI().getIRIString()),
 					getLiteral((ValueConstant) constant));
 		} else if (constant instanceof ObjectConstant)  {
 			return fact.createStatement(getResource(assertion.getSubject()),
-					createURI(assertion.getProperty().getPredicate().getName()),
+					createURI(assertion.getProperty().getIRI().getIRIString()),
 					getResource((ObjectConstant) constant));
 		} else {
 			throw new RuntimeException("Unsupported constant for an annotation property!"
@@ -109,6 +109,6 @@ public class RDF4JHelper {
 	private static Statement createStatement(ClassAssertion assertion) {
 		return fact.createStatement(getResource(assertion.getIndividual()),
 				createURI(IriConstants.RDF_TYPE),
-				createURI(assertion.getConcept().getPredicate().getName()));
+				createURI(assertion.getConcept().getIRI().getIRIString()));
 	}
 }

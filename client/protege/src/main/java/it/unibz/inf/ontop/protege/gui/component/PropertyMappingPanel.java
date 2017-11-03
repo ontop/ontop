@@ -47,6 +47,9 @@ import java.util.EventObject;
 import java.util.List;
 import java.util.Vector;
 
+import static it.unibz.inf.ontop.protege.gui.PredicateItem.PredicateType.DATA_PROPERTY;
+import static it.unibz.inf.ontop.protege.gui.PredicateItem.PredicateType.OBJECT_PROPERTY;
+
 public class PropertyMappingPanel extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 1L;
@@ -148,10 +151,10 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
         Vector<Object> v = new Vector<Object>();
 		AtomFactory atomFactory = obdaModel.getAtomFactory();
         for (DataPropertyExpression dp : obdaModel.getCurrentVocabulary().getDataProperties()) {
-            v.addElement(new PredicateItem(dp.getPredicate(), prefixManager));
+            v.addElement(new PredicateItem(atomFactory.getDataPropertyPredicate(dp.getIRI()), DATA_PROPERTY, prefixManager));
         }
         for (ObjectPropertyExpression op : obdaModel.getCurrentVocabulary().getObjectProperties()) {
-            v.addElement(new PredicateItem(atomFactory.getObjectPropertyPredicate(op.getIRI()), prefixManager));
+            v.addElement(new PredicateItem(atomFactory.getObjectPropertyPredicate(op.getIRI()), OBJECT_PROPERTY, prefixManager));
         }
         cboPropertyAutoSuggest = new AutoSuggestComboBox(v);
         cboPropertyAutoSuggest.setRenderer(new PropertyListCellRenderer());

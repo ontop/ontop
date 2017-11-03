@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -50,11 +51,14 @@ public class SQLPPMapping2DatalogConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(SQLPPMapping2DatalogConverter.class);
     private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
 
     @Inject
-    private SQLPPMapping2DatalogConverter(Relation2Predicate relation2Predicate, TermFactory termFactory) {
+    private SQLPPMapping2DatalogConverter(Relation2Predicate relation2Predicate, TermFactory termFactory,
+                                          TypeFactory typeFactory) {
         this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
     }
 
     /**
@@ -79,7 +83,7 @@ public class SQLPPMapping2DatalogConverter {
             try {
                 OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
 
-                SelectQueryParser sqp = new SelectQueryParser(metadata);
+                SelectQueryParser sqp = new SelectQueryParser(metadata, termFactory, typeFactory);
                 List<Function> body;
                 ImmutableMap<QualifiedAttributeID, Variable> lookupTable;
 

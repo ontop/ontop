@@ -31,15 +31,13 @@ import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.IntStream;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 
 public class MappingDataTypeCompletion {
@@ -49,21 +47,27 @@ public class MappingDataTypeCompletion {
 
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeCompletion.class);
     private final Relation2Predicate relation2Predicate;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
 
     /**
      * Constructs a new mapping data type resolution.
      * If no datatype is defined, then we use database metadata for obtaining the table column definition as the
      * default data-type.
      * //TODO: rewrite in a Datalog-free fashion
-     *
-     * @param metadata The database metadata.
+     *  @param metadata The database metadata.
      * @param relation2Predicate
+     * @param termFactory
+     * @param typeFactory
      */
     public MappingDataTypeCompletion(DBMetadata metadata,
-                                     boolean defaultDatatypeInferred, Relation2Predicate relation2Predicate) {
+                                     boolean defaultDatatypeInferred, Relation2Predicate relation2Predicate,
+                                     TermFactory termFactory, TypeFactory typeFactory) {
         this.metadata = metadata;
         this.defaultDatatypeInferred = defaultDatatypeInferred;
         this.relation2Predicate = relation2Predicate;
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
     }
 
     public void insertDataTyping(CQIE rule) throws UnknownDatatypeException {
@@ -107,13 +111,13 @@ public class MappingDataTypeCompletion {
             Variable variable = (Variable) term;
             Term newTerm;
             TermType type = getDataType(termOccurenceIndex, variable);
-            newTerm = TERM_FACTORY.getTypedTerm(variable, type);
+            newTerm = termFactory.getTypedTerm(variable, type);
             log.info("Datatype "+type+" for the value " + variable + " of the property " + predicate + " has been " +
                     "inferred " +
                     "from the database");
             atom.setTerm(position, newTerm);
         } else if (term instanceof ValueConstant) {
-            Term newTerm = TERM_FACTORY.getTypedTerm(term, ((ValueConstant) term).getType());
+            Term newTerm = termFactory.getTypedTerm(term, ((ValueConstant) term).getType());
             atom.setTerm(position, newTerm);
         } else {
             throw new IllegalArgumentException("Unsupported subtype of: " + Term.class.getSimpleName());
@@ -138,7 +142,7 @@ public class MappingDataTypeCompletion {
                     // insert the datatype of the evaluated operation
                     atom.setTerm(
                             position,
-                            TERM_FACTORY.getTypedTerm(
+                            termFactory.getTypedTerm(
                                     term,
                                     inferredType.get()
                             ));
@@ -149,7 +153,7 @@ public class MappingDataTypeCompletion {
 
                     if (defaultDatatypeInferred) {
 
-                        atom.setTerm(position, TERM_FACTORY.getTypedTerm(term, TYPE_FACTORY.getXsdStringDatatype()));
+                        atom.setTerm(position, termFactory.getTypedTerm(term, typeFactory.getXsdStringDatatype()));
                     } else {
                         throw new UnknownDatatypeException("Impossible to determine the expected datatype for the operation " + castTerm + "\n" +
                                 "Possible solutions: \n" +
@@ -211,7 +215,7 @@ public class MappingDataTypeCompletion {
         }
 
         if(defaultDatatypeInferred)
-            return type.orElse(TYPE_FACTORY.getXsdStringDatatype()) ;
+            return type.orElse(typeFactory.getXsdStringDatatype()) ;
         else {
             return type.orElseThrow(() -> new UnknownDatatypeException("Impossible to determine the expected datatype for the column "+ variable+"\n" +
                     "Possible solutions: \n" +

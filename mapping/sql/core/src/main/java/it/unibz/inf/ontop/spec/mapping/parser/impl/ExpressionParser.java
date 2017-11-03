@@ -2,15 +2,14 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryRuntimeException;
@@ -33,9 +32,6 @@ import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
 
 /**
  * Created by Roman Kontchakov on 10/11/2016.
@@ -46,10 +42,15 @@ public class ExpressionParser {
 
     private final QuotedIDFactory idfac;
     private final ImmutableMap<QualifiedAttributeID, Variable> attributes;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
 
-    public ExpressionParser(QuotedIDFactory idfac, ImmutableMap<QualifiedAttributeID, Variable> attributes) {
+    public ExpressionParser(QuotedIDFactory idfac, ImmutableMap<QualifiedAttributeID, Variable> attributes,
+                            TermFactory termFactory, TypeFactory typeFactory) {
         this.idfac = idfac;
         this.attributes = attributes;
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
     }
 
     public Term parseTerm(Expression expression) {
@@ -99,7 +100,7 @@ public class ExpressionParser {
         private Function negation(Function arg) {
             return (arg.getFunctionSymbol() == ExpressionOperation.NOT)
                     ? (Function) arg.getTerm(0)
-                    : TERM_FACTORY.getFunctionNOT(arg);
+                    : termFactory.getFunctionNOT(arg);
         }
 
         private java.util.function.Function<Function, ImmutableList<Function>> notOperation(boolean isNot) {
@@ -127,12 +128,12 @@ public class ExpressionParser {
 
         private Function getOR(ImmutableList<Function> list) {
             return list.reverse().stream()
-                    .reduce(null, (a, b) -> (a == null) ? b : TERM_FACTORY.getFunctionOR(b, a));
+                    .reduce(null, (a, b) -> (a == null) ? b : termFactory.getFunctionOR(b, a));
         }
 
         private Function getAND(ImmutableList<Function> list) {
             return list.reverse().stream()
-                    .reduce(null, (a, b) -> (a == null) ? b : TERM_FACTORY.getFunctionAND(b, a));
+                    .reduce(null, (a, b) -> (a == null) ? b : termFactory.getFunctionAND(b, a));
         }
 
         // ------------------------------------------------------------
@@ -157,7 +158,7 @@ public class ExpressionParser {
             Function right = getAND(translate(expression.getRightExpression()));
             result = (expression.isNot())
                     ? ImmutableList.of(negation(left), negation(right))
-                    : ImmutableList.of(TERM_FACTORY.getFunctionOR(left, right));
+                    : ImmutableList.of(termFactory.getFunctionOR(left, right));
         }
 
         @Override
@@ -174,37 +175,37 @@ public class ExpressionParser {
         @Override
         public void visit(IsNullExpression expression) {
             Term term = termVisitor.getTerm(expression.getLeftExpression());
-            result = notOperation(expression.isNot()).apply(TERM_FACTORY.getFunctionIsNull(term));
+            result = notOperation(expression.isNot()).apply(termFactory.getFunctionIsNull(term));
         }
 
         @Override
         public void visit(EqualsTo expression) {
-            processOJ(expression, (t1, t2) -> TERM_FACTORY.getFunction(ExpressionOperation.EQ, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.EQ, t1, t2));
         }
 
         @Override
         public void visit(GreaterThan expression) {
-            processOJ(expression, (t1, t2) -> TERM_FACTORY.getFunction(ExpressionOperation.GT, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.GT, t1, t2));
         }
 
         @Override
         public void visit(GreaterThanEquals expression) {
-            processOJ(expression, (t1, t2) -> TERM_FACTORY.getFunction(ExpressionOperation.GTE, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.GTE, t1, t2));
         }
 
         @Override
         public void visit(MinorThan expression) {
-            processOJ(expression, (t1, t2) -> TERM_FACTORY.getFunction(ExpressionOperation.LT, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.LT, t1, t2));
         }
 
         @Override
         public void visit(MinorThanEquals expression) {
-            processOJ(expression, (t1, t2) -> TERM_FACTORY.getFunction(ExpressionOperation.LTE, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.LTE, t1, t2));
         }
 
         @Override
         public void visit(NotEqualsTo expression) {
-            processOJ(expression, (t1, t2) -> TERM_FACTORY.getFunction(ExpressionOperation.NEQ, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.NEQ, t1, t2));
         }
 
 
@@ -214,7 +215,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(LikeExpression expression) {
-            process(expression, (t1, t2) -> TERM_FACTORY.getSQLFunctionLike(t1, t2));
+            process(expression, (t1, t2) -> termFactory.getSQLFunctionLike(t1, t2));
         }
 
         @Override
@@ -222,15 +223,15 @@ public class ExpressionParser {
             Term flags;
             switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
-                    flags = TERM_FACTORY.getConstantLiteral("");
+                    flags = termFactory.getConstantLiteral("");
                     break;
                 case MATCH_CASEINSENSITIVE:
-                    flags = TERM_FACTORY.getConstantLiteral("i");
+                    flags = termFactory.getConstantLiteral("i");
                     break;
                 default:
                     throw new UnsupportedOperationException();
             }
-            process(expression, (t1, t2) ->  TERM_FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags));
+            process(expression, (t1, t2) ->  termFactory.getFunction(ExpressionOperation.REGEX, t1, t2, flags));
         }
 
         // POSIX Regular Expressions
@@ -242,26 +243,26 @@ public class ExpressionParser {
             java.util.function.UnaryOperator<Function> not;
             switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
-                    flags = TERM_FACTORY.getConstantLiteral("");
+                    flags = termFactory.getConstantLiteral("");
                     not = UnaryOperator.identity();
                     break;
                 case MATCH_CASEINSENSITIVE:
-                    flags = TERM_FACTORY.getConstantLiteral("i");
+                    flags = termFactory.getConstantLiteral("i");
                     not = UnaryOperator.identity();
                     break;
                 case NOT_MATCH_CASESENSITIVE:
-                    flags = TERM_FACTORY.getConstantLiteral("");
-                    not = arg -> TERM_FACTORY.getFunctionNOT(arg);
+                    flags = termFactory.getConstantLiteral("");
+                    not = arg -> termFactory.getFunctionNOT(arg);
                     break;
                 case NOT_MATCH_CASEINSENSITIVE:
-                    flags = TERM_FACTORY.getConstantLiteral("i");
-                    not = arg -> TERM_FACTORY.getFunctionNOT(arg);
+                    flags = termFactory.getConstantLiteral("i");
+                    not = arg -> termFactory.getFunctionNOT(arg);
                     break;
                 default:
                     throw new UnsupportedOperationException();
             }
             process(expression, (t1, t2) ->
-                    not.apply(TERM_FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags)));
+                    not.apply(termFactory.getFunction(ExpressionOperation.REGEX, t1, t2, flags)));
         }
 
 
@@ -277,14 +278,14 @@ public class ExpressionParser {
             Term t4 = termVisitor.getTerm(expression.getBetweenExpressionEnd());
 
             if (expression.isNot()) {
-                Function atom1 = TERM_FACTORY.getFunction(ExpressionOperation.LT, t1, t2);
-                Function atom2 = TERM_FACTORY.getFunction(ExpressionOperation.GT, t3, t4);
+                Function atom1 = termFactory.getFunction(ExpressionOperation.LT, t1, t2);
+                Function atom2 = termFactory.getFunction(ExpressionOperation.GT, t3, t4);
 
-                result = ImmutableList.of(TERM_FACTORY.getFunctionOR(atom1, atom2));
+                result = ImmutableList.of(termFactory.getFunctionOR(atom1, atom2));
             }
             else {
-                Function atom1 = TERM_FACTORY.getFunction(ExpressionOperation.GTE, t1, t2);
-                Function atom2 = TERM_FACTORY.getFunction(ExpressionOperation.LTE, t3, t4);
+                Function atom1 = termFactory.getFunction(ExpressionOperation.GTE, t1, t2);
+                Function atom2 = termFactory.getFunction(ExpressionOperation.LTE, t3, t4);
 
                 result = ImmutableList.of(atom1, atom2);
             }
@@ -313,7 +314,7 @@ public class ExpressionParser {
                         .map(item -> {
                             Term t1 = termVisitor.getTerm(expression.getLeftExpression());
                             Term t2 = termVisitor.getTerm(item);
-                            return TERM_FACTORY.getFunctionEQ(t1, t2);
+                            return termFactory.getFunctionEQ(t1, t2);
                         });
             }
             else {
@@ -544,7 +545,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(NotExpression expression) {
-            result = ImmutableList.of(TERM_FACTORY.getFunctionNOT(termVisitor.getTerm(expression.getExpression())));
+            result = ImmutableList.of(termFactory.getFunctionNOT(termVisitor.getTerm(expression.getExpression())));
 //            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
 
         }
@@ -767,7 +768,7 @@ public class ExpressionParser {
         }
 
         private void process(String value, IRI datatype) {
-            result = TERM_FACTORY.getConstantLiteral(value, TYPE_FACTORY.getDatatype(datatype));
+            result = termFactory.getConstantLiteral(value, typeFactory.getDatatype(datatype));
         }
 
 
@@ -778,22 +779,22 @@ public class ExpressionParser {
 
         @Override
         public void visit(Addition expression) {
-            process(expression, (t1, t2) -> TERM_FACTORY.getFunction(ExpressionOperation.ADD, t1, t2));
+            process(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.ADD, t1, t2));
         }
 
         @Override
         public void visit(Subtraction expression) {
-            process(expression, (t1, t2) -> TERM_FACTORY.getFunction(ExpressionOperation.SUBTRACT, t1, t2));
+            process(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.SUBTRACT, t1, t2));
         }
 
         @Override
         public void visit(Multiplication expression) {
-            process(expression, (t1, t2) -> TERM_FACTORY.getFunction(ExpressionOperation.MULTIPLY, t1, t2));
+            process(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.MULTIPLY, t1, t2));
         }
 
         @Override
         public void visit(Division expression) {
-            process(expression, (t1, t2) -> TERM_FACTORY.getFunction(ExpressionOperation.DIVIDE, t1, t2));
+            process(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.DIVIDE, t1, t2));
         }
 
         @Override
@@ -804,7 +805,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(Concat expression) {
-            process(expression, (t1, t2) -> TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, t1, t2));
+            process(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.CONCAT, t1, t2));
         }
 
         private void process(BinaryExpression expression, BinaryOperator<Term> op) {
@@ -842,7 +843,7 @@ public class ExpressionParser {
             Term arg = getTerm(expression.getExpression());
             switch (expression.getSign()) {
                 case '-' :
-                    result = TERM_FACTORY.getFunction(ExpressionOperation.MINUS, arg);
+                    result = termFactory.getFunction(ExpressionOperation.MINUS, arg);
                     break;
                 case '+':
                     result = arg;
@@ -878,9 +879,9 @@ public class ExpressionParser {
                 //    - a FUNCTION without arguments like USER, CURRENT_DATE
 
                 if (column.equals(idfac.createAttributeID("true")))
-                    result = TERM_FACTORY.getBooleanConstant(true);
+                    result = termFactory.getBooleanConstant(true);
                 else if (column.equals(idfac.createAttributeID("false")))
-                    result = TERM_FACTORY.getBooleanConstant(false);
+                    result = termFactory.getBooleanConstant(false);
                 else
                     throw new UnsupportedSelectQueryRuntimeException("Unable to find attribute name ", expression);
             }
@@ -1137,50 +1138,50 @@ public class ExpressionParser {
     // (WARNING: not all combinations of the parameters are supported)
     // ---------------------------------------------------------------
 
-    private static final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
+    private final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
             FUNCTIONS = ImmutableMap.<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>builder()
-            .put("REGEXP_REPLACE", ExpressionParser::get_REGEXP_REPLACE)
-            .put("REPLACE", ExpressionParser::get_REPLACE)
-            .put("CONCAT", ExpressionParser::get_CONCAT)
-            .put("SUBSTR", ExpressionParser::get_SUBSTR)
-            .put("SUBSTRING", ExpressionParser::get_SUBSTR)
-            .put("LCASE", ExpressionParser::get_LCASE)
-            .put("LOWER", ExpressionParser::get_LCASE)
-            .put("UCASE", ExpressionParser::get_UCASE)
-            .put("UPPER", ExpressionParser::get_UCASE)
-            .put("LENGTH", ExpressionParser::get_STRLEN)
-            .put("RAND", ExpressionParser::get_RAND)
+            .put("REGEXP_REPLACE", this::get_REGEXP_REPLACE)
+            .put("REPLACE", this::get_REPLACE)
+            .put("CONCAT", this::get_CONCAT)
+            .put("SUBSTR", this::get_SUBSTR)
+            .put("SUBSTRING", this::get_SUBSTR)
+            .put("LCASE", this::get_LCASE)
+            .put("LOWER", this::get_LCASE)
+            .put("UCASE", this::get_UCASE)
+            .put("UPPER", this::get_UCASE)
+            .put("LENGTH", this::get_STRLEN)
+            .put("RAND", this::get_RAND)
             .build();
 
-    private static final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
+    private final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
             BOOLEAN_FUNCTIONS = ImmutableMap.<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>builder()
-            .put("REGEXP_LIKE", ExpressionParser::get_REGEXP_LIKE)
+            .put("REGEXP_LIKE", this::get_REGEXP_LIKE)
             .build();
 
-    private static Function get_REGEXP_LIKE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+    private Function get_REGEXP_LIKE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         // Oracle only:
         // a source string, a regex pattern (POSIX regular expression), an optional flags
         switch (terms.size()) {
             case 2:
-                return TERM_FACTORY.getFunction(
-                        ExpressionOperation.REGEX, terms.get(0), terms.get(1), TERM_FACTORY.getConstantLiteral(""));
+                return termFactory.getFunction(
+                        ExpressionOperation.REGEX, terms.get(0), terms.get(1), termFactory.getConstantLiteral(""));
             case 3:
                 // check the flag?
-                return TERM_FACTORY.getFunction(
+                return termFactory.getFunction(
                         ExpressionOperation.REGEX, terms.get(0), terms.get(1), terms.get(2));
         }
         throw new InvalidSelectQueryRuntimeException("Wrong number of arguments for SQL function", expression);
     }
 
-    private static Function get_REGEXP_REPLACE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+    private Function get_REGEXP_REPLACE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         Term flags;
         switch (terms.size()) {
             case 3:
                 // either Oracle or PostgreSQL, without flags
-                flags = TERM_FACTORY.getConstantLiteral(""); // the 4th argument is flags
+                flags = termFactory.getConstantLiteral(""); // the 4th argument is flags
                 break;
             case 4:
-                if (((ValueConstant)terms.get(3)).getType().equals(TYPE_FACTORY.getDatatype(XSD.STRING))) {
+                if (((ValueConstant)terms.get(3)).getType().equals(typeFactory.getDatatype(XSD.STRING))) {
                     // PostgreSQL
                     flags =  terms.get(3);
                     // check that flags is either ig or g
@@ -1190,8 +1191,8 @@ public class ExpressionParser {
                 break;
             case 6:
                 // Oracle
-                if (!terms.get(3).equals(TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getDatatype(XSD.LONG)))
-                        || !terms.get(4).equals(TERM_FACTORY.getConstantLiteral("0", TYPE_FACTORY.getDatatype(XSD.LONG))))
+                if (!terms.get(3).equals(termFactory.getConstantLiteral("1", typeFactory.getDatatype(XSD.LONG)))
+                        || !terms.get(4).equals(termFactory.getConstantLiteral("0", typeFactory.getDatatype(XSD.LONG))))
                     throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
 
                 // check that the flags is a combination of imx
@@ -1201,69 +1202,69 @@ public class ExpressionParser {
                 throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
         }
 
-        return TERM_FACTORY.getFunction(
+        return termFactory.getFunction(
                 ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
     }
 
-    private static Function get_REPLACE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
-        Term flags = TERM_FACTORY.getConstantLiteral("");
+    private Function get_REPLACE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+        Term flags = termFactory.getConstantLiteral("");
         switch (terms.size()) {
             case 2:
-                return TERM_FACTORY.getFunction(
+                return termFactory.getFunction(
                         ExpressionOperation.REPLACE, terms.get(0), terms.get(1),
-                        TERM_FACTORY.getConstantLiteral(""), flags);
+                        termFactory.getConstantLiteral(""), flags);
             case 3:
-                return TERM_FACTORY.getFunction(
+                return termFactory.getFunction(
                         ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
 
         }
         throw new InvalidSelectQueryRuntimeException("Wrong number of arguments in SQL function", expression);
     }
 
-    private static Function get_CONCAT(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+    private Function get_CONCAT(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         return (Function)
                 terms.stream()  // left recursion to match || in JSQLParser
                         .reduce(null, (a, b) -> (a == null)
                                 ? b
-                                : TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, a, b));
+                                : termFactory.getFunction(ExpressionOperation.CONCAT, a, b));
     }
 
-    private static Function get_SUBSTR(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+    private Function get_SUBSTR(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         switch (terms.size()) {
             case 2:
-                return TERM_FACTORY.getFunction(ExpressionOperation.SUBSTR2, terms.get(0), terms.get(1));
+                return termFactory.getFunction(ExpressionOperation.SUBSTR2, terms.get(0), terms.get(1));
             case 3:
-                return TERM_FACTORY.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
+                return termFactory.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
         }
         // DB2 has 4
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
-    private static Function get_RAND(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+    private Function get_RAND(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         switch (terms.size()) {
             case 0:
-                return TERM_FACTORY.getFunction(ExpressionOperation.RAND);
+                return termFactory.getFunction(ExpressionOperation.RAND);
         }
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
-    private static Function get_LCASE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+    private Function get_LCASE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         if (terms.size() == 1)
-            return TERM_FACTORY.getFunction(ExpressionOperation.LCASE, terms.get(0));
+            return termFactory.getFunction(ExpressionOperation.LCASE, terms.get(0));
         // DB2 has 3
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
-    private static Function get_UCASE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+    private Function get_UCASE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         if (terms.size() == 1)
-            return TERM_FACTORY.getFunction(ExpressionOperation.UCASE, terms.get(0));
+            return termFactory.getFunction(ExpressionOperation.UCASE, terms.get(0));
         // DB2 has 3
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
-    private static Function get_STRLEN(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+    private Function get_STRLEN(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         if (terms.size() == 1)
-            return TERM_FACTORY.getFunction(ExpressionOperation.STRLEN, terms.get(0));
+            return termFactory.getFunction(ExpressionOperation.STRLEN, terms.get(0));
 
         throw new InvalidSelectQueryRuntimeException("Wrong number of arguments in SQL function", expression);
     }

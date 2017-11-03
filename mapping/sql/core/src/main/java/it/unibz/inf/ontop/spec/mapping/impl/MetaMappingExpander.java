@@ -183,7 +183,7 @@ public class MetaMappingExpander {
 
 			String predicateName = getPredicateName(templateAtom.getTerm(0), values);
 			ImmutableFunctionalTerm newTarget = (arity == 1)
-					? termFactory.getImmutableFunctionalTerm(termFactory.getClassPredicate(predicateName),
+					? termFactory.getImmutableFunctionalTerm(atomFactory.getClassPredicate(predicateName),
 					target.getTerm(0))
 					: termFactory.getImmutableFunctionalTerm(atomFactory.getObjectPropertyPredicate(predicateName),
 					target.getTerm(0), target.getTerm(2));

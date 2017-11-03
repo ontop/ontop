@@ -2,8 +2,11 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -16,11 +19,18 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
 
     private Optional<ImmutableExpression> optionalFilterCondition;
     private final TermNullabilityEvaluator nullabilityEvaluator;
+    protected final TermFactory termFactory;
+    protected final TypeFactory typeFactory;
+    protected final DatalogTools datalogTools;
 
     protected JoinOrFilterNodeImpl(Optional<ImmutableExpression> optionalFilterCondition,
-                                   TermNullabilityEvaluator nullabilityEvaluator) {
+                                   TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
+                                   TypeFactory typeFactory, DatalogTools datalogTools) {
         this.optionalFilterCondition = optionalFilterCondition;
         this.nullabilityEvaluator = nullabilityEvaluator;
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
+        this.datalogTools = datalogTools;
     }
 
     @Override
@@ -52,7 +62,11 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
 
         ImmutableExpression substitutedExpression = substitution.applyToBooleanExpression(booleanExpression);
 
-        return new ExpressionEvaluator().evaluateExpression(substitutedExpression);
+        return createExpressionEvaluator().evaluateExpression(substitutedExpression);
+    }
+
+    protected ExpressionEvaluator createExpressionEvaluator() {
+        return new ExpressionEvaluator(datalogTools, termFactory, typeFactory);
     }
 
     protected boolean isFilteringNullValue(Variable variable) {

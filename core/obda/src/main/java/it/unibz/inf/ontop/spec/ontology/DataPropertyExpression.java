@@ -51,8 +51,6 @@ import org.apache.commons.rdf.api.IRI;
 
 public interface DataPropertyExpression extends DescriptionBT {
 
-	@Deprecated
-	public Predicate getPredicate();
 	IRI getIRI();
 
 	public String getName();

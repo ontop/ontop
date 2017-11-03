@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.model.term.Function;
@@ -14,17 +15,17 @@ import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
 
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
 
 public class MappingVocabularyExtractorImpl implements MappingVocabularyExtractor {
 
     private static OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
     private final Mapping2DatalogConverter mapping2DatalogConverter;
+    private final TypeFactory typeFactory;
 
     @Inject
-    private MappingVocabularyExtractorImpl(Mapping2DatalogConverter mapping2DatalogConverter){
+    private MappingVocabularyExtractorImpl(Mapping2DatalogConverter mapping2DatalogConverter, TypeFactory typeFactory){
         this.mapping2DatalogConverter = mapping2DatalogConverter;
+        this.typeFactory = typeFactory;
     }
 
 
@@ -37,7 +38,7 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
                         ontologyVocabulary.createClass(f.getFunctionSymbol().getName());
                     else {
                         TermType secondArgType = f.getFunctionSymbol().getExpectedBaseType(1);
-                        if (secondArgType.isA(TYPE_FACTORY.getAbstractObjectRDFType()))
+                        if (secondArgType.isA(typeFactory.getAbstractObjectRDFType()))
                             ontologyVocabulary.createObjectProperty(f.getFunctionSymbol().getName());
                         else
                             ontologyVocabulary.createDataProperty(f.getFunctionSymbol().getName());

@@ -35,9 +35,7 @@ import java.util.Vector;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import junit.framework.TestCase;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
-//import com.hp.hpl.jena.iri.IRIFactory;
+import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 
 
 public class ThetaGenerationTest extends TestCase {
@@ -62,12 +60,12 @@ public class ThetaGenerationTest extends TestCase {
 			Term t1 = TERM_FACTORY.getVariable("x");
 			Term t2 = TERM_FACTORY.getVariable("x");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -88,12 +86,12 @@ public class ThetaGenerationTest extends TestCase {
 			Term t1 = TERM_FACTORY.getVariable("x");
 			Term t2 = TERM_FACTORY.getVariable("y");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -120,12 +118,12 @@ public class ThetaGenerationTest extends TestCase {
 			Term t1 = TERM_FACTORY.getVariable("x");
 			Term t2 = TERM_FACTORY.getConstantLiteral("y");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -184,12 +182,12 @@ public class ThetaGenerationTest extends TestCase {
 			Term t2 = TERM_FACTORY.getVariable("x");
 			Term t1 = TERM_FACTORY.getConstantLiteral("y");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -212,12 +210,12 @@ public class ThetaGenerationTest extends TestCase {
 			Term t2 = TERM_FACTORY.getConstantLiteral("y");
 			Term t1 = TERM_FACTORY.getConstantLiteral("y");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -266,12 +264,12 @@ public class ThetaGenerationTest extends TestCase {
 			Term t2 = TERM_FACTORY.getConstantLiteral("x");
 			Term t1 = TERM_FACTORY.getConstantLiteral("y");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -294,12 +292,12 @@ public class ThetaGenerationTest extends TestCase {
 			vars.add(t2);
 			Predicate fs = TERM_FACTORY.getPredicate("p", vars.size());
 			FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(ot);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -322,12 +320,12 @@ public class ThetaGenerationTest extends TestCase {
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("x");
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(t2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -346,12 +344,12 @@ public class ThetaGenerationTest extends TestCase {
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("y");
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(t2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -384,12 +382,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -412,12 +410,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars1.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -440,12 +438,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -477,12 +475,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -542,12 +540,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -570,12 +568,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -601,12 +599,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -626,12 +624,12 @@ public class ThetaGenerationTest extends TestCase {
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("x");
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(t2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -650,10 +648,10 @@ public class ThetaGenerationTest extends TestCase {
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("y");
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		Function atom1 = TERM_FACTORY.getFunction(pred1, t2);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		Function atom2 = TERM_FACTORY.getFunction(pred2, ot);
 
 		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
@@ -684,12 +682,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -712,12 +710,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -749,12 +747,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -777,12 +775,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -814,12 +812,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -842,12 +840,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -873,12 +871,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -896,12 +894,12 @@ public class ThetaGenerationTest extends TestCase {
 			Term t1 = TERM_FACTORY.getVariable("w1");
 			Term t2 = TERM_FACTORY.getVariable("w2");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -923,12 +921,12 @@ public class ThetaGenerationTest extends TestCase {
 			Term t1 = TERM_FACTORY.getVariable("x");
 			Term t2 = TERM_FACTORY.getVariable("w1");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = ATOM_FACTORY.getClassPredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);

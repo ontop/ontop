@@ -95,12 +95,12 @@ public class OntopMaterializerTest {
 		mappingFactory = SQLMappingFactoryImpl.getInstance();
 		xsdStringDt = typeFactory.getXsdStringDatatype();
 		
-		person = termFactory.getClassPredicate(PREFIX + "Person");
-		fn = termFactory.getDataPropertyPredicate(PREFIX + "fn", xsdStringDt);
-		ln = termFactory.getDataPropertyPredicate(PREFIX + "ln", xsdStringDt);
-		age = termFactory.getDataPropertyPredicate(PREFIX + "age", xsdStringDt);
+		person = atomFactory.getClassPredicate(PREFIX + "Person");
+		fn = atomFactory.getDataPropertyPredicate(PREFIX + "fn", xsdStringDt);
+		ln = atomFactory.getDataPropertyPredicate(PREFIX + "ln", xsdStringDt);
+		age = atomFactory.getDataPropertyPredicate(PREFIX + "age", xsdStringDt);
 		hasschool = atomFactory.getObjectPropertyPredicate(PREFIX + "hasschool");
-		school = termFactory.getClassPredicate(PREFIX + "School");
+		school = atomFactory.getClassPredicate(PREFIX + "School");
     }
 
 	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {

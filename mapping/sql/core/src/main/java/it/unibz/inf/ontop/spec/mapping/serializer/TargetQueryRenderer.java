@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
@@ -31,14 +32,12 @@ import it.unibz.inf.ontop.model.term.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
 /**
  * A utility class to render a Target Query object into its representational
  * string.
  */
 public class TargetQueryRenderer {
-	
+
 	/**
 	 * Transforms the given <code>OBDAQuery</code> into a string. The method requires
 	 * a prefix manager to shorten full IRI name.
@@ -137,7 +136,7 @@ public class TargetQueryRenderer {
 			String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
 			if (function.isDataTypeFunction()) {
 				// Language tag case
-				if (TYPE_FACTORY.isString(functionSymbol) && (functionSymbol.getArity() == 2)) {
+				if (functionSymbol.getName().equals(RDF.LANGSTRING.getIRIString())) {
 					// with the language tag
 					Term var = function.getTerms().get(0);
 					Term lang = function.getTerms().get(1);

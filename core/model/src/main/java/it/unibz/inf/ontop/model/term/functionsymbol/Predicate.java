@@ -49,20 +49,7 @@ public interface Predicate {
 
 	ImmutableList<TermType> getExpectedBaseArgumentTypes();
 
-	boolean isClass();
-
-	/**
-	 * NB: not exclusive with couldBeADataProperty (e.g., see annotation properties)
-	 */
-	boolean couldBeAnObjectProperty();
-
-	/**
-	 * NB: not exclusive with couldBeAnObjectProperty (e.g., see annotation properties)
-	 */
-	boolean couldBeADataProperty();
-
 	boolean isTriplePredicate();
-
 
 //  boolean isAggregationPredicate();
 }

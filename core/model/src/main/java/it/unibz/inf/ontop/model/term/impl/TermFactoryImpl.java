@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -40,13 +39,9 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class TermFactoryImpl implements TermFactory {
 
-	private static final long serialVersionUID = 1851116693137470887L;
 	private static final TermFactory INSTANCE = new TermFactoryImpl(TypeFactoryImpl.getInstance());
-	private static final ObjectRDFType OBJECT_RDF_TYPE = TYPE_FACTORY.getAbstractObjectRDFType();
-	private static final RDFTermType ROOT_RDF_TERM_TYPE = TYPE_FACTORY.getAbstractRDFTermType();
 	private static final TermType ROOT_TERM_TYPE = TYPE_FACTORY.getAbstractAtomicTermType();
 
-	private static int counter = 0;
 	private final TypeFactory typeFactory;
 
 	public static TermFactory getInstance() {
@@ -72,37 +67,6 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public Predicate getPredicate(String uri, ImmutableList<TermType> types) {
 		return new PredicateImpl(uri, types.size(), types);
-	}
-
-	@Override
-	public Predicate getDataPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, ImmutableList.of(OBJECT_RDF_TYPE, TYPE_FACTORY.getAbstractRDFSLiteral()));
-	}
-
-	@Override
-	public Predicate getDataPropertyPredicate(String name, TermType type) {
-		return new PredicateImpl(name, 2, ImmutableList.of(OBJECT_RDF_TYPE, type)); // COL_TYPE.LITERAL
-	}
-
-	//defining annotation property we still don't know if the values that it will assume, will be an object or a data property
-	@Override
-	public Predicate getAnnotationPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, ImmutableList.of(OBJECT_RDF_TYPE, ROOT_RDF_TERM_TYPE));
-	}
-
-	@Override
-	public Predicate getClassPredicate(String name) {
-		return new PredicateImpl(name, 1, ImmutableList.of(OBJECT_RDF_TYPE));
-	}
-
-	@Override
-	public Predicate getOWLSameAsPredicate() {
-		return new PredicateImpl(IriConstants.SAME_AS, 2, ImmutableList.of(OBJECT_RDF_TYPE, OBJECT_RDF_TYPE));
-	}
-
-	@Override
-	public Predicate getOBDACanonicalIRI() {
-		return new PredicateImpl(IriConstants.CANONICAL_IRI, 2, ImmutableList.of(OBJECT_RDF_TYPE, OBJECT_RDF_TYPE));
 	}
 
 	@Override
@@ -306,25 +270,25 @@ public class TermFactoryImpl implements TermFactory {
 	
 	@Override
 	public Function getBNodeTemplate(Term... terms) {
-		Predicate pred = new BNodePredicateImpl(terms.length);
+		Predicate pred = new BNodePredicateImpl(terms.length, typeFactory);
 		return getFunction(pred, terms);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableTerm... terms) {
-		Predicate pred = new BNodePredicateImpl(terms.length);
+		Predicate pred = new BNodePredicateImpl(terms.length, typeFactory);
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableList<ImmutableTerm> terms) {
-		Predicate pred = new BNodePredicateImpl(terms.size());
+		Predicate pred = new BNodePredicateImpl(terms.size(), typeFactory);
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public Function getBNodeTemplate(List<Term> terms) {
-		Predicate pred = new BNodePredicateImpl(terms.size());
+		Predicate pred = new BNodePredicateImpl(terms.size(), typeFactory);
 		return getFunction(pred, terms);
 	}
 
@@ -444,7 +408,7 @@ public class TermFactoryImpl implements TermFactory {
 	
 	@Override
 	public BNode getConstantBNode(String name) {
-		return new BNodeConstantImpl(name);
+		return new BNodeConstantImpl(name, TYPE_FACTORY);
 	}
 
 	@Override

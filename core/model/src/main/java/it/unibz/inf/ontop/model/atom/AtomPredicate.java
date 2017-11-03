@@ -10,15 +10,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 public interface AtomPredicate extends Predicate {
 
     @Deprecated
-    boolean isClass();
-
-    @Deprecated
-    boolean couldBeAnObjectProperty();
-
-    @Deprecated
-    boolean couldBeADataProperty();
-
-    @Deprecated
     boolean isTriplePredicate();
 
 }

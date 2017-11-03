@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -32,6 +33,7 @@ public class OntopModelModule extends OntopAbstractModule {
         // Core factories: Too central to be overloaded from the properties
         bind(TypeFactory.class).toInstance(TYPE_FACTORY);
         bind(TermFactory.class).toInstance(TERM_FACTORY);
+        bind(DatalogFactory.class).toInstance(DATALOG_FACTORY);
         bindFromSettings(AtomFactory.class);
         bindFromSettings(SubstitutionFactory.class);
 

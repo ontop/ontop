@@ -406,7 +406,8 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                     .map(p -> (Predicate) p);
         }
         if (expression instanceof DataPropertyRangeExpression) {
-            return Optional.of(((DataPropertyRangeExpression) expression).getProperty().getPredicate());
+            return Optional.of(atomFactory.getDataPropertyPredicate(
+                    ((DataPropertyRangeExpression) expression).getProperty().getIRI()));
         }
         return Optional.empty();
     }

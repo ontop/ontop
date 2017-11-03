@@ -20,10 +20,9 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.AnnotationProperty;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 /**
  * Represents AnnotationPropertyExpression from the OWL 2 QL Specification
@@ -40,24 +39,22 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 
 	private static final long serialVersionUID = 500873858691854474L;
 
-	private final Predicate predicate;
 	private final String name;
+	private IRI iri;
 //	private final AnnotationPropertyDomainImpl domain;
 //	private final AnnotationPropertyRangeImpl range;
 
 
 	AnnotationPropertyImpl(String name) {
-
-		this.predicate = TERM_FACTORY.getAnnotationPropertyPredicate(name);
 		this.name = name;
+		this.iri = new SimpleRDF().createIRI(name);
 //		this.domain =  new AnnotationPropertyDomainImpl(this);
 //		this.range = new AnnotationPropertyRangeImpl(this);
-
 	}
 
 	@Override
-	public Predicate getPredicate() {
-		return predicate;
+	public IRI getIRI() {
+		return iri;
 	}
 
 	@Override

@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.model.type.TermType;
 
 import javax.annotation.Nonnull;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class PredicateImpl implements Predicate {
 
@@ -87,44 +86,6 @@ public class PredicateImpl implements Predicate {
 	@Override
 	public ImmutableList<TermType> getExpectedBaseArgumentTypes() {
 		return expectedBaseTypes;
-	}
-
-	@Override
-	public boolean isClass() {
-		return arity == 1
-				&& isRDFObject(getExpectedBaseType(0));
-	}
-
-	@Override
-	public boolean couldBeAnObjectProperty() {
-		// IRI/BNode constraint on the subject
-		if ((arity != 2) || (!isRDFObject(getExpectedBaseType(0))))
-			return false;
-
-		TermType secondBaseType = getExpectedBaseType(1);
-
-		// IRI/BNode constraint
-		return isRDFObject(secondBaseType)
-				// Or accepting any RDF term
-				|| secondBaseType.equals(TYPE_FACTORY.getAbstractRDFTermType());
-	}
-
-	@Override
-	public boolean couldBeADataProperty() {
-		// IRI/BNode constraint on the subject
-		if ((arity != 2) || (!isRDFObject(getExpectedBaseType(0))))
-			return false;
-
-		TermType secondBaseType = getExpectedBaseType(1);
-
-		// Literal constraint
-		return secondBaseType.isA(TYPE_FACTORY.getAbstractRDFSLiteral())
-				// Or accepting any RDF term
-				|| secondBaseType.equals(TYPE_FACTORY.getAbstractRDFTermType());
-	}
-
-	private static boolean isRDFObject(TermType termType) {
-		return termType.isA(TYPE_FACTORY.getAbstractObjectRDFType());
 	}
 
 

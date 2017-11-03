@@ -357,7 +357,7 @@ public class TMappingProcessor {
 				continue;
 			}
 			/* Getting the current node mappings */
-			Predicate currentPredicate = current.getPredicate();
+			Predicate currentPredicate = atomFactory.getDataPropertyPredicate(current.getIRI());
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
 
 			if (full) {
@@ -370,7 +370,8 @@ public class TMappingProcessor {
 						 * predicate and, if the child is inverse and the current is
 						 * positive, it will also invert the terms in the head
 						 */
-						List<TMappingRule> childmappings = originalMappings.get(childproperty.getPredicate());
+						List<TMappingRule> childmappings = originalMappings.get(atomFactory.getDataPropertyPredicate(
+								childproperty.getIRI()));
 						if (childmappings == null)
 							continue;
 						
@@ -390,10 +391,10 @@ public class TMappingProcessor {
 			for (DataPropertyExpression equivProperty : propertySet) {
 			
 				 
-				Predicate p = equivProperty.getPredicate();
+				Predicate p = atomFactory.getDataPropertyPredicate(equivProperty.getIRI());
 
 				// skip the property and its inverse (if it is symmetric)
-				if (p.equals(current.getPredicate()))
+				if (p.equals(currentPredicate))
 					continue;
 				
 				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
@@ -505,7 +506,7 @@ public class TMappingProcessor {
 			}
 
 			/* Getting the current node mappings */
-			Predicate currentPredicate = current.getPredicate();
+			Predicate currentPredicate = atomFactory.getClassPredicate(current.getIRI());
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
 			for (Equivalences<ClassExpression> descendants : reasoner.getClassDAG().getSub(classSet)) {
@@ -523,7 +524,7 @@ public class TMappingProcessor {
 					if (childDescription instanceof OClass) {
 						if (!full)
 							continue;
-						childPredicate = ((OClass) childDescription).getPredicate();
+						childPredicate = atomFactory.getClassPredicate(((OClass) childDescription).getIRI());
 						isClass = true;
 						isInverse = false;
 
@@ -544,7 +545,7 @@ public class TMappingProcessor {
 					else {
 						assert (childDescription instanceof DataSomeValuesFrom);
 						DataPropertyExpression some = ((DataSomeValuesFrom) childDescription).getProperty();
-						childPredicate = some.getPredicate();
+						childPredicate = atomFactory.getDataPropertyPredicate(some.getIRI());
 						isClass = false;
 						isInverse = false;  // can never be an inverse
 					} 
@@ -579,7 +580,7 @@ public class TMappingProcessor {
 				if (!(equiv instanceof OClass) || equiv.equals(current))
 					continue;
 				
-				Predicate p = ((OClass) equiv).getPredicate();
+				Predicate p = atomFactory.getClassPredicate(((OClass) equiv).getIRI());
 				TMappingIndexEntry equivalentClassMappings = getMappings(mappingIndex, p);	
 				
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {

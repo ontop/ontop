@@ -3,12 +3,15 @@ package it.unibz.inf.ontop.evaluator.impl;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import static it.unibz.inf.ontop.model.term.TermConstants.NULL;
@@ -18,10 +21,17 @@ import static it.unibz.inf.ontop.model.term.TermConstants.NULL;
 public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
     private final SubstitutionFactory substitutionFactory;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
+    private final DatalogTools datalogTools;
 
     @Inject
-    private TermNullabilityEvaluatorImpl(SubstitutionFactory substitutionFactory) {
+    private TermNullabilityEvaluatorImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
+                                         TypeFactory typeFactory, DatalogTools datalogTools) {
         this.substitutionFactory = substitutionFactory;
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
+        this.datalogTools = datalogTools;
     }
 
     @Override
@@ -47,7 +57,8 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
                 .applyToBooleanExpression(expression);
 
         // TODO: inject the expression evaluator instead
-        EvaluationResult evaluationResult = new ExpressionEvaluator().evaluateExpression(nullCaseExpression);
+        EvaluationResult evaluationResult = new ExpressionEvaluator(datalogTools, termFactory, typeFactory)
+                .evaluateExpression(nullCaseExpression);
         return evaluationResult.isEffectiveFalse();
     }
 

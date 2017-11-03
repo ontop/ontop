@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -78,7 +79,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 								JoinLikeOptimizer joinLikeOptimizer,
 								InputQueryFactory inputQueryFactory,
 								LinearInclusionDependencyTools inclusionDependencyTools,
-								AtomFactory atomFactory) {
+								AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
@@ -100,7 +101,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.queryUnfolder = translationFactory.create(saturatedMapping);
 
 		this.vocabularyValidator = new VocabularyValidator(obdaSpecification.getSaturatedTBox(),
-				obdaSpecification.getVocabulary(), atomFactory);
+				obdaSpecification.getVocabulary(), atomFactory, termFactory, datalogFactory);
 		this.dbMetadata = obdaSpecification.getDBMetadata();
 		this.datasourceQueryGenerator = translationFactory.create(dbMetadata);
 		this.inputQueryTranslator = translationFactory.createInputQueryTranslator(saturatedMapping.getMetadata()

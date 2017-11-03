@@ -25,6 +25,8 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -33,10 +35,6 @@ import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.ontology.OClass;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
@@ -73,7 +71,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.protege.gui.PredicateItem.PredicateType.CLASS;
 
 public class MappingAssistantPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
@@ -97,6 +95,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
 	private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
+	private final TermFactory termFactory;
+	private final AtomFactory atomFactory;
 
 	public MappingAssistantPanel(OBDAModel model, OntopConfigurationManager configurationManager,
 								 OWLModelManager owlModelManager) {
@@ -104,6 +104,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		this.configurationManager = configurationManager;
 		this.owlModelManager = owlModelManager;
 		prefixManager = obdaModel.getMutablePrefixManager();
+		termFactory = obdaModel.getTermFactory();
+		atomFactory = obdaModel.getAtomFactory();
 		initComponents();
 
 		if (obdaModel.getSources().size() > 0) {
@@ -305,8 +307,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
 		Vector<Object> v = new Vector<Object>();
 		for (OClass c : obdaModel.getCurrentVocabulary().getClasses()) {
-			Predicate pred = c.getPredicate();
-			v.addElement(new PredicateItem(pred, prefixManager));
+			Predicate pred = atomFactory.getClassPredicate(c.getIRI());
+			v.addElement(new PredicateItem(pred, CLASS, prefixManager));
 		}
 		cboClassAutoSuggest = new AutoSuggestComboBox(v);
 		cboClassAutoSuggest.setRenderer(new ClassListCellRenderer());
@@ -563,7 +565,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		// Store concept in the body, if any
 		ImmutableTerm subjectTerm = createSubjectTerm(predicateSubjectMap);
 		if (!predicateSubjectMap.getName().equals("owl:Thing")) {
-			ImmutableFunctionalTerm concept = TERM_FACTORY.getImmutableFunctionalTerm(predicateSubjectMap.getSourcePredicate(), subjectTerm);
+			ImmutableFunctionalTerm concept = termFactory.getImmutableFunctionalTerm(predicateSubjectMap.getSourcePredicate(), subjectTerm);
 			bodyBuilder.add(concept);
 		}
 
@@ -572,18 +574,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
 				ImmutableTerm objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
-				ImmutableFunctionalTerm attribute = TERM_FACTORY.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				ImmutableFunctionalTerm attribute = termFactory.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				bodyBuilder.add(attribute);
 				//distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				ImmutableFunctionalTerm objectRefTerm = createRefObjectTerm(predicateObjectMap);
-				ImmutableFunctionalTerm role = TERM_FACTORY.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
+				ImmutableFunctionalTerm role = termFactory.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
 				bodyBuilder.add(role);
 			}
 		}
 		// Create the head
 		//int arity = distinguishVariables.size();
-		//Function head = TERM_FACTORY.getFunction(TERM_FACTORY.getTermType(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
+		//Function head = termFactory.getFunction(termFactory.getTermType(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 
 		// Create and return the conjunctive query
 		return bodyBuilder.build();
@@ -606,11 +608,11 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			throw new RuntimeException("Invalid column mapping: " + column);
 		}
 		String columnName = columnStrings.get(0).toString();
-		Variable var = TERM_FACTORY.getVariable(columnName);
+		Variable var = termFactory.getVariable(columnName);
 		if (datatype == null) {
 			return var;
 		} else {
-			return TERM_FACTORY.getImmutableFunctionalTerm(datatype, var);
+			return termFactory.getImmutableFunctionalTerm(datatype, var);
 		}
 	}
 
@@ -651,7 +653,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private MapItem createPredicateSubjectMap() {
 		// Create a default subject map using owl:Thing as the subject
-		return new MapItem(new PredicateItem(TERM_FACTORY.getClassPredicate("owl:Thing"), prefixManager));
+		return new MapItem(new PredicateItem(atomFactory.getClassPredicate("owl:Thing"), CLASS, prefixManager));
 	}
 
 	private ImmutableFunctionalTerm getUriFunctionTerm(String text) {
@@ -664,13 +666,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				sb.append(token.toString());
 			} else if (token instanceof ColumnString) {
 				sb.append(PLACEHOLDER);
-				Variable column = TERM_FACTORY.getVariable(token.toString());
+				Variable column = termFactory.getVariable(token.toString());
 				terms.add(column);
 			}
 		}
-		ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
+		ValueConstant uriTemplate = termFactory.getConstantLiteral(sb.toString()); // complete URI template
 		terms.add(0, uriTemplate);
-		return TERM_FACTORY.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+		return termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 	}
 
 	// Column placeholder pattern

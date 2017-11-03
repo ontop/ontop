@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
@@ -28,6 +29,7 @@ public class MappingTestingTools {
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final Relation2Predicate RELATION_2_PREDICATE;
     public static final SpecificationFactory MAPPING_FACTORY;
+    public static final DatalogFactory DATALOG_FACTORY;
     public static final MappingNormalizer MAPPING_NORMALIZER;
 
     static {
@@ -42,6 +44,7 @@ public class MappingTestingTools {
         MAPPING_NORMALIZER = injector.getInstance(MappingNormalizer.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
+        DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         RELATION_2_PREDICATE = injector.getInstance(Relation2Predicate.class);
 

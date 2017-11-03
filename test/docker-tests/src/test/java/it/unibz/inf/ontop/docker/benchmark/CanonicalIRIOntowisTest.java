@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.docker.benchmark;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
@@ -506,11 +505,10 @@ public class CanonicalIRIOntowisTest {
     /**
      * @throws OWLOntologyCreationException
      * @throws InvalidMappingException
-     * @throws InvalidPredicateDeclarationException
      * @throws IOException
      * @throws OWLException
      */
-    private OWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
+    private OWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidMappingException{
 
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)

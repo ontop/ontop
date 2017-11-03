@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -24,8 +25,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 import java.util.Collection;
 import java.util.HashSet;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Converts a Datalog rule into an intermediate query.
@@ -42,11 +41,14 @@ public class DatalogRule2QueryConverter {
         private final List<Function> dataAndCompositeAtoms;
         private final List<Function> booleanAtoms;
         private final Optional<Function> optionalGroupAtom;
+        private final DatalogTools datalogTools;
 
-        protected AtomClassification(List<Function> atoms) throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
+        protected AtomClassification(List<Function> atoms, DatalogTools datalogTools)
+                throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
+            this.datalogTools = datalogTools;
             dataAndCompositeAtoms = DatalogTools.filterDataAndCompositeAtoms(atoms);
             List<Function> otherAtoms = DatalogTools.filterNonDataAndCompositeAtoms(atoms);
-            booleanAtoms = DatalogTools.filterBooleanAtoms(otherAtoms);
+            booleanAtoms = datalogTools.filterBooleanAtoms(otherAtoms);
 
             if (dataAndCompositeAtoms.isEmpty())
                 throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("No data or composite atom in " + atoms);
@@ -103,10 +105,15 @@ public class DatalogRule2QueryConverter {
     private static final Optional<ArgumentPosition> NO_POSITION = Optional.empty();
     private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
     private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);
-    private final DatalogConversionTools datalogTools;
+    private final TermFactory termFactory;
+    private final DatalogConversionTools datalogConversionTools;
+    private final DatalogTools datalogTools;
 
     @Inject
-    private DatalogRule2QueryConverter(DatalogConversionTools datalogTools) {
+    private DatalogRule2QueryConverter(TermFactory termFactory, DatalogConversionTools datalogConversionTools,
+                                       DatalogTools datalogTools) {
+        this.termFactory = termFactory;
+        this.datalogConversionTools = datalogConversionTools;
         this.datalogTools = datalogTools;
     }
 
@@ -120,7 +127,7 @@ public class DatalogRule2QueryConverter {
                                                        ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
-        TargetAtom targetAtom = datalogTools.convertFromDatalogDataAtom(datalogRule.getHead());
+        TargetAtom targetAtom = datalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
 
         DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
 
@@ -132,7 +139,7 @@ public class DatalogRule2QueryConverter {
             return createFact(dbMetadata, rootNode, projectionAtom, executorRegistry, iqFactory);
         }
         else {
-            AtomClassification atomClassification = new AtomClassification(bodyAtoms);
+            AtomClassification atomClassification = new AtomClassification(bodyAtoms, datalogTools);
 
             return createDefinition(dbMetadata, rootNode, projectionAtom, tablePredicates,
                     atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
@@ -212,7 +219,7 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: explain
      */
-    private static Optional<JoinOrFilterNode> createFilterOrJoinNode(IntermediateQueryFactory iqFactory,
+    private Optional<JoinOrFilterNode> createFilterOrJoinNode(IntermediateQueryFactory iqFactory,
                                                                      List<Function> dataAndCompositeAtoms,
                                                                      List<Function> booleanAtoms) {
         Optional<ImmutableExpression> optionalFilter = createFilterExpression(booleanAtoms);
@@ -239,10 +246,10 @@ public class DatalogRule2QueryConverter {
     }
 
 
-    private static Optional<ImmutableExpression> createFilterExpression(List<Function> booleanAtoms) {
+    private Optional<ImmutableExpression> createFilterExpression(List<Function> booleanAtoms) {
         if (booleanAtoms.isEmpty())
             return Optional.empty();
-        return Optional.of(TERM_FACTORY.getImmutableExpression(DatalogTools.foldBooleanConditions(booleanAtoms)));
+        return Optional.of(termFactory.getImmutableExpression(datalogTools.foldBooleanConditions(booleanAtoms)));
     }
 
     /**
@@ -286,10 +293,10 @@ public class DatalogRule2QueryConverter {
                 /*
                  * Creates the node
                  */
-                TargetAtom targetAtom = datalogTools.convertFromDatalogDataAtom(atom);
+                TargetAtom targetAtom = datalogConversionTools.convertFromDatalogDataAtom(atom);
                 ImmutableSubstitution<ImmutableTerm> bindings = targetAtom.getSubstitution();
                 DataAtom dataAtom = bindings.applyToDataAtom(targetAtom.getProjectionAtom());
-                DataNode currentNode = datalogTools.createDataNode(queryBuilder.getFactory(),
+                DataNode currentNode = datalogConversionTools.createDataNode(queryBuilder.getFactory(),
                         dataAtom, tablePredicates);
                 queryBuilder.addChild(parentNode, currentNode, optionalPosition);
             }
@@ -315,7 +322,7 @@ public class DatalogRule2QueryConverter {
         /*
          * TODO: explain why we just care about the right
          */
-        AtomClassification rightSubAtomClassification = new AtomClassification(rightAtoms);
+        AtomClassification rightSubAtomClassification = new AtomClassification(rightAtoms, datalogTools);
 
         Optional<ImmutableExpression> optionalFilterCondition = createFilterExpression(
                 rightSubAtomClassification.booleanAtoms);
@@ -346,7 +353,7 @@ public class DatalogRule2QueryConverter {
                                                             Collection<Predicate> tablePredicates)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
-        AtomClassification classification = new AtomClassification(subAtomsOfTheJoin);
+        AtomClassification classification = new AtomClassification(subAtomsOfTheJoin, datalogTools);
         if (classification.optionalGroupAtom.isPresent()) {
             throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("GROUP atom found inside a LJ meta-atom");
         }

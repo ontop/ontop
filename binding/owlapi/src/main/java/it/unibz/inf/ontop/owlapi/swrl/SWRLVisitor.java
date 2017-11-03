@@ -1,20 +1,19 @@
 package it.unibz.inf.ontop.owlapi.swrl;
 
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 
 /**
@@ -43,9 +42,16 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	List<String> errors= new LinkedList<String> ();
 	private static Logger log = LoggerFactory.getLogger(SWRLVisitor.class);
 	private final AtomFactory atomFactory;
+	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
+	private final DatalogFactory datalogFactory;
 
-	public SWRLVisitor(AtomFactory atomFactory){
+	public SWRLVisitor(AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
+					   DatalogFactory datalogFactory){
 		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
+		this.typeFactory = typeFactory;
+		this.datalogFactory = datalogFactory;
 
 		facts = new HashSet<CQIE>();
 		
@@ -76,7 +82,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		}
 		
 		
-		DatalogProgram dp = DATALOG_FACTORY.getDatalogProgram();
+		DatalogProgram dp = datalogFactory.getDatalogProgram();
 		dp.appendRule(facts);
 		return dp;
 	}
@@ -97,7 +103,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 			errors.clear();
 		}
 
-		DatalogProgram dp = DATALOG_FACTORY.getDatalogProgram();
+		DatalogProgram dp = datalogFactory.getDatalogProgram();
 		dp.appendRule(facts);
 		return dp;
 	}
@@ -143,7 +149,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 			getBody(node.getBody());
 			
 			
-			facts.add(DATALOG_FACTORY.getCQIE(head, body));
+			facts.add(datalogFactory.getCQIE(head, body));
 			}
 		
 	}
@@ -155,7 +161,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		if(!node.getPredicate().isAnonymous()){
 			
 		//get predicate for datalog
-		Predicate predicate= TERM_FACTORY.getClassPredicate(node.getPredicate().asOWLClass().toStringID());
+		Predicate predicate= atomFactory.getClassPredicate(node.getPredicate().asOWLClass().toStringID());
 		
 		terms = new ArrayList<Term>();
 		//get terms for datalog
@@ -164,7 +170,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 			
 		}
 		
-		function = TERM_FACTORY.getFunction(predicate, terms);
+		function = termFactory.getFunction(predicate, terms);
 		}
 		else{
 			notSupported=false;
@@ -197,7 +203,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 				argument.accept(this);
 	
 			}
-			function = TERM_FACTORY.getFunction(predicate, terms);
+			function = termFactory.getFunction(predicate, terms);
 		}
 		else{
 			notSupported=false;
@@ -213,7 +219,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		if(!node.getPredicate().isAnonymous()){
 		
 			//get predicate for datalog
-			 predicate= TERM_FACTORY.getDataPropertyPredicate(node.getPredicate().asOWLDataProperty().toStringID());
+			 predicate= atomFactory.getDataPropertyPredicate(node.getPredicate().asOWLDataProperty().toStringID());
 					
 			terms = new ArrayList<Term>();
 					//get terms for datalog
@@ -221,7 +227,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 						argument.accept(this);
 			
 					}
-			function = TERM_FACTORY.getFunction(predicate, terms);
+			function = termFactory.getFunction(predicate, terms);
 		}
 		else{
 			notSupported=false;
@@ -243,7 +249,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	@Override
 	public void visit(SWRLVariable node) {
 		
-		terms.add(TERM_FACTORY.getVariable(node.getIRI().getFragment()));
+		terms.add(termFactory.getVariable(node.getIRI().getFragment()));
 		
 	}
 
@@ -251,7 +257,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	public void visit(SWRLIndividualArgument node) {
 	
 		//get the id without the quotes <>
-		terms.add(TERM_FACTORY.getConstantLiteral(node.getIndividual().toStringID(), TYPE_FACTORY.getXsdStringDatatype()));
+		terms.add(termFactory.getConstantLiteral(node.getIndividual().toStringID(), typeFactory.getXsdStringDatatype()));
 	}
 
 	@Override
@@ -260,17 +266,17 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		OWLLiteral literal=node.getLiteral();
 		
 		if (literal.isBoolean()) 
-			terms.add(TERM_FACTORY.getBooleanConstant(literal.parseBoolean()));
+			terms.add(termFactory.getBooleanConstant(literal.parseBoolean()));
 		else if(literal.hasLang())
-			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), literal.getLang()));
+			terms.add(termFactory.getConstantLiteral(literal.getLiteral(), literal.getLang()));
 		else if (literal.isDouble())
-			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), TYPE_FACTORY.getXsdDoubleDatatype()));
+			terms.add(termFactory.getConstantLiteral(literal.getLiteral(), typeFactory.getXsdDoubleDatatype()));
 		else if (literal.isFloat())
-			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), TYPE_FACTORY.getXsdDecimalDatatype()));
+			terms.add(termFactory.getConstantLiteral(literal.getLiteral(), typeFactory.getXsdDecimalDatatype()));
 		else if (literal.isInteger())
-			terms.add(TERM_FACTORY.getConstantLiteral(literal.getLiteral(), TYPE_FACTORY.getXsdIntegerDatatype()));
+			terms.add(termFactory.getConstantLiteral(literal.getLiteral(), typeFactory.getXsdIntegerDatatype()));
 		else 
-			TERM_FACTORY.getConstantLiteral(literal.getLiteral());
+			termFactory.getConstantLiteral(literal.getLiteral());
 	}
 
 //	we do not support swrl same as

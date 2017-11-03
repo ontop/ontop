@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
@@ -25,8 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-
 
 public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingConverter {
 
@@ -37,16 +36,19 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private final AtomFactory atomFactory;
     private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
+    private final DatalogFactory datalogFactory;
 
     @Inject
     public LegacyABoxFactIntoMappingConverter(Datalog2QueryMappingConverter datalog2QueryMappingConverter,
                                               SpecificationFactory mappingFactory, AtomFactory atomFactory,
-                                              Relation2Predicate relation2Predicate, TermFactory termFactory) {
+                                              Relation2Predicate relation2Predicate, TermFactory termFactory,
+                                              DatalogFactory datalogFactory) {
         this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
         this.mappingFactory = mappingFactory;
         this.atomFactory = atomFactory;
         this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
+        this.datalogFactory = datalogFactory;
     }
 
     @Override
@@ -96,10 +98,10 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         for (ClassAssertion ca : cas) {
             // no blank nodes are supported here
             URIConstant c = (URIConstant) ca.getIndividual();
-            Predicate p = ca.getConcept().getPredicate();
+            Predicate p = atomFactory.getClassPredicate(ca.getConcept().getIRI());
             Function head = termFactory.getFunction(p,
                     uriTemplateMatcher.generateURIFunction(c.getURI()));
-            CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
+            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -115,7 +117,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             Function head = termFactory.getFunction(p,
                     uriTemplateMatcher.generateURIFunction(s.getURI()),
                     uriTemplateMatcher.generateURIFunction(o.getURI()));
-            CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
+            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -128,7 +130,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             // no blank nodes are supported here
             URIConstant s = (URIConstant) da.getSubject();
             ValueConstant o = da.getValue();
-            Predicate p = da.getProperty().getPredicate();
+            Predicate p = atomFactory.getDataPropertyPredicate(da.getProperty().getIRI());
 
             Function head;
             if (o.getLanguage() != null) {
@@ -140,7 +142,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                 head = termFactory.getFunction(p, termFactory.getUriTemplate(
                         termFactory.getConstantLiteral(s.getURI())), termFactory.getTypedTerm(o, o.getType()));
             }
-            CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
+            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -154,7 +156,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
             URIConstant s = (URIConstant) aa.getSubject();
             Constant v = aa.getValue();
-            Predicate p = aa.getProperty().getPredicate();
+            Predicate p = atomFactory.getAnnotationPropertyPredicate(aa.getProperty().getIRI());
 
             Function head;
             if (v instanceof ValueConstant) {
@@ -179,7 +181,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
 
             }
-            CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
+            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;

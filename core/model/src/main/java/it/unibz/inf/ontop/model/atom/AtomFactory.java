@@ -21,6 +21,27 @@ public interface AtomFactory {
 
     AtomPredicate getObjectPropertyPredicate(IRI iri);
 
+    AtomPredicate getDataPropertyPredicate(String name, TermType type);
+
+    @Deprecated
+    AtomPredicate getAnnotationPropertyPredicate(String name);
+
+    AtomPredicate getAnnotationPropertyPredicate(IRI iri);
+
+    @Deprecated
+    AtomPredicate getDataPropertyPredicate(String name);
+
+    AtomPredicate getDataPropertyPredicate(IRI iri);
+
+    @Deprecated
+    AtomPredicate getClassPredicate(String name);
+
+    AtomPredicate getClassPredicate(IRI iri);
+
+    AtomPredicate getOWLSameAsPredicate();
+
+    AtomPredicate getOBDACanonicalIRI();
+
     /**
      * Beware: a DataAtom is immutable
      */

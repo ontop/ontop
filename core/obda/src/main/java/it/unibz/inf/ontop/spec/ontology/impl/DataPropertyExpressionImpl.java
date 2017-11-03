@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyRangeExpression;
 import it.unibz.inf.ontop.spec.ontology.DataSomeValuesFrom;
@@ -32,8 +31,6 @@ import org.apache.commons.rdf.simple.SimpleRDF;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Represents DataPropertyExpression from the OWL 2 QL Specification
@@ -51,7 +48,6 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	private static final long serialVersionUID = 500873858691854474L;
 	private static final RDF RDF_FACTORY = new SimpleRDF();
 
-	private final Predicate predicate;
 	private final String name;
 	
 	private final boolean isTop, isBottom;
@@ -64,11 +60,12 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	
     public static final DataPropertyExpression owlTopDataProperty = new DataPropertyExpressionImpl(owlTopDataPropertyIRI);
     public static final DataPropertyExpression owlBottomDataProperty = new DataPropertyExpressionImpl(owlBottomDataPropertyIRI);
-	
+	private final IRI iri;
+
 
 	DataPropertyExpressionImpl(String name) {
-		this.predicate = TERM_FACTORY.getDataPropertyPredicate(name);
-		this.name = name;		
+		this.name = name;
+		this.iri = RDF_FACTORY.createIRI(name);
 		this.isTop = name.equals(owlTopDataPropertyIRI);
 		this.isBottom = name.equals(owlBottomDataPropertyIRI);
 
@@ -76,15 +73,9 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 		this.range = new DataPropertyRangeExpressionImpl(this);
 	}
 
-
-	@Override
-	public Predicate getPredicate() {
-		return predicate;
-	}
-
 	@Override
 	public IRI getIRI() {
-		return RDF_FACTORY.createIRI(name);
+		return iri;
 	}
 
 	@Override

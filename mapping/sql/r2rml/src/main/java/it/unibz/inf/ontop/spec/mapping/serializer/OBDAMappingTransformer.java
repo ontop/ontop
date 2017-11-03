@@ -138,7 +138,7 @@ public class OBDAMappingTransformer {
 			OWLObjectProperty objectProperty = factory.getOWLObjectProperty(propname);
             OWLDataProperty dataProperty = factory.getOWLDataProperty(propname);
 			
-			if (!predURIString.equals(IriConstants.RDF_TYPE) && pred.isClass() ) {
+			if (!predURIString.equals(IriConstants.RDF_TYPE) && pred.getArity() == 1) {
 				// The term is actually a SubjectMap (class)
 				//add class declaration to subject Map node
 				sm.addClass(predUri);

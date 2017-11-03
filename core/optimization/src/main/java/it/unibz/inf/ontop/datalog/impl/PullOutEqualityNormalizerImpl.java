@@ -49,12 +49,15 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
 
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final DatalogTools datalogTools;
 
     @Inject
-    private PullOutEqualityNormalizerImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+    private PullOutEqualityNormalizerImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
+                                          DatalogTools datalogTools) {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.trueEq = termFactory.getFunctionEQ(TermConstants.TRUE, TermConstants.TRUE);
+        this.datalogTools = datalogTools;
     }
 
 
@@ -313,8 +316,8 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
              * Folds the joining conditions (they will remain in the JOIN meta-atom, they are not pushed)
              * and finally folds the Join meta-atom to respected its 3-arity.
              */
-            Function joiningCondition = DatalogTools.foldBooleanConditions(normalizationResult.getPushableBoolAtoms());
-            Function normalizedJoinMetaAtom = foldJoin(normalizationResult.getNonPushableAtoms(),joiningCondition);
+            Function joiningCondition = datalogTools.foldBooleanConditions(normalizationResult.getPushableBoolAtoms());
+            Function normalizedJoinMetaAtom = datalogTools.foldJoin(normalizationResult.getNonPushableAtoms(),joiningCondition);
 
             /**
              * A real JOIN is blocking --> no pushable boolean atom.
@@ -344,7 +347,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      *
      * TODO: This would be much nicer with as a Visitor.
      */
-    private static  P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> normalizeTermInDataAtom(
+    private  P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> normalizeTermInDataAtom(
             Term term, VariableDispatcher variableDispatcher) {
         if (term instanceof Variable) {
             return normalizeVariableInDataAtom((Variable) term, variableDispatcher);
@@ -413,7 +416,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      *   - a list of variable-to-variable renamings,
      *   - a list of variable-to-constant pairs.
      */
-    private static P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> normalizeFunctionalTermInDataAtom(
+    private P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> normalizeFunctionalTermInDataAtom(
                         Function functionalTerm, final VariableDispatcher variableDispatcher) {
 
         /**
@@ -427,7 +430,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          * Retrieves normalized sub-terms.
          */
         List<Term> newSubTerms = subTermResults.map(P3::_1);
-        Function newFunctionalTerm = constructNewFunction(functionalTerm.getFunctionSymbol(), newSubTerms);
+        Function newFunctionalTerm = datalogTools.constructNewFunction(functionalTerm.getFunctionSymbol(), newSubTerms);
 
         /**
          * Concatenates variable-to-variable renamings and variable-to-constant pairs.

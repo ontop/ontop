@@ -43,25 +43,8 @@ public class Indicator {
      *          The error category.
      */
     public Indicator(int lineNumber, Object hint, int reason) {
-        this(lineNumber, -1, hint, reason);
-    }
-
-    /**
-     * An error indicator that points to a given line number in the file. In addition,
-     * users can specify the column number if the error is contained in a table list.
-     * 
-     * @param lineNumber
-     *          The line number that contains the error.
-     * @param columnNumber
-     *          The column order that contains the error.
-     * @param hint
-     *          Part of the file that has the error.
-     * @param reason
-     *          The error category.
-     */
-    public Indicator(int lineNumber, int columnNumber, Object hint, int reason) {
         this.lineNumber = lineNumber;
-        this.columnNumber = columnNumber;
+        this.columnNumber = -1;
         this.hint = hint;
         this.reason = reason;
     }

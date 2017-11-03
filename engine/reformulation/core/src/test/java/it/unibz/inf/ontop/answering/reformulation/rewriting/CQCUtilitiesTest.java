@@ -298,7 +298,7 @@ public class CQCUtilitiesTest {
 
 		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
 
 		CQIE q1 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -318,7 +318,7 @@ public class CQCUtilitiesTest {
 
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
 
 		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -350,7 +350,7 @@ public class CQCUtilitiesTest {
 
 		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
 
 		CQIE q1 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -368,7 +368,7 @@ public class CQCUtilitiesTest {
 		head = getFunction("q", TERM_FACTORY.getVariable("x"));
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
 
 		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -425,11 +425,11 @@ public class CQCUtilitiesTest {
 			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", Collections.<Term>singletonList(TERM_FACTORY.getVariable("x")));
-			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
+			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", Collections.<Term>singletonList(TERM_FACTORY.getVariable("y")));
-			Function body2 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("C"), TERM_FACTORY.getVariable("y"));
+			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("C"), TERM_FACTORY.getVariable("y"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			
@@ -453,7 +453,7 @@ public class CQCUtilitiesTest {
 			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
-			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
+			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", TERM_FACTORY.getVariable("y"));
@@ -481,7 +481,7 @@ public class CQCUtilitiesTest {
 			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
-			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
+			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", TERM_FACTORY.getVariable("y"));
@@ -514,7 +514,7 @@ public class CQCUtilitiesTest {
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", TERM_FACTORY.getVariable("z"));
-			Function body2 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("z"));
+			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("z"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
@@ -543,7 +543,7 @@ public class CQCUtilitiesTest {
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", TERM_FACTORY.getVariable("z"));
-			Function body2 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("z"));
+			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("z"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
@@ -596,7 +596,7 @@ public class CQCUtilitiesTest {
 
         body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
 
-        body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+        body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
 
         CQIE query1 = DATALOG_FACTORY.getCQIE(head, body);
 

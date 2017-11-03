@@ -115,7 +115,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
         //add all class/data/object predicates to selectedVocabulary
             //from ontology
             for (OClass cl : vocabulary.getClasses()) {
-                Predicate p = cl.getPredicate();
+                Predicate p = atomFactory.getClassPredicate(cl.getIRI());
                 if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
                         && !predicates.contains(p))
                     predicates.add(p);
@@ -127,13 +127,13 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
                     predicates.add(p);
             }
             for (DataPropertyExpression role : vocabulary.getDataProperties()) {
-                Predicate p = role.getPredicate();
+                Predicate p = atomFactory.getDataPropertyPredicate(role.getIRI());
                 if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
                         && !predicates.contains(p))
                     predicates.add(p);
             }
 			for (AnnotationProperty role : vocabulary.getAnnotationProperties()) {
-				Predicate p = role.getPredicate();
+				Predicate p = atomFactory.getAnnotationPropertyPredicate(role.getIRI());
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 							&& !predicates.contains(p))
 					predicates.add(p);

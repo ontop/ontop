@@ -19,8 +19,7 @@ public class AtomPredicateImpl extends PredicateImpl implements AtomPredicate {
     protected AtomPredicateImpl(Predicate datalogPredicate) {
         super(datalogPredicate.getName(),
                 datalogPredicate.getArity(),
-                datalogPredicate.getExpectedBaseArgumentTypes()
-        );
+                datalogPredicate.getExpectedBaseArgumentTypes());
         if (datalogPredicate instanceof BuiltinPredicate) {
             throw new IllegalArgumentException("The predicate must corresponds to a data atom!");
         }

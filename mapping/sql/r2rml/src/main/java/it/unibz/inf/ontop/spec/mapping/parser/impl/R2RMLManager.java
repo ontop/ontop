@@ -29,6 +29,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -72,16 +73,18 @@ public class R2RMLManager {
 	private Graph myModel;
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
 
 	/**
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the full path of the file
 	 * @param atomFactory
 	 * @param termFactory
+	 * @param typeFactory
 	 */
-	public R2RMLManager(String file, AtomFactory atomFactory, TermFactory termFactory)
+	public R2RMLManager(String file, AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory)
 			throws RDFParseException, MappingIOException, RDFHandlerException {
-		this(new File(file), atomFactory, termFactory);
+		this(new File(file), atomFactory, termFactory, typeFactory);
 	}
 	
 	/**
@@ -89,11 +92,13 @@ public class R2RMLManager {
 	 * @param file - the File object
 	 * @param atomFactory
 	 * @param termFactory
+	 * @param typeFactory
 	 */
-	public R2RMLManager(File file, AtomFactory atomFactory, TermFactory termFactory)
+	public R2RMLManager(File file, AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory)
 			throws MappingIOException, RDFParseException, RDFHandlerException {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
+		this.typeFactory = typeFactory;
 
 		try {
             LinkedHashModel model = new LinkedHashModel();
@@ -104,7 +109,7 @@ public class R2RMLManager {
 			parser.setRDFHandler(collector);
 			parser.parse(in, documentUrl.toString());
 			this.myModel = new RDF4J().asGraph(model);
-			r2rmlParser = new R2RMLParser();
+			r2rmlParser = new R2RMLParser(atomFactory, termFactory, this.typeFactory);
 		} catch (IOException e) {
 			throw new MappingIOException(e);
 		}
@@ -116,12 +121,14 @@ public class R2RMLManager {
 	 * @param model - the sesame Model containing mappings
 	 * @param atomFactory
 	 * @param termFactory
+	 * @param typeFactory
 	 */
-	public R2RMLManager(Graph model, AtomFactory atomFactory, TermFactory termFactory){
+	public R2RMLManager(Graph model, AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory){
 		myModel = model;
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
-		r2rmlParser = new R2RMLParser();
+		this.typeFactory = typeFactory;
+		r2rmlParser = new R2RMLParser(atomFactory, termFactory, this.typeFactory);
 	}
 	
 	/**

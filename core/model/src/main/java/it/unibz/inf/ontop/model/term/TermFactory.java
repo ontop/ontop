@@ -46,24 +46,6 @@ public interface TermFactory {
 
 	public Predicate getPredicate(String uri, ImmutableList<TermType> types);
 
-	public Predicate getDataPropertyPredicate(String name, TermType type);
-
-	public Predicate getAnnotationPropertyPredicate(String name);
-
-	/**
-	 * with default type COL_TYPE.LITERAL
-	 * @param name
-	 * @return
-	 */
-	
-	public Predicate getDataPropertyPredicate(String name);
-	
-	public Predicate getClassPredicate(String name);
-
-	public Predicate getOWLSameAsPredicate();
-
-	public Predicate getOBDACanonicalIRI();
-
 	/*
 	 * Built-in function predicates
 	 */

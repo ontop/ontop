@@ -389,7 +389,7 @@ public class OBDAModelManager implements Disposable {
 			}
 			String uri = entity.getIRI().toString();
 
-			p = termFactory.getClassPredicate(uri);
+			p = atomFactory.getClassPredicate(uri);
 		} else if (entity instanceof OWLObjectProperty) {
 			String uri = entity.getIRI().toString();
 
@@ -397,12 +397,12 @@ public class OBDAModelManager implements Disposable {
 		} else if (entity instanceof OWLDataProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = termFactory.getDataPropertyPredicate(uri);
+			p = atomFactory.getDataPropertyPredicate(uri);
 
 		} else if (entity instanceof OWLAnnotationProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = termFactory.getAnnotationPropertyPredicate(uri);
+			p = atomFactory.getAnnotationPropertyPredicate(uri);
 		}
 		return p;
 	}

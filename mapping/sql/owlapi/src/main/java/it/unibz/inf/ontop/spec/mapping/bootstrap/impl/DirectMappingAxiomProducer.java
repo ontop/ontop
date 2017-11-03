@@ -132,7 +132,7 @@ public class DirectMappingAxiomProducer {
 
 		//Class Atom
 		ImmutableTerm sub = generateSubject(table, false);
-		atoms.add(termFactory.getImmutableFunctionalTerm(termFactory.getClassPredicate(getTableIRI(table.getID())), sub));
+		atoms.add(termFactory.getImmutableFunctionalTerm(atomFactory.getClassPredicate(getTableIRI(table.getID())), sub));
 
 		//DataType Atoms
 		for (Attribute att : table.getAttributes()) {
@@ -140,7 +140,7 @@ public class DirectMappingAxiomProducer {
 			Variable objV = termFactory.getVariable(att.getID().getName());
 			ImmutableTerm obj = termFactory.getImmutableTypedTerm(objV, type);
 			
-			atoms.add(termFactory.getImmutableFunctionalTerm(termFactory.getDataPropertyPredicate(getLiteralPropertyIRI(att)), sub, obj));
+			atoms.add(termFactory.getImmutableFunctionalTerm(atomFactory.getDataPropertyPredicate(getLiteralPropertyIRI(att)), sub, obj));
 		}
 
 		return atoms.build();

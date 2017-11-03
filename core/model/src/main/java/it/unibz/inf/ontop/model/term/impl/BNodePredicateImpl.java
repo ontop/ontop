@@ -21,24 +21,21 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
 public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate {
-
-	private static final long serialVersionUID = -1546325236776439443L;
 	
 	// The name of the function that creates URI's in Quest
 	public static final String QUEST_BNODE = "BNODE";
 
-	public BNodePredicateImpl(int arity) {
+	public BNodePredicateImpl(int arity, TypeFactory typeFactory) {
 		super(QUEST_BNODE, arity, IntStream.range(0, arity)
 				.boxed()
 				// TODO: require strings
-				.map(i -> TYPE_FACTORY.getAbstractAtomicTermType())
+				.map(i -> typeFactory.getAbstractAtomicTermType())
 				.collect(ImmutableCollectors.toList()));
 	}
 

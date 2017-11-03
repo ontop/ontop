@@ -5,20 +5,21 @@ import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 public class LinearInclusionDependencyTools {
 
     private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
 
     @Inject
-    private LinearInclusionDependencyTools(AtomFactory atomFactory) {
+    private LinearInclusionDependencyTools(AtomFactory atomFactory, TermFactory termFactory) {
         this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
     }
 
     public LinearInclusionDependencies getABoxDependencies(TBoxReasoner reasoner, boolean full) {
@@ -93,44 +94,44 @@ public class LinearInclusionDependencyTools {
     private static final String variableZname = "z";
 
     private Function translate(ObjectPropertyExpression property) {
-        final Variable varX = TERM_FACTORY.getVariable(variableXname);
-        final Variable varY = TERM_FACTORY.getVariable(variableYname);
+        final Variable varX = termFactory.getVariable(variableXname);
+        final Variable varY = termFactory.getVariable(variableYname);
 
         AtomPredicate propertyPredicate = atomFactory.getObjectPropertyPredicate(property.getIRI());
 
         if (property.isInverse())
-            return TERM_FACTORY.getFunction(propertyPredicate, varY, varX);
+            return termFactory.getFunction(propertyPredicate, varY, varX);
         else
-            return TERM_FACTORY.getFunction(propertyPredicate, varX, varY);
+            return termFactory.getFunction(propertyPredicate, varX, varY);
     }
 
     private Function translate(DataPropertyExpression property) {
-        final Variable varX = TERM_FACTORY.getVariable(variableXname);
-        final Variable varY = TERM_FACTORY.getVariable(variableYname);
+        final Variable varX = termFactory.getVariable(variableXname);
+        final Variable varY = termFactory.getVariable(variableYname);
 
-        return TERM_FACTORY.getFunction(property.getPredicate(), varX, varY);
+        return termFactory.getFunction(atomFactory.getDataPropertyPredicate(property.getIRI()), varX, varY);
     }
 
     private Function translate(ClassExpression description, String existentialVariableName) {
-        final Variable varX = TERM_FACTORY.getVariable(variableXname);
+        final Variable varX = termFactory.getVariable(variableXname);
         if (description instanceof OClass) {
             OClass klass = (OClass) description;
-            return TERM_FACTORY.getFunction(klass.getPredicate(), varX);
+            return termFactory.getFunction(atomFactory.getDataPropertyPredicate(klass.getIRI()), varX);
         }
         else if (description instanceof ObjectSomeValuesFrom) {
-            final Variable varY = TERM_FACTORY.getVariable(existentialVariableName);
+            final Variable varY = termFactory.getVariable(existentialVariableName);
             ObjectPropertyExpression property = ((ObjectSomeValuesFrom) description).getProperty();
             AtomPredicate propertyPredicate = atomFactory.getObjectPropertyPredicate(property.getIRI());
             if (property.isInverse())
-                return TERM_FACTORY.getFunction(propertyPredicate, varY, varX);
+                return termFactory.getFunction(propertyPredicate, varY, varX);
             else
-                return TERM_FACTORY.getFunction(propertyPredicate, varX, varY);
+                return termFactory.getFunction(propertyPredicate, varX, varY);
         }
         else {
             assert (description instanceof DataSomeValuesFrom);
-            final Variable varY = TERM_FACTORY.getVariable(existentialVariableName);
+            final Variable varY = termFactory.getVariable(existentialVariableName);
             DataPropertyExpression property = ((DataSomeValuesFrom) description).getProperty();
-            return TERM_FACTORY.getFunction(property.getPredicate(), varX, varY);
+            return termFactory.getFunction(atomFactory.getDataPropertyPredicate(property.getIRI()), varX, varY);
         }
     }
 }

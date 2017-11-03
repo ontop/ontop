@@ -39,10 +39,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Before;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.utils.ReformulationTestingTools.ATOM_FACTORY;
+import static it.unibz.inf.ontop.utils.ReformulationTestingTools.*;
 
 @SuppressWarnings("deprecation")
 public class DatalogToSparqlTranslatorTest {
@@ -708,16 +705,16 @@ public class DatalogToSparqlTranslatorTest {
 	private static Predicate predHasAdvancedCourse;
 	
 	static {
-		predStudent = TERM_FACTORY.getClassPredicate("http://example.org/Student");
-		predBachelorStudent = TERM_FACTORY.getClassPredicate("http://example.org/BachelorStudent");
-		predMasterStudent = TERM_FACTORY.getClassPredicate("http://example.org/MasterStudent");
-		predDoctoralStudent = TERM_FACTORY.getClassPredicate("http://example.org/DoctoralStudent");
+		predStudent = ATOM_FACTORY.getClassPredicate("http://example.org/Student");
+		predBachelorStudent = ATOM_FACTORY.getClassPredicate("http://example.org/BachelorStudent");
+		predMasterStudent = ATOM_FACTORY.getClassPredicate("http://example.org/MasterStudent");
+		predDoctoralStudent = ATOM_FACTORY.getClassPredicate("http://example.org/DoctoralStudent");
 		
-		predFirstName = TERM_FACTORY.getDataPropertyPredicate("http://example.org/firstName", XSD_STRING_DT);
-		predLastName = TERM_FACTORY.getDataPropertyPredicate("http://example.org/lastName", XSD_STRING_DT);
-		predAge = TERM_FACTORY.getDataPropertyPredicate("http://example.org/age", XSD_INTEGER_DT);
-		predGrade = TERM_FACTORY.getDataPropertyPredicate("http://example.org/grade", XSD_DECIMAL_DT);
-		predEnrollmentDate = TERM_FACTORY.getDataPropertyPredicate("http://example.org/enrollmentDate", XSD_DATETIME_DT);
+		predFirstName = ATOM_FACTORY.getDataPropertyPredicate("http://example.org/firstName", XSD_STRING_DT);
+		predLastName = ATOM_FACTORY.getDataPropertyPredicate("http://example.org/lastName", XSD_STRING_DT);
+		predAge = ATOM_FACTORY.getDataPropertyPredicate("http://example.org/age", XSD_INTEGER_DT);
+		predGrade = ATOM_FACTORY.getDataPropertyPredicate("http://example.org/grade", XSD_DECIMAL_DT);
+		predEnrollmentDate = ATOM_FACTORY.getDataPropertyPredicate("http://example.org/enrollmentDate", XSD_DATETIME_DT);
 		
 		predHasCourse = ATOM_FACTORY.getObjectPropertyPredicate("http://example.org/hasCourse");
 		predHasElementaryCourse = ATOM_FACTORY.getObjectPropertyPredicate("http://example.org/hasElementaryCourse");

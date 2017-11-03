@@ -13,7 +13,7 @@ import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.utils.ReformulationTestingTools.ATOM_FACTORY;
+import static it.unibz.inf.ontop.utils.ReformulationTestingTools.*;
 
 
 /**
@@ -36,7 +36,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(queryBind, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                UriTemplateMatcher.create(Stream.of()), null, ATOM_FACTORY);
+                UriTemplateMatcher.create(Stream.of()), null, ATOM_FACTORY, TERM_FACTORY, TYPE_FACTORY, DATALOG_FACTORY);
 
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
@@ -59,7 +59,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(queryBind, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                UriTemplateMatcher.create(Stream.of()), null, ATOM_FACTORY);
+                UriTemplateMatcher.create(Stream.of()), null, ATOM_FACTORY, TERM_FACTORY, TYPE_FACTORY, DATALOG_FACTORY);
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
@@ -83,7 +83,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(query6, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                UriTemplateMatcher.create(Stream.of()), null, ATOM_FACTORY);
+                UriTemplateMatcher.create(Stream.of()), null, ATOM_FACTORY, TERM_FACTORY, TYPE_FACTORY, DATALOG_FACTORY);
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
@@ -102,7 +102,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(query6, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                UriTemplateMatcher.create(Stream.of()), null, ATOM_FACTORY);
+                UriTemplateMatcher.create(Stream.of()), null, ATOM_FACTORY, TERM_FACTORY, TYPE_FACTORY, DATALOG_FACTORY);
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }

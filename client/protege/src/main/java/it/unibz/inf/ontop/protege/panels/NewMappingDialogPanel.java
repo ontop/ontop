@@ -593,7 +593,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 	private ImmutableList<ImmutableFunctionalTerm> parse(String query) {
 		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getMutablePrefixManager().getPrefixMap(),
-				obdaModel.getAtomFactory(), obdaModel.getTermFactory());
+				obdaModel.getAtomFactory(), obdaModel.getTermFactory(), obdaModel.getTypeFactory());
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {

@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -106,11 +105,11 @@ public class CanonicalIRIRewriterTest {
         List<Term> list = new ArrayList<>(2);
         list.add(term1);
         list.add(term2);
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getOBDACanonicalIRI(), list);
+        return TERM_FACTORY.getFunction(ATOM_FACTORY.getOBDACanonicalIRI(), list);
     }
 
     private Function getClassPropertyFunction(String name, Term term1) {
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate(name), term1);
+        return TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate(name), term1);
 
     }
     private Function getDataPropertyFunction(String name, Term term1, Term term2) {
@@ -118,7 +117,7 @@ public class CanonicalIRIRewriterTest {
         List<Term> list = new ArrayList<>(2);
         list.add(term1);
         list.add(term2);
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getDataPropertyPredicate(name, TYPE_FACTORY.getAbstractRDFSLiteral()), list);
+        return TERM_FACTORY.getFunction(ATOM_FACTORY.getDataPropertyPredicate(name, TYPE_FACTORY.getAbstractRDFSLiteral()), list);
 
     }
 

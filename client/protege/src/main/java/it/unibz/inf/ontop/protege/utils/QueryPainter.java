@@ -172,7 +172,7 @@ public class QueryPainter {
 		}
 
 		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(apic.getMutablePrefixManager().getPrefixMap(),
-				apic.getAtomFactory(), apic.getTermFactory());
+				apic.getAtomFactory(), apic.getTermFactory(), apic.getTypeFactory());
 		ImmutableList<ImmutableFunctionalTerm> query = textParser.parse(text);
 
 		if (query == null) {
@@ -448,7 +448,7 @@ public class QueryPainter {
 	private ImmutableList<ImmutableFunctionalTerm> parse(String query, PrefixManager man) {
 		try {
 			TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(man.getPrefixMap(),
-					apic.getAtomFactory(), apic.getTermFactory());
+					apic.getAtomFactory(), apic.getTermFactory(), apic.getTypeFactory());
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
 			parsingException = e;

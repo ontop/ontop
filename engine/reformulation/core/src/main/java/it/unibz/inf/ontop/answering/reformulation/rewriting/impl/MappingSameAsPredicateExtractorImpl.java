@@ -41,8 +41,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 /**
  * 19/07/2017: partially refactored, in order to support some (unconventional) mapping assertions.
  * <p>
@@ -79,7 +77,7 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
     public MappingSameAsPredicateExtractorImpl(VariableDefinitionExtractor definitionExtractor,
                                                AtomFactory atomFactory) throws IllegalArgumentException {
         this.definitionExtractor = definitionExtractor;
-        this.sameAsAtomPredicate = atomFactory.getAtomPredicate(TERM_FACTORY.getOWLSameAsPredicate());
+        this.sameAsAtomPredicate = atomFactory.getAtomPredicate(atomFactory.getOWLSameAsPredicate());
     }
 
     @Override
