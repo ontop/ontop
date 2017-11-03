@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 import com.google.common.collect.*;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.*;
@@ -30,6 +31,12 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 public class TypeExtractor {
 
     private static final TermType LITERAL_TYPE = TYPE_FACTORY.getAbstractRDFSLiteral();
+    private final Relation2Predicate relation2Predicate;
+
+    @Inject
+    private TypeExtractor(Relation2Predicate relation2Predicate) {
+        this.relation2Predicate = relation2Predicate;
+    }
 
 
     public static class TypeResults {
@@ -56,7 +63,7 @@ public class TypeExtractor {
      *
      * Extracts the TermTypes and the cast types from a set of Datalog rules.
      */
-    public static TypeResults extractTypes(Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesInBottomUp, DBMetadata metadata)
+    public TypeResults extractTypes(Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesInBottomUp, DBMetadata metadata)
             throws IncompatibleTermException {
         ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = extractTermTypeMap(ruleIndex.values());
 
@@ -81,7 +88,7 @@ public class TypeExtractor {
     /**
      * Infers cast types for each predicate in the bottom up order
      */
-    private static ImmutableMap<Predicate,ImmutableList<TermType>> extractCastTypeMap(
+    private ImmutableMap<Predicate,ImmutableList<TermType>> extractCastTypeMap(
             Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesInBottomUp,
             ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap, DBMetadata metadata) {
 
@@ -103,7 +110,7 @@ public class TypeExtractor {
      *
      * No side-effect on alreadyKnownCastTypes
      */
-    private static ImmutableList<TermType> inferCastTypes(
+    private ImmutableList<TermType> inferCastTypes(
             Predicate predicate, Collection<CQIE> samePredicateRules,
             ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
             Map<Predicate, ImmutableList<TermType>> alreadyKnownCastTypes, DBMetadata metadata) {
@@ -112,7 +119,7 @@ public class TypeExtractor {
 
             ImmutableList.Builder<TermType> defaultTypeBuilder = ImmutableList.builder();
 
-            RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), predicate);
+            RelationID tableId = relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), predicate);
             Optional<RelationDefinition> td = Optional.ofNullable(metadata.getRelation(tableId));
 
             IntStream.range(0, predicate.getArity())
@@ -162,10 +169,10 @@ public class TypeExtractor {
 
         int arity = samePredicateRules.iterator().next().getHead().getTerms().size();
 
-        /**
+        /*
          * For each rule...
          */
-        samePredicateRules.stream()
+        samePredicateRules
                 .forEach(rule -> {
                     List<Term> headArguments = rule.getHead().getTerms();
                     ImmutableList<Optional<TermType>> termTypes = termTypeMap.get(rule);
@@ -174,7 +181,7 @@ public class TypeExtractor {
                             .forEach(i -> {
 
                                 TermType type = termTypes.get(i)
-                                        /**
+                                        /*
                                          * If not defined, extracts the cast type of the variable by looking at its defining
                                          * data atom (normally intensional)
                                          */

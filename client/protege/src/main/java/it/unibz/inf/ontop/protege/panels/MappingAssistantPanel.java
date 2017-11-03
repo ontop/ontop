@@ -797,7 +797,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		DefaultComboBoxModel<RelationDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
 			Connection conn = ConnectionTools.getConnection(selectedSource);
-			RDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn);
+			RDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn, obdaModel.getAtomFactory(),
+					obdaModel.getRelation2Predicate());
 			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
 			RDBMetadataExtractionTools.loadMetadata(md, conn, null);
 			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {

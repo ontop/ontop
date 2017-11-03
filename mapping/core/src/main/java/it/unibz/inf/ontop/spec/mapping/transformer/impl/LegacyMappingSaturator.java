@@ -6,6 +6,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
@@ -24,9 +26,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Uses the old Datalog-based mapping saturation code
@@ -37,14 +37,25 @@ public class LegacyMappingSaturator implements MappingSaturator {
     private final TMappingExclusionConfig tMappingExclusionConfig;
     private final Mapping2DatalogConverter mapping2DatalogConverter;
     private final Datalog2QueryMappingConverter datalog2MappingConverter;
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
+    private final LegacyIsNotNullDatalogMappingFiller isNotNullDatalogMappingFiller;
+    private final TMappingProcessor tMappingProcessor;
 
     @Inject
     private LegacyMappingSaturator(TMappingExclusionConfig tMappingExclusionConfig,
                                    Mapping2DatalogConverter mapping2DatalogConverter,
-                                   Datalog2QueryMappingConverter datalog2MappingConverter) {
+                                   Datalog2QueryMappingConverter datalog2MappingConverter,
+                                   AtomFactory atomFactory, TermFactory termFactory,
+                                   LegacyIsNotNullDatalogMappingFiller isNotNullDatalogMappingFiller,
+                                   TMappingProcessor tMappingProcessor) {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.datalog2MappingConverter = datalog2MappingConverter;
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
+        this.isNotNullDatalogMappingFiller = isNotNullDatalogMappingFiller;
+        this.tMappingProcessor = tMappingProcessor;
     }
 
     @Override
@@ -54,13 +65,13 @@ public class LegacyMappingSaturator implements MappingSaturator {
         CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
 
         ImmutableList<CQIE> initialMappingRules = mapping2DatalogConverter.convert(mapping)
-                .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
+                .map(r -> isNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableSet<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(initialMappingRules, saturatedTBox,
+        ImmutableSet<CQIE> saturatedMappingRules = tMappingProcessor.getTMappings(initialMappingRules, saturatedTBox,
                 true,
                 foreignKeyCQC, tMappingExclusionConfig).stream()
-                .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
+                .map(r -> isNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
                 .collect(ImmutableCollectors.toSet());
 
         List<CQIE> allMappingRules = new ArrayList<>(saturatedMappingRules);
@@ -76,7 +87,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
      *
      * TODO: clean it
      */
-    private static List<CQIE> generateTripleMappings(ImmutableSet<CQIE> saturatedRules) {
+    private List<CQIE> generateTripleMappings(ImmutableSet<CQIE> saturatedRules) {
         List<CQIE> newmappings = new LinkedList<CQIE>();
 
         for (CQIE mapping : saturatedRules) {
@@ -87,12 +98,12 @@ public class LegacyMappingSaturator implements MappingSaturator {
 				 * head is Class(x) Forming head as triple(x,uri(rdf:type),
 				 * uri(Class))
 				 */
-                Function rdfTypeConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(IriConstants.RDF_TYPE));
+                Function rdfTypeConstant = termFactory.getUriTemplate(termFactory.getConstantLiteral(IriConstants.RDF_TYPE));
 
                 String classname = currenthead.getFunctionSymbol().getName();
-                Term classConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(classname));
+                Term classConstant = termFactory.getUriTemplate(termFactory.getConstantLiteral(classname));
 
-                newhead = ATOM_FACTORY.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
+                newhead = atomFactory.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
             }
             else if (currenthead.getArity() == 2) {
 				/*
@@ -100,9 +111,9 @@ public class LegacyMappingSaturator implements MappingSaturator {
 				 * y)
 				 */
                 String propname = currenthead.getFunctionSymbol().getName();
-                Function propConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(propname));
+                Function propConstant = termFactory.getUriTemplate(termFactory.getConstantLiteral(propname));
 
-                newhead = ATOM_FACTORY.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
+                newhead = atomFactory.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
             }
             else {
 				/*

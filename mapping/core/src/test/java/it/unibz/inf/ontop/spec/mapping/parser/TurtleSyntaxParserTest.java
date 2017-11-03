@@ -34,6 +34,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
+
 
 /**
  * Test syntax of the parser.
@@ -295,7 +297,7 @@ public class TurtleSyntaxParserTest {
 	}
 
 	private boolean compareCQIE(String input, int countBody) {
-		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap(), ATOM_FACTORY, TERM_FACTORY);
 		ImmutableList<ImmutableFunctionalTerm> mapping;
 		try {
 			mapping = parser.parse(input);
@@ -311,7 +313,7 @@ public class TurtleSyntaxParserTest {
 
 
 	private boolean parse(String input) {
-		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap(), ATOM_FACTORY, TERM_FACTORY);
 
 		ImmutableList<ImmutableFunctionalTerm> mapping;
 		try {

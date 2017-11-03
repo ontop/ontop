@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.si.repository.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -56,8 +57,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Store ABox assertions in the DB
@@ -267,10 +266,15 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	private SemanticIndexViewsManager views = new SemanticIndexViewsManager();
 	
 	private final List<RepositoryChangedListener> changeList = new LinkedList<>();
+	private final AtomFactory atomFactory;
+	private final TermFactory termFactory;
 
-	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag, ImmutableOntologyVocabulary voc) {
+	public RDBMSSIRepositoryManager(ImmutableOntologyVocabulary voc, TBoxReasoner reasonerDag, AtomFactory atomFactory,
+									TermFactory termFactory) {
 		this.reasonerDag = reasonerDag;
 		this.voc = voc;
+		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
 	}
 
 	@Override
@@ -382,7 +386,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		
 		// For counting the insertion
 		int success = 0;
-		Map<Predicate, Integer> failures = new HashMap<>();
+		Map<IRI, Integer> failures = new HashMap<>();
 
 		int batchCount = 0;
 		int commitCount = 0;
@@ -402,11 +406,11 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 						success++;
 					}
 					catch (Exception e) {
-						Predicate predicate = ca.getConcept().getPredicate();
-						Integer counter = failures.get(predicate);
-						if (counter == null) 
+						IRI iri = ca.getConcept().getIRI();
+						Integer counter = failures.get(iri);
+						if (counter == null)
 							counter = 0;
-						failures.put(predicate, counter + 1);					
+						failures.put(iri, counter + 1);
 					}
 				} 
 				else if (ax instanceof ObjectPropertyAssertion) {
@@ -416,11 +420,11 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 						success++;
 					}
 					catch (Exception e) {
-						Predicate predicate = opa.getProperty().getPredicate();
-						Integer counter = failures.get(predicate);
+						IRI iri = opa.getProperty().getIRI();
+						Integer counter = failures.get(iri);
 						if (counter == null) 
 							counter = 0;
-						failures.put(predicate, counter + 1);					
+						failures.put(iri, counter + 1);
 					}
 				}
 				else if (ax instanceof DataPropertyAssertion)  {
@@ -430,11 +434,11 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 						success++;					
 					}
 					catch (Exception e) {
-						Predicate predicate = dpa.getProperty().getPredicate();
-						Integer counter = failures.get(predicate);
+						IRI iri = dpa.getProperty().getIRI();
+						Integer counter = failures.get(iri);
 						if (counter == null) 
 							counter = 0;
-						failures.put(predicate, counter + 1);					
+						failures.put(iri, counter + 1);
 					}
 				}
 
@@ -479,7 +483,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		// Print the monitoring log
 		log.debug("Total successful insertions: " + success + ".");
 		int totalFailures = 0;
-		for (Map.Entry<Predicate, Integer> entry : failures.entrySet()) {
+		for (Map.Entry<IRI, Integer> entry : failures.entrySet()) {
 			log.warn("Failed to insert data for predicate {} ({} tuples).", entry.getKey(), entry.getValue());
 			totalFailures += entry.getValue();
 		}
@@ -817,7 +821,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(ope.getPredicate(),
+				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(atomFactory.getObjectPropertyPredicate(ope.getIRI()),
 						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
@@ -933,16 +937,16 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	
 	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, ObjectRDFType type) {
 
-		Variable X = TERM_FACTORY.getVariable("X");
+		Variable X = termFactory.getVariable("X");
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (!type.isBlankNode())
-			subjectTerm = TERM_FACTORY.getImmutableUriTemplate(X);
+			subjectTerm = termFactory.getImmutableUriTemplate(X);
 		else {
-			subjectTerm = TERM_FACTORY.getImmutableBNodeTemplate(X);
+			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
 		}
 
-		ImmutableFunctionalTerm body = TERM_FACTORY.getImmutableFunctionalTerm(predicate, subjectTerm);
+		ImmutableFunctionalTerm body = termFactory.getImmutableFunctionalTerm(predicate, subjectTerm);
 		return ImmutableList.of(body);
 	}
 	
@@ -950,34 +954,34 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, ObjectRDFType type1,
 																		RDFTermType type2) {
 
-		Variable X = TERM_FACTORY.getVariable("X");
-		Variable Y = TERM_FACTORY.getVariable("Y");
+		Variable X = termFactory.getVariable("X");
+		Variable Y = termFactory.getVariable("Y");
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (!type1.isBlankNode())
-			subjectTerm = TERM_FACTORY.getImmutableUriTemplate(X);
+			subjectTerm = termFactory.getImmutableUriTemplate(X);
 		else {
-			subjectTerm = TERM_FACTORY.getImmutableBNodeTemplate(X);
+			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
 		}
 		
 		ImmutableFunctionalTerm objectTerm;
 		if (type2 instanceof ObjectRDFType) {
 			objectTerm = ((ObjectRDFType)type2).isBlankNode()
-					? TERM_FACTORY.getImmutableBNodeTemplate(Y)
-					: TERM_FACTORY.getImmutableUriTemplate(Y);
+					? termFactory.getImmutableBNodeTemplate(Y)
+					: termFactory.getImmutableUriTemplate(Y);
 		}
 		else {
 			RDFDatatype datatype = (RDFDatatype) type2;
 			if (datatype.getLanguageTag().isPresent()) {
 				LanguageTag languageTag = datatype.getLanguageTag().get();
-				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, languageTag.getFullString());
+				objectTerm = termFactory.getImmutableTypedTerm(Y, languageTag.getFullString());
 			}
 			else {
-				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, type2);
+				objectTerm = termFactory.getImmutableTypedTerm(Y, type2);
 			}
 		}
 
-		ImmutableFunctionalTerm body = TERM_FACTORY.getImmutableFunctionalTerm(predicate, subjectTerm, objectTerm);
+		ImmutableFunctionalTerm body = termFactory.getImmutableFunctionalTerm(predicate, subjectTerm, objectTerm);
 		return ImmutableList.of(body);
 	}
 

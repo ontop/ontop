@@ -20,11 +20,15 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
@@ -52,7 +56,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 /**
@@ -69,7 +72,15 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	private LinearInclusionDependencies sigma;
 	
 	private Collection<TreeWitnessGenerator> generators;
-	
+	private final AtomFactory atomFactory;
+	private final TermFactory termFactory;
+
+	@Inject
+	private TreeWitnessRewriter(AtomFactory atomFactory, TermFactory termFactory) {
+		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
+	}
+
 	@Override
 	public void setTBox(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, LinearInclusionDependencies sigma) {
 		double startime = System.currentTimeMillis();
@@ -99,16 +110,16 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
 	 */
 	
-	private static Function getHeadAtom(String base, String suffix, List<Term> arguments) {
-		Predicate predicate = TERM_FACTORY.getPredicate(base + suffix, arguments.size());
-		return TERM_FACTORY.getFunction(predicate, arguments);
+	private Function getHeadAtom(String base, String suffix, List<Term> arguments) {
+		Predicate predicate = termFactory.getPredicate(base + suffix, arguments.size());
+		return termFactory.getFunction(predicate, arguments);
 	}
 	
 	private int freshVarIndex = 0;
 	
 	private Variable getFreshVariable() {
 		freshVarIndex++;
-		return TERM_FACTORY.getVariable("twr" + freshVarIndex);
+		return termFactory.getVariable("twr" + freshVarIndex);
 	}
 	
 	/*
@@ -124,17 +135,18 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			log.debug("  BASIC CONCEPT: {}", con);
 			Function atom; 
 			if (con instanceof OClass) {
-				atom = TERM_FACTORY.getFunction(((OClass)con).getPredicate(), r0);
+				atom = termFactory.getFunction(((OClass)con).getPredicate(), r0);
 			}
 			else if (con instanceof ObjectSomeValuesFrom) {
 				ObjectPropertyExpression some = ((ObjectSomeValuesFrom)con).getProperty();
+				AtomPredicate propertyPredicate = atomFactory.getObjectPropertyPredicate(some.getIRI());
 				atom = (!some.isInverse()) ?  
-						TERM_FACTORY.getFunction(some.getPredicate(), r0, getFreshVariable()) :
-							TERM_FACTORY.getFunction(some.getPredicate(), getFreshVariable(), r0);
+						termFactory.getFunction(propertyPredicate, r0, getFreshVariable()) :
+							termFactory.getFunction(propertyPredicate, getFreshVariable(), r0);
 			}
 			else {
 				DataPropertyExpression some = ((DataSomeValuesFrom)con).getProperty();
-				atom = TERM_FACTORY.getFunction(some.getPredicate(), r0, getFreshVariable());
+				atom = termFactory.getFunction(some.getPredicate(), r0, getFreshVariable());
 			}
 			genAtoms.add(atom);
 		}
@@ -170,12 +182,12 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			Iterator<Term> i = tw.getRoots().iterator();
 			Term r0 = i.next();
 			while (i.hasNext()) 
-				twf.add(TERM_FACTORY.getFunctionEQ(i.next(), r0));
+				twf.add(termFactory.getFunctionEQ(i.next(), r0));
 			
 			// root atoms
 			for (Function a : tw.getRootAtoms()) {
 				Predicate predicate = a.getFunctionSymbol();
-				twf.add((predicate.getArity() == 1) ? TERM_FACTORY.getFunction(predicate, r0) : TERM_FACTORY.getFunction(predicate, r0, r0));
+				twf.add((predicate.getArity() == 1) ? termFactory.getFunction(predicate, r0) : termFactory.getFunction(predicate, r0, r0));
 			}
 			
 			List<Function> genAtoms = getAtomsForGenerators(tw.getGenerators(), r0);			
@@ -245,7 +257,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 					for (TreeWitness tw : tws.getTWs())
 						if (tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1())) {
 							if (edgeAtom == null) {
-								//IRI atomURI = edge.getBAtoms().iterator().next().getPredicate().getName();
+								//IRI atomURI = edge.getBAtoms().iterator().next().getIRI().getName();
 								edgeAtom = getHeadAtom(headURI, 
 										"_EDGE_" + (edgeDP.getRules().size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
 								mainbody.add(edgeAtom);				

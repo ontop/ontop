@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.stream.IntStream;
 
@@ -54,6 +55,11 @@ public class AtomFactoryImpl implements AtomFactory {
     @Override
     public AtomPredicate getObjectPropertyPredicate(String name) {
         return new AtomPredicateImpl(name, 2, ImmutableList.of(objectRDFType, objectRDFType));
+    }
+
+    @Override
+    public AtomPredicate getObjectPropertyPredicate(IRI iri) {
+        return getObjectPropertyPredicate(iri.getIRIString());
     }
 
     @Override

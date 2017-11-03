@@ -22,10 +22,13 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.base.Optional;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
@@ -61,8 +64,6 @@ import java.io.Reader;
 import java.net.URI;
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 public class OBDAModelManager implements Disposable {
 
 	private static final String OBDA_EXT = ".obda"; // The default OBDA file extension.
@@ -73,6 +74,7 @@ public class OBDAModelManager implements Disposable {
 	private final OWLEditorKit owlEditorKit;
 
 	private final OWLOntologyManager mmgr;
+	private final TermFactory termFactory;
 
 	private QueryController queryController;
 
@@ -105,6 +107,8 @@ public class OBDAModelManager implements Disposable {
 
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private java.util.Optional<OWLOntologyID> lastKnownOntologyId;
+	private final AtomFactory atomFactory;
+	private final Relation2Predicate relation2Predicate;
 
 	public OBDAModelManager(EditorKit editorKit) {
 
@@ -121,6 +125,9 @@ public class OBDAModelManager implements Disposable {
 
 		SpecificationFactory specificationFactory = defaultInjector.getInstance(SpecificationFactory.class);
 		SQLPPMappingFactory ppMappingFactory = defaultInjector.getInstance(SQLPPMappingFactory.class);
+		atomFactory = defaultInjector.getInstance(AtomFactory.class);
+		termFactory = defaultInjector.getInstance(TermFactory.class);
+		relation2Predicate = defaultInjector.getInstance(Relation2Predicate.class);
 
 		lastKnownOntologyId = java.util.Optional.empty();
 
@@ -142,7 +149,7 @@ public class OBDAModelManager implements Disposable {
 		queryController = new QueryController();
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
-		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat);
+		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory, relation2Predicate);
 		obdaModel.addSourceListener(dlistener);
 		obdaModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);
@@ -156,6 +163,18 @@ public class OBDAModelManager implements Disposable {
 
 	public OntopConfigurationManager getConfigurationManager() {
 		return configurationManager;
+	}
+
+	public AtomFactory getAtomFactory() {
+		return atomFactory;
+	}
+
+	public Relation2Predicate getRelation2Predicate() {
+		return relation2Predicate;
+	}
+
+	public TermFactory getTermFactory() {
+		return termFactory;
 	}
 
 	/***
@@ -361,7 +380,7 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	private static Predicate getPredicate(OWLEntity entity) {
+	private Predicate getPredicate(OWLEntity entity) {
 		Predicate p = null;
 		if (entity instanceof OWLClass) {
 			/* We ignore TOP and BOTTOM (Thing and Nothing) */
@@ -370,20 +389,20 @@ public class OBDAModelManager implements Disposable {
 			}
 			String uri = entity.getIRI().toString();
 
-			p = TERM_FACTORY.getClassPredicate(uri);
+			p = termFactory.getClassPredicate(uri);
 		} else if (entity instanceof OWLObjectProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = TERM_FACTORY.getObjectPropertyPredicate(uri);
+			p = atomFactory.getObjectPropertyPredicate(uri);
 		} else if (entity instanceof OWLDataProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = TERM_FACTORY.getDataPropertyPredicate(uri);
+			p = termFactory.getDataPropertyPredicate(uri);
 
 		} else if (entity instanceof OWLAnnotationProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = TERM_FACTORY.getAnnotationPropertyPredicate(uri);
+			p = termFactory.getAnnotationPropertyPredicate(uri);
 		}
 		return p;
 	}

@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.spec.ontology;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import org.apache.commons.rdf.api.IRI;
 
 /**
  * Represents ObjectPropertyExpression from the OWL 2 QL Specification
@@ -46,12 +46,11 @@ public interface ObjectPropertyExpression extends DescriptionBT {
 	public boolean isInverse();
 
 	/**
-	 * the name of the object property
-	 * 
-	 * @return the predicate symbol that corresponds to the object property name
+	 * the IRI of the object property
+	 *
 	 */
 	
-	public Predicate getPredicate();
+	IRI getIRI();
 
 	public String getName();
 	

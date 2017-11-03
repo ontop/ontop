@@ -11,8 +11,6 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import java.util.Objects;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
 public class RDF4JHelper {
 
 	private static final ValueFactory fact = SimpleValueFactory.getInstance();
@@ -80,7 +78,7 @@ public class RDF4JHelper {
 
 	private static Statement createStatement(ObjectPropertyAssertion assertion) {
 		return fact.createStatement(getResource(assertion.getSubject()),
-				createURI(assertion.getProperty().getPredicate().getName()),
+				createURI(assertion.getProperty().getIRI().getIRIString()),
 				getResource(assertion.getObject()));
 	}
 

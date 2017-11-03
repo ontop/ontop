@@ -15,9 +15,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -420,7 +418,7 @@ public class SelectQueryParserTest {
 
 
     private DBMetadata createMetadata() {
-        RDBMetadata metadata = RDBMetadataExtractionTools.createDummyMetadata();
+        RDBMetadata metadata = RDBMetadataExtractionTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 
         DatabaseRelationDefinition relation1 =

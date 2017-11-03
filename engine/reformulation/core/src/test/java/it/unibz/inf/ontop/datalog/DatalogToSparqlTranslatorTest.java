@@ -42,6 +42,7 @@ import org.junit.Test;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.utils.ReformulationTestingTools.ATOM_FACTORY;
 
 @SuppressWarnings("deprecation")
 public class DatalogToSparqlTranslatorTest {
@@ -718,9 +719,9 @@ public class DatalogToSparqlTranslatorTest {
 		predGrade = TERM_FACTORY.getDataPropertyPredicate("http://example.org/grade", XSD_DECIMAL_DT);
 		predEnrollmentDate = TERM_FACTORY.getDataPropertyPredicate("http://example.org/enrollmentDate", XSD_DATETIME_DT);
 		
-		predHasCourse = TERM_FACTORY.getObjectPropertyPredicate("http://example.org/hasCourse");
-		predHasElementaryCourse = TERM_FACTORY.getObjectPropertyPredicate("http://example.org/hasElementaryCourse");
-		predHasAdvancedCourse = TERM_FACTORY.getObjectPropertyPredicate("http://example.org/hasAdvancedCourse");
+		predHasCourse = ATOM_FACTORY.getObjectPropertyPredicate("http://example.org/hasCourse");
+		predHasElementaryCourse = ATOM_FACTORY.getObjectPropertyPredicate("http://example.org/hasElementaryCourse");
+		predHasAdvancedCourse = ATOM_FACTORY.getObjectPropertyPredicate("http://example.org/hasAdvancedCourse");
 	}
 	
 	private static Variable x;

@@ -8,12 +8,14 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.datalog.IntermediateQuery2DatalogTranslator;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
+import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 
 import javax.annotation.Nullable;
 
@@ -33,8 +35,11 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                                @Nullable IRIDictionary iriDictionary,
                                OntopReformulationSQLSettings settings,
                                IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
-                               JdbcTypeMapper jdbcTypeMapper) {
-        originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper, iq2DatalogTranslator);
+                               JdbcTypeMapper jdbcTypeMapper,
+                               PullOutVariableOptimizer pullOutVariableOptimizer,
+                               TypeExtractor typeExtractor, Relation2Predicate relation2Predicate) {
+        originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper,
+                iq2DatalogTranslator, pullOutVariableOptimizer, typeExtractor, relation2Predicate);
     }
 
     @Override

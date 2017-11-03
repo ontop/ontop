@@ -22,6 +22,11 @@ package it.unibz.inf.ontop.docker;
 
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.dbschema.Relation2Predicate;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +57,13 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 			properties = new Properties();
 			properties.load(pStream);
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
-			metadata = RDBMetadataExtractionTools.createMetadata(conn);
+
+
+			OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
+
+			metadata = RDBMetadataExtractionTools.createMetadata(conn, defaultConfiguration.getAtomFactory(),
+					defaultConfiguration.getInjector().getInstance(Relation2Predicate.class));
+
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		}
 		catch (IOException e) {

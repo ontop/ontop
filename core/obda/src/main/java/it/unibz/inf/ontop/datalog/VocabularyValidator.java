@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.datalog;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -40,10 +42,12 @@ public class VocabularyValidator {
 
 	private final TBoxReasoner reasoner;
 	private final ImmutableOntologyVocabulary voc;
+	private final AtomFactory atomFactory;
 
-	public VocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
+	public VocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, AtomFactory atomFactory) {
 		this.reasoner = reasoner;
 		this.voc = voc;
+		this.atomFactory = atomFactory;
 	}
 
 
@@ -93,10 +97,11 @@ public class VocabularyValidator {
 			ObjectPropertyExpression ope = voc.getObjectProperty(p.getName());
 			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyDAG().getCanonicalForm(ope);
 			if (equivalent != null && !equivalent.equals(ope)) {
+				AtomPredicate propertyPredicate = atomFactory.getObjectPropertyPredicate(equivalent.getIRI().getIRIString());
 				if (!equivalent.isInverse()) 
-					return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
+					return TERM_FACTORY.getFunction(propertyPredicate, atom.getTerms());
 				else 
-					return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+					return TERM_FACTORY.getFunction(propertyPredicate, atom.getTerm(1), atom.getTerm(0));
 			}
 		}
 		else if (/*p.couldBeADataProperty()*/ (p.getArity() == 2)  && voc.containsDataProperty(p.getName())) {

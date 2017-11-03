@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.datalog.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.datalog.VocabularyValidator;
@@ -18,8 +19,9 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 
 public class LegacyMappingVocabularyValidator extends VocabularyValidator {
 
-    public LegacyMappingVocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
-        super(reasoner, voc);
+    public LegacyMappingVocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc,
+                                            AtomFactory atomFactory) {
+        super(reasoner, voc, atomFactory);
     }
 
     /***

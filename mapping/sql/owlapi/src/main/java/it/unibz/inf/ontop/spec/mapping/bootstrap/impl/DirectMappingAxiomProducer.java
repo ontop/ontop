@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -40,12 +41,14 @@ public class DirectMappingAxiomProducer {
 
 	private final String baseIRI;
 
-	private final TermFactory df;
+	private final TermFactory termFactory;
 	private final JdbcTypeMapper typeMapper;
+	private final AtomFactory atomFactory;
 
-	public DirectMappingAxiomProducer(String baseIRI, TermFactory dfac) {
-		this.df = dfac;
+	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, AtomFactory atomFactory) {
+		this.termFactory = termFactory;
         this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
+		this.atomFactory = atomFactory;
 		/**
 		 * TODO: use Guice instead
 		 */
@@ -129,15 +132,15 @@ public class DirectMappingAxiomProducer {
 
 		//Class Atom
 		ImmutableTerm sub = generateSubject(table, false);
-		atoms.add(df.getImmutableFunctionalTerm(df.getClassPredicate(getTableIRI(table.getID())), sub));
+		atoms.add(termFactory.getImmutableFunctionalTerm(termFactory.getClassPredicate(getTableIRI(table.getID())), sub));
 
 		//DataType Atoms
 		for (Attribute att : table.getAttributes()) {
 			TermType type = typeMapper.getTermType(att.getType());
-			Variable objV = df.getVariable(att.getID().getName());
-			ImmutableTerm obj = df.getImmutableTypedTerm(objV, type);
+			Variable objV = termFactory.getVariable(att.getID().getName());
+			ImmutableTerm obj = termFactory.getImmutableTypedTerm(objV, type);
 			
-			atoms.add(df.getImmutableFunctionalTerm(df.getDataPropertyPredicate(getLiteralPropertyIRI(att)), sub, obj));
+			atoms.add(termFactory.getImmutableFunctionalTerm(termFactory.getDataPropertyPredicate(getLiteralPropertyIRI(att)), sub, obj));
 		}
 
 		return atoms.build();
@@ -153,8 +156,8 @@ public class DirectMappingAxiomProducer {
         ImmutableTerm sub = generateSubject(fk.getRelation(), true);
 		ImmutableTerm obj = generateSubject(fk.getReferencedRelation(), true);
 
-		ImmutableFunctionalTerm atom = df.getImmutableFunctionalTerm(
-				df.getObjectPropertyPredicate(getReferencePropertyIRI(fk)), sub, obj);
+		ImmutableFunctionalTerm atom = termFactory.getImmutableFunctionalTerm(
+				atomFactory.getObjectPropertyPredicate(getReferencePropertyIRI(fk)), sub, obj);
 		return ImmutableList.of(atom);
 	}
 
@@ -237,19 +240,19 @@ public class DirectMappingAxiomProducer {
 				attributes.add(percentEncode(att.getID().getName()) + "={}");
 			
 			String template = baseIRI + percentEncode(td.getID().getTableName()) + "/" + Joiner.on(";").join(attributes);
-			terms.add(df.getConstantLiteral(template));
+			terms.add(termFactory.getConstantLiteral(template));
 			
 			for (Attribute att : pk.getAttributes())
-				terms.add(df.getVariable(varNamePrefix + att.getID().getName()));
+				terms.add(termFactory.getVariable(varNamePrefix + att.getID().getName()));
 
-			return df.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+			return termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 		}
 		else {
 			List<ImmutableTerm> vars = new ArrayList<>(td.getAttributes().size());
 			for (Attribute att : td.getAttributes())
-				vars.add(df.getVariable(varNamePrefix + att.getID().getName()));
+				vars.add(termFactory.getVariable(varNamePrefix + att.getID().getName()));
 
-			return df.getImmutableBNodeTemplate(ImmutableList.copyOf(vars));
+			return termFactory.getImmutableBNodeTemplate(ImmutableList.copyOf(vars));
 		}
 	}
     

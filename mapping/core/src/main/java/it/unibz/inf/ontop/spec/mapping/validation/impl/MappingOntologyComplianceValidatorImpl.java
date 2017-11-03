@@ -8,16 +8,14 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
@@ -30,10 +28,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 
 @Singleton
 public class MappingOntologyComplianceValidatorImpl implements MappingOntologyComplianceValidator {
@@ -42,9 +36,15 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     private static final String OBJECT_PROPERTY_STR = "an object property";
     private static final String ANNOTATION_PROPERTY_STR = "an annotation property";
     private static final String CLASS_STR = "a class";
+    private final TermFactory termFactory;
+    private final AtomFactory atomFactory;
+    private final TypeFactory typeFactory;
 
     @Inject
-    private MappingOntologyComplianceValidatorImpl() {
+    private MappingOntologyComplianceValidatorImpl(TermFactory termFactory, AtomFactory atomFactory, TypeFactory typeFactory) {
+        this.termFactory = termFactory;
+        this.atomFactory = atomFactory;
+        this.typeFactory = typeFactory;
     }
 
 
@@ -83,7 +83,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
     private String extractPredicateIRI(IntermediateQuery mappingAssertion) {
         AtomPredicate projectionAtomPredicate = mappingAssertion.getProjectionAtom().getPredicate();
-        if (projectionAtomPredicate.equals(ATOM_FACTORY.getTripleAtomPredicate()))
+        if (projectionAtomPredicate.equals(atomFactory.getTripleAtomPredicate()))
             throw new RuntimeException("TODO: extract the RDF predicate from a triple atom");
         else
             return projectionAtomPredicate.getName();
@@ -117,7 +117,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                 Predicate functionSymbol = constructionFunctionalTerm.getFunctionSymbol();
                 if ((functionSymbol instanceof BNodePredicate)
                         || (functionSymbol instanceof URITemplatePredicate)) {
-                    return Optional.of(TYPE_FACTORY.getIRITermType());
+                    return Optional.of(typeFactory.getIRITermType());
                 }
                 else if (functionSymbol instanceof DatatypePredicate) {
                     DatatypePredicate datatypeConstructionFunctionSymbol = (DatatypePredicate) functionSymbol;
@@ -126,7 +126,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                         return Optional.of(extractLangTermType(constructionFunctionalTerm));
                     }
                     else {
-                        Optional<TermType> optionalTermtype = TYPE_FACTORY.getInternalType(datatypeConstructionFunctionSymbol);
+                        Optional<TermType> optionalTermtype = typeFactory.getInternalType(datatypeConstructionFunctionSymbol);
 
                         if (!optionalTermtype.isPresent())
                             // TODO: find a better exception
@@ -176,7 +176,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             throw new IllegalStateException("A langString must have a constant language tag: "
                     + constructionFunctionalTerm);
         }
-        return TYPE_FACTORY.getLangTermType(((Constant) langTerm).getValue());
+        return typeFactory.getLangTermType(((Constant) langTerm).getValue());
     }
 
     private Optional<Variable> extractTripleObjectVariable(IntermediateQuery mappingAssertion)
@@ -278,7 +278,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                 break;
             }
             // TODO: throw a better exception
-            RDFDatatype declaredTermType = TYPE_FACTORY.getOptionalDatatype(declaredDatatype.getIRI())
+            RDFDatatype declaredTermType = typeFactory.getOptionalDatatype(declaredDatatype.getIRI())
                     .orElseThrow(() -> new RuntimeException("Unsupported datatype declared in the ontology: "
                             + declaredDatatype + " used for " + predicateIRI));
 
@@ -289,7 +289,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                                 " is declared with datatype " +
                                 declaredDatatype +
                                 " in the ontology, but has datatype " +
-                                TYPE_FACTORY.getRequiredTypePredicate(tripleObjectType).getName() +
+                                typeFactory.getRequiredTypePredicate(tripleObjectType).getName() +
                                 " according to the following triplesMap (either declared in the triplesMap, or " +
                                 "inferred from its source):\n[\n" +
                                 provenance.getProvenanceInfo() +
@@ -401,8 +401,8 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     // if the answer is no, drop the Optional and throw an exception instead
     private Optional<Predicate> getPredicate(DataRangeExpression expression) {
         if (expression instanceof Datatype) {
-            return TYPE_FACTORY.getOptionalDatatype(((Datatype) expression).getIRI())
-                    .flatMap(TYPE_FACTORY::getOptionalTypePredicate)
+            return typeFactory.getOptionalDatatype(((Datatype) expression).getIRI())
+                    .flatMap(typeFactory::getOptionalTypePredicate)
                     .map(p -> (Predicate) p);
         }
         if (expression instanceof DataPropertyRangeExpression) {
@@ -437,7 +437,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         }
     }
 
-    private static Variable generateFreshVariable() {
-        return TERM_FACTORY.getVariable("fresh-" + UUID.randomUUID());
+    private Variable generateFreshVariable() {
+        return termFactory.getVariable("fresh-" + UUID.randomUUID());
     }
 }

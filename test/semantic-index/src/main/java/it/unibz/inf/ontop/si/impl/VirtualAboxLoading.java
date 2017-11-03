@@ -33,7 +33,8 @@ public class VirtualAboxLoading {
             OWLOntology inputOntology = obdaConfiguration.loadInputOntology()
                     .orElseThrow(() -> new IllegalArgumentException("The configuration must provide an ontology"));
 
-            RepositoryInit init = createRepository(inputOntology);
+            RepositoryInit init = createRepository(inputOntology, obdaConfiguration.getAtomFactory(),
+                    obdaConfiguration.getTermFactory());
 
             OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
             MaterializationParams materializationParams = MaterializationParams.defaultBuilder()

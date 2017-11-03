@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
@@ -23,14 +24,16 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     private final Datalog2QueryMappingConverter datalog2MappingConverter;
     private final Mapping2DatalogConverter mapping2DatalogConverter;
     private final OntopMappingSettings settings;
+    private final Relation2Predicate relation2Predicate;
 
     @Inject
     private LegacyMappingDatatypeFiller(Datalog2QueryMappingConverter datalog2MappingConverter,
                                         Mapping2DatalogConverter mapping2DatalogConverter,
-                                        OntopMappingSettings settings) {
+                                        OntopMappingSettings settings, Relation2Predicate relation2Predicate) {
         this.datalog2MappingConverter = datalog2MappingConverter;
         this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.settings = settings;
+        this.relation2Predicate = relation2Predicate;
     }
 
     /***
@@ -56,7 +59,7 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
      */
     @Override
     public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping, DBMetadata dbMetadata) throws UnknownDatatypeException {
-        MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata,  settings.isDefaultDatatypeInferred());
+        MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata,  settings.isDefaultDatatypeInferred(), relation2Predicate);
         ImmutableMap<CQIE, PPMappingAssertionProvenance> ruleMap = mapping2DatalogConverter.convert(mapping);
 
         //CQIEs are mutable

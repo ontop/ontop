@@ -38,10 +38,10 @@ import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
 
+import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
 public class SQLMappingParserUsingOwlTest {
@@ -91,7 +91,7 @@ public class SQLMappingParserUsingOwlTest {
 
         // Setting up the CQ parser
         prefixes = prefixManager.getPrefixMap();
-        parser = new TurtleOBDASyntaxParser(prefixes);
+        parser = new TurtleOBDASyntaxParser(prefixes, ATOM_FACTORY, TERM_FACTORY);
     }
 
     @Test

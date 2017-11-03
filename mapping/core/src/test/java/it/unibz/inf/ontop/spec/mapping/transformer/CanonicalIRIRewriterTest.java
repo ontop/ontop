@@ -15,8 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -127,7 +126,7 @@ public class CanonicalIRIRewriterTest {
         List<Term> list = new ArrayList<>(2);
         list.add(term1);
         list.add(term2);
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate(name), list);
+        return TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate(name), list);
 
     }
 

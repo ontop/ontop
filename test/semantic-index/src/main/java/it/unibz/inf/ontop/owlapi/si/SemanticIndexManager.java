@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.owlapi.si;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
@@ -53,14 +55,15 @@ public class SemanticIndexManager {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public SemanticIndexManager(OWLOntology tbox, Connection connection) throws Exception {
+	public SemanticIndexManager(OWLOntology tbox, Connection connection, AtomFactory atomFactory,
+								TermFactory termFactory) throws Exception {
 		conn = connection;
 		Ontology ontologyClosure = QuestOWL.loadOntologies(tbox);
 		voc = ontologyClosure.getVocabulary();
 
 		reasoner = TBoxReasonerImpl.create(ontologyClosure, true);
 			
-		dataRepository = new RDBMSSIRepositoryManager(reasoner, ontologyClosure.getVocabulary());
+		dataRepository = new RDBMSSIRepositoryManager(ontologyClosure.getVocabulary(), reasoner, atomFactory, termFactory);
 		dataRepository.generateMetadata(); // generate just in case
 
 		log.debug("TBox has been processed. Ready to ");

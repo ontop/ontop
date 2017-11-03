@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TermType;
+import org.apache.commons.rdf.api.IRI;
 
 public interface AtomFactory {
 
@@ -15,7 +16,10 @@ public interface AtomFactory {
 
     AtomPredicate getAtomPredicate(Predicate datalogPredicate);
 
+    @Deprecated
     AtomPredicate getObjectPropertyPredicate(String name);
+
+    AtomPredicate getObjectPropertyPredicate(IRI iri);
 
     /**
      * Beware: a DataAtom is immutable

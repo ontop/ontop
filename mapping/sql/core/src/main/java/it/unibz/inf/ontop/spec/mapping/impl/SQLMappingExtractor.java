@@ -48,11 +48,13 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final OntopMappingSQLSettings settings;
     private final MappingDatatypeFiller mappingDatatypeFiller;
     private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
+    private final MetaMappingExpander metaMappingExpander;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
-                                NativeQueryLanguageComponentFactory nativeQLFactory, OntopMappingSQLSettings settings) {
+                                NativeQueryLanguageComponentFactory nativeQLFactory, OntopMappingSQLSettings settings,
+                                MetaMappingExpander metaMappingExpander) {
 
         this.mappingParser = mappingParser;
         this.ontologyComplianceValidator = ontologyComplianceValidator;
@@ -60,6 +62,7 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.dbMetadataExtractor = nativeQLFactory.create();
         this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.settings = settings;
+        this.metaMappingExpander = metaMappingExpander;
     }
 
     @Override
@@ -141,7 +144,7 @@ public class SQLMappingExtractor implements MappingExtractor {
 
     private SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
             throws MetaMappingExpansionException {
-        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
+        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = metaMappingExpander.expand(
                 ppMapping.getTripleMaps(),
                 settings,
                 dbMetadata);

@@ -21,6 +21,10 @@ package it.unibz.inf.ontop.docker;
  */
 
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +68,12 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 			log.info(getConnectionString() + "\n");
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
-			metadata = RDBMetadataExtractionTools.createMetadata(conn);
+
+			OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
+			AtomFactory atomFactory = defaultConfiguration.getAtomFactory();
+			Relation2Predicate relation2Predicate = defaultConfiguration.getInjector().getInstance(Relation2Predicate.class);
+
+			metadata = RDBMetadataExtractionTools.createMetadata(conn, atomFactory, relation2Predicate);
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		}
 		catch (IOException e) {

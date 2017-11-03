@@ -18,8 +18,7 @@ import net.sf.jsqlparser.schema.Table;
 import org.junit.Before;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -29,7 +28,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class RelationalExpressionTest {
 
-    private static DBMetadata METADATA = RDBMetadataExtractionTools.createDummyMetadata();
+    private static DBMetadata METADATA = EMPTY_METADATA;
     private static QuotedIDFactory MDFAC = METADATA.getQuotedIDFactory();
     private static TermType ROOT_TERM_TYPE = TYPE_FACTORY.getAbstractAtomicTermType();
 

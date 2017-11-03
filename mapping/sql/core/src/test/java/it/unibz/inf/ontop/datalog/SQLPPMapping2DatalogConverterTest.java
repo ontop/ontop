@@ -23,8 +23,6 @@ package it.unibz.inf.ontop.datalog;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.SQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
@@ -44,7 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 
 
 public class SQLPPMapping2DatalogConverterTest extends TestCase {
@@ -52,20 +50,22 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final SpecificationFactory specificationFactory;
 
-	private RDBMetadata md = RDBMetadataExtractionTools.createDummyMetadata();
+	private RDBMetadata md;
 	private PrefixManager pm;
+	private final SQLPPMapping2DatalogConverter ppMapping2DatalogConverter;
 
-    public SQLPPMapping2DatalogConverterTest() {
+	public SQLPPMapping2DatalogConverterTest() {
 		OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
 				.enableTestMode()
 				.build();
 
 		Injector injector = defaultConfiguration.getInjector();
 		specificationFactory = injector.getInstance(SpecificationFactory.class);
+		ppMapping2DatalogConverter = injector.getInstance(SQLPPMapping2DatalogConverter.class);
     }
 	
 	public void setUp() {
-		md = RDBMetadataExtractionTools.createDummyMetadata();
+		md = RDBMetadataExtractionTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
 
 		// Database schema
@@ -97,7 +97,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 	}
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
-		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm.getPrefixMap());
+		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm.getPrefixMap(), ATOM_FACTORY, TERM_FACTORY);
 		ImmutableList<ImmutableFunctionalTerm> target = targetParser.parse(targetString).stream()
 				.map(TERM_FACTORY::getImmutableFunctionalTerm)
 				.collect(ImmutableCollectors.toList());
@@ -106,7 +106,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		ArrayList<SQLPPTriplesMap> mappingList = new ArrayList<SQLPPTriplesMap>();
 		mappingList.add(mappingAxiom);
 
-		List<CQIE> dp = SQLPPMapping2DatalogConverter.constructDatalogProgram(mappingList, md);
+		List<CQIE> dp = ppMapping2DatalogConverter.constructDatalogProgram(mappingList, md);
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

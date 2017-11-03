@@ -262,4 +262,8 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     protected boolean isStillMutable() {
         return isStillMutable;
     }
+
+    protected AtomFactory getAtomFactory() {
+        return atomFactory;
+    }
 }

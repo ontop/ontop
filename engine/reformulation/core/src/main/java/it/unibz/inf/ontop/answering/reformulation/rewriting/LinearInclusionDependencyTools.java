@@ -1,6 +1,9 @@
 package it.unibz.inf.ontop.answering.reformulation.rewriting;
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.ontology.*;
@@ -11,7 +14,14 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class LinearInclusionDependencyTools {
 
-    public static LinearInclusionDependencies getABoxDependencies(TBoxReasoner reasoner, boolean full) {
+    private final AtomFactory atomFactory;
+
+    @Inject
+    private LinearInclusionDependencyTools(AtomFactory atomFactory) {
+        this.atomFactory = atomFactory;
+    }
+
+    public LinearInclusionDependencies getABoxDependencies(TBoxReasoner reasoner, boolean full) {
         LinearInclusionDependencies dependencies = new LinearInclusionDependencies();
 
         for (Equivalences<ObjectPropertyExpression> propNode : reasoner.getObjectPropertyDAG()) {
@@ -82,24 +92,26 @@ public class LinearInclusionDependencyTools {
     private static final String variableYname = "y";
     private static final String variableZname = "z";
 
-    private static Function translate(ObjectPropertyExpression property) {
+    private Function translate(ObjectPropertyExpression property) {
         final Variable varX = TERM_FACTORY.getVariable(variableXname);
         final Variable varY = TERM_FACTORY.getVariable(variableYname);
 
+        AtomPredicate propertyPredicate = atomFactory.getObjectPropertyPredicate(property.getIRI());
+
         if (property.isInverse())
-            return TERM_FACTORY.getFunction(property.getPredicate(), varY, varX);
+            return TERM_FACTORY.getFunction(propertyPredicate, varY, varX);
         else
-            return TERM_FACTORY.getFunction(property.getPredicate(), varX, varY);
+            return TERM_FACTORY.getFunction(propertyPredicate, varX, varY);
     }
 
-    private static Function translate(DataPropertyExpression property) {
+    private Function translate(DataPropertyExpression property) {
         final Variable varX = TERM_FACTORY.getVariable(variableXname);
         final Variable varY = TERM_FACTORY.getVariable(variableYname);
 
         return TERM_FACTORY.getFunction(property.getPredicate(), varX, varY);
     }
 
-    private static Function translate(ClassExpression description, String existentialVariableName) {
+    private Function translate(ClassExpression description, String existentialVariableName) {
         final Variable varX = TERM_FACTORY.getVariable(variableXname);
         if (description instanceof OClass) {
             OClass klass = (OClass) description;
@@ -108,10 +120,11 @@ public class LinearInclusionDependencyTools {
         else if (description instanceof ObjectSomeValuesFrom) {
             final Variable varY = TERM_FACTORY.getVariable(existentialVariableName);
             ObjectPropertyExpression property = ((ObjectSomeValuesFrom) description).getProperty();
+            AtomPredicate propertyPredicate = atomFactory.getObjectPropertyPredicate(property.getIRI());
             if (property.isInverse())
-                return TERM_FACTORY.getFunction(property.getPredicate(), varY, varX);
+                return TERM_FACTORY.getFunction(propertyPredicate, varY, varX);
             else
-                return TERM_FACTORY.getFunction(property.getPredicate(), varX, varY);
+                return TERM_FACTORY.getFunction(propertyPredicate, varX, varY);
         }
         else {
             assert (description instanceof DataSomeValuesFrom);

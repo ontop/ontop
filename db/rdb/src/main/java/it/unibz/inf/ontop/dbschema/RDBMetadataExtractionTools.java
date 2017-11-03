@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.dbschema;
 
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,12 +106,14 @@ public class RDBMetadataExtractionTools {
 	private static Logger log = LoggerFactory.getLogger(RDBMetadataExtractionTools.class);
 
 	
-	public static RDBMetadata createDummyMetadata() {
-		return createDummyMetadata("dummy class");
+	public static RDBMetadata createDummyMetadata(AtomFactory atomFactory, Relation2Predicate relation2Predicate) {
+		return createDummyMetadata("dummy class", atomFactory, relation2Predicate);
 	}
 	
-	public static RDBMetadata createDummyMetadata(String driver_class) {
-		return new RDBMetadata(driver_class, null, null, "", new QuotedIDFactoryStandardSQL("\""), JdbcTypeMapper.getInstance());
+	public static RDBMetadata createDummyMetadata(String driver_class, AtomFactory atomFactory,
+												  Relation2Predicate relation2Predicate) {
+		return new RDBMetadata(driver_class, null, null, "",
+				new QuotedIDFactoryStandardSQL("\""), JdbcTypeMapper.getInstance(), atomFactory, relation2Predicate);
 	}
 	
 	
@@ -121,7 +124,8 @@ public class RDBMetadataExtractionTools {
 	 * @throws SQLException 
 	 */
 
-	public static RDBMetadata createMetadata(Connection conn) throws SQLException  {
+	public static RDBMetadata createMetadata(Connection conn,
+											 AtomFactory atomFactory, Relation2Predicate relation2Predicate) throws SQLException  {
 		
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
@@ -173,7 +177,8 @@ public class RDBMetadataExtractionTools {
 		}
 		
 		RDBMetadata metadata = new RDBMetadata(md.getDriverName(), md.getDriverVersion(),
-							productName, md.getDatabaseProductVersion(), idfac, JdbcTypeMapper.getInstance());
+							productName, md.getDatabaseProductVersion(), idfac, JdbcTypeMapper.getInstance(),
+				atomFactory, relation2Predicate);
 		
 		return metadata;	
 	}

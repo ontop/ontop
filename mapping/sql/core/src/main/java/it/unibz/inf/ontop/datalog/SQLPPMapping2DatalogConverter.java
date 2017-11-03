@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.model.term.*;
@@ -42,22 +43,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 public class SQLPPMapping2DatalogConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SQLPPMapping2DatalogConverter.class);
+    private final Relation2Predicate relation2Predicate;
+    private final TermFactory termFactory;
+
+    @Inject
+    private SQLPPMapping2DatalogConverter(Relation2Predicate relation2Predicate, TermFactory termFactory) {
+        this.relation2Predicate = relation2Predicate;
+        this.termFactory = termFactory;
+    }
 
     /**
      * returns a Datalog representation of the mappings
      */
-    public static ImmutableList<CQIE> constructDatalogProgram(Collection<SQLPPTriplesMap> triplesMaps,
+    public ImmutableList<CQIE> constructDatalogProgram(Collection<SQLPPTriplesMap> triplesMaps,
                                                               DBMetadata metadata) throws InvalidMappingSourceQueriesException {
         return ImmutableList.copyOf(convert(triplesMaps, metadata).keySet());
     }
 
-    public static ImmutableMap<CQIE, PPMappingAssertionProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
+    public ImmutableMap<CQIE, PPMappingAssertionProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
                                                                      DBMetadata metadata0) throws InvalidMappingSourceQueriesException {
         Map<CQIE, PPMappingAssertionProvenance> mutableMap = new HashMap<>();
 
@@ -101,7 +109,7 @@ public class SQLPPMapping2DatalogConverter {
                         QualifiedAttributeID qId = new QualifiedAttributeID(null, id);
                         if (needsCreating)
                             view.addAttribute(qId);
-                        Variable var = TERM_FACTORY.getVariable(id.getName());
+                        Variable var = termFactory.getVariable(id.getName());
                         builder.put(qId, var);
                         arguments.add(var);
                     });
@@ -109,7 +117,7 @@ public class SQLPPMapping2DatalogConverter {
                     lookupTable = builder.build();
 
                     body = new ArrayList<>(1);
-                    body.add(TERM_FACTORY.getFunction(Relation2Predicate.createPredicateFromRelation(view), arguments));
+                    body.add(termFactory.getFunction(relation2Predicate.createPredicateFromRelation(view), arguments));
                 }
 
                 for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {
@@ -148,21 +156,21 @@ public class SQLPPMapping2DatalogConverter {
      * Returns a new function by renaming variables occurring in the {@code function}
      *  according to the {@code attributes} lookup table
      */
-    private static Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Variable> attributes,
+    private Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Variable> attributes,
                                             QuotedIDFactory idfac) throws UnboundVariableException {
         List<Term> terms = function.getTerms();
         List<Term> newTerms = new ArrayList<>(terms.size());
         for (Term t : terms)
             newTerms.add(renameTermVariables(t, attributes, idfac));
 
-        return TERM_FACTORY.getFunction(function.getFunctionSymbol(), newTerms);
+        return termFactory.getFunction(function.getFunctionSymbol(), newTerms);
     }
 
     /**
      * Returns a new term by renaming variables occurring in the {@code term}
      *  according to the {@code attributes} lookup table
      */
-    private static Term renameTermVariables(Term term, ImmutableMap<QualifiedAttributeID, Variable> attributes,
+    private Term renameTermVariables(Term term, ImmutableMap<QualifiedAttributeID, Variable> attributes,
                                             QuotedIDFactory idfac) throws UnboundVariableException {
 
         if (term instanceof Variable) {

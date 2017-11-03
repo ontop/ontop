@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.*;
 
@@ -70,7 +71,8 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 												  @Nonnull MaterializationParams params)
 			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
-		ImmutableSet<Predicate> vocabulary = extractVocabulary(obdaSpecification.getVocabulary());
+		ImmutableSet<Predicate> vocabulary = extractVocabulary(obdaSpecification.getVocabulary(),
+				configuration.getAtomFactory());
 		return apply(obdaSpecification, vocabulary, params, configuration);
 	}
 
@@ -80,8 +82,9 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 												  @Nonnull MaterializationParams params)
 			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
+		AtomFactory atomFactory = configuration.getAtomFactory();
 
-		ImmutableMap<URI, Predicate> vocabularyMap = extractVocabulary(obdaSpecification.getVocabulary()).stream()
+		ImmutableMap<URI, Predicate> vocabularyMap = extractVocabulary(obdaSpecification.getVocabulary(), atomFactory).stream()
 				.collect(ImmutableCollectors.toMap(
 						DefaultOntopRDFMaterializer::convertIntoURI,
 						p -> p));
@@ -105,7 +108,8 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		return new DefaultMaterializedGraphResultSet(selectedVocabulary, params, queryEngine, inputQueryFactory);
 	}
 
-	private static ImmutableSet<Predicate> extractVocabulary(@Nonnull ImmutableOntologyVocabulary vocabulary) {
+	private static ImmutableSet<Predicate> extractVocabulary(@Nonnull ImmutableOntologyVocabulary vocabulary,
+															 AtomFactory atomFactory) {
         Set<Predicate> predicates = new HashSet<>();
 
         //add all class/data/object predicates to selectedVocabulary
@@ -117,7 +121,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
                     predicates.add(p);
             }
             for (ObjectPropertyExpression role : vocabulary.getObjectProperties()) {
-                Predicate p = role.getPredicate();
+                Predicate p = atomFactory.getObjectPropertyPredicate(role.getIRI());
                 if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
                         && !predicates.contains(p))
                     predicates.add(p);

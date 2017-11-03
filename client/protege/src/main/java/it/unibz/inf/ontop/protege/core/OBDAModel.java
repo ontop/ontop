@@ -1,13 +1,16 @@
 package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
@@ -67,6 +70,7 @@ public class OBDAModel {
     private final OBDADataSource source;
     // Mutable and replaced after reset
     private MutablePrefixManager prefixManager;
+    private final PrefixDocumentFormat owlPrefixManager;
     // Mutable and replaced after reset
     private OntologyVocabulary currentMutableVocabulary;
 
@@ -75,12 +79,22 @@ public class OBDAModel {
     private final List<OBDAMappingListener> mappingListeners;
 
     private static final OBDADataSourceFactory DS_FACTORY = OBDADataSourceFactoryImpl.getInstance();
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
+    private final Relation2Predicate relation2Predicate;
 
     public OBDAModel(SpecificationFactory specificationFactory,
-                     SQLPPMappingFactory ppMappingFactory, PrefixDocumentFormat owlPrefixManager) {
+                     SQLPPMappingFactory ppMappingFactory,
+                     PrefixDocumentFormat owlPrefixManager,
+                     AtomFactory atomFactory, TermFactory termFactory,
+                     Relation2Predicate relation2Predicate) {
         this.specificationFactory = specificationFactory;
         this.ppMappingFactory = ppMappingFactory;
+        this.atomFactory = atomFactory;
         this.prefixManager = new MutablePrefixManager(owlPrefixManager);
+        this.owlPrefixManager = owlPrefixManager;
+        this.termFactory = termFactory;
+        this.relation2Predicate = relation2Predicate;
         this.triplesMapMap = new LinkedHashMap<>();
 
         this.sourceListeners = new ArrayList<>();
@@ -448,5 +462,17 @@ public class OBDAModel {
                     throw new IllegalStateException(String.format("Duplicate key %s", u));
                 },
                 LinkedHashMap::new);
+    }
+
+    public AtomFactory getAtomFactory() {
+        return atomFactory;
+    }
+
+    public TermFactory getTermFactory() {
+        return termFactory;
+    }
+
+    public Relation2Predicate getRelation2Predicate() {
+        return relation2Predicate;
     }
 }

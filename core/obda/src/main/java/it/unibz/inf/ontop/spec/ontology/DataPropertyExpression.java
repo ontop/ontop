@@ -35,6 +35,7 @@ package it.unibz.inf.ontop.spec.ontology;
 import java.util.Collection;
 
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import org.apache.commons.rdf.api.IRI;
 
 /**
  * Represents DataPropertyExpression from the OWL 2 QL Specification
@@ -50,7 +51,9 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
 public interface DataPropertyExpression extends DescriptionBT {
 
+	@Deprecated
 	public Predicate getPredicate();
+	IRI getIRI();
 
 	public String getName();
 	
@@ -70,5 +73,4 @@ public interface DataPropertyExpression extends DescriptionBT {
 	 * @return
 	 */
 	public DataPropertyRangeExpression getRange();
-	
 }

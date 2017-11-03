@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryExcept
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
 public class SelectQueryAttributeExtractorTest {
@@ -13,7 +14,7 @@ public class SelectQueryAttributeExtractorTest {
 
     @Test
     public void test_1() throws InvalidSelectQueryException {
-        RDBMetadata metadata = RDBMetadataExtractionTools.createDummyMetadata();
+        RDBMetadata metadata = RDBMetadataExtractionTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
         DatabaseRelationDefinition r = metadata.createDatabaseRelation(idfac.createRelationID(null, "student"));
 

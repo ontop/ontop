@@ -28,21 +28,19 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.MappingSameAsPredicateExtractor;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
@@ -54,7 +52,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredicateExtractor{
 
     private final VariableDefinitionExtractor definitionExtractor;
-    private final AtomPredicate sameAsAtomPredicate = ATOM_FACTORY.getAtomPredicate(TERM_FACTORY.getOWLSameAsPredicate());
+    private final AtomPredicate sameAsAtomPredicate;
 
     public class ResultImpl implements Result {
         private final ImmutableSet<Predicate> subjectOnlySameAsRewritingTargets;
@@ -78,8 +76,10 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
     }
 
     @Inject
-    public MappingSameAsPredicateExtractorImpl(VariableDefinitionExtractor definitionExtractor) throws IllegalArgumentException {
+    public MappingSameAsPredicateExtractorImpl(VariableDefinitionExtractor definitionExtractor,
+                                               AtomFactory atomFactory) throws IllegalArgumentException {
         this.definitionExtractor = definitionExtractor;
+        this.sameAsAtomPredicate = atomFactory.getAtomPredicate(TERM_FACTORY.getOWLSameAsPredicate());
     }
 
     @Override

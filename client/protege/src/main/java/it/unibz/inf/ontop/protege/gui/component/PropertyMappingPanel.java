@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
@@ -145,11 +146,12 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
         pnlAddProperty.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 3, 0));
         pnlAddProperty.setLayout(new java.awt.BorderLayout(3, 0));
         Vector<Object> v = new Vector<Object>();
+		AtomFactory atomFactory = obdaModel.getAtomFactory();
         for (DataPropertyExpression dp : obdaModel.getCurrentVocabulary().getDataProperties()) {
             v.addElement(new PredicateItem(dp.getPredicate(), prefixManager));
         }
         for (ObjectPropertyExpression op : obdaModel.getCurrentVocabulary().getObjectProperties()) {
-            v.addElement(new PredicateItem(op.getPredicate(), prefixManager));
+            v.addElement(new PredicateItem(atomFactory.getObjectPropertyPredicate(op.getIRI()), prefixManager));
         }
         cboPropertyAutoSuggest = new AutoSuggestComboBox(v);
         cboPropertyAutoSuggest.setRenderer(new PropertyListCellRenderer());

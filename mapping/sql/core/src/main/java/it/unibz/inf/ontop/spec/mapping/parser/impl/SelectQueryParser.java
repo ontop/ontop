@@ -36,10 +36,12 @@ public class SelectQueryParser {
     private final QuotedIDFactory idfac;
 
     private int relationIndex = 0;
+    private final Relation2Predicate relation2Predicate;
 
     public SelectQueryParser(DBMetadata metadata) {
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
+        this.relation2Predicate = metadata.getRelation2Predicate();
     }
 
     public RAExpression parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
@@ -239,7 +241,7 @@ public class SelectQueryParser {
                 attributes.put(attributeId, var);
             });
             // create an atom for a particular table
-            Function atom = Relation2Predicate.getAtom(relation, terms);
+            Function atom = relation2Predicate.getAtom(relation, terms);
 
             // DEFAULT SCHEMA
             // TODO: to be improved

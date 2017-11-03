@@ -2,6 +2,7 @@
 
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -109,6 +110,8 @@ public class TurtleOBDAParser extends Parser {
 	public static final int URI_PATH=74;
 	public static final int VARNAME=75;
 	public static final int WS=76;
+	private final AtomFactory atomFactory;
+	private final TermFactory termFactory;
 
 	// delegates
 	public Parser[] getDelegates() {
@@ -118,11 +121,13 @@ public class TurtleOBDAParser extends Parser {
 	// delegators
 
 
-	public TurtleOBDAParser(TokenStream input) {
-		this(input, new RecognizerSharedState());
+	public TurtleOBDAParser(TokenStream input, AtomFactory atomFactory, TermFactory termFactory) {
+		this(input, new RecognizerSharedState(), atomFactory, termFactory);
 	}
-	public TurtleOBDAParser(TokenStream input, RecognizerSharedState state) {
+	public TurtleOBDAParser(TokenStream input, RecognizerSharedState state, AtomFactory atomFactory, TermFactory termFactory) {
 		super(input, state);
+		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
 	}
 
 	@Override public String[] getTokenNames() { return TurtleOBDAParser.tokenNames; }
@@ -187,13 +192,13 @@ public class TurtleOBDAParser extends Parser {
 		   if (size == 1) {
 		      FormatString token = tokens.get(0);
 		      if (token instanceof FixedString) {
-		          ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(token.toString()); // a single URI template
-		          toReturn = TERM_FACTORY.getUriTemplate(uriTemplate);
+		          ValueConstant uriTemplate = termFactory.getConstantLiteral(token.toString()); // a single URI template
+		          toReturn = termFactory.getUriTemplate(uriTemplate);
 		      }
 		      else if (token instanceof ColumnString) {
 		         // a single URI template
-		         Variable column = TERM_FACTORY.getVariable(token.toString());
-		         toReturn = TERM_FACTORY.getUriTemplate(column);
+		         Variable column = termFactory.getVariable(token.toString());
+		         toReturn = termFactory.getUriTemplate(column);
 		      }
 		   }
 		   else {
@@ -204,13 +209,13 @@ public class TurtleOBDAParser extends Parser {
 		         }
 		         else if (token instanceof ColumnString) {
 		            sb.append(PLACEHOLDER);
-		            Variable column = TERM_FACTORY.getVariable(token.toString());
+		            Variable column = termFactory.getVariable(token.toString());
 		            terms.add(column);
 		         }
 		      }
-		      ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
+		      ValueConstant uriTemplate = termFactory.getConstantLiteral(sb.toString()); // complete URI template
 		      terms.add(0, uriTemplate);
-		      toReturn = TERM_FACTORY.getUriTemplate(terms);
+		      toReturn = termFactory.getUriTemplate(terms);
 		   }
 		   return toReturn;
 		}
@@ -285,11 +290,11 @@ public class TurtleOBDAParser extends Parser {
 		      if (i > 0){
 		    	 st = str.substring(0,i);
 		    	 st = st.replace("\\\\", "");
-		         terms.add(TERM_FACTORY.getConstantLiteral(st));
+		         terms.add(termFactory.getConstantLiteral(st));
 		         str = str.substring(str.indexOf("{", i), str.length());
 		      }else if (i == 0){
 		         j = str.indexOf("}");
-		         terms.add(TERM_FACTORY.getVariable(str.substring(1,j)));
+		         terms.add(termFactory.getVariable(str.substring(1,j)));
 		         str = str.substring(j+1,str.length());
 		      } else {
 		    	  break;
@@ -297,7 +302,7 @@ public class TurtleOBDAParser extends Parser {
 		   }
 		   if(!str.equals("")){
 		      str = str.replace("\\\\", "");
-		      terms.add(TERM_FACTORY.getConstantLiteral(str));
+		      terms.add(termFactory.getConstantLiteral(str));
 		   }
 		   return terms;
 		}
@@ -313,9 +318,9 @@ public class TurtleOBDAParser extends Parser {
 	          return v;
 		   }
 
-	       Function f = TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
+	       Function f = termFactory.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
 	       for(int j=2;j<terms.size();j++) {
-	          f = TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
+	          f = termFactory.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
 	       }
 	       return f;
 		}
@@ -337,36 +342,36 @@ public class TurtleOBDAParser extends Parser {
 			             if (object instanceof  Function) {
 			                  if(QueryUtils.isGrounded(object)) {
 			                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
-			                      Predicate predicate = TERM_FACTORY.getClassPredicate(c.getValue());
-			                      atom = TERM_FACTORY.getFunction(predicate, subject);
+			                      Predicate predicate = termFactory.getClassPredicate(c.getValue());
+			                      atom = termFactory.getFunction(predicate, subject);
 			                  } else {
-			                       atom = ATOM_FACTORY.getTripleAtom(subject, pred, object);
+			                       atom = atomFactory.getTripleAtom(subject, pred, object);
 			                  }
 			             }
 			             else if (object instanceof  Variable){
-			                  Term uriOfPred = TERM_FACTORY.getUriTemplate(pred);
-			                  Term uriOfObject = TERM_FACTORY.getUriTemplate(object);
-			                  atom = ATOM_FACTORY.getTripleAtom(subject, uriOfPred,  uriOfObject);
+			                  Term uriOfPred = termFactory.getUriTemplate(pred);
+			                  Term uriOfObject = termFactory.getUriTemplate(object);
+			                  atom = atomFactory.getTripleAtom(subject, uriOfPred,  uriOfObject);
 			              }
 			             else {
 			                  throw new IllegalArgumentException("parser cannot handle object " + object);
 			              }
 			        } else if( ! QueryUtils.isGrounded(pred) ){
-			             atom = ATOM_FACTORY.getTripleAtom(subject, pred,  object);
+			             atom = atomFactory.getTripleAtom(subject, pred,  object);
 			        } else {
-	                			             //Predicate predicate = TERM_FACTORY.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+	                			             //Predicate predicate = termFactory.getIRI(pred.toString(), 2); // the data type cannot be determined here!
 	                			             Predicate predicate;
 	                			             if(pred instanceof Function) {
 	                							 ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
 	                							 if (object instanceof Variable) {
-	                								 predicate = TERM_FACTORY.getDataPropertyPredicate(pr.getValue());
+	                								 predicate = termFactory.getDataPropertyPredicate(pr.getValue());
 	                							 } else {
 	                								 if (object instanceof Function) {
 	                									 if (((Function) object).getFunctionSymbol() instanceof URITemplatePredicate) {
 
-	                										 predicate = TERM_FACTORY.getObjectPropertyPredicate(pr.getValue());
+	                										 predicate = atomFactory.getObjectPropertyPredicate(pr.getValue());
 	                									 } else {
-	                										 predicate = TERM_FACTORY.getDataPropertyPredicate(pr.getValue());
+	                										 predicate = termFactory.getDataPropertyPredicate(pr.getValue());
 	                									 }
 	                								 }
 	                									 else {
@@ -376,7 +381,7 @@ public class TurtleOBDAParser extends Parser {
 	                						 }else {
 	                			                  throw new IllegalArgumentException("predicate should be a URI Function");
 	                			             }
-	                			             atom = TERM_FACTORY.getFunction(predicate, subject, object);
+	                			             atom = termFactory.getFunction(predicate, subject, object);
 	                			       }
 	                			       return atom;
 		  }
@@ -917,8 +922,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					match(input,77,FOLLOW_77_in_verb300); 
 
-					  Term constant = TERM_FACTORY.getConstantLiteral(RDF_TYPE);
-					  value = TERM_FACTORY.getUriTemplate(constant);
+					  Term constant = termFactory.getConstantLiteral(RDF_TYPE);
+					  value = termFactory.getUriTemplate(constant);
 					  
 					}
 					break;
@@ -1422,7 +1427,7 @@ public class TurtleOBDAParser extends Parser {
 			{
 			STRING_WITH_CURLY_BRACKET19=(Token)match(input,STRING_WITH_CURLY_BRACKET,FOLLOW_STRING_WITH_CURLY_BRACKET_in_variable542); 
 
-			      value = TERM_FACTORY.getVariable(removeBrackets((STRING_WITH_CURLY_BRACKET19!=null?STRING_WITH_CURLY_BRACKET19.getText():null)));
+			      value = termFactory.getVariable(removeBrackets((STRING_WITH_CURLY_BRACKET19!=null?STRING_WITH_CURLY_BRACKET19.getText():null)));
 			      variableSet.add(value);
 			    
 			}
@@ -1467,8 +1472,8 @@ public class TurtleOBDAParser extends Parser {
 
 			      String functionName = resource20.toString();
 			      int arity = terms21.size();
-			      Predicate functionSymbol = TERM_FACTORY.getPredicate(functionName, arity);
-			      value = TERM_FACTORY.getFunction(functionSymbol, terms21);
+			      Predicate functionSymbol = termFactory.getPredicate(functionName, arity);
+			      value = termFactory.getFunction(functionSymbol, terms21);
 			    
 			}
 
@@ -1546,7 +1551,7 @@ public class TurtleOBDAParser extends Parser {
 
 					      Variable var = variable22;
 					      Term lang = language23;   
-					      value = TERM_FACTORY.getTypedTerm(var, lang);
+					      value = termFactory.getTypedTerm(var, lang);
 
 					    
 					}
@@ -1577,7 +1582,7 @@ public class TurtleOBDAParser extends Parser {
 					    if (!type.isPresent())
 					 	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
 					    
-					      value = TERM_FACTORY.getTypedTerm(var, type.get());
+					      value = termFactory.getTypedTerm(var, type.get());
 
 						
 					     
@@ -1634,7 +1639,7 @@ public class TurtleOBDAParser extends Parser {
 					state._fsp--;
 
 
-					    	value = TERM_FACTORY.getConstantLiteral((languageTag26!=null?input.toString(languageTag26.start,languageTag26.stop):null).toLowerCase(),
+					    	value = termFactory.getConstantLiteral((languageTag26!=null?input.toString(languageTag26.start,languageTag26.stop):null).toLowerCase(),
 									TYPE_FACTORY.getXsdStringDatatype());
 					    
 					}
@@ -1922,23 +1927,23 @@ public class TurtleOBDAParser extends Parser {
 					       if (literal instanceof Function){
 					          Function f = (Function)stringLiteral32;
 					          if (lang != null){
-					             value = TERM_FACTORY.getTypedTerm(f,lang);
+					             value = termFactory.getTypedTerm(f,lang);
 					          }else{
-					             value = TERM_FACTORY.getTypedTerm(f, TYPE_FACTORY.getXsdStringDatatype());
+					             value = termFactory.getTypedTerm(f, TYPE_FACTORY.getXsdStringDatatype());
 					          }       
 					       }else{
 
 					       //if variable we cannot assign a datatype yet
 					       if (literal instanceof Variable)
 					       {
-					            value = TERM_FACTORY.getTypedTerm(literal, TYPE_FACTORY.getXsdStringDatatype());
+					            value = termFactory.getTypedTerm(literal, TYPE_FACTORY.getXsdStringDatatype());
 					       }
 					       else{
 					          ValueConstant constant = (ValueConstant)stringLiteral32;
 					          if (lang != null) {
-						     value = TERM_FACTORY.getTypedTerm(constant, lang);
+						     value = termFactory.getTypedTerm(constant, lang);
 					          } else {
-					      	     value = TERM_FACTORY.getTypedTerm(constant, TYPE_FACTORY.getXsdStringDatatype());
+					      	     value = termFactory.getTypedTerm(constant, TYPE_FACTORY.getXsdStringDatatype());
 					          }
 					       }
 					       }
@@ -2009,7 +2014,7 @@ public class TurtleOBDAParser extends Parser {
 			      if (str.contains("{")){
 			      	value = getNestedConcat(str);
 			      }else{
-			      	value = TERM_FACTORY.getConstantLiteral(str.substring(1, str.length()-1),
+			      	value = termFactory.getConstantLiteral(str.substring(1, str.length()-1),
 							TYPE_FACTORY.getXsdStringDatatype()); // without the double quotes
 			      }
 			    
@@ -2061,10 +2066,10 @@ public class TurtleOBDAParser extends Parser {
 			                    if (!type.isPresent()) {
 			                      throw new RuntimeException("Unsupported datatype: " + functionName);
 			                    }
-			                    value = TERM_FACTORY.getTypedTerm(stringValue, type.get());
+			                    value = termFactory.getTypedTerm(stringValue, type.get());
 			                    }
 			           else {
-			          value = TERM_FACTORY.getTypedTerm(stringValue, TYPE_FACTORY.getXsdStringDatatype());
+			          value = termFactory.getTypedTerm(stringValue, TYPE_FACTORY.getXsdStringDatatype());
 			          }
 
 			  
@@ -2372,9 +2377,9 @@ public class TurtleOBDAParser extends Parser {
 					{
 					TRUE42=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral930); 
 
-					  ValueConstant trueConstant = TERM_FACTORY.getConstantLiteral((TRUE42!=null?TRUE42.getText():null),
+					  ValueConstant trueConstant = termFactory.getConstantLiteral((TRUE42!=null?TRUE42.getText():null),
 							  TYPE_FACTORY.getXsdStringDatatype());
-					  value = TERM_FACTORY.getTypedTerm(trueConstant, TYPE_FACTORY.getXsdBooleanDatatype());
+					  value = termFactory.getTypedTerm(trueConstant, TYPE_FACTORY.getXsdBooleanDatatype());
 					}
 					break;
 				case 2 :
@@ -2382,9 +2387,9 @@ public class TurtleOBDAParser extends Parser {
 					{
 					FALSE43=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral939); 
 
-					  ValueConstant falseConstant = TERM_FACTORY.getConstantLiteral((FALSE43!=null?FALSE43.getText():null),
+					  ValueConstant falseConstant = termFactory.getConstantLiteral((FALSE43!=null?FALSE43.getText():null),
 							  TYPE_FACTORY.getXsdStringDatatype());
-					  value = TERM_FACTORY.getTypedTerm(falseConstant, TYPE_FACTORY.getXsdBooleanDatatype());
+					  value = termFactory.getTypedTerm(falseConstant, TYPE_FACTORY.getXsdBooleanDatatype());
 					  
 					}
 					break;
@@ -2444,8 +2449,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					INTEGER44=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned958); 
 
-					  ValueConstant integerConstant = TERM_FACTORY.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), TYPE_FACTORY.getXsdIntegerDatatype());
-					  value = TERM_FACTORY.getTypedTerm(integerConstant, TYPE_FACTORY.getXsdIntegerDatatype());
+					  ValueConstant integerConstant = termFactory.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), TYPE_FACTORY.getXsdIntegerDatatype());
+					  value = termFactory.getTypedTerm(integerConstant, TYPE_FACTORY.getXsdIntegerDatatype());
 					  
 					}
 					break;
@@ -2454,9 +2459,9 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DOUBLE45=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned966); 
 
-					  ValueConstant doubleConstant = TERM_FACTORY.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null),
+					  ValueConstant doubleConstant = termFactory.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null),
 							  TYPE_FACTORY.getXsdStringDatatype());
-					  value = TERM_FACTORY.getTypedTerm(doubleConstant, TYPE_FACTORY.getXsdDoubleDatatype());
+					  value = termFactory.getTypedTerm(doubleConstant, TYPE_FACTORY.getXsdDoubleDatatype());
 					  
 					}
 					break;
@@ -2465,8 +2470,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DECIMAL46=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned975); 
 
-					  ValueConstant decimalConstant = TERM_FACTORY.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), TYPE_FACTORY.getXsdDecimalDatatype());
-					  value = TERM_FACTORY.getTypedTerm(decimalConstant, TYPE_FACTORY.getXsdDecimalDatatype());
+					  ValueConstant decimalConstant = termFactory.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), TYPE_FACTORY.getXsdDecimalDatatype());
+					  value = termFactory.getTypedTerm(decimalConstant, TYPE_FACTORY.getXsdDecimalDatatype());
 					   
 					}
 					break;
@@ -2526,8 +2531,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					INTEGER_POSITIVE47=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive994); 
 
-					   ValueConstant integerConstant = TERM_FACTORY.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), TYPE_FACTORY.getXsdIntegerDatatype());
-					   value = TERM_FACTORY.getTypedTerm(integerConstant, TYPE_FACTORY.getXsdIntegerDatatype());
+					   ValueConstant integerConstant = termFactory.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), TYPE_FACTORY.getXsdIntegerDatatype());
+					   value = termFactory.getTypedTerm(integerConstant, TYPE_FACTORY.getXsdIntegerDatatype());
 					  
 					}
 					break;
@@ -2536,8 +2541,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DOUBLE_POSITIVE48=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive1002); 
 
-					  ValueConstant doubleConstant = TERM_FACTORY.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), TYPE_FACTORY.getXsdDoubleDatatype());
-					  value = TERM_FACTORY.getTypedTerm(doubleConstant, TYPE_FACTORY.getXsdDoubleDatatype());
+					  ValueConstant doubleConstant = termFactory.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), TYPE_FACTORY.getXsdDoubleDatatype());
+					  value = termFactory.getTypedTerm(doubleConstant, TYPE_FACTORY.getXsdDoubleDatatype());
 					  
 					}
 					break;
@@ -2546,8 +2551,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DECIMAL_POSITIVE49=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive1011); 
 
-					  ValueConstant decimalConstant = TERM_FACTORY.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), TYPE_FACTORY.getXsdDecimalDatatype());
-					  value = TERM_FACTORY.getTypedTerm(decimalConstant, TYPE_FACTORY.getXsdDecimalDatatype());
+					  ValueConstant decimalConstant = termFactory.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), TYPE_FACTORY.getXsdDecimalDatatype());
+					  value = termFactory.getTypedTerm(decimalConstant, TYPE_FACTORY.getXsdDecimalDatatype());
 					   
 					}
 					break;
@@ -2607,9 +2612,9 @@ public class TurtleOBDAParser extends Parser {
 					{
 					INTEGER_NEGATIVE50=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1030); 
 
-					  ValueConstant integerConstant = TERM_FACTORY.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null),
+					  ValueConstant integerConstant = termFactory.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null),
 							  TYPE_FACTORY.getXsdIntegerDatatype());
-					  value = TERM_FACTORY.getTypedTerm(integerConstant, TYPE_FACTORY.getXsdIntegerDatatype());
+					  value = termFactory.getTypedTerm(integerConstant, TYPE_FACTORY.getXsdIntegerDatatype());
 					  
 					}
 					break;
@@ -2618,9 +2623,9 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DOUBLE_NEGATIVE51=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1038); 
 
-					   ValueConstant doubleConstant = TERM_FACTORY.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null),
+					   ValueConstant doubleConstant = termFactory.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null),
 							   TYPE_FACTORY.getXsdDoubleDatatype());
-					   value = TERM_FACTORY.getTypedTerm(doubleConstant, TYPE_FACTORY.getXsdDoubleDatatype());
+					   value = termFactory.getTypedTerm(doubleConstant, TYPE_FACTORY.getXsdDoubleDatatype());
 					  
 					}
 					break;
@@ -2629,9 +2634,9 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DECIMAL_NEGATIVE52=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1047); 
 
-					  ValueConstant decimalConstant = TERM_FACTORY.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null),
+					  ValueConstant decimalConstant = termFactory.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null),
 							  TYPE_FACTORY.getXsdDecimalDatatype());
-					  value = TERM_FACTORY.getTypedTerm(decimalConstant, TYPE_FACTORY.getXsdDecimalDatatype());
+					  value = termFactory.getTypedTerm(decimalConstant, TYPE_FACTORY.getXsdDecimalDatatype());
 					  
 					}
 					break;

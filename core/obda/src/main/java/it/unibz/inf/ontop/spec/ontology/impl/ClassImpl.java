@@ -22,12 +22,16 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.OClass;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class ClassImpl implements OClass {
 
 	private static final long serialVersionUID = -4930755519806785384L;
+	private static final RDF RDF_FACTORY = new SimpleRDF();
 
 	private final Predicate predicate;
 	private final String name;
@@ -55,7 +59,12 @@ public class ClassImpl implements OClass {
 	public String getName() {
 		return name;
 	}
-	
+
+	@Override
+	public IRI getIRI() {
+		return RDF_FACTORY.createIRI(name);
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this)

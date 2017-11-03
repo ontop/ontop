@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.dbschema;
 
+import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.*;
 
 import java.util.HashSet;
@@ -10,7 +11,7 @@ import org.junit.Test;
 
 public class QuotedIdentifierTest {
 
-	RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
+	RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
 	QuotedIDFactory fac = dbMetadata.getQuotedIDFactory();
 		
 	@Test

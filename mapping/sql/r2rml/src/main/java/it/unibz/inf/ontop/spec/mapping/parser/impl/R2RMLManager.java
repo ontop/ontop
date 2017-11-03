@@ -28,6 +28,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -64,30 +65,35 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 public class R2RMLManager {
 
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private R2RMLParser r2rmlParser;
 	private Graph myModel;
+	private final AtomFactory atomFactory;
+	private final TermFactory termFactory;
 
 	/**
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the full path of the file
+	 * @param atomFactory
+	 * @param termFactory
 	 */
-	public R2RMLManager(String file)
+	public R2RMLManager(String file, AtomFactory atomFactory, TermFactory termFactory)
 			throws RDFParseException, MappingIOException, RDFHandlerException {
-		this(new File(file));
+		this(new File(file), atomFactory, termFactory);
 	}
 	
 	/**
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the File object
+	 * @param atomFactory
+	 * @param termFactory
 	 */
-	public R2RMLManager(File file)
+	public R2RMLManager(File file, AtomFactory atomFactory, TermFactory termFactory)
 			throws MappingIOException, RDFParseException, RDFHandlerException {
+		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
 
 		try {
             LinkedHashModel model = new LinkedHashModel();
@@ -108,9 +114,13 @@ public class R2RMLManager {
 	/**
 	 * Constructor to start the parser from an RDF Model
 	 * @param model - the sesame Model containing mappings
+	 * @param atomFactory
+	 * @param termFactory
 	 */
-	public R2RMLManager(Graph model){
+	public R2RMLManager(Graph model, AtomFactory atomFactory, TermFactory termFactory){
 		myModel = model;
+		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
 		r2rmlParser = new R2RMLParser();
 	}
 	
@@ -219,7 +229,7 @@ public class R2RMLManager {
 				
 			List<Predicate> joinPredicates = r2rmlParser.getBodyPredicates(pobm);
 			for (Predicate pred : joinPredicates) {
-				bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(pred, ImmutableList.copyOf(terms)));
+				bodyBuilder.add(termFactory.getImmutableFunctionalTerm(pred, ImmutableList.copyOf(terms)));
 			}
 
 			//Function head = getHeadAtom(body);
@@ -253,7 +263,7 @@ public class R2RMLManager {
 		}
 		int arity = vars.size();
 		List<Term> dvars = new ArrayList<Term>(vars);
-		Function head = TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(Constants.QUERY_HEAD, arity), dvars);
+		Function head = termFactory.getFunction(termFactory.getPredicate(Constants.QUERY_HEAD, arity), dvars);
 		return head;
 	}
 	
@@ -273,7 +283,7 @@ public class R2RMLManager {
 		//get any class predicates, construct atom Class(subject), add to body
 		List<Predicate> classPredicates = r2rmlParser.getClassPredicates();
 		for (Predicate classPred : classPredicates) {
-			bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(classPred, subjectAtom));
+			bodyBuilder.add(termFactory.getImmutableFunctionalTerm(classPred, subjectAtom));
 		}		
 
 		for (PredicateObjectMap pom : tm.getPredicateObjectMaps()) {
@@ -312,14 +322,14 @@ public class R2RMLManager {
 						if (term0 instanceof ImmutableFunctionalTerm) {
 							ImmutableFunctionalTerm constPred = (ImmutableFunctionalTerm) term0;
 							Predicate newpred = constPred.getFunctionSymbol();
-							ImmutableFunctionalTerm bodyAtom = TERM_FACTORY.getImmutableFunctionalTerm(newpred, subjectAtom);
+							ImmutableFunctionalTerm bodyAtom = termFactory.getImmutableFunctionalTerm(newpred, subjectAtom);
 							bodyBuilder.add(bodyAtom);
 						}
 						else if (term0 instanceof ValueConstant) {
 							ValueConstant vconst = (ValueConstant) term0;
 							String predName = vconst.getValue();
-							Predicate newpred = TERM_FACTORY.getPredicate(predName, 1);
-							bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(newpred, subjectAtom));
+							Predicate newpred = termFactory.getPredicate(predName, 1);
+							bodyBuilder.add(termFactory.getImmutableFunctionalTerm(newpred, subjectAtom));
 						} 
 						else 
 							throw new IllegalStateException();
@@ -327,17 +337,17 @@ public class R2RMLManager {
 					else { // if object is a variable
 						// TODO (ROMAN): double check -- the list terms appears to accumulate the PO pairs
 						//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
-						ImmutableFunctionalTerm rdftype = TERM_FACTORY.getImmutableUriTemplate(
-								TERM_FACTORY.getConstantLiteral(IriConstants.RDF_TYPE));
+						ImmutableFunctionalTerm rdftype = termFactory.getImmutableUriTemplate(
+								termFactory.getConstantLiteral(IriConstants.RDF_TYPE));
 						//terms.add(rdftype);
 						//terms.add(objectAtom);
-						ImmutableFunctionalTerm bodyAtom = ATOM_FACTORY.getImmutableTripleAtom(subjectAtom, rdftype, objectAtom);
-						bodyBuilder.add(bodyAtom); // TERM_FACTORY.getFunction(newpred, terms)
+						ImmutableFunctionalTerm bodyAtom = atomFactory.getImmutableTripleAtom(subjectAtom, rdftype, objectAtom);
+						bodyBuilder.add(bodyAtom); // termFactory.getFunction(newpred, terms)
 					}
 				} 
 				else {
 					// create predicate(subject, object) and add it to the body
-					bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(bodyPred, subjectAtom, objectAtom));
+					bodyBuilder.add(termFactory.getImmutableFunctionalTerm(bodyPred, subjectAtom, objectAtom));
 				}
 			}
 			
@@ -347,7 +357,7 @@ public class R2RMLManager {
 				//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 				//terms.add(predFunction);
 				//terms.add(objectAtom);
-				bodyBuilder.add(ATOM_FACTORY.getImmutableTripleAtom(subjectAtom, predFunction, objectAtom));   // objectAtom
+				bodyBuilder.add(atomFactory.getImmutableTripleAtom(subjectAtom, predFunction, objectAtom));   // objectAtom
 			}
 		}
 		return bodyBuilder.build();

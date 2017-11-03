@@ -8,13 +8,15 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Types;
 
+import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
+
 public abstract class AbstractBasicMappingMistakeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicMappingMistakeTest.class);
     private final DBMetadata dbMetadata;
 
     AbstractBasicMappingMistakeTest() {
-        RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
+        RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DatabaseRelationDefinition personTable = dbMetadata.createDatabaseRelation(

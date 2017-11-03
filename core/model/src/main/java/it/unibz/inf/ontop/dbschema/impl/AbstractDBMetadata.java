@@ -85,7 +85,8 @@ public abstract class AbstractDBMetadata implements DBMetadata {
     protected abstract AtomPredicate convertToAtomPredicate(Predicate functionSymbol,
                                                             Map<Predicate, AtomPredicate> knownPredicateMap);
 
-    protected Relation2Predicate getRelation2Predicate() {
+    @Override
+    public Relation2Predicate getRelation2Predicate() {
         return relation2Predicate;
     }
 }

@@ -6,6 +6,8 @@ import com.google.inject.Inject;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -30,12 +32,17 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
 
 
     @Inject
-    private R2RMLMappingParser(SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory) {
+    private R2RMLMappingParser(SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory,
+                               AtomFactory atomFactory, TermFactory termFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
     }
 
 
@@ -43,7 +50,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
     public SQLPPMapping parse(File mappingFile) throws InvalidMappingException, MappingIOException, DuplicateMappingException {
 
         try {
-            R2RMLManager r2rmlManager = new R2RMLManager(mappingFile);
+            R2RMLManager r2rmlManager = new R2RMLManager(mappingFile, atomFactory, termFactory);
             return parse(r2rmlManager);
         } catch (RDFParseException | RDFHandlerException e) {
             throw new InvalidMappingException(e.getMessage());
@@ -60,7 +67,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
     @Override
     public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException, DuplicateMappingException {
-        R2RMLManager r2rmlManager = new R2RMLManager(mappingGraph);
+        R2RMLManager r2rmlManager = new R2RMLManager(mappingGraph, atomFactory, termFactory);
         return parse(r2rmlManager);
     }
 

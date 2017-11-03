@@ -48,6 +48,7 @@ public class MappingDataTypeCompletion {
     private final boolean defaultDatatypeInferred;
 
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeCompletion.class);
+    private final Relation2Predicate relation2Predicate;
 
     /**
      * Constructs a new mapping data type resolution.
@@ -56,11 +57,13 @@ public class MappingDataTypeCompletion {
      * //TODO: rewrite in a Datalog-free fashion
      *
      * @param metadata The database metadata.
+     * @param relation2Predicate
      */
     public MappingDataTypeCompletion(DBMetadata metadata,
-                                     boolean defaultDatatypeInferred) {
+                                     boolean defaultDatatypeInferred, Relation2Predicate relation2Predicate) {
         this.metadata = metadata;
         this.defaultDatatypeInferred = defaultDatatypeInferred;
+        this.relation2Predicate = relation2Predicate;
     }
 
     public void insertDataTyping(CQIE rule) throws UnknownDatatypeException {
@@ -193,7 +196,7 @@ public class MappingDataTypeCompletion {
         //                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!
         IndexedPosition ip = list.get(0);
 
-        RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom
+        RelationID tableId = relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom
                 .getFunctionSymbol());
         RelationDefinition td = metadata.getRelation(tableId);
         Attribute attribute = td.getAttribute(ip.pos);

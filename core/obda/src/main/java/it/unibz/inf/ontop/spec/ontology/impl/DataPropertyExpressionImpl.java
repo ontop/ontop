@@ -25,6 +25,9 @@ import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyRangeExpression;
 import it.unibz.inf.ontop.spec.ontology.DataSomeValuesFrom;
 import it.unibz.inf.ontop.spec.ontology.Datatype;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,6 +49,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 public class DataPropertyExpressionImpl implements DataPropertyExpression {
 
 	private static final long serialVersionUID = 500873858691854474L;
+	private static final RDF RDF_FACTORY = new SimpleRDF();
 
 	private final Predicate predicate;
 	private final String name;
@@ -76,6 +80,11 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	@Override
 	public Predicate getPredicate() {
 		return predicate;
+	}
+
+	@Override
+	public IRI getIRI() {
+		return RDF_FACTORY.createIRI(name);
 	}
 
 	@Override

@@ -1,11 +1,13 @@
 package it.unibz.inf.ontop.spec.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -17,22 +19,29 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 
 public class LegacyIsNotNullDatalogMappingFiller {
+
+    private final Relation2Predicate relation2Predicate;
+    private final TermFactory termFactory;
+
+    @Inject
+    private LegacyIsNotNullDatalogMappingFiller(Relation2Predicate relation2Predicate, TermFactory termFactory) {
+        this.relation2Predicate = relation2Predicate;
+        this.termFactory = termFactory;
+    }
 
     /***
      * Adding NOT NULL conditions to the variables used in the head
      * to preserve SQL-RDF semantics
      */
-    public static CQIE addNotNull(CQIE rule, DBMetadata dbMetadata) {
+    public CQIE addNotNull(CQIE rule, DBMetadata dbMetadata) {
         Set<Variable> headvars = new HashSet<>();
         TermUtils.addReferencedVariablesTo(headvars, rule.getHead());
         for (Variable var : headvars) {
             List<Function> body = rule.getBody();
             if (isNullable(var, body, dbMetadata)) {
-                Function notnull = TERM_FACTORY.getFunctionIsNotNull(var);
+                Function notnull = termFactory.getFunctionIsNotNull(var);
                 if (!body.contains(notnull))
                     body.add(notnull);
             }
@@ -43,7 +52,7 @@ public class LegacyIsNotNullDatalogMappingFiller {
     /**
      * Returns false if it detects that the variable is guaranteed not being null.
      */
-    private static boolean isNullable(Variable variable, List<Function> bodyAtoms, DBMetadata metadata) {
+    private boolean isNullable(Variable variable, List<Function> bodyAtoms, DBMetadata metadata) {
         /*
          * NB: only looks for data atoms in a flat mapping (no algebraic (meta-)predicate such as LJ).
          */
@@ -96,8 +105,8 @@ public class LegacyIsNotNullDatalogMappingFiller {
         return true;
     }
 
-    private static boolean hasNonNullColumnForVariable(Function atom, Variable variable, DBMetadata metadata) {
-        RelationID relationId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
+    private boolean hasNonNullColumnForVariable(Function atom, Variable variable, DBMetadata metadata) {
+        RelationID relationId = relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
                 atom.getFunctionSymbol());
         DatabaseRelationDefinition relation = metadata.getDatabaseRelation(relationId);
 

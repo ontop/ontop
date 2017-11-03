@@ -23,10 +23,12 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 
 import java.util.Map;
 
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -34,16 +36,20 @@ import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 public class TurtleOBDASyntaxParser implements TargetQueryParser {
 
 	private final Map<String, String> prefixes;
+	private final AtomFactory atomFactory;
+	private final TermFactory termFactory;
 
 	/**
 	 * Default constructor;
+	 * @param atomFactory
+	 * @param termFactory
 	 */
-	public TurtleOBDASyntaxParser() {
+	public TurtleOBDASyntaxParser(AtomFactory atomFactory, TermFactory termFactory) {
+		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
 		this.prefixes = ImmutableMap.of();
 	}
 
@@ -53,8 +59,10 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 	 * (i.e., the directives @BASE and @PREFIX).
 	 *
 	 */
-	public TurtleOBDASyntaxParser(Map<String, String> prefixes) {
+	public TurtleOBDASyntaxParser(Map<String, String> prefixes, AtomFactory atomFactory, TermFactory termFactory) {
 		this.prefixes = prefixes;
+		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
 	}
 
 	/**
@@ -79,9 +87,9 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 			ANTLRStringStream inputStream = new ANTLRStringStream(bf.toString());
 			TurtleOBDALexer lexer = new TurtleOBDALexer(inputStream);
 			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-			TurtleOBDAParser parser = new TurtleOBDAParser(tokenStream);
+			TurtleOBDAParser parser = new TurtleOBDAParser(tokenStream, atomFactory, termFactory);
 			return parser.parse().stream()
-					.map(TERM_FACTORY::getImmutableFunctionalTerm)
+					.map(termFactory::getImmutableFunctionalTerm)
 					.collect(ImmutableCollectors.toList());
 		} catch (RecognitionException e) {
 			throw new TargetQueryParserException(input, e);

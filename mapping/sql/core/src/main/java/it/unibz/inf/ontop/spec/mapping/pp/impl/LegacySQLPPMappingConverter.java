@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
@@ -25,8 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 
 /**
  * SQLPPMapping -> Datalog -> MappingWithProvenance
@@ -35,10 +34,18 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacySQLPPMappingConverter.class);
     private final Datalog2QueryMappingConverter mappingConverter;
+    private final LegacyIsNotNullDatalogMappingFiller isNotNullDatalogMappingFiller;
+    private final TermFactory termFactory;
+    private final SQLPPMapping2DatalogConverter ppMapping2DatalogConverter;
 
     @Inject
-    private LegacySQLPPMappingConverter(Datalog2QueryMappingConverter mappingConverter) {
+    private LegacySQLPPMappingConverter(Datalog2QueryMappingConverter mappingConverter,
+                                        LegacyIsNotNullDatalogMappingFiller isNotNullDatalogMappingFiller,
+                                        TermFactory termFactory, SQLPPMapping2DatalogConverter ppMapping2DatalogConverter) {
         this.mappingConverter = mappingConverter;
+        this.isNotNullDatalogMappingFiller = isNotNullDatalogMappingFiller;
+        this.termFactory = termFactory;
+        this.ppMapping2DatalogConverter = ppMapping2DatalogConverter;
     }
 
     @Override
@@ -58,7 +65,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
         /*
          * May also add views in the DBMetadata!
          */
-        ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap = SQLPPMapping2DatalogConverter.convert(
+        ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap = ppMapping2DatalogConverter.convert(
                 ppMapping.getTripleMaps(), dbMetadata);
 
         LOGGER.debug("Original mapping size: {}", datalogMap.size());
@@ -68,7 +75,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
         return datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> LegacyIsNotNullDatalogMappingFiller.addNotNull(e.getKey(), dbMetadata),
+                        e -> isNotNullDatalogMappingFiller.addNotNull(e.getKey(), dbMetadata),
                         Map.Entry::getValue));
     }
 
@@ -93,7 +100,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                     Term originalLangTag = typedTerm.getTerm(1);
                     if (originalLangTag instanceof ValueConstant) {
                         ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
-                        Term normalizedLangTag = TERM_FACTORY.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
+                        Term normalizedLangTag = termFactory.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
                                 originalLangConstant.getType());
                         typedTerm.setTerm(1, normalizedLangTag);
                     }

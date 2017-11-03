@@ -68,7 +68,7 @@ public class DAG implements Serializable {
 	// "http://www.w3.org/2002/07/owl#Thing";
 	// public final static URI thingUri = URI.create(thingStr);
 	// public final static Predicate thingPred =
-	// predicateFactory.getPredicate(thingUri, 1);
+	// predicateFactory.getIRI(thingUri, 1);
 	// public final static ClassDescription thingConcept =
 	// descFactory.createClass(thingPred);
 	// public final DAGNode thing = new DAGNode(thingConcept);

@@ -82,4 +82,5 @@ public interface DBMetadata extends Serializable {
     void freeze();
 
 
+    Relation2Predicate getRelation2Predicate();
 }

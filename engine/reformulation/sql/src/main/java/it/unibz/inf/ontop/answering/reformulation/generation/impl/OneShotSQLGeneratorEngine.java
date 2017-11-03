@@ -102,6 +102,7 @@ public class OneShotSQLGeneratorEngine {
 	private final RDBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
 	private final IntermediateQuery2DatalogTranslator iq2DatalogTranslator;
+	private final TypeExtractor typeExtractor;
 
 
 	private boolean generatingREPLACE = true;
@@ -126,12 +127,19 @@ public class OneShotSQLGeneratorEngine {
 	private static final org.slf4j.Logger log = LoggerFactory
 			.getLogger(OneShotSQLGeneratorEngine.class);
 	private final JdbcTypeMapper jdbcTypeMapper;
+	private final PullOutVariableOptimizer pullOutVariableOptimizer;
+	private final Relation2Predicate relation2Predicate;
 
 	OneShotSQLGeneratorEngine(DBMetadata metadata,
 							  IRIDictionary iriDictionary,
 							  OntopReformulationSQLSettings settings,
 							  JdbcTypeMapper jdbcTypeMapper,
-							  IntermediateQuery2DatalogTranslator iq2DatalogTranslator) {
+							  IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
+							  PullOutVariableOptimizer pullOutVariableOptimizer,
+							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate) {
+		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
+		this.typeExtractor = typeExtractor;
+		this.relation2Predicate = relation2Predicate;
 
 		String driverURI = settings.getJdbcDriver()
 				.orElseGet(() -> {
@@ -178,10 +186,12 @@ public class OneShotSQLGeneratorEngine {
 	 * For clone purposes only
 	 */
 	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
-                                      String replace1, String replace2, boolean distinctResultSet,
-                                      IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
-                                      ImmutableMap<ExpressionOperation, String> operations,
-									  IntermediateQuery2DatalogTranslator iq2DatalogTranslator) {
+									  String replace1, String replace2, boolean distinctResultSet,
+									  IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
+									  ImmutableMap<ExpressionOperation, String> operations,
+									  IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
+									  PullOutVariableOptimizer pullOutVariableOptimizer,
+									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate) {
 		this.metadata = metadata;
 		this.sqladapter = sqlAdapter;
 		this.operations = operations;
@@ -192,6 +202,9 @@ public class OneShotSQLGeneratorEngine {
 		this.uriRefIds = uriRefIds;
 		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.iq2DatalogTranslator = iq2DatalogTranslator;
+		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
+		this.typeExtractor = typeExtractor;
+		this.relation2Predicate = relation2Predicate;
 	}
 
 	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -248,7 +261,8 @@ public class OneShotSQLGeneratorEngine {
 	@Override
 	public OneShotSQLGeneratorEngine clone() {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter, generatingREPLACE,
-				replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator);
+				replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
+				pullOutVariableOptimizer, typeExtractor, relation2Predicate);
 	}
 
 	/**
@@ -330,7 +344,7 @@ public class OneShotSQLGeneratorEngine {
 				.optimize(intermediateQuery);
 		log.debug("New query after removing ground terms: \n" + groundTermFreeQuery);
 
-		IntermediateQuery queryAfterPullOut = new PullOutVariableOptimizer().optimize(groundTermFreeQuery);
+		IntermediateQuery queryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeQuery);
 		log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
 
 		return queryAfterPullOut;
@@ -385,7 +399,7 @@ public class OneShotSQLGeneratorEngine {
 
 		TypeExtractor.TypeResults typeResults;
 		try {
-			typeResults = TypeExtractor.extractTypes(ruleIndex, predicatesInBottomUp, metadata);
+			typeResults = typeExtractor.extractTypes(ruleIndex, predicatesInBottomUp, metadata);
 			/*
 			 * Currently, incompatible terms are treated as a reformulation error
 			 */
@@ -2228,7 +2242,7 @@ public class OneShotSQLGeneratorEngine {
 			}
 
 			Predicate predicate = atom.getFunctionSymbol();
-			RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
+			RelationID tableId = relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
 					predicate);
 			RelationDefinition def = metadata.getRelation(tableId);
 

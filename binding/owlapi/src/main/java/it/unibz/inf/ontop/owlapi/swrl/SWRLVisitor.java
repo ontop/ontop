@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.owlapi.swrl;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -40,9 +41,11 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	//to throw an exception when there are some swrl structure that cannot be translated in Datalog
 	boolean notSupported;
 	List<String> errors= new LinkedList<String> ();
-	private static Logger log = LoggerFactory.getLogger(SWRLVisitor.class); 
-	
-	public SWRLVisitor(){
+	private static Logger log = LoggerFactory.getLogger(SWRLVisitor.class);
+	private final AtomFactory atomFactory;
+
+	public SWRLVisitor(AtomFactory atomFactory){
+		this.atomFactory = atomFactory;
 
 		facts = new HashSet<CQIE>();
 		
@@ -186,7 +189,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		//we consider only namedOwlObjectProperty example not an object property expression such as inv(p)
 		if(!node.getPredicate().isAnonymous()){
 			
-			predicate= TERM_FACTORY.getObjectPropertyPredicate(node.getPredicate().asOWLObjectProperty().toStringID());
+			predicate= atomFactory.getObjectPropertyPredicate(node.getPredicate().asOWLObjectProperty().toStringID());
 			
 			terms = new ArrayList<Term>();
 			//get terms for datalog

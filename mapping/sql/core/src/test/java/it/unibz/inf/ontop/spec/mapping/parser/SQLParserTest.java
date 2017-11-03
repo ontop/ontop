@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
 public class SQLParserTest {
@@ -41,7 +42,7 @@ public class SQLParserTest {
 
 	@Before
 	public void beforeEachTest() {
-		metadata = RDBMetadataExtractionTools.createDummyMetadata();
+		metadata = RDBMetadataExtractionTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
 		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 		DatabaseRelationDefinition r = metadata.createDatabaseRelation(idfac.createRelationID(null, "student"));
 		r.addAttribute(idfac.createAttributeID("id"), 0, "INT", false);

@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.*;
@@ -38,8 +39,9 @@ public class RDBMetadata extends BasicDBMetadata {
 	 * DO NOT USE THIS CONSTRUCTOR -- USE MetadataExtractor METHODS INSTEAD
 	 */
 
-	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion, QuotedIDFactory idfac, JdbcTypeMapper jdbcTypeMapper) {
-		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac);
+	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion, QuotedIDFactory idfac,
+				JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory, Relation2Predicate relation2Predicate) {
+		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac, atomFactory, relation2Predicate);
 		this.jdbcTypeMapper = jdbcTypeMapper;
 	}
 
@@ -51,8 +53,9 @@ public class RDBMetadata extends BasicDBMetadata {
 	private RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
 						QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
 						Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
-						int parserViewCounter, JdbcTypeMapper jdbcTypeMapper) {
-		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac, tables, relations, listOfTables);
+						int parserViewCounter, JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory, Relation2Predicate relation2Predicate) {
+		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac, tables, relations, listOfTables,
+				relation2Predicate, atomFactory);
 		this.parserViewCounter = parserViewCounter;
 		this.jdbcTypeMapper = jdbcTypeMapper;
 	}
@@ -81,6 +84,7 @@ public class RDBMetadata extends BasicDBMetadata {
 	@Override
 	public RDBMetadata clone() {
 		return new RDBMetadata(getDriverName(), getDriverVersion(), getDbmsProductName(), getDbmsVersion(), getQuotedIDFactory(),
-				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()), parserViewCounter, jdbcTypeMapper);
+				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()),
+				parserViewCounter, jdbcTypeMapper, getAtomFactory(), getRelation2Predicate());
 	}
 }

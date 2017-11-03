@@ -1,22 +1,22 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.dbschema.Relation2Predicate;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.OntopModelSingletons;
+import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
+import it.unibz.inf.ontop.dbschema.Relation2Predicate;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
+import it.unibz.inf.ontop.model.OntopModelSingletons;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingNormalizer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
-public class MappingTestingTools {
+public class SQLAllMappingTestingTools {
 
     public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;

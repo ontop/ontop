@@ -22,9 +22,10 @@ package it.unibz.inf.ontop.rdf4j.rio.helpers;
 
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.AssertionFactory;
@@ -48,8 +49,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
@@ -61,10 +60,15 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 	private List<Statement> buffer;
 	private int MAX_BUFFER_SIZE = 5000;
 	private int count;
+	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
 
-	public SemanticIndexRDFHandler(SIRepositoryManager repositoryManager, Connection connection) {
+	public SemanticIndexRDFHandler(SIRepositoryManager repositoryManager, Connection connection,
+								   TermFactory termFactory, TypeFactory typeFactory) {
 		this.repositoryManager = repositoryManager;
 		this.connection = connection;
+		this.termFactory = termFactory;
+		this.typeFactory = typeFactory;
 		this.buffer = new ArrayList<>(MAX_BUFFER_SIZE);
 		this.count = 0;
 	}
@@ -92,7 +96,7 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
 	private void loadBuffer() throws SQLException {
 		Iterator<Assertion> assertionIterator = buffer.stream()
-				.map(SemanticIndexRDFHandler::constructAssertion)
+				.map(this::constructAssertion)
 				.iterator();
 		count += repositoryManager.insertData(connection, assertionIterator, 5000, 500);
 		buffer.clear();
@@ -105,14 +109,14 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 	 * predicate is not type and the object is URI or BNode. Its a data property
 	 * if the predicate is not rdf:type and the object is a Literal.
 	 */
-	private static Assertion constructAssertion(Statement st) {
+	private Assertion constructAssertion(Statement st) {
 		Resource currSubject = st.getSubject();
 		
 		ObjectConstant c = null;
 		if (currSubject instanceof IRI) {
-			c = TERM_FACTORY.getConstantURI(currSubject.stringValue());
+			c = termFactory.getConstantURI(currSubject.stringValue());
 		} else if (currSubject instanceof BNode) {
-			c = TERM_FACTORY.getConstantBNode(currSubject.stringValue());
+			c = termFactory.getConstantBNode(currSubject.stringValue());
 		} else {
 			throw new RuntimeException("Unsupported subject found in triple: "	+ st.toString() + " (Required URI or BNode)");
 		}
@@ -120,32 +124,36 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 		IRI currPredicate = st.getPredicate();
 		Value currObject = st.getObject();
 
-		Predicate currentPredicate = null;
+		IRI currentIRI;
+		boolean isProperty;
 		if (currObject instanceof Literal) {
-			currentPredicate = TERM_FACTORY.getDataPropertyPredicate(currPredicate.stringValue());
+			currentIRI = currPredicate;
+			isProperty = true;
 		} else {
 			String predStringValue = currPredicate.stringValue();
 			if (predStringValue.equals(IriConstants.RDF_TYPE)) {
-					currentPredicate = TERM_FACTORY.getClassPredicate(currObject.stringValue());
+					currentIRI = (IRI)currObject;
+					isProperty = false;
 			} else {
-				currentPredicate = TERM_FACTORY.getObjectPropertyPredicate(currPredicate.stringValue());
+				currentIRI = currPredicate;
+				isProperty = true;
 			}
 		}
 		
 		// Create the assertion
 		Assertion assertion;
 		try {
-			if (currentPredicate.getArity() == 1) {
-				assertion = ASSERTION_FACTORY.createClassAssertion(currentPredicate.getName(), c);
+			if (!isProperty) {
+				assertion = ASSERTION_FACTORY.createClassAssertion(currentIRI.stringValue(), c);
 			} 
-			else if (currentPredicate.getArity() == 2) {
+			else {
 				if (currObject instanceof IRI) {
-					ObjectConstant c2 = TERM_FACTORY.getConstantURI(currObject.stringValue());
-					assertion = ASSERTION_FACTORY.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
+					ObjectConstant c2 = termFactory.getConstantURI(currObject.stringValue());
+					assertion = ASSERTION_FACTORY.createObjectPropertyAssertion(currentIRI.stringValue(), c, c2);
 				} 
 				else if (currObject instanceof BNode) {
-					ObjectConstant c2 = TERM_FACTORY.getConstantBNode(currObject.stringValue());
-					assertion = ASSERTION_FACTORY.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
+					ObjectConstant c2 = termFactory.getConstantBNode(currObject.stringValue());
+					assertion = ASSERTION_FACTORY.createObjectPropertyAssertion(currentIRI.stringValue(), c, c2);
 				} 
 				else if (currObject instanceof Literal) {
 					Literal l = (Literal) currObject;				
@@ -156,30 +164,27 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 						RDFDatatype type;
 						
 						if (datatype == null) {
-							type = TYPE_FACTORY.getXsdStringDatatype();
+							type = typeFactory.getXsdStringDatatype();
 						} 
 						else {
-							type = TYPE_FACTORY.getOptionalDatatype(RDF_FACTORY.createIRI(datatype.stringValue()))
-									.orElseGet(TYPE_FACTORY::getUnsupportedDatatype);
+							type = typeFactory.getOptionalDatatype(RDF_FACTORY.createIRI(datatype.stringValue()))
+									.orElseGet(typeFactory::getUnsupportedDatatype);
 						}			
 						
-						c2 = TERM_FACTORY.getConstantLiteral(l.getLabel(), type);
+						c2 = termFactory.getConstantLiteral(l.getLabel(), type);
 					} 
 					else {
-						c2 = TERM_FACTORY.getConstantLiteral(l.getLabel(), lang.get());
+						c2 = termFactory.getConstantLiteral(l.getLabel(), lang.get());
 					}
-					assertion = ASSERTION_FACTORY.createDataPropertyAssertion(currentPredicate.getName(), c, c2);
+					assertion = ASSERTION_FACTORY.createDataPropertyAssertion(currentIRI.stringValue(), c, c2);
 				} 
 				else {
 					throw new RuntimeException("Unsupported object found in triple: " + st.toString() + " (Required URI, BNode or Literal)");
 				}
-			} 
-			else {
-				throw new RuntimeException("Unsupported statement: " + st.toString());
 			}
 		}
 		catch (InconsistentOntologyException e) {
-			throw new RuntimeException("InconsistentOntologyException: " + currentPredicate + " " + currSubject + " " + currObject);
+			throw new RuntimeException("InconsistentOntologyException: " + currentIRI + " " + currSubject + " " + currObject);
 		}
 		return assertion;
 	}

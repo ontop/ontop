@@ -1,6 +1,9 @@
 package it.unibz.inf.ontop.owlapi.swrl;
 
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -78,6 +81,13 @@ public class SWRLTest extends TestCase {
 		
 				
 	}
+
+	private static SWRLAPITranslator createTranslator(OWLOntology ontology) {
+		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
+		AtomFactory atomFactory = defaultConfiguration.getAtomFactory();
+
+		return new SWRLAPITranslator(ontology, atomFactory);
+	}
 	
 	@Test
 	public void testVisitorSimpleExample() throws Exception {
@@ -85,8 +95,10 @@ public class SWRLTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		owlontology = man.loadOntologyFromOntologyDocument(new File(input.get(0)));	
 		fac = man.getOWLDataFactory();
+
+
 		
-		SWRLAPITranslator trans= new SWRLAPITranslator(owlontology);
+		SWRLAPITranslator trans= createTranslator(owlontology);
 		log.info(trans.getDatalog().toString());
 		List<CQIE> rules= trans.getDatalog().getRules();
 		assertEquals(4,rules.size());
@@ -97,11 +109,6 @@ public class SWRLTest extends TestCase {
 			assertNotNull(rule.getBody());
 			
 		}
-		
-		
-		
-
-		
 	}
 	
 	@Test
@@ -111,7 +118,7 @@ public class SWRLTest extends TestCase {
 		owlontology = man.loadOntologyFromOntologyDocument(new File(input.get(1)));	
 		fac = man.getOWLDataFactory();
 		
-		SWRLAPITranslator trans= new SWRLAPITranslator(owlontology);
+		SWRLAPITranslator trans= createTranslator(owlontology);
 		log.info(trans.getDatalog().toString());
 		List<CQIE> rules= trans.getDatalog().getRules();
 		assertEquals(5,rules.size());
@@ -134,7 +141,7 @@ public void testVisitorPropertyExample() throws Exception {
 		owlontology = man.loadOntologyFromOntologyDocument(new File(input.get(2)));	
 		fac = man.getOWLDataFactory();
 		
-		SWRLAPITranslator trans= new SWRLAPITranslator(owlontology);
+		SWRLAPITranslator trans= createTranslator(owlontology);
 		log.info(trans.getDatalog().toString());
 		List<CQIE> rules= trans.getDatalog().getRules();
 		assertEquals(2,rules.size());

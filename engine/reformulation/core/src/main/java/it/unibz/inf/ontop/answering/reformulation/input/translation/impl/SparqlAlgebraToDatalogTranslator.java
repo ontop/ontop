@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
@@ -78,6 +79,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	private final UriTemplateMatcher uriTemplateMatcher;
 	private final IRIDictionary uriRef;
+    private final AtomFactory atomFactory;
 
     private final DatalogProgram program;
     private int predicateIdx = 0;
@@ -90,9 +92,11 @@ public class SparqlAlgebraToDatalogTranslator {
      *
 	 */
 	SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
-                                     @Nullable IRIDictionary iriDictionary) {
+                                     @Nullable IRIDictionary iriDictionary,
+                                     AtomFactory atomFactory) {
 		this.uriTemplateMatcher = uriTemplateMatcher;
 		this.uriRef = iriDictionary;
+        this.atomFactory = atomFactory;
 
         this.program = DATALOG_FACTORY.getDatalogProgram();
         this.rdfFactory = new SimpleRDF();
@@ -450,7 +454,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			//  term variable term .
             Term pTerm = getTermForVariable(triple.getPredicateVar(), variables);
             Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
-			atom = ATOM_FACTORY.getTripleAtom(sTerm, pTerm, oTerm);
+			atom = atomFactory.getTripleAtom(sTerm, pTerm, oTerm);
 		}
 		else if (p instanceof IRI) {
 			if (p.equals(RDF.TYPE)) {
@@ -458,7 +462,7 @@ public class SparqlAlgebraToDatalogTranslator {
 					// term rdf:type variable .
 					Term pTerm = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(RDF_TYPE));
                     Term oTerm = getTermForVariable(triple.getObjectVar(), variables);
-					atom = ATOM_FACTORY.getTripleAtom(sTerm, pTerm, oTerm);
+					atom = atomFactory.getTripleAtom(sTerm, pTerm, oTerm);
 				}
 				else if (o instanceof IRI) {
 					// term rdf:type uri .

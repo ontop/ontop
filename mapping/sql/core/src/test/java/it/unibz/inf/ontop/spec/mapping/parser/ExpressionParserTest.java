@@ -26,6 +26,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.EMPTY_METADATA;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -38,7 +39,7 @@ public class ExpressionParserTest {
 
     @Before
     public void beforeEachTest() {
-        METADATA = RDBMetadataExtractionTools.createDummyMetadata();
+        METADATA = EMPTY_METADATA;
         IDFAC = METADATA.getQuotedIDFactory();
     }
 
