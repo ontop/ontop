@@ -20,29 +20,26 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.Vector;
 
-public class IncrementalResultSetTableModel implements TableModel {
+public class ResultSetTableModel implements TableModel {
 
-	
+
 	ResultSet set; // The ResultSet to interpret
 
 	ResultSetMetaData metadata; // Additional information about the results
 
-	int numcols, numrows, fetchsize; // How many rows and columns in the table
-	
-	Vector<Vector<String>> results = null; 
-	
+	int numcols; // How many rows and columns in the table
+
+	Vector<Vector<String>> results = null;
+
 	Vector<TableModelListener> listener = null;
-	
-	boolean isAfterLast = false;
+
 
 	/**
 	 * This constructor creates a TableModel from a ResultSet. It is package
@@ -50,17 +47,15 @@ public class IncrementalResultSetTableModel implements TableModel {
 	 * ResultSetTableModelFactory, which is what you should use to obtain a
 	 * ResultSetTableModel
 	 */
-	public IncrementalResultSetTableModel(ResultSet set) throws SQLException {
+	public ResultSetTableModel(ResultSet set) throws SQLException {
 		this.set = set; // Save the results
 		metadata = set.getMetaData(); // Get metadata on them
 		numcols = metadata.getColumnCount(); // How many columns?
 		listener = new Vector<TableModelListener>();
-		numrows = 100;
-		fetchsize = 100;
-		
+
 		results = new Vector<Vector<String>>();
 		int i=1;
-		while( i<= fetchsize && set.next()){
+		while(set.next()){
 			Vector<String> aux = new Vector<String>();
 			for(int j=1;j<=numcols;j++){
 				String s = "";
@@ -75,10 +70,7 @@ public class IncrementalResultSetTableModel implements TableModel {
 			results.add(aux);
 			i++;
 		}
-		numrows = i-1;
-		if(numrows < fetchsize){
-			isAfterLast = true;
-		}
+
 	}
 
 	/**
@@ -112,7 +104,7 @@ public class IncrementalResultSetTableModel implements TableModel {
 
 	@Override
 	public int getRowCount() {
-		return numrows;
+		return results.size();
 	}
 
 	// This TableModel method returns columns names from the ResultSetMetaData
@@ -143,15 +135,6 @@ public class IncrementalResultSetTableModel implements TableModel {
 	 */
 	@Override
 	public Object getValueAt(int row, int column) {
-
-
-		try {
-			if(row + 2 >= numrows && !isAfterLast){
-				fetchMoreResults();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		Vector<String> aux = results.get(row);
 		return aux.get(column);
 	}
@@ -176,39 +159,6 @@ public class IncrementalResultSetTableModel implements TableModel {
 	public void removeTableModelListener(TableModelListener l) {
 		listener.remove(l);
 	}
-	
-	private void fetchMoreResults() throws Exception{
-		int i=1;
-		while( i<= fetchsize && !isAfterLast){
 
-			if(set.next()){
-				Vector<String> aux = new Vector<String>();
-				for(int j=1;j<=numcols;j++){
-					String s = "";
-					Object ob = set.getObject(j);
-					if(ob == null){
-						s = "null";
-					}else{
-						s = ob.toString();
-					}
-					aux.add(s);
-				}
-				results.add(aux);
-				i++;
-			}else{
-				isAfterLast = true;
-			}
-		}
-		numrows = numrows+ i-1;
-		fireTableChanged();
-	}
-	
-	private void fireTableChanged(){
-		Iterator<TableModelListener> it = listener.iterator();
-		while(it.hasNext()){
-			TableModelListener l = it.next();
-			l.tableChanged(new TableModelEvent(this));
-		}
-	}
 	
 }
