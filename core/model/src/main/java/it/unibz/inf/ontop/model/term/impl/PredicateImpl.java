@@ -54,6 +54,9 @@ public class PredicateImpl implements Predicate {
 		return name;
 	}
 
+	/**
+	 * TODO: also check arity?
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof PredicateImpl)) {

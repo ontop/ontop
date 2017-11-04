@@ -116,7 +116,7 @@ public class LinearInclusionDependencyTools {
         final Variable varX = termFactory.getVariable(variableXname);
         if (description instanceof OClass) {
             OClass klass = (OClass) description;
-            return termFactory.getFunction(atomFactory.getDataPropertyPredicate(klass.getIRI()), varX);
+            return termFactory.getFunction(atomFactory.getClassPredicate(klass.getIRI()), varX);
         }
         else if (description instanceof ObjectSomeValuesFrom) {
             final Variable varY = termFactory.getVariable(existentialVariableName);
