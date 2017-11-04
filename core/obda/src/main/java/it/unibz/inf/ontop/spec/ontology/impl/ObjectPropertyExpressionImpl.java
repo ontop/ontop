@@ -111,7 +111,7 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 
 	@Override
 	public String getName() {
-		return string;
+		return iri.getIRIString();
 	}
 	
 	@Override
