@@ -285,7 +285,8 @@ public class TMappingProcessor {
 					 */
 					boolean requiresInverse = childproperty.isInverse();
 
-					List<TMappingRule> childmappings = originalMappings.get(childproperty.getIRI());
+					AtomPredicate childPredicate = atomFactory.getObjectPropertyPredicate(childproperty.getIRI());
+					List<TMappingRule> childmappings = originalMappings.get(childPredicate);
 					if (childmappings == null)
 						continue;
 					
