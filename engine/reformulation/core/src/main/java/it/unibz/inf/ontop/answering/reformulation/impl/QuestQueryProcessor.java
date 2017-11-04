@@ -67,6 +67,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final JoinLikeOptimizer joinLikeOptimizer;
 	private final InputQueryTranslator inputQueryTranslator;
 	private final InputQueryFactory inputQueryFactory;
+	private final DatalogFactory datalogFactory;
+	private final DatalogNormalizer datalogNormalizer;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -79,11 +81,14 @@ public class QuestQueryProcessor implements QueryReformulator {
 								JoinLikeOptimizer joinLikeOptimizer,
 								InputQueryFactory inputQueryFactory,
 								LinearInclusionDependencyTools inclusionDependencyTools,
-								AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory) {
+								AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
+								DatalogNormalizer datalogNormalizer) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
 		this.inputQueryFactory = inputQueryFactory;
+		this.datalogFactory = datalogFactory;
+		this.datalogNormalizer = datalogNormalizer;
 		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
@@ -144,7 +149,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 			newprogramEq.appendRule(newquery);
 		}
 
-		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
+		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory);
 		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
 		DatalogProgram newprogram = DATALOG_FACTORY.getDatalogProgram(program.getQueryModifiers(), p);
 
@@ -170,7 +175,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 			DatalogProgram newprogram = preProcess(translation);
 
 			for (CQIE q : newprogram.getRules()) 
-				DatalogNormalizer.unfoldJoinTrees(q);
+				datalogNormalizer.unfoldJoinTrees(q);
 			log.debug("Normalized program: \n{}", newprogram);
 
 			if (newprogram.getRules().size() < 1)

@@ -6,6 +6,8 @@ import com.google.inject.Inject;
 import fj.P2;
 import fj.data.List;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.PullOutEqualityNormalizer;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
@@ -41,13 +43,15 @@ public class DatalogRule2QueryConverter {
         private final List<Function> dataAndCompositeAtoms;
         private final List<Function> booleanAtoms;
         private final Optional<Function> optionalGroupAtom;
+        private final DatalogFactory datalogFactory;
         private final DatalogTools datalogTools;
 
-        protected AtomClassification(List<Function> atoms, DatalogTools datalogTools)
+        protected AtomClassification(List<Function> atoms, DatalogFactory datalogFactory, DatalogTools datalogTools)
                 throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
+            this.datalogFactory = datalogFactory;
             this.datalogTools = datalogTools;
-            dataAndCompositeAtoms = DatalogTools.filterDataAndCompositeAtoms(atoms);
-            List<Function> otherAtoms = DatalogTools.filterNonDataAndCompositeAtoms(atoms);
+            dataAndCompositeAtoms = datalogTools.filterDataAndCompositeAtoms(atoms);
+            List<Function> otherAtoms = datalogTools.filterNonDataAndCompositeAtoms(atoms);
             booleanAtoms = datalogTools.filterBooleanAtoms(otherAtoms);
 
             if (dataAndCompositeAtoms.isEmpty())
@@ -61,10 +65,10 @@ public class DatalogRule2QueryConverter {
             checkNonDataOrCompositeAtomSupport(otherAtoms, booleanAtoms, optionalGroupAtom);
         }
 
-        private static Optional<Function> extractOptionalGroupAtom(List<Function> atoms)
+        private Optional<Function> extractOptionalGroupAtom(List<Function> atoms)
                 throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
             List<Function> groupAtoms = atoms.filter(atom -> atom.getFunctionSymbol().equals(
-                    DatalogAlgebraOperatorPredicates.SPARQL_GROUP));
+                    datalogFactory.getSparqlGroupPredicate()));
 
             switch(groupAtoms.length()) {
                 case 0:
@@ -106,15 +110,21 @@ public class DatalogRule2QueryConverter {
     private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
     private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);
     private final TermFactory termFactory;
+    private final DatalogFactory datalogFactory;
     private final DatalogConversionTools datalogConversionTools;
     private final DatalogTools datalogTools;
+    private final PullOutEqualityNormalizer pullOutEqualityNormalizer;
 
     @Inject
-    private DatalogRule2QueryConverter(TermFactory termFactory, DatalogConversionTools datalogConversionTools,
-                                       DatalogTools datalogTools) {
+    private DatalogRule2QueryConverter(TermFactory termFactory, DatalogFactory datalogFactory,
+                                       DatalogConversionTools datalogConversionTools,
+                                       DatalogTools datalogTools,
+                                       PullOutEqualityNormalizerImpl pullOutEqualityNormalizer) {
         this.termFactory = termFactory;
+        this.datalogFactory = datalogFactory;
         this.datalogConversionTools = datalogConversionTools;
         this.datalogTools = datalogTools;
+        this.pullOutEqualityNormalizer = pullOutEqualityNormalizer;
     }
 
     /**
@@ -139,7 +149,7 @@ public class DatalogRule2QueryConverter {
             return createFact(dbMetadata, rootNode, projectionAtom, executorRegistry, iqFactory);
         }
         else {
-            AtomClassification atomClassification = new AtomClassification(bodyAtoms, datalogTools);
+            AtomClassification atomClassification = new AtomClassification(bodyAtoms, datalogFactory, datalogTools);
 
             return createDefinition(dbMetadata, rootNode, projectionAtom, tablePredicates,
                     atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
@@ -273,11 +283,11 @@ public class DatalogRule2QueryConverter {
                         (java.util.List<Function>)(java.util.List<?>)atom.getTerms());
 
                 Predicate atomPredicate = atom.getFunctionSymbol();
-                if (atomPredicate.equals(DatalogAlgebraOperatorPredicates.SPARQL_JOIN)) {
+                if (atomPredicate.equals(datalogFactory.getSparqlJoinPredicate())) {
                     queryBuilder = convertJoinAtom(queryBuilder, parentNode, subAtoms, optionalPosition,
                             tablePredicates);
                 }
-                else if(atomPredicate.equals(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)) {
+                else if(atomPredicate.equals(datalogFactory.getSparqlLeftJoinPredicate())) {
                     queryBuilder = convertLeftJoinAtom(queryBuilder, parentNode, subAtoms, optionalPosition,
                             tablePredicates);
                 }
@@ -315,14 +325,14 @@ public class DatalogRule2QueryConverter {
                                                                 Collection<Predicate> tablePredicates)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
-        P2<List<Function>, List<Function>> decomposition = PullOutEqualityNormalizerImpl.splitLeftJoinSubAtoms(subAtomsOfTheLJ);
+        P2<List<Function>, List<Function>> decomposition = pullOutEqualityNormalizer.splitLeftJoinSubAtoms(subAtomsOfTheLJ);
         final List<Function> leftAtoms = decomposition._1();
         final List<Function> rightAtoms = decomposition._2();
 
         /*
          * TODO: explain why we just care about the right
          */
-        AtomClassification rightSubAtomClassification = new AtomClassification(rightAtoms, datalogTools);
+        AtomClassification rightSubAtomClassification = new AtomClassification(rightAtoms, datalogFactory, datalogTools);
 
         Optional<ImmutableExpression> optionalFilterCondition = createFilterExpression(
                 rightSubAtomClassification.booleanAtoms);
@@ -353,7 +363,7 @@ public class DatalogRule2QueryConverter {
                                                             Collection<Predicate> tablePredicates)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
-        AtomClassification classification = new AtomClassification(subAtomsOfTheJoin, datalogTools);
+        AtomClassification classification = new AtomClassification(subAtomsOfTheJoin, datalogFactory, datalogTools);
         if (classification.optionalGroupAtom.isPresent()) {
             throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("GROUP atom found inside a LJ meta-atom");
         }

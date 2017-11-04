@@ -1,25 +1,33 @@
 package it.unibz.inf.ontop.datalog.impl;
 
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 
 public class DatalogFactoryImpl implements DatalogFactory {
 
     private static final DatalogFactory INSTANCE = new DatalogFactoryImpl();
+    private final AlgebraOperatorPredicate sparqlJoinPredicate;
+    private final AlgebraOperatorPredicate sparqlLeftjoinPredicate;
+    private final AlgebraOperatorPredicate sparqlGroupPredicate;
+    private final AlgebraOperatorPredicate sparqlHavingPredicate;
 
     private DatalogFactoryImpl() {
+        TypeFactory typeFactory = TYPE_FACTORY;
+        sparqlJoinPredicate = new AlgebraOperatorPredicateImpl("Join", typeFactory);
+        sparqlLeftjoinPredicate = new AlgebraOperatorPredicateImpl("LeftJoin", typeFactory);
+        sparqlGroupPredicate = new AlgebraOperatorPredicateImpl("Group", typeFactory);
+        sparqlHavingPredicate = new AlgebraOperatorPredicateImpl("Having", typeFactory);
     }
 
 
@@ -55,12 +63,12 @@ public class DatalogFactoryImpl implements DatalogFactory {
 
     @Override
     public Function getSPARQLJoin(Function t1, Function t2) {
-        return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_JOIN, t1, t2);
+        return TERM_FACTORY.getFunction(sparqlJoinPredicate, t1, t2);
     }
 
     @Override
     public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition) {
-        return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_JOIN, t1, t2, joinCondition);
+        return TERM_FACTORY.getFunction(sparqlJoinPredicate, t1, t2, joinCondition);
     }
 
 
@@ -81,12 +89,32 @@ public class DatalogFactoryImpl implements DatalogFactory {
          */
         optionalCondition.ifPresent(joinTerms::add);
 
-        return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN, joinTerms);
+        return TERM_FACTORY.getFunction(sparqlLeftjoinPredicate, joinTerms);
     }
 
     @Override
     public Function getSPARQLLeftJoin(Term t1, Term t2) {
-        return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN, t1, t2);
+        return TERM_FACTORY.getFunction(sparqlLeftjoinPredicate, t1, t2);
+    }
+
+    @Override
+    public AlgebraOperatorPredicate getSparqlJoinPredicate() {
+        return sparqlJoinPredicate;
+    }
+
+    @Override
+    public AlgebraOperatorPredicate getSparqlLeftJoinPredicate() {
+        return sparqlLeftjoinPredicate;
+    }
+
+    @Override
+    public AlgebraOperatorPredicate getSparqlGroupPredicate() {
+        return sparqlGroupPredicate;
+    }
+
+    @Override
+    public AlgebraOperatorPredicate getSparqlHavingPredicate() {
+        return sparqlHavingPredicate;
     }
 
 

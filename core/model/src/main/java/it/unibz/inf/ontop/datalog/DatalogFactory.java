@@ -35,4 +35,9 @@ public interface DatalogFactory {
     public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2, Optional<Function> optionalCondition);
 
     public Function getSPARQLLeftJoin(Term t1, Term t2);
+
+    AlgebraOperatorPredicate getSparqlJoinPredicate();
+    AlgebraOperatorPredicate getSparqlLeftJoinPredicate();
+    AlgebraOperatorPredicate getSparqlGroupPredicate();
+    AlgebraOperatorPredicate getSparqlHavingPredicate();
 }

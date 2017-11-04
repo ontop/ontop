@@ -6,10 +6,7 @@ import fj.*;
 import fj.data.List;
 import fj.data.Set;
 import fj.data.TreeMap;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.PullOutEqLocalNormResult;
-import it.unibz.inf.ontop.datalog.PullOutEqualityNormalizer;
-import it.unibz.inf.ontop.datalog.VariableDispatcher;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -18,8 +15,6 @@ import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 
 import java.util.*;
-
-import static it.unibz.inf.ontop.datalog.impl.DatalogTools.*;
 
 /**
  * Default implementation of PullOutEqualityNormalizer. Is Left-Join aware.
@@ -49,14 +44,16 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
 
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final DatalogFactory datalogFactory;
     private final DatalogTools datalogTools;
 
     @Inject
     private PullOutEqualityNormalizerImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
-                                          DatalogTools datalogTools) {
+                                          DatalogFactory datalogFactory, DatalogTools datalogTools) {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.trueEq = termFactory.getFunctionEQ(TermConstants.TRUE, TermConstants.TRUE);
+        this.datalogFactory = datalogFactory;
         this.datalogTools = datalogTools;
     }
 
@@ -100,7 +97,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          */
         final Var2VarSubstitution substitution = mainAtomsResult.getVar2VarSubstitution();
         List<Function> otherAtoms = initialAtoms
-                .filter(atom -> !isDataOrLeftJoinOrJoinAtom(atom))
+                .filter(atom -> !datalogTools.isDataOrLeftJoinOrJoinAtom(atom))
                 .map(atom -> {
                     Function newAtom = (Function) atom.clone();
                     // SIDE-EFFECT on the newly created object
@@ -136,7 +133,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          * Normalizes the composite atoms.
          */
         List<PullOutEqLocalNormResult> compositeAtomResults = sameLevelAtoms
-                .filter(DatalogTools::isLeftJoinOrJoinAtom)
+                .filter(datalogTools::isLeftJoinOrJoinAtom)
                 .map(atom -> normalizeCompositeAtom(atom, variableDispatcher));
 
         List<Function> secondNonPushableAtoms = compositeAtomResults
@@ -221,9 +218,9 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          */
         if (atom.isAlgebraFunction()) {
             Predicate functionSymbol = atom.getFunctionSymbol();
-            if (functionSymbol.equals(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)) {
+            if (functionSymbol.equals(datalogFactory.getSparqlLeftJoinPredicate())) {
                 return normalizeLeftJoin(atom, variableDispatcher);
-            } else if (functionSymbol.equals(DatalogAlgebraOperatorPredicates.SPARQL_JOIN)) {
+            } else if (functionSymbol.equals(datalogFactory.getSparqlJoinPredicate())) {
                 return normalizeJoin(atom, variableDispatcher);
             }
         }
@@ -283,7 +280,8 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         List<Function> remainingLJAtoms = leftNormalizationResults.getNonPushableAtoms().snoc(trueEq).
                 append(rightNormalizationResults.getAllAtoms()).append(joiningEqualities);
         // TODO: add a proper method in the data factory
-        Function normalizedLeftJoinAtom = termFactory.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN,
+        Function normalizedLeftJoinAtom = termFactory.getFunction(
+                datalogFactory.getSparqlLeftJoinPredicate(),
                 new ArrayList<Term>(remainingLJAtoms.toCollection()));
 
         /**
@@ -310,7 +308,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         /**
          * Real join
          */
-        if (isRealJoin(subAtoms)) {
+        if (datalogTools.isRealJoin(subAtoms)) {
 
             /**
              * Folds the joining conditions (they will remain in the JOIN meta-atom, they are not pushed)
@@ -534,16 +532,17 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      * However, if the 3-arity of the LJ is respected and a JOIN is used for the left part, no problem.
      *
      */
-    private static P2<List<Function>, List<Function>> splitLeftJoinSubAtoms(Function leftJoinMetaAtom) {
+    private P2<List<Function>, List<Function>> splitLeftJoinSubAtoms(Function leftJoinMetaAtom) {
         List<Function> subAtoms = List.iterableList(
                 (java.util.List<Function>) (java.util.List<?>) leftJoinMetaAtom.getTerms());
         return splitLeftJoinSubAtoms(subAtoms);
     }
 
-    public static P2<List<Function>, List<Function>> splitLeftJoinSubAtoms(List<Function> ljSubAtoms) {
+    @Override
+    public P2<List<Function>, List<Function>> splitLeftJoinSubAtoms(List<Function> ljSubAtoms) {
 
         // TODO: make it static (performance improvement).
-        F<Function, Boolean> isNotDataOrCompositeAtomFct = atom -> !(isDataOrLeftJoinOrJoinAtom(atom));
+        F<Function, Boolean> isNotDataOrCompositeAtomFct = atom -> !(datalogTools.isDataOrLeftJoinOrJoinAtom(atom));
 
         /**
          * Left: left of the first data/composite atom (usually empty).

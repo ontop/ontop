@@ -50,7 +50,7 @@ public class DatalogToSparqlTranslatorTest {
 	@Before
 	public void setup() {
 		prefixManager = new SimplePrefixManager(ImmutableMap.of(":", "http://example.org/"));
-		datalogTranslator = new DatalogToSparqlTranslator(prefixManager);
+		datalogTranslator = new DatalogToSparqlTranslator(DATALOG_FACTORY, prefixManager, TERM_FACTORY);
 	}
 
 	@Test

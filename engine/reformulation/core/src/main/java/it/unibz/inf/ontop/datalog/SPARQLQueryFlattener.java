@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Stack;
 
-import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -15,8 +14,6 @@ import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 
 public class SPARQLQueryFlattener {
 
@@ -27,9 +24,11 @@ public class SPARQLQueryFlattener {
      */
     private final List<Predicate> irreducible = new LinkedList<>();
 	private final DatalogProgram program;
+	private final DatalogFactory datalogFactory;
 
-    public SPARQLQueryFlattener(DatalogProgram program) {
+	public SPARQLQueryFlattener(DatalogProgram program, DatalogFactory datalogFactory) {
 		this.program = program;
+		this.datalogFactory = datalogFactory;
 	}
 
 	/***
@@ -148,7 +147,7 @@ public class SPARQLQueryFlattener {
 
                 termidx.push(atomIdx);
                 List<CQIE> result;
-				if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)
+				if (atom.getFunctionSymbol().equals(datalogFactory.getSparqlLeftJoinPredicate()))
 					result = computePartialEvaluationInLeftJoin(getSubAtoms(atom), rule, termidx);
 				else
 					result = computePartialEvaluation(getSubAtoms(atom), rule, termidx);
@@ -201,7 +200,7 @@ public class SPARQLQueryFlattener {
 
                 termidx.push(atomIdx);
 				List<CQIE> result;
-				if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)
+				if (atom.getFunctionSymbol().equals(datalogFactory.getSparqlLeftJoinPredicate()))
 					result = computePartialEvaluationInLeftJoin(getSubAtoms(atom), rule, termidx);
 				else
 					result = computePartialEvaluation(getSubAtoms(atom), rule, termidx);
@@ -261,7 +260,7 @@ public class SPARQLQueryFlattener {
 
         List<CQIE> result = new LinkedList<>();
         for (CQIE candidateRule : definitions) {
-            CQIE freshRule = DATALOG_FACTORY.getFreshCQIECopy(candidateRule);
+            CQIE freshRule = datalogFactory.getFreshCQIECopy(candidateRule);
             // IMPORTANT: getMGU changes arguments
             Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), atom);
             if (mgu == null) {
@@ -336,7 +335,7 @@ public class SPARQLQueryFlattener {
 		
 		Function foldedJoinAtom = dataAtomsList.remove(0);
 		for (Function a : dataAtomsList)
-			foldedJoinAtom = DATALOG_FACTORY.getSPARQLJoin(foldedJoinAtom, a);
+			foldedJoinAtom = datalogFactory.getSPARQLJoin(foldedJoinAtom, a);
 		
 		otherAtomsList.add(0, foldedJoinAtom);
 		

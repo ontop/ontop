@@ -23,15 +23,10 @@ package it.unibz.inf.ontop.datalog.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.AlgebraOperatorPredicate;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
-import it.unibz.inf.ontop.model.type.TermType;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 public class AlgebraOperatorPredicateImpl extends PredicateImpl implements AlgebraOperatorPredicate {
 
-	private static final long serialVersionUID = 9152448029926695852L;
-
-	private static final TermType ROOT_TERM_TYPE = TYPE_FACTORY.getAbstractAtomicTermType();
 
 	/**
 	 * Constructs a datatype predicate with one term. This is a usual construct
@@ -40,8 +35,9 @@ public class AlgebraOperatorPredicateImpl extends PredicateImpl implements Algeb
 	 * @param name
 	 *            The predicate name.
 	 */
-	protected AlgebraOperatorPredicateImpl(String name) {
-		super(name, 2, ImmutableList.of(ROOT_TERM_TYPE, ROOT_TERM_TYPE));
+	protected AlgebraOperatorPredicateImpl(String name, TypeFactory typeFactory) {
+		super(name, 2, ImmutableList.of(typeFactory.getAbstractAtomicTermType(),
+				typeFactory.getAbstractAtomicTermType()));
 	}
 
 

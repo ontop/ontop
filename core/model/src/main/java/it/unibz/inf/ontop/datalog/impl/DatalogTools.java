@@ -25,8 +25,8 @@ public class DatalogTools {
 
     private final Expression TRUE_EQ;
 
-    private final static  F<Function, Boolean> IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = DatalogTools::isDataOrLeftJoinOrJoinAtom;
-    private final static  F<Function, Boolean> IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT = atom -> !isDataOrLeftJoinOrJoinAtom(atom);
+    private final  F<Function, Boolean> IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT;
+    private final  F<Function, Boolean> IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT;
     private final  F<Function, Boolean> IS_BOOLEAN_ATOM_FCT;
 
     @Inject
@@ -35,24 +35,26 @@ public class DatalogTools {
         this.typeFactory = typeFactory;
         this.datalogFactory = datalogFactory;
         TRUE_EQ = termFactory.getFunctionEQ(TermConstants.TRUE, TermConstants.TRUE);
+        IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = this::isDataOrLeftJoinOrJoinAtom;
+        IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT = atom -> !isDataOrLeftJoinOrJoinAtom(atom);
         IS_BOOLEAN_ATOM_FCT = atom -> atom.isOperation() || typeFactory.isBoolean(atom.getFunctionSymbol());
     }
 
-    public static Boolean isDataOrLeftJoinOrJoinAtom(Function atom) {
+    public Boolean isDataOrLeftJoinOrJoinAtom(Function atom) {
         return atom.isDataFunction() || isLeftJoinOrJoinAtom(atom);
     }
 
-    public static Boolean isLeftJoinOrJoinAtom(Function atom) {
+    public Boolean isLeftJoinOrJoinAtom(Function atom) {
         Predicate predicate = atom.getFunctionSymbol();
-        return predicate.equals(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) ||
-                predicate.equals(DatalogAlgebraOperatorPredicates.SPARQL_JOIN);
+        return predicate.equals(datalogFactory.getSparqlLeftJoinPredicate()) ||
+                predicate.equals(datalogFactory.getSparqlJoinPredicate());
     }
 
-    public static List<Function> filterDataAndCompositeAtoms(List<Function> atoms) {
+    public List<Function> filterDataAndCompositeAtoms(List<Function> atoms) {
         return atoms.filter(IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT);
     }
 
-    public static List<Function> filterNonDataAndCompositeAtoms(List<Function> atoms) {
+    public List<Function> filterNonDataAndCompositeAtoms(List<Function> atoms) {
         return atoms.filter(IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT);
     }
 
@@ -142,14 +144,9 @@ public class DatalogTools {
      *
      * May produces some false negatives for crazy abusive nested joins of boolean atoms (using JOIN instead of AND).
      */
-    public static boolean isRealJoin(List<Function> subAtoms) {
+    public boolean isRealJoin(List<Function> subAtoms) {
         //TODO: reuse a shared static filter fct object.
-        List<Function> dataAndCompositeAtoms = subAtoms.filter(new F<Function, Boolean>() {
-            @Override
-            public Boolean f(Function atom) {
-                return isDataOrLeftJoinOrJoinAtom(atom);
-            }
-        });
+        List<Function> dataAndCompositeAtoms = subAtoms.filter(atom -> isDataOrLeftJoinOrJoinAtom(atom));
 
         return dataAndCompositeAtoms.length() > 1;
     }

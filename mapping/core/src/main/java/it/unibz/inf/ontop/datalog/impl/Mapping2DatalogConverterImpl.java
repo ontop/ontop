@@ -23,14 +23,17 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
 
     private final QueryUnionSplitter unionSplitter;
     private final IntermediateQuery2DatalogTranslator iq2DatalogTranslator;
+    private final DatalogNormalizer datalogNormalizer;
 
     // For the translation of subqueries: prevents conflicts in generated predicate names
 
     @Inject
     private Mapping2DatalogConverterImpl(QueryUnionSplitter unionSplitter,
-                                         IntermediateQuery2DatalogTranslator iq2DatalogTranslator) {
+                                         IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
+                                         DatalogNormalizer datalogNormalizer) {
         this.unionSplitter = unionSplitter;
         this.iq2DatalogTranslator = iq2DatalogTranslator;
+        this.datalogNormalizer = datalogNormalizer;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
                 .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
                 .collect(ImmutableCollectors.toSet());
         //CQIEs are mutable
-        rules.forEach(DatalogNormalizer::unfoldJoinTrees);
+        rules.forEach(datalogNormalizer::unfoldJoinTrees);
         return rules.stream();
     }
 }
