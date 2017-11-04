@@ -860,7 +860,8 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(dpe.getPredicate(),
+				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(
+						atomFactory.getDataPropertyPredicate(dpe.getIRI()),
 						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery),
 						targetQuery);
@@ -894,7 +895,8 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(classNode.getIri(), view.getId().getType1());
+				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(
+						atomFactory.getClassPredicate(classNode.getIRI()), view.getId().getType1());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
