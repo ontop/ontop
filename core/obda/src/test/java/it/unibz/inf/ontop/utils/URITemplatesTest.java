@@ -22,14 +22,17 @@ package it.unibz.inf.ontop.utils;
 
 import java.util.Arrays;
 
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.model.term.Function;
 
+import it.unibz.inf.ontop.model.term.TermFactory;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static org.junit.Assert.assertEquals;
 
 public class URITemplatesTest {
+
+    private static final TermFactory TERM_FACTORY = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
 	
 	@SuppressWarnings("unchecked")
     @Test

@@ -33,25 +33,25 @@ public class PushDownBooleanExpressionOptimizerTest {
     private final static AtomPredicate ANS1_PREDICATE2 = ATOM_FACTORY.getAtomPredicate("ans1", 3);
     private final static AtomPredicate ANS1_PREDICATE3 = ATOM_FACTORY.getAtomPredicate("ans1", 5);
     private final static AtomPredicate ANS2_PREDICATE1 = ATOM_FACTORY.getAtomPredicate("ans2", 2);
-    private final static Variable X = DATA_FACTORY.getVariable("X");
-    private final static Variable Y = DATA_FACTORY.getVariable("Y");
-    private final static Variable Z = DATA_FACTORY.getVariable("Z");
-    private final static Variable W = DATA_FACTORY.getVariable("W");
-    private final static Variable A = DATA_FACTORY.getVariable("A");
+    private final static Variable X = TERM_FACTORY.getVariable("X");
+    private final static Variable Y = TERM_FACTORY.getVariable("Y");
+    private final static Variable Z = TERM_FACTORY.getVariable("Z");
+    private final static Variable W = TERM_FACTORY.getVariable("W");
+    private final static Variable A = TERM_FACTORY.getVariable("A");
 
-    private final static ImmutableExpression EXPRESSION1 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, X, Z);
-    private final static ImmutableExpression EXPRESSION2 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.NEQ, Y, Z);
-    private final static ImmutableExpression EXPRESSION3 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.LT, Z, W);
-    private final static ImmutableExpression EXPRESSION4 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, Y, Z);
-    private final static ImmutableExpression EXPRESSION5 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.NEQ, Z, W);
-    private final static ImmutableExpression EXPRESSION6 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION6 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, X, W);
-    private final static ImmutableExpression EXPRESSION7 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION7 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, X, Y);
 
     @Test

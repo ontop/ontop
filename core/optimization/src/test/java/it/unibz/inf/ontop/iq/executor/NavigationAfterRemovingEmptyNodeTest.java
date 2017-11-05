@@ -34,28 +34,28 @@ public class NavigationAfterRemovingEmptyNodeTest {
     private static final AtomPredicate ANS1_ARITY_1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
     private static final AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
 
-    private static final Variable X = DATA_FACTORY.getVariable("x");
-    private static final Variable Y = DATA_FACTORY.getVariable("y");
-    private static final Variable W = DATA_FACTORY.getVariable("w");
-    private static final Variable Z = DATA_FACTORY.getVariable("z");
-    private static final Variable A = DATA_FACTORY.getVariable("a");
-    private static final Variable B = DATA_FACTORY.getVariable("b");
-    private static final Variable C = DATA_FACTORY.getVariable("c");
-    private static final Variable D = DATA_FACTORY.getVariable("d");
-    private static final Variable E = DATA_FACTORY.getVariable("e");
-    private static final Variable F = DATA_FACTORY.getVariable("f");
-    private static final Variable G = DATA_FACTORY.getVariable("g");
-    private static final Variable H = DATA_FACTORY.getVariable("h");
-    private static final Variable I = DATA_FACTORY.getVariable("i");
-    private static final Variable L = DATA_FACTORY.getVariable("l");
-    private static final Variable M = DATA_FACTORY.getVariable("m");
-    private static final Variable N = DATA_FACTORY.getVariable("n");
+    private static final Variable X = TERM_FACTORY.getVariable("x");
+    private static final Variable Y = TERM_FACTORY.getVariable("y");
+    private static final Variable W = TERM_FACTORY.getVariable("w");
+    private static final Variable Z = TERM_FACTORY.getVariable("z");
+    private static final Variable A = TERM_FACTORY.getVariable("a");
+    private static final Variable B = TERM_FACTORY.getVariable("b");
+    private static final Variable C = TERM_FACTORY.getVariable("c");
+    private static final Variable D = TERM_FACTORY.getVariable("d");
+    private static final Variable E = TERM_FACTORY.getVariable("e");
+    private static final Variable F = TERM_FACTORY.getVariable("f");
+    private static final Variable G = TERM_FACTORY.getVariable("g");
+    private static final Variable H = TERM_FACTORY.getVariable("h");
+    private static final Variable I = TERM_FACTORY.getVariable("i");
+    private static final Variable L = TERM_FACTORY.getVariable("l");
+    private static final Variable M = TERM_FACTORY.getVariable("m");
+    private static final Variable N = TERM_FACTORY.getVariable("n");
 
 
     private static final URITemplatePredicate URI1_PREDICATE =  new URITemplatePredicateImpl(2);
     private static final URITemplatePredicate URI2_PREDICATE =  new URITemplatePredicateImpl(3);
-    private static final Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private static final Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
+    private static final Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
+    private static final Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
 
     private static final ExtensionalDataNode DATA_NODE_1 = buildExtensionalDataNode(TABLE1_PREDICATE, A, B);
     private static final ExtensionalDataNode DATA_NODE_2 = buildExtensionalDataNode(TABLE2_PREDICATE, A, E);
@@ -80,8 +80,8 @@ public class NavigationAfterRemovingEmptyNodeTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(unionNode, joinNode);
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(DATA_FACTORY.getImmutableExpression(ExpressionOperation.GT, A,
-                DATA_FACTORY.getConstantLiteral("2")));
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(ExpressionOperation.GT, A,
+                TERM_FACTORY.getConstantLiteral("2")));
         initialQueryBuilder.addChild(joinNode, filterNode);
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A));
         initialQueryBuilder.addChild(filterNode, emptyNode);
@@ -116,10 +116,10 @@ public class NavigationAfterRemovingEmptyNodeTest {
         UnionNode unionNode = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
         initialQueryBuilder.addChild(initialRootNode, unionNode);
 
-        InnerJoinNode unsatisfiedJoinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(
+        InnerJoinNode unsatisfiedJoinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ,
-                DATA_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype()),
-                DATA_FACTORY.getConstantLiteral("3", TYPE_FACTORY.getXsdIntegerDatatype())));
+                TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype()),
+                TERM_FACTORY.getConstantLiteral("3", TYPE_FACTORY.getXsdIntegerDatatype())));
         initialQueryBuilder.addChild(unionNode, unsatisfiedJoinNode);
         initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_1);
         initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_2);
@@ -141,11 +141,11 @@ public class NavigationAfterRemovingEmptyNodeTest {
     }
 
     private static ImmutableFunctionalTerm generateURI1(ImmutableTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI1_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI1_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }
 
     private static ImmutableFunctionalTerm generateURI2(ImmutableTerm argument1, ImmutableTerm argument2) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI2_PREDICATE, URI_TEMPLATE_STR_2, argument1, argument2);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI2_PREDICATE, URI_TEMPLATE_STR_2, argument1, argument2);
     }
 
     private static ExtensionalDataNode buildExtensionalDataNode(AtomPredicate predicate, VariableOrGroundTerm... arguments) {

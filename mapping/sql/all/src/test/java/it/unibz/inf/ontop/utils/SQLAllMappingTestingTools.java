@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.OntopModelSingletons;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -20,7 +19,7 @@ public class SQLAllMappingTestingTools {
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final DBMetadata EMPTY_METADATA;
 
-    public static final TermFactory TERM_FACTORY = OntopModelSingletons.TERM_FACTORY;
+    public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
@@ -40,6 +39,7 @@ public class SQLAllMappingTestingTools {
         MAPPING_FACTORY = injector.getInstance(SpecificationFactory.class);
         MAPPING_NORMALIZER = injector.getInstance(MappingNormalizer.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
+        TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         RELATION_2_PREDICATE = injector.getInstance(Relation2Predicate.class);

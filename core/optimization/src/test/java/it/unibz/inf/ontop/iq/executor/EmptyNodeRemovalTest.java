@@ -31,16 +31,16 @@ import static org.junit.Assert.assertTrue;
 public class EmptyNodeRemovalTest {
 
     private static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
-    private static Variable X = DATA_FACTORY.getVariable("x");
-    private static Variable Y = DATA_FACTORY.getVariable("y");
-    private static Variable A = DATA_FACTORY.getVariable("a");
-    private static Variable B = DATA_FACTORY.getVariable("b");
-    private static Variable B1 = DATA_FACTORY.getVariable("b1");
-    private static Variable C = DATA_FACTORY.getVariable("c");
+    private static Variable X = TERM_FACTORY.getVariable("x");
+    private static Variable Y = TERM_FACTORY.getVariable("y");
+    private static Variable A = TERM_FACTORY.getVariable("a");
+    private static Variable B = TERM_FACTORY.getVariable("b");
+    private static Variable B1 = TERM_FACTORY.getVariable("b1");
+    private static Variable C = TERM_FACTORY.getVariable("c");
     private static DistinctVariableOnlyDataAtom PROJECTION_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_PREDICATE, ImmutableList.of(X, Y));
     private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
-    private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
+    private static Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
     private static AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 1);
     private static ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, A, B));
@@ -428,7 +428,7 @@ public class EmptyNodeRemovalTest {
     @Test(expected = EmptyQueryException.class)
     public void testJoinLJ1() throws EmptyQueryException {
         IntermediateQuery query = generateJoinLJInitialQuery(
-                Optional.of(DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ, B, C)), B);
+                Optional.of(TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ, B, C)), B);
 
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
@@ -440,7 +440,7 @@ public class EmptyNodeRemovalTest {
     @Test(expected = EmptyQueryException.class)
     public void testJoinLJ2() throws EmptyQueryException {
 
-        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(DATA_FACTORY.getImmutableExpression(
+        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.IS_NOT_NULL, C)), B);
 
         System.out.println("\n Unsatisfiable query: \n" +  query);
@@ -453,7 +453,7 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testJoinLJ3() throws EmptyQueryException {
 
-        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(DATA_FACTORY.getImmutableExpression(
+        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.IS_NULL, C)), B);
 
         /**
@@ -537,7 +537,7 @@ public class EmptyNodeRemovalTest {
                 Optional.empty());
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(DATA_FACTORY.getImmutableExpression(
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.IS_NOT_NULL, C));
         queryBuilder.addChild(rootNode, filterNode);
 
@@ -567,7 +567,7 @@ public class EmptyNodeRemovalTest {
                 Optional.empty());
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(DATA_FACTORY.getImmutableExpression(
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.IS_NULL, C));
         queryBuilder.addChild(rootNode, filterNode);
 
@@ -606,7 +606,7 @@ public class EmptyNodeRemovalTest {
 
         queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
 
-        InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(
+        InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.IS_NOT_NULL, C));
         queryBuilder.addChild(lj1, join, RIGHT);
 
@@ -643,7 +643,7 @@ public class EmptyNodeRemovalTest {
                         Y, generateURI1(B))));
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(
+        LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ, B, B1));
         queryBuilder.addChild(rootNode, lj1);
         queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, A, B1)), RIGHT);
@@ -713,7 +713,7 @@ public class EmptyNodeRemovalTest {
                         Y, generateURI1(B))));
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(
+        LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ, B, B1));
         queryBuilder.addChild(rootNode, lj1);
         queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, B1, C)), RIGHT);
@@ -908,7 +908,7 @@ public class EmptyNodeRemovalTest {
 
 
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }
 
 }

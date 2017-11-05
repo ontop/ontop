@@ -28,43 +28,43 @@ public class PullOutVariableOptimizerTest {
     private final static AtomPredicate ANS1_PREDICATE2 = ATOM_FACTORY.getAtomPredicate("ans1", 3);
     private final static AtomPredicate ANS1_PREDICATE3 = ATOM_FACTORY.getAtomPredicate("ans1", 2);
 
-    private final static Variable X = DATA_FACTORY.getVariable("X");
-    private final static Variable X0 = DATA_FACTORY.getVariable("Xf0");
-    private final static Variable X1 = DATA_FACTORY.getVariable("Xf1");
-    private final static Variable X2 = DATA_FACTORY.getVariable("Xf2");
-    private final static Variable X3 = DATA_FACTORY.getVariable("Xf3");
-    private final static Variable X4 = DATA_FACTORY.getVariable("Xf0f3");
-    private final static Variable X5 = DATA_FACTORY.getVariable("Xf0f1");
-    private final static Variable Y = DATA_FACTORY.getVariable("Y");
-    private final static Variable Y1 = DATA_FACTORY.getVariable("Yf1");
-    private final static Variable Y2 = DATA_FACTORY.getVariable("Yf2");
-    private final static Variable Z = DATA_FACTORY.getVariable("Z");
-    private final static Variable Z0 = DATA_FACTORY.getVariable("Zf0");
-    private final static Variable Z2 = DATA_FACTORY.getVariable("Zf2");
-    private final static Variable W = DATA_FACTORY.getVariable("W");
-    private final static Variable R = DATA_FACTORY.getVariable("R");
-    private final static Variable S = DATA_FACTORY.getVariable("S");
-    private final static Variable T = DATA_FACTORY.getVariable("T");
+    private final static Variable X = TERM_FACTORY.getVariable("X");
+    private final static Variable X0 = TERM_FACTORY.getVariable("Xf0");
+    private final static Variable X1 = TERM_FACTORY.getVariable("Xf1");
+    private final static Variable X2 = TERM_FACTORY.getVariable("Xf2");
+    private final static Variable X3 = TERM_FACTORY.getVariable("Xf3");
+    private final static Variable X4 = TERM_FACTORY.getVariable("Xf0f3");
+    private final static Variable X5 = TERM_FACTORY.getVariable("Xf0f1");
+    private final static Variable Y = TERM_FACTORY.getVariable("Y");
+    private final static Variable Y1 = TERM_FACTORY.getVariable("Yf1");
+    private final static Variable Y2 = TERM_FACTORY.getVariable("Yf2");
+    private final static Variable Z = TERM_FACTORY.getVariable("Z");
+    private final static Variable Z0 = TERM_FACTORY.getVariable("Zf0");
+    private final static Variable Z2 = TERM_FACTORY.getVariable("Zf2");
+    private final static Variable W = TERM_FACTORY.getVariable("W");
+    private final static Variable R = TERM_FACTORY.getVariable("R");
+    private final static Variable S = TERM_FACTORY.getVariable("S");
+    private final static Variable T = TERM_FACTORY.getVariable("T");
 
-    private final static ImmutableExpression EXPRESSION1 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
             EQ, X, X0);
-    private final static ImmutableExpression EXPRESSION2 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
             EQ, Y, Y1);
-    private final static ImmutableExpression EXPRESSION3 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getImmutableExpression(
             EQ, X, X1);
-    private final static ImmutableExpression EXPRESSION4 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getImmutableExpression(
             EQ, X, X2);
-    private final static ImmutableExpression EXPRESSION5 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getImmutableExpression(
             EQ, X, X3);
-    private final static ImmutableExpression EXPRESSION6 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION6 = TERM_FACTORY.getImmutableExpression(
             EQ, Y, Y2);
-    private final static ImmutableExpression EXPRESSION7 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION7 = TERM_FACTORY.getImmutableExpression(
             EQ, X0, X4);
-    private final static ImmutableExpression EXPRESSION8 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION8 = TERM_FACTORY.getImmutableExpression(
             EQ, X0, X5);
-    private final static ImmutableExpression EXPRESSION_Z_Z0 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION_Z_Z0 = TERM_FACTORY.getImmutableExpression(
             EQ, Z, Z0);
-    private final static ImmutableExpression EXPRESSION_Z_Z2 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION_Z_Z2 = TERM_FACTORY.getImmutableExpression(
             EQ, Z, Z2);
 
     @Test

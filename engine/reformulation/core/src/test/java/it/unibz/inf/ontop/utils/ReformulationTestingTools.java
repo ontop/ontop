@@ -24,7 +24,7 @@ public class ReformulationTestingTools {
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final DBMetadata EMPTY_METADATA;
 
-    public static final TermFactory TERM_FACTORY = OntopModelSingletons.TERM_FACTORY;
+    public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
@@ -45,6 +45,7 @@ public class ReformulationTestingTools {
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         MAPPING_FACTORY = injector.getInstance(SpecificationFactory.class);
         MAPPING_NORMALIZER = injector.getInstance(MappingNormalizer.class);
+        TERM_FACTORY = injector.getInstance(TermFactory.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);

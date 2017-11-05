@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.model.term.TermConstants.NULL;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
@@ -33,17 +32,17 @@ public class TrueNodesRemovalOptimizerTest {
     private final AtomPredicate ANS1_ARITY_1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
     private final AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
 
-    private final Variable A = DATA_FACTORY.getVariable("a");
-    private final Variable B = DATA_FACTORY.getVariable("b");
-    private final Variable X = DATA_FACTORY.getVariable("x");
-    private final Variable Y = DATA_FACTORY.getVariable("y");
+    private final Variable A = TERM_FACTORY.getVariable("a");
+    private final Variable B = TERM_FACTORY.getVariable("b");
+    private final Variable X = TERM_FACTORY.getVariable("x");
+    private final Variable Y = TERM_FACTORY.getVariable("y");
 
     private ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_ARITY_1_PREDICATE, A));
     private ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_ARITY_1_PREDICATE, B));
     private ExtensionalDataNode DATA_NODE_3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_ARITY_2_PREDICATE, A, B));
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(
+        return TERM_FACTORY.getImmutableFunctionalTerm(
                 TYPE_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
                 argument);
     }
@@ -96,7 +95,7 @@ public class TrueNodesRemovalOptimizerTest {
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
 
-        ImmutableExpression expression = DATA_FACTORY.getImmutableExpression(NEQ, A, B);
+        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(NEQ, A, B);
         InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode(expression);
         queryBuilder.addChild(rootNode, jn);
 

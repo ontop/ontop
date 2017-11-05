@@ -35,18 +35,18 @@ public class QueryMergingTest {
     private static AtomPredicate P3_PREDICATE = ATOM_FACTORY.getAtomPredicate("p3", 1);
     private static AtomPredicate P4_PREDICATE = ATOM_FACTORY.getAtomPredicate("p4", 1);
     private static AtomPredicate P5_PREDICATE = ATOM_FACTORY.getAtomPredicate("p5", 1);
-    private static Variable X = DATA_FACTORY.getVariable("x");
-    private static Variable Y = DATA_FACTORY.getVariable("y");
-    private static Variable Z = DATA_FACTORY.getVariable("z");
-    private static Variable S = DATA_FACTORY.getVariable("s");
-    private static Variable T = DATA_FACTORY.getVariable("t");
-    private static Variable R = DATA_FACTORY.getVariable("r");
-    private static Variable U = DATA_FACTORY.getVariable("u");
-    private static Variable A = DATA_FACTORY.getVariable("a");
-    private static Variable B = DATA_FACTORY.getVariable("b");
-    private static Variable C = DATA_FACTORY.getVariable("c");
-    private static Variable D = DATA_FACTORY.getVariable("d");
-    private static Variable E = DATA_FACTORY.getVariable("e");
+    private static Variable X = TERM_FACTORY.getVariable("x");
+    private static Variable Y = TERM_FACTORY.getVariable("y");
+    private static Variable Z = TERM_FACTORY.getVariable("z");
+    private static Variable S = TERM_FACTORY.getVariable("s");
+    private static Variable T = TERM_FACTORY.getVariable("t");
+    private static Variable R = TERM_FACTORY.getVariable("r");
+    private static Variable U = TERM_FACTORY.getVariable("u");
+    private static Variable A = TERM_FACTORY.getVariable("a");
+    private static Variable B = TERM_FACTORY.getVariable("b");
+    private static Variable C = TERM_FACTORY.getVariable("c");
+    private static Variable D = TERM_FACTORY.getVariable("d");
+    private static Variable E = TERM_FACTORY.getVariable("e");
     private static DistinctVariableOnlyDataAtom ANS1_XY_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_PREDICATE, ImmutableList.of(X, Y));
     private static DistinctVariableOnlyDataAtom ANS1_X_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -65,17 +65,17 @@ public class QueryMergingTest {
             P5_PREDICATE, ImmutableList.of(X));
     private static URITemplatePredicate URI_PREDICATE_ONE_VAR = new URITemplatePredicateImpl(2);
     private static URITemplatePredicate URI_PREDICATE_TWO_VAR = new URITemplatePredicateImpl(3);
-    private static Constant URI_TEMPLATE_STR_1 = DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private static Constant URI_TEMPLATE_STR_2 = DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
-    private static Constant URI_TEMPLATE_STR_3 = DATA_FACTORY.getConstantLiteral("http://example.org/ds3/{}/{}");
-    private static Constant ONE = DATA_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static Constant TWO = DATA_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static Constant URI_TEMPLATE_STR_1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
+    private static Constant URI_TEMPLATE_STR_2 = TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
+    private static Constant URI_TEMPLATE_STR_3 = TERM_FACTORY.getConstantLiteral("http://example.org/ds3/{}/{}");
+    private static Constant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static Constant TWO = TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
     private static DatatypePredicate XSD_INTEGER = TYPE_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getXsdIntegerDatatype());
-    private static Constant THREE = DATA_FACTORY.getConstantLiteral("3", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static GroundTerm INT_OF_THREE = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, THREE);
-    private static GroundTerm INT_OF_ONE = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, ONE);
-    private static GroundTerm INT_OF_TWO = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, TWO);
-    private static ImmutableFunctionalTerm INT_OF_B = DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, B);
+    private static Constant THREE = TERM_FACTORY.getConstantLiteral("3", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static GroundTerm INT_OF_THREE = (GroundTerm) TERM_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, THREE);
+    private static GroundTerm INT_OF_ONE = (GroundTerm) TERM_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, ONE);
+    private static GroundTerm INT_OF_TWO = (GroundTerm) TERM_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, TWO);
+    private static ImmutableFunctionalTerm INT_OF_B = TERM_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, B);
     private static AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
     private static AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 1);
     private static AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table3", 2);
@@ -814,8 +814,8 @@ public class QueryMergingTest {
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(P1_ST_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(S, generateURI1(INT_OF_ONE), T, generateURI1(INT_OF_ONE))));
         subQueryBuilder.init(P1_ST_ATOM, subQueryRoot);
-        ExtensionalDataNode tableNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, DATA_FACTORY.getConstantLiteral("2"),
-                DATA_FACTORY.getConstantLiteral("2")));
+        ExtensionalDataNode tableNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, TERM_FACTORY.getConstantLiteral("2"),
+                TERM_FACTORY.getConstantLiteral("2")));
         subQueryBuilder.addChild(subQueryRoot, tableNode);
 
         /**
@@ -913,7 +913,7 @@ public class QueryMergingTest {
         expectedQueryBuilder.addChild(joinNode, leftConstructionNode);
         expectedQueryBuilder.addChild(leftConstructionNode, firstNameDataNode);
 
-        Variable b1 = DATA_FACTORY.getVariable("bf0");
+        Variable b1 = TERM_FACTORY.getVariable("bf0");
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(D), Z, generateString(b1))),
                 Optional.empty());
@@ -1073,7 +1073,7 @@ public class QueryMergingTest {
 
         queryBuilder.init(ANS0_ATOM, rootNode);
         IntensionalDataNode intensionalDataNode = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(P3_PREDICATE,
-                DATA_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype())));
+                TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype())));
         queryBuilder.addChild(rootNode, intensionalDataNode);
         IntermediateQuery mainQuery = queryBuilder.build();
 
@@ -1085,7 +1085,7 @@ public class QueryMergingTest {
         IntermediateQueryBuilder mappingBuilder = createQueryBuilder(EMPTY_METADATA);
         ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(
-                        ImmutableMap.of(X, DATA_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype()))),
+                        ImmutableMap.of(X, TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype()))),
                 Optional.empty());
         mappingBuilder.init(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P3_PREDICATE, X), mappingRootNode);
         IntermediateQuery mapping = mappingBuilder.build();
@@ -1154,19 +1154,19 @@ public class QueryMergingTest {
     }
 
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_ONE_VAR, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_ONE_VAR, URI_TEMPLATE_STR_1, argument);
     }
 
     private static ImmutableFunctionalTerm generateURI2(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_ONE_VAR, URI_TEMPLATE_STR_2, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_ONE_VAR, URI_TEMPLATE_STR_2, argument);
     }
 
     private static ImmutableFunctionalTerm generateURI3(VariableOrGroundTerm arg1, VariableOrGroundTerm arg2) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_TWO_VAR, URI_TEMPLATE_STR_3, arg1, arg2);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_TWO_VAR, URI_TEMPLATE_STR_3, arg1, arg2);
     }
 
     private static ImmutableFunctionalTerm generateString(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(
+        return TERM_FACTORY.getImmutableFunctionalTerm(
                 TYPE_FACTORY.getRequiredTypePredicate(XSD.STRING), argument);
     }
 }

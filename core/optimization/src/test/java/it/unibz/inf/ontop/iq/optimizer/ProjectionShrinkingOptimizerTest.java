@@ -26,21 +26,21 @@ public class ProjectionShrinkingOptimizerTest {
     private final static AtomPredicate TABLE4_PREDICATE = ATOM_FACTORY.getAtomPredicate("table4", 3);
     private final static AtomPredicate TABLE5_PREDICATE = ATOM_FACTORY.getAtomPredicate("table5", 3);
     private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final static Variable X = DATA_FACTORY.getVariable("X");
-    private final static Variable Y = DATA_FACTORY.getVariable("Y");
-    private final static Variable Z = DATA_FACTORY.getVariable("Z");
-    private final static Variable W = DATA_FACTORY.getVariable("W");
-    private final static Variable A = DATA_FACTORY.getVariable("A");
-    private final static Variable B = DATA_FACTORY.getVariable("B");
+    private final static Variable X = TERM_FACTORY.getVariable("X");
+    private final static Variable Y = TERM_FACTORY.getVariable("Y");
+    private final static Variable Z = TERM_FACTORY.getVariable("Z");
+    private final static Variable W = TERM_FACTORY.getVariable("W");
+    private final static Variable A = TERM_FACTORY.getVariable("A");
+    private final static Variable B = TERM_FACTORY.getVariable("B");
 
-    private final static ImmutableExpression EXPRESSION1 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.NEQ, Y, Z);
-    private final static ImmutableExpression EXPRESSION2 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.NEQ, W, X);
 
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(
+        return TERM_FACTORY.getImmutableFunctionalTerm(
                 TYPE_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
                 argument
         );

@@ -3,10 +3,12 @@ package it.unibz.inf.ontop.spec.mapping.validation;
 import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -18,7 +20,6 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
@@ -32,6 +33,7 @@ public class UnknownDatatypeMappingTest {
     private static final String DROP_SCRIPT = DIR + "drop-db.sql";
     private static final String DEFAULT_OWL_FILE = DIR + "marriage.ttl";
     private static TestConnectionManager TEST_MANAGER;
+    private static final TypeFactory TYPE_FACTORY = OntopModelConfiguration.defaultBuilder().build().getTypeFactory();
 
     @BeforeClass
     public static void setUp() throws Exception {

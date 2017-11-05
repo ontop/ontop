@@ -21,7 +21,7 @@ public class MappingTestingTools {
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final DBMetadata EMPTY_METADATA;
 
-    public static final TermFactory TERM_FACTORY = OntopModelSingletons.TERM_FACTORY;
+    public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
@@ -42,6 +42,7 @@ public class MappingTestingTools {
         MAPPING_FACTORY = injector.getInstance(SpecificationFactory.class);
         MAPPING_NORMALIZER = injector.getInstance(MappingNormalizer.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
+        TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);

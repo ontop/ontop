@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.executor;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.OptimizationTestingTools;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -39,35 +40,35 @@ public class FunctionalDependencyTest {
     private final static AtomPredicate ANS1_PREDICATE_AR_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
     private final static AtomPredicate ANS1_PREDICATE_AR_2 = ATOM_FACTORY.getAtomPredicate("ans1", 2);
     private final static AtomPredicate ANS1_PREDICATE_AR_3 = ATOM_FACTORY.getAtomPredicate("ans1", 3);
-    private final static Variable A = DATA_FACTORY.getVariable("a");
-    private final static Variable B = DATA_FACTORY.getVariable("b");
-    private final static Variable C = DATA_FACTORY.getVariable("c");
-    private final static Variable D = DATA_FACTORY.getVariable("d");
-    private final static Variable E = DATA_FACTORY.getVariable("e");
-    private final static Variable F = DATA_FACTORY.getVariable("f");
-    private final static Variable G = DATA_FACTORY.getVariable("g");
-    private final static Variable H = DATA_FACTORY.getVariable("h");
-    private final static Variable I = DATA_FACTORY.getVariable("i");
-    private final static Variable J = DATA_FACTORY.getVariable("j");
-    private final static Variable K = DATA_FACTORY.getVariable("k");
-    private final static Variable L = DATA_FACTORY.getVariable("l");
-    private final static Variable M = DATA_FACTORY.getVariable("m");
-    private final static Variable N = DATA_FACTORY.getVariable("n");
-    private final static Variable O = DATA_FACTORY.getVariable("o");
-    private final static Variable P = DATA_FACTORY.getVariable("p");
-    private final static Variable Q = DATA_FACTORY.getVariable("q");
-    private final static Variable R = DATA_FACTORY.getVariable("r");
-    private final static Variable S = DATA_FACTORY.getVariable("s");
-    private final static Variable T = DATA_FACTORY.getVariable("t");
-    private final static Variable U = DATA_FACTORY.getVariable("u");
-    private final static Variable V = DATA_FACTORY.getVariable("v");
-    private final static Variable W = DATA_FACTORY.getVariable("w");
-    private final static Variable X = DATA_FACTORY.getVariable("x");
-    private final static Variable Y = DATA_FACTORY.getVariable("y");
-    private final static Variable Z = DATA_FACTORY.getVariable("z");
-    private final static Constant ONE = DATA_FACTORY.getConstantLiteral("1");
-    private final static Constant TWO = DATA_FACTORY.getConstantLiteral("2");
-    private final static Constant THREE = DATA_FACTORY.getConstantLiteral("3");
+    private final static Variable A = TERM_FACTORY.getVariable("a");
+    private final static Variable B = TERM_FACTORY.getVariable("b");
+    private final static Variable C = TERM_FACTORY.getVariable("c");
+    private final static Variable D = TERM_FACTORY.getVariable("d");
+    private final static Variable E = TERM_FACTORY.getVariable("e");
+    private final static Variable F = TERM_FACTORY.getVariable("f");
+    private final static Variable G = TERM_FACTORY.getVariable("g");
+    private final static Variable H = TERM_FACTORY.getVariable("h");
+    private final static Variable I = TERM_FACTORY.getVariable("i");
+    private final static Variable J = TERM_FACTORY.getVariable("j");
+    private final static Variable K = TERM_FACTORY.getVariable("k");
+    private final static Variable L = TERM_FACTORY.getVariable("l");
+    private final static Variable M = TERM_FACTORY.getVariable("m");
+    private final static Variable N = TERM_FACTORY.getVariable("n");
+    private final static Variable O = TERM_FACTORY.getVariable("o");
+    private final static Variable P = TERM_FACTORY.getVariable("p");
+    private final static Variable Q = TERM_FACTORY.getVariable("q");
+    private final static Variable R = TERM_FACTORY.getVariable("r");
+    private final static Variable S = TERM_FACTORY.getVariable("s");
+    private final static Variable T = TERM_FACTORY.getVariable("t");
+    private final static Variable U = TERM_FACTORY.getVariable("u");
+    private final static Variable V = TERM_FACTORY.getVariable("v");
+    private final static Variable W = TERM_FACTORY.getVariable("w");
+    private final static Variable X = TERM_FACTORY.getVariable("x");
+    private final static Variable Y = TERM_FACTORY.getVariable("y");
+    private final static Variable Z = TERM_FACTORY.getVariable("z");
+    private final static Constant ONE = TERM_FACTORY.getConstantLiteral("1");
+    private final static Constant TWO = TERM_FACTORY.getConstantLiteral("2");
+    private final static Constant THREE = TERM_FACTORY.getConstantLiteral("3");
 
     private final static ImmutableQueryModifiers DISTINCT_MODIFIER = new ImmutableQueryModifiersImpl(true, -1, -1, ImmutableList.of()) ;
 
@@ -744,7 +745,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(NEQ, B, TWO));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(NEQ, B, TWO));
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
@@ -771,7 +772,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(NEQ, F, TWO));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(NEQ, F, TWO));
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(

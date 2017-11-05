@@ -49,37 +49,37 @@ public class BindingLiftTest {
     private final AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
     private final AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 4);
 
-    private final Variable X = DATA_FACTORY.getVariable("x");
-    private final Variable Y = DATA_FACTORY.getVariable("y");
-    private final Variable W = DATA_FACTORY.getVariable("w");
-    private final Variable Z = DATA_FACTORY.getVariable("z");
-    private final Variable A = DATA_FACTORY.getVariable("a");
-    private final Variable AF0 = DATA_FACTORY.getVariable("af0");
-    private final Variable B = DATA_FACTORY.getVariable("b");
-    private final Variable C = DATA_FACTORY.getVariable("c");
-    private final Variable D = DATA_FACTORY.getVariable("d");
-    private final Variable E = DATA_FACTORY.getVariable("e");
-    private final Variable F = DATA_FACTORY.getVariable("f");
-    private final Variable G = DATA_FACTORY.getVariable("g");
-    private final Variable H = DATA_FACTORY.getVariable("h");
-    private final Variable I = DATA_FACTORY.getVariable("i");
-    private final Variable L = DATA_FACTORY.getVariable("l");
-    private final Variable M = DATA_FACTORY.getVariable("m");
-    private final Variable N = DATA_FACTORY.getVariable("n");
+    private final Variable X = TERM_FACTORY.getVariable("x");
+    private final Variable Y = TERM_FACTORY.getVariable("y");
+    private final Variable W = TERM_FACTORY.getVariable("w");
+    private final Variable Z = TERM_FACTORY.getVariable("z");
+    private final Variable A = TERM_FACTORY.getVariable("a");
+    private final Variable AF0 = TERM_FACTORY.getVariable("af0");
+    private final Variable B = TERM_FACTORY.getVariable("b");
+    private final Variable C = TERM_FACTORY.getVariable("c");
+    private final Variable D = TERM_FACTORY.getVariable("d");
+    private final Variable E = TERM_FACTORY.getVariable("e");
+    private final Variable F = TERM_FACTORY.getVariable("f");
+    private final Variable G = TERM_FACTORY.getVariable("g");
+    private final Variable H = TERM_FACTORY.getVariable("h");
+    private final Variable I = TERM_FACTORY.getVariable("i");
+    private final Variable L = TERM_FACTORY.getVariable("l");
+    private final Variable M = TERM_FACTORY.getVariable("m");
+    private final Variable N = TERM_FACTORY.getVariable("n");
 
 
     private URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
     private URITemplatePredicate URI_2PREDICATE =  new URITemplatePredicateImpl(3);
 
-    private Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
-    private Constant URI_TEMPLATE_STR_2_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
+    private Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
+    private Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
+    private Constant URI_TEMPLATE_STR_2_2 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
 
     private ExtensionalDataNode EXPECTED_DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, C));
     private ExtensionalDataNode EXPECTED_DATA_NODE_3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, C, D));
     private ExtensionalDataNode EXPECTED_DATA_NODE_4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
     private ExtensionalDataNode EXPECTED_DATA_NODE_5 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, B, D));
-    private ExtensionalDataNode EXPECTED_DATA_NODE_6 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, A, DATA_FACTORY.getVariable("ff0")));
+    private ExtensionalDataNode EXPECTED_DATA_NODE_6 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, A, TERM_FACTORY.getVariable("ff0")));
 
     private ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
     private ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, A, E));
@@ -94,7 +94,7 @@ public class BindingLiftTest {
     InnerJoinNode joinNode;
     UnionNode unionNode;
 
-    private final ImmutableExpression EXPRESSIONGT = DATA_FACTORY.getImmutableExpression(
+    private final ImmutableExpression EXPRESSIONGT = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.GT, Z, Y);
 
     public BindingLiftTest() {
@@ -172,7 +172,7 @@ public class BindingLiftTest {
         expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
 
         //construct expected innerjoin
-        ImmutableExpression expectedEspressionGT = DATA_FACTORY.getImmutableExpression(ExpressionOperation.GT, generateInt(A), generateInt(D));
+        ImmutableExpression expectedEspressionGT = TERM_FACTORY.getImmutableExpression(ExpressionOperation.GT, generateInt(A), generateInt(D));
         InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode(expectedEspressionGT);
         expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
 
@@ -373,7 +373,7 @@ public class BindingLiftTest {
 
         //----------------------------------------------------------------------
         //Construct expected query
-        Variable BF0 = DATA_FACTORY.getVariable("bf0");
+        Variable BF0 = TERM_FACTORY.getVariable("bf0");
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateURI1(BF0))));
@@ -562,25 +562,25 @@ public class BindingLiftTest {
 
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }
 
     private ImmutableFunctionalTerm generateURI2(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_2, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_2, argument);
     }
 
     private ImmutableFunctionalTerm generateCompositeURI2(ImmutableTerm argument1, ImmutableTerm argument2) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_2PREDICATE, URI_TEMPLATE_STR_2_2, argument1, argument2);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_2PREDICATE, URI_TEMPLATE_STR_2_2, argument1, argument2);
     }
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(
+        return TERM_FACTORY.getImmutableFunctionalTerm(
                 TYPE_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
                 argument);
     }
 
     private ImmutableFunctionalTerm generateString(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(
+        return TERM_FACTORY.getImmutableFunctionalTerm(
                 TYPE_FACTORY.getRequiredTypePredicate(XSD.STRING),
                 argument);
     }
@@ -772,8 +772,8 @@ public class BindingLiftTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-        Variable AF4 = DATA_FACTORY.getVariable("af4");
-        Variable BF5 = DATA_FACTORY.getVariable("bf5");
+        Variable AF4 = TERM_FACTORY.getVariable("af4");
+        Variable BF5 = TERM_FACTORY.getVariable("bf5");
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
@@ -970,7 +970,7 @@ public class BindingLiftTest {
         UnionNode leftUnionNode = topUnionNode.clone();
         queryBuilder.addChild(topUnionNode, leftUnionNode);
 
-        ValueConstant two = DATA_FACTORY.getConstantLiteral("2");
+        ValueConstant two = TERM_FACTORY.getConstantLiteral("2");
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -995,7 +995,7 @@ public class BindingLiftTest {
         queryBuilder.addChild(topUnionNode, joinNode);
 
 
-        ValueConstant three = DATA_FACTORY.getConstantLiteral("3");
+        ValueConstant three = TERM_FACTORY.getConstantLiteral("3");
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -1070,7 +1070,7 @@ public class BindingLiftTest {
         UnionNode leftUnionNode = topUnionNode.clone();
         queryBuilder.addChild(topUnionNode, leftUnionNode);
 
-        ValueConstant two = DATA_FACTORY.getConstantLiteral("2");
+        ValueConstant two = TERM_FACTORY.getConstantLiteral("2");
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -1164,7 +1164,7 @@ public class BindingLiftTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of()));
         queryBuilder.init(projectionAtom, rootNode);
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(EQ,
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(EQ,
                 buildSparqlDatatype(X), buildSparqlDatatype(Y)));
         queryBuilder.addChild(rootNode,joinNode);
 
@@ -1185,7 +1185,7 @@ public class BindingLiftTest {
         queryBuilder.addChild(rightChildUnion, DATA_NODE_3 );
 
         ConstructionNode otherNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateInt(DATA_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype())) )));
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateInt(TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype())) )));
 
         queryBuilder.addChild(joinNode, otherNode);
 
@@ -1196,7 +1196,7 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateInt(A), Y, generateInt(
-                        DATA_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype())))));
+                        TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype())))));
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
 
         expectedQueryBuilder.addChild(expectedRootNode, DATA_NODE_1);
@@ -1227,7 +1227,7 @@ public class BindingLiftTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of()));
         queryBuilder.init(projectionAtom, rootNode);
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(EQ,
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(EQ,
                 buildSparqlDatatype(X), buildSparqlDatatype(Y)));
         queryBuilder.addChild(rootNode,joinNode);
 
@@ -1289,7 +1289,7 @@ public class BindingLiftTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of()));
         queryBuilder.init(projectionAtom, rootNode);
 
-        InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(EQ,
+        InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(EQ,
                 buildSparqlDatatype(X), buildSparqlDatatype(Y)));
         queryBuilder.addChild(rootNode, jn);
         ConstructionNode leftCn = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
@@ -1576,6 +1576,6 @@ public class BindingLiftTest {
     }
 
     private static ImmutableFunctionalTerm buildSparqlDatatype(ImmutableTerm argument){
-        return DATA_FACTORY.getImmutableFunctionalTerm(SPARQL_DATATYPE, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(SPARQL_DATATYPE, argument);
     }
 }

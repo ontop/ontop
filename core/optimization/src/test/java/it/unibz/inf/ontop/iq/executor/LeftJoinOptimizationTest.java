@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.executor;
 
+import it.unibz.inf.ontop.OptimizationTestingTools;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -39,25 +40,25 @@ public class LeftJoinOptimizationTest {
     private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
     private final static AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 4);
-    private final static Variable X = DATA_FACTORY.getVariable("X");
-    private final static Variable Y = DATA_FACTORY.getVariable("Y");
-    private final static Variable Z = DATA_FACTORY.getVariable("z");
-    private final static Constant ONE = DATA_FACTORY.getConstantLiteral("1");
-    private final static Constant TWO = DATA_FACTORY.getConstantLiteral("2");
+    private final static Variable X = TERM_FACTORY.getVariable("X");
+    private final static Variable Y = TERM_FACTORY.getVariable("Y");
+    private final static Variable Z = TERM_FACTORY.getVariable("z");
+    private final static Constant ONE = TERM_FACTORY.getConstantLiteral("1");
+    private final static Constant TWO = TERM_FACTORY.getConstantLiteral("2");
 
-    private final static Variable M = DATA_FACTORY.getVariable("m");
-    private final static Variable M1 = DATA_FACTORY.getVariable("m1");
-    private final static Variable M2 = DATA_FACTORY.getVariable("m2");
-    private final static Variable N = DATA_FACTORY.getVariable("n");
-    private final static Variable N1 = DATA_FACTORY.getVariable("n1");
-    private final static Variable N2 = DATA_FACTORY.getVariable("n2");
-    private final static Variable O = DATA_FACTORY.getVariable("o");
-    private final static Variable O1 = DATA_FACTORY.getVariable("o1");
-    private final static Variable O2 = DATA_FACTORY.getVariable("o2");
+    private final static Variable M = TERM_FACTORY.getVariable("m");
+    private final static Variable M1 = TERM_FACTORY.getVariable("m1");
+    private final static Variable M2 = TERM_FACTORY.getVariable("m2");
+    private final static Variable N = TERM_FACTORY.getVariable("n");
+    private final static Variable N1 = TERM_FACTORY.getVariable("n1");
+    private final static Variable N2 = TERM_FACTORY.getVariable("n2");
+    private final static Variable O = TERM_FACTORY.getVariable("o");
+    private final static Variable O1 = TERM_FACTORY.getVariable("o1");
+    private final static Variable O2 = TERM_FACTORY.getVariable("o2");
 
-    private final static ImmutableExpression EXPRESSION1 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, M, N);
-    private final static ImmutableExpression EXPRESSION2 = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, N, M);
 
     private static final DBMetadata DB_METADATA;
@@ -211,7 +212,7 @@ public class LeftJoinOptimizationTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
-        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ, O, TWO));
 
         queryBuilder.addChild(constructionNode, leftJoinNode);
@@ -278,7 +279,7 @@ public class LeftJoinOptimizationTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, M, N);
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, N));
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, N));
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N1, ONE));
         ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, TWO));
@@ -573,7 +574,7 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, N1));
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, N1));
         ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, M, M1, O));
         ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, O1, N1));
 
@@ -608,7 +609,7 @@ public class LeftJoinOptimizationTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(
-                        DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ, O1, TWO));
+                        TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ, O1, TWO));
         ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, M, M1, O));
         ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N1, O1));
 

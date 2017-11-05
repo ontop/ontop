@@ -33,17 +33,17 @@ public class RedundantJoinFKTest {
     private final static AtomPredicate TABLE4_PREDICATE;
     private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
     private final static AtomPredicate ANS1_PREDICATE_2 = ATOM_FACTORY.getAtomPredicate("ans1", 2);
-    private final static Variable X = DATA_FACTORY.getVariable("X");
-    private final static Variable A = DATA_FACTORY.getVariable("A");
-    private final static Variable B = DATA_FACTORY.getVariable("B");
-    private final static Variable C = DATA_FACTORY.getVariable("C");
-    private final static Variable D = DATA_FACTORY.getVariable("D");
-    private final static Variable E = DATA_FACTORY.getVariable("E");
-    private final static Variable F = DATA_FACTORY.getVariable("F");
+    private final static Variable X = TERM_FACTORY.getVariable("X");
+    private final static Variable A = TERM_FACTORY.getVariable("A");
+    private final static Variable B = TERM_FACTORY.getVariable("B");
+    private final static Variable C = TERM_FACTORY.getVariable("C");
+    private final static Variable D = TERM_FACTORY.getVariable("D");
+    private final static Variable E = TERM_FACTORY.getVariable("E");
+    private final static Variable F = TERM_FACTORY.getVariable("F");
 
-    private static Constant ONE = DATA_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static Constant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
 
-    private final static ImmutableExpression EXPRESSION = DATA_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, B, ONE);
 
     private static final DBMetadata DB_METADATA;

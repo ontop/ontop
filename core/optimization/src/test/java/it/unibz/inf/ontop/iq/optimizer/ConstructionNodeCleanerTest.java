@@ -15,13 +15,11 @@ import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.iq.optimizer.ConstructionNodeCleaner;
 import org.junit.Test;
 
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static junit.framework.TestCase.assertTrue;
 
 public class ConstructionNodeCleanerTest {

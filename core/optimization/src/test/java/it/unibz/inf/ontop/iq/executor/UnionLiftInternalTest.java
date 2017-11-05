@@ -28,7 +28,7 @@ import static org.junit.Assert.assertTrue;
 
 public class UnionLiftInternalTest {
 
-    private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
+    private static Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
 
     private static AtomPredicate P1_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 1);
@@ -39,16 +39,16 @@ public class UnionLiftInternalTest {
     private static AtomPredicate TABLE_3 = ATOM_FACTORY.getAtomPredicate("table3", 2);
     private static AtomPredicate TABLE_4 = ATOM_FACTORY.getAtomPredicate("table4", 2);
 
-    private static Variable X = DATA_FACTORY.getVariable("x");
-    private static Variable Y = DATA_FACTORY.getVariable("y");
-    private static Variable Z = DATA_FACTORY.getVariable("z");
-    private static Variable T = DATA_FACTORY.getVariable("t");
-    private static Variable A = DATA_FACTORY.getVariable("a");
-    private static Variable B = DATA_FACTORY.getVariable("b");
-    private static Variable C = DATA_FACTORY.getVariable("c");
-    private static Variable D = DATA_FACTORY.getVariable("d");
-    private static Variable E = DATA_FACTORY.getVariable("e");
-    private static Variable F = DATA_FACTORY.getVariable("f");
+    private static Variable X = TERM_FACTORY.getVariable("x");
+    private static Variable Y = TERM_FACTORY.getVariable("y");
+    private static Variable Z = TERM_FACTORY.getVariable("z");
+    private static Variable T = TERM_FACTORY.getVariable("t");
+    private static Variable A = TERM_FACTORY.getVariable("a");
+    private static Variable B = TERM_FACTORY.getVariable("b");
+    private static Variable C = TERM_FACTORY.getVariable("c");
+    private static Variable D = TERM_FACTORY.getVariable("d");
+    private static Variable E = TERM_FACTORY.getVariable("e");
+    private static Variable F = TERM_FACTORY.getVariable("f");
 
     private static DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
             ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -867,7 +867,7 @@ public class UnionLiftInternalTest {
     }
 
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }
 
 

@@ -29,7 +29,7 @@ import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
 
 
 /***

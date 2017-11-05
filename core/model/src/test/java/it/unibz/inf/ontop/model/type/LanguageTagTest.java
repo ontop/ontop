@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.OntopModelTestingTools.TYPE_FACTORY;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;

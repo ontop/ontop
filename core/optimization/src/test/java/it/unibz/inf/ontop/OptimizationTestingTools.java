@@ -25,7 +25,6 @@ public class OptimizationTestingTools {
     private static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final DBMetadata EMPTY_METADATA;
-    public static final TermFactory DATA_FACTORY = OntopModelSingletons.TERM_FACTORY;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
     public static final InnerJoinOptimizer INNER_JOIN_OPTIMIZER;
     public static final BindingLiftOptimizer BINDING_LIFT_OPTIMIZER;

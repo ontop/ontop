@@ -27,25 +27,25 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 public class UriTemplateTest {
 
     private static URITemplatePredicate URI_PREDICATE_ONE_VAR =  new URITemplatePredicateImpl(2);
-    private static Constant URI_TEMPLATE_STR_1_PREFIX =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/");
-    private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral(URI_TEMPLATE_STR_1_PREFIX.getValue() + "{}");
-    private static Constant URI_TEMPLATE_STR_2_PREFIX =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/");
-    private static Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral(URI_TEMPLATE_STR_2_PREFIX.getValue() + "{}");
-    private static Constant URI_TEMPLATE_STR_3 =  DATA_FACTORY.getConstantLiteral("{}");
+    private static Constant URI_TEMPLATE_STR_1_PREFIX =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/");
+    private static Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral(URI_TEMPLATE_STR_1_PREFIX.getValue() + "{}");
+    private static Constant URI_TEMPLATE_STR_2_PREFIX =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/");
+    private static Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral(URI_TEMPLATE_STR_2_PREFIX.getValue() + "{}");
+    private static Constant URI_TEMPLATE_STR_3 =  TERM_FACTORY.getConstantLiteral("{}");
 
     private final static AtomPredicate TABLE1_PREDICATE = ATOM_FACTORY.getAtomPredicate("T1", 2);
     private final static AtomPredicate TABLE2_PREDICATE = ATOM_FACTORY.getAtomPredicate("T2", 2);
     private final static AtomPredicate TABLE3_PREDICATE = ATOM_FACTORY.getAtomPredicate("T3", 1);
 
-    private final static Variable X = DATA_FACTORY.getVariable("x");
-    private final static Variable Y = DATA_FACTORY.getVariable("y");
-    private final static Variable Z = DATA_FACTORY.getVariable("z");
-    private final static Variable A = DATA_FACTORY.getVariable("a");
-    private final static Variable B = DATA_FACTORY.getVariable("b");
-    private final static Variable C = DATA_FACTORY.getVariable("c");
-    private final static Variable D = DATA_FACTORY.getVariable("d");
-    private final static Variable E = DATA_FACTORY.getVariable("e");
-    private final static Variable F = DATA_FACTORY.getVariable("f");
+    private final static Variable X = TERM_FACTORY.getVariable("x");
+    private final static Variable Y = TERM_FACTORY.getVariable("y");
+    private final static Variable Z = TERM_FACTORY.getVariable("z");
+    private final static Variable A = TERM_FACTORY.getVariable("a");
+    private final static Variable B = TERM_FACTORY.getVariable("b");
+    private final static Variable C = TERM_FACTORY.getVariable("c");
+    private final static Variable D = TERM_FACTORY.getVariable("d");
+    private final static Variable E = TERM_FACTORY.getVariable("e");
+    private final static Variable F = TERM_FACTORY.getVariable("f");
 
     private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
 
@@ -96,8 +96,8 @@ public class UriTemplateTest {
         expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
 
         InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(
-                DATA_FACTORY.getImmutableExpression(EQ,
-                        DATA_FACTORY.getImmutableExpression(CONCAT, URI_TEMPLATE_STR_1_PREFIX, A),
+                TERM_FACTORY.getImmutableExpression(EQ,
+                        TERM_FACTORY.getImmutableExpression(CONCAT, URI_TEMPLATE_STR_1_PREFIX, A),
                         C));
 
         expectedQueryBuilder.addChild(leftConstructionNode, newJoinNode);
@@ -114,6 +114,6 @@ public class UriTemplateTest {
 
 
     private static ImmutableFunctionalTerm generateOneVarURITemplate(Constant templateString, ImmutableTerm value) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_ONE_VAR, templateString, value);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_ONE_VAR, templateString, value);
     }
 }

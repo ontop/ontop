@@ -24,7 +24,6 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -45,30 +44,30 @@ public class SubstitutionPropagationTest {
     private static final AtomPredicate ANS1_PREDICATE_2 = ATOM_FACTORY.getAtomPredicate("ans1", 2);
 
 
-    private static final Variable X = DATA_FACTORY.getVariable("x");
-    private static final Variable Y = DATA_FACTORY.getVariable("y");
-    private static final Variable W = DATA_FACTORY.getVariable("w");
-    private static final Variable Z = DATA_FACTORY.getVariable("z");
-    private static final Variable A = DATA_FACTORY.getVariable("a");
-    private static final Variable B = DATA_FACTORY.getVariable("b");
-    private static final Variable C = DATA_FACTORY.getVariable("c");
-    private static final Variable D = DATA_FACTORY.getVariable("d");
-    private static final Variable E = DATA_FACTORY.getVariable("e");
-    private static final Variable F = DATA_FACTORY.getVariable("f");
-    private static final Variable G = DATA_FACTORY.getVariable("g");
-    private static final Variable H = DATA_FACTORY.getVariable("h");
-    private static final Variable I = DATA_FACTORY.getVariable("i");
-    private static final Variable L = DATA_FACTORY.getVariable("l");
-    private static final Variable M = DATA_FACTORY.getVariable("m");
-    private static final Variable N = DATA_FACTORY.getVariable("n");
-    private static final ValueConstant ONE = DATA_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static final ValueConstant TWO = DATA_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static final Variable X = TERM_FACTORY.getVariable("x");
+    private static final Variable Y = TERM_FACTORY.getVariable("y");
+    private static final Variable W = TERM_FACTORY.getVariable("w");
+    private static final Variable Z = TERM_FACTORY.getVariable("z");
+    private static final Variable A = TERM_FACTORY.getVariable("a");
+    private static final Variable B = TERM_FACTORY.getVariable("b");
+    private static final Variable C = TERM_FACTORY.getVariable("c");
+    private static final Variable D = TERM_FACTORY.getVariable("d");
+    private static final Variable E = TERM_FACTORY.getVariable("e");
+    private static final Variable F = TERM_FACTORY.getVariable("f");
+    private static final Variable G = TERM_FACTORY.getVariable("g");
+    private static final Variable H = TERM_FACTORY.getVariable("h");
+    private static final Variable I = TERM_FACTORY.getVariable("i");
+    private static final Variable L = TERM_FACTORY.getVariable("l");
+    private static final Variable M = TERM_FACTORY.getVariable("m");
+    private static final Variable N = TERM_FACTORY.getVariable("n");
+    private static final ValueConstant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static final ValueConstant TWO = TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
 
 
     private static final URITemplatePredicate URI1_PREDICATE =  new URITemplatePredicateImpl(2);
     private static final URITemplatePredicate URI2_PREDICATE =  new URITemplatePredicateImpl(3);
-    private static final Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private static final Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
+    private static final Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
+    private static final Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
 
     private static final ExtensionalDataNode DATA_NODE_1 = buildExtensionalDataNode(TABLE1_PREDICATE, A, B);
     private static final ExtensionalDataNode DATA_NODE_2 = buildExtensionalDataNode(TABLE2_PREDICATE, C, B);
@@ -763,8 +762,8 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftJoin, leftConstructionNode, LEFT);
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
-                X, generateURI1(DATA_FACTORY.getConstantLiteral("two"))));
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
+                X, generateURI1(TERM_FACTORY.getConstantLiteral("two"))));
         initialQueryBuilder.addChild(leftJoin, filterNode, RIGHT);
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
@@ -1533,11 +1532,11 @@ public class SubstitutionPropagationTest {
 
 
     private static ImmutableFunctionalTerm generateURI1(ImmutableTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI1_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI1_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }
 
     private static ImmutableFunctionalTerm generateURI2(ImmutableTerm argument1, ImmutableTerm argument2) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI2_PREDICATE, URI_TEMPLATE_STR_2, argument1, argument2);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI2_PREDICATE, URI_TEMPLATE_STR_2, argument1, argument2);
     }
     
     private static ExtensionalDataNode buildExtensionalDataNode(AtomPredicate predicate, VariableOrGroundTerm... arguments) {

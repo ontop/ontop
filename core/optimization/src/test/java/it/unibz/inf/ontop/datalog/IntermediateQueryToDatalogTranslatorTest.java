@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 public class IntermediateQueryToDatalogTranslatorTest {
 
 
-    private static Variable X = DATA_FACTORY.getVariable("x");
+    private static Variable X = TERM_FACTORY.getVariable("x");
     private static AtomPredicate ANS1_IQ_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
     private static DistinctVariableOnlyDataAtom ANS1_X_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_IQ_PREDICATE, ImmutableList.of(X));
@@ -92,10 +92,10 @@ public class IntermediateQueryToDatalogTranslatorTest {
         /**
          Expected Datalog program
          */
-        Function ans1Atom = DATA_FACTORY.getFunction(ANS1_DATALOG_PREDICATE, X);
-        Function ansSQ1Atom = DATA_FACTORY.getFunction(ANSSQ1_DATALOG_PREDICATE, X);
-        Function p1Atom = DATA_FACTORY.getFunction(P1_DATALOG_PREDICATE, X);
-        Function p2Atom = DATA_FACTORY.getFunction(P2_DATALOG_PREDICATE, X);
+        Function ans1Atom = TERM_FACTORY.getFunction(ANS1_DATALOG_PREDICATE, X);
+        Function ansSQ1Atom = TERM_FACTORY.getFunction(ANSSQ1_DATALOG_PREDICATE, X);
+        Function p1Atom = TERM_FACTORY.getFunction(P1_DATALOG_PREDICATE, X);
+        Function p2Atom = TERM_FACTORY.getFunction(P2_DATALOG_PREDICATE, X);
 
         List<CQIE> cqies = new ArrayList<>();
 

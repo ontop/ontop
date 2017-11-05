@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static junit.framework.TestCase.assertTrue;
 
 public class FlattenUnionOptimizerTest {
