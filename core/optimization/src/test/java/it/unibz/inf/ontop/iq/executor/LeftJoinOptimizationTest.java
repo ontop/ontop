@@ -63,7 +63,7 @@ public class LeftJoinOptimizationTest {
     private static final DBMetadata DB_METADATA;
 
     static {
-        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
+        BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         /**

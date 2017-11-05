@@ -21,7 +21,9 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.*;
@@ -40,8 +42,10 @@ public class RDBMetadata extends BasicDBMetadata {
 	 */
 
 	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion, QuotedIDFactory idfac,
-				JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory, Relation2Predicate relation2Predicate) {
-		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac, atomFactory, relation2Predicate);
+				JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory, Relation2Predicate relation2Predicate,
+				TermFactory termFactory, DatalogFactory datalogFactory) {
+		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac, atomFactory, relation2Predicate,
+				termFactory, datalogFactory);
 		this.jdbcTypeMapper = jdbcTypeMapper;
 	}
 
@@ -53,9 +57,10 @@ public class RDBMetadata extends BasicDBMetadata {
 	private RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
 						QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
 						Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
-						int parserViewCounter, JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory, Relation2Predicate relation2Predicate) {
+						int parserViewCounter, JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory,
+						Relation2Predicate relation2Predicate, TermFactory termFactory, DatalogFactory datalogFactory) {
 		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac, tables, relations, listOfTables,
-				relation2Predicate, atomFactory);
+				relation2Predicate, atomFactory, termFactory, datalogFactory);
 		this.parserViewCounter = parserViewCounter;
 		this.jdbcTypeMapper = jdbcTypeMapper;
 	}
@@ -85,6 +90,7 @@ public class RDBMetadata extends BasicDBMetadata {
 	public RDBMetadata clone() {
 		return new RDBMetadata(getDriverName(), getDriverVersion(), getDbmsProductName(), getDbmsVersion(), getQuotedIDFactory(),
 				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()),
-				parserViewCounter, jdbcTypeMapper, getAtomFactory(), getRelation2Predicate());
+				parserViewCounter, jdbcTypeMapper, getAtomFactory(), getRelation2Predicate(), getTermFactory(),
+				getDatalogFactory());
 	}
 }

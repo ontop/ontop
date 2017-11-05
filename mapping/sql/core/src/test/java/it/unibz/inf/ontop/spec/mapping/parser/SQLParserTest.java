@@ -42,7 +42,7 @@ public class SQLParserTest {
 
 	@Before
 	public void beforeEachTest() {
-		metadata = RDBMetadataExtractionTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
+		metadata = createDummyMetadata();
 		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 		DatabaseRelationDefinition r = metadata.createDatabaseRelation(idfac.createRelationID(null, "student"));
 		r.addAttribute(idfac.createAttributeID("id"), 0, "INT", false);

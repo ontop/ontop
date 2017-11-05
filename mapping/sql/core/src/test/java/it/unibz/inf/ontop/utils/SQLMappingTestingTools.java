@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
-import it.unibz.inf.ontop.dbschema.Relation2Predicate;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
@@ -29,6 +27,7 @@ public class SQLMappingTestingTools {
     public static final Relation2Predicate RELATION_2_PREDICATE;
     public static final SpecificationFactory MAPPING_FACTORY;
     public static final MappingNormalizer MAPPING_NORMALIZER;
+    private static final DummyRDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -45,11 +44,17 @@ public class SQLMappingTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         RELATION_2_PREDICATE = injector.getInstance(Relation2Predicate.class);
 
-        EMPTY_METADATA = DBMetadataTestingTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
+        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyRDBMetadata.class);
+
+        EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();
     }
 
     public static IntermediateQueryBuilder createQueryBuilder(DBMetadata dbMetadata) {
         return IQ_FACTORY.createIQBuilder(dbMetadata, EXECUTOR_REGISTRY);
+    }
+
+    public static RDBMetadata createDummyMetadata() {
+        return DEFAULT_DUMMY_DB_METADATA.clone();
     }
 }

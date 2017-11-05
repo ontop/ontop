@@ -4,7 +4,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
+import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
@@ -33,6 +33,7 @@ public class ReformulationTestingTools {
     public static final SpecificationFactory MAPPING_FACTORY;
     public static final MappingNormalizer MAPPING_NORMALIZER;
     public static final LinearInclusionDependencyTools INCLUSION_DEPENDENCY_TOOLS;
+    private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -51,7 +52,8 @@ public class ReformulationTestingTools {
         RELATION_2_PREDICATE = injector.getInstance(Relation2Predicate.class);
         INCLUSION_DEPENDENCY_TOOLS = injector.getInstance(LinearInclusionDependencyTools.class);
 
-        EMPTY_METADATA = DBMetadataTestingTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
+        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
+        EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();
     }
 

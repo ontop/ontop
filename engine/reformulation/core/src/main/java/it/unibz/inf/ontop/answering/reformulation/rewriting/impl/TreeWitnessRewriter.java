@@ -90,7 +90,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		this.voc = voc;
 		this.sigma = sigma;
 		
-		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma);
+		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma, datalogFactory);
 		
 		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner);
 		

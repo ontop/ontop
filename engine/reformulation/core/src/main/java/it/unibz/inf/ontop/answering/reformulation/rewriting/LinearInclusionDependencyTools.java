@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.answering.reformulation.rewriting;
 
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -15,15 +16,18 @@ public class LinearInclusionDependencyTools {
 
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
+    private final DatalogFactory datalogFactory;
 
     @Inject
-    private LinearInclusionDependencyTools(AtomFactory atomFactory, TermFactory termFactory) {
+    private LinearInclusionDependencyTools(AtomFactory atomFactory, TermFactory termFactory,
+                                           DatalogFactory datalogFactory) {
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
+        this.datalogFactory = datalogFactory;
     }
 
     public LinearInclusionDependencies getABoxDependencies(TBoxReasoner reasoner, boolean full) {
-        LinearInclusionDependencies dependencies = new LinearInclusionDependencies();
+        LinearInclusionDependencies dependencies = new LinearInclusionDependencies(datalogFactory);
 
         for (Equivalences<ObjectPropertyExpression> propNode : reasoner.getObjectPropertyDAG()) {
             // super might be more efficient

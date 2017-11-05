@@ -2,23 +2,27 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 public abstract class AbstractDBMetadata implements DBMetadata {
 
     private final Relation2Predicate relation2Predicate;
+    private final TermFactory termFactory;
+    private final DatalogFactory datalogFactory;
 
-    protected AbstractDBMetadata(Relation2Predicate relation2Predicate) {
+    protected AbstractDBMetadata(Relation2Predicate relation2Predicate,
+                                 TermFactory termFactory, DatalogFactory datalogFactory) {
         this.relation2Predicate = relation2Predicate;
+        this.termFactory = termFactory;
+        this.datalogFactory = datalogFactory;
     }
 
     @Override
@@ -55,14 +59,14 @@ public abstract class AbstractDBMetadata implements DBMetadata {
                 int len1 = def.getAttributes().size();
                 List<Term> terms1 = new ArrayList<>(len1);
                 for (int i = 1; i <= len1; i++)
-                    terms1.add(TERM_FACTORY.getVariable("t" + i));
+                    terms1.add(termFactory.getVariable("t" + i));
 
                 // Roman: important correction because table2 may not be in the same case
                 // (e.g., it may be all upper-case)
                 int len2 = def2.getAttributes().size();
                 List<Term> terms2 = new ArrayList<>(len2);
                 for (int i = 1; i <= len2; i++)
-                    terms2.add(TERM_FACTORY.getVariable("p" + i));
+                    terms2.add(termFactory.getVariable("p" + i));
 
                 // do the swapping
                 for (Map.Entry<Integer,Integer> swap : positionMatch.entrySet())
@@ -71,7 +75,7 @@ public abstract class AbstractDBMetadata implements DBMetadata {
                 Function head = relation2Predicate.getAtom(def2, terms2);
                 Function body = relation2Predicate.getAtom(def, terms1);
 
-                CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
+                CQIE rule = datalogFactory.getCQIE(head, body);
                 multimapBuilder.put(convertToAtomPredicate(body.getFunctionSymbol(), knownPredicateMap), rule);
                 if (printouts)
                     System.out.println("   FK_" + ++count + " " +  head + " :- " + body);
@@ -88,5 +92,13 @@ public abstract class AbstractDBMetadata implements DBMetadata {
     @Override
     public Relation2Predicate getRelation2Predicate() {
         return relation2Predicate;
+    }
+
+    protected TermFactory getTermFactory() {
+        return termFactory;
+    }
+
+    protected DatalogFactory getDatalogFactory() {
+        return datalogFactory;
     }
 }

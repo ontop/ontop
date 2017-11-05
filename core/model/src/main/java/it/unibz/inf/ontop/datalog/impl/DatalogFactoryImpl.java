@@ -1,33 +1,31 @@
 package it.unibz.inf.ontop.datalog.impl;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
-
+@Singleton
 public class DatalogFactoryImpl implements DatalogFactory {
-
-    private static final DatalogFactory INSTANCE = new DatalogFactoryImpl();
+    
     private final AlgebraOperatorPredicate sparqlJoinPredicate;
     private final AlgebraOperatorPredicate sparqlLeftjoinPredicate;
     private final AlgebraOperatorPredicate sparqlGroupPredicate;
     private final AlgebraOperatorPredicate sparqlHavingPredicate;
+    private final TermFactory termFactory;
 
-    private DatalogFactoryImpl() {
-        TypeFactory typeFactory = TYPE_FACTORY;
+    @Inject
+    private DatalogFactoryImpl(TypeFactory typeFactory, TermFactory termFactory) {
         sparqlJoinPredicate = new AlgebraOperatorPredicateImpl("Join", typeFactory);
         sparqlLeftjoinPredicate = new AlgebraOperatorPredicateImpl("LeftJoin", typeFactory);
         sparqlGroupPredicate = new AlgebraOperatorPredicateImpl("Group", typeFactory);
         sparqlHavingPredicate = new AlgebraOperatorPredicateImpl("Having", typeFactory);
+        this.termFactory = termFactory;
     }
 
 
@@ -63,12 +61,12 @@ public class DatalogFactoryImpl implements DatalogFactory {
 
     @Override
     public Function getSPARQLJoin(Function t1, Function t2) {
-        return TERM_FACTORY.getFunction(sparqlJoinPredicate, t1, t2);
+        return termFactory.getFunction(sparqlJoinPredicate, t1, t2);
     }
 
     @Override
     public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition) {
-        return TERM_FACTORY.getFunction(sparqlJoinPredicate, t1, t2, joinCondition);
+        return termFactory.getFunction(sparqlJoinPredicate, t1, t2, joinCondition);
     }
 
 
@@ -89,12 +87,12 @@ public class DatalogFactoryImpl implements DatalogFactory {
          */
         optionalCondition.ifPresent(joinTerms::add);
 
-        return TERM_FACTORY.getFunction(sparqlLeftjoinPredicate, joinTerms);
+        return termFactory.getFunction(sparqlLeftjoinPredicate, joinTerms);
     }
 
     @Override
     public Function getSPARQLLeftJoin(Term t1, Term t2) {
-        return TERM_FACTORY.getFunction(sparqlLeftjoinPredicate, t1, t2);
+        return termFactory.getFunction(sparqlLeftjoinPredicate, t1, t2);
     }
 
     @Override
@@ -173,7 +171,7 @@ public class DatalogFactoryImpl implements DatalogFactory {
         Term newTerm;
         if (term instanceof Variable) {
             Variable variable = (Variable) term;
-            newTerm = TERM_FACTORY.getVariable(variable.getName() + "_" + suff);
+            newTerm = termFactory.getVariable(variable.getName() + "_" + suff);
         }
         else if (term instanceof Function) {
             Function functionalTerm = (Function) term;
@@ -184,7 +182,7 @@ public class DatalogFactoryImpl implements DatalogFactory {
                 newInnerTerms.add(getFreshTerm(innerTerm, suff));
             }
             Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-            Function newFunctionalTerm = TERM_FACTORY.getFunction(newFunctionSymbol, newInnerTerms);
+            Function newFunctionalTerm = termFactory.getFunction(newFunctionSymbol, newInnerTerms);
             newTerm = newFunctionalTerm;
         }
         else if (term instanceof Constant) {
@@ -194,9 +192,5 @@ public class DatalogFactoryImpl implements DatalogFactory {
             throw new RuntimeException("Unsupported term: " + term);
         }
         return newTerm;
-    }
-
-    public static DatalogFactory getInstance() {
-        return INSTANCE;
     }
 }

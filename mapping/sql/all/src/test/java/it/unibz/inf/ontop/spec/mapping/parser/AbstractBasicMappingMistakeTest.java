@@ -16,7 +16,7 @@ public abstract class AbstractBasicMappingMistakeTest {
     private final DBMetadata dbMetadata;
 
     AbstractBasicMappingMistakeTest() {
-        RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
+        RDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DatabaseRelationDefinition personTable = dbMetadata.createDatabaseRelation(

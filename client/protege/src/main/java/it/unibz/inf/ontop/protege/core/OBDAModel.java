@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
@@ -83,12 +84,14 @@ public class OBDAModel {
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final Relation2Predicate relation2Predicate;
-    private TypeFactory typeFactory;
+    private final TypeFactory typeFactory;
+    private final DatalogFactory datalogFactory;
 
     public OBDAModel(SpecificationFactory specificationFactory,
                      SQLPPMappingFactory ppMappingFactory,
                      PrefixDocumentFormat owlPrefixManager,
                      AtomFactory atomFactory, TermFactory termFactory,
+                     TypeFactory typeFactory, DatalogFactory datalogFactory,
                      Relation2Predicate relation2Predicate) {
         this.specificationFactory = specificationFactory;
         this.ppMappingFactory = ppMappingFactory;
@@ -96,6 +99,8 @@ public class OBDAModel {
         this.prefixManager = new MutablePrefixManager(owlPrefixManager);
         this.owlPrefixManager = owlPrefixManager;
         this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
+        this.datalogFactory = datalogFactory;
         this.relation2Predicate = relation2Predicate;
         this.triplesMapMap = new LinkedHashMap<>();
 
@@ -480,5 +485,9 @@ public class OBDAModel {
 
     public TypeFactory getTypeFactory() {
         return typeFactory;
+    }
+
+    public DatalogFactory getDatalogFactory() {
+        return datalogFactory;
     }
 }

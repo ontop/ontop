@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.*;
@@ -64,6 +65,7 @@ public class DirectMappingEngine {
 	private final AtomFactory atomFactory;
 	private final Relation2Predicate relation2Predicate;
 	private final TermFactory termFactory;
+	private final DatalogFactory datalogFactory;
 
 	public static class DefaultBootstrappingResults implements BootstrappingResults {
 		private final SQLPPMapping ppMapping;
@@ -107,11 +109,12 @@ public class DirectMappingEngine {
 	@Inject
 	private DirectMappingEngine(OntopSQLCredentialSettings settings, MappingVocabularyExtractor vocabularyExtractor,
 								AtomFactory atomFactory, Relation2Predicate relation2Predicate,
-								TermFactory termFactory, SpecificationFactory specificationFactory,
+								TermFactory termFactory, DatalogFactory datalogFactory, SpecificationFactory specificationFactory,
 								SQLPPMappingFactory ppMappingFactory) {
 		this.atomFactory = atomFactory;
 		this.relation2Predicate = relation2Predicate;
 		this.termFactory = termFactory;
+		this.datalogFactory = datalogFactory;
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
@@ -232,7 +235,8 @@ public class DirectMappingEngine {
 			throw new IllegalArgumentException("Model should not be null");
 		}
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
-			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, atomFactory, relation2Predicate);
+			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, datalogFactory,
+					atomFactory, relation2Predicate);
 			// this operation is EXPENSIVE
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 			return bootstrapMappings(metadata, ppMapping);

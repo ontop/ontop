@@ -49,6 +49,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final SpecificationFactory specificationFactory;
+	private final DummyRDBMetadata defaultDummyMetadata;
 
 	private RDBMetadata md;
 	private PrefixManager pm;
@@ -62,10 +63,11 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		Injector injector = defaultConfiguration.getInjector();
 		specificationFactory = injector.getInstance(SpecificationFactory.class);
 		ppMapping2DatalogConverter = injector.getInstance(SQLPPMapping2DatalogConverter.class);
+		defaultDummyMetadata = injector.getInstance(DummyRDBMetadata.class);
     }
 	
 	public void setUp() {
-		md = RDBMetadataExtractionTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
+		md = defaultDummyMetadata.clone();
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
 
 		// Database schema

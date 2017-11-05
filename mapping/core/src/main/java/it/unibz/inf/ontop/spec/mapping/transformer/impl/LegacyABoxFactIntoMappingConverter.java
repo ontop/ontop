@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
+import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -37,18 +37,21 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
+    private final DummyBasicDBMetadata defaultDummyDBMetadata;
 
     @Inject
     public LegacyABoxFactIntoMappingConverter(Datalog2QueryMappingConverter datalog2QueryMappingConverter,
                                               SpecificationFactory mappingFactory, AtomFactory atomFactory,
                                               Relation2Predicate relation2Predicate, TermFactory termFactory,
-                                              DatalogFactory datalogFactory) {
+                                              DatalogFactory datalogFactory,
+                                              DummyBasicDBMetadata defaultDummyDBMetadata) {
         this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
         this.mappingFactory = mappingFactory;
         this.atomFactory = atomFactory;
         this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
+        this.defaultDummyDBMetadata = defaultDummyDBMetadata;
     }
 
     @Override
@@ -59,7 +62,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                 ontology.getAnnotationAssertions() :
                 Collections.emptyList();
 
-        DBMetadata dummyDBMetadata = DBMetadataTestingTools.createDummyMetadata(atomFactory, relation2Predicate);
+        DBMetadata dummyDBMetadata = defaultDummyDBMetadata.clone();
 
         // Mutable !!
 //        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(Stream.empty());

@@ -74,7 +74,7 @@ public class FunctionalDependencyTest {
     private static final DBMetadata METADATA;
 
     static{
-        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
+        BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         /*

@@ -11,7 +11,7 @@ import org.junit.Test;
 
 public class QuotedIdentifierTest {
 
-	RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
+	RDBMetadata dbMetadata = createDummyMetadata();
 	QuotedIDFactory fac = dbMetadata.getQuotedIDFactory();
 		
 	@Test

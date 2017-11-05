@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -56,7 +57,7 @@ import java.util.Set;
 
 public class TMappingProcessor {
 
-	private static class TMappingIndexEntry implements Iterable<TMappingRule> {
+	private class TMappingIndexEntry implements Iterable<TMappingRule> {
 		private final List<TMappingRule> rules = new LinkedList<>();
 	
 
@@ -209,7 +210,7 @@ public class TMappingProcessor {
 					
 	                mappingIterator.remove();
 	                
-					newRule = new TMappingRule(currentRule, filterAtoms);
+					newRule = new TMappingRule(currentRule, filterAtoms, datalogFactory, termFactory);
 
 					break;
 				}				
@@ -240,11 +241,13 @@ public class TMappingProcessor {
 	private static final boolean noCQC = false;
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
+	private final DatalogFactory datalogFactory;
 
 	@Inject
-	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory) {
+	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
+		this.datalogFactory = datalogFactory;
 	}
 
 	/**
@@ -303,7 +306,7 @@ public class TMappingProcessor {
 						else {
 							newMappingHead = termFactory.getFunction(currentPredicate, terms.get(1), terms.get(0));
 						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -329,7 +332,7 @@ public class TMappingProcessor {
 					else 
 						newhead = termFactory.getFunction(p, terms.get(1), terms.get(0));
 					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, datalogFactory, termFactory);
 					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
@@ -381,7 +384,7 @@ public class TMappingProcessor {
 							List<Term> terms = childmapping.getHeadTerms();
 
 							Function newMappingHead = termFactory.getFunction(currentPredicate, terms);
-							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
+							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory);
 							currentNodeMappings.mergeMappingsWithCQC(newmapping);
 						}
 					}
@@ -403,7 +406,7 @@ public class TMappingProcessor {
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
 					Function newhead = termFactory.getFunction(p, currentNodeMapping.getHeadTerms());
 					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, datalogFactory, termFactory);
 					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
@@ -459,7 +462,7 @@ public class TMappingProcessor {
 					CQContainmentCheckUnderLIDs.twoAtomQs++;
 			}	
 			
-			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc);
+			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc, datalogFactory, termFactory);
 			Predicate ruleIndex = mapping.getHead().getFunctionSymbol();
 			List<TMappingRule> ms = originalMappingIndex.get(ruleIndex);
 			if (ms == null) {
@@ -569,7 +572,7 @@ public class TMappingProcessor {
 							else 
 								newMappingHead = termFactory.getFunction(currentPredicate, terms.get(1));
 						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -587,7 +590,7 @@ public class TMappingProcessor {
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
 					Function newhead = termFactory.getFunction(p, currentNodeMapping.getHeadTerms());
 
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, datalogFactory, termFactory);
 					equivalentClassMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
@@ -636,7 +639,7 @@ public class TMappingProcessor {
 	}
 
 	
-	private static TMappingIndexEntry getMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, Predicate current) {
+	private TMappingIndexEntry getMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, Predicate current) {
 		
 		TMappingIndexEntry currentMappings = mappingIndex.get(current);	
 		if (currentMappings == null) {

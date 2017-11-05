@@ -24,10 +24,7 @@ package it.unibz.inf.ontop.datalog.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.IntermediateQuery2DatalogTranslator;
-import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.*;
@@ -43,7 +40,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertToMutableFunction;
 
 /***
@@ -60,6 +56,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	private static final String SUBQUERY_PRED_PREFIX = "ansSQ";
 	private final IntermediateQueryFactory iqFactory;
 	private final AtomFactory atomFactory;
+	private final DatalogFactory datalogFactory;
 
 	private static class RuleHead {
 		public final ImmutableSubstitution<ImmutableTerm> substitution;
@@ -81,9 +78,11 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	private int dummyPredCounter;
 
 	@Inject
-	private IntermediateQuery2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory) {
+	private IntermediateQuery2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
+													DatalogFactory datalogFactory) {
 		this.iqFactory = iqFactory;
 		this.atomFactory = atomFactory;
+		this.datalogFactory = datalogFactory;
 		this.subQueryCounter = 0;
 		this.dummyPredCounter = 0;
 	}
@@ -109,10 +108,10 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			MutableQueryModifiers mutableModifiers = new MutableQueryModifiersImpl(immutableQueryModifiers);
 			// TODO: support GROUP BY (distinct QueryNode)
 
-            dProgram = DATALOG_FACTORY.getDatalogProgram(mutableModifiers);
+            dProgram = datalogFactory.getDatalogProgram(mutableModifiers);
 		}
         else {
-            dProgram = DATALOG_FACTORY.getDatalogProgram();
+            dProgram = datalogFactory.getDatalogProgram();
         }
 
 		translate(query,  dProgram, root);
@@ -148,7 +147,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			List<Function> atoms = new LinkedList<>();
 
 			//Constructing the rule
-			CQIE newrule = DATALOG_FACTORY.getCQIE(convertToMutableFunction(substitutedHeadAtom), atoms);
+			CQIE newrule = datalogFactory.getCQIE(convertToMutableFunction(substitutedHeadAtom), atoms);
 
 			pr.appendRule(newrule);
 
@@ -226,11 +225,11 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			if (filter.isPresent()){
 				ImmutableExpression filter2 = filter.get();
 				Expression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter2);
-				Function newLJAtom = DATALOG_FACTORY.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.of(mutFilter));
+				Function newLJAtom = datalogFactory.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.of(mutFilter));
 				body.add(newLJAtom);
 				return body;
 			}else{
-				Function newLJAtom = DATALOG_FACTORY.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.empty());
+				Function newLJAtom = datalogFactory.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.empty());
 				body.add(newLJAtom);
 				return body;
 			}
@@ -340,7 +339,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 		return atomFactory.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}
 
-	private static Function getSPARQLJoin(List<Function> atoms, Optional<Function> optionalCondition) {
+	private Function getSPARQLJoin(List<Function> atoms, Optional<Function> optionalCondition) {
 		int atomCount = atoms.size();
 		Function rightTerm;
 
@@ -357,8 +356,8 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 		}
 
 		return optionalCondition.isPresent()
-				? DATALOG_FACTORY.getSPARQLJoin(atoms.get(0), rightTerm, optionalCondition.get())
-				: DATALOG_FACTORY.getSPARQLJoin(atoms.get(0), rightTerm);
+				? datalogFactory.getSPARQLJoin(atoms.get(0), rightTerm, optionalCondition.get())
+				: datalogFactory.getSPARQLJoin(atoms.get(0), rightTerm);
 	}
 
 }

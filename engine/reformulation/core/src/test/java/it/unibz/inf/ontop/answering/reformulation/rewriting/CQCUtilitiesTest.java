@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.utils.ReformulationTestingTools.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -246,7 +245,7 @@ public class CQCUtilitiesTest {
 
 		// Checking containment 5 in 6 and viceversa
 
-		CQContainmentCheckUnderLIDs cqcu = new CQContainmentCheckUnderLIDs();
+		CQContainmentCheckUnderLIDs cqcu = new CQContainmentCheckUnderLIDs(DATALOG_FACTORY);
 		
 		assertTrue(cqcu.isContainedIn(q6, q5));
 
@@ -435,7 +434,7 @@ public class CQCUtilitiesTest {
 			
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 			
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -463,7 +462,7 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -491,7 +490,7 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 			
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -519,7 +518,7 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -548,7 +547,7 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -607,7 +606,7 @@ public class CQCUtilitiesTest {
         CQIE query2 = DATALOG_FACTORY.getCQIE(head, body);
 
 		LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
-		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY);
 				
         assertTrue(cqc.isContainedIn(query1, query2));  // ROMAN: changed from False
 

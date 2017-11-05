@@ -63,7 +63,7 @@ public class MappingTest {
     private static final Constant URI_TEMPLATE_STR_1;
 
     static {
-        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
+        BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p1"));

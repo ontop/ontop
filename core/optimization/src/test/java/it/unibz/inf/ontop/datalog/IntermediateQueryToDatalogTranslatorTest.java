@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static org.junit.Assert.assertTrue;
 
 

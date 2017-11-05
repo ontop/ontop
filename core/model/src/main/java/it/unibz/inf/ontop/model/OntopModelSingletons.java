@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.model;
 
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.impl.DatalogFactoryImpl;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.impl.TypeFactoryImpl;
 import it.unibz.inf.ontop.model.term.impl.TermFactoryImpl;
@@ -14,5 +12,4 @@ public interface OntopModelSingletons {
 
     TypeFactory TYPE_FACTORY = TypeFactoryImpl.getInstance();
     TermFactory TERM_FACTORY = TermFactoryImpl.getInstance();
-    DatalogFactory DATALOG_FACTORY = DatalogFactoryImpl.getInstance();
 }

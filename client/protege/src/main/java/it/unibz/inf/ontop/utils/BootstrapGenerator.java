@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
@@ -49,6 +50,7 @@ public class BootstrapGenerator {
     private final MappingVocabularyExtractor vocabularyExtractor;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
+    private final DatalogFactory datalogFactory;
     private final Relation2Predicate relation2Predicate;
     private int currentMappingIndex = 1;
 
@@ -62,6 +64,7 @@ public class BootstrapGenerator {
         vocabularyExtractor = configuration.getInjector().getInstance(MappingVocabularyExtractor.class);
         atomFactory = obdaModelManager.getAtomFactory();
         termFactory = obdaModelManager.getTermFactory();
+        datalogFactory = obdaModelManager.getDatalogFactory();
         relation2Predicate = obdaModelManager.getRelation2Predicate();
 
         bootstrapMappingAndOntologyProtege(baseUri);
@@ -98,7 +101,8 @@ public class BootstrapGenerator {
             throw new RuntimeException("JDBC connection are missing, have you setup Ontop Mapping properties?" +
                     " Message: " + e.getMessage());
         }
-        RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, atomFactory, relation2Predicate);
+        RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, datalogFactory,
+                atomFactory, relation2Predicate);
 
         // this operation is EXPENSIVE
         RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);

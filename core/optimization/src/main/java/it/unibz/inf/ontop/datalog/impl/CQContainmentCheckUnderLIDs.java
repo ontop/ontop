@@ -12,6 +12,7 @@ import java.util.Set;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.CQContainmentCheck;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.model.term.functionsymbol.BuiltinPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -26,8 +27,6 @@ import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-
 public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CQContainmentCheckUnderLIDs.class);
@@ -35,13 +34,16 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	private final Map<CQIE,IndexedCQ> indexedCQcache = new HashMap<>();
 	
 	private final LinearInclusionDependencies dependencies;
-	
+	private final DatalogFactory datalogFactory;
+
 	/***
 	 * Constructs a CQC utility using the given query. If Sigma is not null and
 	 * not empty, then it will also be used to verify containment w.r.t.\ Sigma.
 	 *
+	 * @param datalogFactory
 	 */
-	public CQContainmentCheckUnderLIDs() {
+	public CQContainmentCheckUnderLIDs(DatalogFactory datalogFactory) {
+		this.datalogFactory = datalogFactory;
 		dependencies = null;
 	}
 
@@ -49,8 +51,9 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 * *@param sigma
 	 * A set of ABox dependencies
 	 */
-	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies dependencies) {
+	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies dependencies, DatalogFactory datalogFactory) {
 		this.dependencies = dependencies;
+		this.datalogFactory = datalogFactory;
 	}
 	
 	
@@ -69,7 +72,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		for (Function fact : atoms) {
 			derivedAtoms.add(fact);
 			for (CQIE rule : dependencies.getRules(fact.getFunctionSymbol())) {
-				rule = DATALOG_FACTORY.getFreshCQIECopy(rule);
+				rule = datalogFactory.getFreshCQIECopy(rule);
 				Function ruleBody = rule.getBody().get(0);
 				Substitution theta = UnifierUtilities.getMGU(ruleBody, fact);
 				if (theta != null && !theta.isEmpty()) {
@@ -201,7 +204,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		
 		collectVariables(groundTerms, query.getHead());
 		
-		CQIE db = DATALOG_FACTORY.getCQIE(query.getHead(), databaseAtoms);
+		CQIE db = datalogFactory.getCQIE(query.getHead(), databaseAtoms);
 		
 		for (int i = 0; i < databaseAtoms.size(); i++) {
 			Function atomToBeRemoved = databaseAtoms.get(i);
@@ -230,7 +233,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			return false;
 		}
 
-		CQIE q0 = DATALOG_FACTORY.getCQIE(db.getHead(), atomsToLeave);
+		CQIE q0 = datalogFactory.getCQIE(db.getHead(), atomsToLeave);
 		// if db is homomorphically embeddable into q0
 		if (computeHomomorphsim(q0, db) != null) {
 			oneAtomQs++;

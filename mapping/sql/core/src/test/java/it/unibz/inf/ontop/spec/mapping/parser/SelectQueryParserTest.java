@@ -418,7 +418,7 @@ public class SelectQueryParserTest {
 
 
     private DBMetadata createMetadata() {
-        RDBMetadata metadata = RDBMetadataExtractionTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
+        RDBMetadata metadata = createDummyMetadata();
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 
         DatabaseRelationDefinition relation1 =

@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
@@ -82,9 +81,7 @@ private static RDBMetadata getMeta(){
 	Injector defaultInjector = defaultConfiguration.getInjector();
 
 
-	RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata(
-			defaultInjector.getInstance(AtomFactory.class),
-			defaultInjector.getInstance(Relation2Predicate.class));
+	RDBMetadata dbMetadata = defaultInjector.getInstance(DummyRDBMetadata.class);
 
 	defMeasTable(dbMetadata, "burner");
 	defMessTable(dbMetadata, "events");

@@ -28,7 +28,7 @@ public class TestImplicitDBConstraints {
 	
 	@Before
 	public void setupMetadata(){
-		this.md = DBMetadataTestingTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
+		this.md = createDummyMetadata();
 		this.idfac = md.getQuotedIDFactory();
 
 		DatabaseRelationDefinition td = md.createDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));

@@ -38,8 +38,7 @@ import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import junit.framework.TestCase;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 
 
 public class ThetaApplicationTest extends TestCase {

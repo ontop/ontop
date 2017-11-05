@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.base.Optional;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
@@ -30,6 +31,7 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -75,6 +77,7 @@ public class OBDAModelManager implements Disposable {
 
 	private final OWLOntologyManager mmgr;
 	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
 
 	private QueryController queryController;
 
@@ -109,6 +112,7 @@ public class OBDAModelManager implements Disposable {
 	private java.util.Optional<OWLOntologyID> lastKnownOntologyId;
 	private final AtomFactory atomFactory;
 	private final Relation2Predicate relation2Predicate;
+	private final DatalogFactory datalogFactory;
 
 	public OBDAModelManager(EditorKit editorKit) {
 
@@ -127,6 +131,8 @@ public class OBDAModelManager implements Disposable {
 		SQLPPMappingFactory ppMappingFactory = defaultInjector.getInstance(SQLPPMappingFactory.class);
 		atomFactory = defaultInjector.getInstance(AtomFactory.class);
 		termFactory = defaultInjector.getInstance(TermFactory.class);
+		typeFactory = defaultInjector.getInstance(TypeFactory.class);
+		datalogFactory = defaultInjector.getInstance(DatalogFactory.class);
 		relation2Predicate = defaultInjector.getInstance(Relation2Predicate.class);
 
 		lastKnownOntologyId = java.util.Optional.empty();
@@ -149,7 +155,8 @@ public class OBDAModelManager implements Disposable {
 		queryController = new QueryController();
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
-		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory, relation2Predicate);
+		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory,
+				typeFactory, datalogFactory, relation2Predicate);
 		obdaModel.addSourceListener(dlistener);
 		obdaModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);
@@ -175,6 +182,10 @@ public class OBDAModelManager implements Disposable {
 
 	public TermFactory getTermFactory() {
 		return termFactory;
+	}
+
+	public DatalogFactory getDatalogFactory() {
+		return datalogFactory;
 	}
 
 	/***

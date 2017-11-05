@@ -131,7 +131,7 @@ public class ParserFileTest extends TestCase {
 
 	private void execute(SQLPPMapping ppMapping, URI identifier) {
 
-		RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata(ATOM_FACTORY, RELATION_2_PREDICATE);
+		RDBMetadata dbMetadata = createDummyMetadata();
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 
         /**

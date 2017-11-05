@@ -5,10 +5,9 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.impl.DatalogConversionTools;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
-import it.unibz.inf.ontop.dbschema.Relation2Predicate;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -18,7 +17,6 @@ import it.unibz.inf.ontop.iq.optimizer.InnerJoinOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
@@ -40,6 +38,7 @@ public class OptimizationTestingTools {
     public static final PullOutVariableOptimizer PULL_OUT_VARIABLE_OPTIMIZER;
     public static final DatalogConversionTools DATALOG_CONVERSION_TOOLS;
     public static final DatalogTools DATALOG_TOOLS;
+    private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     static {
 
@@ -60,14 +59,21 @@ public class OptimizationTestingTools {
         DATALOG_TOOLS = injector.getInstance(DatalogTools.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         RELATION_2_PREDICATE = injector.getInstance(Relation2Predicate.class);
-        EMPTY_METADATA = DBMetadataTestingTools.createDummyMetadata(ATOM_FACTORY,
-                RELATION_2_PREDICATE);
+
+        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
+        EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
+        EMPTY_METADATA.freeze();
+        
         PULL_OUT_VARIABLE_OPTIMIZER = injector.getInstance(PullOutVariableOptimizer.class);
         DATALOG_CONVERSION_TOOLS = injector.getInstance(DatalogConversionTools.class);
     }
 
     public static IntermediateQueryBuilder createQueryBuilder(DBMetadata metadata) {
         return IQ_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
+    }
+
+    public static BasicDBMetadata createDummyMetadata() {
+        return DEFAULT_DUMMY_DB_METADATA.clone();
     }
 
 }

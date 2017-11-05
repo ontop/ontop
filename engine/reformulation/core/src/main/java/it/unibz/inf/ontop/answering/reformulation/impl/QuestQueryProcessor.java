@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.atom.PredicateConstants.ONTOP_QUERY;
 
 /**
@@ -135,7 +134,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 
 		log.debug("Replacing equivalences...");
-		DatalogProgram newprogramEq = DATALOG_FACTORY.getDatalogProgram(program.getQueryModifiers());
+		DatalogProgram newprogramEq = datalogFactory.getDatalogProgram(program.getQueryModifiers());
 		Predicate topLevelPredicate = null;
 		for (CQIE query : program.getRules()) {
 			// TODO: fix cloning
@@ -151,7 +150,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory);
 		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
-		DatalogProgram newprogram = DATALOG_FACTORY.getDatalogProgram(program.getQueryModifiers(), p);
+		DatalogProgram newprogram = datalogFactory.getDatalogProgram(program.getQueryModifiers(), p);
 
 		return newprogram;
 	}

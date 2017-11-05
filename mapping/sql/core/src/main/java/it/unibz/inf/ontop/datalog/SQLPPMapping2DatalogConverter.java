@@ -43,8 +43,6 @@ import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-
 
 public class SQLPPMapping2DatalogConverter {
 
@@ -52,13 +50,15 @@ public class SQLPPMapping2DatalogConverter {
     private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final DatalogFactory datalogFactory;
 
     @Inject
     private SQLPPMapping2DatalogConverter(Relation2Predicate relation2Predicate, TermFactory termFactory,
-                                          TypeFactory typeFactory) {
+                                          TypeFactory typeFactory, DatalogFactory datalogFactory) {
         this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.datalogFactory = datalogFactory;
     }
 
     /**
@@ -128,7 +128,7 @@ public class SQLPPMapping2DatalogConverter {
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     try {
                         Function head = renameVariables(atom, lookupTable, idfac);
-                        CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
+                        CQIE rule = datalogFactory.getCQIE(head, body);
 
                         if (mutableMap.containsKey(rule)) {
                             LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + mutableMap.get(rule));
