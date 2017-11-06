@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.utils;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
@@ -17,6 +18,8 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingNormalizer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
 public class ReformulationTestingTools {
 
@@ -35,6 +38,10 @@ public class ReformulationTestingTools {
     public static final LinearInclusionDependencyTools INCLUSION_DEPENDENCY_TOOLS;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
+    public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
+    public static final UnifierUtilities UNIFIER_UTILITIES;
+    public static final CQCUtilities CQC_UTILITIES;
+
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
                 .enableTestMode()
@@ -52,6 +59,10 @@ public class ReformulationTestingTools {
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         RELATION_2_PREDICATE = injector.getInstance(Relation2Predicate.class);
         INCLUSION_DEPENDENCY_TOOLS = injector.getInstance(LinearInclusionDependencyTools.class);
+
+        SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);
+        UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
+        CQC_UTILITIES = injector.getInstance(CQCUtilities.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();

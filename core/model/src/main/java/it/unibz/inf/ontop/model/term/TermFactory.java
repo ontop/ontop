@@ -172,6 +172,8 @@ public interface TermFactory {
 	public BNode getConstantBNode(String name);
 
 	public ValueConstant getBooleanConstant(boolean value);
+
+	ValueConstant getNullConstant();
 	
 	/**
 	 * Construct a {@link ValueConstant} object.

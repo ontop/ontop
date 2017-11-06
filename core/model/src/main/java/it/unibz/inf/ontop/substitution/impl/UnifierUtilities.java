@@ -30,8 +30,11 @@ package it.unibz.inf.ontop.substitution.impl;
  * variables ie. A(#1,#2)
  */
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 /**
@@ -43,7 +46,17 @@ import it.unibz.inf.ontop.substitution.Substitution;
  *
  * @author mariano
  */
+@Singleton
 public class UnifierUtilities {
+
+    private final TermFactory termFactory;
+    private final SubstitutionUtilities substitutionUtilities;
+
+    @Inject
+    public UnifierUtilities(TermFactory termFactory) {
+        this.termFactory = termFactory;
+        this.substitutionUtilities = new SubstitutionUtilities(termFactory);
+    }
 
     /**
      * Unifies two atoms in a conjunctive query returning a new conjunctive
@@ -57,7 +70,7 @@ public class UnifierUtilities {
      * query produced by the unification of j and i
      * @throws Exception
      */
-    public static CQIE unify(CQIE q, int i, int j) {
+    public CQIE unify(CQIE q, int i, int j) {
 
         Function atom1 = q.getBody().get(i);
         Function atom2 = q.getBody().get(j);
@@ -66,12 +79,12 @@ public class UnifierUtilities {
         if (mgu == null)
             return null;
 
-        CQIE unifiedQ = SubstitutionUtilities.applySubstitution(q, mgu);
+        CQIE unifiedQ = substitutionUtilities.applySubstitution(q, mgu);
         unifiedQ.getBody().remove(i);
         unifiedQ.getBody().remove(j - 1);
 
         Function newatom = (Function) atom1.clone();
-        SubstitutionUtilities.applySubstitution(newatom, mgu);
+        substitutionUtilities.applySubstitution(newatom, mgu);
         unifiedQ.getBody().add(i, newatom);
 
         return unifiedQ;
@@ -90,8 +103,8 @@ public class UnifierUtilities {
      * @param second
      * @return the substitution corresponding to this unification.
      */
-    public static Substitution getMGU(Function first, Function second) {
-        SubstitutionImpl mgu = new SubstitutionImpl();
+    public Substitution getMGU(Function first, Function second) {
+        SubstitutionImpl mgu = new SubstitutionImpl(termFactory);
         if (mgu.composeFunctions(first, second))
             return mgu;
         return null;

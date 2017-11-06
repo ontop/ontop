@@ -17,6 +17,8 @@ import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.impl.LegacyIsNotNullDatalogMappingFiller;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSaturator;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
@@ -37,6 +39,8 @@ public class LegacyMappingSaturator implements MappingSaturator {
     private final LegacyIsNotNullDatalogMappingFiller isNotNullDatalogMappingFiller;
     private final TMappingProcessor tMappingProcessor;
     private final DatalogFactory datalogFactory;
+    private final UnifierUtilities unifierUtilities;
+    private final SubstitutionUtilities substitutionUtilities;
 
     @Inject
     private LegacyMappingSaturator(TMappingExclusionConfig tMappingExclusionConfig,
@@ -44,7 +48,8 @@ public class LegacyMappingSaturator implements MappingSaturator {
                                    Datalog2QueryMappingConverter datalog2MappingConverter,
                                    AtomFactory atomFactory, TermFactory termFactory,
                                    LegacyIsNotNullDatalogMappingFiller isNotNullDatalogMappingFiller,
-                                   TMappingProcessor tMappingProcessor, DatalogFactory datalogFactory) {
+                                   TMappingProcessor tMappingProcessor, DatalogFactory datalogFactory,
+                                   UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities) {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.datalog2MappingConverter = datalog2MappingConverter;
@@ -53,13 +58,16 @@ public class LegacyMappingSaturator implements MappingSaturator {
         this.isNotNullDatalogMappingFiller = isNotNullDatalogMappingFiller;
         this.tMappingProcessor = tMappingProcessor;
         this.datalogFactory = datalogFactory;
+        this.unifierUtilities = unifierUtilities;
+        this.substitutionUtilities = substitutionUtilities;
     }
 
     @Override
     public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, TBoxReasoner saturatedTBox) {
 
         LinearInclusionDependencies foreignKeyRules = new LinearInclusionDependencies(dbMetadata.generateFKRules(), datalogFactory);
-        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules, datalogFactory);
+        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules, datalogFactory,
+                unifierUtilities, substitutionUtilities, termFactory);
 
         ImmutableList<CQIE> initialMappingRules = mapping2DatalogConverter.convert(mapping)
                 .map(r -> isNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))

@@ -1,5 +1,8 @@
 package it.unibz.inf.ontop.datalog;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -9,9 +12,19 @@ import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 
 import java.util.List;
 
+@Singleton
 public class EQNormalizer {
 
-	/***
+    private final TermFactory termFactory;
+    private final SubstitutionUtilities substitutionUtilities;
+
+    @Inject
+    private EQNormalizer(TermFactory termFactory, SubstitutionUtilities substitutionUtilities) {
+        this.termFactory = termFactory;
+        this.substitutionUtilities = substitutionUtilities;
+    }
+
+    /***
 	 * Enforces all equalities in the query, that is, for every equivalence
 	 * class (among variables) defined by a set of equalities, it chooses one
 	 * representative variable and replaces all other variables in the equivalence
@@ -26,16 +39,16 @@ public class EQNormalizer {
 	 * 
 	 * @param result
 	 */
-	public static void enforceEqualities(CQIE result) {
+	public void enforceEqualities(CQIE result) {
 
 		List<Function> body = result.getBody();
-		Substitution mgu = new SubstitutionImpl();
+		Substitution mgu = new SubstitutionImpl(termFactory);
 
 		// collecting all equalities as substitutions 
 
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = body.get(i);
-			SubstitutionUtilities.applySubstitution(atom, mgu);
+			substitutionUtilities.applySubstitution(atom, mgu);
 
             if (atom.getFunctionSymbol() == ExpressionOperation.EQ) {
                 if (!mgu.composeTerms(atom.getTerm(0), atom.getTerm(1)))
@@ -62,18 +75,17 @@ public class EQNormalizer {
             }
         }
 
-		SubstitutionUtilities.applySubstitution(result, mgu, false);
+		substitutionUtilities.applySubstitution(result, mgu, false);
 	}
 
     /**
      * We search for equalities in conjunctions. This recursive methods explore AND functions 
      * and removes EQ functions, substituting the values using the class
-     * {@link it.unibz.inf.ontop.owlrefplatform.core.basicoperations.Substitution#composeTerms(Term, Term)}
      * 
      * @param atom the atom that can contain equalities
      * @param mgu mapping between a variable and a term
      */
-    private static void nestedEQSubstitutions(Function atom, Substitution mgu) {
+    private void nestedEQSubstitutions(Function atom, Substitution mgu) {
     	
         List<Term> terms = atom.getTerms();
         for (int i = 0; i < terms.size(); i++) {
@@ -81,7 +93,7 @@ public class EQNormalizer {
 
             if (t instanceof Function) {
                 Function t2 = (Function) t;
-                SubstitutionUtilities.applySubstitution(t2, mgu);
+                substitutionUtilities.applySubstitution(t2, mgu);
 
                 //in case of equalities do the substitution and remove the term
                 if (t2.getFunctionSymbol() == ExpressionOperation.EQ) {

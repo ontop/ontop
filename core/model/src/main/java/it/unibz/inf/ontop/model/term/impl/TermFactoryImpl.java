@@ -43,6 +43,9 @@ public class TermFactoryImpl implements TermFactory {
 	private static final TermType ROOT_TERM_TYPE = TYPE_FACTORY.getAbstractAtomicTermType();
 
 	private final TypeFactory typeFactory;
+	private final ValueConstant valueTrue;
+	private final ValueConstant valueFalse;
+	private final ValueConstant valueNull;
 
 	public static TermFactory getInstance() {
 		return INSTANCE;
@@ -51,6 +54,10 @@ public class TermFactoryImpl implements TermFactory {
 	private TermFactoryImpl(TypeFactory typeFactory) {
 		// protected constructor prevents instantiation from other classes.
 		this.typeFactory = typeFactory;
+		RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
+		this.valueTrue = new ValueConstantImpl("true", xsdBoolean);
+		this.valueFalse = new ValueConstantImpl("false", xsdBoolean);
+		this.valueNull = new ValueConstantImpl("null", TYPE_FACTORY.getXsdStringDatatype());
 	}
 
 	@Deprecated
@@ -419,7 +426,12 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ValueConstant getBooleanConstant(boolean value) {
-		return value ? TermConstants.TRUE : TermConstants.FALSE;
+		return value ? valueTrue : valueFalse;
+	}
+
+	@Override
+	public ValueConstant getNullConstant() {
+		return valueNull;
 	}
 
 }

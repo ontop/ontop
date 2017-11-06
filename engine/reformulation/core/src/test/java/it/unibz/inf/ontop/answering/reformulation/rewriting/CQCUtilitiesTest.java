@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
@@ -245,7 +244,8 @@ public class CQCUtilitiesTest {
 
 		// Checking containment 5 in 6 and viceversa
 
-		CQContainmentCheckUnderLIDs cqcu = new CQContainmentCheckUnderLIDs(DATALOG_FACTORY);
+		CQContainmentCheckUnderLIDs cqcu = new CQContainmentCheckUnderLIDs(DATALOG_FACTORY, UNIFIER_UTILITIES, 
+				SUBSTITUTION_UTILITIES, TERM_FACTORY);
 		
 		assertTrue(cqcu.isContainedIn(q6, q5));
 
@@ -321,13 +321,13 @@ public class CQCUtilitiesTest {
 
 		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
-		assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q1, q2));
+		assertTrue(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(q1, q2));
 
-		assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q1, q3));
+		assertTrue(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(q1, q3));
 
-		assertFalse(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q2, q1));
+		assertFalse(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(q2, q1));
 
-		assertFalse(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q3, q1));
+		assertFalse(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(q3, q1));
 
 	}
 
@@ -374,7 +374,7 @@ public class CQCUtilitiesTest {
 		LinkedList<CQIE> queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q2);
-		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
+		CQC_UTILITIES.removeContainedQueries(queries, CQC_UTILITIES.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q2));
@@ -382,7 +382,7 @@ public class CQCUtilitiesTest {
 		queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q3);
-		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
+		CQC_UTILITIES.removeContainedQueries(queries, CQC_UTILITIES.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q3));
@@ -390,7 +390,7 @@ public class CQCUtilitiesTest {
 		queries = new LinkedList<CQIE>();
 		queries.add(q2);
 		queries.add(q3);
-		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
+		CQC_UTILITIES.removeContainedQueries(queries, CQC_UTILITIES.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
@@ -400,7 +400,7 @@ public class CQCUtilitiesTest {
 		queries.add(q1);
 		queries.add(q2);
 		queries.add(q3);
-		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
+		CQC_UTILITIES.removeContainedQueries(queries, CQC_UTILITIES.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
@@ -434,7 +434,8 @@ public class CQCUtilitiesTest {
 			
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 			
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES,
+					SUBSTITUTION_UTILITIES, TERM_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -462,7 +463,8 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES, 
+					SUBSTITUTION_UTILITIES, TERM_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -490,7 +492,8 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 			
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES, 
+					SUBSTITUTION_UTILITIES, TERM_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -518,7 +521,8 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES,
+					SUBSTITUTION_UTILITIES, TERM_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -547,7 +551,8 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES, 
+					SUBSTITUTION_UTILITIES, TERM_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -571,7 +576,7 @@ public class CQCUtilitiesTest {
 
 	}
 
-    //Facts should not be removed by the CQCUtilities
+    //Facts should not be removed by the CQC_UTILITIES
     @Test
     public void testFacts() throws Exception {
 
@@ -593,7 +598,8 @@ public class CQCUtilitiesTest {
 
         List<Function> body = new LinkedList<Function>();
 
-        body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+        body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), 
+				TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
 
         body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
 
@@ -606,14 +612,15 @@ public class CQCUtilitiesTest {
         CQIE query2 = DATALOG_FACTORY.getCQIE(head, body);
 
 		LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
-		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY);
+		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES, 
+				SUBSTITUTION_UTILITIES, TERM_FACTORY);
 				
         assertTrue(cqc.isContainedIn(query1, query2));  // ROMAN: changed from False
 
         assertFalse(cqc.isContainedIn(query2, query1));
 
-        assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(query1, query2)); // ROMAN: changed from False
+        assertTrue(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(query1, query2)); // ROMAN: changed from False
         
-        assertFalse(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(query2, query1));
+        assertFalse(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(query2, query1));
     }
 }

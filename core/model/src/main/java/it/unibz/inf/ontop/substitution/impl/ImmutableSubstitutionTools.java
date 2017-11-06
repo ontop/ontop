@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -26,10 +25,12 @@ import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
 public class ImmutableSubstitutionTools {
 
     private final SubstitutionFactory substitutionFactory;
+    private final TermFactory termFactory;
 
     @Inject
-    private ImmutableSubstitutionTools(SubstitutionFactory substitutionFactory) {
+    private ImmutableSubstitutionTools(SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         this.substitutionFactory = substitutionFactory;
+        this.termFactory = termFactory;
     }
 
     ImmutableSubstitution<ImmutableTerm> convertMutableSubstitution(Substitution substitution) {
@@ -174,7 +175,7 @@ public class ImmutableSubstitutionTools {
 
     public ImmutableSubstitution<Constant> computeNullSubstitution(ImmutableSet<Variable> nullVariables) {
         ImmutableMap<Variable, Constant> map = nullVariables.stream()
-                .map(v -> new AbstractMap.SimpleEntry<Variable, Constant>(v, TermConstants.NULL))
+                .map(v -> new AbstractMap.SimpleEntry<Variable, Constant>(v, termFactory.getNullConstant()))
                 .collect(ImmutableCollectors.toMap());
         return substitutionFactory.getSubstitution(map);
     }

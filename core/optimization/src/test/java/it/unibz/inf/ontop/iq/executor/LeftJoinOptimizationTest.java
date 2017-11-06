@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.iq.executor;
 
-import it.unibz.inf.ontop.OptimizationTestingTools;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.TermConstants;
 
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
@@ -260,7 +258,7 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(N, TermConstants.NULL));
+                SUBSTITUTION_FACTORY.getSubstitution(N, NULL));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
 
         expectedQueryBuilder.addChild(constructionNode1, dataNode1);

@@ -14,12 +14,9 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.CQContainmentCheck;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BuiltinPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionBuilder;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
@@ -35,15 +32,24 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	
 	private final LinearInclusionDependencies dependencies;
 	private final DatalogFactory datalogFactory;
+	private final UnifierUtilities unifierUtilities;
+	private final SubstitutionUtilities substitutionUtilities;
+	private final TermFactory termFactory;
 
 	/***
 	 * Constructs a CQC utility using the given query. If Sigma is not null and
 	 * not empty, then it will also be used to verify containment w.r.t.\ Sigma.
-	 *
 	 * @param datalogFactory
+	 * @param unifierUtilities
+	 * @param substitutionUtilities
+	 * @param termFactory
 	 */
-	public CQContainmentCheckUnderLIDs(DatalogFactory datalogFactory) {
+	public CQContainmentCheckUnderLIDs(DatalogFactory datalogFactory, UnifierUtilities unifierUtilities,
+									   SubstitutionUtilities substitutionUtilities, TermFactory termFactory) {
 		this.datalogFactory = datalogFactory;
+		this.unifierUtilities = unifierUtilities;
+		this.substitutionUtilities = substitutionUtilities;
+		this.termFactory = termFactory;
 		dependencies = null;
 	}
 
@@ -51,9 +57,14 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 * *@param sigma
 	 * A set of ABox dependencies
 	 */
-	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies dependencies, DatalogFactory datalogFactory) {
+	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies dependencies, DatalogFactory datalogFactory,
+									   UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
+									   TermFactory termFactory) {
 		this.dependencies = dependencies;
 		this.datalogFactory = datalogFactory;
+		this.unifierUtilities = unifierUtilities;
+		this.substitutionUtilities = substitutionUtilities;
+		this.termFactory = termFactory;
 	}
 	
 	
@@ -74,13 +85,13 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			for (CQIE rule : dependencies.getRules(fact.getFunctionSymbol())) {
 				rule = datalogFactory.getFreshCQIECopy(rule);
 				Function ruleBody = rule.getBody().get(0);
-				Substitution theta = UnifierUtilities.getMGU(ruleBody, fact);
+				Substitution theta = unifierUtilities.getMGU(ruleBody, fact);
 				if (theta != null && !theta.isEmpty()) {
 					Function ruleHead = rule.getHead();
 					Function newFact = (Function)ruleHead.clone();
 					// unify to get fact is needed because the dependencies are not necessarily full
 					// (in other words, they may contain existentials in the head)
-					SubstitutionUtilities.applySubstitution(newFact, theta);
+					substitutionUtilities.applySubstitution(newFact, theta);
 					derivedAtoms.add(newFact);
 				}
 			}
@@ -88,14 +99,14 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		return derivedAtoms;
 	}
 	
-	public static final class IndexedCQ {
+	public final class IndexedCQ {
 		
 		private final Function head;
 		/***
 		 * An index of all the facts obtained by freezing this query.
 		 */
 		private final Map<Predicate, List<Function>> factMap;
-		
+
 		/***
 		 * Computes a query in which all terms have been replaced by
 		 * ValueConstants that have the no type and have the same 'name' as the
@@ -124,7 +135,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		}
 		
 		private Substitution computeHomomorphism(CQIE query) {
-			SubstitutionBuilder sb = new  SubstitutionBuilder();
+			SubstitutionBuilder sb = new  SubstitutionBuilder(termFactory);
 
 			// get the substitution for the head first 
 			// it will ensure that all answer variables are mapped either to constants or

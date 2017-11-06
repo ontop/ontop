@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -17,23 +18,27 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import java.util.*;
 
 import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertToMutableFunction;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Tools for new-gen immutable unifying substitutions.
  */
+@Singleton
 public class ImmutableUnificationTools {
 
+    private final TermFactory termFactory;
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableSubstitutionTools substitutionTools;
+    private final UnifierUtilities unifierUtilities;
 
     @Inject
-    private ImmutableUnificationTools(AtomFactory atomFactory, SubstitutionFactory substitutionFactory,
-                                      ImmutableSubstitutionTools substitutionTools) {
+    private ImmutableUnificationTools(TermFactory termFactory, AtomFactory atomFactory, SubstitutionFactory substitutionFactory,
+                                      ImmutableSubstitutionTools substitutionTools, UnifierUtilities unifierUtilities) {
+        this.termFactory = termFactory;
         this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
         this.substitutionTools = substitutionTools;
+        this.unifierUtilities = unifierUtilities;
     }
 
     /**
@@ -136,7 +141,7 @@ public class ImmutableUnificationTools {
      *
      */
     public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableFunctionalTerm term1, ImmutableFunctionalTerm term2) {
-        Substitution mutableSubstitution = UnifierUtilities.getMGU(convertToMutableFunction(term1), convertToMutableFunction(term2));
+        Substitution mutableSubstitution = unifierUtilities.getMGU(convertToMutableFunction(term1), convertToMutableFunction(term2));
 
         if (mutableSubstitution == null) {
             return Optional.empty();
@@ -145,7 +150,7 @@ public class ImmutableUnificationTools {
     }
 
     public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
-        Substitution mutableSubstitution = UnifierUtilities.getMGU(
+        Substitution mutableSubstitution = unifierUtilities.getMGU(
                 convertToMutableFunction(atom1),
                 convertToMutableFunction(atom2));
 
@@ -190,8 +195,8 @@ public class ImmutableUnificationTools {
 
         Predicate predicate = atomFactory.getAtomPredicate(PREDICATE_STR, firstArgList.size());
 
-        ImmutableFunctionalTerm functionalTerm1 = TERM_FACTORY.getImmutableFunctionalTerm(predicate, firstArgList);
-        ImmutableFunctionalTerm functionalTerm2 = TERM_FACTORY.getImmutableFunctionalTerm(predicate, secondArgList);
+        ImmutableFunctionalTerm functionalTerm1 = termFactory.getImmutableFunctionalTerm(predicate, firstArgList);
+        ImmutableFunctionalTerm functionalTerm2 = termFactory.getImmutableFunctionalTerm(predicate, secondArgList);
 
         return computeMGU(functionalTerm1, functionalTerm2);
     }

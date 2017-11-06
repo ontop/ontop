@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
@@ -47,6 +48,19 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 public class DatalogQueryServices {
 	
 	private static final Logger log = LoggerFactory.getLogger(DatalogQueryServices.class);
+	private final UnifierUtilities unifierUtilities;
+	private final SubstitutionUtilities substitutionUtilities;
+	private final EQNormalizer eqNormalizer;
+	private final CQCUtilities cqcUtilities;
+
+	@Inject
+	private DatalogQueryServices(UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
+								 EQNormalizer eqNormalizer, CQCUtilities cqcUtilities) {
+		this.unifierUtilities = unifierUtilities;
+		this.substitutionUtilities = substitutionUtilities;
+		this.eqNormalizer = eqNormalizer;
+		this.cqcUtilities = cqcUtilities;
+	}
 
 	// to be taken from it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder
 	
@@ -65,7 +79,7 @@ public class DatalogQueryServices {
 		
 	}
 	
-	public static List<CQIE> plugInDefinitions(List<CQIE> rules, DatalogProgram defs) {
+	public List<CQIE> plugInDefinitions(List<CQIE> rules, DatalogProgram defs) {
 		
 		PriorityQueue<CQIE> queue = new PriorityQueue<CQIE>(rules.size(), new Comparator<CQIE> () {
 			@Override
@@ -110,7 +124,7 @@ public class DatalogQueryServices {
 				
 				for (CQIE rule : chosenDefinitions) {				
 					//CQIE newquery = ResolutionEngine.resolve(rule, query, chosenAtomIdx);					
-					Substitution mgu = UnifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix),
+					Substitution mgu = unifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix),
                             query.getBody().get(chosenAtomIdx));
 					if (mgu != null) {
 						CQIE newquery = query.clone();
@@ -120,13 +134,13 @@ public class DatalogQueryServices {
 							newbody.add(getFreshAtom(a, suffix));
 												
 						// newquery contains only cloned atoms, so it is safe to unify "in-place"
-						SubstitutionUtilities.applySubstitution(newquery, mgu, false);
+						substitutionUtilities.applySubstitution(newquery, mgu, false);
 						
 						// REDUCE
-						EQNormalizer.enforceEqualities(newquery);
+						eqNormalizer.enforceEqualities(newquery);
 						//makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
 						// newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
-						CQCUtilities.removeRundantAtoms(newquery);
+						cqcUtilities.removeRundantAtoms(newquery);
 						
 						queue.add(newquery);
 						replaced = true;

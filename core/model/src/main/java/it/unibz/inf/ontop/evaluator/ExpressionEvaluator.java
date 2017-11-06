@@ -20,12 +20,11 @@ package it.unibz.inf.ontop.evaluator;
  * #L%
  */
 
-import it.unibz.inf.ontop.datalog.DatalogFactory;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.evaluator.impl.ExpressionNormalizerImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -40,16 +39,29 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
+/**
+ * WARNING: NOT immutable!!!!!
+ */
 public class ExpressionEvaluator {
 
 	private final DatalogTools datalogTools;
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
+	private final ValueConstant valueFalse;
+	private final ValueConstant valueTrue;
+	private final ValueConstant valueNull;
+	private final UnifierUtilities unifierUtilities;
 
-	public ExpressionEvaluator(DatalogTools datalogTools, TermFactory termFactory, TypeFactory typeFactory) {
+	@Inject
+	private ExpressionEvaluator(DatalogTools datalogTools, TermFactory termFactory, TypeFactory typeFactory,
+							   UnifierUtilities unifierUtilities) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.datalogTools = datalogTools;
+		valueFalse = termFactory.getBooleanConstant(false);
+		valueTrue = termFactory.getBooleanConstant(true);
+		valueNull = termFactory.getNullConstant();
+		this.unifierUtilities = unifierUtilities;
 	}
 
 	public static class EvaluationResult {
@@ -57,21 +69,26 @@ public class ExpressionEvaluator {
 		private final Optional<Boolean> optionalBooleanValue;
 
 		private static final ExpressionNormalizer NORMALIZER = new ExpressionNormalizerImpl();
+		private final TermFactory termFactory;
 
-		private EvaluationResult(ImmutableExpression expression) {
+		private EvaluationResult(ImmutableExpression expression, TermFactory termFactory) {
 			optionalExpression = Optional.of(NORMALIZER.normalize(expression));
+			this.termFactory = termFactory;
 			optionalBooleanValue = Optional.empty();
 		}
 
-		private EvaluationResult(boolean value) {
+		private EvaluationResult(boolean value, TermFactory termFactory) {
+			this.termFactory = termFactory;
 			optionalExpression = Optional.empty();
 			optionalBooleanValue = Optional.of(value);
 		}
 
 		/**
-		 * Evaluated as NULL
+		 * Evaluated as valueNull
+		 * @param termFactory
 		 */
-		private EvaluationResult() {
+		private EvaluationResult(TermFactory termFactory) {
+			this.termFactory = termFactory;
 			optionalExpression = Optional.empty();
 			optionalBooleanValue = Optional.empty();
 		}
@@ -105,8 +122,8 @@ public class ExpressionEvaluator {
 				return optionalExpression.get();
 			else
 				return optionalBooleanValue
-						.map(v -> v ? TermConstants.TRUE : TermConstants.FALSE)
-						.orElse(TermConstants.NULL);
+						.map(termFactory::getBooleanConstant)
+						.orElseGet(termFactory::getNullConstant);
 		}
 	}
 
@@ -129,21 +146,21 @@ public class ExpressionEvaluator {
 
 			return new EvaluationResult(termFactory.getImmutableExpression(
 					termFactory.getExpression((OperationPredicate) predicate,
-							evaluatedFunctionalTerm.getTerms())));
+							evaluatedFunctionalTerm.getTerms())), termFactory);
 		}
 		else if (evaluatedTerm instanceof Constant) {
-			if (evaluatedTerm == TermConstants.FALSE) {
-				return new EvaluationResult(false);
+			if (evaluatedTerm == valueFalse) {
+				return new EvaluationResult(false, termFactory);
 			}
-			else if (evaluatedTerm == TermConstants.NULL)
-				return new EvaluationResult();
+			else if (evaluatedTerm == valueNull)
+				return new EvaluationResult(termFactory);
 			else {
-				return new EvaluationResult(true);
+				return new EvaluationResult(true, termFactory);
 			}
 		}
 		else if (evaluatedTerm instanceof Variable) {
 		    return new EvaluationResult(termFactory.getImmutableExpression(ExpressionOperation.IS_TRUE,
-                    ImmutabilityTools.convertIntoImmutableTerm(evaluatedTerm)));
+                    ImmutabilityTools.convertIntoImmutableTerm(evaluatedTerm)), termFactory);
         }
 		else {
 			throw new RuntimeException("Unexpected term returned after evaluation: " + evaluatedTerm);
@@ -173,10 +190,10 @@ public class ExpressionEvaluator {
 				if (old instanceof Function) {
 					Term newterm = eval((Function)old);
 					if (!newterm.equals(old))
-						if (newterm == TermConstants.FALSE) {
+						if (newterm == valueFalse) {
 							//
-							terms.set(i, termFactory.getTypedTerm(TermConstants.FALSE, typeFactory.getXsdBooleanDatatype()));
-						} else if (newterm == TermConstants.TRUE) {
+							terms.set(i, termFactory.getTypedTerm(valueFalse, typeFactory.getXsdBooleanDatatype()));
+						} else if (newterm == valueTrue) {
 							//remove
 							terms.remove(i);
 							i--;
@@ -199,10 +216,10 @@ public class ExpressionEvaluator {
 				String valueString = value.getValue();
 				if (typeFactory.isBoolean(p)) { // OBDAVocabulary.XSD_BOOLEAN
 					if (valueString.equals("true") || valueString.equals("1")) {
-						return TermConstants.TRUE;
+						return valueTrue;
 					} 
 					else if (valueString.equals("false") || valueString.equals("0")) {
-						return TermConstants.FALSE;
+						return valueFalse;
 					}
 				}
 				else if (typeFactory.isInteger(p)) {
@@ -246,7 +263,7 @@ public class ExpressionEvaluator {
                 return term;
             }
 			else
-				return TermConstants.FALSE;
+				return valueFalse;
 			case AND :
 				return evalAnd(term.getTerm(0), term.getTerm(1));
 			case OR:
@@ -416,7 +433,7 @@ public class ExpressionEvaluator {
 				return termFactory.getTypedTerm(function.clone(), typeFactory.getXsdStringDatatype());
 			} 
 			else if (predicate instanceof BNodePredicate) {
-				return TermConstants.NULL;
+				return valueNull;
 			}
 		}
 		return term;
@@ -571,14 +588,14 @@ public class ExpressionEvaluator {
 		 */
 		Term teval1 = eval(term.getTerm(0));
 		if (teval1 == null) {
-			return TermConstants.NULL; // ROMAN (10 Jan 2017): not FALSE
+			return valueNull; // ROMAN (10 Jan 2017): not valueFalse
 		}
 		/*
 		 * Evaluate the second term
 		 */
 		Term innerTerm2 = term.getTerm(1);
 		if (innerTerm2 == null) {
-			return TermConstants.NULL; // ROMAN (10 Jan 2017): not FALSE
+			return valueNull; // ROMAN (10 Jan 2017): not valueFalse
 		}
 
 		/*
@@ -632,11 +649,11 @@ public class ExpressionEvaluator {
         Term eval3 = term.getTerm(2);
         eval3 = evalRegexSingleExpression(eval3);
 
-        if(eval1.equals(TermConstants.FALSE)
-                || eval2.equals(TermConstants.FALSE)
-                || eval3.equals(TermConstants.FALSE))
+        if(eval1.equals(valueFalse)
+                || eval2.equals(valueFalse)
+                || eval3.equals(valueFalse))
         {
-            return TermConstants.FALSE;
+            return valueFalse;
         }
 
         return termFactory.getFunction(term.getFunctionSymbol(), eval1, eval2, term.getTerm(2));
@@ -650,7 +667,7 @@ public class ExpressionEvaluator {
             Predicate predicate1 = function1.getFunctionSymbol();
             if((predicate1 instanceof URITemplatePredicate)
                     ||(predicate1 instanceof BNodePredicate)) {
-                return TermConstants.FALSE;
+                return valueFalse;
             }
             if (!function1.isDataTypeFunction()){
                 return evalRegexSingleExpression( eval(expr));
@@ -672,7 +689,7 @@ public class ExpressionEvaluator {
 			}
 		}
 		Term result = eval(innerTerm);
-		if (result == TermConstants.NULL) {
+		if (result == valueNull) {
 			return termFactory.getBooleanConstant(isnull);
 		} 
 		else if (result instanceof Constant) {
@@ -770,11 +787,11 @@ public class ExpressionEvaluator {
 				return termFactory.getFunctionNEQ(f.getTerm(0), f.getTerm(1));
 			}
 		} else if (teval instanceof Constant) {
-			if (teval == TermConstants.FALSE)
-				return TermConstants.TRUE;
-			else if (teval == TermConstants.TRUE)
-				return TermConstants.FALSE;
-			else if (teval == TermConstants.NULL)
+			if (teval == valueFalse)
+				return valueTrue;
+			else if (teval == valueTrue)
+				return valueFalse;
+			else if (teval == valueNull)
 				return teval;
 			// ROMAN (10 Jan 2017): this needs to be revised
 			return teval;
@@ -794,15 +811,15 @@ public class ExpressionEvaluator {
 			if (!(t1.isDataTypeFunction())) {
 				teval1 = eval(term.getTerm(0));
 				if (teval1 == null) {
-					return TermConstants.FALSE;
+					return valueFalse;
 				}
 			} else {
 				teval1 = term.getTerm(0);
 			}
 		}
-		// This follows the SQL semantics NULL != NULL
-		else if (term.getTerm(0).equals(TermConstants.NULL)) {
-			return eq ? TermConstants.FALSE : TermConstants.TRUE;
+		// This follows the SQL semantics valueNull != valueNull
+		else if (term.getTerm(0).equals(valueNull)) {
+			return eq ? valueFalse : valueTrue;
 		}
 		else {
 			teval1 = eval(term.getTerm(0));
@@ -818,15 +835,15 @@ public class ExpressionEvaluator {
 			if (!(t2.isDataTypeFunction())) {
 				teval2 = eval(term.getTerm(1));
 				if (teval2 == null) {
-					return TermConstants.FALSE;
+					return valueFalse;
 				}
 			} else {
 				teval2 = term.getTerm(1);
 			}
 		}
-		// This follows the SQL semantics NULL != NULL
-		else if (term.getTerm(1).equals(TermConstants.NULL)) {
-			return eq ? TermConstants.FALSE : TermConstants.TRUE;
+		// This follows the SQL semantics valueNull != valueNull
+		else if (term.getTerm(1).equals(valueNull)) {
+			return eq ? valueFalse : valueTrue;
 		}
 		else {
 			teval2 = eval(term.getTerm(1));
@@ -1004,7 +1021,7 @@ public class ExpressionEvaluator {
 	}
 
 	private Term evalUriFunctionsWithMultipleTerms(Function uriFunction1, Function uriFunction2, boolean isEqual) {
-		Substitution theta = UnifierUtilities.getMGU(uriFunction1, uriFunction2);
+		Substitution theta = unifierUtilities.getMGU(uriFunction1, uriFunction2);
 		if (theta == null) {
 			return termFactory.getBooleanConstant(!isEqual);
 		} 
@@ -1044,13 +1061,13 @@ public class ExpressionEvaluator {
 		Term e1 = eval(t1);
 		Term e2 = eval(t2);
 	
-		if (e1 == TermConstants.FALSE || e2 == TermConstants.FALSE)
-			return TermConstants.FALSE;
+		if (e1 == valueFalse || e2 == valueFalse)
+			return valueFalse;
 		
-		if (e1 == TermConstants.TRUE)
+		if (e1 == valueTrue)
 			return e2;
 		
-		if (e2 == TermConstants.TRUE)
+		if (e2 == valueTrue)
 			return e1;
 		
 		return termFactory.getFunctionAND(e1, e2);
@@ -1060,15 +1077,20 @@ public class ExpressionEvaluator {
 		Term e1 = eval(t1);
 		Term e2 = eval(t2);
 	
-		if (e1 == TermConstants.TRUE || e2 == TermConstants.TRUE)
-			return TermConstants.TRUE;
+		if (e1 == valueTrue || e2 == valueTrue)
+			return valueTrue;
 		
-		if (e1 == TermConstants.FALSE)
+		if (e1 == valueFalse)
 			return e2;
 		
-		if (e2 == TermConstants.FALSE)
+		if (e2 == valueFalse)
 			return e1;
 		
 		return termFactory.getFunctionOR(e1, e2);
+	}
+
+	@Override
+	public ExpressionEvaluator clone() {
+		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unifierUtilities);
 	}
 }

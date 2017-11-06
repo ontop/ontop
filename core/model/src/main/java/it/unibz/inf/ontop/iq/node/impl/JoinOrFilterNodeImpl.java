@@ -22,15 +22,18 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
     protected final TermFactory termFactory;
     protected final TypeFactory typeFactory;
     protected final DatalogTools datalogTools;
+    private final ExpressionEvaluator defaultExpressionEvaluator;
 
     protected JoinOrFilterNodeImpl(Optional<ImmutableExpression> optionalFilterCondition,
                                    TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
-                                   TypeFactory typeFactory, DatalogTools datalogTools) {
+                                   TypeFactory typeFactory, DatalogTools datalogTools,
+                                   ExpressionEvaluator defaultExpressionEvaluator) {
         this.optionalFilterCondition = optionalFilterCondition;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.datalogTools = datalogTools;
+        this.defaultExpressionEvaluator = defaultExpressionEvaluator;
     }
 
     @Override
@@ -66,7 +69,7 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
     }
 
     protected ExpressionEvaluator createExpressionEvaluator() {
-        return new ExpressionEvaluator(datalogTools, termFactory, typeFactory);
+        return defaultExpressionEvaluator.clone();
     }
 
     protected boolean isFilteringNullValue(Variable variable) {

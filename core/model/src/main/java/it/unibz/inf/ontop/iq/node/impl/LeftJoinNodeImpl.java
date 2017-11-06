@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.foldBooleanExpressions;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.REPLACE_BY_NEW_NODE;
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.REPLACE_BY_UNIQUE_NON_EMPTY_CHILD;
@@ -46,28 +45,36 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
     private final SubstitutionFactory substitutionFactory;
+    private final ValueConstant valueNull;
 
     @AssistedInject
     private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
-                             TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools) {
-        super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools);
+                             TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
+                             ExpressionEvaluator defaultExpressionEvaluator) {
+        super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator);
         this.substitutionFactory = substitutionFactory;
+        this.valueNull = termFactory.getNullConstant();
     }
 
     @AssistedInject
     private LeftJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
-                             TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools) {
-        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools);
+                             TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
+                             ExpressionEvaluator defaultExpressionEvaluator) {
+        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
+                defaultExpressionEvaluator);
         this.substitutionFactory = substitutionFactory;
+        this.valueNull = termFactory.getNullConstant();
     }
 
     @AssistedInject
     private LeftJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
-                             TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools) {
-        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools);
+                             TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
+                             ExpressionEvaluator defaultExpressionEvaluator) {
+        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator);
         this.substitutionFactory = substitutionFactory;
+        this.valueNull = termFactory.getNullConstant();
     }
 
     @Override
@@ -78,7 +85,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public LeftJoinNode clone() {
         return new LeftJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(), substitutionFactory,
-                termFactory, typeFactory, datalogTools);
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator());
     }
 
     @Override
@@ -89,7 +96,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new LeftJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator(), substitutionFactory,
-                termFactory, typeFactory, datalogTools);
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator());
     }
 
     @Override
@@ -124,7 +131,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          */
         Optional<ImmutableExpression> optionalNewEqualities = foldBooleanExpressions(substitutionEntries.stream()
                 .filter(e -> leftVariables.contains(e.getKey()))
-                .map(e -> TERM_FACTORY.getImmutableExpression(
+                .map(e -> termFactory.getImmutableExpression(
                         ExpressionOperation.EQ, e.getKey(), e.getValue())));
 
         /**
@@ -149,7 +156,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          */
         if (rightVariables.stream()
                 .filter(substitution::isDefining)
-                .anyMatch(v -> substitution.get(v).equals(TermConstants.NULL))) {
+                .anyMatch(v -> substitution.get(v).equals(valueNull))) {
             return proposeToRemoveTheRightPart(query, substitution, Optional.of(rightVariables), Provenance.FROM_LEFT);
         }
 
@@ -246,7 +253,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .collect(ImmutableCollectors.toSet());
 
         Stream<Map.Entry<Variable, ImmutableTerm>> nullEntries = newlyNullVariables.stream()
-                .map(v -> new SimpleEntry<>(v, TermConstants.NULL));
+                .map(v -> new SimpleEntry<>(v, valueNull));
 
         Stream<Map.Entry<Variable, ImmutableTerm>> alreadyExistingEntries = substitution.getImmutableMap().entrySet().stream()
                 .map(e -> (Map.Entry<Variable, ImmutableTerm>)e);
@@ -271,7 +278,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .collect(ImmutableCollectors.toSet());
 
         Stream<Map.Entry<Variable, ImmutableTerm>> nullEntries = newlyNullVariables.stream()
-                .map(v -> new SimpleEntry<>(v, TermConstants.NULL));
+                .map(v -> new SimpleEntry<>(v, valueNull));
 
         Stream<Map.Entry<Variable, ImmutableTerm>> otherEntries = substitution.getImmutableMap().entrySet().stream()
                 .filter(e -> !newlyNullVariables.contains(e.getKey()))

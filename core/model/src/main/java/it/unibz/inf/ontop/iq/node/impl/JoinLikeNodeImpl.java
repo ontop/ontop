@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multiset;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -26,8 +25,10 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
     protected JoinLikeNodeImpl(Optional<ImmutableExpression> optionalJoinCondition,
                                TermNullabilityEvaluator nullabilityEvaluator,
                                TermFactory termFactory,
-                               TypeFactory typeFactory, DatalogTools datalogTools) {
-        super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools);
+                               TypeFactory typeFactory, DatalogTools datalogTools,
+                               ExpressionEvaluator defaultExpressionEvaluator) {
+        super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools,
+                defaultExpressionEvaluator);
     }
 
     /**

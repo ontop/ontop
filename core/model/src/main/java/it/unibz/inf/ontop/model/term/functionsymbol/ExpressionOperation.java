@@ -3,9 +3,11 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.ArgumentValidator;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.SimpleArgumentValidator;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
@@ -198,10 +200,13 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public Optional<TermType> inferType(ImmutableList<? extends ImmutableTerm> terms) throws IncompatibleTermException {
+	public Optional<TermType> inferType(ImmutableList<? extends ImmutableTerm> terms,
+										TermFactory termFactory, TypeFactory typeFactory) throws IncompatibleTermException {
+
+		TermTypeInferenceTools termTypeInferenceTools = new TermTypeInferenceTools(typeFactory, termFactory);
 		ImmutableList<Optional<TermType>> argumentTypes = ImmutableList.copyOf(
 				terms.stream()
-						.map(TermTypeInferenceTools::inferType)
+						.map(termTypeInferenceTools::inferType)
 						.collect(Collectors.toList()));
 
 		return inferTypeFromArgumentTypes(argumentTypes);

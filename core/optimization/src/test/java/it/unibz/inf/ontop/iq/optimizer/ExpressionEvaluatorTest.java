@@ -357,7 +357,7 @@ public class ExpressionEvaluatorTest {
     @Test
     public void testIsNotNullUri1() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, generateURI1(X));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator(DATALOG_TOOLS, TERM_FACTORY, TYPE_FACTORY)
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
@@ -367,7 +367,7 @@ public class ExpressionEvaluatorTest {
     @Test
     public void testIsNotNullUri2() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, generateURI2(X, Y));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator(DATALOG_TOOLS, TERM_FACTORY, TYPE_FACTORY)
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
@@ -381,7 +381,7 @@ public class ExpressionEvaluatorTest {
     public void testIsNotNullUri3() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL,
                 generateURI2(TERM_FACTORY.getConstantLiteral("toto"), X));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator(DATALOG_TOOLS, TERM_FACTORY, TYPE_FACTORY)
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
@@ -393,7 +393,7 @@ public class ExpressionEvaluatorTest {
     public void testIsNotNullUri4() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL,
                 generateURI1(TERM_FACTORY.getConstantLiteral("toto")));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator(DATALOG_TOOLS, TERM_FACTORY, TYPE_FACTORY).evaluateExpression(initialExpression);
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone().evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertFalse(optionalExpression.isPresent());
         assertTrue(result.isEffectiveTrue());
@@ -404,7 +404,7 @@ public class ExpressionEvaluatorTest {
     public void testIsNotNullUriTrickyCase() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL,
                 generateURI1(TERM_FACTORY.getImmutableExpression(IS_NULL, X)));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator(DATALOG_TOOLS, TERM_FACTORY, TYPE_FACTORY).evaluateExpression(initialExpression);
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone().evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
 
         /*
@@ -425,7 +425,7 @@ public class ExpressionEvaluatorTest {
     @Test
     public void testIsNullUri1() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL, generateURI1(X));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator(DATALOG_TOOLS, TERM_FACTORY, TYPE_FACTORY)
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
@@ -435,7 +435,7 @@ public class ExpressionEvaluatorTest {
     @Test
     public void testIsNullUri2() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL, generateURI2(X, Y));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator(DATALOG_TOOLS, TERM_FACTORY, TYPE_FACTORY).evaluateExpression(initialExpression);
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone().evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(optionalExpression.get(),
@@ -448,7 +448,7 @@ public class ExpressionEvaluatorTest {
     public void testIsNullUri3() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL,
                 generateURI2(TERM_FACTORY.getConstantLiteral("toto"), X));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator(DATALOG_TOOLS, TERM_FACTORY, TYPE_FACTORY)
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
@@ -460,7 +460,7 @@ public class ExpressionEvaluatorTest {
     public void testIsNullUri4() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL,
                 generateURI1(TERM_FACTORY.getConstantLiteral("toto")));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator(DATALOG_TOOLS, TERM_FACTORY, TYPE_FACTORY)
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertFalse(optionalExpression.isPresent());

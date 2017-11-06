@@ -25,10 +25,18 @@ public class SPARQLQueryFlattener {
     private final List<Predicate> irreducible = new LinkedList<>();
 	private final DatalogProgram program;
 	private final DatalogFactory datalogFactory;
+	private final EQNormalizer eqNormalizer;
+	private final UnifierUtilities unifierUtilities;
+	private final SubstitutionUtilities substitutionUtilities;
 
-	public SPARQLQueryFlattener(DatalogProgram program, DatalogFactory datalogFactory) {
+	public SPARQLQueryFlattener(DatalogProgram program, DatalogFactory datalogFactory,
+								EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
+								SubstitutionUtilities substitutionUtilities) {
 		this.program = program;
 		this.datalogFactory = datalogFactory;
+		this.eqNormalizer = eqNormalizer;
+		this.unifierUtilities = unifierUtilities;
+		this.substitutionUtilities = substitutionUtilities;
 	}
 
 	/***
@@ -108,7 +116,7 @@ public class SPARQLQueryFlattener {
 		// We need to enforce equality again, because at this point it is 
 		//  possible that there is still some EQ(...) 
 		for (CQIE query : workingSet) {
-			EQNormalizer.enforceEqualities(query);
+			eqNormalizer.enforceEqualities(query);
 		}
 
 		return workingSet;
@@ -262,7 +270,7 @@ public class SPARQLQueryFlattener {
         for (CQIE candidateRule : definitions) {
             CQIE freshRule = datalogFactory.getFreshCQIECopy(candidateRule);
             // IMPORTANT: getMGU changes arguments
-            Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), atom);
+            Substitution mgu = unifierUtilities.getMGU(freshRule.getHead(), atom);
             if (mgu == null) {
                 continue; // Failed attempt
             }
@@ -292,7 +300,7 @@ public class SPARQLQueryFlattener {
             atomsList.remove(pos);
             atomsList.addAll(pos, freshRuleBody);
 
-            SubstitutionUtilities.applySubstitution(partialEvaluation, mgu, false);
+            substitutionUtilities.applySubstitution(partialEvaluation, mgu, false);
             result.add(partialEvaluation);
         }// end for candidate matches
 

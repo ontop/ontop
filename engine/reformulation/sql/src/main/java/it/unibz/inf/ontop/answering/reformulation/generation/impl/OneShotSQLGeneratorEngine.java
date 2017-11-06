@@ -128,6 +128,7 @@ public class OneShotSQLGeneratorEngine {
 	private final DatalogNormalizer datalogNormalizer;
 	private final DatalogFactory datalogFactory;
 	private final TypeFactory typeFactory;
+	private final TermFactory termFactory;
 
 	OneShotSQLGeneratorEngine(DBMetadata metadata,
 							  IRIDictionary iriDictionary,
@@ -137,13 +138,14 @@ public class OneShotSQLGeneratorEngine {
 							  PullOutVariableOptimizer pullOutVariableOptimizer,
 							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 							  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
-							  TypeFactory typeFactory) {
+							  TypeFactory typeFactory, TermFactory termFactory) {
 		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
 		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
 		this.datalogNormalizer = datalogNormalizer;
 		this.datalogFactory = datalogFactory;
 		this.typeFactory = typeFactory;
+		this.termFactory = termFactory;
 
 		String driverURI = settings.getJdbcDriver()
 				.orElseGet(() -> {
@@ -196,7 +198,7 @@ public class OneShotSQLGeneratorEngine {
 									  IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
 									  PullOutVariableOptimizer pullOutVariableOptimizer,
 									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
-									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory, TypeFactory typeFactory) {
+									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory, TypeFactory typeFactory, TermFactory termFactory) {
 		this.metadata = metadata;
 		this.sqladapter = sqlAdapter;
 		this.operations = operations;
@@ -213,6 +215,7 @@ public class OneShotSQLGeneratorEngine {
 		this.datalogNormalizer = datalogNormalizer;
 		this.datalogFactory = datalogFactory;
 		this.typeFactory = typeFactory;
+		this.termFactory = termFactory;
 	}
 
 	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -270,7 +273,7 @@ public class OneShotSQLGeneratorEngine {
 	public OneShotSQLGeneratorEngine clone() {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter, generatingREPLACE,
 				replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
-				pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory, typeFactory);
+				pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory, typeFactory, termFactory);
 	}
 
 	/**
@@ -1242,11 +1245,11 @@ public class OneShotSQLGeneratorEngine {
 			throw new RuntimeException("Cannot return the SQL type for: "
 					+ term.toString());
 		}
-		/**
+		/*
 		 * Boolean constant
 		 */
-		else if (term.equals(TermConstants.FALSE)
-				 || term.equals(TermConstants.TRUE)) {
+		else if (term.equals(termFactory.getBooleanConstant(false))
+				 || term.equals(termFactory.getBooleanConstant(true))) {
 			return Types.BOOLEAN;
 		}
 
@@ -1365,7 +1368,7 @@ public class OneShotSQLGeneratorEngine {
 			 * TODO: we should not have to treat NULL as a special case! It is because this constant is currently
 			 * a STRING!
 			 */
-		} else if (ht == TermConstants.NULL) {
+		} else if (ht.equals(termFactory.getNullConstant())) {
 			mainColumn = "NULL";
 		} else if (ht instanceof ValueConstant) {
 			mainColumn = getSQLLexicalForm((ValueConstant) ht);

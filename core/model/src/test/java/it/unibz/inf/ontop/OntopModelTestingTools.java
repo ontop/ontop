@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
 /**
  *
@@ -24,6 +25,7 @@ public class OntopModelTestingTools {
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
+    public static final UnifierUtilities UNIFIER_UTILITIES;
 
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
@@ -40,6 +42,7 @@ public class OntopModelTestingTools {
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
+        UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
 
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
     }

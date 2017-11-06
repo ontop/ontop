@@ -34,7 +34,8 @@ public class DatalogTools {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.datalogFactory = datalogFactory;
-        TRUE_EQ = termFactory.getFunctionEQ(TermConstants.TRUE, TermConstants.TRUE);
+        ValueConstant valueTrue = termFactory.getBooleanConstant(true);
+        TRUE_EQ = termFactory.getFunctionEQ(valueTrue, valueTrue);
         IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = this::isDataOrLeftJoinOrJoinAtom;
         IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT = atom -> !isDataOrLeftJoinOrJoinAtom(atom);
         IS_BOOLEAN_ATOM_FCT = atom -> atom.isOperation() || typeFactory.isBoolean(atom.getFunctionSymbol());

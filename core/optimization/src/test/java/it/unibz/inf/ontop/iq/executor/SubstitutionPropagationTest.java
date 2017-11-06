@@ -833,7 +833,7 @@ public class SubstitutionPropagationTest {
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(A),
-                        Y, TermConstants.NULL));
+                        Y, NULL));
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
         expectedQueryBuilder.addChild(expectedRootNode, DATA_NODE_1);
 
@@ -904,7 +904,7 @@ public class SubstitutionPropagationTest {
 
         ConstructionNode thirdConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(A,B),
-                        Y, TermConstants.NULL));
+                        Y, NULL));
         initialQueryBuilder.addChild(uselessConstructionNode, thirdConstructionNode);
         initialQueryBuilder.addChild(thirdConstructionNode, DATA_NODE_1);
 

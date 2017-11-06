@@ -49,25 +49,29 @@ public class MappingDataTypeCompletion {
     private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final TermTypeInferenceTools termTypeInferenceTools;
 
     /**
      * Constructs a new mapping data type resolution.
      * If no datatype is defined, then we use database metadata for obtaining the table column definition as the
      * default data-type.
      * //TODO: rewrite in a Datalog-free fashion
-     *  @param metadata The database metadata.
+     * @param metadata The database metadata.
      * @param relation2Predicate
      * @param termFactory
      * @param typeFactory
+     * @param termTypeInferenceTools
      */
     public MappingDataTypeCompletion(DBMetadata metadata,
                                      boolean defaultDatatypeInferred, Relation2Predicate relation2Predicate,
-                                     TermFactory termFactory, TypeFactory typeFactory) {
+                                     TermFactory termFactory, TypeFactory typeFactory,
+                                     TermTypeInferenceTools termTypeInferenceTools) {
         this.metadata = metadata;
         this.defaultDatatypeInferred = defaultDatatypeInferred;
         this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.termTypeInferenceTools = termTypeInferenceTools;
     }
 
     public void insertDataTyping(CQIE rule) throws UnknownDatatypeException {
@@ -135,7 +139,7 @@ public class MappingDataTypeCompletion {
             ImmutableFunctionalTerm castTerm = (ImmutableFunctionalTerm) immutableTerm;
             if (castTerm.isOperation()) {
 
-                Optional<TermType> inferredType = TermTypeInferenceTools.inferType(castTerm);
+                Optional<TermType> inferredType = termTypeInferenceTools.inferType(castTerm);
                 if(inferredType.isPresent()){
                     // delete explicit datatypes of the operands
                     deleteExplicitTypes(term, atom, position);

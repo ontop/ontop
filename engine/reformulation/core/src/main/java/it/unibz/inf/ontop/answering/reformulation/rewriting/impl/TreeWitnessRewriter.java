@@ -53,6 +53,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,12 +76,22 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
 	private final DatalogFactory datalogFactory;
+	private final DatalogQueryServices datalogQueryServices;
+	private final UnifierUtilities unifierUtilities;
+	private final SubstitutionUtilities substitutionUtilities;
+	private final CQCUtilities cqcUtilities;
 
 	@Inject
-	private TreeWitnessRewriter(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory) {
+	private TreeWitnessRewriter(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
+								DatalogQueryServices datalogQueryServices, UnifierUtilities unifierUtilities,
+								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
+		this.datalogQueryServices = datalogQueryServices;
+		this.unifierUtilities = unifierUtilities;
+		this.substitutionUtilities = substitutionUtilities;
+		this.cqcUtilities = cqcUtilities;
 	}
 
 	@Override
@@ -90,7 +102,8 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		this.voc = voc;
 		this.sigma = sigma;
 		
-		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma, datalogFactory);
+		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma, datalogFactory, unifierUtilities,
+				substitutionUtilities, termFactory);
 		
 		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner);
 		
@@ -335,24 +348,24 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		log.debug("REWRITTEN PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
 		if (!edgeDP.getRules().isEmpty()) {
 			log.debug("EDGE DEFS\n{}", edgeDP);			
-			outputRules = DatalogQueryServices.plugInDefinitions(outputRules, edgeDP);
+			outputRules = datalogQueryServices.plugInDefinitions(outputRules, edgeDP);
 			if (ccDP != null)
 				ccDP = datalogFactory.getDatalogProgram(dp.getQueryModifiers(),
-						DatalogQueryServices.plugInDefinitions(ccDP.getRules(), edgeDP));
+						datalogQueryServices.plugInDefinitions(ccDP.getRules(), edgeDP));
 			log.debug("INLINE EDGE PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
 		}
 		if (ccDP != null) {
-			outputRules = DatalogQueryServices.plugInDefinitions(outputRules, ccDP);
+			outputRules = datalogQueryServices.plugInDefinitions(outputRules, ccDP);
 			log.debug("INLINE CONNECTED COMPONENTS PROGRAM\n{}", outputRules);
 		}
 	
 		// extra CQC 
 		if (outputRules.size() > 1) 
-			CQCUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
+			cqcUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
 		
 		DatalogProgram output = datalogFactory.getDatalogProgram(dp.getQueryModifiers(), outputRules);
 		for (CQIE cq : output.getRules())
-			CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+			cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;

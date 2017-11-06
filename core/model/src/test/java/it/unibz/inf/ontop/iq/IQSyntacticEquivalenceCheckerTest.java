@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.impl.MutableQueryModifiersImpl;
-import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -509,7 +508,7 @@ public class IQSyntacticEquivalenceCheckerTest {
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, TermConstants.NULL)));
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, TERM_FACTORY.getNullConstant())));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(dbMetadata, EXECUTOR_REGISTRY);
         queryBuilder.init(projectionAtom, constructionNode);

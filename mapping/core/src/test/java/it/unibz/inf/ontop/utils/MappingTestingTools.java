@@ -14,6 +14,8 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingNormalizer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
 public class MappingTestingTools {
 
@@ -30,6 +32,9 @@ public class MappingTestingTools {
     public static final DatalogFactory DATALOG_FACTORY;
     public static final MappingNormalizer MAPPING_NORMALIZER;
     private static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+
+    public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
+    public static final UnifierUtilities UNIFIER_UTILITIES;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -48,6 +53,9 @@ public class MappingTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         RELATION_2_PREDICATE = injector.getInstance(Relation2Predicate.class);
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
+
+        SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);
+        UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
 
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();

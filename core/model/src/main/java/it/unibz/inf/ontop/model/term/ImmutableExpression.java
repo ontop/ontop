@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.Optional;
 
@@ -33,12 +34,13 @@ public interface ImmutableExpression extends Expression, ImmutableFunctionalTerm
     boolean isVar2VarEquality();
 
     /**
-     * TODO: generalize
+     * TODO: inject termFactory and typeFactory
+     *
      */
-    default Optional<TermType> getOptionalTermType() throws IncompatibleTermException {
+    default Optional<TermType> getOptionalTermType(TermFactory termFactory, TypeFactory typeFactory) throws IncompatibleTermException {
         try {
             OperationPredicate predicate = getFunctionSymbol();
-            return predicate.inferType(getArguments());
+            return predicate.inferType(getArguments(), termFactory, typeFactory);
         } catch (IncompatibleTermException e) {
             throw new IncompatibleTermException(this, e);
         }

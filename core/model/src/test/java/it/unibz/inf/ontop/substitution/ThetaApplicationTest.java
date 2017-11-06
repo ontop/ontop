@@ -107,9 +107,11 @@ public class ThetaApplicationTest extends TestCase {
 		entries.put(s1.getVariable(), s1.getTerm());
 		entries.put(s2.getVariable(), s2.getTerm());
 		entries.put(s3.getVariable(), s3.getTerm());
-        Substitution mgu = new SubstitutionImpl(entries);
+        Substitution mgu = new SubstitutionImpl(entries, TERM_FACTORY);
 
-		CQIE newquery = SubstitutionUtilities.applySubstitution(query, mgu);
+
+		SubstitutionUtilities substitutionUtilities = new SubstitutionUtilities(TERM_FACTORY);
+		CQIE newquery = substitutionUtilities.applySubstitution(query, mgu);
 
 		List<Function> newbody = newquery.getBody();
 		assertEquals(1, newbody.size());

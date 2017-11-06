@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -35,11 +34,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
-
 
     /**
      * TODO: find a better name
@@ -73,6 +69,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private final SubstitutionFactory substitutionFactory;
 
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
+    private final TermFactory termFactory;
+    private final ValueConstant nullValue;
 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
@@ -80,7 +78,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  @Assisted Optional<ImmutableQueryModifiers> optionalQueryModifiers,
                                  TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
-                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory) {
+                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.optionalModifiers = optionalQueryModifiers;
@@ -89,6 +87,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.constructionNodeTools = constructionNodeTools;
         this.substitutionTools = substitutionTools;
         this.substitutionFactory = substitutionFactory;
+        this.termFactory = termFactory;
+        this.nullValue = termFactory.getNullConstant();
 
         validate();
     }
@@ -120,15 +120,17 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools,
                                  ConstructionNodeTools constructionNodeTools,
-                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory) {
+                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         this.projectedVariables = projectedVariables;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.unificationTools = unificationTools;
         this.substitutionTools = substitutionTools;
         this.substitution = substitutionFactory.getSubstitution();
+        this.termFactory = termFactory;
         this.optionalModifiers = Optional.empty();
         this.constructionNodeTools = constructionNodeTools;
         this.substitutionFactory = substitutionFactory;
+        this.nullValue = termFactory.getNullConstant();
 
         validate();
     }
@@ -138,7 +140,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  @Assisted ImmutableSubstitution<ImmutableTerm> substitution,
                                  TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
-                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory) {
+                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.nullabilityEvaluator = nullabilityEvaluator;
@@ -146,7 +148,9 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.constructionNodeTools = constructionNodeTools;
         this.substitutionTools = substitutionTools;
         this.substitutionFactory = substitutionFactory;
+        this.termFactory = termFactory;
         this.optionalModifiers = Optional.empty();
+        this.nullValue = termFactory.getNullConstant();
 
         validate();
     }
@@ -172,7 +176,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     @Override
     public ConstructionNode clone() {
         return new ConstructionNodeImpl(projectedVariables, substitution, optionalModifiers, nullabilityEvaluator,
-                unificationTools, constructionNodeTools, substitutionTools, substitutionFactory);
+                unificationTools, constructionNodeTools, substitutionTools, substitutionFactory, termFactory);
     }
 
     @Override
@@ -277,7 +281,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
         ImmutableMap.Builder<Variable, ImmutableTerm> newSubstitutionMapBuilder = ImmutableMap.builder();
         compositeSubstitution.getImmutableMap().entrySet().stream()
-                .map(ConstructionNodeImpl::applyNullNormalization)
+                .map(this::applyNullNormalization)
                 .filter(e -> projectedVariables.contains(e.getKey()))
                 .forEach(newSubstitutionMapBuilder::put);
 
@@ -285,7 +289,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 newSubstitutionMapBuilder.build());
 
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
-                newSubstitution, getOptionalModifiers(), nullabilityEvaluator, unificationTools, constructionNodeTools, substitutionTools, substitutionFactory);
+                newSubstitution, getOptionalModifiers(), nullabilityEvaluator, unificationTools, constructionNodeTools, substitutionTools, substitutionFactory, termFactory);
 
         /*
          * Stops to propagate the substitution
@@ -296,7 +300,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     /**
      * Most functional terms do not accept NULL as arguments. If this happens, they become NULL.
      */
-    private static Map.Entry<Variable, ImmutableTerm> applyNullNormalization(
+    private Map.Entry<Variable, ImmutableTerm> applyNullNormalization(
             Map.Entry<Variable, ImmutableTerm> substitutionEntry) {
         ImmutableTerm value = substitutionEntry.getValue();
         if (value instanceof ImmutableFunctionalTerm) {
@@ -308,7 +312,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         return substitutionEntry;
     }
 
-    private static ImmutableTerm normalizeFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
+    private ImmutableTerm normalizeFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
         if (isSupportingNullArguments(functionalTerm)) {
             return functionalTerm;
         }
@@ -319,11 +323,11 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                         : arg)
                 .collect(ImmutableCollectors.toList());
         if (newArguments.stream()
-                .anyMatch(arg -> arg.equals(TermConstants.NULL))) {
-            return TermConstants.NULL;
+                .anyMatch(arg -> arg.equals(nullValue))) {
+            return nullValue;
         }
 
-        return TERM_FACTORY.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newArguments);
+        return termFactory.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newArguments);
     }
 
     /**
@@ -396,7 +400,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         else {
             ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
                     newSubstitutions.bindings, newOptionalModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
-                    substitutionTools, substitutionFactory);
+                    substitutionTools, substitutionFactory, termFactory);
 
             return DefaultSubstitutionResults.newNode(newConstructionNode, substitutionToPropagate);
         }
@@ -428,7 +432,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
         }
         else if (substitutionValue instanceof Constant) {
-            return substitutionValue.equals(TermConstants.NULL);
+            return substitutionValue.equals(nullValue);
         }
         else if (substitutionValue instanceof Variable) {
             return isChildVariableNullable(query, (Variable)substitutionValue);

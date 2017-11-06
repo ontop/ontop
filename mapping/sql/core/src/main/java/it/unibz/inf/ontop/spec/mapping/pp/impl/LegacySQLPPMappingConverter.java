@@ -37,15 +37,18 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     private final LegacyIsNotNullDatalogMappingFiller isNotNullDatalogMappingFiller;
     private final TermFactory termFactory;
     private final SQLPPMapping2DatalogConverter ppMapping2DatalogConverter;
+    private final EQNormalizer eqNormalizer;
 
     @Inject
     private LegacySQLPPMappingConverter(Datalog2QueryMappingConverter mappingConverter,
                                         LegacyIsNotNullDatalogMappingFiller isNotNullDatalogMappingFiller,
-                                        TermFactory termFactory, SQLPPMapping2DatalogConverter ppMapping2DatalogConverter) {
+                                        TermFactory termFactory, SQLPPMapping2DatalogConverter ppMapping2DatalogConverter,
+                                        EQNormalizer eqNormalizer) {
         this.mappingConverter = mappingConverter;
         this.isNotNullDatalogMappingFiller = isNotNullDatalogMappingFiller;
         this.termFactory = termFactory;
         this.ppMapping2DatalogConverter = ppMapping2DatalogConverter;
+        this.eqNormalizer = eqNormalizer;
     }
 
     @Override
@@ -110,6 +113,6 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
         // Normalizing equalities
         for (CQIE cq: unfoldingProgram)
-            EQNormalizer.enforceEqualities(cq);
+            eqNormalizer.enforceEqualities(cq);
     }
 }

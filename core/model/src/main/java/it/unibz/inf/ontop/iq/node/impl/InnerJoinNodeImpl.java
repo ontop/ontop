@@ -30,21 +30,26 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @AssistedInject
     protected InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition,
                                 TermNullabilityEvaluator nullabilityEvaluator,
-                                TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools) {
-        super(optionalFilterCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools);
+                                TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
+                                ExpressionEvaluator defaultExpressionEvaluator) {
+        super(optionalFilterCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools,
+                defaultExpressionEvaluator);
     }
 
     @AssistedInject
     private InnerJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
                               TermNullabilityEvaluator nullabilityEvaluator,
-                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools) {
-        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools);
+                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
+                              ExpressionEvaluator defaultExpressionEvaluator) {
+        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
+                defaultExpressionEvaluator);
     }
 
     @AssistedInject
     private InnerJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
-                              TypeFactory typeFactory, DatalogTools datalogTools) {
-        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools);
+                              TypeFactory typeFactory, DatalogTools datalogTools,
+                              ExpressionEvaluator defaultExpressionEvaluator) {
+        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator);
     }
 
     @Override
@@ -55,7 +60,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public InnerJoinNode clone() {
         return new InnerJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(),
-                termFactory, typeFactory, datalogTools);
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator());
     }
 
     @Override
@@ -66,7 +71,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new InnerJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator(),
-                termFactory, typeFactory, datalogTools);
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator());
     }
 
     @Override
@@ -79,7 +84,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         }
 
         ImmutableSet<Variable> nullVariables = substitution.getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue().equals(TermConstants.NULL))
+                .filter(e -> e.getValue().equals(termFactory.getNullConstant()))
                 .map(Map.Entry::getKey)
                 .collect(ImmutableCollectors.toSet());
 

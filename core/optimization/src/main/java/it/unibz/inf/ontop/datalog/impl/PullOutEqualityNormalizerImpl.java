@@ -46,13 +46,17 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
     private final DatalogTools datalogTools;
+    private final SubstitutionUtilities substitutionUtilities;
 
     @Inject
     private PullOutEqualityNormalizerImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
-                                          DatalogFactory datalogFactory, DatalogTools datalogTools) {
+                                          DatalogFactory datalogFactory, DatalogTools datalogTools,
+                                          SubstitutionUtilities substitutionUtilities) {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
-        this.trueEq = termFactory.getFunctionEQ(TermConstants.TRUE, TermConstants.TRUE);
+        this.substitutionUtilities = substitutionUtilities;
+        ValueConstant valueTrue = termFactory.getBooleanConstant(true);
+        this.trueEq = termFactory.getFunctionEQ(valueTrue, valueTrue);
         this.datalogFactory = datalogFactory;
         this.datalogTools = datalogTools;
     }
@@ -101,7 +105,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
                 .map(atom -> {
                     Function newAtom = (Function) atom.clone();
                     // SIDE-EFFECT on the newly created object
-                    SubstitutionUtilities.applySubstitution(newAtom, substitution);
+                    substitutionUtilities.applySubstitution(newAtom, substitution);
                     return newAtom;
         });
 

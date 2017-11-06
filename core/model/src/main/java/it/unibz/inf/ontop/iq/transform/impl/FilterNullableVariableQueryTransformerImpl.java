@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.transform.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.exception.NotFilterableNullVariableException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -12,8 +11,6 @@ import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -38,18 +35,13 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 public class FilterNullableVariableQueryTransformerImpl implements FilterNullableVariableQueryTransformer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
-    private final DatalogTools datalogTools;
+    private final ExpressionEvaluator defaultExpressionEvaluator;
 
     @Inject
     private FilterNullableVariableQueryTransformerImpl(IntermediateQueryFactory iqFactory,
-                                                       TermFactory termFactory, TypeFactory typeFactory,
-                                                       DatalogTools datalogTools) {
+                                                       ExpressionEvaluator defaultExpressionEvaluator) {
         this.iqFactory = iqFactory;
-        this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
-        this.datalogTools = datalogTools;
+        this.defaultExpressionEvaluator = defaultExpressionEvaluator;
     }
 
     @Override
@@ -81,7 +73,7 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
         ImmutableExpression nonOptimizedExpression = foldBooleanExpressions(filteringExpressionStream)
                 .orElseThrow(() -> new IllegalArgumentException("Is nullableProjectedVariables empty? After folding" +
                         "there should be one expression"));
-        EvaluationResult evaluationResult = new ExpressionEvaluator(datalogTools, termFactory, typeFactory)
+        EvaluationResult evaluationResult = defaultExpressionEvaluator.clone()
                 .evaluateExpression(nonOptimizedExpression);
 
         Optional<ImmutableExpression> optionalExpression = evaluationResult.getOptionalExpression();

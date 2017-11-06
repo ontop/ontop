@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
@@ -29,18 +30,21 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final TermTypeInferenceTools termTypeInferenceTools;
 
     @Inject
     private LegacyMappingDatatypeFiller(Datalog2QueryMappingConverter datalog2MappingConverter,
                                         Mapping2DatalogConverter mapping2DatalogConverter,
                                         OntopMappingSettings settings, Relation2Predicate relation2Predicate,
-                                        TermFactory termFactory, TypeFactory typeFactory) {
+                                        TermFactory termFactory, TypeFactory typeFactory,
+                                        TermTypeInferenceTools termTypeInferenceTools) {
         this.datalog2MappingConverter = datalog2MappingConverter;
         this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.settings = settings;
         this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.termTypeInferenceTools = termTypeInferenceTools;
     }
 
     /***
@@ -67,7 +71,7 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     @Override
     public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping, DBMetadata dbMetadata) throws UnknownDatatypeException {
         MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata,
-                settings.isDefaultDatatypeInferred(), relation2Predicate, termFactory, typeFactory);
+                settings.isDefaultDatatypeInferred(), relation2Predicate, termFactory, typeFactory, termTypeInferenceTools);
         ImmutableMap<CQIE, PPMappingAssertionProvenance> ruleMap = mapping2DatalogConverter.convert(mapping);
 
         //CQIEs are mutable

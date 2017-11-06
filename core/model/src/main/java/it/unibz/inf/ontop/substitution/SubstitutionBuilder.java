@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.substitution;
 
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 
@@ -9,8 +10,14 @@ import java.util.Map;
 
 public class SubstitutionBuilder implements Cloneable {
 
-	private Map<Variable, Term> map = new HashMap<>();
-	
+	private Map<Variable, Term> map;
+	private final TermFactory termFactory;
+
+	public SubstitutionBuilder(TermFactory termFactory) {
+		this.termFactory = termFactory;
+		this.map = new HashMap<>();
+	}
+
 	public boolean extend(Variable var, Term term) {
 		Term t = map.get(var);
 		// add if there is no value yet
@@ -28,7 +35,7 @@ public class SubstitutionBuilder implements Cloneable {
 	
 	
 	public Substitution getSubstituition() {
-		return new SubstitutionImpl(map);
+		return new SubstitutionImpl(map, termFactory);
 	}
 	
 	@SuppressWarnings("unchecked")

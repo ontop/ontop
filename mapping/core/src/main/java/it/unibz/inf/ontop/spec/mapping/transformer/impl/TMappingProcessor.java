@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -176,7 +177,7 @@ public class TMappingProcessor {
 					// new map always has just one set of filters  !!
 					List<Function> newconditions = TMappingRule.cloneList(newRule.getConditions().get(0));
 					for (Function f : newconditions) 
-						SubstitutionUtilities.applySubstitution(f, fromNewRule);
+						substitutionUtilities.applySubstitution(f, fromNewRule);
 
 					List<List<Function>> existingconditions = currentRule.getConditions();
 					List<List<Function>> filterAtoms = new ArrayList<>(existingconditions.size() + 1);
@@ -210,7 +211,7 @@ public class TMappingProcessor {
 					
 	                mappingIterator.remove();
 	                
-					newRule = new TMappingRule(currentRule, filterAtoms, datalogFactory, termFactory);
+					newRule = new TMappingRule(currentRule, filterAtoms, datalogFactory, termFactory, eqNormalizer);
 
 					break;
 				}				
@@ -227,7 +228,7 @@ public class TMappingProcessor {
 			List<Function> conjucntion1 = rule1.getConditions().get(0);
 			List<Function> conjunction2 = TMappingRule.cloneList(rule2.getConditions().get(0));
 			for (Function f : conjunction2)  {
-				SubstitutionUtilities.applySubstitution(f, toRule1);			
+				substitutionUtilities.applySubstitution(f, toRule1);
 				if (!conjucntion1.contains(f))
 					return false;
 			}
@@ -242,12 +243,17 @@ public class TMappingProcessor {
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
 	private final DatalogFactory datalogFactory;
+	private final SubstitutionUtilities substitutionUtilities;
+	private final EQNormalizer eqNormalizer;
 
 	@Inject
-	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory) {
+	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
+							  SubstitutionUtilities substitutionUtilities, EQNormalizer eqNormalizer) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
+		this.substitutionUtilities = substitutionUtilities;
+		this.eqNormalizer = eqNormalizer;
 	}
 
 	/**
@@ -306,7 +312,7 @@ public class TMappingProcessor {
 						else {
 							newMappingHead = termFactory.getFunction(currentPredicate, terms.get(1), terms.get(0));
 						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory);
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory, eqNormalizer);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -332,7 +338,7 @@ public class TMappingProcessor {
 					else 
 						newhead = termFactory.getFunction(p, terms.get(1), terms.get(0));
 					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, datalogFactory, termFactory);
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, datalogFactory, termFactory, eqNormalizer);
 					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
@@ -384,7 +390,7 @@ public class TMappingProcessor {
 							List<Term> terms = childmapping.getHeadTerms();
 
 							Function newMappingHead = termFactory.getFunction(currentPredicate, terms);
-							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory);
+							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory, eqNormalizer);
 							currentNodeMappings.mergeMappingsWithCQC(newmapping);
 						}
 					}
@@ -406,7 +412,7 @@ public class TMappingProcessor {
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
 					Function newhead = termFactory.getFunction(p, currentNodeMapping.getHeadTerms());
 					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, datalogFactory, termFactory);
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, datalogFactory, termFactory, eqNormalizer);
 					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
@@ -462,7 +468,7 @@ public class TMappingProcessor {
 					CQContainmentCheckUnderLIDs.twoAtomQs++;
 			}	
 			
-			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc, datalogFactory, termFactory);
+			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc, datalogFactory, termFactory, eqNormalizer);
 			Predicate ruleIndex = mapping.getHead().getFunctionSymbol();
 			List<TMappingRule> ms = originalMappingIndex.get(ruleIndex);
 			if (ms == null) {
@@ -572,7 +578,7 @@ public class TMappingProcessor {
 							else 
 								newMappingHead = termFactory.getFunction(currentPredicate, terms.get(1));
 						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory);
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory, eqNormalizer);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -590,7 +596,7 @@ public class TMappingProcessor {
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
 					Function newhead = termFactory.getFunction(p, currentNodeMapping.getHeadTerms());
 
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, datalogFactory, termFactory);
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, datalogFactory, termFactory, eqNormalizer);
 					equivalentClassMappings.mergeMappingsWithCQC(newrule);
 				}
 			}

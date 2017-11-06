@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
@@ -612,7 +611,7 @@ public class BindingLiftTest {
         //first child of unionNode2
         ConstructionNode subQuery1UnionNode2 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(I),
-                        Y, TermConstants.NULL
+                        Y, NULL
                         )));
         queryBuilder.addChild(unionNode2, subQuery1UnionNode2);
 
@@ -621,7 +620,7 @@ public class BindingLiftTest {
         //second child of unionNode2
         ConstructionNode subQuery2UnionNode2 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI2(M),
-                        Y, TermConstants.NULL
+                        Y, NULL
                         )));
         queryBuilder.addChild(unionNode2, subQuery2UnionNode2);
 
@@ -676,7 +675,7 @@ public class BindingLiftTest {
 
         ConstructionNode expectedRightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        Y, TermConstants.NULL
+                        Y, NULL
                 )));
         expectedQueryBuilder.addChild(expectedUnionNode, expectedRightConstructionNode);
 
@@ -736,7 +735,7 @@ public class BindingLiftTest {
         ConstructionNode subQuery1UnionNode2 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         X, generateCompositeURI2(I, L),
-                        Y, TermConstants.NULL
+                        Y, NULL
                         )));
         queryBuilder.addChild(unionNode2, subQuery1UnionNode2);
 
@@ -746,7 +745,7 @@ public class BindingLiftTest {
         ConstructionNode subQuery2UnionNode2 = IQ_FACTORY.createConstructionNode(unionNode2.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         X, generateCompositeURI2(M, N),
-                        Y, TermConstants.NULL
+                        Y, NULL
                         )));
         queryBuilder.addChild(unionNode2, subQuery2UnionNode2);
 
@@ -801,7 +800,7 @@ public class BindingLiftTest {
 
 
         ConstructionNode newRightConstructionNode = IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( Y, TermConstants.NULL)));
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( Y, NULL)));
         expectedQueryBuilder.addChild(expectedUnionNode, newRightConstructionNode);
 
         UnionNode expectedUnionNode2 =  IQ_FACTORY.createUnionNode(ImmutableSet.of(AF4, BF5));
@@ -937,7 +936,7 @@ public class BindingLiftTest {
         expectedQueryBuilder.addChild(expectedLeftJoinNode, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, A, F)), RIGHT);
 
         ConstructionNode expectedNodeOnRight =IQ_FACTORY.createConstructionNode(ImmutableSet.of(G, X, F),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(F, TermConstants.NULL, X, generateURI2(C))));
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(F, NULL, X, generateURI2(C))));
 
         expectedQueryBuilder.addChild(expectedUnionNode, expectedNodeOnRight);
 

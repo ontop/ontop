@@ -42,12 +42,15 @@ public class DatalogNormalizer {
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
 	private final DatalogFactory datalogFactory;
+	private final SubstitutionUtilities substitutionUtilities;
 
 	@Inject
-	private DatalogNormalizer(TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory) {
+	private DatalogNormalizer(TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory,
+							  SubstitutionUtilities substitutionUtilities) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.datalogFactory = datalogFactory;
+		this.substitutionUtilities = substitutionUtilities;
 	}
 
 	/***
@@ -171,7 +174,7 @@ public class DatalogNormalizer {
 	 * @param query
 	 */
 	public void pullOutEqualities(CQIE query) {
-		Substitution substitutions = new SubstitutionImpl();
+		Substitution substitutions = new SubstitutionImpl(termFactory);
 		int[] newVarCounter = { 1 };
 
 		Set<Function> booleanAtoms = new HashSet<>();
@@ -186,7 +189,7 @@ public class DatalogNormalizer {
 		 * query.
 		 */
 
-		SubstitutionUtilities.applySubstitution(query, substitutions, false);
+		substitutionUtilities.applySubstitution(query, substitutions, false);
 
 	}
 

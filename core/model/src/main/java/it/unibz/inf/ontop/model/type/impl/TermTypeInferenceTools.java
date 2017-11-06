@@ -1,31 +1,51 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
+@Singleton
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class TermTypeInferenceTools {
 
-    private static final Optional<TermType> OPTIONAL_OBJECT_TERM_TYPE = Optional.of(TYPE_FACTORY.getIRITermType());
-    private static final Optional<TermType> OPTIONAL_BNODE_TERM_TYPE = Optional.of(TYPE_FACTORY.getBlankNodeType());
-    private static final Optional<TermType> OPTIONAL_UNBOUND_TERM_TYPE = Optional.of(TYPE_FACTORY.getUnboundTermType());
+    private final Optional<TermType> optionalObjectTermType;
+    private final Optional<TermType> optionalBnodeTermType;
+    private final Optional<TermType> optionalUnboundTermType;
 
-    private static final DatatypePredicate LITERAL_LANG_PREDICATE = TYPE_FACTORY.getRequiredTypePredicate(RDF.LANGSTRING);
+    private final DatatypePredicate literalLangPredicate;
+    
+    private final ValueConstant valueNull;
+    private final TypeFactory typeFactory;
+    private final TermFactory termFactory;
+
+    /**
+     * TODO: make it private
+     */
+    @Inject
+    public TermTypeInferenceTools(TypeFactory typeFactory, TermFactory termFactory) {
+        valueNull = termFactory.getNullConstant();
+        optionalObjectTermType = Optional.of(typeFactory.getIRITermType());
+        optionalBnodeTermType = Optional.of(typeFactory.getBlankNodeType());
+        optionalUnboundTermType = Optional.of(typeFactory.getUnboundTermType());
+        literalLangPredicate = typeFactory.getRequiredTypePredicate(RDF.LANGSTRING);
+        this.typeFactory = typeFactory;
+        this.termFactory = termFactory;
+    }
 
     /**
      * TODO: simplify this method
      */
-    public static Optional<TermType> inferType(ImmutableTerm term) throws IncompatibleTermException {
+    public Optional<TermType> inferType(ImmutableTerm term) throws IncompatibleTermException {
         if(term instanceof ImmutableFunctionalTerm){
             ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) term;
             Predicate typePred = f.getFunctionSymbol();
@@ -34,13 +54,13 @@ public class TermTypeInferenceTools {
              * TODO: generalize this
              */
             if(f instanceof ImmutableExpression) {
-                return ((ImmutableExpression) f).getOptionalTermType();
+                return ((ImmutableExpression) f).getOptionalTermType(termFactory, typeFactory);
             }
             else if (typePred instanceof DatatypePredicate){
                 /*
                  * Special case: langString
                  */
-                if (typePred.equals(LITERAL_LANG_PREDICATE)) {
+                if (typePred.equals(literalLangPredicate)) {
                     if (f.getTerms().size() != 2) {
                         throw new IllegalStateException("A lang literal function should have two arguments");
                     }
@@ -48,14 +68,14 @@ public class TermTypeInferenceTools {
                     if (!(secondArgument instanceof Constant))
                         // TODO: return a proper exception (internal bug)
                         throw new IllegalStateException("A lang literal function must have a constant language tag");
-                    return Optional.of(TYPE_FACTORY.getLangTermType(((Constant)secondArgument).getValue()));
+                    return Optional.of(typeFactory.getLangTermType(((Constant)secondArgument).getValue()));
                 }
-                return TYPE_FACTORY.getInternalType((DatatypePredicate) typePred);
+                return typeFactory.getInternalType((DatatypePredicate) typePred);
 
             } else if (typePred instanceof URITemplatePredicate) {
-                return  OPTIONAL_OBJECT_TERM_TYPE;
+                return optionalObjectTermType;
             } else if (typePred instanceof BNodePredicate){
-                return OPTIONAL_BNODE_TERM_TYPE;
+                return optionalBnodeTermType;
             }
             else {
                 throw new IllegalArgumentException("Unexpected functional term: " + term);
@@ -68,14 +88,14 @@ public class TermTypeInferenceTools {
              * Deals with the ugly definition of the NULL constant.
              * COL_TYPE of NULL should be NULL!
              */
-            if (term == TermConstants.NULL) {
-                return OPTIONAL_UNBOUND_TERM_TYPE;
+            if (term == valueNull) {
+                return optionalUnboundTermType;
             }
             else {
                 return Optional.of(((ValueConstant) term).getType());
             }
         } else if(term instanceof URIConstant){
-            return OPTIONAL_OBJECT_TERM_TYPE;
+            return optionalObjectTermType;
         }
         else {
             throw new IllegalStateException("Unexpected term: " + term);

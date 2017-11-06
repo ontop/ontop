@@ -23,13 +23,17 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+
 import java.util.Optional;
 
 public interface OperationPredicate extends BuiltinPredicate {
 
 
-    Optional<TermType> inferType(ImmutableList<? extends ImmutableTerm> terms) throws IncompatibleTermException;
+    Optional<TermType> inferType(ImmutableList<? extends ImmutableTerm> terms,
+                                 TermFactory termFactory, TypeFactory typeFactory) throws IncompatibleTermException;
 
     Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> actualArgumentTypes);
 }

@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.executor.join;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
@@ -13,7 +12,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -24,15 +22,14 @@ import java.util.Queue;
  */
 public class JoinExtractionUtils {
 
-    private TermFactory termFactory;
-    private TypeFactory typeFactory;
-    private DatalogTools datalogTools;
+    private final TermFactory termFactory;
+    private final ExpressionEvaluator defaultExpressionEvaluator;
 
     @Inject
-    private JoinExtractionUtils(TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools) {
+    private JoinExtractionUtils(TermFactory termFactory,
+                                ExpressionEvaluator defaultExpressionEvaluator) {
         this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
-        this.datalogTools = datalogTools;
+        this.defaultExpressionEvaluator = defaultExpressionEvaluator;
     }
 
     /**
@@ -47,7 +44,7 @@ public class JoinExtractionUtils {
 
         Optional<ImmutableExpression> foldedExpression = foldBooleanExpressions(booleanExpressions);
         if (foldedExpression.isPresent()) {
-            ExpressionEvaluator evaluator = new ExpressionEvaluator(datalogTools, termFactory, typeFactory);
+            ExpressionEvaluator evaluator = defaultExpressionEvaluator.clone();
 
             ExpressionEvaluator.EvaluationResult evaluationResult = evaluator.evaluateExpression(foldedExpression.get());
             if (evaluationResult.isEffectiveFalse()) {

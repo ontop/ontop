@@ -36,6 +36,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +70,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final InputQueryFactory inputQueryFactory;
 	private final DatalogFactory datalogFactory;
 	private final DatalogNormalizer datalogNormalizer;
+	private final EQNormalizer eqNormalizer;
+	private final UnifierUtilities unifierUtilities;
+	private final SubstitutionUtilities substitutionUtilities;
+	private final CQCUtilities cqcUtilities;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -81,13 +87,19 @@ public class QuestQueryProcessor implements QueryReformulator {
 								InputQueryFactory inputQueryFactory,
 								LinearInclusionDependencyTools inclusionDependencyTools,
 								AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
-								DatalogNormalizer datalogNormalizer) {
+								DatalogNormalizer datalogNormalizer, EQNormalizer eqNormalizer,
+								UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
+								CQCUtilities cqcUtilities) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
 		this.inputQueryFactory = inputQueryFactory;
 		this.datalogFactory = datalogFactory;
 		this.datalogNormalizer = datalogNormalizer;
+		this.eqNormalizer = eqNormalizer;
+		this.unifierUtilities = unifierUtilities;
+		this.substitutionUtilities = substitutionUtilities;
+		this.cqcUtilities = cqcUtilities;
 		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
@@ -140,7 +152,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 			// TODO: fix cloning
 			CQIE rule = query.clone();
 			// TODO: get rid of EQNormalizer
-			EQNormalizer.enforceEqualities(rule);
+			eqNormalizer.enforceEqualities(rule);
 
 			CQIE newquery = vocabularyValidator.replaceEquivalences(rule);
 			if (newquery.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
@@ -148,7 +160,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 			newprogramEq.appendRule(newquery);
 		}
 
-		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory);
+		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory,
+				eqNormalizer, unifierUtilities, substitutionUtilities);
 		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
 		DatalogProgram newprogram = datalogFactory.getDatalogProgram(program.getQueryModifiers(), p);
 
@@ -185,7 +198,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 			//final long startTime0 = System.currentTimeMillis();
 			for (CQIE cq : newprogram.getRules())
-				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+				cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
 			DatalogProgram programAfterRewriting = rewriter.rewrite(newprogram);
 
 			//rewritingTime = System.currentTimeMillis() - startTime0;

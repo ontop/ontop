@@ -84,6 +84,7 @@ public class SparqlAlgebraToDatalogTranslator {
     private final DatalogFactory datalogFactory;
     private int predicateIdx = 0;
     private final org.apache.commons.rdf.api.RDF rdfFactory;
+    private final it.unibz.inf.ontop.model.term.ValueConstant valueNull;
 
     /**
      * @param uriTemplateMatcher matches URIs to templates (comes from mappings)
@@ -106,6 +107,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
         this.program = this.datalogFactory.getDatalogProgram();
         this.rdfFactory = new SimpleRDF();
+        this.valueNull = termFactory.getNullConstant();
     }
 
 	/**
@@ -199,7 +201,7 @@ public class SparqlAlgebraToDatalogTranslator {
             if (nullVariables.isEmpty())
                 return atoms;
 
-            return getAtomsExtended(nullVariables.stream().map(v -> termFactory.getFunctionEQ(v, TermConstants.NULL)));
+            return getAtomsExtended(nullVariables.stream().map(v -> termFactory.getFunctionEQ(v, valueNull)));
         }
 
         /**
@@ -602,7 +604,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (expr instanceof Var) {
             Var v = (Var) expr;
             Variable var = termFactory.getVariable(v.getName());
-            return variables.contains(var) ? var : TermConstants.NULL;
+            return variables.contains(var) ? var : valueNull;
 		} 
 		else if (expr instanceof ValueConstant) {
 			Value v = ((ValueConstant) expr).getValue();
@@ -683,7 +685,7 @@ public class SparqlAlgebraToDatalogTranslator {
                 // xsd:boolean  REGEX (string literal text, simple literal pattern, simple literal flags)
                 Regex reg = (Regex) expr;
                 Term term3 = (reg.getFlagsArg() != null) ?
-                        getExpression(reg.getFlagsArg(), variables) : TermConstants.NULL;
+                        getExpression(reg.getFlagsArg(), variables) : valueNull;
                 return termFactory.getFunction(ExpressionOperation.REGEX, term1, term2, term3);
             }
             else if (expr instanceof Compare) {

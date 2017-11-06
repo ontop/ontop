@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
@@ -21,21 +22,21 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
-
-
 /**
  * Extracts the TermTypes and the cast types from a set of Datalog rules.
  */
 public class TypeExtractor {
 
-    private static final TermType LITERAL_TYPE = TYPE_FACTORY.getAbstractRDFSLiteral();
+    private final TermType literalType;
     private final Relation2Predicate relation2Predicate;
+    private final TermTypeInferenceTools termTypeInferenceTools;
 
     @Inject
-    private TypeExtractor(Relation2Predicate relation2Predicate) {
+    private TypeExtractor(Relation2Predicate relation2Predicate, TermTypeInferenceTools termTypeInferenceTools,
+                          TypeFactory typeFactory) {
         this.relation2Predicate = relation2Predicate;
+        this.termTypeInferenceTools = termTypeInferenceTools;
+        this.literalType = typeFactory.getAbstractRDFSLiteral();
     }
 
 
@@ -71,7 +72,7 @@ public class TypeExtractor {
                 extractCastTypeMap(ruleIndex, predicatesInBottomUp, termTypeMap, metadata));
     }
 
-    private static ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> extractTermTypeMap(Collection<CQIE> rules)
+    private ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> extractTermTypeMap(Collection<CQIE> rules)
             throws IncompatibleTermException {
         return rules.stream()
                 .collect(ImmutableCollectors.toMap(
@@ -80,7 +81,7 @@ public class TypeExtractor {
                         // Value mapper
                         rule -> rule.getHead().getTerms().stream()
                                 .map(ImmutabilityTools::convertIntoImmutableTerm)
-                                .map(TermTypeInferenceTools::inferType)
+                                .map(termTypeInferenceTools::inferType)
                                 .collect(ImmutableCollectors.toList())
                 ));
     }
@@ -133,7 +134,7 @@ public class TypeExtractor {
                             defaultTypeBuilder.add(type);
                         }
                         else{
-                            defaultTypeBuilder.add(LITERAL_TYPE);
+                            defaultTypeBuilder.add(literalType);
                         }});
             return defaultTypeBuilder.build();
         }
