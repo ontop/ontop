@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.owlapi;
 
-import it.unibz.inf.ontop.injection.OntopTranslationSettings;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
@@ -18,7 +16,6 @@ import java.util.regex.Pattern;
 public class NPDUnfolderTest extends TestCase {
 
     private final String owlfile = "src/test/resources/npd-v2-ql_a.owl";
-    private final String obdafile = "src/test/resources/npd-v2-ql_a.obda";
 
 
     /**
@@ -171,7 +168,7 @@ public class NPDUnfolderTest extends TestCase {
         String unf = getNPDUnfolding(q09, new Properties());
 
         Properties p = new Properties();
-        p.put(OntopTranslationSettings.EXISTENTIAL_REASONING, true);
+        p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, true);
         String unf_rew = getNPDUnfolding(q09, p);
 
         assertEquals(countUnions(unf), countUnions(unf_rew));
@@ -197,7 +194,7 @@ public class NPDUnfolderTest extends TestCase {
         String unf = getNPDUnfolding(q10, new Properties());
 
         Properties p = new Properties();
-        p.put(OntopTranslationSettings.EXISTENTIAL_REASONING, true);
+        p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, true);
         String unf_rew = getNPDUnfolding(q10, p);
 
         assertEquals(countUnions(unf), countUnions(unf_rew));
@@ -246,7 +243,7 @@ public class NPDUnfolderTest extends TestCase {
 	 */
 	private String getRewriting(String query) throws Exception {
         Properties p = new Properties();
-        p.put(OntopTranslationSettings.EXISTENTIAL_REASONING, true);
+        p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, true);
 
 
         OntopOWLFactory fac = OntopOWLFactory.defaultFactory();

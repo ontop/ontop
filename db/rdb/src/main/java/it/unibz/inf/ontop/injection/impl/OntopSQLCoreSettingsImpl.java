@@ -11,8 +11,6 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
 
     private static final String DB_PREFIX = "DB-";
     private final String jdbcUrl;
-    private final String jdbcUser;
-    private final String jdbcPassword;
     private final Optional<String> jdbcDriver;
     private final String jdbcName;
 
@@ -22,7 +20,7 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
      * Recommended constructor.
      * <p>
      * Changing the Properties object afterwards will not have any effect
-     * on this OntopModelProperties object.
+     * on this OntopSQLCoreSettings object.
      *
      * @param userProperties
      */
@@ -30,9 +28,6 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
         super(userProperties);
 
         jdbcUrl = getRequiredProperty(OntopSQLCoreSettings.JDBC_URL);
-        jdbcUser = getRequiredProperty(OntopSQLCoreSettings.JDBC_USER);
-        jdbcPassword = getRequiredProperty(OntopSQLCoreSettings.JDBC_PASSWORD);
-
         jdbcDriver = getProperty(OntopSQLCoreSettings.JDBC_DRIVER);
         jdbcName = getProperty(OntopSQLCoreSettings.JDBC_NAME)
                 .orElseGet(() -> IDGenerator.getNextUniqueID(DB_PREFIX));
@@ -46,15 +41,6 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
     @Override
     public String getJdbcName() {
         return jdbcName;
-    }
-
-    @Override
-    public String getJdbcUser() {
-        return jdbcUser;
-    }
-
-    public String getJdbcPassword() {
-        return jdbcPassword;
     }
 
     @Override

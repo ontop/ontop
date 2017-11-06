@@ -22,46 +22,30 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
 
 
 import com.google.common.collect.ImmutableList;
-import eu.optique.r2rml.api.*;
+import eu.optique.r2rml.api.R2RMLMappingManager;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
-import eu.optique.r2rml.api.model.LogicalTable;
-import eu.optique.r2rml.api.model.ObjectMap;
-import eu.optique.r2rml.api.model.PredicateMap;
-import eu.optique.r2rml.api.model.PredicateObjectMap;
-import eu.optique.r2rml.api.model.SubjectMap;
-import eu.optique.r2rml.api.model.Template;
-import eu.optique.r2rml.api.model.TriplesMap;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import eu.optique.r2rml.api.model.*;
 import it.unibz.inf.ontop.model.IriConstants;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLQueryImpl;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLQueryImpl;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.URITemplates;
-
-
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.rdf4j.RDF4J;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 import java.util.Collection;
-
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDataRange;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.search.EntitySearcher;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
@@ -165,7 +149,7 @@ public class OBDAMappingTransformer {
 				mfact.createPredicateMap(rdf4j.createIRI(predURIString));
 				ObjectMap obm = null; PredicateObjectMap pom = null;
                 Term object = null;
-				if (!pred.isTriplePredicate()) {
+				if (!pred.isTriplePredicate() && !predURIString.equals(IriConstants.RDF_TYPE)) {
 //					predM.setConstant(predURIString);
                     //add object declaration to predObj node
                     //term 0 is always the subject, we are interested in term 1
@@ -209,7 +193,7 @@ public class OBDAMappingTransformer {
 					tm.addPredicateObjectMap(pom);
 				} 
  				else if (object instanceof Function) { //we create a template
-					//check if uritemplate
+					//check if uritemplate we create a template, in case of datatype with single varible we create a column
  					Function o = (Function) object;
  					Predicate objectPred = o.getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {
@@ -234,38 +218,32 @@ public class OBDAMappingTransformer {
 						Term objectTerm = ((Function) object).getTerm(0);
 						
 						if (objectTerm instanceof Variable) {
-							//Now we add the template!!
-							String objectTemplate =  "{"+ ((Variable) objectTerm).getName() +"}" ;
-							//add template subject
-							//statements.add(rdf4j.createTriple(objNode, R2RMLVocabulary.template, rdf4j.createLiteral(objectTemplate)));
-							//obm.setTemplate(mfact.createTemplate(objectTemplate));
-							obm = mfact.createObjectMap(mfact.createTemplate(objectTemplate));
+
+							// column valued
+							obm = mfact.createObjectMap(((Variable) objectTerm).getName());
+							//set the datatype for the typed literal
 							obm.setTermType(R2RMLVocabulary.literal);
-							
-							
-							//check if it is not a plain literal
-							if(!objectPred.getName().equals(IriConstants.RDFS_LITERAL_URI)){
-								
-								//set the datatype for the typed literal								
-								obm.setDatatype(rdf4j.createIRI(objectPred.getName()));
-							}
-							else{
-								//check if the plain literal has a lang value
-								if(objectPred.getArity()==2){
-									
-									Term langTerm = ((Function) object).getTerm(1);
+
+							//check if literal with lang value
+							if(objectPred.getArity()==2){
+
+								Term langTerm = ((Function) objectTerm).getTerm(1);
 
 
-                                    if(langTerm instanceof Constant) {
-                                        obm.setLanguageTag(((Constant) langTerm).getValue());
-                                    }
+								if(langTerm instanceof Constant) {
+									obm.setLanguageTag(((Constant) langTerm).getValue());
 								}
 							}
+							else {
+								//set the datatype for the typed literal
+								obm.setDatatype(rdf4j.createIRI(objectPred.getName()));
+							}
+
 
 						} else if (objectTerm instanceof Constant) {
 							//statements.add(rdf4j.createTriple(objNode, R2RMLVocabulary.constant, rdf4j.createLiteral(((Constant) objectTerm).getValue())));
 							//obm.setConstant(rdf4j.createLiteral(((Constant) objectTerm).getValue()).stringValue());
-							obm = mfact.createObjectMap(((Constant) objectTerm).getValue());
+							obm = mfact.createObjectMap(rdf4j.createLiteral(((Constant) objectTerm).getValue(), rdf4j.createIRI(objectPred.getName())));
 							
 						} else if(objectTerm instanceof Function){
 							

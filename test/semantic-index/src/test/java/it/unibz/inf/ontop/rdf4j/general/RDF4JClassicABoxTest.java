@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.rdf4j.general;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopTranslationSettings;
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.eclipse.rdf4j.model.*;
@@ -57,7 +57,7 @@ public class RDF4JClassicABoxTest {
 		String owlfile = "src/test/resources/onto2.owl";
 
 		Properties p = new Properties();
-		p.put(OntopTranslationSettings.EXISTENTIAL_REASONING, false);
+		p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, false);
 
 		dataset = new SimpleDataset();
 		File dataFile = new File(owlfile);

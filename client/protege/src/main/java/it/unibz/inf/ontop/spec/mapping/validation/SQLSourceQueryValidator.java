@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.spec.mapping.validation;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 
@@ -31,7 +31,7 @@ import java.sql.Statement;
 
 public class SQLSourceQueryValidator {
 
-	private final OntopSQLCoreSettings settings;
+	private final OntopSQLCredentialSettings settings;
 	private OBDASQLQuery sourceQuery = null;
 
 	private Exception reason = null;
@@ -42,7 +42,7 @@ public class SQLSourceQueryValidator {
 
 	private Connection c;
 
-	public SQLSourceQueryValidator(OntopSQLCoreSettings settings, OBDASQLQuery q) {
+	public SQLSourceQueryValidator(OntopSQLCredentialSettings settings, OBDASQLQuery q) {
 		this.settings = settings;
 		sourceQuery = q;
 	}

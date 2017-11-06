@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.docker.db2;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -47,26 +48,31 @@ public class MultiSchemaTestDB2 extends AbstractVirtualModeTest {
 	 * Test use of two aliases to same table
 	 * @throws Exception
 	 */
+	@Test
 	public void testOneSchema() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Address}";
 		checkThereIsAtLeastOneResult(query);
 	}
-	
+
+	@Test
 	public void testTableOneSchema() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Broker}";
 		checkThereIsAtLeastOneResult(query);
 	}
-	
+
+	@Test
 	public void testAliasOneSchema() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Worker}";
 		checkThereIsAtLeastOneResult(query);
 	}
-	
+
+	@Test
 	public void testSchemaWhere() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x ?r WHERE { ?x :isBroker ?r }";
 		checkThereIsAtLeastOneResult(query);
 	}
-	
+
+	@Test
 	public void testMultischema() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x :hasFile ?r }";
 		checkThereIsAtLeastOneResult(query);

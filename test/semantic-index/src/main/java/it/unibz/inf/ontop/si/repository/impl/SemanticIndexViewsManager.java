@@ -2,16 +2,8 @@ package it.unibz.inf.ontop.si.repository.impl;
 
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
 public class SemanticIndexViewsManager {
 
@@ -47,7 +39,7 @@ public class SemanticIndexViewsManager {
 	private static final COL_TYPE[] objectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE };
 
 	private static final COL_TYPE[] typesAndObjectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE, 
-		COL_TYPE.LITERAL, COL_TYPE.LITERAL_LANG, COL_TYPE.BOOLEAN, 
+		COL_TYPE.LITERAL, COL_TYPE.LANG_STRING, COL_TYPE.BOOLEAN,
 		COL_TYPE.DATETIME, COL_TYPE.DATETIME_STAMP, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
 		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
 		COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER, COL_TYPE.FLOAT,  COL_TYPE.LONG, 
@@ -87,7 +79,7 @@ public class SemanticIndexViewsManager {
 						select = RDBMSSIRepositoryManager.attributeTable.get(type2).getSELECT("LANG IS NULL AND " + filter);
 						insert = RDBMSSIRepositoryManager.attributeTable.get(type2).getINSERT("?, ?, ?, NULL, " + value);
 						break;
-					case LITERAL_LANG:
+					case LANG_STRING:
 						/*
 						 * If the mapping is for something of type Literal we need to add IS
 						 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
@@ -120,7 +112,7 @@ public class SemanticIndexViewsManager {
 		COL_TYPE.LONG, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.DATETIME, 
 		COL_TYPE.INT, COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, 
 		COL_TYPE.NON_NEGATIVE_INTEGER, COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER,
-		COL_TYPE.FLOAT, COL_TYPE.BOOLEAN, COL_TYPE.DATETIME_STAMP, COL_TYPE.LITERAL_LANG
+		COL_TYPE.FLOAT, COL_TYPE.BOOLEAN, COL_TYPE.DATETIME_STAMP, COL_TYPE.LANG_STRING
 	};
 	
 	private static final Map<COL_TYPE, Integer> COLTYPEtoSITable = new HashMap<>();

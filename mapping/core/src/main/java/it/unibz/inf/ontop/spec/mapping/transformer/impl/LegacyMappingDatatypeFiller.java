@@ -3,10 +3,12 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.exception.UnknownDatatypeException;
+import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 
@@ -20,12 +22,15 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
 
     private final Datalog2QueryMappingConverter datalog2MappingConverter;
     private final Mapping2DatalogConverter mapping2DatalogConverter;
+    private final OntopMappingSettings settings;
 
     @Inject
     private LegacyMappingDatatypeFiller(Datalog2QueryMappingConverter datalog2MappingConverter,
-                                        Mapping2DatalogConverter mapping2DatalogConverter) {
+                                        Mapping2DatalogConverter mapping2DatalogConverter,
+                                        OntopMappingSettings settings) {
         this.datalog2MappingConverter = datalog2MappingConverter;
         this.mapping2DatalogConverter = mapping2DatalogConverter;
+        this.settings = settings;
     }
 
     /***
@@ -50,8 +55,8 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
      *  .the corresponding column types are compatible (e.g the types for column 1 of A and column 1 of B)
      */
     @Override
-    public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping, DBMetadata dbMetadata) {
-        MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata);
+    public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping, DBMetadata dbMetadata) throws UnknownDatatypeException {
+        MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata,  settings.isDefaultDatatypeInferred());
         ImmutableMap<CQIE, PPMappingAssertionProvenance> ruleMap = mapping2DatalogConverter.convert(mapping);
 
         //CQIEs are mutable

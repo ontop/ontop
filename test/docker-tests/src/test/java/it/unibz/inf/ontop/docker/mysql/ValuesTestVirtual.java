@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 public class ValuesTestVirtual extends AbstractVirtualModeTest {
 	
@@ -38,7 +39,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		countResults(PREFIX + "\n" + query, expectedRows);	
 	}
 
-	
+	@Test
 	public void testQ01() throws Exception {
 		String query1 =
 				"SELECT * " +
@@ -48,7 +49,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query1, 4);
 	}
 
-	
+	@Test
 	public void testQ02() throws Exception {
 		String query2 =
 				"SELECT * " +
@@ -59,7 +60,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query2, 1);
 	}
 
-	
+	@Test
 	public void testQ03() throws Exception {
 		String query3 =
 				"SELECT * " +
@@ -70,7 +71,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query3, 1);
 	}
 
-	
+	@Test
 	public void testQ04() throws Exception {
 		String query4 =
 				"SELECT * " +
@@ -81,7 +82,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query4, 2);
 	}
 
-	
+	@Test
 	public void testQ05() throws Exception {
 		String query5 =
 				"SELECT * " +
@@ -92,7 +93,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query5, 2);
 	}
 
-	
+	@Test
 	public void testQ06() throws Exception {
 		String query6 =
 				"SELECT * " +
@@ -103,7 +104,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query6, 1);
 	}
 
-	
+	@Test
 	public void testQ07() throws Exception {
 		String query7 =
 				"SELECT * " +
@@ -114,7 +115,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query7, 1);
 	}
 
-	
+	@Test
 	public void testQ08() throws Exception {
 		String query8 =
 				"SELECT * " +
@@ -125,7 +126,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query8, 0);
 	}
 
-	
+	@Test
 	public void testQ09() throws Exception {
 		String query9 =
 				"SELECT * " +
@@ -136,7 +137,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query9, 1);
 	}
 
-	
+	@Test
 	public void testQ10() throws Exception {
 		String query10 =
 				"SELECT * " +
@@ -147,7 +148,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query10, 0);
 	}
 
-	
+	@Test
 	public void testQ11() throws Exception {
 		String query11 =
 				"SELECT * " +
@@ -178,7 +179,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 //		runTest(query12, 2);
 //	}
 
-	
+	@Test
 	public void testQ12b() throws Exception {
 		String query12 =
 				"SELECT * " +
@@ -192,7 +193,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query12, 2);
 	}
 
-	
+	@Test
 	public void testQ13() throws Exception {
 		String query13 =
 				"SELECT * " +
@@ -203,7 +204,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query13, 3);
 	}
 
-	
+	@Test
 	public void testQ14() throws Exception {
 		String query14 =
 				"SELECT * " +
@@ -214,7 +215,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query14, 4);
 	}
 
-	
+	@Test
 	public void testQ15() throws Exception {
 		String query15 =
 				"SELECT * " +
@@ -225,7 +226,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 		runTest(query15, 4);
 	}
 
-	
+	@Test
 	public void testQ16() throws Exception {
 		String query16 =
 				"SELECT * " +

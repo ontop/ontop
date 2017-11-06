@@ -21,18 +21,17 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
-import it.unibz.inf.ontop.exception.OntopTranslationException;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -396,8 +395,8 @@ public class BindTest {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial title\"");
-        expectedValues.add("\"The Semantic Web title\"");
+        expectedValues.add("\"SPARQL Tutorial title\"^^xsd:string");
+        expectedValues.add("\"The Semantic Web title\"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
 
 
@@ -419,8 +418,8 @@ public class BindTest {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial 16\"");
-        expectedValues.add("\"The Semantic Web 17\"");
+        expectedValues.add("\"SPARQL Tutorial 16\"^^xsd:string");
+        expectedValues.add("\"The Semantic Web 17\"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
 
 
@@ -466,8 +465,8 @@ public class BindTest {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"goodSPARQL Tutorial\"");
-        expectedValues.add("\"badThe Semantic Web\"");
+        expectedValues.add("\"goodSPARQL Tutorial\"^^xsd:string");
+        expectedValues.add("\"badThe Semantic Web\"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
 
 
@@ -477,7 +476,7 @@ public class BindTest {
 
     //CAST function not supported
     //The builtin function http://www.w3.org/2001/XMLSchema#string is not supported yet!
-    @Test(expected = OntopTranslationException.class)
+    @Test(expected = OntopReformulationException.class)
     public void testBindWithCast() throws Throwable {
 
 		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -525,9 +524,10 @@ public class BindTest {
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
                 OWLObject ind1 = bindingSet.getOWLObject("w");
+                String value = ToStringRenderer.getInstance().getRendering(ind1);
                 // log.debug(ind1.toString());
-                returnedValues.add(ind1.toString());
-                java.lang.System.out.println(ind1);
+                returnedValues.add(value);
+                java.lang.System.out.println(value);
                 i++;
             }
         } catch (Exception e) {

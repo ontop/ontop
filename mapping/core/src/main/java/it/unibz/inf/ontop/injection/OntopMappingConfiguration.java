@@ -1,14 +1,14 @@
 package it.unibz.inf.ontop.injection;
 
 
-import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public interface OntopMappingConfiguration extends OntopOBDASpecificationConfiguration, OntopOptimizationConfiguration {
+public interface OntopMappingConfiguration extends OntopOBDAConfiguration, OntopOptimizationConfiguration {
 
     Optional<TMappingExclusionConfig> getTmappingExclusions();
 
@@ -33,6 +33,8 @@ public interface OntopMappingConfiguration extends OntopOBDASpecificationConfigu
         B enableProvidedDBMetadataCompletion(boolean dbMetadataCompletion);
 
         B dbMetadata(@Nonnull DBMetadata dbMetadata);
+
+        B enableDefaultDatatypeInference(boolean inferDefaultDatatype);
 
     }
 

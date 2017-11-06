@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,6 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.Reader;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;
 
@@ -117,7 +117,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                                   OBDASpecInput specInput, Optional<Ontology> optionalOntology,
                                                   Optional<TBoxReasoner> optionalSaturatedTBox,
                                                   ExecutorRegistry executorRegistry)
-            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException {
+            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
 
         RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
@@ -168,7 +168,7 @@ public class SQLMappingExtractor implements MappingExtractor {
         if (isDBMetadataProvided && (!settings.isProvidedDBMetadataCompletionEnabled()))
             return optionalDBMetadata.get();
 
-        try (Connection localConnection = createConnection()) {
+        try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
             return isDBMetadataProvided
                     ? dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata.get(),
                     specInput.getConstraintFile())
@@ -194,28 +194,6 @@ public class SQLMappingExtractor implements MappingExtractor {
 
             ontologyComplianceValidator.validate(filledProvMapping, ontology.getVocabulary(), saturatedTBox);
         }
-    }
-
-    private Connection createConnection() throws SQLException {
-
-        try {
-            // This should work in most cases (e.g. from CLI, Protege, or Jetty)
-            return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
-        } catch (SQLException ex) {
-            // HACKY(xiao): This part is still necessary for Tomcat.
-            // Otherwise, JDBC drivers are not initialized by default.
-            settings.getJdbcDriver().ifPresent(className -> {
-                try {
-                    Class.forName(className);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
-        }
-
-
     }
 
     private SQLPPMapping castPPMapping(PreProcessedMapping ppMapping) {

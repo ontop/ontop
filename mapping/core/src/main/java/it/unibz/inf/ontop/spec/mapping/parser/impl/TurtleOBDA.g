@@ -29,28 +29,27 @@
 grammar TurtleOBDA;
 
 @header {
-package it.unibz.inf.ontop.parser;
+package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.utils.QueryUtils;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import org.antlr.runtime.BitSet;
+import org.antlr.runtime.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
-import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 
 }
 
 @lexer::header {
-package it.unibz.inf.ontop.parser;
+package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import java.util.Vector;
 }
@@ -150,13 +149,13 @@ private String removeBrackets(String text) {
 	   if (size == 1) {
 	      FormatString token = tokens.get(0);
 	      if (token instanceof FixedString) {
-	          ValueConstant uriTemplate = DATA_FACTORY.getConstantLiteral(token.toString()); // a single URI template
-	          toReturn = DATA_FACTORY.getUriTemplate(uriTemplate);
+	          ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(token.toString()); // a single URI template
+	          toReturn = TERM_FACTORY.getUriTemplate(uriTemplate);
 	      }
 	      else if (token instanceof ColumnString) {
 	         // a single URI template
-	         Variable column = DATA_FACTORY.getVariable(token.toString());
-	         toReturn = DATA_FACTORY.getUriTemplate(column);
+	         Variable column = TERM_FACTORY.getVariable(token.toString());
+	         toReturn = TERM_FACTORY.getUriTemplate(column);
 	      }
 	   }
 	   else {
@@ -167,13 +166,13 @@ private String removeBrackets(String text) {
 	         }
 	         else if (token instanceof ColumnString) {
 	            sb.append(PLACEHOLDER);
-	            Variable column = DATA_FACTORY.getVariable(token.toString());
+	            Variable column = TERM_FACTORY.getVariable(token.toString());
 	            terms.add(column);
 	         }
 	      }
-	      ValueConstant uriTemplate = DATA_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
+	      ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
 	      terms.add(0, uriTemplate);
-	      toReturn = DATA_FACTORY.getUriTemplate(terms);
+	      toReturn = TERM_FACTORY.getUriTemplate(terms);
 	   }
 	   return toReturn;
 	}
@@ -192,6 +191,9 @@ private List<FormatString> parse(String text) {
             toReturn.add(new FixedString(text.substring(i, m.start())));
          }
          String value = m.group(1);
+         if(value.contains(".")){
+         	throw new IllegalArgumentException("Fully qualified columns are not accepted.");
+         }
          toReturn.add(new ColumnString(value));
          i = m.end();
       }
@@ -248,11 +250,11 @@ private class ColumnString implements FormatString {
 	      if (i > 0){
 	    	 st = str.substring(0,i);
 	    	 st = st.replace("\\\\", "");
-	         terms.add(DATA_FACTORY.getConstantLiteral(st));
+	         terms.add(TERM_FACTORY.getConstantLiteral(st));
 	         str = str.substring(str.indexOf("{", i), str.length());
 	      }else if (i == 0){
 	         j = str.indexOf("}");
-	         terms.add(DATA_FACTORY.getVariable(str.substring(1,j)));
+	         terms.add(TERM_FACTORY.getVariable(str.substring(1,j)));
 	         str = str.substring(j+1,str.length());
 	      } else {
 	    	  break;
@@ -260,7 +262,7 @@ private class ColumnString implements FormatString {
 	   }
 	   if(!str.equals("")){
 	      str = str.replace("\\\\", "");
-	      terms.add(DATA_FACTORY.getConstantLiteral(str));
+	      terms.add(TERM_FACTORY.getConstantLiteral(str));
 	   }
 	   return terms;
 	}
@@ -276,9 +278,9 @@ private class ColumnString implements FormatString {
           return v;
 	   }
 
-       Function f = DATA_FACTORY.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
+       Function f = TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
        for(int j=2;j<terms.size();j++) {
-          f = DATA_FACTORY.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
+          f = TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
        }
        return f;
 	}
@@ -300,15 +302,15 @@ private class ColumnString implements FormatString {
 		             if (object instanceof  Function) {
 		                  if(QueryUtils.isGrounded(object)) {
 		                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
-		                      Predicate predicate = DATA_FACTORY.getClassPredicate(c.getValue());
-		                      atom = DATA_FACTORY.getFunction(predicate, subject);
+		                      Predicate predicate = TERM_FACTORY.getClassPredicate(c.getValue());
+		                      atom = TERM_FACTORY.getFunction(predicate, subject);
 		                  } else {
 		                       atom = ATOM_FACTORY.getTripleAtom(subject, pred, object);
 		                  }
 		             }
 		             else if (object instanceof  Variable){
-		                  Term uriOfPred = DATA_FACTORY.getUriTemplate(pred);
-		                  Term uriOfObject = DATA_FACTORY.getUriTemplate(object);
+		                  Term uriOfPred = TERM_FACTORY.getUriTemplate(pred);
+		                  Term uriOfObject = TERM_FACTORY.getUriTemplate(object);
 		                  atom = ATOM_FACTORY.getTripleAtom(subject, uriOfPred,  uriOfObject);
 		              }
 		             else {
@@ -317,19 +319,19 @@ private class ColumnString implements FormatString {
 		        } else if( ! QueryUtils.isGrounded(pred) ){
 		             atom = ATOM_FACTORY.getTripleAtom(subject, pred,  object);
 		        } else {
-                			             //Predicate predicate = DATA_FACTORY.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+                			             //Predicate predicate = TERM_FACTORY.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
                 			             Predicate predicate;
                 			             if(pred instanceof Function) {
                 							 ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
                 							 if (object instanceof Variable) {
-                								 predicate = DATA_FACTORY.getPredicate(pr.getValue(), 2);
+                								 predicate = TERM_FACTORY.getDataPropertyPredicate(pr.getValue());
                 							 } else {
                 								 if (object instanceof Function) {
                 									 if (((Function) object).getFunctionSymbol() instanceof URITemplatePredicate) {
 
-                										 predicate = DATA_FACTORY.getObjectPropertyPredicate(pr.getValue());
+                										 predicate = TERM_FACTORY.getObjectPropertyPredicate(pr.getValue());
                 									 } else {
-                										 predicate = DATA_FACTORY.getDataPropertyPredicate(pr.getValue());
+                										 predicate = TERM_FACTORY.getDataPropertyPredicate(pr.getValue());
                 									 }
                 								 }
                 									 else {
@@ -339,19 +341,19 @@ private class ColumnString implements FormatString {
                 						 }else {
                 			                  throw new IllegalArgumentException("predicate should be a URI Function");
                 			             }
-                			             atom = DATA_FACTORY.getFunction(predicate, subject, object);
+                			             atom = TERM_FACTORY.getFunction(predicate, subject, object);
                 			       }
                 			       return atom;
 	  }
 
 
 private static boolean isRDFType(Term pred) {
-//		if (pred instanceof Constant && ((Constant) pred).getValue().equals(IriConstants.RDF_TYPE)) {
+//		if (pred instanceof Constant && ((Constant) pred).getValue().equals(RDF_TYPE)) {
 //			return true;
 //		}
 		if (pred instanceof Function && ((Function) pred).getTerm(0) instanceof Constant ) {
 			String c= ((Constant) ((Function) pred).getTerm(0)).getValue();
-			return c.equals(IriConstants.RDF_TYPE);
+			return c.equals(RDF_TYPE);
 		}	
 		return false;
 	}
@@ -433,8 +435,8 @@ predicateObjectList returns [List<Function> value]
 verb returns [Term value]
   : predicate { $value = $predicate.value; }
   | 'a' {
-  Term constant = DATA_FACTORY.getConstantLiteral(IriConstants.RDF_TYPE);
-  $value = DATA_FACTORY.getUriTemplate(constant);
+  Term constant = TERM_FACTORY.getConstantLiteral(RDF_TYPE);
+  $value = TERM_FACTORY.getUriTemplate(constant);
   }
   ;
 
@@ -476,8 +478,8 @@ object returns [Term value]
 resource returns [Term value]
    : uriref { $value = construct($uriref.value); }
    | qname { $value = construct($qname.value); }
-  //: uriref { $value = DATA_FACTORY.getConstantURI($uriref.value);}
-  // | qname { $value = DATA_FACTORY.getConstantURI($qname.value); }
+  //: uriref { $value = TERM_FACTORY.getConstantURI($uriref.value);}
+  // | qname { $value = TERM_FACTORY.getConstantURI($qname.value); }
   ;
 
 uriref returns [String value]
@@ -499,7 +501,7 @@ blank
 
 variable returns [Variable value]
   : STRING_WITH_CURLY_BRACKET {
-      $value = DATA_FACTORY.getVariable(removeBrackets($STRING_WITH_CURLY_BRACKET.text));
+      $value = TERM_FACTORY.getVariable(removeBrackets($STRING_WITH_CURLY_BRACKET.text));
       variableSet.add($value);
     }
   ;
@@ -508,8 +510,8 @@ function returns [Function value]
   : resource LPAREN terms RPAREN {
       String functionName = $resource.value.toString();
       int arity = $terms.value.size();
-      Predicate functionSymbol = DATA_FACTORY.getPredicate(functionName, arity);
-      $value = DATA_FACTORY.getFunction(functionSymbol, $terms.value);
+      Predicate functionSymbol = TERM_FACTORY.getPredicate(functionName, arity);
+      $value = TERM_FACTORY.getFunction(functionSymbol, $terms.value);
     }
   ;
 
@@ -517,7 +519,7 @@ typedLiteral returns [Function value]
   : variable AT language {
       Variable var = $variable.value;
       Term lang = $language.value;   
-      $value = DATA_FACTORY.getTypedTerm(var, lang);
+      $value = TERM_FACTORY.getTypedTerm(var, lang);
 
     }
   | variable REFERENCE resource {
@@ -530,11 +532,11 @@ typedLiteral returns [Function value]
     } else {
         throw new IllegalArgumentException("$resource.value should be an URI");
     }
-    Predicate.COL_TYPE type = DATATYPE_FACTORY.getDatatype(functionName);
-    if (type == null)  
+    Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(functionName);
+    if (!type.isPresent())
  	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
     
-      $value = DATA_FACTORY.getTypedTerm(var, type);
+      $value = TERM_FACTORY.getTypedTerm(var, type.get());
 
 	
      }
@@ -542,7 +544,7 @@ typedLiteral returns [Function value]
 
 language returns [Term value]
   : languageTag {
-    	$value = DATA_FACTORY.getConstantLiteral($languageTag.text.toLowerCase(), COL_TYPE.STRING);
+    	$value = TERM_FACTORY.getConstantLiteral($languageTag.text.toLowerCase(), COL_TYPE.STRING);
     }
   | variable {
     	$value = $variable.value;
@@ -569,23 +571,23 @@ literal returns [Term value]
        if (literal instanceof Function){
           Function f = (Function)$stringLiteral.value;
           if (lang != null){
-             value = DATA_FACTORY.getTypedTerm(f,lang);
+             value = TERM_FACTORY.getTypedTerm(f,lang);
           }else{
-             value = DATA_FACTORY.getTypedTerm(f, COL_TYPE.STRING);
+             value = TERM_FACTORY.getTypedTerm(f, COL_TYPE.STRING);
           }       
        }else{
 
        //if variable we cannot assign a datatype yet
        if (literal instanceof Variable)
        {
-            value = DATA_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
+            value = TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
        }
        else{
           ValueConstant constant = (ValueConstant)$stringLiteral.value;
           if (lang != null) {
-	     value = DATA_FACTORY.getTypedTerm(constant, lang);
+	     value = TERM_FACTORY.getTypedTerm(constant, lang);
           } else {
-      	     value = DATA_FACTORY.getTypedTerm(constant, COL_TYPE.STRING);
+      	     value = TERM_FACTORY.getTypedTerm(constant, COL_TYPE.STRING);
           }
        }
        }
@@ -601,7 +603,7 @@ stringLiteral returns [Term value]
       if (str.contains("{")){
       	$value = getNestedConcat(str);
       }else{
-      	$value = DATA_FACTORY.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.STRING); // without the double quotes
+      	$value = TERM_FACTORY.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.STRING); // without the double quotes
       }
     }
   ;
@@ -613,14 +615,14 @@ dataTypeString returns [Term value]
           if ($resource.value instanceof Function){
           	    String functionName = ( (ValueConstant) ((Function)$resource.value).getTerm(0) ).getValue();
 
-                    Predicate.COL_TYPE type = DATATYPE_FACTORY.getDatatype(functionName);
-                    if (type == null) {
+                    Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(functionName);
+                    if (!type.isPresent()) {
                       throw new RuntimeException("Unsupported datatype: " + functionName);
                     }
-                    $value = DATA_FACTORY.getTypedTerm(stringValue, type);
+                    $value = TERM_FACTORY.getTypedTerm(stringValue, type.get());
                     }
            else {
-          value = DATA_FACTORY.getTypedTerm(stringValue, COL_TYPE.STRING);
+          value = TERM_FACTORY.getTypedTerm(stringValue, COL_TYPE.STRING);
           }
 
   };
@@ -657,56 +659,56 @@ languageTag
 
 booleanLiteral returns [Term value]
   : TRUE  {
-  ValueConstant trueConstant = DATA_FACTORY.getConstantLiteral($TRUE.text, COL_TYPE.LITERAL);
-  $value = DATA_FACTORY.getTypedTerm(trueConstant, COL_TYPE.BOOLEAN); }
+  ValueConstant trueConstant = TERM_FACTORY.getConstantLiteral($TRUE.text, COL_TYPE.LITERAL);
+  $value = TERM_FACTORY.getTypedTerm(trueConstant, COL_TYPE.BOOLEAN); }
   | FALSE {
-  ValueConstant falseConstant = DATA_FACTORY.getConstantLiteral($FALSE.text, COL_TYPE.LITERAL);
-  $value = DATA_FACTORY.getTypedTerm(falseConstant, COL_TYPE.BOOLEAN);
+  ValueConstant falseConstant = TERM_FACTORY.getConstantLiteral($FALSE.text, COL_TYPE.LITERAL);
+  $value = TERM_FACTORY.getTypedTerm(falseConstant, COL_TYPE.BOOLEAN);
   }
   ;
 
 numericUnsigned returns [Term value]
   : INTEGER {
-  ValueConstant integerConstant = DATA_FACTORY.getConstantLiteral($INTEGER.text, COL_TYPE.LITERAL);
-  $value = DATA_FACTORY.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
+  ValueConstant integerConstant = TERM_FACTORY.getConstantLiteral($INTEGER.text, COL_TYPE.LITERAL);
+  $value = TERM_FACTORY.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
   }
   | DOUBLE  {
-  ValueConstant doubleConstant = DATA_FACTORY.getConstantLiteral($DOUBLE.text, COL_TYPE.LITERAL);
-  $value = DATA_FACTORY.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
+  ValueConstant doubleConstant = TERM_FACTORY.getConstantLiteral($DOUBLE.text, COL_TYPE.LITERAL);
+  $value = TERM_FACTORY.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
   }
   | DECIMAL {
-  ValueConstant decimalConstant = DATA_FACTORY.getConstantLiteral($DECIMAL.text, COL_TYPE.LITERAL);
-  $value = DATA_FACTORY.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
+  ValueConstant decimalConstant = TERM_FACTORY.getConstantLiteral($DECIMAL.text, COL_TYPE.LITERAL);
+  $value = TERM_FACTORY.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
    }
   ;
 
 numericPositive returns [Term value]
   : INTEGER_POSITIVE {
-   ValueConstant integerConstant = DATA_FACTORY.getConstantLiteral($INTEGER_POSITIVE.text, COL_TYPE.LITERAL);
-   $value = DATA_FACTORY.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
+   ValueConstant integerConstant = TERM_FACTORY.getConstantLiteral($INTEGER_POSITIVE.text, COL_TYPE.LITERAL);
+   $value = TERM_FACTORY.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
   }
   | DOUBLE_POSITIVE  {
-  ValueConstant doubleConstant = DATA_FACTORY.getConstantLiteral($DOUBLE_POSITIVE.text, COL_TYPE.LITERAL);
-  $value = DATA_FACTORY.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
+  ValueConstant doubleConstant = TERM_FACTORY.getConstantLiteral($DOUBLE_POSITIVE.text, COL_TYPE.LITERAL);
+  $value = TERM_FACTORY.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
   }
   | DECIMAL_POSITIVE {
-  ValueConstant decimalConstant = DATA_FACTORY.getConstantLiteral($DECIMAL_POSITIVE.text, COL_TYPE.LITERAL);
-  $value = DATA_FACTORY.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
+  ValueConstant decimalConstant = TERM_FACTORY.getConstantLiteral($DECIMAL_POSITIVE.text, COL_TYPE.LITERAL);
+  $value = TERM_FACTORY.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
    }
   ;
 
 numericNegative returns [Term value]
   : INTEGER_NEGATIVE {
-  ValueConstant integerConstant = DATA_FACTORY.getConstantLiteral($INTEGER_NEGATIVE.text, COL_TYPE.LITERAL);
-  $value = DATA_FACTORY.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
+  ValueConstant integerConstant = TERM_FACTORY.getConstantLiteral($INTEGER_NEGATIVE.text, COL_TYPE.LITERAL);
+  $value = TERM_FACTORY.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
   }
   | DOUBLE_NEGATIVE  {
-   ValueConstant doubleConstant = DATA_FACTORY.getConstantLiteral($DOUBLE_NEGATIVE.text, COL_TYPE.LITERAL);
-   $value = DATA_FACTORY.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
+   ValueConstant doubleConstant = TERM_FACTORY.getConstantLiteral($DOUBLE_NEGATIVE.text, COL_TYPE.LITERAL);
+   $value = TERM_FACTORY.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
   }
   | DECIMAL_NEGATIVE {
-  ValueConstant decimalConstant = DATA_FACTORY.getConstantLiteral($DECIMAL_NEGATIVE.text, COL_TYPE.LITERAL);
-  $value = DATA_FACTORY.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
+  ValueConstant decimalConstant = TERM_FACTORY.getConstantLiteral($DECIMAL_NEGATIVE.text, COL_TYPE.LITERAL);
+  $value = TERM_FACTORY.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
   }
   ;
 

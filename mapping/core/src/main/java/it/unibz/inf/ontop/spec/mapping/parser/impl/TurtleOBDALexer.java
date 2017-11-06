@@ -1,4 +1,4 @@
-// $ANTLR 3.5.2 TurtleOBDA.g 2017-01-16 18:44:29
+// $ANTLR 3.5.2 TurtleOBDA.g 2017-10-27 11:40:00
 
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
@@ -157,8 +157,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BASE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:717:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-			// TurtleOBDA.g:717:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
+			// TurtleOBDA.g:719:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+			// TurtleOBDA.g:719:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
 			{
 			if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
 				input.consume();
@@ -208,8 +208,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PREFIX;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:719:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
-			// TurtleOBDA.g:719:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
+			// TurtleOBDA.g:721:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
+			// TurtleOBDA.g:721:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
 			{
 			if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
 				input.consume();
@@ -275,8 +275,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = FALSE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:721:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-			// TurtleOBDA.g:721:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
+			// TurtleOBDA.g:723:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+			// TurtleOBDA.g:723:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
 			{
 			if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
 				input.consume();
@@ -334,8 +334,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = TRUE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:723:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
-			// TurtleOBDA.g:723:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+			// TurtleOBDA.g:725:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+			// TurtleOBDA.g:725:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
 			{
 			if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
 				input.consume();
@@ -385,8 +385,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = REFERENCE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:725:10: ( '^^' )
-			// TurtleOBDA.g:725:16: '^^'
+			// TurtleOBDA.g:727:10: ( '^^' )
+			// TurtleOBDA.g:727:16: '^^'
 			{
 			match("^^"); 
 
@@ -406,8 +406,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LTSIGN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:726:7: ( '<\"' )
-			// TurtleOBDA.g:726:16: '<\"'
+			// TurtleOBDA.g:728:7: ( '<\"' )
+			// TurtleOBDA.g:728:16: '<\"'
 			{
 			match("<\""); 
 
@@ -427,8 +427,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = RTSIGN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:727:7: ( '\">' )
-			// TurtleOBDA.g:727:16: '\">'
+			// TurtleOBDA.g:729:7: ( '\">' )
+			// TurtleOBDA.g:729:16: '\">'
 			{
 			match("\">"); 
 
@@ -448,8 +448,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = SEMI;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:728:5: ( ';' )
-			// TurtleOBDA.g:728:16: ';'
+			// TurtleOBDA.g:730:5: ( ';' )
+			// TurtleOBDA.g:730:16: ';'
 			{
 			match(';'); 
 			}
@@ -468,8 +468,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PERIOD;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:729:7: ( '.' )
-			// TurtleOBDA.g:729:16: '.'
+			// TurtleOBDA.g:731:7: ( '.' )
+			// TurtleOBDA.g:731:16: '.'
 			{
 			match('.'); 
 			}
@@ -488,8 +488,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = COMMA;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:730:6: ( ',' )
-			// TurtleOBDA.g:730:16: ','
+			// TurtleOBDA.g:732:6: ( ',' )
+			// TurtleOBDA.g:732:16: ','
 			{
 			match(','); 
 			}
@@ -508,8 +508,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LSQ_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:731:12: ( '[' )
-			// TurtleOBDA.g:731:16: '['
+			// TurtleOBDA.g:733:12: ( '[' )
+			// TurtleOBDA.g:733:16: '['
 			{
 			match('['); 
 			}
@@ -528,8 +528,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = RSQ_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:732:12: ( ']' )
-			// TurtleOBDA.g:732:16: ']'
+			// TurtleOBDA.g:734:12: ( ']' )
+			// TurtleOBDA.g:734:16: ']'
 			{
 			match(']'); 
 			}
@@ -548,8 +548,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LCR_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:733:12: ( '{' )
-			// TurtleOBDA.g:733:16: '{'
+			// TurtleOBDA.g:735:12: ( '{' )
+			// TurtleOBDA.g:735:16: '{'
 			{
 			match('{'); 
 			}
@@ -568,8 +568,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = RCR_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:734:12: ( '}' )
-			// TurtleOBDA.g:734:16: '}'
+			// TurtleOBDA.g:736:12: ( '}' )
+			// TurtleOBDA.g:736:16: '}'
 			{
 			match('}'); 
 			}
@@ -588,8 +588,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LPAREN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:735:7: ( '(' )
-			// TurtleOBDA.g:735:16: '('
+			// TurtleOBDA.g:737:7: ( '(' )
+			// TurtleOBDA.g:737:16: '('
 			{
 			match('('); 
 			}
@@ -608,8 +608,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = RPAREN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:736:7: ( ')' )
-			// TurtleOBDA.g:736:16: ')'
+			// TurtleOBDA.g:738:7: ( ')' )
+			// TurtleOBDA.g:738:16: ')'
 			{
 			match(')'); 
 			}
@@ -628,8 +628,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = QUESTION;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:737:9: ( '?' )
-			// TurtleOBDA.g:737:16: '?'
+			// TurtleOBDA.g:739:9: ( '?' )
+			// TurtleOBDA.g:739:16: '?'
 			{
 			match('?'); 
 			}
@@ -648,8 +648,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOLLAR;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:738:7: ( '$' )
-			// TurtleOBDA.g:738:16: '$'
+			// TurtleOBDA.g:740:7: ( '$' )
+			// TurtleOBDA.g:740:16: '$'
 			{
 			match('$'); 
 			}
@@ -668,8 +668,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = QUOTE_DOUBLE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:739:13: ( '\"' )
-			// TurtleOBDA.g:739:16: '\"'
+			// TurtleOBDA.g:741:13: ( '\"' )
+			// TurtleOBDA.g:741:16: '\"'
 			{
 			match('\"'); 
 			}
@@ -688,8 +688,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = QUOTE_SINGLE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:740:13: ( '\\'' )
-			// TurtleOBDA.g:740:16: '\\''
+			// TurtleOBDA.g:742:13: ( '\\'' )
+			// TurtleOBDA.g:742:16: '\\''
 			{
 			match('\''); 
 			}
@@ -708,8 +708,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = APOSTROPHE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:741:11: ( '`' )
-			// TurtleOBDA.g:741:16: '`'
+			// TurtleOBDA.g:743:11: ( '`' )
+			// TurtleOBDA.g:743:16: '`'
 			{
 			match('`'); 
 			}
@@ -728,8 +728,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = UNDERSCORE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:742:11: ( '_' )
-			// TurtleOBDA.g:742:16: '_'
+			// TurtleOBDA.g:744:11: ( '_' )
+			// TurtleOBDA.g:744:16: '_'
 			{
 			match('_'); 
 			}
@@ -748,8 +748,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = MINUS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:743:6: ( '-' )
-			// TurtleOBDA.g:743:16: '-'
+			// TurtleOBDA.g:745:6: ( '-' )
+			// TurtleOBDA.g:745:16: '-'
 			{
 			match('-'); 
 			}
@@ -768,8 +768,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = ASTERISK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:744:9: ( '*' )
-			// TurtleOBDA.g:744:16: '*'
+			// TurtleOBDA.g:746:9: ( '*' )
+			// TurtleOBDA.g:746:16: '*'
 			{
 			match('*'); 
 			}
@@ -788,8 +788,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = AMPERSAND;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:745:10: ( '&' )
-			// TurtleOBDA.g:745:16: '&'
+			// TurtleOBDA.g:747:10: ( '&' )
+			// TurtleOBDA.g:747:16: '&'
 			{
 			match('&'); 
 			}
@@ -808,8 +808,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = AT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:746:3: ( '@' )
-			// TurtleOBDA.g:746:16: '@'
+			// TurtleOBDA.g:748:3: ( '@' )
+			// TurtleOBDA.g:748:16: '@'
 			{
 			match('@'); 
 			}
@@ -828,8 +828,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = EXCLAMATION;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:747:12: ( '!' )
-			// TurtleOBDA.g:747:16: '!'
+			// TurtleOBDA.g:749:12: ( '!' )
+			// TurtleOBDA.g:749:16: '!'
 			{
 			match('!'); 
 			}
@@ -848,8 +848,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = HASH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:748:5: ( '#' )
-			// TurtleOBDA.g:748:16: '#'
+			// TurtleOBDA.g:750:5: ( '#' )
+			// TurtleOBDA.g:750:16: '#'
 			{
 			match('#'); 
 			}
@@ -868,8 +868,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PERCENT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:749:8: ( '%' )
-			// TurtleOBDA.g:749:16: '%'
+			// TurtleOBDA.g:751:8: ( '%' )
+			// TurtleOBDA.g:751:16: '%'
 			{
 			match('%'); 
 			}
@@ -888,8 +888,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PLUS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:750:5: ( '+' )
-			// TurtleOBDA.g:750:16: '+'
+			// TurtleOBDA.g:752:5: ( '+' )
+			// TurtleOBDA.g:752:16: '+'
 			{
 			match('+'); 
 			}
@@ -908,8 +908,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = EQUALS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:751:7: ( '=' )
-			// TurtleOBDA.g:751:16: '='
+			// TurtleOBDA.g:753:7: ( '=' )
+			// TurtleOBDA.g:753:16: '='
 			{
 			match('='); 
 			}
@@ -928,8 +928,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = COLON;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:752:6: ( ':' )
-			// TurtleOBDA.g:752:16: ':'
+			// TurtleOBDA.g:754:6: ( ':' )
+			// TurtleOBDA.g:754:16: ':'
 			{
 			match(':'); 
 			}
@@ -948,8 +948,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LESS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:753:5: ( '<' )
-			// TurtleOBDA.g:753:16: '<'
+			// TurtleOBDA.g:755:5: ( '<' )
+			// TurtleOBDA.g:755:16: '<'
 			{
 			match('<'); 
 			}
@@ -968,8 +968,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = GREATER;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:754:8: ( '>' )
-			// TurtleOBDA.g:754:16: '>'
+			// TurtleOBDA.g:756:8: ( '>' )
+			// TurtleOBDA.g:756:16: '>'
 			{
 			match('>'); 
 			}
@@ -988,8 +988,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = SLASH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:755:6: ( '/' )
-			// TurtleOBDA.g:755:16: '/'
+			// TurtleOBDA.g:757:6: ( '/' )
+			// TurtleOBDA.g:757:16: '/'
 			{
 			match('/'); 
 			}
@@ -1008,8 +1008,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOUBLE_SLASH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:756:13: ( '//' )
-			// TurtleOBDA.g:756:16: '//'
+			// TurtleOBDA.g:758:13: ( '//' )
+			// TurtleOBDA.g:758:16: '//'
 			{
 			match("//"); 
 
@@ -1029,8 +1029,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BACKSLASH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:757:10: ( '\\\\' )
-			// TurtleOBDA.g:757:16: '\\\\'
+			// TurtleOBDA.g:759:10: ( '\\\\' )
+			// TurtleOBDA.g:759:16: '\\\\'
 			{
 			match('\\'); 
 			}
@@ -1049,8 +1049,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BLANK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:758:6: ( '[]' )
-			// TurtleOBDA.g:758:15: '[]'
+			// TurtleOBDA.g:760:6: ( '[]' )
+			// TurtleOBDA.g:760:15: '[]'
 			{
 			match("[]"); 
 
@@ -1070,8 +1070,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BLANK_PREFIX;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:759:13: ( '_:' )
-			// TurtleOBDA.g:759:16: '_:'
+			// TurtleOBDA.g:761:13: ( '_:' )
+			// TurtleOBDA.g:761:16: '_:'
 			{
 			match("_:"); 
 
@@ -1091,8 +1091,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = TILDE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:760:6: ( '~' )
-			// TurtleOBDA.g:760:16: '~'
+			// TurtleOBDA.g:762:6: ( '~' )
+			// TurtleOBDA.g:762:16: '~'
 			{
 			match('~'); 
 			}
@@ -1111,8 +1111,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = CARET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:761:6: ( '^' )
-			// TurtleOBDA.g:761:16: '^'
+			// TurtleOBDA.g:763:6: ( '^' )
+			// TurtleOBDA.g:763:16: '^'
 			{
 			match('^'); 
 			}
@@ -1129,7 +1129,7 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ALPHA"
 	public final void mALPHA() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:764:3: ( 'a' .. 'z' | 'A' .. 'Z' | '\\u00C0' .. '\\u00D6' | '\\u00D8' .. '\\u00F6' | '\\u00F8' .. '\\u02FF' | '\\u0370' .. '\\u037D' | '\\u037F' .. '\\u1FFF' | '\\u200C' .. '\\u200D' | '\\u2070' .. '\\u218F' | '\\u2C00' .. '\\u2FEF' | '\\u3001' .. '\\uD7FF' | '\\uF900' .. '\\uFDCF' | '\\uFDF0' .. '\\uFFFD' )
+			// TurtleOBDA.g:766:3: ( 'a' .. 'z' | 'A' .. 'Z' | '\\u00C0' .. '\\u00D6' | '\\u00D8' .. '\\u00F6' | '\\u00F8' .. '\\u02FF' | '\\u0370' .. '\\u037D' | '\\u037F' .. '\\u1FFF' | '\\u200C' .. '\\u200D' | '\\u2070' .. '\\u218F' | '\\u2C00' .. '\\u2FEF' | '\\u3001' .. '\\uD7FF' | '\\uF900' .. '\\uFDCF' | '\\uFDF0' .. '\\uFFFD' )
 			// TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
@@ -1152,7 +1152,7 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "DIGIT"
 	public final void mDIGIT() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:780:3: ( '0' .. '9' )
+			// TurtleOBDA.g:782:3: ( '0' .. '9' )
 			// TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
@@ -1175,7 +1175,7 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ALPHANUM"
 	public final void mALPHANUM() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:784:3: ( ALPHA | DIGIT )
+			// TurtleOBDA.g:786:3: ( ALPHA | DIGIT )
 			// TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
@@ -1198,7 +1198,7 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "CHAR"
 	public final void mCHAR() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:789:3: ( ALPHANUM | UNDERSCORE | MINUS | PERIOD )
+			// TurtleOBDA.g:791:3: ( ALPHANUM | UNDERSCORE | MINUS | PERIOD )
 			// TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= '-' && input.LA(1) <= '.')||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
@@ -1223,10 +1223,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = INTEGER;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:796:3: ( ( DIGIT )+ )
-			// TurtleOBDA.g:796:5: ( DIGIT )+
+			// TurtleOBDA.g:798:3: ( ( DIGIT )+ )
+			// TurtleOBDA.g:798:5: ( DIGIT )+
 			{
-			// TurtleOBDA.g:796:5: ( DIGIT )+
+			// TurtleOBDA.g:798:5: ( DIGIT )+
 			int cnt1=0;
 			loop1:
 			while (true) {
@@ -1275,14 +1275,14 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOUBLE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:800:3: ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* )
+			// TurtleOBDA.g:802:3: ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* )
 			int alt12=3;
 			alt12 = dfa12.predict(input);
 			switch (alt12) {
 				case 1 :
-					// TurtleOBDA.g:800:5: ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
+					// TurtleOBDA.g:802:5: ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
 					{
-					// TurtleOBDA.g:800:5: ( DIGIT )+
+					// TurtleOBDA.g:802:5: ( DIGIT )+
 					int cnt2=0;
 					loop2:
 					while (true) {
@@ -1317,7 +1317,7 @@ public class TurtleOBDALexer extends Lexer {
 
 					mPERIOD(); 
 
-					// TurtleOBDA.g:800:19: ( DIGIT )*
+					// TurtleOBDA.g:802:19: ( DIGIT )*
 					loop3:
 					while (true) {
 						int alt3=2;
@@ -1354,7 +1354,7 @@ public class TurtleOBDALexer extends Lexer {
 						recover(mse);
 						throw mse;
 					}
-					// TurtleOBDA.g:800:36: ( '-' | '+' )?
+					// TurtleOBDA.g:802:36: ( '-' | '+' )?
 					int alt4=2;
 					int LA4_0 = input.LA(1);
 					if ( (LA4_0=='+'||LA4_0=='-') ) {
@@ -1377,7 +1377,7 @@ public class TurtleOBDALexer extends Lexer {
 
 					}
 
-					// TurtleOBDA.g:800:47: ( DIGIT )*
+					// TurtleOBDA.g:802:47: ( DIGIT )*
 					loop5:
 					while (true) {
 						int alt5=2;
@@ -1409,11 +1409,11 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// TurtleOBDA.g:801:5: PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
+					// TurtleOBDA.g:803:5: PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
 					{
 					mPERIOD(); 
 
-					// TurtleOBDA.g:801:12: ( DIGIT )+
+					// TurtleOBDA.g:803:12: ( DIGIT )+
 					int cnt6=0;
 					loop6:
 					while (true) {
@@ -1454,7 +1454,7 @@ public class TurtleOBDALexer extends Lexer {
 						recover(mse);
 						throw mse;
 					}
-					// TurtleOBDA.g:801:29: ( '-' | '+' )?
+					// TurtleOBDA.g:803:29: ( '-' | '+' )?
 					int alt7=2;
 					int LA7_0 = input.LA(1);
 					if ( (LA7_0=='+'||LA7_0=='-') ) {
@@ -1477,7 +1477,7 @@ public class TurtleOBDALexer extends Lexer {
 
 					}
 
-					// TurtleOBDA.g:801:40: ( DIGIT )*
+					// TurtleOBDA.g:803:40: ( DIGIT )*
 					loop8:
 					while (true) {
 						int alt8=2;
@@ -1509,9 +1509,9 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 3 :
-					// TurtleOBDA.g:802:5: ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
+					// TurtleOBDA.g:804:5: ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
 					{
-					// TurtleOBDA.g:802:5: ( DIGIT )+
+					// TurtleOBDA.g:804:5: ( DIGIT )+
 					int cnt9=0;
 					loop9:
 					while (true) {
@@ -1552,7 +1552,7 @@ public class TurtleOBDALexer extends Lexer {
 						recover(mse);
 						throw mse;
 					}
-					// TurtleOBDA.g:802:22: ( '-' | '+' )?
+					// TurtleOBDA.g:804:22: ( '-' | '+' )?
 					int alt10=2;
 					int LA10_0 = input.LA(1);
 					if ( (LA10_0=='+'||LA10_0=='-') ) {
@@ -1575,7 +1575,7 @@ public class TurtleOBDALexer extends Lexer {
 
 					}
 
-					// TurtleOBDA.g:802:33: ( DIGIT )*
+					// TurtleOBDA.g:804:33: ( DIGIT )*
 					loop11:
 					while (true) {
 						int alt11=2;
@@ -1622,7 +1622,7 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DECIMAL;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:806:3: ( ( DIGIT )+ PERIOD ( DIGIT )+ | PERIOD ( DIGIT )+ )
+			// TurtleOBDA.g:808:3: ( ( DIGIT )+ PERIOD ( DIGIT )+ | PERIOD ( DIGIT )+ )
 			int alt16=2;
 			int LA16_0 = input.LA(1);
 			if ( ((LA16_0 >= '0' && LA16_0 <= '9')) ) {
@@ -1640,9 +1640,9 @@ public class TurtleOBDALexer extends Lexer {
 
 			switch (alt16) {
 				case 1 :
-					// TurtleOBDA.g:806:5: ( DIGIT )+ PERIOD ( DIGIT )+
+					// TurtleOBDA.g:808:5: ( DIGIT )+ PERIOD ( DIGIT )+
 					{
-					// TurtleOBDA.g:806:5: ( DIGIT )+
+					// TurtleOBDA.g:808:5: ( DIGIT )+
 					int cnt13=0;
 					loop13:
 					while (true) {
@@ -1677,7 +1677,7 @@ public class TurtleOBDALexer extends Lexer {
 
 					mPERIOD(); 
 
-					// TurtleOBDA.g:806:19: ( DIGIT )+
+					// TurtleOBDA.g:808:19: ( DIGIT )+
 					int cnt14=0;
 					loop14:
 					while (true) {
@@ -1713,11 +1713,11 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// TurtleOBDA.g:807:5: PERIOD ( DIGIT )+
+					// TurtleOBDA.g:809:5: PERIOD ( DIGIT )+
 					{
 					mPERIOD(); 
 
-					// TurtleOBDA.g:807:12: ( DIGIT )+
+					// TurtleOBDA.g:809:12: ( DIGIT )+
 					int cnt15=0;
 					loop15:
 					while (true) {
@@ -1768,8 +1768,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = INTEGER_POSITIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:811:3: ( PLUS INTEGER )
-			// TurtleOBDA.g:811:5: PLUS INTEGER
+			// TurtleOBDA.g:813:3: ( PLUS INTEGER )
+			// TurtleOBDA.g:813:5: PLUS INTEGER
 			{
 			mPLUS(); 
 
@@ -1791,8 +1791,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = INTEGER_NEGATIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:815:3: ( MINUS INTEGER )
-			// TurtleOBDA.g:815:5: MINUS INTEGER
+			// TurtleOBDA.g:817:3: ( MINUS INTEGER )
+			// TurtleOBDA.g:817:5: MINUS INTEGER
 			{
 			mMINUS(); 
 
@@ -1814,8 +1814,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOUBLE_POSITIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:819:3: ( PLUS DOUBLE )
-			// TurtleOBDA.g:819:5: PLUS DOUBLE
+			// TurtleOBDA.g:821:3: ( PLUS DOUBLE )
+			// TurtleOBDA.g:821:5: PLUS DOUBLE
 			{
 			mPLUS(); 
 
@@ -1837,8 +1837,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOUBLE_NEGATIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:823:3: ( MINUS DOUBLE )
-			// TurtleOBDA.g:823:5: MINUS DOUBLE
+			// TurtleOBDA.g:825:3: ( MINUS DOUBLE )
+			// TurtleOBDA.g:825:5: MINUS DOUBLE
 			{
 			mMINUS(); 
 
@@ -1860,8 +1860,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DECIMAL_POSITIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:827:3: ( PLUS DECIMAL )
-			// TurtleOBDA.g:827:5: PLUS DECIMAL
+			// TurtleOBDA.g:829:3: ( PLUS DECIMAL )
+			// TurtleOBDA.g:829:5: PLUS DECIMAL
 			{
 			mPLUS(); 
 
@@ -1883,8 +1883,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DECIMAL_NEGATIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:831:3: ( MINUS DECIMAL )
-			// TurtleOBDA.g:831:5: MINUS DECIMAL
+			// TurtleOBDA.g:833:3: ( MINUS DECIMAL )
+			// TurtleOBDA.g:833:5: MINUS DECIMAL
 			{
 			mMINUS(); 
 
@@ -1906,12 +1906,12 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = VARNAME;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:835:3: ( ALPHA ( CHAR )* )
-			// TurtleOBDA.g:835:5: ALPHA ( CHAR )*
+			// TurtleOBDA.g:837:3: ( ALPHA ( CHAR )* )
+			// TurtleOBDA.g:837:5: ALPHA ( CHAR )*
 			{
 			mALPHA(); 
 
-			// TurtleOBDA.g:835:11: ( CHAR )*
+			// TurtleOBDA.g:837:11: ( CHAR )*
 			loop17:
 			while (true) {
 				int alt17=2;
@@ -1954,8 +1954,8 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ECHAR"
 	public final void mECHAR() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:839:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
-			// TurtleOBDA.g:839:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
+			// TurtleOBDA.g:841:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
+			// TurtleOBDA.g:841:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
 			{
 			match('\\'); 
 			if ( input.LA(1)=='\"'||input.LA(1)=='\''||input.LA(1)=='\\'||input.LA(1)=='b'||input.LA(1)=='f'||input.LA(1)=='n'||input.LA(1)=='r'||input.LA(1)=='t' ) {
@@ -1978,12 +1978,12 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "SCHEMA"
 	public final void mSCHEMA() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:842:16: ( ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )* )
-			// TurtleOBDA.g:842:18: ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )*
+			// TurtleOBDA.g:844:16: ( ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )* )
+			// TurtleOBDA.g:844:18: ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )*
 			{
 			mALPHA(); 
 
-			// TurtleOBDA.g:842:24: ( ALPHANUM | PLUS | MINUS | PERIOD )*
+			// TurtleOBDA.g:844:24: ( ALPHANUM | PLUS | MINUS | PERIOD )*
 			loop18:
 			while (true) {
 				int alt18=2;
@@ -2024,7 +2024,7 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "URI_PATH"
 	public final void mURI_PATH() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:844:18: ( ( ALPHANUM | UNDERSCORE | MINUS | COLON | PERIOD | HASH | QUESTION | SLASH ) )
+			// TurtleOBDA.g:846:18: ( ( ALPHANUM | UNDERSCORE | MINUS | COLON | PERIOD | HASH | QUESTION | SLASH ) )
 			// TurtleOBDA.g:
 			{
 			if ( input.LA(1)=='#'||(input.LA(1) >= '-' && input.LA(1) <= ':')||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
@@ -2047,7 +2047,7 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ID_START"
 	public final void mID_START() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:846:18: ( ( ALPHA | UNDERSCORE ) )
+			// TurtleOBDA.g:848:18: ( ( ALPHA | UNDERSCORE ) )
 			// TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
@@ -2070,7 +2070,7 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ID_CORE"
 	public final void mID_CORE() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:848:17: ( ( ID_START | DIGIT ) )
+			// TurtleOBDA.g:850:17: ( ( ID_START | DIGIT ) )
 			// TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
@@ -2093,12 +2093,12 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ID"
 	public final void mID() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:850:12: ( ID_START ( ID_CORE )* )
-			// TurtleOBDA.g:850:14: ID_START ( ID_CORE )*
+			// TurtleOBDA.g:852:12: ( ID_START ( ID_CORE )* )
+			// TurtleOBDA.g:852:14: ID_START ( ID_CORE )*
 			{
 			mID_START(); 
 
-			// TurtleOBDA.g:850:23: ( ID_CORE )*
+			// TurtleOBDA.g:852:23: ( ID_CORE )*
 			loop19:
 			while (true) {
 				int alt19=2;
@@ -2139,7 +2139,7 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "NAME_START_CHAR"
 	public final void mNAME_START_CHAR() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:852:25: ( ( ALPHA | UNDERSCORE ) )
+			// TurtleOBDA.g:854:25: ( ( ALPHA | UNDERSCORE ) )
 			// TurtleOBDA.g:
 			{
 			if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
@@ -2162,7 +2162,7 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "NAME_CHAR"
 	public final void mNAME_CHAR() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:854:19: ( ( NAME_START_CHAR | DIGIT | UNDERSCORE | MINUS | PERIOD | HASH | QUESTION | SLASH | PERCENT | EQUALS | SEMI ) )
+			// TurtleOBDA.g:856:19: ( ( NAME_START_CHAR | DIGIT | UNDERSCORE | MINUS | PERIOD | HASH | QUESTION | SLASH | PERCENT | EQUALS | SEMI ) )
 			// TurtleOBDA.g:
 			{
 			if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
@@ -2187,12 +2187,12 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = NCNAME;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:857:3: ( NAME_START_CHAR ( NAME_CHAR )* )
-			// TurtleOBDA.g:857:5: NAME_START_CHAR ( NAME_CHAR )*
+			// TurtleOBDA.g:859:3: ( NAME_START_CHAR ( NAME_CHAR )* )
+			// TurtleOBDA.g:859:5: NAME_START_CHAR ( NAME_CHAR )*
 			{
 			mNAME_START_CHAR(); 
 
-			// TurtleOBDA.g:857:21: ( NAME_CHAR )*
+			// TurtleOBDA.g:859:21: ( NAME_CHAR )*
 			loop20:
 			while (true) {
 				int alt20=2;
@@ -2237,10 +2237,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = NCNAME_EXT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:861:3: ( ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )* )
-			// TurtleOBDA.g:861:5: ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )*
+			// TurtleOBDA.g:863:3: ( ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )* )
+			// TurtleOBDA.g:863:5: ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )*
 			{
-			// TurtleOBDA.g:861:5: ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )*
+			// TurtleOBDA.g:863:5: ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )*
 			loop21:
 			while (true) {
 				int alt21=2;
@@ -2285,12 +2285,12 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = NAMESPACE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:865:3: ( NAME_START_CHAR ( NAME_CHAR )* COLON )
-			// TurtleOBDA.g:865:5: NAME_START_CHAR ( NAME_CHAR )* COLON
+			// TurtleOBDA.g:867:3: ( NAME_START_CHAR ( NAME_CHAR )* COLON )
+			// TurtleOBDA.g:867:5: NAME_START_CHAR ( NAME_CHAR )* COLON
 			{
 			mNAME_START_CHAR(); 
 
-			// TurtleOBDA.g:865:21: ( NAME_CHAR )*
+			// TurtleOBDA.g:867:21: ( NAME_CHAR )*
 			loop22:
 			while (true) {
 				int alt22=2;
@@ -2337,10 +2337,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PREFIXED_NAME;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:869:3: ( ( NCNAME )? COLON NCNAME_EXT )
-			// TurtleOBDA.g:869:5: ( NCNAME )? COLON NCNAME_EXT
+			// TurtleOBDA.g:871:3: ( ( NCNAME )? COLON NCNAME_EXT )
+			// TurtleOBDA.g:871:5: ( NCNAME )? COLON NCNAME_EXT
 			{
-			// TurtleOBDA.g:869:5: ( NCNAME )?
+			// TurtleOBDA.g:871:5: ( NCNAME )?
 			int alt23=2;
 			int LA23_0 = input.LA(1);
 			if ( ((LA23_0 >= 'A' && LA23_0 <= 'Z')||LA23_0=='_'||(LA23_0 >= 'a' && LA23_0 <= 'z')||(LA23_0 >= '\u00C0' && LA23_0 <= '\u00D6')||(LA23_0 >= '\u00D8' && LA23_0 <= '\u00F6')||(LA23_0 >= '\u00F8' && LA23_0 <= '\u02FF')||(LA23_0 >= '\u0370' && LA23_0 <= '\u037D')||(LA23_0 >= '\u037F' && LA23_0 <= '\u1FFF')||(LA23_0 >= '\u200C' && LA23_0 <= '\u200D')||(LA23_0 >= '\u2070' && LA23_0 <= '\u218F')||(LA23_0 >= '\u2C00' && LA23_0 <= '\u2FEF')||(LA23_0 >= '\u3001' && LA23_0 <= '\uD7FF')||(LA23_0 >= '\uF900' && LA23_0 <= '\uFDCF')||(LA23_0 >= '\uFDF0' && LA23_0 <= '\uFFFD')) ) {
@@ -2348,7 +2348,7 @@ public class TurtleOBDALexer extends Lexer {
 			}
 			switch (alt23) {
 				case 1 :
-					// TurtleOBDA.g:869:5: NCNAME
+					// TurtleOBDA.g:871:5: NCNAME
 					{
 					mNCNAME(); 
 
@@ -2377,11 +2377,11 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_WITH_QUOTE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:873:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
-			// TurtleOBDA.g:873:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
+			// TurtleOBDA.g:875:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
+			// TurtleOBDA.g:875:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
 			{
 			match('\''); 
-			// TurtleOBDA.g:873:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+			// TurtleOBDA.g:875:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
 			loop24:
 			while (true) {
 				int alt24=3;
@@ -2398,7 +2398,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt24) {
 				case 1 :
-					// TurtleOBDA.g:873:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
+					// TurtleOBDA.g:875:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '&')||(input.LA(1) >= '(' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -2411,7 +2411,7 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// TurtleOBDA.g:873:87: ECHAR
+					// TurtleOBDA.g:875:87: ECHAR
 					{
 					mECHAR(); 
 
@@ -2440,11 +2440,11 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_WITH_QUOTE_DOUBLE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:877:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
-			// TurtleOBDA.g:877:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
+			// TurtleOBDA.g:879:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
+			// TurtleOBDA.g:879:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
 			{
 			match('\"'); 
-			// TurtleOBDA.g:877:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+			// TurtleOBDA.g:879:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
 			loop25:
 			while (true) {
 				int alt25=3;
@@ -2461,7 +2461,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt25) {
 				case 1 :
-					// TurtleOBDA.g:877:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+					// TurtleOBDA.g:879:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -2474,7 +2474,7 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// TurtleOBDA.g:877:87: ECHAR
+					// TurtleOBDA.g:879:87: ECHAR
 					{
 					mECHAR(); 
 
@@ -2503,11 +2503,11 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_WITH_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:881:3: ( '<' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '>' )
-			// TurtleOBDA.g:881:5: '<' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '>'
+			// TurtleOBDA.g:883:3: ( '<' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '>' )
+			// TurtleOBDA.g:883:5: '<' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '>'
 			{
 			match('<'); 
-			// TurtleOBDA.g:881:9: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+			// TurtleOBDA.g:883:9: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
 			loop26:
 			while (true) {
 				int alt26=3;
@@ -2524,7 +2524,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt26) {
 				case 1 :
-					// TurtleOBDA.g:881:39: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+					// TurtleOBDA.g:883:39: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -2537,7 +2537,7 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// TurtleOBDA.g:881:86: ECHAR
+					// TurtleOBDA.g:883:86: ECHAR
 					{
 					mECHAR(); 
 
@@ -2566,11 +2566,11 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_WITH_CURLY_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:885:3: ( '{' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '}' )
-			// TurtleOBDA.g:885:5: '{' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '}'
+			// TurtleOBDA.g:887:3: ( '{' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '}' )
+			// TurtleOBDA.g:887:5: '{' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '}'
 			{
 			match('{'); 
-			// TurtleOBDA.g:885:9: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+			// TurtleOBDA.g:887:9: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
 			loop27:
 			while (true) {
 				int alt27=3;
@@ -2587,7 +2587,7 @@ public class TurtleOBDALexer extends Lexer {
 
 				switch (alt27) {
 				case 1 :
-					// TurtleOBDA.g:885:39: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+					// TurtleOBDA.g:887:39: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -2600,7 +2600,7 @@ public class TurtleOBDALexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// TurtleOBDA.g:885:86: ECHAR
+					// TurtleOBDA.g:887:86: ECHAR
 					{
 					mECHAR(); 
 
@@ -2629,8 +2629,8 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_URI;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:889:3: ( SCHEMA COLON DOUBLE_SLASH ( URI_PATH )* )
-			// TurtleOBDA.g:889:5: SCHEMA COLON DOUBLE_SLASH ( URI_PATH )*
+			// TurtleOBDA.g:891:3: ( SCHEMA COLON DOUBLE_SLASH ( URI_PATH )* )
+			// TurtleOBDA.g:891:5: SCHEMA COLON DOUBLE_SLASH ( URI_PATH )*
 			{
 			mSCHEMA(); 
 
@@ -2638,7 +2638,7 @@ public class TurtleOBDALexer extends Lexer {
 
 			mDOUBLE_SLASH(); 
 
-			// TurtleOBDA.g:889:31: ( URI_PATH )*
+			// TurtleOBDA.g:891:31: ( URI_PATH )*
 			loop28:
 			while (true) {
 				int alt28=2;
@@ -2683,10 +2683,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = WS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:892:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
-			// TurtleOBDA.g:892:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+			// TurtleOBDA.g:894:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+			// TurtleOBDA.g:894:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
 			{
-			// TurtleOBDA.g:892:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+			// TurtleOBDA.g:894:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
 			int cnt30=0;
 			loop30:
 			while (true) {
@@ -2711,21 +2711,21 @@ public class TurtleOBDALexer extends Lexer {
 				}
 				switch (alt30) {
 				case 1 :
-					// TurtleOBDA.g:892:6: ' '
+					// TurtleOBDA.g:894:6: ' '
 					{
 					match(' '); 
 					}
 					break;
 				case 2 :
-					// TurtleOBDA.g:892:10: '\\t'
+					// TurtleOBDA.g:894:10: '\\t'
 					{
 					match('\t'); 
 					}
 					break;
 				case 3 :
-					// TurtleOBDA.g:892:15: ( '\\n' | '\\r' ( '\\n' ) )
+					// TurtleOBDA.g:894:15: ( '\\n' | '\\r' ( '\\n' ) )
 					{
-					// TurtleOBDA.g:892:15: ( '\\n' | '\\r' ( '\\n' ) )
+					// TurtleOBDA.g:894:15: ( '\\n' | '\\r' ( '\\n' ) )
 					int alt29=2;
 					int LA29_0 = input.LA(1);
 					if ( (LA29_0=='\n') ) {
@@ -2743,17 +2743,17 @@ public class TurtleOBDALexer extends Lexer {
 
 					switch (alt29) {
 						case 1 :
-							// TurtleOBDA.g:892:16: '\\n'
+							// TurtleOBDA.g:894:16: '\\n'
 							{
 							match('\n'); 
 							}
 							break;
 						case 2 :
-							// TurtleOBDA.g:892:21: '\\r' ( '\\n' )
+							// TurtleOBDA.g:894:21: '\\r' ( '\\n' )
 							{
 							match('\r'); 
-							// TurtleOBDA.g:892:25: ( '\\n' )
-							// TurtleOBDA.g:892:26: '\\n'
+							// TurtleOBDA.g:894:25: ( '\\n' )
+							// TurtleOBDA.g:894:26: '\\n'
 							{
 							match('\n'); 
 							}
@@ -3284,7 +3284,7 @@ public class TurtleOBDALexer extends Lexer {
 		}
 		@Override
 		public String getDescription() {
-			return "799:1: DOUBLE : ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* );";
+			return "801:1: DOUBLE : ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* );";
 		}
 	}
 

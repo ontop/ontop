@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 
@@ -40,15 +39,6 @@ public class UriTemplateMatcher {
     }
 
     private final Map<Pattern, ImmutableFunctionalTerm> uriTemplateMatcher = new HashMap<>();
-
-    public static UriTemplateMatcher createFromTargetAtoms(Stream<TargetAtom> targetAtoms) {
-        return create(targetAtoms
-                .map(TargetAtom::getSubstitution)
-                // URI constructors can be found in the co-domain of the substitution
-                .flatMap(s -> s.getImmutableMap().values().stream())
-                .filter(t -> t instanceof ImmutableFunctionalTerm)
-                .map(t -> (ImmutableFunctionalTerm) t));
-    }
 
     /**
      * TODO: refactor using streaming.

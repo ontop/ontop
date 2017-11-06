@@ -1,14 +1,17 @@
 package it.unibz.inf.ontop.spec.ontology.owlapi;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.owlapi.model.*;
 
+import java.util.Optional;
+
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class OWLAPITranslatorHelper {
 
@@ -52,8 +55,13 @@ public class OWLAPITranslatorHelper {
 			c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), object.getLang());
 		}
 		else {
-			Predicate.COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
-			c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), type);
+			Optional<Predicate.COL_TYPE> type = TYPE_FACTORY.getDatatype(object.getDatatype().toStringID());
+			if(type.isPresent()){
+				c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), type.get());
+			}
+			else {
+				c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral());
+			}
 		}
 		URIConstant c1 = getIndividual(ax.getSubject());
 
@@ -175,8 +183,11 @@ public class OWLAPITranslatorHelper {
 
 					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), owlLiteral.getLang());
 				} else {
-					Predicate.COL_TYPE type = OWLTypeMapper.getType(owlLiteral.getDatatype());
-					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), type);
+					Optional<Predicate.COL_TYPE> type = TYPE_FACTORY.getDatatype(owlLiteral.getDatatype().toStringID());
+					if(!type.isPresent()){
+						return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral());
+					}
+					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), type.get());
 				}
 
 			} else {

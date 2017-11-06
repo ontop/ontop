@@ -51,7 +51,7 @@ public enum ExpressionOperation implements OperationPredicate {
 	SUBSTR3("SUBSTR", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.INTEGER, COL_TYPE.INTEGER),
 	STRBEFORE("STRBEFORE", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	STRAFTER("STRAFTER", TermTypeInferenceRules.FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	REPLACE("REPLACE", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	REPLACE("REPLACE", TermTypeInferenceRules.STRING_LANG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	CONCAT("CONCAT", TermTypeInferenceRules.STRING_LANG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	ENCODE_FOR_URI("ENCODE_FOR_URI", TermTypeInferenceRules.PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
 
@@ -83,6 +83,7 @@ public enum ExpressionOperation implements OperationPredicate {
 
 	/* SPARQL built-in predicates */
 
+	IS_NUMERIC("isNumeric", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null),
 	IS_LITERAL("isLiteral", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null),
 	IS_IRI("isIRI", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null),
 	IS_BLANK("isBlank", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, null),
@@ -137,8 +138,6 @@ public enum ExpressionOperation implements OperationPredicate {
 		this.argTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2),
 				Optional.ofNullable(arg3), Optional.ofNullable(arg4));
 	}
-
-
 
 	private final String name;
 	private final TermTypeInferenceRule termTypeInferenceRule;

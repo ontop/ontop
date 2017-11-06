@@ -38,6 +38,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryExcept
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import it.unibz.inf.ontop.utils.URITemplates;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -95,7 +96,7 @@ public class MetaMappingExpander {
 				String id = mapping.getId();
 				OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 
-				try (Connection connection = createConnection(settings)) {
+				try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
 
 					for (ImmutableFunctionalTerm atom : mapping.getTargetAtoms()) {
 						if (!atom.getFunctionSymbol().isTriplePredicate()) {
@@ -395,10 +396,5 @@ public class MetaMappingExpander {
 			String uriTemplate = ((ValueConstant) templateTerm).getValue();
 			return URITemplates.format(uriTemplate, values);
 		}
-	}
-
-	private static Connection createConnection(OntopMappingSQLSettings settings) throws SQLException {
-		return DriverManager.getConnection(settings.getJdbcUrl(),
-				settings.getJdbcUser(), settings.getJdbcPassword());
 	}
 }

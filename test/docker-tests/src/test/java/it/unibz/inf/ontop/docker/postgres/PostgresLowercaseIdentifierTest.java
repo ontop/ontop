@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.docker.postgres;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 /***
  * Tests that oracle identifiers for tables and columns are treated
@@ -42,6 +43,7 @@ public class PostgresLowercaseIdentifierTest extends AbstractVirtualModeTest {
 	 * (Postgres converts unquoted identifer letters to lowercase)
 	 * @throws Exception
 	 */
+	@Test
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
 		checkThereIsAtLeastOneResult(query);
