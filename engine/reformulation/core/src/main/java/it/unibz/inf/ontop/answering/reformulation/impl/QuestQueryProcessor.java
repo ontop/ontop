@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
@@ -74,6 +75,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final UnifierUtilities unifierUtilities;
 	private final SubstitutionUtilities substitutionUtilities;
 	private final CQCUtilities cqcUtilities;
+	private final ImmutabilityTools immutabilityTools;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -89,7 +91,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 								AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
 								DatalogNormalizer datalogNormalizer, EQNormalizer eqNormalizer,
 								UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
-								CQCUtilities cqcUtilities) {
+								CQCUtilities cqcUtilities, ImmutabilityTools immutabilityTools) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
@@ -100,6 +102,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
 		this.cqcUtilities = cqcUtilities;
+		this.immutabilityTools = immutabilityTools;
 		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
@@ -224,7 +227,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
-				intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false).optimize(intermediateQuery);
+				/*
+				 * TODO: USE INJECTION!
+				 */
+				intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false, immutabilityTools).optimize(intermediateQuery);
 				log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
 
 				intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
@@ -31,25 +32,25 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     protected InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition,
                                 TermNullabilityEvaluator nullabilityEvaluator,
                                 TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                                ExpressionEvaluator defaultExpressionEvaluator) {
+                                ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator);
+                defaultExpressionEvaluator, immutabilityTools);
     }
 
     @AssistedInject
     private InnerJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
                               TermNullabilityEvaluator nullabilityEvaluator,
                               TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                              ExpressionEvaluator defaultExpressionEvaluator) {
+                              ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools) {
         super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator);
+                defaultExpressionEvaluator, immutabilityTools);
     }
 
     @AssistedInject
     private InnerJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
                               TypeFactory typeFactory, DatalogTools datalogTools,
-                              ExpressionEvaluator defaultExpressionEvaluator) {
-        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator);
+                              ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools) {
+        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator, immutabilityTools);
     }
 
     @Override
@@ -60,7 +61,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public InnerJoinNode clone() {
         return new InnerJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(),
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator());
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools());
     }
 
     @Override
@@ -71,7 +72,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new InnerJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator(),
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator());
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools());
     }
 
     @Override
@@ -203,4 +204,5 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     public String toString() {
         return JOIN_NODE_STR + getOptionalFilterString();
     }
+
 }

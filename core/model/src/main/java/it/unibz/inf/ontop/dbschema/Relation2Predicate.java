@@ -7,24 +7,25 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Term;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 @Singleton
 public class Relation2Predicate {
 
 	private final AtomFactory atomFactory;
+	private final TermFactory termFactory;
 
 	@Inject
-	private Relation2Predicate(AtomFactory atomFactory) {
+	private Relation2Predicate(AtomFactory atomFactory, TermFactory termFactory) {
 		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
 	}
 
 	public Predicate createPredicateFromRelation(RelationDefinition r) {
 		
-		Predicate pred = TERM_FACTORY.getPredicate(extractPredicateName(r), r.getAttributes().size());
+		Predicate pred = termFactory.getPredicate(extractPredicateName(r), r.getAttributes().size());
 		return pred;
 	}
 
@@ -47,7 +48,7 @@ public class Relation2Predicate {
 			throw new IllegalArgumentException("The number of terms does not match the arity of relation");
 		
 		Predicate pred = createPredicateFromRelation(r);
-		return TERM_FACTORY.getFunction(pred, terms);
+		return termFactory.getFunction(pred, terms);
 	}
 	
 	/**

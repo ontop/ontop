@@ -228,7 +228,8 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                         .flatMap(ax -> ax.getTargetAtoms().stream())
                         .flatMap(atom -> atom.getArguments().stream())
                         .filter(t -> t instanceof ImmutableFunctionalTerm)
-                        .map(t -> (ImmutableFunctionalTerm) t));
+                        .map(t -> (ImmutableFunctionalTerm) t),
+                termFactory);
 
         MappingMetadata metadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
         return ppMappingFactory.createSQLPreProcessedMapping(mappingAxioms, metadata);

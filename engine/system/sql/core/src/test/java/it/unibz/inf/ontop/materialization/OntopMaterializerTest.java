@@ -222,7 +222,8 @@ public class OntopMaterializerTest {
 				body.stream()
 						.flatMap(atom -> atom.getArguments().stream())
 						.filter(t -> t instanceof ImmutableFunctionalTerm)
-						.map(t -> (ImmutableFunctionalTerm) t));
+						.map(t -> (ImmutableFunctionalTerm) t),
+				termFactory);
 
 		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);

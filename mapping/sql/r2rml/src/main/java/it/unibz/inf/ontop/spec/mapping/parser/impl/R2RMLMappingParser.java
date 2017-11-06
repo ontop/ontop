@@ -84,7 +84,8 @@ public class R2RMLMappingParser implements SQLMappingParser {
                             .flatMap(ax -> ax.getTargetAtoms().stream())
                             .flatMap(atom -> atom.getArguments().stream())
                             .filter(t -> t instanceof ImmutableFunctionalTerm)
-                            .map(t -> (ImmutableFunctionalTerm) t));
+                            .map(t -> (ImmutableFunctionalTerm) t),
+                    termFactory);
 
             //TODO: try to extract prefixes from the R2RML mappings
             PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());

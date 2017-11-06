@@ -26,17 +26,20 @@ public class ImmutableSubstitutionTools {
 
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private ImmutableSubstitutionTools(SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+    private ImmutableSubstitutionTools(SubstitutionFactory substitutionFactory, TermFactory termFactory,
+                                       ImmutabilityTools immutabilityTools) {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     ImmutableSubstitution<ImmutableTerm> convertMutableSubstitution(Substitution substitution) {
         ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
         for (Map.Entry<Variable, Term> entry : substitution.getMap().entrySet()) {
-            ImmutableTerm immutableValue = ImmutabilityTools.convertIntoImmutableTerm(entry.getValue());
+            ImmutableTerm immutableValue = immutabilityTools.convertIntoImmutableTerm(entry.getValue());
 
             substitutionMapBuilder.put(entry.getKey(), immutableValue);
 

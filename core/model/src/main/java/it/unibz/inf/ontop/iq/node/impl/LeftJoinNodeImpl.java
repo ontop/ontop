@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -26,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.foldBooleanExpressions;
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.REPLACE_BY_NEW_NODE;
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.REPLACE_BY_UNIQUE_NON_EMPTY_CHILD;
@@ -45,36 +45,40 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
     private final SubstitutionFactory substitutionFactory;
+    private final ImmutabilityTools immutabilityTools;
     private final ValueConstant valueNull;
 
     @AssistedInject
     private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                             ExpressionEvaluator defaultExpressionEvaluator) {
-        super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator);
+                             ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools) {
+        super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator, immutabilityTools);
         this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
+        this.immutabilityTools = immutabilityTools;
     }
 
     @AssistedInject
     private LeftJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                             ExpressionEvaluator defaultExpressionEvaluator) {
+                             ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools) {
         super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator);
+                defaultExpressionEvaluator, immutabilityTools);
         this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
+        this.immutabilityTools = immutabilityTools;
     }
 
     @AssistedInject
     private LeftJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                             ExpressionEvaluator defaultExpressionEvaluator) {
-        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator);
+                             ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools) {
+        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator, immutabilityTools);
         this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
+        this.immutabilityTools = immutabilityTools;
     }
 
     @Override
@@ -85,7 +89,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public LeftJoinNode clone() {
         return new LeftJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(), substitutionFactory,
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator());
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), immutabilityTools);
     }
 
     @Override
@@ -96,7 +100,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new LeftJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator(), substitutionFactory,
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator());
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), immutabilityTools);
     }
 
     @Override
@@ -129,7 +133,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         /**
          * New equalities (which could not be propagated)
          */
-        Optional<ImmutableExpression> optionalNewEqualities = foldBooleanExpressions(substitutionEntries.stream()
+        Optional<ImmutableExpression> optionalNewEqualities = immutabilityTools.foldBooleanExpressions(substitutionEntries.stream()
                 .filter(e -> leftVariables.contains(e.getKey()))
                 .map(e -> termFactory.getImmutableExpression(
                         ExpressionOperation.EQ, e.getKey(), e.getValue())));

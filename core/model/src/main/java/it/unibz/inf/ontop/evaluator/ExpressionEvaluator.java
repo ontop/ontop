@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.evaluator;
  */
 
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.evaluator.impl.ExpressionNormalizerImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -51,10 +50,13 @@ public class ExpressionEvaluator {
 	private final ValueConstant valueTrue;
 	private final ValueConstant valueNull;
 	private final UnifierUtilities unifierUtilities;
+	private final ExpressionNormalizer normalizer;
+	private final ImmutabilityTools immutabilityTools;
 
 	@Inject
 	private ExpressionEvaluator(DatalogTools datalogTools, TermFactory termFactory, TypeFactory typeFactory,
-							   UnifierUtilities unifierUtilities) {
+								UnifierUtilities unifierUtilities, ExpressionNormalizer normalizer,
+								ImmutabilityTools immutabilityTools) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.datalogTools = datalogTools;
@@ -62,22 +64,26 @@ public class ExpressionEvaluator {
 		valueTrue = termFactory.getBooleanConstant(true);
 		valueNull = termFactory.getNullConstant();
 		this.unifierUtilities = unifierUtilities;
+		this.normalizer = normalizer;
+		this.immutabilityTools = immutabilityTools;
 	}
 
 	public static class EvaluationResult {
 		private final Optional<ImmutableExpression> optionalExpression;
 		private final Optional<Boolean> optionalBooleanValue;
 
-		private static final ExpressionNormalizer NORMALIZER = new ExpressionNormalizerImpl();
+		private final ExpressionNormalizer normalizer;
 		private final TermFactory termFactory;
 
-		private EvaluationResult(ImmutableExpression expression, TermFactory termFactory) {
-			optionalExpression = Optional.of(NORMALIZER.normalize(expression));
+		private EvaluationResult(ImmutableExpression expression, ExpressionNormalizer normalizer, TermFactory termFactory) {
+			optionalExpression = Optional.of(normalizer.normalize(expression));
+			this.normalizer = normalizer;
 			this.termFactory = termFactory;
 			optionalBooleanValue = Optional.empty();
 		}
 
-		private EvaluationResult(boolean value, TermFactory termFactory) {
+		private EvaluationResult(boolean value, ExpressionNormalizer normalizer, TermFactory termFactory) {
+			this.normalizer = normalizer;
 			this.termFactory = termFactory;
 			optionalExpression = Optional.empty();
 			optionalBooleanValue = Optional.of(value);
@@ -85,9 +91,11 @@ public class ExpressionEvaluator {
 
 		/**
 		 * Evaluated as valueNull
+		 * @param normalizer
 		 * @param termFactory
 		 */
-		private EvaluationResult(TermFactory termFactory) {
+		private EvaluationResult(ExpressionNormalizer normalizer, TermFactory termFactory) {
+			this.normalizer = normalizer;
 			this.termFactory = termFactory;
 			optionalExpression = Optional.empty();
 			optionalBooleanValue = Optional.empty();
@@ -128,7 +136,7 @@ public class ExpressionEvaluator {
 	}
 
 	public EvaluationResult evaluateExpression(ImmutableExpression expression) {
-		Expression mutableExpression = ImmutabilityTools.convertToMutableBooleanExpression(expression);
+		Expression mutableExpression = immutabilityTools.convertToMutableBooleanExpression(expression);
 
 		Term evaluatedTerm = evalOperation(mutableExpression);
 
@@ -146,21 +154,21 @@ public class ExpressionEvaluator {
 
 			return new EvaluationResult(termFactory.getImmutableExpression(
 					termFactory.getExpression((OperationPredicate) predicate,
-							evaluatedFunctionalTerm.getTerms())), termFactory);
+							evaluatedFunctionalTerm.getTerms())), normalizer, termFactory);
 		}
 		else if (evaluatedTerm instanceof Constant) {
 			if (evaluatedTerm == valueFalse) {
-				return new EvaluationResult(false, termFactory);
+				return new EvaluationResult(false, normalizer, termFactory);
 			}
 			else if (evaluatedTerm == valueNull)
-				return new EvaluationResult(termFactory);
+				return new EvaluationResult(normalizer, termFactory);
 			else {
-				return new EvaluationResult(true, termFactory);
+				return new EvaluationResult(true, normalizer, termFactory);
 			}
 		}
 		else if (evaluatedTerm instanceof Variable) {
 		    return new EvaluationResult(termFactory.getImmutableExpression(ExpressionOperation.IS_TRUE,
-                    ImmutabilityTools.convertIntoImmutableTerm(evaluatedTerm)), termFactory);
+                    immutabilityTools.convertIntoImmutableTerm(evaluatedTerm)), normalizer, termFactory);
         }
 		else {
 			throw new RuntimeException("Unexpected term returned after evaluation: " + evaluatedTerm);
@@ -1091,6 +1099,6 @@ public class ExpressionEvaluator {
 
 	@Override
 	public ExpressionEvaluator clone() {
-		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unifierUtilities);
+		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unifierUtilities, normalizer, immutabilityTools);
 	}
 }

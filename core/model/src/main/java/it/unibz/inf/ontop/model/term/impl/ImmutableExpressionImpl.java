@@ -17,10 +17,6 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
         super(functor, terms);
     }
 
-    protected ImmutableExpressionImpl(Expression expression) {
-        super(expression);
-    }
-
     @Override
     public ImmutableExpression clone() {
         return this;

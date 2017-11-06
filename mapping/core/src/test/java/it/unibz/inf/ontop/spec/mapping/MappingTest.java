@@ -138,7 +138,7 @@ public class MappingTest {
          * Renaming
          */
         MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
-                UriTemplateMatcher.create(Stream.of()));
+                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY));
         ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap = mappingAssertions.stream()
                 .collect(ImmutableCollectors.toMap(
                         q -> q.getProjectionAtom().getPredicate(),
@@ -191,7 +191,7 @@ public class MappingTest {
         mappingAssertions.add(query);
 
         MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
-                UriTemplateMatcher.create(Stream.of()));
+                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY));
         ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap = mappingAssertions.stream()
                 .collect(ImmutableCollectors.toMap(
                         q -> q.getProjectionAtom().getPredicate(),

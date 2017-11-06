@@ -1,16 +1,24 @@
 package it.unibz.inf.ontop.evaluator.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
-
+@Singleton
 public class ExpressionNormalizerImpl implements ExpressionNormalizer {
+
+    private final TermFactory termFactory;
+
+    @Inject
+    private ExpressionNormalizerImpl(TermFactory termFactory) {
+        this.termFactory = termFactory;
+    }
 
     @Override
     public ImmutableExpression normalize(ImmutableExpression expression) {
@@ -37,7 +45,7 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
 
     private ImmutableExpression normalizeArguments(OperationPredicate functionSymbol,
                                                    ImmutableList<? extends ImmutableTerm> arguments) {
-        return TERM_FACTORY.getImmutableExpression(
+        return termFactory.getImmutableExpression(
                 functionSymbol,
                 arguments.stream()
                     .map(this::normalizeArgument)
@@ -55,7 +63,7 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
 
     private ImmutableExpression normalizeCommutative(OperationPredicate functionSymbol,
                                                      ImmutableList<? extends ImmutableTerm> arguments) {
-        return TERM_FACTORY.getImmutableExpression(functionSymbol, sortArguments(arguments));
+        return termFactory.getImmutableExpression(functionSymbol, sortArguments(arguments));
     }
 
     private ImmutableList<? extends ImmutableTerm> sortArguments(ImmutableList<? extends ImmutableTerm> arguments) {
@@ -111,7 +119,7 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
         else if (a2 instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm f2 = (ImmutableFunctionalTerm) a2;
 
-            /**
+            /*
              * Non-ground first (seems to be required by the current ExpressionEvaluator...)
              */
             if (f1.isGround() && (!f2.isGround()))
@@ -130,7 +138,7 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
             if (arityDifference != 0)
                 return arityDifference;
             for(int i=0; i < arguments1.size(); i++) {
-                /**
+                /*
                  * Recursive (not tail)
                  */
                 int argComparison = compareArguments(arguments1.get(i), arguments2.get(i));

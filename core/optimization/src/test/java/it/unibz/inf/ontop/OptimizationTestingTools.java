@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
@@ -37,6 +38,7 @@ public class OptimizationTestingTools {
     public static final Relation2Predicate RELATION_2_PREDICATE;
     public static final PullOutVariableOptimizer PULL_OUT_VARIABLE_OPTIMIZER;
     public static final DatalogConversionTools DATALOG_CONVERSION_TOOLS;
+    public static final ImmutabilityTools IMMUTABILITY_TOOLS;
     public static final DatalogTools DATALOG_TOOLS;
     public static final ExpressionEvaluator DEFAULT_EXPRESSION_EVALUATOR;
     public static final ValueConstant NULL;
@@ -69,6 +71,7 @@ public class OptimizationTestingTools {
         
         PULL_OUT_VARIABLE_OPTIMIZER = injector.getInstance(PullOutVariableOptimizer.class);
         DATALOG_CONVERSION_TOOLS = injector.getInstance(DatalogConversionTools.class);
+        IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
 
         NULL = TERM_FACTORY.getNullConstant();
     }

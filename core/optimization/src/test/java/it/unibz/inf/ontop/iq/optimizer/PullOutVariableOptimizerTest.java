@@ -138,7 +138,7 @@ public class PullOutVariableOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
-        LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION1, EXPRESSION2));
+        LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1, EXPRESSION2));
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X0, Y1, Z));
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
@@ -187,7 +187,7 @@ public class PullOutVariableOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
-        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(ImmutabilityTools.foldBooleanExpressions(
+        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(
                 EXPRESSION1, EXPRESSION2, EXPRESSION_Z_Z2));
         ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X0, Z));
         ExtensionalDataNode newDataNode4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, W, Y1));
@@ -283,7 +283,7 @@ public class PullOutVariableOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
 
-        LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION1,
+        LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1,
                 EXPRESSION2, EXPRESSION7));
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(EXPRESSION4);
         ExtensionalDataNode dataNode3 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE5_PREDICATE, X, X2, Y));
@@ -380,7 +380,7 @@ public class PullOutVariableOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
-        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION1, EXPRESSION2));
+        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1, EXPRESSION2));
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X0, Z, Y1));
 
         queryBuilder2.init(projectionAtom2, constructionNode2);

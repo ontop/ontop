@@ -46,6 +46,7 @@ public class TermFactoryImpl implements TermFactory {
 	private final ValueConstant valueTrue;
 	private final ValueConstant valueFalse;
 	private final ValueConstant valueNull;
+	private final ImmutabilityTools immutabilityTools;
 
 	public static TermFactory getInstance() {
 		return INSTANCE;
@@ -58,6 +59,7 @@ public class TermFactoryImpl implements TermFactory {
 		this.valueTrue = new ValueConstantImpl("true", xsdBoolean);
 		this.valueFalse = new ValueConstantImpl("false", xsdBoolean);
 		this.valueNull = new ValueConstantImpl("null", TYPE_FACTORY.getXsdStringDatatype());
+		this.immutabilityTools = new ImmutabilityTools(this);
 	}
 
 	@Deprecated
@@ -184,10 +186,11 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableExpression getImmutableExpression(Expression expression) {
 		if (GroundTermTools.isGroundTerm(expression)) {
-			return new GroundExpressionImpl(expression);
+			return new GroundExpressionImpl(expression.getFunctionSymbol(),
+					(ImmutableList<? extends GroundTerm>)(ImmutableList<?>)convertTerms(expression));
 		}
 		else {
-			return new NonGroundExpressionImpl(expression);
+			return new NonGroundExpressionImpl(expression.getFunctionSymbol(), convertTerms(expression));
 		}
 	}
 
@@ -227,7 +230,7 @@ public class TermFactoryImpl implements TermFactory {
 			return new GroundFunctionalTermImpl(functionalTerm);
 		}
 		else {
-			return new NonGroundFunctionalTermImpl(functionalTerm);
+			return new NonGroundFunctionalTermImpl(functionalTerm.getFunctionSymbol(), convertTerms(functionalTerm));
 		}
 
 	}
@@ -432,6 +435,14 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ValueConstant getNullConstant() {
 		return valueNull;
+	}
+
+	private ImmutableList<ImmutableTerm> convertTerms(Function functionalTermToClone) {
+		ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
+		for (Term term : functionalTermToClone.getTerms()) {
+			builder.add(immutabilityTools.convertIntoImmutableTerm(term));
+		}
+		return builder.build();
 	}
 
 }

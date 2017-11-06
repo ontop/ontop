@@ -55,9 +55,11 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
 
 
     private final boolean pushAboveUnions;
+    private final ImmutabilityTools immutabilityTools;
 
-    public PushUpBooleanExpressionOptimizerImpl(boolean pushAboveUnions) {
+    public PushUpBooleanExpressionOptimizerImpl(boolean pushAboveUnions, ImmutabilityTools immutabilityTools) {
         this.pushAboveUnions = pushAboveUnions;
+        this.immutabilityTools = immutabilityTools;
     }
 
     @Override
@@ -231,7 +233,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
         }
 
         /* conjunction of all conjuncts to propagate */
-        ImmutableExpression conjunction = ImmutabilityTools.foldBooleanExpressions(propagatedExpressions.stream())
+        ImmutableExpression conjunction = immutabilityTools.foldBooleanExpressions(propagatedExpressions.stream())
                 .orElseThrow(() -> new IllegalStateException("The conjunction should be present"));
 
         Optional<Optional<PushUpBooleanExpressionProposal>> merge = providers.stream()
@@ -326,7 +328,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
                 .orElseThrow(() -> new IllegalStateException("The provider is expected to have a filtering condition"));
 
         // conjuncts which will not be propagated up from this child
-        return ImmutabilityTools.foldBooleanExpressions(
+        return immutabilityTools.foldBooleanExpressions(
                 fullBooleanExpression.flattenAND().stream()
                         .filter(e -> !propagatedExpressions.contains(e))
         );

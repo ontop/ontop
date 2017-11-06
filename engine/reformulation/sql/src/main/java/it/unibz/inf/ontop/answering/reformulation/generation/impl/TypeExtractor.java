@@ -30,13 +30,15 @@ public class TypeExtractor {
     private final TermType literalType;
     private final Relation2Predicate relation2Predicate;
     private final TermTypeInferenceTools termTypeInferenceTools;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
     private TypeExtractor(Relation2Predicate relation2Predicate, TermTypeInferenceTools termTypeInferenceTools,
-                          TypeFactory typeFactory) {
+                          TypeFactory typeFactory, ImmutabilityTools immutabilityTools) {
         this.relation2Predicate = relation2Predicate;
         this.termTypeInferenceTools = termTypeInferenceTools;
         this.literalType = typeFactory.getAbstractRDFSLiteral();
+        this.immutabilityTools = immutabilityTools;
     }
 
 
@@ -80,7 +82,7 @@ public class TypeExtractor {
                         rule -> rule,
                         // Value mapper
                         rule -> rule.getHead().getTerms().stream()
-                                .map(ImmutabilityTools::convertIntoImmutableTerm)
+                                .map(immutabilityTools::convertIntoImmutableTerm)
                                 .map(termTypeInferenceTools::inferType)
                                 .collect(ImmutableCollectors.toList())
                 ));
@@ -162,7 +164,7 @@ public class TypeExtractor {
     /**
      * Collects the proposed cast types by the definitions of the current predicate
      */
-    private static ImmutableMultimap<Integer, TermType> collectProposedCastTypes(
+    private ImmutableMultimap<Integer, TermType> collectProposedCastTypes(
             Collection<CQIE> samePredicateRules, ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
             Map<Predicate, ImmutableList<TermType>> alreadyKnownCastTypes) {
 
@@ -222,7 +224,7 @@ public class TypeExtractor {
      * Extracts the cast type of one projected variable
      * from the body atom that provides it.
      */
-    private static TermType getCastTypeFromSubRule(
+    private TermType getCastTypeFromSubRule(
             Term term,
             ImmutableList<Function> bodyDataAtoms,
             Map<Predicate, ImmutableList<TermType>> alreadyKnownCastTypes) {
@@ -252,7 +254,7 @@ public class TypeExtractor {
             throw new IllegalStateException("Unbounded variable: " + variable);
         }
         else if (term instanceof Expression) {
-            ImmutableExpression expression = (ImmutableExpression) ImmutabilityTools.convertIntoImmutableTerm(term);
+            ImmutableExpression expression = (ImmutableExpression) immutabilityTools.convertIntoImmutableTerm(term);
             ImmutableList<Optional<TermType>> argumentTypes = expression.getTerms().stream()
                     .map(t -> getCastTypeFromSubRule(t, bodyDataAtoms, alreadyKnownCastTypes))
                     .map(Optional::of)

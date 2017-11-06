@@ -140,7 +140,7 @@ public class SQLMappingParserUsingOwlTest {
     private void saveRegularFile() throws Exception {
         SQLPPMapping ppMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(),
                 specificationFactory.createMetadata(specificationFactory.createPrefixManager(ImmutableMap.of()),
-                        UriTemplateMatcher.create(Stream.of())));
+                        UriTemplateMatcher.create(Stream.of(), TERM_FACTORY)));
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
         writer.save(new File("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
     }

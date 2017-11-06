@@ -17,8 +17,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertToMutableFunction;
-
 /**
  * Tools for new-gen immutable unifying substitutions.
  */
@@ -30,15 +28,18 @@ public class ImmutableUnificationTools {
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableSubstitutionTools substitutionTools;
     private final UnifierUtilities unifierUtilities;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
     private ImmutableUnificationTools(TermFactory termFactory, AtomFactory atomFactory, SubstitutionFactory substitutionFactory,
-                                      ImmutableSubstitutionTools substitutionTools, UnifierUtilities unifierUtilities) {
+                                      ImmutableSubstitutionTools substitutionTools, UnifierUtilities unifierUtilities,
+                                      ImmutabilityTools immutabilityTools) {
         this.termFactory = termFactory;
         this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
         this.substitutionTools = substitutionTools;
         this.unifierUtilities = unifierUtilities;
+        this.immutabilityTools = immutabilityTools;
     }
 
     /**
@@ -141,7 +142,8 @@ public class ImmutableUnificationTools {
      *
      */
     public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableFunctionalTerm term1, ImmutableFunctionalTerm term2) {
-        Substitution mutableSubstitution = unifierUtilities.getMGU(convertToMutableFunction(term1), convertToMutableFunction(term2));
+        Substitution mutableSubstitution = unifierUtilities.getMGU(immutabilityTools.convertToMutableFunction(term1),
+                immutabilityTools.convertToMutableFunction(term2));
 
         if (mutableSubstitution == null) {
             return Optional.empty();
@@ -151,8 +153,8 @@ public class ImmutableUnificationTools {
 
     public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
         Substitution mutableSubstitution = unifierUtilities.getMGU(
-                convertToMutableFunction(atom1),
-                convertToMutableFunction(atom2));
+                immutabilityTools.convertToMutableFunction(atom1),
+                immutabilityTools.convertToMutableFunction(atom2));
 
         if (mutableSubstitution == null) {
             return Optional.empty();

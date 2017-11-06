@@ -50,6 +50,7 @@ public class MappingDataTypeCompletion {
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final TermTypeInferenceTools termTypeInferenceTools;
+    private final ImmutabilityTools immutabilityTools;
 
     /**
      * Constructs a new mapping data type resolution.
@@ -61,17 +62,20 @@ public class MappingDataTypeCompletion {
      * @param termFactory
      * @param typeFactory
      * @param termTypeInferenceTools
+     * @param immutabilityTools
      */
     public MappingDataTypeCompletion(DBMetadata metadata,
                                      boolean defaultDatatypeInferred, Relation2Predicate relation2Predicate,
                                      TermFactory termFactory, TypeFactory typeFactory,
-                                     TermTypeInferenceTools termTypeInferenceTools) {
+                                     TermTypeInferenceTools termTypeInferenceTools,
+                                     ImmutabilityTools immutabilityTools) {
         this.metadata = metadata;
         this.defaultDatatypeInferred = defaultDatatypeInferred;
         this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.termTypeInferenceTools = termTypeInferenceTools;
+        this.immutabilityTools = immutabilityTools;
     }
 
     public void insertDataTyping(CQIE rule) throws UnknownDatatypeException {
@@ -133,7 +137,7 @@ public class MappingDataTypeCompletion {
     */
     private void insertOperationDatatyping(Term term, Function atom, int position) throws UnknownDatatypeException {
 
-        ImmutableTerm immutableTerm = ImmutabilityTools.convertIntoImmutableTerm(term);
+        ImmutableTerm immutableTerm = immutabilityTools.convertIntoImmutableTerm(term);
 
         if (immutableTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm castTerm = (ImmutableFunctionalTerm) immutableTerm;

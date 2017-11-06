@@ -26,7 +26,6 @@ import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
-import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.foldBooleanExpressions;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static junit.framework.Assert.assertEquals;
@@ -1315,7 +1314,7 @@ public class RedundantSelfJoinTest {
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
-        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(foldBooleanExpressions(
+        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(
                 TERM_FACTORY.getImmutableExpression(EQ, N, ONE),
                 TERM_FACTORY.getImmutableExpression(EQ, O, ONE)));
         expectedQueryBuilder.addChild(newConstructionNode, newLJNode);

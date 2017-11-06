@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MappingMergingException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -23,11 +24,14 @@ public class MappingMergerImpl implements MappingMerger {
 
     private final SpecificationFactory specificationFactory;
     private final UnionBasedQueryMerger queryMerger;
+    private final TermFactory termFactory;
 
     @Inject
-    private MappingMergerImpl(SpecificationFactory specificationFactory, UnionBasedQueryMerger queryMerger) {
+    private MappingMergerImpl(SpecificationFactory specificationFactory, UnionBasedQueryMerger queryMerger,
+                              TermFactory termFactory) {
         this.specificationFactory = specificationFactory;
         this.queryMerger = queryMerger;
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -84,7 +88,8 @@ public class MappingMergerImpl implements MappingMerger {
     private UriTemplateMatcher mergeURITemplateMatchers(ImmutableSet<Mapping> mappings) {
         return UriTemplateMatcher.merge(
                 mappings.stream()
-                        .map(m -> m.getMetadata().getUriTemplateMatcher())
+                        .map(m -> m.getMetadata().getUriTemplateMatcher()),
+                termFactory
         );
     }
 

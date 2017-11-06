@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.substitution.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -21,8 +22,9 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     /**
      * Regular constructor
      */
-    protected InjectiveVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap, AtomFactory atomFactory) {
-        super(substitutionMap, atomFactory);
+    protected InjectiveVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap, AtomFactory atomFactory,
+                                               TermFactory termFactory) {
+        super(substitutionMap, atomFactory, termFactory);
         isEmpty = substitutionMap.isEmpty();
 
         /**
@@ -56,7 +58,7 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
                 substitutionMapBuilder.put(convertedVariable, convertedTargetTerm);
         }
 
-        return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build(), getAtomFactory());
+        return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build(), getAtomFactory(), getTermFactory());
     }
 
     @Override
@@ -69,7 +71,8 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
 
         return Optional.of(newMap)
                 .filter(InjectiveVar2VarSubstitutionImpl::isInjective)
-                .map(map -> (InjectiveVar2VarSubstitution) new InjectiveVar2VarSubstitutionImpl(map, getAtomFactory()));
+                .map(map -> (InjectiveVar2VarSubstitution) new InjectiveVar2VarSubstitutionImpl(map, getAtomFactory(),
+                        getTermFactory()));
     }
 
 

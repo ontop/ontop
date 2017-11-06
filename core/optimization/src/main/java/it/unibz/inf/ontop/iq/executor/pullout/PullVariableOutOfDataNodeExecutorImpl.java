@@ -67,11 +67,14 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
 
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private PullVariableOutOfDataNodeExecutorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory) {
+    private PullVariableOutOfDataNodeExecutorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
+                                                  ImmutabilityTools immutabilityTools) {
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     @Override
@@ -111,7 +114,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
         }
 
         // return new NodeCentricOptimizationResultsImpl<>(query, focusNodeUpdate.newFocusNode);
-        return new NodeCentricOptimizationResultsImpl(query, query.getNextSibling(newNode),
+        return new NodeCentricOptimizationResultsImpl<>(query, query.getNextSibling(newNode),
                 query.getParent(newNode));
     }
 
@@ -138,7 +141,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
             else if (ancestorNode instanceof FilterNode) {
                 FilterNode originalFilterNode = (FilterNode) ancestorNode;
 
-                ImmutableExpression newFilteringCondition = ImmutabilityTools.foldBooleanExpressions(
+                ImmutableExpression newFilteringCondition = immutabilityTools.foldBooleanExpressions(
                         originalFilterNode.getFilterCondition(), newEqualities).get();
 
                 FilterNode newFilterNode = originalFilterNode.changeFilterCondition(newFilteringCondition);
@@ -173,13 +176,13 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
     /**
      * TODO: explain
      */
-    private static void updateNewJoinLikeNode(QueryTreeComponent treeComponent, JoinLikeNode originalNode,
+    private void updateNewJoinLikeNode(QueryTreeComponent treeComponent, JoinLikeNode originalNode,
                                               ImmutableExpression newEqualities) {
 
         Optional<ImmutableExpression> optionalOriginalFilterCondition = originalNode.getOptionalFilterCondition();
         ImmutableExpression newFilteringCondition;
         if (optionalOriginalFilterCondition.isPresent()) {
-            newFilteringCondition = ImmutabilityTools.foldBooleanExpressions(optionalOriginalFilterCondition.get(),
+            newFilteringCondition = immutabilityTools.foldBooleanExpressions(optionalOriginalFilterCondition.get(),
                     newEqualities).get();
         }
         else {
@@ -282,7 +285,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
             equalityBuilder.add(TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
                     renaming.originalVariable, renaming.newVariable));
         }
-        return ImmutabilityTools.foldBooleanExpressions(equalityBuilder.build()).get();
+        return immutabilityTools.foldBooleanExpressions(equalityBuilder.build()).get();
     }
 
     /**

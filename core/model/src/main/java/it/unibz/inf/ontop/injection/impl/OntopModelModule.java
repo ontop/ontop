@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -41,6 +42,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(TermNullabilityEvaluator.class);
         bindFromSettings(FilterNullableVariableQueryTransformer.class);
         bindFromSettings(VariableDefinitionExtractor.class);
+        bindFromSettings(ExpressionNormalizer.class);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
                 IntermediateQueryBuilder.class,

@@ -17,8 +17,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
  */
@@ -26,9 +24,11 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         implements ImmutableSubstitution<T> {
 
     private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
 
-    protected AbstractImmutableSubstitutionImpl(AtomFactory atomFactory) {
+    protected AbstractImmutableSubstitutionImpl(AtomFactory atomFactory, TermFactory termFactory) {
         this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -63,11 +63,11 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
          * Distinguishes the BooleanExpression from the other functional terms.
          */
         if (functionSymbol instanceof OperationPredicate) {
-            return TERM_FACTORY.getImmutableExpression((OperationPredicate) functionSymbol,
+            return termFactory.getImmutableExpression((OperationPredicate) functionSymbol,
                     subTermsBuilder.build());
         }
         else {
-            return TERM_FACTORY.getImmutableFunctionalTerm(functionSymbol, subTermsBuilder.build());
+            return termFactory.getImmutableFunctionalTerm(functionSymbol, subTermsBuilder.build());
         }
     }
 
@@ -83,7 +83,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
         Predicate functionSymbol = mutableFunctionalTerm.getFunctionSymbol();
 
-        return TERM_FACTORY.getFunction(functionSymbol, transformedSubTerms);
+        return termFactory.getFunction(functionSymbol, transformedSubTerms);
     }
 
     @Override
@@ -195,7 +195,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 substitutionMap.entrySet().stream()
                         // Clean out entries like t/t
                         .filter(entry -> !entry.getKey().equals(entry.getValue()))
-                        .collect(ImmutableCollectors.toMap()), atomFactory);
+                        .collect(ImmutableCollectors.toMap()), atomFactory, termFactory);
     }
 
     /**
@@ -234,7 +234,8 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         Optional<ImmutableMap<Variable, T>> optionalMap = computeUnionMap(otherSubstitution);
         if (optionalMap.isPresent()) {
-            ImmutableSubstitution<T> unionSubstitution = new ImmutableSubstitutionImpl<>(optionalMap.get(), atomFactory);
+            ImmutableSubstitution<T> unionSubstitution = new ImmutableSubstitutionImpl<>(optionalMap.get(),
+                    atomFactory, termFactory);
             return Optional.of(unionSubstitution);
         }
         return Optional.empty();
@@ -266,7 +267,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
                             Map.Entry::getValue));
-            return Optional.of(new ImmutableSubstitutionImpl<>(newMap, atomFactory));
+            return Optional.of(new ImmutableSubstitutionImpl<>(newMap, atomFactory, termFactory));
         }
     }
 
@@ -279,7 +280,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         for (Map.Entry<Variable, ? extends ImmutableTerm> otherEntry : otherSubstitutionMap.entrySet()) {
             mapBuilder.put(otherEntry.getKey(), apply(otherEntry.getValue()));
         }
-        return new ImmutableSubstitutionImpl<>(mapBuilder.build(), atomFactory);
+        return new ImmutableSubstitutionImpl<>(mapBuilder.build(), atomFactory, termFactory);
     }
 
     @Override
@@ -331,7 +332,8 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return this;
         }
         else {
-            Var2VarSubstitution renamingSubstitution = new Var2VarSubstitutionImpl(renamingMap, getAtomFactory());
+            Var2VarSubstitution renamingSubstitution = new Var2VarSubstitutionImpl(renamingMap, getAtomFactory(),
+                    getTermFactory());
 
             ImmutableMap<Variable, T> orientedMap = Stream.concat(
                     localMap.entrySet().stream()
@@ -359,21 +361,21 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     @Override
     public ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain) {
-        return new ImmutableSubstitutionImpl(
+        return new ImmutableSubstitutionImpl<>(
                 this.getImmutableMap().entrySet().stream()
                         .filter(e -> restrictingDomain.contains(e.getKey()))
                         .collect(ImmutableCollectors.toMap()),
-                atomFactory
+                atomFactory, termFactory
         );
     }
 
-    protected static Optional<ImmutableExpression> convertIntoBooleanExpression(
+    protected Optional<ImmutableExpression> convertIntoBooleanExpression(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
 
         List<ImmutableExpression> equalities = new ArrayList<>();
 
         for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-            equalities.add(TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ, entry.getKey(), entry.getValue()));
+            equalities.add(termFactory.getImmutableExpression(ExpressionOperation.EQ, entry.getKey(), entry.getValue()));
         }
 
         switch(equalities.size()) {
@@ -386,7 +388,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 // Non-final
                 ImmutableExpression aggregateExpression = equalityIterator.next();
                 while (equalityIterator.hasNext()) {
-                    aggregateExpression = TERM_FACTORY.getImmutableExpression(ExpressionOperation.AND, aggregateExpression,
+                    aggregateExpression = termFactory.getImmutableExpression(ExpressionOperation.AND, aggregateExpression,
                             equalityIterator.next());
                 }
                 return Optional.of(aggregateExpression);
@@ -415,6 +417,10 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     protected AtomFactory getAtomFactory() {
         return atomFactory;
+    }
+
+    protected TermFactory getTermFactory() {
+        return termFactory;
     }
 
 }

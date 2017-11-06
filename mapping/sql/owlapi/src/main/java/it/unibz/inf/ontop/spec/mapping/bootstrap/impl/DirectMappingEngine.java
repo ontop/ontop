@@ -211,7 +211,8 @@ public class DirectMappingEngine {
 	 */
 	private SQLPPMapping extractPPMapping() throws MappingException, SQLException {
 		it.unibz.inf.ontop.spec.mapping.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, UriTemplateMatcher.create(Stream.empty()));
+		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, UriTemplateMatcher.create(Stream.empty(),
+				termFactory));
 		SQLPPMapping emptyPPMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), mappingMetadata);
 		return extractPPMapping(emptyPPMapping);
 	}

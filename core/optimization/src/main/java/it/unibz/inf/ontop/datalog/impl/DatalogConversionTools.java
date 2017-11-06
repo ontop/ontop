@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -22,18 +23,20 @@ import java.util.Collection;
 
 import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.castIntoGroundTerm;
 import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
-import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertIntoImmutableTerm;
 
 @Singleton
 public class DatalogConversionTools {
 
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private DatalogConversionTools(AtomFactory atomFactory, SubstitutionFactory substitutionFactory) {
+    private DatalogConversionTools(AtomFactory atomFactory, SubstitutionFactory substitutionFactory,
+                                   ImmutabilityTools immutabilityTools) {
         this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     /**
@@ -100,7 +103,7 @@ public class DatalogConversionTools {
              * Non-ground functional term
              */
             else {
-                ImmutableTerm nonVariableTerm = convertIntoImmutableTerm(term);
+                ImmutableTerm nonVariableTerm = immutabilityTools.convertIntoImmutableTerm(term);
                 Variable newVariable = projectedVariableGenerator.generateNewVariable();
                 newArgument = newVariable;
                 bindingBuilder.put(newVariable, nonVariableTerm);

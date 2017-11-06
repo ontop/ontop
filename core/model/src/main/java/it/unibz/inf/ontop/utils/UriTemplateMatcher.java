@@ -31,11 +31,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 public class UriTemplateMatcher {
 
-    private UriTemplateMatcher() {
+    private final TermFactory termFactory;
+
+    private UriTemplateMatcher(TermFactory termFactory) {
+        this.termFactory = termFactory;
     }
 
     private final Map<Pattern, ImmutableFunctionalTerm> uriTemplateMatcher = new HashMap<>();
@@ -43,10 +44,11 @@ public class UriTemplateMatcher {
     /**
      * TODO: refactor using streaming.
      */
-    public static UriTemplateMatcher create(Stream<? extends ImmutableFunctionalTerm> targetAtomStream) {
+    public static UriTemplateMatcher create(Stream<? extends ImmutableFunctionalTerm> targetAtomStream,
+                                            TermFactory termFactory) {
         Set<String> templateStrings = new HashSet<>();
 
-        UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
+        UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher(termFactory);
 
         ImmutableList<? extends ImmutableFunctionalTerm> targetAtoms = targetAtomStream.collect(ImmutableCollectors.toList());
 
@@ -72,7 +74,7 @@ public class UriTemplateMatcher {
                     continue;
                 }
 
-                ImmutableFunctionalTerm templateFunction = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getVariable("x"));
+                ImmutableFunctionalTerm templateFunction = termFactory.getImmutableUriTemplate(termFactory.getVariable("x"));
                 Pattern matcher = Pattern.compile("(.+)");
                 uriTemplateMatcher.uriTemplateMatcher.put(matcher, templateFunction);
                 templateStrings.add("(.+)");
@@ -94,7 +96,7 @@ public class UriTemplateMatcher {
         return uriTemplateMatcher;
     }
 
-    public static UriTemplateMatcher merge(Stream<UriTemplateMatcher> uriTemplateMatchers) {
+    public static UriTemplateMatcher merge(Stream<UriTemplateMatcher> uriTemplateMatchers, TermFactory termFactory) {
 
         ImmutableMap<Pattern, Collection<ImmutableFunctionalTerm>> pattern2Terms = uriTemplateMatchers
                 .flatMap(m -> m.getMap().entrySet().stream())
@@ -106,7 +108,7 @@ public class UriTemplateMatcher {
                         e -> e.getKey(),
                         e -> flatten(e.getKey(), e.getValue())
                 ));
-        UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
+        UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher(termFactory);
         uriTemplateMatcher.uriTemplateMatcher.putAll(pattern2Term);
         return uriTemplateMatcher;
     }
@@ -158,16 +160,16 @@ public class UriTemplateMatcher {
                     values.add(baseParameter);
                     for (int i = 0; i < matcher.groupCount(); i++) {
                         String value = matcher.group(i + 1);
-                        values.add(TERM_FACTORY.getConstantLiteral(value));
+                        values.add(termFactory.getConstantLiteral(value));
                     }
-                    functionURI = TERM_FACTORY.getImmutableUriTemplate(values.build());
+                    functionURI = termFactory.getImmutableUriTemplate(values.build());
                 }
             } else if (baseParameter instanceof Variable) {
 				/*
 				 * This is a direct mapping to a column, uri(x)
 				 * we need to match x with the subjectURI
 				 */
-                functionURI = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral(uriString));
+                functionURI = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(uriString));
             }
             break;
         }
@@ -175,7 +177,7 @@ public class UriTemplateMatcher {
 			/* If we cannot match against a template, we try to match against the most general template (which will
 			 * generate empty queries later in the query answering process
 			 */
-            functionURI = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral(uriString));
+            functionURI = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(uriString));
         }
 
         return functionURI;

@@ -61,7 +61,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(
-                ImmutabilityTools.foldBooleanExpressions (EXPRESSION1, EXPRESSION2)
+                IMMUTABILITY_TOOLS.foldBooleanExpressions (EXPRESSION1, EXPRESSION2)
         );
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom (TABLE4_PREDICATE, X, Y, Z)
@@ -83,7 +83,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -110,7 +110,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(
-                ImmutabilityTools.foldBooleanExpressions (EXPRESSION1, EXPRESSION2)
+                IMMUTABILITY_TOOLS.foldBooleanExpressions (EXPRESSION1, EXPRESSION2)
         );
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE4_PREDICATE, X, Y, Z));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE1_PREDICATE, X, Y));
@@ -126,7 +126,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -158,7 +158,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         System.out.println("\nBefore optimization: \n" + query1);
 
         PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl
-                (true);
+                (true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -197,7 +197,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         System.out.println("\nBefore optimization: \n" + query1);
 
         PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl
-                (true);
+                (true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -215,7 +215,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
-        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(ImmutabilityTools.foldBooleanExpressions (EXPRESSION1, EXPRESSION2));
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions (EXPRESSION1, EXPRESSION2));
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE4_PREDICATE, X, Y, Z));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode (ATOM_FACTORY.getDataAtom (TABLE1_PREDICATE, X, Y));
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE2_PREDICATE, Z, W));
@@ -230,7 +230,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -248,7 +248,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(EXPRESSION3);
-        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(ImmutabilityTools.foldBooleanExpressions
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions
                 (EXPRESSION2));
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, W, X, Y));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
@@ -262,13 +262,13 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
-        FilterNode filterNode2 = IQ_FACTORY.createFilterNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION3, EXPRESSION2).get());
+        FilterNode filterNode2 = IQ_FACTORY.createFilterNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION3, EXPRESSION2).get());
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
 
 
@@ -307,13 +307,13 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
-        InnerJoinNode joinNode3 = IQ_FACTORY.createInnerJoinNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION1, EXPRESSION3));
+        InnerJoinNode joinNode3 = IQ_FACTORY.createInnerJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1, EXPRESSION3));
 
         queryBuilder2.init(projectionAtom, constructionNode);
         queryBuilder2.addChild(constructionNode, joinNode3);
@@ -335,7 +335,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode(Optional.empty());
-        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION1, EXPRESSION2));
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1, EXPRESSION2));
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, Y, Z));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Y));
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, Z, W));
@@ -350,13 +350,13 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
-        LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION1, EXPRESSION2));
+        LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1, EXPRESSION2));
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
 
         queryBuilder2.init(projectionAtom, constructionNode);
@@ -378,7 +378,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(Optional.empty());
-        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION1, EXPRESSION2));
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1, EXPRESSION2));
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, Y, Z));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Y));
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, Z, W));
@@ -393,13 +393,13 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION1, EXPRESSION2).get());
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1, EXPRESSION2).get());
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
 
         queryBuilder2.init(projectionAtom, constructionNode);
@@ -438,7 +438,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -487,13 +487,13 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
-        FilterNode filterNode3 = IQ_FACTORY.createFilterNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION5, EXPRESSION2, EXPRESSION4).get());
+        FilterNode filterNode3 = IQ_FACTORY.createFilterNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION5, EXPRESSION2, EXPRESSION4).get());
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(V, W, X, Y, Z), SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y, Z))));
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
@@ -535,7 +535,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -577,7 +577,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -595,8 +595,8 @@ public class PushUpBooleanExpressionOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
-        FilterNode filterNode1 = IQ_FACTORY.createFilterNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION1, EXPRESSION2).get());
-        FilterNode filterNode2 = IQ_FACTORY.createFilterNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION1, EXPRESSION3).get());
+        FilterNode filterNode1 = IQ_FACTORY.createFilterNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1, EXPRESSION2).get());
+        FilterNode filterNode2 = IQ_FACTORY.createFilterNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1, EXPRESSION3).get());
         FilterNode filterNode3 = IQ_FACTORY.createFilterNode(EXPRESSION1);
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, Y, Z));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, W, X, Z));
@@ -614,7 +614,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
@@ -649,9 +649,9 @@ public class PushUpBooleanExpressionOptimizerTest {
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI(Y))));
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(Y));
-        FilterNode filterNode1 = IQ_FACTORY.createFilterNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION3, EXPRESSION5).get());
+        FilterNode filterNode1 = IQ_FACTORY.createFilterNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION3, EXPRESSION5).get());
         FilterNode filterNode2 = IQ_FACTORY.createFilterNode(EXPRESSION3);
-        FilterNode filterNode3 = IQ_FACTORY.createFilterNode(ImmutabilityTools.foldBooleanExpressions(EXPRESSION3, EXPRESSION2).get());
+        FilterNode filterNode3 = IQ_FACTORY.createFilterNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION3, EXPRESSION2).get());
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, W, Z));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, W, Y, Z));
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE7_PREDICATE, Y, W, U, Z));
@@ -670,7 +670,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true);
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(true, IMMUTABILITY_TOOLS);
         IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);

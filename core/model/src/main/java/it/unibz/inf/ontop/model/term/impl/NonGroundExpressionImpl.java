@@ -23,11 +23,6 @@ public class NonGroundExpressionImpl extends ImmutableExpressionImpl implements 
         checkNonGroundTermConstraint(this);
     }
 
-    protected NonGroundExpressionImpl(Expression expression) {
-        super(expression);
-        checkNonGroundTermConstraint(this);
-    }
-
     @Override
     public boolean isGround() {
         return false;

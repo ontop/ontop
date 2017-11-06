@@ -22,13 +22,17 @@ import java.util.stream.Stream;
 
 public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements JoinLikeNode {
 
+    private final ImmutabilityTools immutabilityTools;
+
     protected JoinLikeNodeImpl(Optional<ImmutableExpression> optionalJoinCondition,
                                TermNullabilityEvaluator nullabilityEvaluator,
                                TermFactory termFactory,
                                TypeFactory typeFactory, DatalogTools datalogTools,
-                               ExpressionEvaluator defaultExpressionEvaluator) {
+                               ExpressionEvaluator defaultExpressionEvaluator,
+                               ImmutabilityTools immutabilityTools) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator);
+        this.immutabilityTools = immutabilityTools;
     }
 
     /**
@@ -41,7 +45,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         Optional<ImmutableExpression> updatedExistingCondition = getOptionalFilterCondition()
                 .map(substitution::applyToBooleanExpression);
 
-        Optional<ImmutableExpression> newCondition = ImmutabilityTools.foldBooleanExpressions(
+        Optional<ImmutableExpression> newCondition = immutabilityTools.foldBooleanExpressions(
                 Stream.concat(
                     Stream.of(updatedExistingCondition),
                     Stream.of(optionalNewEqualities))
@@ -73,5 +77,9 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
 
         return Stream.concat(cooccuringVariableStream, getLocallyRequiredVariables().stream())
                 .collect(ImmutableCollectors.toSet());
+    }
+
+    protected ImmutabilityTools getImmutabilityTools() {
+        return immutabilityTools;
     }
 }

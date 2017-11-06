@@ -68,13 +68,16 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
     private GroundTermRemovalFromDataNodeExecutorImpl(IntermediateQueryFactory iqFactory,
-                                                      AtomFactory atomFactory, TermFactory termFactory) {
+                                                      AtomFactory atomFactory, TermFactory termFactory,
+                                                      ImmutabilityTools immutabilityTools) {
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     /**
@@ -146,7 +149,7 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
             booleanExpressionBuilder.add(termFactory.getImmutableExpression(
                     ExpressionOperation.EQ, pair.variable, pair.groundTerm));
         }
-        Optional<ImmutableExpression> optionalFoldExpression = ImmutabilityTools.foldBooleanExpressions(
+        Optional<ImmutableExpression> optionalFoldExpression = immutabilityTools.foldBooleanExpressions(
                 booleanExpressionBuilder.build());
         return optionalFoldExpression.get();
     }
@@ -260,7 +263,7 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
             ImmutableExpression newExpression;
             if (optionalFormerExpression.isPresent()) {
                 ImmutableExpression formerExpression = optionalFormerExpression.get();
-                newExpression = ImmutabilityTools.foldBooleanExpressions(
+                newExpression = immutabilityTools.foldBooleanExpressions(
                         ImmutableList.of(formerExpression, newAdditionalExpression))
                         .get();
             }

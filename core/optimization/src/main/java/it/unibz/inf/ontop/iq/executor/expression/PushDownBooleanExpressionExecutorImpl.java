@@ -24,10 +24,12 @@ import java.util.Optional;
 public class PushDownBooleanExpressionExecutorImpl implements PushDownBooleanExpressionExecutor {
 
     private final IntermediateQueryFactory iqFactory;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private PushDownBooleanExpressionExecutorImpl(IntermediateQueryFactory iqFactory) {
+    private PushDownBooleanExpressionExecutorImpl(IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools) {
         this.iqFactory = iqFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     /**
@@ -59,7 +61,7 @@ public class PushDownBooleanExpressionExecutorImpl implements PushDownBooleanExp
 
     private void updateIndirectRecipientNode(QueryTreeComponent treeComponent, QueryNode targetNode,
                                              Collection<ImmutableExpression> additionalExpressions) {
-        ImmutableExpression foldedExpression = ImmutabilityTools.foldBooleanExpressions(
+        ImmutableExpression foldedExpression = immutabilityTools.foldBooleanExpressions(
                 ImmutableList.copyOf(additionalExpressions)).get();
         FilterNode newFilterNode = iqFactory.createFilterNode(foldedExpression);
 
@@ -102,7 +104,7 @@ public class PushDownBooleanExpressionExecutorImpl implements PushDownBooleanExp
 
     private Optional<JoinOrFilterNode> generateNewJoinOrFilterNode(JoinOrFilterNode formerNode,
                                                                           ImmutableList<ImmutableExpression> newExpressions) {
-        Optional<ImmutableExpression> optionalExpression = ImmutabilityTools.foldBooleanExpressions(
+        Optional<ImmutableExpression> optionalExpression = immutabilityTools.foldBooleanExpressions(
                 newExpressions);
 
         if (formerNode instanceof JoinLikeNode) {

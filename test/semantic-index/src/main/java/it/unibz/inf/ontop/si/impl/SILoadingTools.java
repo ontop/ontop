@@ -164,7 +164,8 @@ class SILoadingTools {
                         .flatMap(ax -> ax.getTargetAtoms().stream())
                         .flatMap(atom -> atom.getArguments().stream())
                         .filter(t -> t instanceof ImmutableFunctionalTerm)
-                        .map(t -> (ImmutableFunctionalTerm) t));
+                        .map(t -> (ImmutableFunctionalTerm) t),
+                defaultConfiguration.getTermFactory());
 
         try {
             return new SQLPPMappingImpl(mappingAxioms,
