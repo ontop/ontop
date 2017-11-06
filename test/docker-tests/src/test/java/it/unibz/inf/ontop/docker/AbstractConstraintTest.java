@@ -80,7 +80,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 
 			metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, datalogFactory,
-					atomFactory, relation2Predicate);
+					atomFactory, relation2Predicate, jdbcTypeMapper);
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		}
 		catch (IOException e) {

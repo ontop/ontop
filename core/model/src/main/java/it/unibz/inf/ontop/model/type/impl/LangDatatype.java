@@ -1,28 +1,26 @@
 package it.unibz.inf.ontop.model.type.impl;
 
-import it.unibz.inf.ontop.model.type.LanguageTag;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeAncestry;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 
 import java.util.Optional;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class LangDatatype extends AbstractRDFDatatype {
 
     private final LanguageTag langTag;
     private final TermTypeAncestry parentAncestry;
+    private final TypeFactory typeFactory;
 
-    private LangDatatype(LanguageTag langTag, TermTypeAncestry parentAncestry) {
+    private LangDatatype(LanguageTag langTag, TermTypeAncestry parentAncestry, TypeFactory typeFactory) {
         super(RDF.LANGSTRING, parentAncestry, false);
         this.langTag = langTag;
         this.parentAncestry = parentAncestry;
+        this.typeFactory = typeFactory;
     }
 
-    static RDFDatatype createLangDatatype(LanguageTag langTag, TermTypeAncestry parentAncestry) {
-        return new LangDatatype(langTag, parentAncestry);
+    static RDFDatatype createLangDatatype(LanguageTag langTag, TermTypeAncestry parentAncestry,
+                                          TypeFactory typeFactory) {
+        return new LangDatatype(langTag, parentAncestry, typeFactory);
     }
 
 
@@ -50,9 +48,9 @@ public class LangDatatype extends AbstractRDFDatatype {
         return langTag.getCommonDenominator(otherLanguageTag)
                 .map(newLangTag -> newLangTag.equals(langTag)
                         ? (TermType) this
-                        : new LangDatatype(newLangTag, parentAncestry))
+                        : new LangDatatype(newLangTag, parentAncestry, typeFactory))
                 // Incompatible lang tags --> common denominator is xsd:string
-                .orElseGet(TYPE_FACTORY::getXsdStringDatatype);
+                .orElseGet(typeFactory::getXsdStringDatatype);
     }
 
     @Override

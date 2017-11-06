@@ -48,7 +48,7 @@ public class GraphLoading {
             TermFactory termFactory = defaultConfiguration.getTermFactory();
             TypeFactory typeFactory = defaultConfiguration.getTypeFactory();
 
-            RepositoryInit init = createRepository(implicitTbox, atomFactory, termFactory);
+            RepositoryInit init = createRepository(implicitTbox, atomFactory, termFactory, typeFactory);
 
             /*
             Loads the data

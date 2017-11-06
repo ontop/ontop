@@ -2,10 +2,7 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.dbschema.Relation2Predicate;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
@@ -52,11 +49,13 @@ public class BootstrapGenerator {
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
     private final Relation2Predicate relation2Predicate;
+    private final JdbcTypeMapper jdbcTypeMapper;
     private int currentMappingIndex = 1;
 
     public BootstrapGenerator(OBDAModelManager obdaModelManager, String baseUri,
-                              OWLModelManager owlManager) throws DuplicateMappingException, InvalidMappingException, MappingIOException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
-
+                              OWLModelManager owlManager, JdbcTypeMapper jdbcTypeMapper) throws DuplicateMappingException, InvalidMappingException,
+            MappingIOException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
+        this.jdbcTypeMapper = jdbcTypeMapper;
         connManager = JDBCConnectionManager.getJDBCConnectionManager();
         this.owlManager =  owlManager;
         configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
@@ -102,7 +101,7 @@ public class BootstrapGenerator {
                     " Message: " + e.getMessage());
         }
         RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, datalogFactory,
-                atomFactory, relation2Predicate);
+                atomFactory, relation2Predicate, jdbcTypeMapper);
 
         // this operation is EXPENSIVE
         RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
@@ -176,7 +175,7 @@ public class BootstrapGenerator {
 
     private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {
 
-        DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, atomFactory);
+        DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, jdbcTypeMapper, atomFactory);
 
         List<SQLPPTriplesMap> axioms = new ArrayList<>();
         axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));

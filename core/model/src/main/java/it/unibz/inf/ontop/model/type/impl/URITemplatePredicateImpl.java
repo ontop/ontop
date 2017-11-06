@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.term.impl;
+package it.unibz.inf.ontop.model.type.impl;
 
 /*
  * #%L
@@ -21,22 +21,22 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.stream.IntStream;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class URITemplatePredicateImpl extends PredicateImpl implements URITemplatePredicate {
 
 	// The name of the function that creates URI's in Quest
 	private static final String URI_PREFIX = "URI";
 
-	public URITemplatePredicateImpl(int arity) {
+	protected URITemplatePredicateImpl(int arity, TypeFactory typeFactory) {
 		super(URI_PREFIX  + arity, arity, IntStream.range(0, arity)
 				.boxed()
 				// TODO: require strings
-				.map(i -> TYPE_FACTORY.getAbstractAtomicTermType())
+				.map(i -> typeFactory.getAbstractAtomicTermType())
 				.collect(ImmutableCollectors.toList()));
 	}
 	

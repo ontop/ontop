@@ -97,6 +97,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
 	private final TermFactory termFactory;
 	private final AtomFactory atomFactory;
+	private final JdbcTypeMapper jdbcTypeMapper;
 
 	public MappingAssistantPanel(OBDAModel model, OntopConfigurationManager configurationManager,
 								 OWLModelManager owlModelManager) {
@@ -106,6 +107,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		prefixManager = obdaModel.getMutablePrefixManager();
 		termFactory = obdaModel.getTermFactory();
 		atomFactory = obdaModel.getAtomFactory();
+		jdbcTypeMapper = obdaModel.getJDBCTypeMapper();
 		initComponents();
 
 		if (obdaModel.getSources().size() > 0) {
@@ -801,7 +803,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			Connection conn = ConnectionTools.getConnection(selectedSource);
 			RDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn, obdaModel.getTermFactory(),
 					obdaModel.getDatalogFactory(), obdaModel.getAtomFactory(),
-					obdaModel.getRelation2Predicate());
+					obdaModel.getRelation2Predicate(), jdbcTypeMapper);
 			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
 			RDBMetadataExtractionTools.loadMetadata(md, conn, null);
 			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {

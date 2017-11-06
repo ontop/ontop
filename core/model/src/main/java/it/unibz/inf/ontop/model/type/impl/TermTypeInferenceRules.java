@@ -47,7 +47,7 @@ public class TermTypeInferenceRules {
     /**
      * Cannot infer COL_TYPE.INTEGER (will put COL_TYPE.DECIMAL instead)
      */
-    public static final TermTypeInferenceRule NON_INTEGER_NUMERIC_RULE = new NonIntegerNumericInferenceRule();
+    public static final TermTypeInferenceRule NON_INTEGER_NUMERIC_RULE = new NonIntegerNumericInferenceRule(TYPE_FACTORY);
 
     /**
      * TODO: explain

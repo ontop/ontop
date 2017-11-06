@@ -12,10 +12,10 @@ public class DummyRDBMetadata extends RDBMetadata {
 
     @Inject
     private DummyRDBMetadata(AtomFactory atomFactory, Relation2Predicate relation2Predicate, TermFactory termFactory,
-                     DatalogFactory datalogFactory) {
+                             DatalogFactory datalogFactory, JdbcTypeMapper jdbcTypeMapper) {
 
         super("dummy class", null, null, "",
-                new QuotedIDFactoryStandardSQL("\""), JdbcTypeMapper.getInstance(), atomFactory,
+                new QuotedIDFactoryStandardSQL("\""), jdbcTypeMapper, atomFactory,
                 relation2Predicate, termFactory, datalogFactory);
     }
 }

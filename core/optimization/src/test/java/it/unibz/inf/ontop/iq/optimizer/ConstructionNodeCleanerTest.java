@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -45,8 +44,8 @@ public class ConstructionNodeCleanerTest {
     private final static Variable Z2 = TERM_FACTORY.getVariable("Z2");
 
 
-    private URITemplatePredicate URI_PREDICATE = new URITemplatePredicateImpl(2);
-    private URITemplatePredicate URI_2PREDICATE = new URITemplatePredicateImpl(3);
+    private URITemplatePredicate URI_PREDICATE = TYPE_FACTORY.getURITemplatePredicate(2);
+    private URITemplatePredicate URI_2PREDICATE = TYPE_FACTORY.getURITemplatePredicate(3);
 
     private Constant URI_TEMPLATE_STR_1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private Constant URI_TEMPLATE_STR_2_2 = TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");

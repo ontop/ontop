@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.type.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.Constant;
@@ -26,7 +26,7 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 
 public class UriTemplateTest {
 
-    private static URITemplatePredicate URI_PREDICATE_ONE_VAR =  new URITemplatePredicateImpl(2);
+    private static URITemplatePredicate URI_PREDICATE_ONE_VAR =  TYPE_FACTORY.getURITemplatePredicate(2);
     private static Constant URI_TEMPLATE_STR_1_PREFIX =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/");
     private static Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral(URI_TEMPLATE_STR_1_PREFIX.getValue() + "{}");
     private static Constant URI_TEMPLATE_STR_2_PREFIX =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/");

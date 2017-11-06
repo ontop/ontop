@@ -116,7 +116,8 @@ public class RDBMetadataExtractionTools {
 
 	public static RDBMetadata createMetadata(Connection conn,
 											 TermFactory termFactory, DatalogFactory datalogFactory,
-											 AtomFactory atomFactory, Relation2Predicate relation2Predicate) throws SQLException  {
+											 AtomFactory atomFactory, Relation2Predicate relation2Predicate,
+											 JdbcTypeMapper jdbcTypeMapper) throws SQLException  {
 		
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
@@ -168,7 +169,7 @@ public class RDBMetadataExtractionTools {
 		}
 		
 		RDBMetadata metadata = new RDBMetadata(md.getDriverName(), md.getDriverVersion(),
-							productName, md.getDatabaseProductVersion(), idfac, JdbcTypeMapper.getInstance(),
+							productName, md.getDatabaseProductVersion(), idfac, jdbcTypeMapper,
 				atomFactory, relation2Predicate, termFactory, datalogFactory);
 		
 		return metadata;	

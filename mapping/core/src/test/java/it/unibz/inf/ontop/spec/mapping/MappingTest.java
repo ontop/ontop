@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -96,7 +95,7 @@ public class MappingTest {
         tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), Types.INTEGER, null, true);
         BROKER_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(tableBrokerDef);
 
-        URI_PREDICATE =  new URITemplatePredicateImpl(2);
+        URI_PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(2);
         ANS1_VAR1_PREDICATE = ATOM_FACTORY.getAtomPredicate("http://example.org/Dealer", 1);
         URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/person/{}");
 

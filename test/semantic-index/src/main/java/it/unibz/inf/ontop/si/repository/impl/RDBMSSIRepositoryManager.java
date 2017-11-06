@@ -263,18 +263,19 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	
 	private boolean isIndexed;  // database index created
 
-	private SemanticIndexViewsManager views = new SemanticIndexViewsManager();
+	private final SemanticIndexViewsManager views;
 	
 	private final List<RepositoryChangedListener> changeList = new LinkedList<>();
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
 
 	public RDBMSSIRepositoryManager(ImmutableOntologyVocabulary voc, TBoxReasoner reasonerDag, AtomFactory atomFactory,
-									TermFactory termFactory) {
+									TermFactory termFactory, TypeFactory typeFactory) {
 		this.reasonerDag = reasonerDag;
 		this.voc = voc;
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
+		views = new SemanticIndexViewsManager(typeFactory);
 	}
 
 	@Override

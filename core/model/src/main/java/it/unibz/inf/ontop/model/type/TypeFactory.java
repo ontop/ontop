@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.type;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
@@ -22,6 +23,8 @@ public interface TypeFactory {
 	DatatypePredicate getRequiredTypePredicate(IRI datatypeIri);
 
 	Optional<DatatypePredicate> getOptionalTypePredicate(TermType type);
+
+	URITemplatePredicate getURITemplatePredicate(int arity);
 		
 	boolean isBoolean(Predicate p);
 	

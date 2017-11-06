@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
@@ -84,13 +85,14 @@ public class OBDAModel {
     private final Relation2Predicate relation2Predicate;
     private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
+    private final JdbcTypeMapper jdbcTypeMapper;
 
     public OBDAModel(SpecificationFactory specificationFactory,
                      SQLPPMappingFactory ppMappingFactory,
                      PrefixDocumentFormat owlPrefixManager,
                      AtomFactory atomFactory, TermFactory termFactory,
                      TypeFactory typeFactory, DatalogFactory datalogFactory,
-                     Relation2Predicate relation2Predicate) {
+                     Relation2Predicate relation2Predicate, JdbcTypeMapper jdbcTypeMapper) {
         this.specificationFactory = specificationFactory;
         this.ppMappingFactory = ppMappingFactory;
         this.atomFactory = atomFactory;
@@ -100,6 +102,7 @@ public class OBDAModel {
         this.typeFactory = typeFactory;
         this.datalogFactory = datalogFactory;
         this.relation2Predicate = relation2Predicate;
+        this.jdbcTypeMapper = jdbcTypeMapper;
         this.triplesMapMap = new LinkedHashMap<>();
 
         this.sourceListeners = new ArrayList<>();
@@ -488,5 +491,9 @@ public class OBDAModel {
 
     public DatalogFactory getDatalogFactory() {
         return datalogFactory;
+    }
+
+    public JdbcTypeMapper getJDBCTypeMapper() {
+        return jdbcTypeMapper;
     }
 }

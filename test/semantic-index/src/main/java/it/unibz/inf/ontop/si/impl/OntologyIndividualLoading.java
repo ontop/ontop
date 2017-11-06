@@ -58,7 +58,7 @@ public class OntologyIndividualLoading {
         OWLAPITranslatorUtility owlapiTranslatorUtility = defaultConfiguration.getInjector()
                 .getInstance(OWLAPITranslatorUtility.class);
 
-        RepositoryInit init = createRepository(owlOntology, atomFactory, termFactory, owlapiTranslatorUtility);
+        RepositoryInit init = createRepository(owlOntology, atomFactory, termFactory, owlapiTranslatorUtility, typeFactory);
 
         try {
             /*

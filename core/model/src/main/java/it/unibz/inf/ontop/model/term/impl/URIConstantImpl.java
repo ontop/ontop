@@ -23,10 +23,9 @@ package it.unibz.inf.ontop.model.term.impl;
 import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 
 /**
@@ -38,10 +37,12 @@ public class URIConstantImpl implements URIConstant {
 	
 	private final int identifier;
 	private final String iristr;
+	private final ObjectRDFType type;
 
-	protected URIConstantImpl(String iri) {
+	protected URIConstantImpl(String iri, TypeFactory typeFactory) {
 		this.iristr = iri;
 		this.identifier = iri.hashCode();
+		this.type = typeFactory.getIRITermType();
 	}
 	
 	@Override
@@ -85,7 +86,7 @@ public class URIConstantImpl implements URIConstant {
 
 	@Override
 	public ObjectRDFType getType() {
-		return TYPE_FACTORY.getIRITermType();
+		return type;
 	}
 
 

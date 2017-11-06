@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.protege.gui.component;
 
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 
 import javax.swing.*;
@@ -29,24 +30,20 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
 public class DataTypeComboBox extends JComboBox {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final Predicate[] SUPPORTED_DATATYPES = getQuestDataTypePredicates();
 	
-	public DataTypeComboBox() {
-		super(SUPPORTED_DATATYPES);
+	public DataTypeComboBox(TypeFactory typeFactory) {
+		super(getQuestDataTypePredicates(typeFactory));
 		setRenderer(new DataTypeRenderer());
 		setPreferredSize(new Dimension(130, 23));
 		setSelectedIndex(-1);
 	}
 	
-	private static Predicate[] getQuestDataTypePredicates() {
+	private static Predicate[] getQuestDataTypePredicates(TypeFactory typeFactory) {
 		
-		List<Predicate> prediacteList = TYPE_FACTORY.getDatatypePredicates();
+		List<Predicate> prediacteList = typeFactory.getDatatypePredicates();
 		
 		int length = prediacteList.size() + 1;
 		Predicate[] dataTypes = new Predicate[length];

@@ -45,14 +45,12 @@ public class DirectMappingAxiomProducer {
 	private final JdbcTypeMapper typeMapper;
 	private final AtomFactory atomFactory;
 
-	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, AtomFactory atomFactory) {
+	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, JdbcTypeMapper typeMapper,
+									  AtomFactory atomFactory) {
 		this.termFactory = termFactory;
         this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
+		this.typeMapper = typeMapper;
 		this.atomFactory = atomFactory;
-		/**
-		 * TODO: use Guice instead
-		 */
-		typeMapper = JdbcTypeMapper.getInstance();
 	}
 
 

@@ -36,7 +36,8 @@ public class VirtualAboxLoading {
 
             RepositoryInit init = createRepository(inputOntology, obdaConfiguration.getAtomFactory(),
                     obdaConfiguration.getTermFactory(),
-                    obdaConfiguration.getInjector().getInstance(OWLAPITranslatorUtility.class));
+                    obdaConfiguration.getInjector().getInstance(OWLAPITranslatorUtility.class),
+                    obdaConfiguration.getTypeFactory());
 
             OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
             MaterializationParams materializationParams = MaterializationParams.defaultBuilder()

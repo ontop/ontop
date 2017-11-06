@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.type.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
@@ -52,8 +52,8 @@ public class NavigationAfterRemovingEmptyNodeTest {
     private static final Variable N = TERM_FACTORY.getVariable("n");
 
 
-    private static final URITemplatePredicate URI1_PREDICATE =  new URITemplatePredicateImpl(2);
-    private static final URITemplatePredicate URI2_PREDICATE =  new URITemplatePredicateImpl(3);
+    private static final URITemplatePredicate URI1_PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(2);
+    private static final URITemplatePredicate URI2_PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(3);
     private static final Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static final Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
 

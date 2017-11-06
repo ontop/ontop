@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -65,25 +66,29 @@ class SILoadingTools {
     }
 
     static RepositoryInit createRepository(OWLOntology owlOntology, AtomFactory atomFactory, TermFactory termFactory,
-                                           OWLAPITranslatorUtility owlapiTranslatorUtility) throws SemanticIndexException {
+                                           OWLAPITranslatorUtility owlapiTranslatorUtility,
+                                           TypeFactory typeFactory) throws SemanticIndexException {
 
         Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
         Ontology ontology = owlapiTranslatorUtility.mergeTranslateOntologies(ontologyClosure);
-        return createRepository(ontology, Optional.of(ontologyClosure), atomFactory, termFactory);
+        return createRepository(ontology, Optional.of(ontologyClosure), atomFactory, termFactory, typeFactory);
     }
 
-    static RepositoryInit createRepository(Ontology ontology, AtomFactory atomFactory, TermFactory termFactory) throws SemanticIndexException {
-        return createRepository(ontology, Optional.empty(), atomFactory, termFactory);
+    static RepositoryInit createRepository(Ontology ontology, AtomFactory atomFactory, TermFactory termFactory,
+                                           TypeFactory typeFactory) throws SemanticIndexException {
+        return createRepository(ontology, Optional.empty(), atomFactory, termFactory, typeFactory);
     }
 
     private static RepositoryInit createRepository(Ontology ontology, Optional<Set<OWLOntology>> ontologyClosure,
-                                                   AtomFactory atomFactory, TermFactory termFactory)
+                                                   AtomFactory atomFactory, TermFactory termFactory,
+                                                   TypeFactory typeFactory)
             throws SemanticIndexException {
         ImmutableOntologyVocabulary vocabulary = ontology.getVocabulary();
 
         final TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(ontology, OPTIMIZE_EQUIVALENCES);
 
-        SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(vocabulary, reformulationReasoner, atomFactory, termFactory);
+        SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(vocabulary, reformulationReasoner, atomFactory,
+                termFactory, typeFactory);
 
         LOG.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
         // we work in memory (with H2), the database is clean and

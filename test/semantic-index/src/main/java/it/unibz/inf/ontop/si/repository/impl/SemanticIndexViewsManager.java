@@ -16,17 +16,38 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
 public class SemanticIndexViewsManager {
+
+	private static final IRI[] SITableToIRI = {
+			XSD.STRING, XSD.INTEGER,
+			XSD.LONG, XSD.DECIMAL, XSD.DOUBLE, XSD.DATETIME,
+			XSD.INT, XSD.UNSIGNED_INT, XSD.NEGATIVE_INTEGER,
+			XSD.NON_NEGATIVE_INTEGER, XSD.POSITIVE_INTEGER, XSD.NON_POSITIVE_INTEGER,
+			XSD.FLOAT, XSD.BOOLEAN, XSD.DATETIMESTAMP};
+
+
+	// these two values distinguish between COL_TYPE.OBJECT and COL_TYPE.BNODE
+	private static final int OBJ_TYPE_URI = 0;
+	private static final int OBJ_TYPE_BNode = 1;
 
 	private final Map<SemanticIndexViewID, SemanticIndexView> views = new HashMap<>();
 	
 	private final List<SemanticIndexView> propertyViews = new LinkedList<>();
 	private final List<SemanticIndexView> classViews = new LinkedList<>();
-	
-	public SemanticIndexViewsManager() {
+	private final TypeFactory typeFactory;
+	private final Map<TermType, Integer> colTypetoSITable;
+
+	public SemanticIndexViewsManager(TypeFactory typeFactory) {
+		this.typeFactory = typeFactory;
 		init();
+
+		// special case of COL_TYPE.OBJECT and COL_TYPE.BNODE (both are mapped to 1)
+		colTypetoSITable = new HashMap<>();
+		colTypetoSITable.put(typeFactory.getBlankNodeType(), 1);
+		colTypetoSITable.put(typeFactory.getIRITermType(), 1);
+		// Class SITable has value 0 (skip it)
+		for (int i = 2; i < SITableToIRI.length; i++)
+			colTypetoSITable.put(typeFactory.getDatatype(SITableToIRI[i]), i);
 	}
 
 	public List<SemanticIndexView> getPropertyViews() {
@@ -57,8 +78,8 @@ public class SemanticIndexViewsManager {
 	
 	private final void init() {
 
-		ImmutableList<ObjectRDFType> objectTypes = ImmutableList.of(TYPE_FACTORY.getIRITermType(),
-				TYPE_FACTORY.getBlankNodeType());
+		ImmutableList<ObjectRDFType> objectTypes = ImmutableList.of(typeFactory.getIRITermType(),
+				typeFactory.getBlankNodeType());
 
 
 		IRI[] datatypeIRIs = { XSD.BOOLEAN, XSD.DATETIME, XSD.DATETIMESTAMP, XSD.DECIMAL, XSD.DOUBLE, XSD.INTEGER,
@@ -86,7 +107,7 @@ public class SemanticIndexViewsManager {
 			}
 			
 			for (IRI iriType2 : datatypeIRIs) {
-				initDataProperty(type1, TYPE_FACTORY.getDatatype(iriType2));
+				initDataProperty(type1, typeFactory.getDatatype(iriType2));
 			}
 		}
 	}
@@ -142,32 +163,7 @@ public class SemanticIndexViewsManager {
 		views.put(view.getId(), view);
 		propertyViews.add(view);
 	}
-	
-	
-	
-	// view id codes that are stored in DB (starts with 0)
 
-	private static final IRI[] SITableToIRI = {
-		XSD.STRING, XSD.INTEGER,
-		XSD.LONG, XSD.DECIMAL, XSD.DOUBLE, XSD.DATETIME, 
-		XSD.INT, XSD.UNSIGNED_INT, XSD.NEGATIVE_INTEGER, 
-		XSD.NON_NEGATIVE_INTEGER, XSD.POSITIVE_INTEGER, XSD.NON_POSITIVE_INTEGER,
-		XSD.FLOAT, XSD.BOOLEAN, XSD.DATETIMESTAMP};
-	
-	private static final Map<TermType, Integer> COLTYPEtoSITable = new HashMap<>();
-	
-	static {
-		// special case of COL_TYPE.OBJECT and COL_TYPE.BNODE (both are mapped to 1)
-		COLTYPEtoSITable.put(TYPE_FACTORY.getBlankNodeType(), 1);
-		COLTYPEtoSITable.put(TYPE_FACTORY.getIRITermType(), 1);
-		// Class SITable has value 0 (skip it)
-		for (int i = 2; i < SITableToIRI.length; i++)
-			COLTYPEtoSITable.put(TYPE_FACTORY.getDatatype(SITableToIRI[i]), i);
-	}
-	
-	// these two values distinguish between COL_TYPE.OBJECT and COL_TYPE.BNODE
-	private static final int OBJ_TYPE_URI = 0;
-	private static final int OBJ_TYPE_BNode = 1;
 	
 	private static int COLTYPEtoInt(ObjectRDFType t) {
 		return t.isBlankNode()  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
@@ -195,7 +191,7 @@ public class SemanticIndexViewsManager {
 					}
 					else {
 						// property view
-						stm.setInt(1, COLTYPEtoSITable.get(viewId.getType2()));
+						stm.setInt(1, colTypetoSITable.get(viewId.getType2()));
 						stm.setInt(2, idx);
 						stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
 						stm.setInt(4, COLTYPEtoInt((ObjectRDFType) viewId.getType2()));

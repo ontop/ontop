@@ -23,12 +23,10 @@ package it.unibz.inf.ontop.model.term.impl;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import javax.annotation.Nonnull;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class ValueConstantImpl implements ValueConstant {
 
@@ -54,10 +52,10 @@ public class ValueConstantImpl implements ValueConstant {
 		this.string = "\"" + value + "\"";
 	}
 
-	protected ValueConstantImpl(@Nonnull String value, @Nonnull String language) {
+	protected ValueConstantImpl(@Nonnull String value, @Nonnull String language, TypeFactory typeFactory) {
 		this.value = value;
 		this.language = language;
-		this.termType = TYPE_FACTORY.getLangTermType(language);
+		this.termType = typeFactory.getLangTermType(language);
 		this.string = "\"" + value + "@" + language + "\"";
 	}
 	

@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.type.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 public class UnionLiftInternalTest {
 
     private static Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
+    private static URITemplatePredicate URI_PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(2);
 
     private static AtomPredicate P1_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 1);
     private static AtomPredicate P2_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 2);

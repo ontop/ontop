@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.type.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.proposal.NodeTracker;
 import it.unibz.inf.ontop.iq.proposal.NodeTrackingResults;
@@ -38,7 +38,7 @@ public class EmptyNodeRemovalTest {
     private static Variable C = TERM_FACTORY.getVariable("c");
     private static DistinctVariableOnlyDataAtom PROJECTION_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_PREDICATE, ImmutableList.of(X, Y));
-    private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
+    private static URITemplatePredicate URI_PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(2);
     private static Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
     private static AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 1);

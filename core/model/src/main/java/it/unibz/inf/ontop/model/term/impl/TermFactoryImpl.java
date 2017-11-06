@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -77,7 +78,7 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	@Deprecated
 	public URIConstant getConstantURI(String uriString) {
-		return new URIConstantImpl(uriString);
+		return new URIConstantImpl(uriString, typeFactory);
 	}
 	
 	@Override
@@ -106,7 +107,7 @@ public class TermFactoryImpl implements TermFactory {
 	
 	@Override
 	public ValueConstant getConstantLiteral(String value, String language) {
-		return new ValueConstantImpl(value, language.toLowerCase());
+		return new ValueConstantImpl(value, language.toLowerCase(), typeFactory);
 	}
 
 	@Override
@@ -247,31 +248,31 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Function getUriTemplate(Term... terms) {
-		Predicate uriPred = new URITemplatePredicateImpl(terms.length);
+		Predicate uriPred = typeFactory.getURITemplatePredicate(terms.length);
 		return getFunction(uriPred, terms);		
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableTerm... terms) {
-		Predicate pred = new URITemplatePredicateImpl(terms.length);
+		Predicate pred = typeFactory.getURITemplatePredicate(terms.length);
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableList<ImmutableTerm> terms) {
-		Predicate pred = new URITemplatePredicateImpl(terms.size());
+		Predicate pred = typeFactory.getURITemplatePredicate(terms.size());
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public Function getUriTemplate(List<Term> terms) {
-		Predicate uriPred = new URITemplatePredicateImpl(terms.size());
+		Predicate uriPred = typeFactory.getURITemplatePredicate(terms.size());
 		return getFunction(uriPred, terms);		
 	}
 
 	@Override
 	public Function getUriTemplateForDatatype(String type) {
-		return getFunction(new URITemplatePredicateImpl(1), getConstantLiteral(type));
+		return getFunction(typeFactory.getURITemplatePredicate(1), getConstantLiteral(type));
 	}
 	
 	@Override

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.type.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.model.vocabulary.OntopInternal;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
@@ -273,11 +274,16 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
+	public URITemplatePredicate getURITemplatePredicate(int arity) {
+		return new URITemplatePredicateImpl(arity, this);
+	}
+
+	@Override
 	public RDFDatatype getLangTermType(String languageTagString) {
 		return langTypeCache
 				.computeIfAbsent(languageTagString,
 						k -> LangDatatype.createLangDatatype(
-								new LanguageTagImpl(languageTagString), xsdStringDatatype.getAncestry()));
+								new LanguageTagImpl(languageTagString), xsdStringDatatype.getAncestry(), this));
 	}
 
 	@Override

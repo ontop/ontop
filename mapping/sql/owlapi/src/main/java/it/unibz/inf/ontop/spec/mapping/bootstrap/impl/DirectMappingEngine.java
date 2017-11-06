@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.dbschema.Relation2Predicate;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -37,9 +37,6 @@ import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
@@ -66,6 +63,7 @@ public class DirectMappingEngine {
 	private final Relation2Predicate relation2Predicate;
 	private final TermFactory termFactory;
 	private final DatalogFactory datalogFactory;
+	private final JdbcTypeMapper jdbcTypeMapper;
 
 	public static class DefaultBootstrappingResults implements BootstrappingResults {
 		private final SQLPPMapping ppMapping;
@@ -109,12 +107,14 @@ public class DirectMappingEngine {
 	@Inject
 	private DirectMappingEngine(OntopSQLCredentialSettings settings, MappingVocabularyExtractor vocabularyExtractor,
 								AtomFactory atomFactory, Relation2Predicate relation2Predicate,
-								TermFactory termFactory, DatalogFactory datalogFactory, SpecificationFactory specificationFactory,
+								TermFactory termFactory, DatalogFactory datalogFactory, JdbcTypeMapper jdbcTypeMapper,
+								SpecificationFactory specificationFactory,
 								SQLPPMappingFactory ppMappingFactory) {
 		this.atomFactory = atomFactory;
 		this.relation2Predicate = relation2Predicate;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
+		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
@@ -237,7 +237,7 @@ public class DirectMappingEngine {
 		}
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
 			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, datalogFactory,
-					atomFactory, relation2Predicate);
+					atomFactory, relation2Predicate, jdbcTypeMapper);
 			// this operation is EXPENSIVE
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 			return bootstrapMappings(metadata, ppMapping);
@@ -272,7 +272,7 @@ public class DirectMappingEngine {
 	 */
 	private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {
 
-		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, atomFactory);
+		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, jdbcTypeMapper, atomFactory);
 
 		List<SQLPPTriplesMap> axioms = new ArrayList<>();
 		axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));
