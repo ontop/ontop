@@ -54,7 +54,9 @@ public class TemporalOBDASpecificationExtractorImpl implements OBDASpecification
         TemporalMappingExtractor.MappingAndDBMetadata temporalMappingAndDBMetadata = temporalMappingExtractor.extract(specInput, dbMetadata, ontology,
                 optionalSaturatedTBox, executorRegistry);
 
-        return transform(specInput, ontology, optionalSaturatedTBox, mappingAndDBMetadata);
+        OBDASpecification s = transform(specInput, ontology, optionalSaturatedTBox, mappingAndDBMetadata);
+        System.out.println();
+        return s;
     }
 
     @Override

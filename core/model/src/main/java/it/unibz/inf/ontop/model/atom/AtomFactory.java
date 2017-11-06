@@ -41,4 +41,6 @@ public interface AtomFactory {
      * (not only Variable or ground terms)
      */
     ImmutableFunctionalTerm getImmutableTripleAtom(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object);
+
+    ImmutableFunctionalTerm getImmutableQuadrupleAtom(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object);
 }

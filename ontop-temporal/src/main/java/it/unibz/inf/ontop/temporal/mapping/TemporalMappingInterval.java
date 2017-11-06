@@ -12,4 +12,8 @@ public interface TemporalMappingInterval {
 
     Variable getEnd();
 
+    String isBeginInclusiveToString();
+
+    String isEndInclusiveToString();
+
 }

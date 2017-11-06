@@ -27,8 +27,9 @@ import static it.unibz.inf.ontop.model.IriConstants.SAME_AS;
 
 public class PredicateImpl implements Predicate {
 
-	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl("triple", 3, new COL_TYPE[3]);	
-	
+	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl("triple", 3, new COL_TYPE[3]);
+	public static final Predicate QUEST_QUADRUPLE_PRED = new PredicateImpl("quadruple", 4, new COL_TYPE[3]);
+
 	private int arity = -1;
 	private String name = null;
 	private int identifier = -1;

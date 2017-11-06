@@ -22,6 +22,7 @@ public class SQLPPTemporalTriplesMapProvenance implements PPTriplesMapProvenance
         info += "\ntarget atoms: " + triplesMap.getTargetAtoms().stream()
                 .map(Object::toString)
                 .collect(Collectors.joining(", "));
+        info += "\ntemporal interval: "+ triplesMap.getTemporalMappingInterval();
         info += "\nsource query: " + triplesMap.getSourceQuery();
         return info;
     }

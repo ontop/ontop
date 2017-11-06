@@ -2,12 +2,16 @@ package it.unibz.inf.ontop.temporal.mapping;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
@@ -19,19 +23,27 @@ import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.temporal.mapping.impl.SQLPPTemporalTriplesMapImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.exception.InvalidMappingTemporalExceptionwithIndicator.*;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.castIntoGroundTerm;
+import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
+import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertIntoImmutableTerm;
+import static it.unibz.inf.ontop.model.term.impl.PredicateImpl.QUEST_QUADRUPLE_PRED;
 
 
 public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
@@ -104,7 +116,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
             throws MappingIOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
 
         final Map<String, String> prefixes = new HashMap<>();
-        final List<SQLPPTriplesMap> mappings = new ArrayList<>();
+        final List<SQLPPTemporalTriplesMap> mappings = new ArrayList<>();
         final List<Indicator> invalidMappingIndicators = new ArrayList<>();
 
         List<TargetQueryParser> parsers = null;
@@ -120,6 +132,8 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
                     }
                     if (line.contains(PREFIX_DECLARATION_TAG)) {
                         prefixes.putAll(readPrefixDeclaration(lineNumberReader));
+                        //add time prefix for the temporal named graphs
+                        prefixes.putIfAbsent("time:", "http://www.w3.org/2006/time#");
 
                     /*
                      * In case of late prefix declaration
@@ -164,8 +178,11 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
             throw new InvalidMappingExceptionWithIndicator(invalidMappingIndicators);
         }
 
+        //TODO: expand into NAMED GRAPHS here!
+        List<SQLPPTemporalTriplesMap> expandedMappings =  expandTemporalTriplesMapsIntoNamedGraphs(mappings);
+
         it.unibz.inf.ontop.spec.mapping.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.copyOf(prefixes));
-        ImmutableList<SQLPPTriplesMap> mappingAxioms = ImmutableList.copyOf(mappings);
+        ImmutableList<SQLPPTriplesMap> mappingAxioms = ImmutableList.copyOf(expandedMappings);
 
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                 mappingAxioms.stream()
@@ -202,6 +219,131 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
             prefixes.put(tokens[0], tokens[1]);
         }
         return prefixes;
+    }
+
+    private static List<SQLPPTemporalTriplesMap> expandTemporalTriplesMapsIntoNamedGraphs(List<SQLPPTemporalTriplesMap> mappings){
+        List<SQLPPTemporalTriplesMap> expandedTriplesMap = new ArrayList<>();
+
+        for(SQLPPTemporalTriplesMap temporalTriplesMap : mappings){
+            for(ImmutableFunctionalTerm targetAtom : temporalTriplesMap.getTargetAtoms()){
+                List<ImmutableFunctionalTerm> targetAtomList = new LinkedList<>();
+                ImmutableFunctionalTerm quadAtom = convertToQuadAtom(targetAtom, temporalTriplesMap.getTemporalMappingInterval());
+                targetAtomList.add(quadAtom);
+                expandedTriplesMap.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap.getId(),
+                        temporalTriplesMap.getSourceQuery(),
+                        targetAtomList.stream().collect(ImmutableCollectors.toList()),
+                        temporalTriplesMap.getTemporalMappingInterval()));
+                expandedTriplesMap.addAll(createTemporalIntervalNamedGraphComponents(quadAtom,temporalTriplesMap));
+            }
+        }
+        return expandedTriplesMap;
+    }
+
+    private static List<SQLPPTemporalTriplesMap> createTemporalIntervalNamedGraphComponents(ImmutableFunctionalTerm quadAtom, SQLPPTemporalTriplesMap temporalTriplesMap){
+        List<SQLPPTemporalTriplesMap> temporalTriplesMapList = new LinkedList<>();
+        List<ImmutableFunctionalTerm> ngComponentsList = new LinkedList<>();
+
+        //hasTime
+        ImmutableTerm graphURITemplate = quadAtom.getArguments().get(3);
+        Predicate hasTime = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#hasTime",2);
+        Predicate interval = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#Interval",1);
+
+        ImmutableFunctionalTerm intervalURITemplate  =
+                TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral(interval.getName()),
+                temporalTriplesMap.getTemporalMappingInterval().getBegin(),
+                temporalTriplesMap.getTemporalMappingInterval().getEnd());
+
+        ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(hasTime, graphURITemplate, intervalURITemplate));
+        temporalTriplesMapList.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList())));
+
+        //TODO: find a better way to create SQLPPTriplesMap.
+        ngComponentsList.clear();
+
+        //hasBeginning
+        Predicate hasBeginning = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#hasBeginning",2);
+        Predicate beginInstant = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#Instant",1);
+        ImmutableFunctionalTerm beginInstantURITemplate =
+                TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral(beginInstant.getName()),
+                        temporalTriplesMap.getTemporalMappingInterval().getBegin());
+
+        ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(hasBeginning,intervalURITemplate, beginInstantURITemplate));
+        temporalTriplesMapList.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList())));
+
+        //TODO: find a better way to create SQLPPTriplesMap.
+        ngComponentsList.clear();
+
+        //TODO:support other types too
+        //begin inXSDDateTime
+        Predicate beginInXSDDateTime = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#inXSDDateTime",2);
+
+        ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(beginInXSDDateTime, beginInstantURITemplate, temporalTriplesMap.getTemporalMappingInterval().getBegin()));
+        temporalTriplesMapList.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList())));
+
+        //TODO: find a better way to create SQLPPTriplesMap.
+        ngComponentsList.clear();
+
+
+        //hasEnd
+        Predicate hasEnd = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#hasEnd",2);
+        Predicate endInstant = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#Instant",1);
+        ImmutableFunctionalTerm endInstantURITemplate =
+                TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral(endInstant.getName()),
+                        temporalTriplesMap.getTemporalMappingInterval().getEnd());
+
+        ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(hasEnd,intervalURITemplate, endInstantURITemplate));
+        temporalTriplesMapList.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList())));
+
+        //TODO: find a better way to create SQLPPTriplesMap.
+        ngComponentsList.clear();
+
+        //TODO:support other types too
+        //end inXSDDateTime
+        Predicate endInXSDDateTime = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#inXSDDateTime",2);
+
+        ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(endInXSDDateTime, endInstantURITemplate, temporalTriplesMap.getTemporalMappingInterval().getEnd()));
+        temporalTriplesMapList.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList())));
+
+        //TODO: find a better way to create SQLPPTriplesMap.
+        ngComponentsList.clear();
+
+        return temporalTriplesMapList;
+    }
+
+    private static ImmutableTerm getGraphURITemplate(TemporalMappingInterval intervalQuery){
+
+        ImmutableTerm graphConstrantLiteral = TERM_FACTORY.getConstantLiteral("NAMEDGRAPH/");
+        ImmutableTerm beginInc = TERM_FACTORY.getConstantLiteral(intervalQuery.isBeginInclusiveToString(), Predicate.COL_TYPE.BOOLEAN);
+        ImmutableTerm endInc = TERM_FACTORY.getConstantLiteral(intervalQuery.isEndInclusiveToString(), Predicate.COL_TYPE.BOOLEAN);
+
+        return TERM_FACTORY.getImmutableUriTemplate(graphConstrantLiteral, beginInc, intervalQuery.getBegin(),intervalQuery.getEnd(), endInc);
+    }
+
+
+    private static ImmutableFunctionalTerm convertToQuadAtom(ImmutableFunctionalTerm targetAtom, TemporalMappingInterval intervalQuery){
+        Predicate atomPred = targetAtom.getFunctionSymbol();
+
+        ArrayList <ImmutableTerm> argList = new ArrayList();
+        Iterator it = targetAtom.getArguments().iterator();
+        while(it.hasNext()){
+            argList.add((ImmutableTerm) it.next());
+        }
+
+        if(argList.size() == 1){
+            ImmutableTerm rdfTypeTerm = TERM_FACTORY.getConstantLiteral(IriConstants.RDF_TYPE);
+            argList.add(rdfTypeTerm);
+            ImmutableTerm predTerm = TERM_FACTORY.getConstantLiteral(atomPred.getName());
+            argList.add(predTerm);
+        }else {
+            ImmutableTerm predTerm = TERM_FACTORY.getConstantLiteral(atomPred.getName());
+            argList.add(1, predTerm);
+        }
+
+        ImmutableTerm graphURITemplate = getGraphURITemplate(intervalQuery);
+        argList.add(graphURITemplate);
+
+        ImmutableFunctionalTerm dataAtom = TERM_FACTORY.getImmutableFunctionalTerm(ATOM_FACTORY.getAtomPredicate(QUEST_QUADRUPLE_PRED), argList.stream().collect(ImmutableCollectors.toList()));
+
+        return dataAtom;
     }
 
     /**

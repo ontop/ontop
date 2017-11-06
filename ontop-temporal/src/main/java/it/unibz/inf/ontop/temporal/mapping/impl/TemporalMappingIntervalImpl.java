@@ -22,6 +22,16 @@ public class TemporalMappingIntervalImpl implements TemporalMappingInterval {
     }
 
     @Override
+    public String isBeginInclusiveToString() {
+        return String.valueOf(beginInclusive);
+    }
+
+    @Override
+    public String isEndInclusiveToString() {
+        return String.valueOf(endInclusive);
+    }
+
+    @Override
     public Variable getBegin() {
         return begin;
     }

@@ -29,6 +29,12 @@ public class SQLPPTemporalTriplesMapImpl extends AbstractSQLPPTriplesMap impleme
         setTemporalMappingInterval(temporalMappingInterval);
     }
 
+    public SQLPPTemporalTriplesMapImpl(SQLPPTemporalTriplesMap oldTriplesMap, ImmutableList<ImmutableFunctionalTerm> targetAtoms) {
+        super(targetAtoms, oldTriplesMap.getSourceQuery());
+        this.triplesMapProvenance = (SQLPPTemporalTriplesMapProvenance) oldTriplesMap.getTriplesMapProvenance();
+        setTemporalMappingInterval(oldTriplesMap.getTemporalMappingInterval());
+    }
+
     private static SQLPPTemporalTriplesMapProvenance createProvenance(SQLPPTemporalTriplesMapImpl triplesMap) {
         return new SQLPPTemporalTriplesMapProvenance(triplesMap);
     }
@@ -66,11 +72,11 @@ public class SQLPPTemporalTriplesMapImpl extends AbstractSQLPPTriplesMap impleme
 
     @Override
     public PPMappingAssertionProvenance getMappingAssertionProvenance(ImmutableFunctionalTerm targetAtom) {
-        return null;
+        return new SQLTemporalMappingAssertionProvenance(targetAtom, this);
     }
 
     @Override
     public PPTriplesMapProvenance getTriplesMapProvenance() {
-        return null;
+        return triplesMapProvenance;
     }
 }

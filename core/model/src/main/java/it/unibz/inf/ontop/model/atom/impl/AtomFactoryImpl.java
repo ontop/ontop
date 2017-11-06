@@ -109,4 +109,10 @@ public class AtomFactoryImpl implements AtomFactory {
                                                           ImmutableTerm object) {
         return TERM_FACTORY.getImmutableFunctionalTerm(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
     }
+
+    @Override
+    public ImmutableFunctionalTerm getImmutableQuadrupleAtom(ImmutableTerm subject, ImmutableTerm predicate,
+                                                          ImmutableTerm object) {
+        return TERM_FACTORY.getImmutableFunctionalTerm(PredicateImpl.QUEST_QUADRUPLE_PRED, subject, predicate, object);
+    }
 }

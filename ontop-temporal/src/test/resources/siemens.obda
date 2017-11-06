@@ -8,8 +8,8 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [MappingDeclaration] @collection [[
 mappingId	urn:Map-TempSensor
-target		:TemperatureSensor/{sensor_id} a :TemperatureSensor . 
-source		SELECT sensor_id FROM tb_sensors WHERE sensor_type =1
+target		:TemperatureSensor/{sensor_id} a :TemperatureSensor ;  :measures {m_type}^^xsd:string .
+source		SELECT sensor_id, 'Temperature' AS m_type FROM tb_sensors WHERE sensor_type =1
 
 mappingId	urn:Map-Burner
 target		:Burner/{turbine_id}/{component_id} a :Burner . 
@@ -20,7 +20,7 @@ target		:TurbinePart/{mnted_part} :isMonitoredBy :Sensor/{sensor_id} .
 source		SELECT mnted_part, sensor_id FROM tb_sensors
 
 mappingId	urn:Map-RotSpeedSensor
-target		:RotationSpeedSensor/{sensor_id} a :RotationSpeedSensor . 
+target		:RotationSpeedSensor/{sensor_id} a :RotationSpeedSensor ;  :measures {sensor_id}^^xsd:integer .
 source		SELECT sensor_id FROM tb_sensors WHERE sensor_type = 0
 
 mappingId	urn:Map-PowerTurbine

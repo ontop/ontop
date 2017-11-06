@@ -6,16 +6,16 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLTemporalConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLTemporalSettings;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
-import it.unibz.inf.ontop.spec.TOBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
-import it.unibz.inf.ontop.spec.impl.TOBDASpecInputImpl;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.TemporalMappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.TemporalPPMappingConverter;
+import it.unibz.inf.ontop.temporal.datalog.TemporalDatalog2QueryMappingConverter;
+import it.unibz.inf.ontop.temporal.datalog.TemporalDatalogProgram2QueryConverter;
 
 /**
  * Created by elem on 08/08/2017.
@@ -41,6 +41,9 @@ public class OntopTemporalModule extends OntopAbstractModule{
         bindFromPreferences(TemporalMappingExtractor.class);
         bindFromPreferences(TemporalMappingParser.class);
         bindFromPreferences(TemporalPPMappingConverter.class);
+        bindFromPreferences(TemporalDatalog2QueryMappingConverter.class);
+        bindFromPreferences(TemporalDatalogProgram2QueryConverter.class);
+
 
         Module nativeQLFactoryModule = buildFactory(
                 ImmutableList.of(RDBMetadataExtractor.class),
