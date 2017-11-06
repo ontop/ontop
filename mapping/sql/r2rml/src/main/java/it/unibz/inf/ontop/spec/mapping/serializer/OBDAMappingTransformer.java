@@ -47,8 +47,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 /**
  * Transform OBDA mappings in R2rml mappings
  * @author Sarah, Mindas, Timi, Guohui, Martin
@@ -62,14 +60,16 @@ public class OBDAMappingTransformer {
 
 	private RDF4J rdf4j = new RDF4J();
     private String baseIRIString;
+	private final TermFactory termFactory;
 
-    OBDAMappingTransformer() {
-        this("urn:");
+	OBDAMappingTransformer(TermFactory termFactory) {
+        this("urn:", termFactory);
 	}
 
-    OBDAMappingTransformer(String baseIRIString) {
+    OBDAMappingTransformer(String baseIRIString, TermFactory termFactory) {
         this.baseIRIString = baseIRIString;
-    }
+		this.termFactory = termFactory;
+	}
 
     /**
 	 * Get R2RML TriplesMaps from OBDA mapping axiom
@@ -117,7 +117,7 @@ public class OBDAMappingTransformer {
 				Function predf = (Function)func.getTerm(1);
 				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) { //fixed string 
-						pred = TERM_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
+						pred = termFactory.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = rdf4j.createIRI(pred.getName());
 					}
 					else {

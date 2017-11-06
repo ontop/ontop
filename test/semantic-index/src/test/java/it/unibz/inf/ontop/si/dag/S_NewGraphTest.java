@@ -29,6 +29,8 @@ import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR_UTILITY;
+
 public class S_NewGraphTest  extends TestCase{
 	
 	Logger log = LoggerFactory.getLogger(S_NewGraphTest.class);
@@ -42,7 +44,7 @@ public class S_NewGraphTest  extends TestCase{
 
 		// Loading the OWL file
 		log.info("Translating");
-		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile(roleowlfile);
+		Ontology o = OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(roleowlfile);
 
 		log.info("Generating graph");
 		TBoxReasonerImpl r = (TBoxReasonerImpl)TBoxReasonerImpl.create(o);

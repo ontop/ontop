@@ -21,12 +21,13 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.impl.TypeFactoryImpl;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -35,30 +36,25 @@ import org.apache.commons.rdf.api.IRI;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
+@Singleton
 public class TermFactoryImpl implements TermFactory {
 
-	private static final TermFactory INSTANCE = new TermFactoryImpl(TypeFactoryImpl.getInstance());
-	private static final TermType ROOT_TERM_TYPE = TYPE_FACTORY.getAbstractAtomicTermType();
-
+	private final TermType rootTermType;
 	private final TypeFactory typeFactory;
 	private final ValueConstant valueTrue;
 	private final ValueConstant valueFalse;
 	private final ValueConstant valueNull;
 	private final ImmutabilityTools immutabilityTools;
 
-	public static TermFactory getInstance() {
-		return INSTANCE;
-	}
-
+	@Inject
 	private TermFactoryImpl(TypeFactory typeFactory) {
 		// protected constructor prevents instantiation from other classes.
 		this.typeFactory = typeFactory;
 		RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
 		this.valueTrue = new ValueConstantImpl("true", xsdBoolean);
 		this.valueFalse = new ValueConstantImpl("false", xsdBoolean);
-		this.valueNull = new ValueConstantImpl("null", TYPE_FACTORY.getXsdStringDatatype());
+		this.valueNull = new ValueConstantImpl("null", typeFactory.getXsdStringDatatype());
+		this.rootTermType = typeFactory.getAbstractAtomicTermType();
 		this.immutabilityTools = new ImmutabilityTools(this);
 	}
 
@@ -66,7 +62,7 @@ public class TermFactoryImpl implements TermFactory {
 	public PredicateImpl getPredicate(String name, int arity) {
 		ImmutableList<TermType> expectedArgumentTypes = IntStream.range(0, arity)
 				.boxed()
-				.map(i -> ROOT_TERM_TYPE)
+				.map(i -> rootTermType)
 				.collect(ImmutableCollectors.toList());
 
 			return new PredicateImpl(name, arity, expectedArgumentTypes);
@@ -86,7 +82,7 @@ public class TermFactoryImpl implements TermFactory {
 	
 	@Override
 	public ValueConstant getConstantLiteral(String value) {
-		return new ValueConstantImpl(value, TYPE_FACTORY.getXsdStringDatatype());
+		return new ValueConstantImpl(value, typeFactory.getXsdStringDatatype());
 	}
 
 	@Override
@@ -96,7 +92,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ValueConstant getConstantLiteral(String value, IRI type) {
-		return getConstantLiteral(value, TYPE_FACTORY.getDatatype(type));
+		return getConstantLiteral(value, typeFactory.getDatatype(type));
 	}
 
 	@Override
@@ -121,7 +117,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Function getTypedTerm(Term value, String language) {
-		Term lang = getConstantLiteral(language.toLowerCase(), TYPE_FACTORY.getXsdStringDatatype());
+		Term lang = getConstantLiteral(language.toLowerCase(), typeFactory.getXsdStringDatatype());
 		Predicate pred = typeFactory.getRequiredTypePredicate(RDF.LANGSTRING);
 		return getFunction(pred, value, lang);
 	}
@@ -418,7 +414,7 @@ public class TermFactoryImpl implements TermFactory {
 	
 	@Override
 	public BNode getConstantBNode(String name) {
-		return new BNodeConstantImpl(name, TYPE_FACTORY);
+		return new BNodeConstantImpl(name, typeFactory);
 	}
 
 	@Override

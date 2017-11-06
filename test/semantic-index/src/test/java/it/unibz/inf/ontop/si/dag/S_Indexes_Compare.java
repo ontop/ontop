@@ -37,6 +37,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR_UTILITY;
+
 public class S_Indexes_Compare extends TestCase {
 	
 	ArrayList<String> input= new ArrayList<String>();
@@ -56,7 +58,7 @@ public class S_Indexes_Compare extends TestCase {
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasoner dag = TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+		TBoxReasoner dag = TBoxReasonerImpl.create(OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(fileInput));
 
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 
@@ -65,7 +67,7 @@ public class S_Indexes_Compare extends TestCase {
 		
 		testIndexes(engine, dag);
 
-		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(fileInput);
+		Ontology onto = OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(fileInput);
 		DAG dag2 = DAGConstructor.getISADAG(onto);
 		dag2.clean();
         DAGOperations.buildDescendants(dag2);

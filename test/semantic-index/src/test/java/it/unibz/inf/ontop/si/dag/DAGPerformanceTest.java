@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR_UTILITY;
+
 public class DAGPerformanceTest extends TestCase {
 
 	Logger log = LoggerFactory.getLogger(DAGPerformanceTest.class);
@@ -126,7 +128,7 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		Ontology o = OWLAPITranslatorUtility.translate(ont);
+		Ontology o = OWLAPI_TRANSLATOR_UTILITY.translate(ont);
 
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
@@ -216,7 +218,7 @@ public class DAGPerformanceTest extends TestCase {
     		
     	}
 		log.debug("Translating into quest API");
-		Ontology o = OWLAPITranslatorUtility.translate(ont);
+		Ontology o = OWLAPI_TRANSLATOR_UTILITY.translate(ont);
 
 		log.debug("Creating a DAG out of it");
 
@@ -312,7 +314,7 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		Ontology o = OWLAPITranslatorUtility.translate(ont);
+		Ontology o = OWLAPI_TRANSLATOR_UTILITY.translate(ont);
 
 		log.debug("Creating a DAG out of it");
 

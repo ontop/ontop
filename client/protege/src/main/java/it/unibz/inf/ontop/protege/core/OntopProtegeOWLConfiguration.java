@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.protege.core;
 
 import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.impl.QuestOWLConfiguration;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
 import javax.annotation.Nonnull;
@@ -19,8 +20,14 @@ public class OntopProtegeOWLConfiguration extends QuestOWLConfiguration {
     }
 
 
-    public OntopProtegeOWLConfiguration(@Nonnull OntopSystemOWLAPIConfiguration ontopConfiguration, @Nonnull ReasonerProgressMonitor progressMonitor,  @Nonnull OntopConfigurationManager configurationGenerator) {
+    public OntopProtegeOWLConfiguration(@Nonnull OntopSystemOWLAPIConfiguration ontopConfiguration,
+                                        @Nonnull ReasonerProgressMonitor progressMonitor,
+                                        @Nonnull OntopConfigurationManager configurationGenerator) {
         super(ontopConfiguration, progressMonitor);
         this.ontopConfigurationManager = configurationGenerator;
+    }
+
+    public OWLAPITranslatorUtility getOWLAPITranslatorUtility() {
+        return getOntopConfiguration().getInjector().getInstance(OWLAPITranslatorUtility.class);
     }
 }

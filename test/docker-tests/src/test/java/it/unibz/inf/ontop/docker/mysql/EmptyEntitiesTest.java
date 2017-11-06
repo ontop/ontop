@@ -42,6 +42,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.docker.utils.DockerTestingTools.OWLAPI_TRANSLATOR_UTILITY;
+
 /***
  * Test returns  empty concepts and roles, based on the mappings.
  * Given an ontology, which is connected to a database via mappings,
@@ -96,7 +98,7 @@ public class EmptyEntitiesTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		onto = OWLAPITranslatorUtility.translate(config.loadProvidedInputOntology());
+		onto = OWLAPI_TRANSLATOR_UTILITY.translate(config.loadProvidedInputOntology());
 	}
 
 	@After

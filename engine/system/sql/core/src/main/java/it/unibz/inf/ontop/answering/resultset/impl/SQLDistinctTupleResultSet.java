@@ -25,6 +25,8 @@ import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.ResultSet;
 import java.util.*;
@@ -42,9 +44,10 @@ public class SQLDistinctTupleResultSet implements TupleResultSet {
 
     public SQLDistinctTupleResultSet(ResultSet set, List<String> signature,
                                      DBMetadata dbMetadata,
-                                     Optional<IRIDictionary> iriDictionary) {
+                                     Optional<IRIDictionary> iriDictionary, TermFactory termFactory,
+                                     TypeFactory typeFactory) {
 
-        tupleResultSet = new SQLTupleResultSet(set, signature, dbMetadata, iriDictionary);
+        tupleResultSet = new SQLTupleResultSet(set, signature, dbMetadata, iriDictionary, termFactory, typeFactory);
 
         distinctKeys = new HashSet<>();
 

@@ -72,7 +72,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         CQIE newRule = initialRule.clone();
 
         // Mutable object
-        final VariableDispatcher variableDispatcher = new VariableDispatcher(initialRule);
+        final VariableDispatcher variableDispatcher = new VariableDispatcher(initialRule, termFactory);
 
         /**
          * Result for the top atoms of the rule.

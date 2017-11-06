@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -49,9 +50,9 @@ public class SelectQueryAttributeExtractor {
 
     private final SelectQueryAttributeExtractor2 sqae;
 
-    public SelectQueryAttributeExtractor(DBMetadata metadata) {
+    public SelectQueryAttributeExtractor(DBMetadata metadata, TermFactory termFactory) {
         this.idfac = metadata.getQuotedIDFactory();
-        sqae = new SelectQueryAttributeExtractor2(metadata);
+        sqae = new SelectQueryAttributeExtractor2(metadata, termFactory);
     }
 
     public ImmutableList<QuotedID> extract(String sql) throws InvalidSelectQueryException {

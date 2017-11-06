@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.spec.ontology.owlapi;
 
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
@@ -42,10 +44,10 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	private final boolean functionalityAxioms = true; // TEMPORARY FIX
 	private final boolean minCardinalityClassExpressions = true; // TEMPORARY FIX
 	private final boolean nestedQualifiedExistentials = true; // TEMPORARY FIX
-	
-	public OWLAPITranslatorOWL2QL(Collection<OWLOntology> owls) {
+
+	public OWLAPITranslatorOWL2QL(Collection<OWLOntology> owls, TermFactory termFactory, TypeFactory typeFactory) {
 		dl_onto = createOntology(owls);
-		helper = new OWLAPITranslatorHelper(dl_onto.getVocabulary());
+		helper = new OWLAPITranslatorHelper(dl_onto.getVocabulary(), termFactory, typeFactory);
 	}
 	
 	public ImmutableOntologyVocabulary getVocabulary() {

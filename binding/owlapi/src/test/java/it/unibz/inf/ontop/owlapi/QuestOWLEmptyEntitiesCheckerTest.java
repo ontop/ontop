@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.OWLAPI_TRANSLATOR_UTILITY;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -102,7 +103,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-		onto =  OWLAPITranslatorUtility.translate(ontology);
+		onto =  OWLAPI_TRANSLATOR_UTILITY.translate(ontology);
 
 		// Creating a new instance of the reasoner
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();

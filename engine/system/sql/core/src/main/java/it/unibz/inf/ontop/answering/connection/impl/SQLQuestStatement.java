@@ -16,6 +16,8 @@ import it.unibz.inf.ontop.answering.resultset.impl.PredefinedBooleanResultSet;
 
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.*;
 import java.sql.ResultSet;
@@ -29,16 +31,21 @@ public class SQLQuestStatement extends QuestStatement {
     private final Statement sqlStatement;
     private final DBMetadata dbMetadata;
     private final Optional<IRIDictionary> iriDictionary;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
     private final OntopSystemSQLSettings settings;
 
     public SQLQuestStatement(QueryReformulator queryProcessor, Statement sqlStatement,
                              Optional<IRIDictionary> iriDictionary, DBMetadata dbMetadata,
                              InputQueryFactory inputQueryFactory,
+                             TermFactory termFactory, TypeFactory typeFactory,
                              OntopSystemSQLSettings settings) {
         super(queryProcessor, inputQueryFactory);
         this.sqlStatement = sqlStatement;
         this.dbMetadata = dbMetadata;
         this.iriDictionary = iriDictionary;
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
         this.settings = settings;
     }
 
@@ -193,8 +200,8 @@ public class SQLQuestStatement extends QuestStatement {
         try {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
             return settings.isDistinctPostProcessingEnabled()
-                    ? new SQLDistinctTupleResultSet(set, executableQuery.getSignature(), dbMetadata, iriDictionary)
-                    : new SQLTupleResultSet(set, executableQuery.getSignature(), dbMetadata, iriDictionary);
+                    ? new SQLDistinctTupleResultSet(set, executableQuery.getSignature(), dbMetadata, iriDictionary, termFactory, typeFactory)
+                    : new SQLTupleResultSet(set, executableQuery.getSignature(), dbMetadata, iriDictionary, termFactory, typeFactory);
         } catch (SQLException e) {
             throw new OntopQueryEvaluationException(e);
         }
@@ -217,12 +224,12 @@ public class SQLQuestStatement extends QuestStatement {
             try {
                 ResultSet set = sqlStatement.executeQuery(sqlQuery);
                 tuples = new SQLTupleResultSet(set, executableQuery.getSignature(), dbMetadata,
-                        iriDictionary);
+                        iriDictionary, termFactory, typeFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e.getMessage());
             }
         }
-        return new DefaultSimpleGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults);
+        return new DefaultSimpleGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults, termFactory);
     }
 
     private SQLExecutableQuery checkAndConvertTargetQuery(ExecutableQuery executableQuery) {

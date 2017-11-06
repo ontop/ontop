@@ -35,8 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 /**
  *
  *
@@ -207,7 +205,7 @@ public class OBDAModel {
                 .map(a -> {
                     if (a.getFunctionSymbol().equals(removedPredicate)) {
                         counter.incrementAndGet();
-                        return  TERM_FACTORY.getImmutableFunctionalTerm(newPredicate,
+                        return  termFactory.getImmutableFunctionalTerm(newPredicate,
                                 ImmutableList.copyOf(a.getArguments()));
                     }
                     return a;

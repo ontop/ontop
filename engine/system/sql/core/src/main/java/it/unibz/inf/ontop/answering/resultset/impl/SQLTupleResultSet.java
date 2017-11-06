@@ -26,6 +26,8 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,14 +51,15 @@ public class SQLTupleResultSet implements TupleResultSet {
      * Constructs an OBDA statement from an SQL statement, a signature described
      * by terms and a statement. The statement is maintained only as a reference
      * for closing operations.
-     *
      * @param set
      * @param signature
      *            A list of terms that determines the type of the columns of
-     *            this results set.
+     * @param termFactory
+     * @param typeFactory
      */
     public SQLTupleResultSet(ResultSet set, List<String> signature,
-                             DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) {
+                             DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary,
+                             TermFactory termFactory, TypeFactory typeFactory) {
         this.rs = set;
 
         this.signature = signature;
@@ -67,7 +70,7 @@ public class SQLTupleResultSet implements TupleResultSet {
             columnMap.put(signature.get(j - 1), j);
         }
 
-        this.ontopConstantRetriever = new JDBC2ConstantConverter(dbMetadata, iriDictionary);
+        this.ontopConstantRetriever = new JDBC2ConstantConverter(dbMetadata, iriDictionary, termFactory, typeFactory);
     }
 
     @Override

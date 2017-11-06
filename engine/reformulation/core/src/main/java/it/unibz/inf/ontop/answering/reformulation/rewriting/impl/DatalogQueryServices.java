@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.ArrayList;
@@ -43,19 +44,19 @@ import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 public class DatalogQueryServices {
 	
 	private static final Logger log = LoggerFactory.getLogger(DatalogQueryServices.class);
+	private final TermFactory termFactory;
 	private final UnifierUtilities unifierUtilities;
 	private final SubstitutionUtilities substitutionUtilities;
 	private final EQNormalizer eqNormalizer;
 	private final CQCUtilities cqcUtilities;
 
 	@Inject
-	private DatalogQueryServices(UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
+	private DatalogQueryServices(TermFactory termFactory, UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
 								 EQNormalizer eqNormalizer, CQCUtilities cqcUtilities) {
+		this.termFactory = termFactory;
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
 		this.eqNormalizer = eqNormalizer;
@@ -64,18 +65,18 @@ public class DatalogQueryServices {
 
 	// to be taken from it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder
 	
-	private static Function getFreshAtom(Function a, String suffix) {
+	private Function getFreshAtom(Function a, String suffix) {
 		List<Term> termscopy = new ArrayList<>(a.getArity());
 		
 		for (Term t : a.getTerms()) {
 			if (t instanceof Variable) {
 				Variable v = (Variable)t;
-				termscopy.add(TERM_FACTORY.getVariable(v.getName() + suffix));
+				termscopy.add(termFactory.getVariable(v.getName() + suffix));
 			}
 			else
 				termscopy.add(t.clone());
 		}
-		return TERM_FACTORY.getFunction(a.getFunctionSymbol(), termscopy);
+		return termFactory.getFunction(a.getFunctionSymbol(), termscopy);
 		
 	}
 	

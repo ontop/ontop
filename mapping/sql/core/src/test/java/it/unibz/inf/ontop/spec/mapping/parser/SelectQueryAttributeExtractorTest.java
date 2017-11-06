@@ -18,7 +18,7 @@ public class SelectQueryAttributeExtractorTest {
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
         DatabaseRelationDefinition r = metadata.createDatabaseRelation(idfac.createRelationID(null, "student"));
 
-        SelectQueryAttributeExtractor aex = new SelectQueryAttributeExtractor(metadata);
+        SelectQueryAttributeExtractor aex = new SelectQueryAttributeExtractor(metadata, TERM_FACTORY);
 
         ImmutableList<QuotedID> res = aex.extract("SELECT ALMAES001.IDART,\n"+
 //                "     ALMAES001.CODART,\n"+

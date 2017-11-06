@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.impl.OWLReasonerBase;
@@ -14,8 +16,6 @@ import org.semanticweb.owlapi.util.Version;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
-
-import static it.unibz.inf.ontop.owlapi.impl.QuestOWL.loadOntologies;
 
 /**
  * Wrapper around OntopOWLReasoner to use inside Protege
@@ -26,6 +26,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     private final OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
     private final OntopConfigurationManager configurationManager;
     private OntopOWLConnection owlConnection;
+    private final OWLAPITranslatorUtility owlapiTranslatorUtility;
 
 
     protected OntopProtegeReasoner(OWLOntology rootOntology, OntopProtegeOWLConfiguration configuration) throws IllegalConfigurationException {
@@ -34,6 +35,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
         reasoner = factory.createReasoner(rootOntology, configuration);
         this.configurationManager = configuration.getOntopConfigurationManager();
         owlConnection = reasoner.getConnection();
+        owlapiTranslatorUtility = configuration.getOWLAPITranslatorUtility();
     }
 
     public OntopOWLStatement getStatement() throws OWLException {
@@ -322,7 +324,8 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
      * @throws Exception
      */
     public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() throws Exception {
-        return new QuestOWLEmptyEntitiesChecker(loadOntologies(getRootOntology()), owlConnection);
+        Ontology ontology = owlapiTranslatorUtility.translateImportsClosure(getRootOntology());
+        return new QuestOWLEmptyEntitiesChecker(ontology, owlConnection);
     }
 
     /**

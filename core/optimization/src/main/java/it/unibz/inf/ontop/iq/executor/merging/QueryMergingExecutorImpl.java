@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -166,14 +167,16 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final QueryTransformerFactory transformerFactory;
+    private final TermFactory termFactory;
 
     @Inject
     private QueryMergingExecutorImpl(IntermediateQueryFactory iqFactory,
                                      QueryTransformerFactory transformerFactory,
-                                     SubstitutionFactory substitutionFactory) {
+                                     SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
         this.transformerFactory = transformerFactory;
         this.substitutionFactory = substitutionFactory;
+        this.termFactory = termFactory;
     }
 
 
@@ -229,7 +232,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         treeComponent.removeSubTree(intensionalDataNode);
 
 
-        VariableGenerator variableGenerator = new VariableGenerator(treeComponent.getKnownVariables());
+        VariableGenerator variableGenerator = new VariableGenerator(treeComponent.getKnownVariables(), termFactory);
         InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(variableGenerator,
                 subQuery.getKnownVariables());
 

@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -27,8 +28,6 @@ import it.unibz.inf.ontop.iq.proposal.PullVariableOutOfDataNodeProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 
 import java.util.Optional;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 /**
@@ -67,13 +66,15 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
 
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
     private final ImmutabilityTools immutabilityTools;
 
     @Inject
     private PullVariableOutOfDataNodeExecutorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
-                                                  ImmutabilityTools immutabilityTools) {
+                                                  TermFactory termFactory, ImmutabilityTools immutabilityTools) {
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
         this.immutabilityTools = immutabilityTools;
     }
 
@@ -282,7 +283,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
 
         ImmutableList.Builder<ImmutableExpression> equalityBuilder = ImmutableList.builder();
         for (VariableRenaming renaming : renamingMap.values()) {
-            equalityBuilder.add(TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
+            equalityBuilder.add(termFactory.getImmutableExpression(ExpressionOperation.EQ,
                     renaming.originalVariable, renaming.newVariable));
         }
         return immutabilityTools.foldBooleanExpressions(equalityBuilder.build()).get();

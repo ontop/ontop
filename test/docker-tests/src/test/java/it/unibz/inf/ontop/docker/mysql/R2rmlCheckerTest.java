@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static it.unibz.inf.ontop.docker.utils.DockerTestingTools.OWLAPI_TRANSLATOR_UTILITY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -94,7 +95,7 @@ public class R2rmlCheckerTest {
 		owlOntology = manager
 				.loadOntologyFromOntologyDocument(owlFileName);
 
-		onto = OWLAPITranslatorUtility.translate(owlOntology);
+		onto = OWLAPI_TRANSLATOR_UTILITY.translate(owlOntology);
 
 		loadOBDA();
 		loadR2rml();
@@ -192,7 +193,7 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		conn = reasonerOBDA.getConnection();
-		Ontology ontology =  OWLAPITranslatorUtility.translate(owlOntology);
+		Ontology ontology =  OWLAPI_TRANSLATOR_UTILITY.translate(owlOntology);
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology, conn);
 		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
 		while (iteratorC.hasNext()){
@@ -221,7 +222,7 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		conn = reasonerR2rml.getConnection();
-		Ontology ontology =  OWLAPITranslatorUtility.translate(owlOntology);
+		Ontology ontology =  OWLAPI_TRANSLATOR_UTILITY.translate(owlOntology);
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(
 				ontology, conn);
 		Iterator<IRI> iteratorC = empties.iEmptyConcepts();

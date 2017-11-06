@@ -106,6 +106,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	private final OntopQueryEngine queryEngine;
 	private final InputQueryFactory inputQueryFactory;
+	private final OWLAPITranslatorUtility owlapiTranslatorUtility;
 	
 	/* Used to signal whether to apply the user constraints above */
 	//private boolean applyExcludeFromTMappings = false;
@@ -145,6 +146,8 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		pm = owlConfiguration.getProgressMonitor();
 
 		version = extractVersion();
+
+		owlapiTranslatorUtility = ontopConfiguration.getInjector().getInstance(OWLAPITranslatorUtility.class);
 
 		prepareReasoner();
 
@@ -229,14 +232,14 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	 * are used later when classify() is called.
 	 * 
 	 */
-	public static Ontology loadOntologies(OWLOntology ontology) throws Exception {
+	private Ontology loadOntologies(OWLOntology ontology) throws Exception {
 		/*
 		 * We will keep track of the loaded ontologies and translate the TBox
 		 * part of them into our internal representation.
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
 
-        Ontology mergeOntology = OWLAPITranslatorUtility.translateImportsClosure(ontology);
+        Ontology mergeOntology = owlapiTranslatorUtility.translateImportsClosure(ontology);
         return mergeOntology;
 //		log.debug("Ontology loaded: {}", mergeOntology);
 	}

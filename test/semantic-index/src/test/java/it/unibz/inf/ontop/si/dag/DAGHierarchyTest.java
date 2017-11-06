@@ -35,6 +35,8 @@ import junit.framework.TestCase;
 
 import java.util.Set;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR_UTILITY;
+
 public class DAGHierarchyTest extends TestCase {
 	/**
 	 * A -> B, B -> {E, F}, {C, D} -> {E, F} with A, B, C, D, E, F are atomic
@@ -62,7 +64,7 @@ public class DAGHierarchyTest extends TestCase {
 	public void testDescendantClasses() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-class-hierarchy.owl#";
 
-		Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile1);
+		Ontology onto =  OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(inputFile1);
 
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
@@ -144,7 +146,7 @@ public class DAGHierarchyTest extends TestCase {
 	public void testAncestorClasses() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-class-hierarchy.owl#";
 
-		Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile1);
+		Ontology onto =  OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(inputFile1);
 
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
@@ -228,7 +230,7 @@ public class DAGHierarchyTest extends TestCase {
 	public void testDescendantRoles() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-role-hierarchy.owl#";
 
-		Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile2);
+		Ontology onto =  OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(inputFile2);
 		
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
@@ -308,7 +310,7 @@ public class DAGHierarchyTest extends TestCase {
 	public void testAncestorRoles() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-role-hierarchy.owl#";
 
-		Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile2);
+		Ontology onto =  OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(inputFile2);
 
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);

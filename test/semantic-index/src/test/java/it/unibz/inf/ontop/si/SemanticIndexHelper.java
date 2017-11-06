@@ -49,6 +49,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR_UTILITY;
+
 /**
  * Helper class to load ontologies and compare computed values to expected results
  *
@@ -82,7 +84,7 @@ public class SemanticIndexHelper {
 
     public Ontology load_onto(String ontoname) throws Exception {
         String owlfile = owlloc + ontoname + ".owl";
-        Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(owlfile);
+        Ontology ontology = OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(owlfile);
         return ontology;
     }
 

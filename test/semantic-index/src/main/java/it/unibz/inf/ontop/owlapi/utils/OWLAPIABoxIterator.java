@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.owlapi.utils;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
@@ -43,14 +45,15 @@ import java.util.NoSuchElementException;
 public class OWLAPIABoxIterator implements Iterator<Assertion> {
 
 	private final Iterator<OWLOntology> ontologiesIterator;
-	
+
 	private Iterator<OWLAxiom> owlaxiomIterator = null;
 	private Assertion next = null;
 	
 	private final OWLAPITranslatorHelper helper;
 
-	public OWLAPIABoxIterator(Collection<OWLOntology> ontologies, ImmutableOntologyVocabulary voc) {
-		helper = new OWLAPITranslatorHelper(voc);
+	public OWLAPIABoxIterator(Collection<OWLOntology> ontologies, ImmutableOntologyVocabulary voc,
+							  TermFactory termFactory, TypeFactory typeFactory) {
+		helper = new OWLAPITranslatorHelper(voc, termFactory, typeFactory);
 		ontologiesIterator = ontologies.iterator();
 		if (ontologiesIterator.hasNext()) 
 			owlaxiomIterator = ontologiesIterator.next().getAxioms().iterator();

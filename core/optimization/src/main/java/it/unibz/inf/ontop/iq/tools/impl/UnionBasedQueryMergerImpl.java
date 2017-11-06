@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.optimizer.ConstructionNodeCleaner;
 import it.unibz.inf.ontop.iq.optimizer.impl.FixedPointBindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.FlattenUnionOptimizer;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -39,17 +40,19 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
     private final FlattenUnionOptimizer unionFlattener;
     private final SubstitutionFactory substitutionFactory;
     private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
 
     @Inject
     private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, FixedPointBindingLiftOptimizer bindingLifter,
                                       ConstructionNodeCleaner constructionNodeCleaner, FlattenUnionOptimizer unionFlattener,
-                                      SubstitutionFactory substitutionFactory, AtomFactory atomFactory) {
+                                      SubstitutionFactory substitutionFactory, AtomFactory atomFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
         this.bindingLifter = bindingLifter;
         this.constructionNodeCleaner = constructionNodeCleaner;
         this.unionFlattener = unionFlattener;
         this.substitutionFactory = substitutionFactory;
         this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -92,7 +95,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
         // First definition can be added safely
         appendFirstDefinition(queryBuilder, unionNode, firstDefinition);
 
-        VariableGenerator variableGenerator = new VariableGenerator(firstDefinition.getKnownVariables());
+        VariableGenerator variableGenerator = new VariableGenerator(firstDefinition.getKnownVariables(), termFactory);
 
         predicateDefinitions.stream()
                 .skip(1)

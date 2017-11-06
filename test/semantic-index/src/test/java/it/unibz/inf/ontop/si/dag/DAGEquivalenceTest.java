@@ -34,6 +34,8 @@ import junit.framework.TestCase;
 
 import java.util.List;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR_UTILITY;
+
 
 public class 	DAGEquivalenceTest extends TestCase {
 
@@ -58,7 +60,7 @@ public class 	DAGEquivalenceTest extends TestCase {
 
 	public void testIndexClasses() throws Exception {
 		String testURI = "http://it.unibz.inf/obda/ontologies/test.owl#";
-		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceClasses);
+		Ontology onto = OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(testEquivalenceClasses);
 
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
@@ -115,7 +117,7 @@ public class 	DAGEquivalenceTest extends TestCase {
 
 	public void testIntervalsRoles() throws Exception {
 		String testURI = "http://it.unibz.inf/obda/ontologies/Ontology1314774461138.owl#";
-		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceRoles);
+		Ontology onto = OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(testEquivalenceRoles);
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		// generate named DAG
@@ -172,7 +174,7 @@ public class 	DAGEquivalenceTest extends TestCase {
 
 	public void testIntervalsRolesWithInverse() throws Exception {
 		String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
-		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceRolesInverse);
+		Ontology onto = OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(testEquivalenceRolesInverse);
 		// generate DAG
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		// generate named DAG

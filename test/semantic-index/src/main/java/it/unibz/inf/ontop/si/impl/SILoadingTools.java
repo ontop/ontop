@@ -64,10 +64,11 @@ class SILoadingTools {
         }
     }
 
-    static RepositoryInit createRepository(OWLOntology owlOntology, AtomFactory atomFactory, TermFactory termFactory) throws SemanticIndexException {
+    static RepositoryInit createRepository(OWLOntology owlOntology, AtomFactory atomFactory, TermFactory termFactory,
+                                           OWLAPITranslatorUtility owlapiTranslatorUtility) throws SemanticIndexException {
 
         Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
-        Ontology ontology = OWLAPITranslatorUtility.mergeTranslateOntologies(ontologyClosure);
+        Ontology ontology = owlapiTranslatorUtility.mergeTranslateOntologies(ontologyClosure);
         return createRepository(ontology, Optional.of(ontologyClosure), atomFactory, termFactory);
     }
 

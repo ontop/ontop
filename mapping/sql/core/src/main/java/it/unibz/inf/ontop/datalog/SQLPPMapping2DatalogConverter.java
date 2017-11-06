@@ -102,7 +102,7 @@ public class SQLPPMapping2DatalogConverter {
                     //        .reduce((s1, s2) -> ImmutableSet.<QuotedID>builder().addAll(s1).addAll(s2).build())
                     //        .get();
                     ImmutableList<QuotedID> variableNames =
-                            new SelectQueryAttributeExtractor(metadata).extract(sourceQuery.toString());
+                            new SelectQueryAttributeExtractor(metadata, termFactory).extract(sourceQuery.toString());
 
                     ParserViewDefinition view = metadata.createParserView(sourceQuery.toString());
                     // TODO: clean up

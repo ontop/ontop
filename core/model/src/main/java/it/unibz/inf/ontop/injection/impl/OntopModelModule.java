@@ -33,7 +33,7 @@ public class OntopModelModule extends OntopAbstractModule {
 
         // Core factories: Too central to be overloaded from the properties
         bind(TypeFactory.class).toInstance(TYPE_FACTORY);
-        bind(TermFactory.class).toInstance(TERM_FACTORY);
+        bindFromSettings(TermFactory.class);
         bindFromSettings(AtomFactory.class);
         bindFromSettings(SubstitutionFactory.class);
         bindFromSettings(DatalogFactory.class);

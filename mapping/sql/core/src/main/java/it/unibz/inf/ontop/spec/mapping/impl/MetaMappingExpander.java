@@ -204,10 +204,10 @@ public class MetaMappingExpander {
 
 
 
-	private static ImmutableList<SelectExpressionItem> getQueryColumns(DBMetadata metadata, String sql)
+	private ImmutableList<SelectExpressionItem> getQueryColumns(DBMetadata metadata, String sql)
 			throws InvalidSelectQueryException, UnsupportedSelectQueryException {
 
-		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata);
+		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata, termFactory);
 
 		PlainSelect plainSelect = sqae.getParsedSql(sql);
 

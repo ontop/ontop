@@ -86,7 +86,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return getInjectiveVar2VarSubstitution(newMap);
     }
 
-    private static Variable generateNonConflictingVariable(Variable v, VariableGenerator variableGenerator,
+    private Variable generateNonConflictingVariable(Variable v, VariableGenerator variableGenerator,
                                                            ImmutableSet<Variable> variables) {
 
         Variable proposedVariable = variableGenerator.generateNewVariableIfConflicting(v);
@@ -103,7 +103,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 variables)
                 .immutableCopy();
 
-        VariableGenerator newVariableGenerator = new VariableGenerator(knownVariables);
+        VariableGenerator newVariableGenerator = new VariableGenerator(knownVariables, termFactory);
         return newVariableGenerator.generateNewVariableFromVar(v);
 
 

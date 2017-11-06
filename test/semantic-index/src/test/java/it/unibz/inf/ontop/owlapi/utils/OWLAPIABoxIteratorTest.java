@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlapi.utils.OWLAPIABoxIterator;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -33,6 +32,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
+
+import static it.unibz.inf.ontop.utils.SITestingTools.*;
 
 public class OWLAPIABoxIteratorTest extends TestCase {
 
@@ -57,7 +58,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		//Iterator<OWLAxiom> owliterator = ontology.getAxioms().iterator();
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(Lists.newArrayList(ontology), voc);
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(Lists.newArrayList(ontology), voc, TERM_FACTORY, TYPE_FACTORY);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -73,7 +74,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(Lists.newArrayList(ontology), voc);
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(Lists.newArrayList(ontology), voc, TERM_FACTORY, TYPE_FACTORY);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -84,7 +85,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 	
 	public void testAssertionEmptyIterable() throws Exception {
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(Lists.<OWLOntology>newArrayList(), voc);
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(Lists.<OWLOntology>newArrayList(), voc, TERM_FACTORY, TYPE_FACTORY);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -104,7 +105,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(Lists.newArrayList(ontology), voc);
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(Lists.newArrayList(ontology), voc, TERM_FACTORY, TYPE_FACTORY);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -118,7 +119,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.createOntology();
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(Lists.newArrayList(ontology), voc);
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(Lists.newArrayList(ontology), voc, TERM_FACTORY, TYPE_FACTORY);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -138,7 +139,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		manager.loadOntologyFromOntologyDocument((new File(owlfile2)));
 		manager.loadOntologyFromOntologyDocument((new File(owlfile3)));
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(manager.getOntologies(), voc);
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(manager.getOntologies(), voc, TERM_FACTORY, TYPE_FACTORY);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -149,7 +150,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 	
 	public void testAssertionEmptyOntologySet() throws Exception {
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(new HashSet<OWLOntology>(), voc);
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(new HashSet<OWLOntology>(), voc, TERM_FACTORY, TYPE_FACTORY);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;

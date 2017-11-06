@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.impl.IntermediateQueryImpl;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
+import it.unibz.inf.ontop.model.term.TermFactory;
 
 import java.util.Optional;
 
@@ -29,6 +30,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     private final ExecutorRegistry executorRegistry;
     private final IntermediateQueryFactory iqFactory;
     private final IntermediateQueryValidator validator;
+    private final TermFactory termFactory;
     private final OntopModelSettings settings;
     private DistinctVariableOnlyDataAtom projectionAtom;
     private QueryTree tree;
@@ -36,14 +38,15 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
 
     @AssistedInject
     protected DefaultIntermediateQueryBuilder(@Assisted DBMetadata dbMetadata,
-                                            @Assisted ExecutorRegistry executorRegistry,
-                                            IntermediateQueryFactory iqFactory,
-                                            IntermediateQueryValidator validator,
-                                            OntopModelSettings settings) {
+                                              @Assisted ExecutorRegistry executorRegistry,
+                                              IntermediateQueryFactory iqFactory,
+                                              IntermediateQueryValidator validator,
+                                              TermFactory termFactory, OntopModelSettings settings) {
         this.dbMetadata = dbMetadata;
         this.executorRegistry = executorRegistry;
         this.iqFactory = iqFactory;
         this.validator = validator;
+        this.termFactory = termFactory;
         this.settings = settings;
         tree = null;
         canEdit = true;
@@ -104,7 +107,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
-        IntermediateQuery query = buildQuery(dbMetadata, projectionAtom, new DefaultQueryTreeComponent(tree));
+        IntermediateQuery query = buildQuery(dbMetadata, projectionAtom, new DefaultQueryTreeComponent(tree, termFactory));
         canEdit = false;
         return query;
     }

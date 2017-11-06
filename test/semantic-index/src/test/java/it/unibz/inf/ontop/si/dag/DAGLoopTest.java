@@ -28,6 +28,8 @@ import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 import org.junit.Before;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR_UTILITY;
+
 /* 
  * Test class for infinite loop in the ontology "final_project_original.owl"
  * after the method eliominateCycles is called there is still a cycle in the graph with the nodes
@@ -40,7 +42,7 @@ public class DAGLoopTest {
 	Ontology onto;
 	@Before
 	public void setUp() throws Exception {
-		onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/dag/final_project_original.owl");
+		onto = OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile("src/test/resources/test/dag/final_project_original.owl");
 	}
 
 	

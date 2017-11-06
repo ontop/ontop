@@ -30,13 +30,15 @@ public class DatalogConversionTools {
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
     private final ImmutabilityTools immutabilityTools;
+    private final TermFactory termFactory;
 
     @Inject
     private DatalogConversionTools(AtomFactory atomFactory, SubstitutionFactory substitutionFactory,
-                                   ImmutabilityTools immutabilityTools) {
+                                   ImmutabilityTools immutabilityTools, TermFactory termFactory) {
         this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
         this.immutabilityTools = immutabilityTools;
+        this.termFactory = termFactory;
     }
 
     /**
@@ -74,7 +76,7 @@ public class DatalogConversionTools {
          *
          * Creates allBindings entries if needed (in case of constant of a functional term)
          */
-        VariableGenerator projectedVariableGenerator = new VariableGenerator(ImmutableSet.of());
+        VariableGenerator projectedVariableGenerator = new VariableGenerator(ImmutableSet.of(), termFactory);
         for (Term term : datalogDataAtom.getTerms()) {
             Variable newArgument;
 
