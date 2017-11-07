@@ -270,6 +270,11 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
 
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(hasTime, graphURITemplate, intervalURITemplate));
 
+        //isBeginInclusive
+        Predicate beginInclusive = ATOM_FACTORY.getAtomPredicate("https://w3id.org/tobda/vocabulary#isBeginInclusive",2);
+
+        ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(beginInclusive, intervalURITemplate, TERM_FACTORY.getBooleanConstant(temporalTriplesMap.getTemporalMappingInterval().isBeginInclusive())));
+
         //hasBeginning
         Predicate hasBeginning = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#hasBeginning",2);
         Predicate beginInstant = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#Instant",1);
@@ -284,6 +289,11 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
         Predicate beginInXSDDateTime = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#inXSDDateTime",2);
 
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(beginInXSDDateTime, beginInstantURITemplate, temporalTriplesMap.getTemporalMappingInterval().getBegin()));
+
+        //isEndInclusive
+        Predicate endInclusive = ATOM_FACTORY.getAtomPredicate("https://w3id.org/tobda/vocabulary#isEndInclusive",2);
+
+        ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(endInclusive, intervalURITemplate, TERM_FACTORY.getBooleanConstant(temporalTriplesMap.getTemporalMappingInterval().isEndInclusive())));
 
         //hasEnd
         Predicate hasEnd = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#hasEnd",2);
