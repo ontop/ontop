@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 
 public class OntopModelModule extends OntopAbstractModule {
 
@@ -32,7 +31,7 @@ public class OntopModelModule extends OntopAbstractModule {
         configureCoreConfiguration();
 
         // Core factories: Too central to be overloaded from the properties
-        bind(TypeFactory.class).toInstance(TYPE_FACTORY);
+        bindFromSettings(TypeFactory.class);
         bindFromSettings(TermFactory.class);
         bindFromSettings(AtomFactory.class);
         bindFromSettings(SubstitutionFactory.class);

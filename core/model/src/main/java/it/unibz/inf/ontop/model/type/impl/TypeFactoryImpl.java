@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
@@ -31,8 +32,6 @@ public class TypeFactoryImpl implements TypeFactory {
 
 	// special case of literals with the specified language
 	private final DatatypePredicate RDF_LANG_STRING;
-
-	private static final TypeFactory INSTANCE = new TypeFactoryImpl();
 
 	private final DatatypePredicate XSD_STRING;
 	private final DatatypePredicate XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
@@ -67,6 +66,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final RDFDatatype xsdTimeDatatype, xsdDateDatatype, xsdDatetimeDatatype, xsdDatetimeStampDatatype, xsdGYearDatatype;
 	private final RDF rdfFactory;
 
+	@Inject
 	private TypeFactoryImpl() {
 		rdfFactory = new SimpleRDF();
 
@@ -188,11 +188,6 @@ public class TypeFactoryImpl implements TypeFactory {
 
 	private void registerDatatype(RDFDatatype datatype) {
 		datatypeCache.put(datatype.getIRI(), datatype);
-	}
-
-
-	public static TypeFactory getInstance() {
-		return INSTANCE;
 	}
 
 	private DatatypePredicate registerType(IRI uri, TermType type) {
