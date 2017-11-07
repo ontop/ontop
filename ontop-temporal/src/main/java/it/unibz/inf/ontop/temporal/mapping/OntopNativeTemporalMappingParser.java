@@ -134,6 +134,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
                         prefixes.putAll(readPrefixDeclaration(lineNumberReader));
                         //add time prefix for the temporal named graphs
                         prefixes.putIfAbsent("time:", "http://www.w3.org/2006/time#");
+                        prefixes.putIfAbsent("tobda:", "https://w3id.org/tobda/vocabulary#");
 
                     /*
                      * In case of late prefix declaration
@@ -221,27 +222,41 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
         return prefixes;
     }
 
+//    private static List<SQLPPTemporalTriplesMap> expandTemporalTriplesMapsIntoNamedGraphs(List<SQLPPTemporalTriplesMap> mappings){
+//        List<SQLPPTemporalTriplesMap> expandedTriplesMapList = new ArrayList<>();
+//
+//        for(SQLPPTemporalTriplesMap temporalTriplesMap : mappings){
+//            for(ImmutableFunctionalTerm targetAtom : temporalTriplesMap.getTargetAtoms()){
+//                List<ImmutableFunctionalTerm> targetAtomList = new LinkedList<>();
+//                ImmutableFunctionalTerm quadAtom = convertToQuadAtom(targetAtom, temporalTriplesMap.getTemporalMappingInterval());
+//                targetAtomList.add(quadAtom);
+//                expandedTriplesMapList.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap.getId(),
+//                        temporalTriplesMap.getSourceQuery(),
+//                        targetAtomList.stream().collect(ImmutableCollectors.toList()),
+//                        temporalTriplesMap.getTemporalMappingInterval()));
+//                expandedTriplesMapList.add(createTemporalIntervalNamedGraphComponents(quadAtom,temporalTriplesMap));
+//            }
+//        }
+//        return expandedTriplesMapList;
+//    }
+
     private static List<SQLPPTemporalTriplesMap> expandTemporalTriplesMapsIntoNamedGraphs(List<SQLPPTemporalTriplesMap> mappings){
-        List<SQLPPTemporalTriplesMap> expandedTriplesMap = new ArrayList<>();
+        List<SQLPPTemporalTriplesMap> expandedTriplesMapList = new ArrayList<>();
 
         for(SQLPPTemporalTriplesMap temporalTriplesMap : mappings){
             for(ImmutableFunctionalTerm targetAtom : temporalTriplesMap.getTargetAtoms()){
-                List<ImmutableFunctionalTerm> targetAtomList = new LinkedList<>();
-                ImmutableFunctionalTerm quadAtom = convertToQuadAtom(targetAtom, temporalTriplesMap.getTemporalMappingInterval());
-                targetAtomList.add(quadAtom);
-                expandedTriplesMap.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap.getId(),
-                        temporalTriplesMap.getSourceQuery(),
-                        targetAtomList.stream().collect(ImmutableCollectors.toList()),
-                        temporalTriplesMap.getTemporalMappingInterval()));
-                expandedTriplesMap.addAll(createTemporalIntervalNamedGraphComponents(quadAtom,temporalTriplesMap));
+                expandedTriplesMapList.add(createTemporalIntervalNamedGraphComponents(targetAtom,temporalTriplesMap));
             }
         }
-        return expandedTriplesMap;
+        return expandedTriplesMapList;
     }
 
-    private static List<SQLPPTemporalTriplesMap> createTemporalIntervalNamedGraphComponents(ImmutableFunctionalTerm quadAtom, SQLPPTemporalTriplesMap temporalTriplesMap){
-        List<SQLPPTemporalTriplesMap> temporalTriplesMapList = new LinkedList<>();
+    private static SQLPPTemporalTriplesMap createTemporalIntervalNamedGraphComponents(ImmutableFunctionalTerm targetAtom, SQLPPTemporalTriplesMap temporalTriplesMap){
+
         List<ImmutableFunctionalTerm> ngComponentsList = new LinkedList<>();
+
+        ImmutableFunctionalTerm quadAtom = convertToQuadAtom(targetAtom, temporalTriplesMap.getTemporalMappingInterval());
+        ngComponentsList.add(quadAtom);
 
         //hasTime
         ImmutableTerm graphURITemplate = quadAtom.getArguments().get(3);
@@ -254,10 +269,6 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
                 temporalTriplesMap.getTemporalMappingInterval().getEnd());
 
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(hasTime, graphURITemplate, intervalURITemplate));
-        temporalTriplesMapList.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList())));
-
-        //TODO: find a better way to create SQLPPTriplesMap.
-        ngComponentsList.clear();
 
         //hasBeginning
         Predicate hasBeginning = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#hasBeginning",2);
@@ -267,21 +278,12 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
                         temporalTriplesMap.getTemporalMappingInterval().getBegin());
 
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(hasBeginning,intervalURITemplate, beginInstantURITemplate));
-        temporalTriplesMapList.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList())));
-
-        //TODO: find a better way to create SQLPPTriplesMap.
-        ngComponentsList.clear();
 
         //TODO:support other types too
         //begin inXSDDateTime
         Predicate beginInXSDDateTime = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#inXSDDateTime",2);
 
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(beginInXSDDateTime, beginInstantURITemplate, temporalTriplesMap.getTemporalMappingInterval().getBegin()));
-        temporalTriplesMapList.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList())));
-
-        //TODO: find a better way to create SQLPPTriplesMap.
-        ngComponentsList.clear();
-
 
         //hasEnd
         Predicate hasEnd = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#hasEnd",2);
@@ -291,27 +293,19 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
                         temporalTriplesMap.getTemporalMappingInterval().getEnd());
 
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(hasEnd,intervalURITemplate, endInstantURITemplate));
-        temporalTriplesMapList.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList())));
-
-        //TODO: find a better way to create SQLPPTriplesMap.
-        ngComponentsList.clear();
 
         //TODO:support other types too
         //end inXSDDateTime
         Predicate endInXSDDateTime = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#inXSDDateTime",2);
 
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(endInXSDDateTime, endInstantURITemplate, temporalTriplesMap.getTemporalMappingInterval().getEnd()));
-        temporalTriplesMapList.add(new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList())));
 
-        //TODO: find a better way to create SQLPPTriplesMap.
-        ngComponentsList.clear();
-
-        return temporalTriplesMapList;
+        return new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList()));
     }
 
     private static ImmutableTerm getGraphURITemplate(TemporalMappingInterval intervalQuery){
 
-        ImmutableTerm graphConstrantLiteral = TERM_FACTORY.getConstantLiteral("NAMEDGRAPH/");
+        ImmutableTerm graphConstrantLiteral = TERM_FACTORY.getConstantLiteral("https://w3id.org/tobda/vocabulary#namedGraph/");
         ImmutableTerm beginInc = TERM_FACTORY.getConstantLiteral(intervalQuery.isBeginInclusiveToString(), Predicate.COL_TYPE.BOOLEAN);
         ImmutableTerm endInc = TERM_FACTORY.getConstantLiteral(intervalQuery.isEndInclusiveToString(), Predicate.COL_TYPE.BOOLEAN);
 
