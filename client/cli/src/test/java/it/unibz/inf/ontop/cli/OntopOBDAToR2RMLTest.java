@@ -62,12 +62,5 @@ public class OntopOBDAToR2RMLTest {
         Ontop.main(argv);
     }
 
-    @Test
-    public void testOntopOBDAToR2RML4 (){
-        String[] argv = {"mapping", "to-r2rml",
-                "-i", "src/test/resources/npd-boolean-mapping.obda",
-                "-o", "src/test/resources/output/npd-boolean-mapping.ttl"
-        };
-        Ontop.main(argv);
-    }
+
 }
