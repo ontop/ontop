@@ -75,8 +75,8 @@ public abstract class AbstractConstraintTest extends TestCase {
 			TermFactory termFactory = defaultConfiguration.getTermFactory();
 			Injector injector = defaultConfiguration.getInjector();
 			DatalogFactory datalogFactory = injector.getInstance(DatalogFactory.class);
-
 			Relation2Predicate relation2Predicate = injector.getInstance(Relation2Predicate.class);
+			JdbcTypeMapper jdbcTypeMapper = injector.getInstance(JdbcTypeMapper.class);
 
 
 			metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, datalogFactory,

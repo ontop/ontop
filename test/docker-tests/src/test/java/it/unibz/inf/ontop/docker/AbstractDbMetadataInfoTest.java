@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.docker;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
@@ -65,7 +66,8 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 					defaultConfiguration.getTermFactory(),
 					injector.getInstance(DatalogFactory.class),
 					defaultConfiguration.getAtomFactory(),
-					injector.getInstance(Relation2Predicate.class), jdbcTypeMapper);
+					injector.getInstance(Relation2Predicate.class),
+					injector.getInstance(JdbcTypeMapper.class));
 
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		}
