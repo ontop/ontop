@@ -38,6 +38,11 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
     }
 
     @Override
+    public boolean isDefaultDatatypeInferred() {
+        return getRequiredBoolean(INFER_DEFAULT_DATATYPE);
+    }
+
+    @Override
     public boolean isOntologyAnnotationQueryingEnabled() {
         return getRequiredBoolean(QUERY_ONTOLOGY_ANNOTATIONS);
     }

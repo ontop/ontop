@@ -48,7 +48,6 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 * 
 	 * @param name
 	 */
-	
 	protected DatabaseRelationDefinition(RelationID name) {
 		super(name);
 	}

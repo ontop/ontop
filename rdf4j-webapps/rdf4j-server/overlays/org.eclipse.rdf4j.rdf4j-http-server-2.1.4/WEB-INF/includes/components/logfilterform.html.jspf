@@ -1,0 +1,97 @@
+<c:if test="${!empty level || !empty thread || !empty startDate || !empty endDate}">
+		<form method="post">
+			<input type="hidden" name="filterapplied" value="true" />
+			<table border="0"><tr><td valign="top" nowrap="true">
+			<c:if test="${!empty level}">
+				<fmt:message key="system.logging.overview.level" />:&nbsp;
+				<select name="level">
+					<c:forEach var="l" items="${loglevels}">
+						<option value="${l}" <c:if test="${l == level}">selected</c:if>>${l}</option>
+					</c:forEach>
+				</select>
+				&nbsp;&nbsp;
+			</c:if>		
+			<c:if test="${!empty thread}">
+				<fmt:message key="system.logging.overview.thread" />:&nbsp;
+				<select name="thread">
+					<c:forEach var="t" items="${threadnames}">
+						<option value="${t}" <c:if test="${t == thread}">selected</c:if>>${t}</option>
+					</c:forEach>
+				</select>
+				&nbsp;&nbsp;
+			</c:if>
+			</td><td valign="top">
+			<table border="0">
+			<c:if test="${!empty startDate}">
+				<tr><td nowrap="true">
+				<input type="checkbox" name="applystartdate" checked />
+				<fmt:message key="system.logging.overview.after" />:&nbsp;				
+				</td>
+				<td nowrap="true">
+				<select name="s_year">
+				<c:forEach var="i" begin="2000" end="2099">
+            		<option value="${i}" <c:if test="${i == s_year}">selected</c:if>>${i}</option>
+				</c:forEach>
+				</select>&nbsp;-&nbsp;
+				<select name="s_month">
+				<c:forEach var="i" begin="0" end="11">
+            		<option value="${i}" <c:if test="${i == s_month}">selected</c:if>>${i+1}</option>
+				</c:forEach>
+				</select>&nbsp;-&nbsp;
+				<select name="s_day">
+				<c:forEach var="i" begin="1" end="31">
+            		<option value="${i}" <c:if test="${i == s_day}">selected</c:if>>${i}</option>
+				</c:forEach>
+				</select>&nbsp;/&nbsp;
+				<select name="s_hour">
+				<c:forEach var="i" begin="0" end="23">
+            		<option value="${i}" <c:if test="${i == s_hour}">selected</c:if>>${i}</option>
+				</c:forEach>
+				</select>&nbsp;:&nbsp;
+				<select name="s_min">
+				<c:forEach var="i" begin="0" end="59">
+            		<option value="${i}" <c:if test="${i == s_min}">selected</c:if>>
+						<c:if test="${i < 10}">0</c:if>${i}</option>
+				</c:forEach>
+				</select>
+				</td></tr>
+			</c:if>
+			<c:if test="${!empty endDate}">
+				<tr><td nowrap="true">
+				<input type="checkbox" name="applyenddate" checked />
+				<fmt:message key="system.logging.overview.before" />:&nbsp;
+				</td>
+				<td nowrap="true">
+				<select name="e_year">
+				<c:forEach var="i" begin="2000" end="2099">
+            		<option value="${i}" <c:if test="${i == e_year}">selected</c:if>>${i}</option>
+				</c:forEach>
+				</select>&nbsp;-&nbsp;
+				<select name="e_month">
+				<c:forEach var="i" begin="0" end="11">
+            		<option value="${i}" <c:if test="${i == e_month}">selected</c:if>>${i+1}</option>
+				</c:forEach>
+				</select>&nbsp;-&nbsp;
+				<select name="e_day">
+				<c:forEach var="i" begin="1" end="31">
+            		<option value="${i}" <c:if test="${i == e_day}">selected</c:if>>${i}</option>
+				</c:forEach>
+				</select>&nbsp;/&nbsp;
+				<select name="e_hour">
+				<c:forEach var="i" begin="0" end="23">
+            		<option value="${i}" <c:if test="${i == e_hour}">selected</c:if>>${i}</option>
+				</c:forEach>
+				</select>&nbsp;:&nbsp;
+				<select name="e_min">
+				<c:forEach var="i" begin="0" end="59">
+            		<option value="${i}" <c:if test="${i == e_min}">selected</c:if>>
+						<c:if test="${i < 10}">0</c:if>${i}</option>
+				</c:forEach>
+				</select>
+				</td></tr>
+			</c:if>
+			</table></td>			
+			<td>&nbsp;&nbsp;<input type="submit" value="<fmt:message key="system.logging.overview.applyfilter" />" /></td>
+			</tr></table>
+		</form>
+</c:if>

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
+import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -13,8 +13,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import static it.unibz.inf.ontop.iq.node.SubstitutionResults.LocalAction.NO_CHANGE;
 
 public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
 
@@ -51,7 +49,7 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     public SubstitutionResults<EmptyNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode childNode, IntermediateQuery query) {
-        return new SubstitutionResultsImpl<>(NO_CHANGE);
+        return DefaultSubstitutionResults.noChange();
     }
 
     @Override
@@ -64,7 +62,7 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
                 .collect(ImmutableCollectors.toSet());
 
         EmptyNode newNode = new EmptyNodeImpl(newProjectedVariables);
-        return new SubstitutionResultsImpl<>(newNode);
+        return DefaultSubstitutionResults.newNode(newNode);
     }
 
     @Override

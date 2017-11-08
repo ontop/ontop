@@ -53,7 +53,7 @@ public class QuotedID {
 		this(id, quoteString, true);
 	}
 	
-	QuotedID(String id, String quoteString, boolean caseSensitive) {
+	protected QuotedID(String id, String quoteString, boolean caseSensitive) {
 		this.id = id;
 		this.quoteString = quoteString;
 		this.caseSensitive = caseSensitive;

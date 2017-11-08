@@ -1,16 +1,16 @@
 package it.unibz.inf.ontop.model.type.impl;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.type.LanguageTag;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.LanguageTag;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.LANG_STRING;
 import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.LITERAL;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.LITERAL_LANG;
 
 /**
  * TODO: integrate into a factory
@@ -28,7 +28,7 @@ public class TermTypeImpl implements TermType {
      *
      */
     protected TermTypeImpl(LanguageTag languageTag) {
-        this.colType = LITERAL_LANG;
+        this.colType = LANG_STRING;
         this.optionalLangTagConstant = Optional.of(languageTag);
         this.optionalLangTagTerm = Optional.empty();
     }
@@ -45,16 +45,16 @@ public class TermTypeImpl implements TermType {
         if (languageTagTerm instanceof Constant) {
             throw new IllegalArgumentException("Used the other constructor if languageTerm is constant");
         }
-        this.colType = LITERAL_LANG;
+        this.colType = LANG_STRING;
         this.optionalLangTagConstant = Optional.empty();
         this.optionalLangTagTerm = Optional.of(languageTagTerm);
     }
 
     /**
-     * Do not use this construction for LITERAL_LANG!.
+     * Do not use this construction for LANG_STRING!.
      */
     protected TermTypeImpl(Predicate.COL_TYPE colType) {
-        if (colType == LITERAL_LANG) {
+        if (colType == LANG_STRING) {
             throw new IllegalArgumentException("A Literal lang must have a language tag (constant or variable)!");
         }
         this.colType = colType;
@@ -90,7 +90,7 @@ public class TermTypeImpl implements TermType {
         /**
          * TODO: explain
          */
-        if (colType == LITERAL_LANG && otherTermType.getColType() == LITERAL_LANG) {
+        if (colType == LANG_STRING && otherTermType.getColType() == LANG_STRING) {
 
             if (optionalLangTagConstant.isPresent()) {
                 LanguageTag langTag = optionalLangTagConstant.get();

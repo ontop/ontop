@@ -556,8 +556,6 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 				dl_onto.addSubPropertyOfAxiom(dpe, DataPropertyExpressionImpl.owlBottomDataProperty);
 			}
 			else {
-				//Predicate.COL_TYPE columnType = OWLTypeMapper.getType(owlDatatype);
-				//Datatype datatype = ofac.createDataType(columnType);
 				Datatype datatype = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
 				dl_onto.addDataPropertyRangeAxiom(dpe.getRange(), datatype);		
 			}		

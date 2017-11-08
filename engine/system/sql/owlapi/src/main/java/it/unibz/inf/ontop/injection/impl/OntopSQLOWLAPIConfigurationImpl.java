@@ -1,8 +1,5 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -11,7 +8,6 @@ import it.unibz.inf.ontop.injection.impl.OntopMappingOWLAPIConfigurationImpl.Ont
 import it.unibz.inf.ontop.injection.impl.OntopMappingOWLAPIConfigurationImpl.StandardMappingOWLAPIBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.OntopMappingOntologyOptions;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.StandardMappingOntologyBuilderFragment;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -34,13 +30,8 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
     }
 
     @Override
-    public OBDASpecification loadSpecification() throws OBDASpecificationException {
+    public OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
         return loadSpecification(mappingOWLConfiguration::loadOntology);
-    }
-
-    @Override
-    public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
-        return loadPPMapping(mappingOWLConfiguration::loadOntology);
     }
 
     @Override

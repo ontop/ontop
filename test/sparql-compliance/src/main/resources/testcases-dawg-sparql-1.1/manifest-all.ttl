@@ -9,7 +9,7 @@
 	#	<add/manifest.ttl>
 	#	<aggregates/manifest.ttl>
 	#	<basic-update/manifest.ttl>
-	#	<bind/manifest.ttl>
+		<bind/manifest.ttl>
 	#	<bindings/manifest.ttl>
 	#	<clear/manifest.ttl>
 	#	<construct/manifest.ttl>
@@ -20,7 +20,7 @@
 	#	<delete-where/manifest.ttl>
 	#	<delete/manifest.ttl>
 	#	<drop/manifest.ttl>
-	#	<entailment/manifest.ttl>
+		<entailment/manifest.ttl>
 	#	<exists/manifest.ttl>
 		<functions/manifest.ttl>
 	#	<grouping/manifest.ttl>
@@ -42,11 +42,11 @@
 <http://www.w3.org/TR/sparql11-query/> rdfs:label "SPARQL 1.1 Query Language" ;
 	mf:conformanceRequirement (
 	#	<aggregates/manifest.ttl>
-	#	<bind/manifest.ttl>
+		<bind/manifest.ttl>
 	#	<bindings/manifest.ttl>
 	#	<construct/manifest.ttl>
 	#	<exists/manifest.ttl>
-	#	<functions/manifest.ttl>
+		<functions/manifest.ttl>
 	#	<grouping/manifest.ttl>
 	#	<negation/manifest.ttl>
 	#	<project-expression/manifest.ttl>
@@ -90,6 +90,6 @@
 
 <http://www.w3.org/TR/sparql11-entailment/> rdfs:label "SPARQL 1.1 Entailment Regimes" ;
 	mf:conformanceRequirement (
-	#	<entailment/manifest.ttl>
+		<entailment/manifest.ttl>
 	).
 

@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.docker.postgres;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 /**
  * Test to check if the sql parser supports regex correctly when written with postgres syntax. 
@@ -42,6 +43,7 @@ public class RegexPostgresSQLTest extends AbstractVirtualModeTest {
 	 * select id, street, number, city, state, country from address where city ~* 'b.+z'
 	 * @throws Exception
 	 */
+	@Test
 	public void testPostgresRegex() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :BolzanoAddress}";
         countResults(query, 2);
@@ -52,6 +54,7 @@ public class RegexPostgresSQLTest extends AbstractVirtualModeTest {
 	 * select "id", "name", "lastname", "dateofbirth", "ssn" from "broker" where  "name" !~* 'J.+a'
 	 * @throws Exception
 	 */
+	@Test
 	public void testPostgresRegexNot() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :PhysicalPerson}";
 		countResults(query, 3);

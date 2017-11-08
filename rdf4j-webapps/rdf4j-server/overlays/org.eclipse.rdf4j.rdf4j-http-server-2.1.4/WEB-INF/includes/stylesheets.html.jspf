@@ -1,0 +1,10 @@
+	<link title="Default" rel="stylesheet" type="text/css" href="${path}/styles/default/print.css" media="print" />
+	<link title="Default" rel="stylesheet" type="text/css" href="${path}/styles/default/screen.css" media="screen" />
+	<!--[if (gt IE 5.5)&(lt IE 7)]>
+	<link title="Default" rel="stylesheet" type="text/css" href="${path}/styles/msie-png-alpha.css" media="screen" />
+	<![endif]-->
+	<!--[if IE 6]>
+	<link title="Default" rel="stylesheet" type="text/css" href="${path}/styles/default/msie-minheight.css" media="screen" />
+	<![endif]-->
+	<link title="Basic" rel="alternate stylesheet" type="text/css" href="${path}/basic/all.css" media="all" />
+	

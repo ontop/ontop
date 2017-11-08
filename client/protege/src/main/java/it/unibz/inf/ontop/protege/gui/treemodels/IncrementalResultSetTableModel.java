@@ -99,20 +99,24 @@ public class IncrementalResultSetTableModel implements TableModel {
 	}
 
 	/** Automatically close when we're garbage collected */
+	@Override
 	protected void finalize() {
 		close();
 	}
 
 	// These two TableModel methods return the size of the table
+	@Override
 	public int getColumnCount() {
 		return numcols;
 	}
 
+	@Override
 	public int getRowCount() {
 		return numrows;
 	}
 
 	// This TableModel method returns columns names from the ResultSetMetaData
+	@Override
 	public String getColumnName(int column) {
 		try {
 			return metadata.getColumnLabel(column + 1);
@@ -125,6 +129,7 @@ public class IncrementalResultSetTableModel implements TableModel {
 	// This TableModel method specifies the data type for each column.
 	// We could map SQL types to Java types, but for this example, we'll just
 	// convert all the returned data to strings.
+	@Override
 	public Class getColumnClass(int column) {
 		return String.class;
 	}
@@ -136,9 +141,10 @@ public class IncrementalResultSetTableModel implements TableModel {
 	 * Note that SQL row and column numbers start at 1, but TableModel column
 	 * numbers start at 0.
 	 */
+	@Override
 	public Object getValueAt(int row, int column) {
-		
-		
+
+
 		try {
 			if(row + 2 >= numrows && !isAfterLast){
 				fetchMoreResults();
@@ -151,18 +157,22 @@ public class IncrementalResultSetTableModel implements TableModel {
 	}
 
 	// Our table isn't editable
+	@Override
 	public boolean isCellEditable(int row, int column) {
 		return false;
 	}
 
 	// Since its not editable, we don't need to implement these methods
+	@Override
 	public void setValueAt(Object value, int row, int column) {
 	}
 
+	@Override
 	public void addTableModelListener(TableModelListener l) {
 		listener.add(l);
 	}
 
+	@Override
 	public void removeTableModelListener(TableModelListener l) {
 		listener.remove(l);
 	}
@@ -170,7 +180,7 @@ public class IncrementalResultSetTableModel implements TableModel {
 	private void fetchMoreResults() throws Exception{
 		int i=1;
 		while( i<= fetchsize && !isAfterLast){
-			
+
 			if(set.next()){
 				Vector<String> aux = new Vector<String>();
 				for(int j=1;j<=numcols;j++){

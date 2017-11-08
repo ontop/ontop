@@ -20,28 +20,20 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.gui.treemodels.TreeElement;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.QueryControllerTreeModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.QueryGroupTreeElement;
 import it.unibz.inf.ontop.protege.gui.treemodels.QueryTreeElement;
+import it.unibz.inf.ontop.protege.gui.treemodels.TreeElement;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.utils.querymanager.QueryController;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerListener;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.utils.querymanager.*;
 
-import java.awt.Dialog.ModalityType;
-import java.util.Vector;
-
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
+import java.awt.Dialog.ModalityType;
+import java.util.Vector;
 
 /**
  * This class represents the display of stored queries using a tree structure.
@@ -124,8 +116,6 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
         lblSavedQuery = new javax.swing.JLabel();
         cmdRemove = new javax.swing.JButton();
         cmdAdd = new javax.swing.JButton();
-        cmdExport = new javax.swing.JButton();
-        cmdImport = new javax.swing.JButton();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -140,7 +130,6 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
         treSavedQuery.setForeground(new java.awt.Color(51, 51, 51));
         treSavedQuery.setModel(queryControllerModel);
         treSavedQuery.setCellRenderer(new SavedQueriesTreeCellRenderer());
-		treSavedQuery.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         treSavedQuery.setMaximumSize(new java.awt.Dimension(5000, 5000));
         treSavedQuery.setRootVisible(false);
         treSavedQuery.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -210,37 +199,6 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         pnlCommandPanel.add(cmdAdd, gridBagConstraints);
-
-        cmdExport.setText("Export");
-        cmdExport.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdExport.setContentAreaFilled(false);
-        cmdExport.setEnabled(false);
-        cmdExport.setMaximumSize(new java.awt.Dimension(100, 25));
-        cmdExport.setMinimumSize(new java.awt.Dimension(50, 25));
-        cmdExport.setPreferredSize(new java.awt.Dimension(60, 25));
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-        pnlCommandPanel.add(cmdExport, gridBagConstraints);
-
-        cmdImport.setText("Import");
-        cmdImport.setToolTipText("Import queries from an obda file");
-        cmdImport.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdImport.setContentAreaFilled(false);
-        cmdImport.setEnabled(false);
-        cmdImport.setMaximumSize(new java.awt.Dimension(100, 25));
-        cmdImport.setMinimumSize(new java.awt.Dimension(25, 25));
-        cmdImport.setPreferredSize(new java.awt.Dimension(60, 25));
-        
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-        pnlCommandPanel.add(cmdImport, gridBagConstraints);
 
         pnlSavedQuery.add(pnlCommandPanel, java.awt.BorderLayout.NORTH);
 
@@ -330,8 +288,6 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdAdd;
-    private javax.swing.JButton cmdExport;
-    private javax.swing.JButton cmdImport;
     private javax.swing.JButton cmdRemove;
     private javax.swing.JLabel lblSavedQuery;
     private javax.swing.JPanel pnlCommandPanel;

@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Properties;
 
 import static it.unibz.inf.ontop.injection.OntopSQLCoreSettings.*;
+import static it.unibz.inf.ontop.injection.OntopSQLCredentialSettings.*;
 
 /**
  * TODO: find a better name

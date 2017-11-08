@@ -57,6 +57,7 @@ import static org.junit.Assert.assertTrue;
  * Class to test that the r2rml file with the mappings give the same results of the corresponding obda file.
  * We use the npd database.
  */
+
 public class R2rmlCheckerTest {
 	private OWLConnection conn;
 
@@ -135,6 +136,8 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @throws Exception
 	 */
+
+
 
 	@Test
 	public void testDescriptionsCheck() throws Exception {

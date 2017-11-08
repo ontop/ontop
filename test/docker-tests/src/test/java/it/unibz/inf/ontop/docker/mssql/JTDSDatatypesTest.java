@@ -21,6 +21,9 @@ package it.unibz.inf.ontop.docker.mssql;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /***
  * Tests that jtds jdbc driver for SQL Server returns the datatypes correctly
@@ -41,12 +44,13 @@ public class JTDSDatatypesTest extends AbstractVirtualModeTest {
 	 * @throws Exception
 	 */
 
+	@Test
 	public void testDatetime() throws Exception {
 
 		String query =  "PREFIX : <http://knova.ru/adventureWorks.owl#>\n" +
 				"SELECT DISTINCT ?s ?x { ?s :SpecialOffer_ModifiedDate ?x }";
 		String val = runQueryAndReturnStringOfLiteralX(query);
-		assertEquals("\"2005-05-02T00:00:00.0\"^^xsd:dateTime", val);
+		assertEquals("\"2005-05-02T00:00:00+02:00\"^^xsd:dateTime", val);
 	}
 
 

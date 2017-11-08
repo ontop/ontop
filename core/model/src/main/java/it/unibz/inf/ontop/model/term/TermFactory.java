@@ -21,12 +21,12 @@ package it.unibz.inf.ontop.model.term;
  */
 
 
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+
+import java.util.List;
 
 public interface TermFactory {
 
@@ -243,15 +243,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language);
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, ImmutableTerm language);
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, Predicate.COL_TYPE type);
-	
-	/**
-	 * Construct a {@link ValueConstant} object with a system-assigned name
-	 * that is automatically generated.
-	 * 
-	 * @return the value constant.
-	 */
-	public ValueConstant getConstantFreshLiteral();
-	
+
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a
 	 * dollar sign ('$') or a question mark sign ('?'), e.g.:

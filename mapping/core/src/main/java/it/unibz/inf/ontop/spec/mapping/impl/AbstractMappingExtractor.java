@@ -95,7 +95,7 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
         }
     }
 
-    protected abstract MappingAndDBMetadata convertPPMapping(T1 ppMapping, Optional<T2> dbMetadata, OBDASpecInput specInput, Optional<Ontology> ontology, Optional<TBoxReasoner> saturatedTBox, ExecutorRegistry executorRegistry) throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, NullVariableInMappingException;
+    protected abstract MappingAndDBMetadata convertPPMapping(T1 ppMapping, Optional<T2> dbMetadata, OBDASpecInput specInput, Optional<Ontology> ontology, Optional<TBoxReasoner> saturatedTBox, ExecutorRegistry executorRegistry) throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, NullVariableInMappingException, UnknownDatatypeException;
 
     protected abstract Optional<T2> castDBMetadata(Optional<DBMetadata> dbMetadata);
 

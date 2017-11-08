@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.protege.core.OBDADataSourceFactory;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import org.slf4j.Logger;
@@ -135,9 +136,9 @@ public class OldSyntaxMappingConverter {
             } else if (parameter.equals(Label.connectionUrl.name())) {
                 dataSourceProperties.put(OntopSQLCoreSettings.JDBC_URL, inputParameter);
             } else if (parameter.equals(Label.username.name())) {
-                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_USER, inputParameter);
+                dataSourceProperties.put(OntopSQLCredentialSettings.JDBC_USER, inputParameter);
             } else if (parameter.equals(Label.password.name())) {
-                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_PASSWORD, inputParameter);
+                dataSourceProperties.put(OntopSQLCredentialSettings.JDBC_PASSWORD, inputParameter);
             } else if (parameter.equals(Label.driverClass.name())) {
                 dataSourceProperties.put(OntopSQLCoreSettings.JDBC_DRIVER, inputParameter);
 

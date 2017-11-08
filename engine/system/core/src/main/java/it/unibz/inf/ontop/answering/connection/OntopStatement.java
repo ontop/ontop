@@ -13,9 +13,9 @@ import it.unibz.inf.ontop.exception.*;
  */
 public interface OntopStatement extends OBDAStatement {
 
-    int getTupleCount(InputQuery inputQuery) throws OntopTranslationException, OntopQueryEvaluationException, OntopConnectionException;
+    int getTupleCount(InputQuery inputQuery) throws OntopReformulationException, OntopQueryEvaluationException, OntopConnectionException;
 
-    String getRewritingRendering(InputQuery inputQuery) throws OntopTranslationException;
+    String getRewritingRendering(InputQuery inputQuery) throws OntopReformulationException;
 
-    ExecutableQuery getExecutableQuery(InputQuery inputQuery) throws OntopTranslationException;
+    ExecutableQuery getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException;
 }

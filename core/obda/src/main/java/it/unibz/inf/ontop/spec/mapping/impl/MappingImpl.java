@@ -56,18 +56,10 @@ public class MappingImpl implements Mapping {
 
     @Override
     public Optional<IntermediateQuery> getDefinition(AtomPredicate predicate) {
-
         IntermediateQuery query = definitions.get(predicate);
-        if(query != null){
-            return checkArities(query, predicate)?
-                    Optional.of(query):
-                    Optional.empty();
-        }
-        return Optional.empty();
-    }
-
-    private boolean checkArities(IntermediateQuery query, AtomPredicate predicate) {
-        return  query.getProjectionAtom().getPredicate().getArity() == predicate.getArity();
+        return query != null && query.getProjectionAtom().getPredicate().getArity() == predicate.getArity()?
+            Optional.of(query):
+            Optional.empty();
     }
 
     @Override

@@ -12,6 +12,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedTriplesMap;
  */
 public interface PPMappingConverter<T extends PreProcessedTriplesMap, M extends PreProcessedMapping<T>, D extends DBMetadata> {
 
-    MappingWithProvenance convert(M ppMapping, D dbMetadata, ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException, NullVariableInMappingException;
+    MappingWithProvenance convert(M ppMapping, D dbMetadata, ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException;
 
 }

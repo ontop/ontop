@@ -2,21 +2,9 @@ package it.unibz.inf.ontop.rdf4j.utils;
 
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.BNode;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.URIConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.spec.ontology.AnnotationAssertion;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
-import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyAssertion;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.ValueFactory;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.spec.ontology.*;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import java.util.Objects;
@@ -47,7 +35,7 @@ public class RDF4JHelper {
             case STRING:
                 // creates xsd:string
                 return fact.createLiteral(literal.getValue());
-            case LITERAL_LANG:
+            case LANG_STRING:
                 // creates xsd:langString
                 return fact.createLiteral(literal.getValue(), literal.getLanguage());
             default:

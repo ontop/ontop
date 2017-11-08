@@ -9,8 +9,8 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 [MappingDeclaration] @collection [[
 
 mappingId	Series + Series_Title + Production_Year (for Series)
-target		:series-{t.id} a :Series ; :Series_Title {t.title} ; :Production_Year {t.production_year} . 
-source		SELECT t.id, t.title, t.production_year
+target		:series-{tid} a :Series ; :Series_Title {title} ; :Production_Year {year} .
+source		SELECT t.id as tid, t.title as title, t.production_year as year
 			FROM title t
 			WHERE t.kind_id = 2
 

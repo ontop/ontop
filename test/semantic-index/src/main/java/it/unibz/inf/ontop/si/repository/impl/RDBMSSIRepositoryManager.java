@@ -20,40 +20,25 @@ package it.unibz.inf.ontop.si.repository.impl;
  * #L%
  */
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyAssertion;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.sql.*;
-import java.sql.ResultSet;
-import java.util.*;
-import java.util.Map.Entry;
-
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.ontology.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.util.*;
+import java.util.Map.Entry;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
@@ -564,7 +549,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			case LITERAL:  // 0
 				stm.setString(2, value);
 				break;  
-			case LITERAL_LANG:  // -3
+			case LANG_STRING:  // -3
 				stm.setString(2, value);
 				stm.setString(4, object.getLanguage());
 				break;  
@@ -1070,7 +1055,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			case OBJECT:
 				objectTerm = TERM_FACTORY.getImmutableUriTemplate(Y);
 				break;
-			case LITERAL_LANG:	
+			case LANG_STRING:
 				objectTerm = TERM_FACTORY.getImmutableTypedTerm(Y, TERM_FACTORY.getVariable("Z"));
 				break;
 			case DATE:

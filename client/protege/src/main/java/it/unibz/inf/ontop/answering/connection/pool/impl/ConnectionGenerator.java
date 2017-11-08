@@ -4,9 +4,9 @@ package it.unibz.inf.ontop.answering.connection.pool.impl;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
+import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
@@ -37,6 +37,6 @@ public class ConnectionGenerator implements JDBCConnectionPool {
      */
     @Override
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
+        return LocalJDBCConnectionUtils.createConnection(settings);
     }
 }

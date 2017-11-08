@@ -12,6 +12,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
@@ -214,9 +215,9 @@ public class OntopMappingV1ToV3 implements OntopCommand {
             } else if (parameter.equals(Label.connectionUrl.name())) {
                 dataSourceProperties.put(OntopSQLCoreSettings.JDBC_URL, inputParameter);
             } else if (parameter.equals(Label.username.name())) {
-                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_USER, inputParameter);
+                dataSourceProperties.put(OntopSQLCredentialSettings.JDBC_USER, inputParameter);
             } else if (parameter.equals(Label.password.name())) {
-                dataSourceProperties.put(OntopSQLCoreSettings.JDBC_PASSWORD, inputParameter);
+                dataSourceProperties.put(OntopSQLCredentialSettings.JDBC_PASSWORD, inputParameter);
             } else if (parameter.equals(Label.driverClass.name())) {
                 dataSourceProperties.put(OntopSQLCoreSettings.JDBC_DRIVER, inputParameter);
 

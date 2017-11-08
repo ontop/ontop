@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
@@ -23,6 +22,7 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +64,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
                                                   OBDASpecInput specInput, Optional<Ontology> optionalOntology,
                                                   Optional<TBoxReasoner> optionalSaturatedTBox,
                                                   ExecutorRegistry executorRegistry)
-            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, NullVariableInMappingException {
+            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
 
         RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
@@ -115,7 +115,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         if (isDBMetadataProvided && (!settings.isProvidedDBMetadataCompletionEnabled()))
             return optionalDBMetadata.get();
 
-        try (Connection localConnection = createConnection()) {
+        try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
             return isDBMetadataProvided
                     ? dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata.get(),
                     specInput.getConstraintFile())

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 
 /**
@@ -18,6 +19,7 @@ public class AssignmentTest extends AbstractVirtualModeTest {
         super(owlFile, obdaFile, propertyFile);
     }
 
+    @Test
     public void testBindQuery() throws Exception {
         String queryBind = "PREFIX : <http://myproject.org/odbs#> \n" +
                 "\n" +
@@ -30,6 +32,7 @@ public class AssignmentTest extends AbstractVirtualModeTest {
         countResults(queryBind, 500);
     }
 
+    @Test
     public void testBindAndConcatQuery() throws Exception {
         String queryConcat1 = "PREFIX : <http://myproject.org/odbs#> \n" +
                 "\n" +
@@ -59,6 +62,7 @@ public class AssignmentTest extends AbstractVirtualModeTest {
         countResults(queryConcat2, 500);
     }
 
+    @Test
     public void testSelectQuery() throws Exception {
         String querySelect = "PREFIX : <http://myproject.org/odbs#> \n" +
 
@@ -69,6 +73,7 @@ public class AssignmentTest extends AbstractVirtualModeTest {
         countResults(querySelect, 500);
     }
 
+    @Test
     public void testSelectWithConcatQuery() throws Exception {
         String querySelConcat = "PREFIX : <http://myproject.org/odbs#> \n" +
 
@@ -81,6 +86,7 @@ public class AssignmentTest extends AbstractVirtualModeTest {
         countResults(querySelConcat, 500);
     }
 
+    @Test
     public void testConcatWithIntegerQuery() throws Exception {
         String querySelConcat = "PREFIX : <http://myproject.org/odbs#> \n" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n" +

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
+import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -11,8 +11,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-
-import static it.unibz.inf.ontop.iq.node.SubstitutionResults.LocalAction.NO_CHANGE;
 
 public class TrueNodeImpl implements TrueNode {
 
@@ -48,7 +46,7 @@ public class TrueNodeImpl implements TrueNode {
     public SubstitutionResults<TrueNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode childNode, IntermediateQuery query) {
-        return new SubstitutionResultsImpl<>(NO_CHANGE);
+        return DefaultSubstitutionResults.noChange();
     }
 
     @Override
@@ -62,7 +60,7 @@ public class TrueNodeImpl implements TrueNode {
     @Override
     public SubstitutionResults<TrueNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        return new SubstitutionResultsImpl<>(clone());
+        return DefaultSubstitutionResults.newNode(clone());
     }
 
     @Override

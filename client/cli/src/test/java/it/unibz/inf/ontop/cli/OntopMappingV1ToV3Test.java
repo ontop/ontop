@@ -46,8 +46,8 @@ public class OntopMappingV1ToV3Test {
     @Test
     public void OntopR2rmlCleanupAllSetting (){
         String[] argv = {"mapping", "v1-to-v3",
-                "-m", "src/test/resources/npd-v2-ql-mysql-ontop1.17.ttl",
-                "-o", "src/test/resources/output/npd-v2-ql-mysql-ontop1.17.ttl"
+                "-m", "src/test/resources/npd-old-v2-ql-mysql-ontop1.17.ttl",
+                "-o", "src/test/resources/output/npd-old-v2-ql-mysql-ontop1.17.ttl"
         };
         Ontop.main(argv);
     }
@@ -56,7 +56,7 @@ public class OntopMappingV1ToV3Test {
     @Test
     public void OntopR2RMLCleanupNoOutput (){
         String[] argv = {"mapping", "v1-to-v3",
-                "-m", "src/test/resources/npd-v2-ql-mysql-ontop1.17.ttl",
+                "-m", "src/test/resources/npd-old-v2-ql-mysql-ontop1.17.ttl",
                 "--overwrite"
         };
         Ontop.main(argv);
