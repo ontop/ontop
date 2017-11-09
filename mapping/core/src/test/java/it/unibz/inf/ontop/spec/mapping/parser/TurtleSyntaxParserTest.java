@@ -305,11 +305,11 @@ public class TurtleSyntaxParserTest {
 
 	}
 
-	//Test for language tag from db
+	//Test for language tag from a variable (FORBIDDEN)
 	@Test
 	public void test_12_1(){
 		final boolean result = parse(":Person-{id} a :Person ; :firstName {name}@{lang} . ");
-		TestCase.assertTrue(result);
+		TestCase.assertFalse(result);
 
 	}
 
