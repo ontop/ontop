@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.NumericRDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -529,7 +530,8 @@ public class ExpressionEvaluator {
 	}
 	
 	private boolean isNumeric(Predicate pred) {
-		return (typeFactory.isInteger(pred) || typeFactory.isFloat(pred));
+		return (pred instanceof DatatypePredicate)
+				&& (((DatatypePredicate) pred).getReturnedType() instanceof NumericRDFDatatype);
 	}
 	
 	private boolean isNumeric(ValueConstant constant) {
