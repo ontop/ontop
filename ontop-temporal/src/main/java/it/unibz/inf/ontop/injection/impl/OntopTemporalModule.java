@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.TemporalPPMappingConverter;
+import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingTransformer;
 import it.unibz.inf.ontop.temporal.datalog.TemporalDatalog2QueryMappingConverter;
 import it.unibz.inf.ontop.temporal.datalog.TemporalDatalogProgram2QueryConverter;
 
@@ -43,6 +44,7 @@ public class OntopTemporalModule extends OntopAbstractModule{
         bindFromPreferences(TemporalPPMappingConverter.class);
         bindFromPreferences(TemporalDatalog2QueryMappingConverter.class);
         bindFromPreferences(TemporalDatalogProgram2QueryConverter.class);
+        bindFromPreferences(TemporalMappingTransformer.class);
 
 
         Module nativeQLFactoryModule = buildFactory(

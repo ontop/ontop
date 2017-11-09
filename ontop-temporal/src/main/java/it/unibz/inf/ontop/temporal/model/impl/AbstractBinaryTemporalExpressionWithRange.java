@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.temporal.model.TemporalExpression;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
 import it.unibz.inf.ontop.temporal.model.UnaryTemporalExpression;
 
+import java.util.Arrays;
+
 public abstract class AbstractBinaryTemporalExpressionWithRange extends AbstractTemporalExpressionWithRange implements BinaryTemporalExpression {
 
     private final TemporalExpression leftOperand, rightOperand;
@@ -13,6 +15,11 @@ public abstract class AbstractBinaryTemporalExpressionWithRange extends Abstract
         super(range);
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
+    }
+
+    @Override
+    public Iterable<TemporalExpression> getChildNodes() {
+        return Arrays.asList(leftOperand, rightOperand);
     }
 
     @Override

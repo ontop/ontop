@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.temporal.model.impl;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.temporal.model.TemporalAtomicExpression;
+import it.unibz.inf.ontop.temporal.model.TemporalExpression;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +30,11 @@ public class TemporalAtomicExpressionImpl implements TemporalAtomicExpression {
     @Override
     public String render() {
         return String.format("%s(%s)", predicate, terms.stream().map(Term::toString).collect(joining(",")));
+    }
+
+    @Override
+    public Iterable<TemporalExpression> getChildNodes() {
+        return null;
     }
 
     @Override
