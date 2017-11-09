@@ -23,16 +23,6 @@ public interface TypeFactory {
 	Optional<DatatypePredicate> getOptionalTypePredicate(TermType type);
 
 	URITemplatePredicate getURITemplatePredicate(int arity);
-		
-	boolean isBoolean(Predicate p);
-	
-	boolean isInteger(Predicate p);
-	
-	boolean isFloat(Predicate p);
-	
-//	boolean isLiteral(Predicate p);
-	
-	boolean isString(Predicate p);
 	
 	ImmutableList<Predicate> getDatatypePredicates();
 

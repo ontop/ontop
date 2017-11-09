@@ -201,33 +201,6 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public boolean isBoolean(Predicate pred) {
-		return pred == XSD_BOOLEAN;
-	}
-	
-	@Override
-	public boolean isInteger(Predicate p) {
-		return p == XSD_INTEGER || p == XSD_NEGATIVE_INTEGER || p == XSD_INT || p == XSD_NON_NEGATIVE_INTEGER ||
-                p == XSD_UNSIGNED_INT || p == XSD_POSITIVE_INTEGER || p == XSD_NON_POSITIVE_INTEGER || p == XSD_LONG;		
-	}
-	
-	@Override
-	public boolean isFloat(Predicate p) {
-		return p == XSD_DOUBLE || p == XSD_FLOAT || p == XSD_DECIMAL;
-	}
-	
-//	@Override
-//	public boolean isLiteral(Predicate p) {
-//		return p == RDFS_LITERAL ;
-//	}
-	
-	@Override 
-	public boolean isString(Predicate p) {
-		return p == XSD_STRING
-				|| p.getName().equals(LANGSTRING.getIRIString());
-	}
-
-	@Override
 	public ImmutableList<Predicate> getDatatypePredicates() {
 		return ImmutableList.copyOf(predicateList);
 	}

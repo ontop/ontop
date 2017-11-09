@@ -29,11 +29,11 @@ import it.unibz.inf.ontop.model.type.NumericRDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -225,7 +225,10 @@ public class ExpressionEvaluator {
 			if (t0 instanceof Constant) {
 				ValueConstant value = (ValueConstant) t0;
 				String valueString = value.getValue();
-				if (typeFactory.isBoolean(p)) { // OBDAVocabulary.XSD_BOOLEAN
+
+				RDFDatatype datatype = value.getType();
+
+				if (datatype.isA(XSD.BOOLEAN)) { // OBDAVocabulary.XSD_BOOLEAN
 					if (valueString.equals("true") || valueString.equals("1")) {
 						return valueTrue;
 					} 
@@ -233,15 +236,11 @@ public class ExpressionEvaluator {
 						return valueFalse;
 					}
 				}
-				else if (typeFactory.isInteger(p)) {
-					long valueInteger = Long.parseLong(valueString);
-					return termFactory.getBooleanConstant(valueInteger != 0);
-				} 
-				else if (typeFactory.isFloat(p)) {
-					double valueD = Double.parseDouble(valueString);
-					return termFactory.getBooleanConstant(valueD > 0);
-				} 
-				else if (typeFactory.isString(p)) {
+				else if (isNumeric(p)) {
+					BigDecimal valueDecimal = new BigDecimal(valueString);
+					return termFactory.getBooleanConstant(!valueDecimal.equals(BigDecimal.ZERO));
+				}
+				else if (datatype.isA(XSD.STRING)) {
 					// ROMAN (18 Dec 2015): toString() was wrong -- it contains "" and so is never empty
 					return termFactory.getBooleanConstant(valueString.length() != 0);
 				}
@@ -428,7 +427,7 @@ public class ExpressionEvaluator {
 			Predicate predicate = function.getFunctionSymbol();
 			Term parameter = function.getTerm(0);
 			if (function.isDataTypeFunction()) {
-				if (typeFactory.isString(predicate) ) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
+				if (isXsdString(predicate) ) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
 					return termFactory.getTypedTerm(
 							termFactory.getVariable(parameter.toString()), typeFactory.getXsdStringDatatype());
 				} 
@@ -448,6 +447,11 @@ public class ExpressionEvaluator {
 			}
 		}
 		return term;
+	}
+
+	private static boolean isXsdString(Predicate predicate) {
+		return (predicate instanceof DatatypePredicate)
+				&& ((DatatypePredicate) predicate).getReturnedType().isA(XSD.STRING);
 	}
 
 	/*
@@ -899,7 +903,7 @@ public class ExpressionEvaluator {
 				/*
 				 * Evaluate both terms by comparing their datatypes
 				 */
-				if (typeFactory.isString(pred1) && typeFactory.isString(pred2)) { // R: replaced incorrect check
+				if (isXsdString(pred1) && isXsdString(pred2)) { // R: replaced incorrect check
 																		//  pred1 == termFactory.getDataTypePredicateLiteral()
 																		// && pred2 == termFactory.getDataTypePredicateLiteral())
 																	    // which does not work for LANG_STRING

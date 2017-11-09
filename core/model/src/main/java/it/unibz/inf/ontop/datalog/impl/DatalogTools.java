@@ -6,10 +6,12 @@ import fj.F2;
 import fj.data.List;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public class DatalogTools {
         TRUE_EQ = termFactory.getFunctionEQ(valueTrue, valueTrue);
         IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = this::isDataOrLeftJoinOrJoinAtom;
         IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT = atom -> !isDataOrLeftJoinOrJoinAtom(atom);
-        IS_BOOLEAN_ATOM_FCT = atom -> atom.isOperation() || typeFactory.isBoolean(atom.getFunctionSymbol());
+        IS_BOOLEAN_ATOM_FCT = atom -> atom.isOperation() || isXsdBoolean(atom.getFunctionSymbol());
     }
 
     public Boolean isDataOrLeftJoinOrJoinAtom(Function atom) {
@@ -89,7 +91,8 @@ public class DatalogTools {
             return termFactory.getExpression((OperationPredicate)predicate,
                     atom.getTerms());
         // XSD:BOOLEAN case
-        else if (typeFactory.isBoolean(predicate)) {
+        if ((predicate instanceof DatatypePredicate)
+                && ((DatatypePredicate) predicate).getReturnedType().isA(XSD.BOOLEAN)) {
             return termFactory.getExpression(ExpressionOperation.IS_TRUE, atom);
         }
 
@@ -159,5 +162,10 @@ public class DatalogTools {
 
     public Function constructNewFunction(Predicate functionSymbol, List<Term> subTerms) {
         return termFactory.getFunction(functionSymbol, new ArrayList<>(subTerms.toCollection()));
+    }
+
+    private static boolean isXsdBoolean(Predicate predicate) {
+        return (predicate instanceof DatatypePredicate)
+                && ((DatatypePredicate) predicate).getReturnedType().isA(XSD.BOOLEAN);
     }
 }
