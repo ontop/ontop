@@ -9,7 +9,7 @@ public abstract class AbstractRDFDatatype extends RDFTermTypeImpl implements RDF
     private final IRI datatypeIRI;
 
     protected AbstractRDFDatatype(IRI datatypeIRI, TermTypeAncestry parentAncestry, boolean isAbstract) {
-        super(datatypeIRI.toString(), parentAncestry, isAbstract);
+        super(datatypeIRI.getIRIString(), parentAncestry, isAbstract);
         this.datatypeIRI = datatypeIRI;
     }
 
