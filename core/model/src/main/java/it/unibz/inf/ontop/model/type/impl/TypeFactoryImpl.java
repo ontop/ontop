@@ -30,16 +30,6 @@ import static it.unibz.inf.ontop.model.vocabulary.RDF.LANGSTRING;
 @Singleton
 public class TypeFactoryImpl implements TypeFactory {
 
-	private final DatatypePredicate XSD_STRING;
-	private final DatatypePredicate XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
-	private final DatatypePredicate XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
-	private final DatatypePredicate XSD_INT, XSD_UNSIGNED_INT, XSD_LONG;
-	private final DatatypePredicate XSD_DECIMAL;
-	private final DatatypePredicate XSD_DOUBLE, XSD_FLOAT;
-	private final DatatypePredicate XSD_DATETIME, XSD_DATETIME_STAMP;
-	private final DatatypePredicate XSD_BOOLEAN, XSD_BASE64;
-	private final DatatypePredicate XSD_DATE, XSD_TIME, XSD_YEAR;
-
 	private final Map<TermType, DatatypePredicate> mapTypetoPredicate = new HashMap<>();
 	private final List<Predicate> predicateList = new LinkedList<>();
 
@@ -157,37 +147,36 @@ public class TypeFactoryImpl implements TypeFactory {
 		xsdBase64Datatype = createSimpleRDFDatatype(XSD.BASE64BINARY, rdfsLiteralDatatype.getAncestry(), false);
 		registerDatatype(xsdBase64Datatype);
 
-		XSD_INTEGER = registerType(xsdIntegerDatatype);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
-		XSD_DECIMAL = registerType( xsdDecimalDatatype);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
-		XSD_DOUBLE = registerType(xsdDoubleDatatype);  // 6 "http://www.w3.org/2001/XMLSchema#double"
-		XSD_STRING = registerType(xsdStringDatatype);  // 7 "http://www.w3.org/2001/XMLSchema#string"
-		XSD_DATETIME = registerType(xsdDatetimeDatatype); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
-		XSD_DATETIME_STAMP = registerType(xsdDatetimeStampDatatype);
-		XSD_BOOLEAN = registerType(xsdBooleanDatatype);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
-		XSD_DATE = registerType(xsdDateDatatype);  // 10 "http://www.w3.org/2001/XMLSchema#date";
-		XSD_TIME = registerType(xsdTimeDatatype);  // 11 "http://www.w3.org/2001/XMLSchema#time";
-		XSD_YEAR = registerType(xsdGYearDatatype);  // 12 "http://www.w3.org/2001/XMLSchema#gYear";
-		XSD_LONG = registerType(xsdLongDatatype);  // 13 "http://www.w3.org/2001/XMLSchema#long"
-		XSD_FLOAT = registerType(xsdFloatDatatype); // 14 "http://www.w3.org/2001/XMLSchema#float"
-		XSD_NEGATIVE_INTEGER = registerType(xsdNegativeIntegerDatatype); // 15 "http://www.w3.org/2001/XMLSchema#negativeInteger";
-		XSD_NON_NEGATIVE_INTEGER = registerType(xsdNonNegativeIntegerDatatype); // 16 "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
-		XSD_POSITIVE_INTEGER = registerType(xsdPositiveIntegerDatatype); // 17 "http://www.w3.org/2001/XMLSchema#positiveInteger"
-		XSD_NON_POSITIVE_INTEGER = registerType(xsdNonPositiveIntegerDatatype); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
-		XSD_INT = registerType(xsdIntDatatype);  // 19 "http://www.w3.org/2001/XMLSchema#int"
-		XSD_UNSIGNED_INT = registerType(xsdUnsignedIntDatatype);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
+		registerType(xsdIntegerDatatype);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
+		registerType( xsdDecimalDatatype);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
+		registerType(xsdDoubleDatatype);  // 6 "http://www.w3.org/2001/XMLSchema#double"
+		registerType(xsdStringDatatype);  // 7 "http://www.w3.org/2001/XMLSchema#string"
+		registerType(xsdDatetimeDatatype); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
+		registerType(xsdDatetimeStampDatatype);
+		registerType(xsdBooleanDatatype);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
+		registerType(xsdDateDatatype);  // 10 "http://www.w3.org/2001/XMLSchema#date";
+		registerType(xsdTimeDatatype);  // 11 "http://www.w3.org/2001/XMLSchema#time";
+		registerType(xsdGYearDatatype);  // 12 "http://www.w3.org/2001/XMLSchema#gYear";
+		registerType(xsdLongDatatype);  // 13 "http://www.w3.org/2001/XMLSchema#long"
+		registerType(xsdFloatDatatype); // 14 "http://www.w3.org/2001/XMLSchema#float"
+		registerType(xsdNegativeIntegerDatatype); // 15 "http://www.w3.org/2001/XMLSchema#negativeInteger";
+		registerType(xsdNonNegativeIntegerDatatype); // 16 "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
+		registerType(xsdPositiveIntegerDatatype); // 17 "http://www.w3.org/2001/XMLSchema#positiveInteger"
+		registerType(xsdNonPositiveIntegerDatatype); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
+		registerType(xsdIntDatatype);  // 19 "http://www.w3.org/2001/XMLSchema#int"
+		registerType(xsdUnsignedIntDatatype);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
 
-		XSD_BASE64 = registerType(xsdBase64Datatype);
+		registerType(xsdBase64Datatype);
 	}
 
 	private void registerDatatype(RDFDatatype datatype) {
 		datatypeCache.put(datatype.getIRI(), datatype);
 	}
 
-	private DatatypePredicate registerType(RDFDatatype type) {
+	private void registerType(RDFDatatype type) {
 		DatatypePredicate predicate = new DatatypePredicateImpl(type, type);
 		mapTypetoPredicate.put(type, predicate);
 		predicateList.add(predicate);
-		return predicate;
 	}
 
 	@Override
