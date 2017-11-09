@@ -105,7 +105,12 @@ public class TermFactoryImpl implements TermFactory {
 		
 		return getFunction(pred, value);
 	}
-	
+
+	@Override
+	public Function getTypedTerm(Term value, IRI datatypeIRI) {
+		return getTypedTerm(value, typeFactory.getDatatype(datatypeIRI));
+	}
+
 	@Override
 	public ValueConstant getConstantLiteral(String value, String language) {
 		return new ValueConstantImpl(value, language.toLowerCase(), typeFactory);
@@ -124,6 +129,11 @@ public class TermFactoryImpl implements TermFactory {
 			throw new RuntimeException("Unknown data type: " + type);
 
 		return getImmutableFunctionalTerm(pred, value);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, IRI datatypeIRI) {
+		return getImmutableTypedTerm(value, typeFactory.getDatatype(datatypeIRI));
 	}
 
 	@Override

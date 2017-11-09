@@ -58,9 +58,12 @@ public class ExpressionEvaluatorTest {
 
 
     private final String languageTag =  "en-us";
+    // TODO: avoid this language tag wrapping approach
+    private final ImmutableFunctionalTerm wrappedLanguageTag = TERM_FACTORY.getImmutableTypedTerm(
+            TERM_FACTORY.getConstantLiteral(languageTag, XSD.STRING), XSD.STRING);
 
     private final ImmutableExpression EXPR_LANGMATCHES = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.LANGMATCHES, EXPR_LANG, TERM_FACTORY.getConstantLiteral(languageTag, XSD.STRING));
+            ExpressionOperation.LANGMATCHES, EXPR_LANG, wrappedLanguageTag);
 
 
     private IntermediateQuery getExpectedQuery() {

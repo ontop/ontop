@@ -225,9 +225,11 @@ public interface TermFactory {
 
 	public Function getTypedTerm(Term value, String language);
 	public Function getTypedTerm(Term value, TermType type);
+	Function getTypedTerm(Term value, IRI datatype);
 
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language);
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, TermType type);
+	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, IRI datatypeIRI);
 
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a

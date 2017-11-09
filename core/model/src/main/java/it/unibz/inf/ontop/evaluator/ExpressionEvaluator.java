@@ -549,7 +549,9 @@ public class ExpressionEvaluator {
 		Term innerTerm = term.getTerm(0);
 
 		// Create a default return constant: blank language with literal type.
-		ValueConstant emptyString = termFactory.getConstantLiteral("", XSD.STRING);
+		// TODO: avoid this constant wrapping thing
+		Function emptyString = termFactory.getTypedTerm(
+				termFactory.getConstantLiteral("", XSD.STRING), XSD.STRING);
 
         if (innerTerm instanceof Variable) {
             return term;
@@ -571,7 +573,10 @@ public class ExpressionEvaluator {
 			RDFDatatype datatype = ((DatatypePredicate) predicate).getReturnedType();
 
 			return datatype.getLanguageTag()
-					.map(tag -> termFactory.getConstantLiteral(tag.getFullString(), XSD.STRING))
+					// TODO: avoid this constant wrapping thing
+					.map(tag -> termFactory.getTypedTerm(
+							termFactory.getConstantLiteral(tag.getFullString(), XSD.STRING),
+							XSD.STRING))
 					.orElse(emptyString);
 
 		}
