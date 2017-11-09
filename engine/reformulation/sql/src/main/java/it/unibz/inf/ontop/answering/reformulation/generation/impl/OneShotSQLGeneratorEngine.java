@@ -1235,8 +1235,7 @@ public class OneShotSQLGeneratorEngine {
 			Predicate p = f.getFunctionSymbol();
 			if (p instanceof DatatypePredicate) {
 
-				// NB: what about a langString. TODO: make a clear distinction between lexical values and RDF terms
-				RDFDatatype type = typeFactory.getDatatype(((DatatypePredicate)p).getIRI());
+				RDFDatatype type = ((DatatypePredicate) p).getReturnedType();
 				return jdbcTypeMapper.getSQLType(type);
 			}
 			// Return varchar for unknown

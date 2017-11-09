@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.type.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
@@ -14,7 +13,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -59,59 +57,13 @@ public class ExpressionEvaluatorTest {
             ExpressionOperation.SPARQL_LANG, W );
 
 
-    private Constant langValueConstant =  TERM_FACTORY.getConstantLiteral("en.us");
-    private ImmutableFunctionalTerm langValue =  generateLiteral(langValueConstant);
-
-    private final ImmutableExpression EXPR_EQ = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, B, langValueConstant );
+    private final String languageTag =  "en-us";
 
     private final ImmutableExpression EXPR_LANGMATCHES = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.LANGMATCHES, EXPR_LANG, langValue);
+            ExpressionOperation.LANGMATCHES, EXPR_LANG, TERM_FACTORY.getConstantLiteral(languageTag, XSD.STRING));
 
-    /**
-     * test LangMatches matching a  lang function with a constant value
-     * (this case should not happen)
-     * @throws EmptyQueryException
-     */
-    @Test
-    public void testLangLeftNodeVariable() throws EmptyQueryException {
 
-        //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-
-        queryBuilder.init(projectionAtom, rootNode);
-
-        //construct innerjoin
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(EXPR_LANGMATCHES);
-        queryBuilder.addChild(rootNode, joinNode);
-
-        //construct left side join
-        ConstructionNode leftNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,W),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B,B)));
-        queryBuilder.addChild(joinNode, leftNode);
-
-        queryBuilder.addChild(leftNode, DATA_NODE_1);
-
-        //construct right side join
-        ConstructionNode rightNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(C), Y, generateInt(D)));
-
-        queryBuilder.addChild(joinNode, rightNode);
-
-        queryBuilder.addChild(rightNode, DATA_NODE_2);
-
-        //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
-
-        unOptimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(unOptimizedQuery);
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
+    private IntermediateQuery getExpectedQuery() {
         //----------------------------------------------------------------------
         // Construct expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
@@ -119,35 +71,7 @@ public class ExpressionEvaluatorTest {
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution( W, generateLangString(B, B), X, generateURI1(A), Y, generateInt(D)));
-
-        expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
-
-        //construct expected innerjoin
-
-        InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode(EXPR_EQ);
-        expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
-
-        expectedQueryBuilder.addChild(expectedJoinNode, DATA_NODE_1);
-
-        expectedQueryBuilder.addChild(expectedJoinNode, EXPECTED_DATA_NODE_2);
-
-        //build expected query
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\n Expected query: \n" +  expectedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
-    }
-
-    private IntermediateQuery getExpectedQuery() {
-        //----------------------------------------------------------------------
-        // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);;
-
-
-        DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
-        ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), Y, generateInt(D), W, generateLangString(B, langValueConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), Y, generateInt(D), W, generateLangString(B, languageTag)));
 
         expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
 
@@ -174,7 +98,7 @@ public class ExpressionEvaluatorTest {
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(C), Y, generateInt(D), W, generateLangString(B, langValueConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(C), Y, generateInt(D), W, generateLangString(B, languageTag)));
 
         expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
 
@@ -213,7 +137,7 @@ public class ExpressionEvaluatorTest {
 
         //construct left side join
         ConstructionNode leftNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,W),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B,langValueConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B, languageTag)));
         queryBuilder.addChild(joinNode, leftNode);
 
         queryBuilder.addChild(leftNode, DATA_NODE_1);
@@ -273,7 +197,7 @@ public class ExpressionEvaluatorTest {
 
         //construct right side join
         ConstructionNode rightNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,W),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B,langValueConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B, languageTag)));
 
 
         queryBuilder.addChild(joinNode, rightNode);
@@ -474,15 +398,10 @@ public class ExpressionEvaluatorTest {
         return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE2, URI_TEMPLATE_STR_1, var1, var2);
     }
 
-    private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, Constant argument2) {
+    private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, String languageTag) {
         return TERM_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getRequiredTypePredicate(RDF.LANGSTRING),
-                argument1, argument2);
-    }
-    private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, VariableOrGroundTerm argument2) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getRequiredTypePredicate(RDF.LANGSTRING),
-                argument1, argument2);
+                TYPE_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getLangTermType(languageTag)),
+                argument1);
     }
 
 

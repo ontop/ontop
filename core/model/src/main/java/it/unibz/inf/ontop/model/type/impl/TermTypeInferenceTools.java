@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 
 import java.util.Optional;
 
@@ -21,8 +20,6 @@ public class TermTypeInferenceTools {
     private final Optional<TermType> optionalObjectTermType;
     private final Optional<TermType> optionalBnodeTermType;
     private final Optional<TermType> optionalUnboundTermType;
-
-    private final DatatypePredicate literalLangPredicate;
     
     private final ValueConstant valueNull;
     private final TypeFactory typeFactory;
@@ -37,7 +34,6 @@ public class TermTypeInferenceTools {
         optionalObjectTermType = Optional.of(typeFactory.getIRITermType());
         optionalBnodeTermType = Optional.of(typeFactory.getBlankNodeType());
         optionalUnboundTermType = Optional.of(typeFactory.getUnboundTermType());
-        literalLangPredicate = typeFactory.getRequiredTypePredicate(RDF.LANGSTRING);
         this.typeFactory = typeFactory;
         this.termFactory = termFactory;
     }
@@ -57,20 +53,7 @@ public class TermTypeInferenceTools {
                 return ((ImmutableExpression) f).getOptionalTermType(termFactory, typeFactory);
             }
             else if (typePred instanceof DatatypePredicate){
-                /*
-                 * Special case: langString
-                 */
-                if (typePred.equals(literalLangPredicate)) {
-                    if (f.getTerms().size() != 2) {
-                        throw new IllegalStateException("A lang literal function should have two arguments");
-                    }
-                    ImmutableTerm secondArgument = f.getArguments().get(1);
-                    if (!(secondArgument instanceof Constant))
-                        // TODO: return a proper exception (internal bug)
-                        throw new IllegalStateException("A lang literal function must have a constant language tag");
-                    return Optional.of(typeFactory.getLangTermType(((Constant)secondArgument).getValue()));
-                }
-                return typeFactory.getInternalType((DatatypePredicate) typePred);
+                return Optional.of(((DatatypePredicate) typePred).getReturnedType());
 
             } else if (typePred instanceof URITemplatePredicate) {
                 return optionalObjectTermType;

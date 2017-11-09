@@ -224,7 +224,6 @@ public interface TermFactory {
 	public ValueConstant getConstantLiteral(String value, String language);
 
 	public Function getTypedTerm(Term value, String language);
-	public Function getTypedTerm(Term value, Term language);
 	public Function getTypedTerm(Term value, TermType type);
 
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language);

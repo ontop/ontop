@@ -1557,8 +1557,8 @@ public class TurtleOBDAParser extends Parser {
 
 
 					      Variable var = variable22;
-					      Term lang = language23;   
-					      value = termFactory.getTypedTerm(var, lang);
+					      Constant lang = (Constant)language23;
+					      value = termFactory.getTypedTerm(var, lang.getValue());
 
 					    
 					}
@@ -1929,12 +1929,12 @@ public class TurtleOBDAParser extends Parser {
 					}
 
 
-					       Term lang = language31;
+					       Constant lang = (Constant)language31;
 					       Term literal = stringLiteral32;
 					       if (literal instanceof Function){
 					          Function f = (Function)stringLiteral32;
 					          if (lang != null){
-					             value = termFactory.getTypedTerm(f,lang);
+					             value = termFactory.getTypedTerm(f,lang.getValue());
 					          }else{
 					             value = termFactory.getTypedTerm(f, typeFactory.getXsdStringDatatype());
 					          }       
@@ -1948,7 +1948,7 @@ public class TurtleOBDAParser extends Parser {
 					       else{
 					          ValueConstant constant = (ValueConstant)stringLiteral32;
 					          if (lang != null) {
-						     value = termFactory.getTypedTerm(constant, lang);
+						     value = termFactory.getTypedTerm(constant, lang.getValue());
 					          } else {
 					      	     value = termFactory.getTypedTerm(constant, typeFactory.getXsdStringDatatype());
 					          }

@@ -30,9 +30,6 @@ import static it.unibz.inf.ontop.model.vocabulary.RDF.LANGSTRING;
 @Singleton
 public class TypeFactoryImpl implements TypeFactory {
 
-	// special case of literals with the specified language
-	private final DatatypePredicate RDF_LANG_STRING;
-
 	private final DatatypePredicate XSD_STRING;
 	private final DatatypePredicate XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
 	private final DatatypePredicate XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
@@ -160,38 +157,34 @@ public class TypeFactoryImpl implements TypeFactory {
 		xsdBase64Datatype = createSimpleRDFDatatype(XSD.BASE64BINARY, rdfsLiteralDatatype.getAncestry(), false);
 		registerDatatype(xsdBase64Datatype);
 
-		XSD_INTEGER = registerType(XSD.INTEGER, xsdIntegerDatatype);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
-		XSD_DECIMAL = registerType(XSD.DECIMAL, xsdDecimalDatatype);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
-		XSD_DOUBLE = registerType(XSD.DOUBLE, xsdDoubleDatatype);  // 6 "http://www.w3.org/2001/XMLSchema#double"
-		XSD_STRING = registerType(XSD.STRING, xsdStringDatatype);  // 7 "http://www.w3.org/2001/XMLSchema#string"
-		XSD_DATETIME = registerType(XSD.DATETIME, xsdDatetimeDatatype); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
-		XSD_DATETIME_STAMP = registerType(XSD.DATETIMESTAMP, xsdDatetimeStampDatatype);
-		XSD_BOOLEAN = registerType(XSD.BOOLEAN, xsdBooleanDatatype);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
-		XSD_DATE = registerType(XSD.DATE, xsdDateDatatype);  // 10 "http://www.w3.org/2001/XMLSchema#date";
-		XSD_TIME = registerType(XSD.TIME, xsdTimeDatatype);  // 11 "http://www.w3.org/2001/XMLSchema#time";
-		XSD_YEAR = registerType(XSD.GYEAR, xsdGYearDatatype);  // 12 "http://www.w3.org/2001/XMLSchema#gYear";
-		XSD_LONG = registerType(XSD.LONG, xsdLongDatatype);  // 13 "http://www.w3.org/2001/XMLSchema#long"
-		XSD_FLOAT = registerType(XSD.FLOAT,xsdFloatDatatype); // 14 "http://www.w3.org/2001/XMLSchema#float"
-		XSD_NEGATIVE_INTEGER = registerType(XSD.NEGATIVE_INTEGER, xsdNegativeIntegerDatatype); // 15 "http://www.w3.org/2001/XMLSchema#negativeInteger";
-		XSD_NON_NEGATIVE_INTEGER = registerType(XSD.NON_NEGATIVE_INTEGER, xsdNonNegativeIntegerDatatype); // 16 "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
-		XSD_POSITIVE_INTEGER = registerType(XSD.POSITIVE_INTEGER, xsdPositiveIntegerDatatype); // 17 "http://www.w3.org/2001/XMLSchema#positiveInteger"
-		XSD_NON_POSITIVE_INTEGER = registerType(XSD.NON_POSITIVE_INTEGER, xsdNonPositiveIntegerDatatype); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
-		XSD_INT = registerType(XSD.INT, xsdIntDatatype);  // 19 "http://www.w3.org/2001/XMLSchema#int"
-		XSD_UNSIGNED_INT = registerType(XSD.UNSIGNED_INT, xsdUnsignedIntDatatype);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
+		XSD_INTEGER = registerType(xsdIntegerDatatype);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
+		XSD_DECIMAL = registerType( xsdDecimalDatatype);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
+		XSD_DOUBLE = registerType(xsdDoubleDatatype);  // 6 "http://www.w3.org/2001/XMLSchema#double"
+		XSD_STRING = registerType(xsdStringDatatype);  // 7 "http://www.w3.org/2001/XMLSchema#string"
+		XSD_DATETIME = registerType(xsdDatetimeDatatype); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
+		XSD_DATETIME_STAMP = registerType(xsdDatetimeStampDatatype);
+		XSD_BOOLEAN = registerType(xsdBooleanDatatype);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
+		XSD_DATE = registerType(xsdDateDatatype);  // 10 "http://www.w3.org/2001/XMLSchema#date";
+		XSD_TIME = registerType(xsdTimeDatatype);  // 11 "http://www.w3.org/2001/XMLSchema#time";
+		XSD_YEAR = registerType(xsdGYearDatatype);  // 12 "http://www.w3.org/2001/XMLSchema#gYear";
+		XSD_LONG = registerType(xsdLongDatatype);  // 13 "http://www.w3.org/2001/XMLSchema#long"
+		XSD_FLOAT = registerType(xsdFloatDatatype); // 14 "http://www.w3.org/2001/XMLSchema#float"
+		XSD_NEGATIVE_INTEGER = registerType(xsdNegativeIntegerDatatype); // 15 "http://www.w3.org/2001/XMLSchema#negativeInteger";
+		XSD_NON_NEGATIVE_INTEGER = registerType(xsdNonNegativeIntegerDatatype); // 16 "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
+		XSD_POSITIVE_INTEGER = registerType(xsdPositiveIntegerDatatype); // 17 "http://www.w3.org/2001/XMLSchema#positiveInteger"
+		XSD_NON_POSITIVE_INTEGER = registerType(xsdNonPositiveIntegerDatatype); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
+		XSD_INT = registerType(xsdIntDatatype);  // 19 "http://www.w3.org/2001/XMLSchema#int"
+		XSD_UNSIGNED_INT = registerType(xsdUnsignedIntDatatype);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
 
-		XSD_BASE64 = registerType(XSD.BASE64BINARY, xsdBase64Datatype);
-
-		// Limited registration
-		RDF_LANG_STRING = new DatatypePredicateImpl(LANGSTRING, ImmutableList.of(xsdStringDatatype, xsdStringDatatype));
-		predicateList.add(RDF_LANG_STRING);
+		XSD_BASE64 = registerType(xsdBase64Datatype);
 	}
 
 	private void registerDatatype(RDFDatatype datatype) {
 		datatypeCache.put(datatype.getIRI(), datatype);
 	}
 
-	private DatatypePredicate registerType(IRI uri, TermType type) {
-		DatatypePredicate predicate = new DatatypePredicateImpl(uri, type);
+	private DatatypePredicate registerType(RDFDatatype type) {
+		DatatypePredicate predicate = new DatatypePredicateImpl(type, type);
 		mapTypetoPredicate.put(type, predicate);
 		predicateList.add(predicate);
 		return predicate;
@@ -230,17 +223,13 @@ public class TypeFactoryImpl implements TypeFactory {
 	
 	@Override 
 	public boolean isString(Predicate p) {
-		return p == XSD_STRING || p == RDF_LANG_STRING;
+		return p == XSD_STRING
+				|| p.getName().equals(LANGSTRING.getIRIString());
 	}
 
 	@Override
 	public ImmutableList<Predicate> getDatatypePredicates() {
 		return ImmutableList.copyOf(predicateList);
-	}
-
-	@Override
-	public Optional<TermType> getInternalType(DatatypePredicate predicate) {
-		return Optional.ofNullable(datatypeCache.get(rdfFactory.createIRI(predicate.getName())));
 	}
 
 	@Override
@@ -252,20 +241,13 @@ public class TypeFactoryImpl implements TypeFactory {
 	@Override
 	public DatatypePredicate getRequiredTypePredicate(IRI datatypeIri) {
 		if (datatypeIri.equals(LANGSTRING))
-			return RDF_LANG_STRING;
+			throw new IllegalArgumentException("Lang string predicates are not unique (they depend on the language tag)");
 		return getRequiredTypePredicate(getDatatype(datatypeIri));
 	}
 
 	@Override
 	public Optional<DatatypePredicate> getOptionalTypePredicate(TermType type) {
-		return  Optional.ofNullable(mapTypetoPredicate.get(type))
-				.map(Optional::of)
-				// Lang string
-				.orElseGet(() -> Optional.of(type)
-						.filter(t -> t instanceof RDFDatatype)
-						.map(t -> (RDFDatatype) t)
-						.filter(t -> t.getLanguageTag().isPresent())
-						.map(t -> RDF_LANG_STRING));
+		return Optional.ofNullable(mapTypetoPredicate.get(type));
 	}
 
 	@Override
@@ -276,9 +258,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	@Override
 	public RDFDatatype getLangTermType(String languageTagString) {
 		return langTypeCache
-				.computeIfAbsent(languageTagString,
-						k -> LangDatatype.createLangDatatype(
-								new LanguageTagImpl(languageTagString), xsdStringDatatype.getAncestry(), this));
+				.computeIfAbsent(languageTagString.toLowerCase(), this::createLangStringDatatype);
 	}
 
 	@Override
@@ -333,6 +313,16 @@ public class TypeFactoryImpl implements TypeFactory {
     public ObjectRDFType getAbstractObjectRDFType() {
 		return objectRDFType;
     }
+
+    private RDFDatatype createLangStringDatatype(String languageTagString) {
+		RDFDatatype datatype = LangDatatype.createLangDatatype(
+				new LanguageTagImpl(languageTagString), xsdStringDatatype.getAncestry(), this);
+
+		// Creates a predicate
+		mapTypetoPredicate.put(datatype, new DatatypePredicateImpl(datatype, datatype));
+
+		return datatype;
+	}
 
 
     private static class NoConstructorFunctionException extends OntopInternalBugException {

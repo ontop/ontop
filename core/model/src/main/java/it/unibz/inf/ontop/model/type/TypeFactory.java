@@ -16,8 +16,6 @@ public interface TypeFactory {
 
 	Optional<RDFDatatype> getOptionalDatatype(IRI iri);
 
-	Optional<TermType> getInternalType(DatatypePredicate predicate);
-
 	DatatypePredicate getRequiredTypePredicate(TermType type);
 
 	DatatypePredicate getRequiredTypePredicate(IRI datatypeIri);

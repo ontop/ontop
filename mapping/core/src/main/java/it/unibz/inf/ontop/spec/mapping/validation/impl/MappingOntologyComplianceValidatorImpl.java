@@ -121,27 +121,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                 }
                 else if (functionSymbol instanceof DatatypePredicate) {
                     DatatypePredicate datatypeConstructionFunctionSymbol = (DatatypePredicate) functionSymbol;
-
-                    if (datatypeConstructionFunctionSymbol.getName().equals(RDF.LANGSTRING.getIRIString())) {
-                        return Optional.of(extractLangTermType(constructionFunctionalTerm));
-                    }
-                    else {
-                        Optional<TermType> optionalTermtype = typeFactory.getInternalType(datatypeConstructionFunctionSymbol);
-
-                        if (!optionalTermtype.isPresent())
-                            // TODO: find a better exception
-                            throw new RuntimeException("Internal bug: unsupported datatype predicate: " + functionSymbol
-                                    + "\n TODO: throw a better exception");
-
-                        RDFTermType termType = optionalTermtype
-                                .filter(t -> t instanceof RDFTermType)
-                                .map(t -> (RDFTermType) t)
-                                // TODO: find a better exception
-                                .orElseThrow(() -> new RuntimeException("Was expecting a RDFTermType. Was "
-                                        + optionalTermtype.get()));
-
-                        return Optional.of(termType);
-                    }
+                    return Optional.of(datatypeConstructionFunctionSymbol.getReturnedType());
                 }
                 else {
                     throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,

@@ -22,8 +22,8 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
-import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
@@ -31,36 +31,12 @@ import javax.annotation.Nonnull;
 
 public class DatatypePredicateImpl extends PredicateImpl implements DatatypePredicate {
 
-	private final IRI iri;
+	@Nonnull
+	private final RDFDatatype returnedType;
 
-	/**
-	 * Constructs a datatype predicate with one term. This is a usual construct
-	 * where the type of the term represents the datatype itself.
-	 * 
-	 * @param iri
-	 * 			The predicate IRI.
-	 * @param type
-	 * 			The datatype that the term holds.
-	 */
-	public DatatypePredicateImpl(@Nonnull IRI iri, @Nonnull TermType type) {
-		super(iri.getIRIString(), 1, ImmutableList.of(type));
-		this.iri = iri;
-	}
-	
-	/**
-	 * Construct a datatype predicate with two or more terms. The first term
-	 * used to hold the value and the others are for any additional information.
-	 * An example for using this constructor is the rdfs:Literal(value, lang).
-	 * The predicate uses the second term to put the language tag.
-	 * 
-	 * @param iri
-	 * 			The predicate IRI.
-	 * @param types
-	 * 			The datatypes that each term holds.
-	 */
-	public DatatypePredicateImpl(@Nonnull IRI iri, @Nonnull  ImmutableList<TermType> types) {
-		super(iri.getIRIString(), types.size(), types);
-		this.iri = iri;
+	public DatatypePredicateImpl(@Nonnull RDFDatatype returnedType, @Nonnull TermType argumentType) {
+		super(returnedType.toString(), 1, ImmutableList.of(argumentType));
+		this.returnedType = returnedType;
 	}
 	
 	@Override
@@ -68,8 +44,9 @@ public class DatatypePredicateImpl extends PredicateImpl implements DatatypePred
 		return this;
 	}
 
+
 	@Override
-	public IRI getIRI() {
-		return iri;
+	public RDFDatatype getReturnedType() {
+		return returnedType;
 	}
 }

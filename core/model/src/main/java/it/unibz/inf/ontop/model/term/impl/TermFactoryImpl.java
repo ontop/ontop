@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.model.term.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -111,16 +112,9 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public Function getTypedTerm(Term value, Term language) {
-		Predicate pred = typeFactory.getRequiredTypePredicate(RDF.LANGSTRING);
-		return getFunction(pred, value, language);
-	}
-
-	@Override
 	public Function getTypedTerm(Term value, String language) {
-		Term lang = getConstantLiteral(language.toLowerCase(), typeFactory.getXsdStringDatatype());
-		Predicate pred = typeFactory.getRequiredTypePredicate(RDF.LANGSTRING);
-		return getFunction(pred, value, lang);
+		DatatypePredicate functionSymbol = typeFactory.getRequiredTypePredicate(typeFactory.getLangTermType(language));
+		return getFunction(functionSymbol, value);
 	}
 
 	@Override
@@ -134,9 +128,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language) {
-		ValueConstant lang = getConstantLiteral(language.toLowerCase(), XSD.STRING);
-		Predicate pred = typeFactory.getRequiredTypePredicate(RDF.LANGSTRING);
-		return getImmutableFunctionalTerm(pred, value, lang);
+		return getImmutableTypedTerm(value, typeFactory.getLangTermType(language));
 	}
 
 	@Override

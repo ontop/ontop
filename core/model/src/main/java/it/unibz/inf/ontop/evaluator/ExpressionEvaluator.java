@@ -28,6 +28,8 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
@@ -547,15 +549,17 @@ public class ExpressionEvaluator {
 		Term innerTerm = term.getTerm(0);
 
 		// Create a default return constant: blank language with literal type.
-		Term emptyconstant = termFactory.getTypedTerm(termFactory.getConstantLiteral("", typeFactory.getXsdStringDatatype()), typeFactory.getXsdStringDatatype());
+		ValueConstant emptyString = termFactory.getConstantLiteral("", XSD.STRING);
 
         if (innerTerm instanceof Variable) {
             return term;
         }
-
-        if (!(innerTerm instanceof Function)) {
-			return emptyconstant;
-		} 
+		/*
+		 * TODO: consider the case of constants
+		 */
+		if (!(innerTerm instanceof Function)) {
+			return emptyString;
+		}
 		Function function = (Function) innerTerm;
 
 		if (!function.isDataTypeFunction()) {
@@ -563,24 +567,13 @@ public class ExpressionEvaluator {
 		}
 
 		Predicate predicate = function.getFunctionSymbol();
-		//String datatype = predicate.toString();
-		if (!typeFactory.isString(predicate)) { // (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI))
-			return emptyconstant;
-		}
+		if (predicate instanceof DatatypePredicate) {
+			RDFDatatype datatype = ((DatatypePredicate) predicate).getReturnedType();
 
-		if (function.getTerms().size() != 2) {
-			return emptyconstant;
-		} 
-		else { // rdfs:Literal(text, lang)
-			Term parameter = function.getTerm(1);
-			if (parameter instanceof Variable) {
-				return termFactory.getTypedTerm(parameter.clone(), typeFactory.getXsdStringDatatype());
-			} 
-			else if (parameter instanceof Constant) {
-				return termFactory.getTypedTerm(
-						termFactory.getConstantLiteral(((Constant) parameter).getValue(),typeFactory.getXsdStringDatatype()),
-						typeFactory.getXsdStringDatatype());
-			}
+			return datatype.getLanguageTag()
+					.map(tag -> termFactory.getConstantLiteral(tag.getFullString(), XSD.STRING))
+					.orElse(emptyString);
+
 		}
 		return term;
 	}

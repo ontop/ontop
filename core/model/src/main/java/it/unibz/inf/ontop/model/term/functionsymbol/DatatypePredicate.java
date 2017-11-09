@@ -19,9 +19,10 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import org.apache.commons.rdf.api.IRI;
 
 public interface DatatypePredicate extends BuiltinPredicate {
 
-	IRI getIRI();
+	RDFDatatype getReturnedType();
 }
