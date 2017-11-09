@@ -20,6 +20,5 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  * #L%
  */
 
-public interface BNodePredicate extends BuiltinPredicate {
-	// NO-OP
+public interface BNodePredicate extends ObjectRDFConstructionSymbol {
 }

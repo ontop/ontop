@@ -200,10 +200,9 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public Optional<TermType> inferType(ImmutableList<? extends ImmutableTerm> terms,
-										TermFactory termFactory, TypeFactory typeFactory) throws IncompatibleTermException {
+	public Optional<TermType> inferType(ImmutableList<? extends ImmutableTerm> terms) throws IncompatibleTermException {
 
-		TermTypeInferenceTools termTypeInferenceTools = new TermTypeInferenceTools(typeFactory, termFactory);
+		TermTypeInferenceTools termTypeInferenceTools = new TermTypeInferenceTools();
 		ImmutableList<Optional<TermType>> argumentTypes = ImmutableList.copyOf(
 				terms.stream()
 						.map(termTypeInferenceTools::inferType)

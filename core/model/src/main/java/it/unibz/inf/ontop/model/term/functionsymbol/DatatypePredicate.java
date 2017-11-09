@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  */
 
 import it.unibz.inf.ontop.model.type.RDFDatatype;
-import org.apache.commons.rdf.api.IRI;
 
-public interface DatatypePredicate extends BuiltinPredicate {
+public interface DatatypePredicate extends RDFTermConstructionSymbol {
 
+	@Override
 	RDFDatatype getReturnedType();
 }

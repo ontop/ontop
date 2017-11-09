@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -29,7 +30,8 @@ import java.util.stream.IntStream;
 public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate {
 	
 	// The name of the function that creates URI's in Quest
-	public static final String QUEST_BNODE = "BNODE";
+	private static final String QUEST_BNODE = "BNODE";
+	private final ObjectRDFType type;
 
 	public BNodePredicateImpl(int arity, TypeFactory typeFactory) {
 		super(QUEST_BNODE, arity, IntStream.range(0, arity)
@@ -37,10 +39,16 @@ public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate 
 				// TODO: require strings
 				.map(i -> typeFactory.getAbstractAtomicTermType())
 				.collect(ImmutableCollectors.toList()));
+		type = typeFactory.getBlankNodeType();
 	}
 
 	@Override
 	public BNodePredicateImpl clone() {
 		return this;
+	}
+
+	@Override
+	public ObjectRDFType getReturnedType() {
+		return type;
 	}
 }

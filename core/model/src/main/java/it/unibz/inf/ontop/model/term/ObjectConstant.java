@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.model.term;
 
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 
-public interface ObjectConstant extends Constant {
+public interface ObjectConstant extends RDFConstant {
 
     @Override
     ObjectRDFType getType();

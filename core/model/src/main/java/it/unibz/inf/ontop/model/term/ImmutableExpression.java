@@ -37,10 +37,10 @@ public interface ImmutableExpression extends Expression, ImmutableFunctionalTerm
      * TODO: inject termFactory and typeFactory
      *
      */
-    default Optional<TermType> getOptionalTermType(TermFactory termFactory, TypeFactory typeFactory) throws IncompatibleTermException {
+    default Optional<TermType> getOptionalTermType() throws IncompatibleTermException {
         try {
             OperationPredicate predicate = getFunctionSymbol();
-            return predicate.inferType(getArguments(), termFactory, typeFactory);
+            return predicate.inferType(getArguments());
         } catch (IncompatibleTermException e) {
             throw new IncompatibleTermException(this, e);
         }
