@@ -579,7 +579,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		switch (COL_TYPE.getColType(object.getType().getIRI())) {
 			case LANG_STRING:  // -3
 				stm.setString(2, value);
-				stm.setString(4, object.getLanguage());
+				stm.setString(4, object.getType().getLanguageTag().get().getFullString());
 				break;  
 			case STRING:   // 1
 				stm.setString(2, value);

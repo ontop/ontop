@@ -33,7 +33,6 @@ public class ValueConstantImpl implements ValueConstant {
 	private static final long serialVersionUID = 8031338451909170400L;
 
 	private final String value;
-	private final String language;
 	private final String string;
 	private final RDFDatatype termType;
 
@@ -47,14 +46,12 @@ public class ValueConstantImpl implements ValueConstant {
 	 */
 	protected ValueConstantImpl(@Nonnull String value, @Nonnull RDFDatatype type) {
 		this.value = value;
-		this.language = null;
 		this.termType = type;
 		this.string = "\"" + value + "\"";
 	}
 
 	protected ValueConstantImpl(@Nonnull String value, @Nonnull String language, TypeFactory typeFactory) {
 		this.value = value;
-		this.language = language;
 		this.termType = typeFactory.getLangTermType(language);
 		this.string = "\"" + value + "@" + language + "\"";
 	}
@@ -91,11 +88,6 @@ public class ValueConstantImpl implements ValueConstant {
 	@Override
 	public String getValue() {
 		return value;
-	}
-
-	@Override
-	public String getLanguage() {
-		return language;
 	}
 
 	@Override

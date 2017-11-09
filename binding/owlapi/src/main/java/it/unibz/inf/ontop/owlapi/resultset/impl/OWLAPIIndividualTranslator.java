@@ -109,7 +109,7 @@ public class OWLAPIIndividualTranslator {
 		RDFDatatype datatype = (RDFDatatype) type;
 
 		if (datatype.getLanguageTag().isPresent()) {
-			return dataFactory.getOWLLiteral(value, v.getLanguage());
+			return dataFactory.getOWLLiteral(value, datatype.getLanguageTag().get().getFullString());
 		} 
 		else {
 			OWLDatatype owlDatatype = new OWLDatatypeImpl(IRI.create(datatype.getIRI().getIRIString()));

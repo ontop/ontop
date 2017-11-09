@@ -34,7 +34,6 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyABoxFactIntoMappingConverter.class);
     private final AtomFactory atomFactory;
-    private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
     private final DummyBasicDBMetadata defaultDummyDBMetadata;
@@ -42,13 +41,11 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     @Inject
     public LegacyABoxFactIntoMappingConverter(Datalog2QueryMappingConverter datalog2QueryMappingConverter,
                                               SpecificationFactory mappingFactory, AtomFactory atomFactory,
-                                              Relation2Predicate relation2Predicate, TermFactory termFactory,
-                                              DatalogFactory datalogFactory,
+                                              TermFactory termFactory, DatalogFactory datalogFactory,
                                               DummyBasicDBMetadata defaultDummyDBMetadata) {
         this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
         this.mappingFactory = mappingFactory;
         this.atomFactory = atomFactory;
-        this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
         this.defaultDummyDBMetadata = defaultDummyDBMetadata;
@@ -135,16 +132,13 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             ValueConstant o = da.getValue();
             Predicate p = atomFactory.getDataPropertyPredicate(da.getProperty().getIRI());
 
-            Function head;
-            if (o.getLanguage() != null) {
-                head = termFactory.getFunction(p, termFactory.getUriTemplate(
-                        termFactory.getConstantLiteral(s.getURI())),
-                        termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), o.getLanguage()));
-            } else {
 
-                head = termFactory.getFunction(p, termFactory.getUriTemplate(
-                        termFactory.getConstantLiteral(s.getURI())), termFactory.getTypedTerm(o, o.getType()));
-            }
+            Function head = o.getType().getLanguageTag()
+                    .map(lang -> termFactory.getFunction(p, termFactory.getUriTemplate(
+                            termFactory.getConstantLiteral(s.getURI())),
+                            termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
+                    .orElseGet(() -> termFactory.getFunction(p, termFactory.getUriTemplate(
+                            termFactory.getConstantLiteral(s.getURI())), termFactory.getTypedTerm(o, o.getType())));
             CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
@@ -166,15 +160,12 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
                 ValueConstant o = (ValueConstant) v;
 
-                if (o.getLanguage() != null) {
-                    head = termFactory.getFunction(p, termFactory.getUriTemplate(
-                            termFactory.getConstantLiteral(s.getURI())),
-                            termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), o.getLanguage()));
-                } else {
-
-                    head = termFactory.getFunction(p, termFactory.getUriTemplate(
-                            termFactory.getConstantLiteral(s.getURI())), termFactory.getTypedTerm(o, o.getType()));
-                }
+                head = o.getType().getLanguageTag()
+                        .map(lang -> termFactory.getFunction(p, termFactory.getUriTemplate(
+                                    termFactory.getConstantLiteral(s.getURI())),
+                                    termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
+                        .orElseGet(() -> termFactory.getFunction(p, termFactory.getUriTemplate(
+                                termFactory.getConstantLiteral(s.getURI())), termFactory.getTypedTerm(o, o.getType())));
             } else {
 
                 URIConstant o = (URIConstant) v;

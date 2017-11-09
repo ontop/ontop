@@ -37,12 +37,10 @@ public class RDF4JHelper {
 			throw new IllegalStateException("A ValueConstant given to OWLAPI must have a RDF datatype");
 		RDFDatatype datatype = (RDFDatatype) type;
 
-		if (datatype.getLanguageTag().isPresent()) {
-			return fact.createLiteral(literal.getValue(), literal.getLanguage());
-		}
-		else {
-			return fact.createLiteral(literal.getValue(), fact.createIRI(datatype.getIRI().getIRIString()));
-		}
+		return datatype.getLanguageTag()
+				.map(lang -> fact.createLiteral(literal.getValue(), lang.getFullString()))
+				.orElseGet(() -> fact.createLiteral(literal.getValue(),
+						fact.createIRI(datatype.getIRI().getIRIString())));
 	}
 
     public static Value getValue(Constant c) {

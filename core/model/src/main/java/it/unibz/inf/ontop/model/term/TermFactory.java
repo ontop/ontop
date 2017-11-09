@@ -221,7 +221,7 @@ public interface TermFactory {
 	 *            the language tag for the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getConstantLiteral(String value, String language);
+	public ValueConstant getConstantLiteral(String value, String laanguage);
 
 	public Function getTypedTerm(Term value, String language);
 	public Function getTypedTerm(Term value, TermType type);
