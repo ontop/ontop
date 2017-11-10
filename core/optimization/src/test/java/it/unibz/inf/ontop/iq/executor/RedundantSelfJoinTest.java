@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.type.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
@@ -76,7 +75,7 @@ public class RedundantSelfJoinTest {
 
     private static final DBMetadata METADATA;
 
-    private static URITemplatePredicate URI_PREDICATE_ONE_VAR =  TYPE_FACTORY.getURITemplatePredicate(2);
+    private static URITemplatePredicate URI_PREDICATE_ONE_VAR =  TERM_FACTORY.getURITemplatePredicate(2);
     private static Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
 

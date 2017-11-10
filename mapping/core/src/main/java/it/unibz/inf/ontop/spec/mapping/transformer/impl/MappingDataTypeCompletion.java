@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
@@ -118,7 +119,7 @@ public class MappingDataTypeCompletion {
         } else if (term instanceof Variable) {
             Variable variable = (Variable) term;
             Term newTerm;
-            TermType type = getDataType(termOccurenceIndex, variable);
+            RDFDatatype type = getDataType(termOccurenceIndex, variable);
             newTerm = termFactory.getTypedTerm(variable, type);
             log.info("Datatype "+type+" for the value " + variable + " of the property " + predicate + " has been " +
                     "inferred " +
@@ -152,7 +153,8 @@ public class MappingDataTypeCompletion {
                             position,
                             termFactory.getTypedTerm(
                                     term,
-                                    inferredType.get()
+                                    // TODO: refactor this cast
+                                    (RDFDatatype) inferredType.get()
                             ));
                 }
                 else
@@ -197,7 +199,7 @@ public class MappingDataTypeCompletion {
      * @param variable
      * @return
      */
-    private TermType getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) throws UnknownDatatypeException {
+    private RDFDatatype getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) throws UnknownDatatypeException {
 
 
         List<IndexedPosition> list = termOccurenceIndex.get(variable.getName());
@@ -212,18 +214,20 @@ public class MappingDataTypeCompletion {
                 .getFunctionSymbol());
         RelationDefinition td = metadata.getRelation(tableId);
         Attribute attribute = td.getAttribute(ip.pos);
-        Optional<TermType>  type;
+        Optional<RDFDatatype>  type;
         //we want to assign the default value or throw an exception when the type of the attribute is missing (case of view)
         if (attribute.getType() == 0){
 
             type = Optional.empty();
         }
         else{
-            type = metadata.getTermType(attribute);
+            type = metadata.getTermType(attribute)
+                    // TODO: refactor this (unsafe)!!!
+                    .map(t -> (RDFDatatype) t);
         }
 
         if(defaultDatatypeInferred)
-            return type.orElse(typeFactory.getXsdStringDatatype()) ;
+            return type.orElseGet(typeFactory::getXsdStringDatatype) ;
         else {
             return type.orElseThrow(() -> new UnknownDatatypeException("Impossible to determine the expected datatype for the column "+ variable+"\n" +
                     "Possible solutions: \n" +

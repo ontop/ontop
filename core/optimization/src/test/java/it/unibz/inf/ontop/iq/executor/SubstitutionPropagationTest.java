@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.type.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Test;
 
@@ -64,8 +63,8 @@ public class SubstitutionPropagationTest {
     private static final ValueConstant TWO = TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
 
 
-    private static final URITemplatePredicate URI1_PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(2);
-    private static final URITemplatePredicate URI2_PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(3);
+    private static final URITemplatePredicate URI1_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
+    private static final URITemplatePredicate URI2_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(3);
     private static final Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static final Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
 

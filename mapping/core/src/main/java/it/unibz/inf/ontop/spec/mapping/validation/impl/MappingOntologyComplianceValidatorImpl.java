@@ -269,7 +269,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                                 " is declared with datatype " +
                                 declaredDatatype +
                                 " in the ontology, but has datatype " +
-                                typeFactory.getRequiredTypePredicate(tripleObjectType).getName() +
+                                termFactory.getRequiredTypePredicate(tripleObjectType).getName() +
                                 " according to the following triplesMap (either declared in the triplesMap, or " +
                                 "inferred from its source):\n[\n" +
                                 provenance.getProvenanceInfo() +
@@ -382,7 +382,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     private Optional<Predicate> getPredicate(DataRangeExpression expression) {
         if (expression instanceof Datatype) {
             return typeFactory.getOptionalDatatype(((Datatype) expression).getIRI())
-                    .flatMap(typeFactory::getOptionalTypePredicate)
+                    .flatMap(termFactory::getOptionalTypePredicate)
                     .map(p -> (Predicate) p);
         }
         if (expression instanceof DataPropertyRangeExpression) {

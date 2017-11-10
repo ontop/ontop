@@ -95,7 +95,7 @@ public class MappingTest {
         tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), Types.INTEGER, null, true);
         BROKER_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(tableBrokerDef);
 
-        URI_PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(2);
+        URI_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
         ANS1_VAR1_PREDICATE = ATOM_FACTORY.getAtomPredicate("http://example.org/Dealer", 1);
         URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/person/{}");
 

@@ -505,7 +505,7 @@ public class ExpressionEvaluator {
 		}
 		else if (function.isOperation()) {
 			//return boolean uri
-			return termFactory.getUriTemplateForDatatype(typeFactory.getXsdBooleanDatatype().getIRI().getIRIString());
+			return termFactory.getUriTemplateForDatatype(XSD.BOOLEAN.getIRIString());
 		}
 		return null;
 	}
@@ -515,22 +515,22 @@ public class ExpressionEvaluator {
 			Function function = (Function) term;
 			return function.getFunctionSymbol();
 		} 
-		else if (term instanceof Constant) {
-			Constant constant = (Constant) term;
-			TermType type = constant.getType();
-			Predicate pred = typeFactory.getRequiredTypePredicate(type);
+		else if (term instanceof ValueConstant) {
+			ValueConstant constant = (ValueConstant) term;
+			RDFDatatype type = constant.getType();
+			Predicate pred = termFactory.getRequiredTypePredicate(type);
 			if (pred == null)
-				pred = typeFactory.getRequiredTypePredicate(typeFactory.getXsdStringDatatype()); // .XSD_STRING;
+				pred = termFactory.getRequiredTypePredicate(XSD.STRING); // .XSD_STRING;
 			return pred;
 		} 
 		else {
-			throw new RuntimeException("Unknown term type");
+			throw new RuntimeException("Unexpected term type: " + term);
 		}
 	}
 	
 	private boolean isDouble(Predicate pred) {
-		return (pred.equals(typeFactory.getRequiredTypePredicate(typeFactory.getXsdDoubleDatatype()))
-				|| pred.equals(typeFactory.getRequiredTypePredicate(typeFactory.getXsdFloatDatatype())));
+		return (pred.equals(termFactory.getRequiredTypePredicate(XSD.DOUBLE))
+				|| pred.equals(termFactory.getRequiredTypePredicate(XSD.FLOAT)));
 	}
 	
 	private boolean isNumeric(Predicate pred) {
@@ -542,7 +542,7 @@ public class ExpressionEvaluator {
 		String constantValue = constant.getValue();
 		Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(constantValue);
 		if (type.isPresent()) {
-			Predicate p = typeFactory.getRequiredTypePredicate(type.get());
+			Predicate p = termFactory.getRequiredTypePredicate(type.get());
 			return isNumeric(p);
 		}
 		return false;	

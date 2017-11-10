@@ -476,7 +476,7 @@ public class SparqlAlgebraToDatalogTranslator {
 					// term rdf:type uri .
                     atom = typeFactory.getOptionalDatatype(rdfFactory.createIRI(o.stringValue()))
                             // datatype
-                            .map(rdfDatatype -> termFactory.getFunction(typeFactory.getRequiredTypePredicate(rdfDatatype), sTerm))
+                            .map(rdfDatatype -> termFactory.getFunction(termFactory.getRequiredTypePredicate(rdfDatatype), sTerm))
                             // class
                             .orElseGet(() -> termFactory.getFunction(atomFactory.getClassPredicate(o.stringValue()), sTerm));
 				}

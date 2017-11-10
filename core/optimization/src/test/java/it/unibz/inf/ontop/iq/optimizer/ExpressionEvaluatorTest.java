@@ -43,8 +43,8 @@ public class ExpressionEvaluatorTest {
     private final Variable C = TERM_FACTORY.getVariable("c");
     private final Variable D = TERM_FACTORY.getVariable("d");
 
-    private URITemplatePredicate URI_PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(2);
-    private URITemplatePredicate URI_PREDICATE2 =  TYPE_FACTORY.getURITemplatePredicate(3);
+    private URITemplatePredicate URI_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
+    private URITemplatePredicate URI_PREDICATE2 =  TERM_FACTORY.getURITemplatePredicate(3);
     private Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/stock/{}");
 
     private ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
@@ -403,20 +403,20 @@ public class ExpressionEvaluatorTest {
 
     private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, String languageTag) {
         return TERM_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getLangTermType(languageTag)),
+                TERM_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getLangTermType(languageTag)),
                 argument1);
     }
 
 
     private ImmutableFunctionalTerm generateLiteral(Constant argument1) {
         return TERM_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getRequiredTypePredicate(XSD.STRING),
+                TERM_FACTORY.getRequiredTypePredicate(XSD.STRING),
                 argument1);
     }
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
         return TERM_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
+                TERM_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
                 argument);
     }
 }

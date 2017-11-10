@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.type.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
@@ -63,15 +62,15 @@ public class QueryMergingTest {
             P4_PREDICATE, ImmutableList.of(X));
     private static DistinctVariableOnlyDataAtom P5_X_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             P5_PREDICATE, ImmutableList.of(X));
-    private static URITemplatePredicate URI_PREDICATE_ONE_VAR = TYPE_FACTORY.getURITemplatePredicate(2);
-    private static URITemplatePredicate URI_PREDICATE_TWO_VAR = TYPE_FACTORY.getURITemplatePredicate(3);
+    private static URITemplatePredicate URI_PREDICATE_ONE_VAR = TERM_FACTORY.getURITemplatePredicate(2);
+    private static URITemplatePredicate URI_PREDICATE_TWO_VAR = TERM_FACTORY.getURITemplatePredicate(3);
     private static Constant URI_TEMPLATE_STR_1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static Constant URI_TEMPLATE_STR_2 = TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
     private static Constant URI_TEMPLATE_STR_3 = TERM_FACTORY.getConstantLiteral("http://example.org/ds3/{}/{}");
     private static Constant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
     private static Constant TWO = TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static DatatypePredicate XSD_INTEGER = TYPE_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getXsdIntegerDatatype());
-    private static Constant THREE = TERM_FACTORY.getConstantLiteral("3", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static DatatypePredicate XSD_INTEGER = TERM_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getXsdIntegerDatatype());
+    private static Constant THREE = TERM_FACTORY.getConstantLiteral("3", XSD.INTEGER);
     private static GroundTerm INT_OF_THREE = (GroundTerm) TERM_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, THREE);
     private static GroundTerm INT_OF_ONE = (GroundTerm) TERM_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, ONE);
     private static GroundTerm INT_OF_TWO = (GroundTerm) TERM_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, TWO);
@@ -1073,7 +1072,7 @@ public class QueryMergingTest {
 
         queryBuilder.init(ANS0_ATOM, rootNode);
         IntensionalDataNode intensionalDataNode = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(P3_PREDICATE,
-                TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype())));
+                TERM_FACTORY.getConstantLiteral("1", XSD.INTEGER)));
         queryBuilder.addChild(rootNode, intensionalDataNode);
         IntermediateQuery mainQuery = queryBuilder.build();
 
@@ -1085,7 +1084,7 @@ public class QueryMergingTest {
         IntermediateQueryBuilder mappingBuilder = createQueryBuilder(EMPTY_METADATA);
         ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(
-                        ImmutableMap.of(X, TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype()))),
+                        ImmutableMap.of(X, TERM_FACTORY.getConstantLiteral("1", XSD.INTEGER))),
                 Optional.empty());
         mappingBuilder.init(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P3_PREDICATE, X), mappingRootNode);
         IntermediateQuery mapping = mappingBuilder.build();
@@ -1167,7 +1166,7 @@ public class QueryMergingTest {
 
     private static ImmutableFunctionalTerm generateString(VariableOrGroundTerm argument) {
         return TERM_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getRequiredTypePredicate(XSD.STRING), argument);
+                TERM_FACTORY.getRequiredTypePredicate(XSD.STRING), argument);
     }
 }
 

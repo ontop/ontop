@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.type.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
@@ -67,8 +66,8 @@ public class BindingLiftTest {
     private final Variable N = TERM_FACTORY.getVariable("n");
 
 
-    private URITemplatePredicate URI_PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(2);
-    private URITemplatePredicate URI_2PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(3);
+    private URITemplatePredicate URI_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
+    private URITemplatePredicate URI_2PREDICATE =  TERM_FACTORY.getURITemplatePredicate(3);
 
     private Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
@@ -574,13 +573,13 @@ public class BindingLiftTest {
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
         return TERM_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
+                TERM_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
                 argument);
     }
 
     private ImmutableFunctionalTerm generateString(VariableOrGroundTerm argument) {
         return TERM_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getRequiredTypePredicate(XSD.STRING),
+                TERM_FACTORY.getRequiredTypePredicate(XSD.STRING),
                 argument);
     }
 

@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.*;
 import org.eclipse.rdf4j.model.Resource;
 import org.slf4j.Logger;
@@ -590,7 +591,7 @@ public class R2RMLParser {
 			// pred = typeFactory.getRequiredTypePredicate(); //
 			// the URI template is always on the first position in the term list
 			// terms.add(0, uriTemplate);
-			return termFactory.getImmutableTypedTerm(uriTemplate, typeFactory.getXsdStringDatatype());
+			return termFactory.getImmutableTypedTerm(uriTemplate, XSD.STRING);
 		case 4://concat
 			ImmutableFunctionalTerm f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
             for(int j=2;j<terms.size();j++){

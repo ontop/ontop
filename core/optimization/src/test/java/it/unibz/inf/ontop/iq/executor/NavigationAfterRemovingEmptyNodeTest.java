@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.type.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
@@ -16,6 +15,7 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertTrue;
@@ -52,8 +52,8 @@ public class NavigationAfterRemovingEmptyNodeTest {
     private static final Variable N = TERM_FACTORY.getVariable("n");
 
 
-    private static final URITemplatePredicate URI1_PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(2);
-    private static final URITemplatePredicate URI2_PREDICATE =  TYPE_FACTORY.getURITemplatePredicate(3);
+    private static final URITemplatePredicate URI1_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
+    private static final URITemplatePredicate URI2_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(3);
     private static final Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static final Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
 
@@ -118,8 +118,8 @@ public class NavigationAfterRemovingEmptyNodeTest {
 
         InnerJoinNode unsatisfiedJoinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ,
-                TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype()),
-                TERM_FACTORY.getConstantLiteral("3", TYPE_FACTORY.getXsdIntegerDatatype())));
+                TERM_FACTORY.getConstantLiteral("2", XSD.INTEGER),
+                TERM_FACTORY.getConstantLiteral("3", XSD.INTEGER)));
         initialQueryBuilder.addChild(unionNode, unsatisfiedJoinNode);
         initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_1);
         initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_2);

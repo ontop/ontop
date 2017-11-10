@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.protege.gui.component;
  */
 
 import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 
@@ -37,14 +37,14 @@ public class DataTypeComboBox extends JComboBox {
 
 	private static final long serialVersionUID = 1L;
 	
-	public DataTypeComboBox(TypeFactory typeFactory) {
-		super(getQuestDataTypePredicates(typeFactory));
+	public DataTypeComboBox(TermFactory termFactory) {
+		super(getQuestDataTypePredicates(termFactory));
 		setRenderer(new DataTypeRenderer());
 		setPreferredSize(new Dimension(130, 23));
 		setSelectedIndex(-1);
 	}
 	
-	private static Predicate[] getQuestDataTypePredicates(TypeFactory typeFactory) {
+	private static Predicate[] getQuestDataTypePredicates(TermFactory termFactory) {
 
 		// TODO: complete?
 		List<Predicate> prediacteList = Stream.of(
@@ -72,7 +72,7 @@ public class DataTypeComboBox extends JComboBox {
 				XSD.UNSIGNED_INT,
 				XSD.UNSIGNED_LONG,
 				XSD.UNSIGNED_SHORT)
-				.map(typeFactory::getRequiredTypePredicate)
+				.map(termFactory::getRequiredTypePredicate)
 				.collect(Collectors.toList());
 
 		

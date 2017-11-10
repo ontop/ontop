@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.EncodeForURI;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
@@ -134,7 +135,8 @@ public class DirectMappingAxiomProducer {
 
 		//DataType Atoms
 		for (Attribute att : table.getAttributes()) {
-			TermType type = typeMapper.getTermType(att.getType());
+			// TODO: revisit this
+			RDFDatatype type = (RDFDatatype) typeMapper.getTermType(att.getType());
 			Variable objV = termFactory.getVariable(att.getID().getName());
 			ImmutableTerm obj = termFactory.getImmutableTypedTerm(objV, type);
 			

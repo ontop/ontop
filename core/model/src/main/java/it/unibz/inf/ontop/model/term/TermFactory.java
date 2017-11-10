@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.model.term;
 
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
@@ -30,6 +31,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TermFactory {
 
@@ -221,14 +223,14 @@ public interface TermFactory {
 	 *            the language tag for the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getConstantLiteral(String value, String laanguage);
+	public ValueConstant getConstantLiteral(String value, String language);
 
 	public Function getTypedTerm(Term value, String language);
-	public Function getTypedTerm(Term value, TermType type);
+	public Function getTypedTerm(Term value, RDFDatatype type);
 	Function getTypedTerm(Term value, IRI datatype);
 
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language);
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, TermType type);
+	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, RDFDatatype type);
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, IRI datatypeIRI);
 
 	/**
@@ -245,4 +247,13 @@ public interface TermFactory {
 	 * @return the variable object.
 	 */
 	public Variable getVariable(String name);
+
+
+	DatatypePredicate getRequiredTypePredicate(RDFDatatype type);
+
+	DatatypePredicate getRequiredTypePredicate(IRI datatypeIri);
+
+	Optional<DatatypePredicate> getOptionalTypePredicate(RDFDatatype type);
+
+	URITemplatePredicate getURITemplatePredicate(int arity);
 }

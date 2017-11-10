@@ -33,7 +33,7 @@ public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate 
 	private static final String QUEST_BNODE = "BNODE";
 	private final ObjectRDFType type;
 
-	public BNodePredicateImpl(int arity, TypeFactory typeFactory) {
+	protected BNodePredicateImpl(int arity, TypeFactory typeFactory) {
 		super(QUEST_BNODE, arity, IntStream.range(0, arity)
 				.boxed()
 				// TODO: require strings

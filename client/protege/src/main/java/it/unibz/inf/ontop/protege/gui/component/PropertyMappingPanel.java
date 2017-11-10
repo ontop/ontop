@@ -388,7 +388,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 			pnlPropertyName = new JPanel();
 			pnlPropertyUriTemplate = new JPanel();
 			lblPropertyName = new JLabel();
-			cboDataTypes = new DataTypeComboBox(obdaModel.getTypeFactory());
+			cboDataTypes = new DataTypeComboBox(obdaModel.getTermFactory());
 			lblMapIcon = new JLabel();
 			txtPropertyTargetMap = new JTextField();
 			
@@ -494,7 +494,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 			pnlPropertyName = new JPanel();
 			pnlPropertyUriTemplate = new JPanel();
 			lblPropertyName = new JLabel();
-			cboDataTypes = new DataTypeComboBox(obdaModel.getTypeFactory());
+			cboDataTypes = new DataTypeComboBox(obdaModel.getTermFactory());
 			lblMapIcon = new JLabel();
 			txtPropertyTargetMap = new JTextField();
 			

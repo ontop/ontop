@@ -34,7 +34,7 @@ public class DatatypePredicateImpl extends PredicateImpl implements DatatypePred
 	@Nonnull
 	private final RDFDatatype returnedType;
 
-	public DatatypePredicateImpl(@Nonnull RDFDatatype returnedType, @Nonnull TermType argumentType) {
+	protected DatatypePredicateImpl(@Nonnull RDFDatatype returnedType, @Nonnull TermType argumentType) {
 		super(returnedType.toString(), 1, ImmutableList.of(argumentType));
 		this.returnedType = returnedType;
 	}

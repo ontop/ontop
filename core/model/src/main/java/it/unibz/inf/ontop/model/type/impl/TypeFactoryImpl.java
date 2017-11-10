@@ -1,16 +1,10 @@
 package it.unibz.inf.ontop.model.type.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.model.vocabulary.OntopInternal;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
@@ -25,13 +19,9 @@ import static it.unibz.inf.ontop.model.type.impl.AbstractNumericRDFDatatype.crea
 import static it.unibz.inf.ontop.model.type.impl.ConcreteNumericRDFDatatypeImpl.createConcreteNumericTermType;
 import static it.unibz.inf.ontop.model.type.impl.ConcreteNumericRDFDatatypeImpl.createTopConcreteNumericTermType;
 import static it.unibz.inf.ontop.model.type.impl.SimpleRDFDatatype.createSimpleRDFDatatype;
-import static it.unibz.inf.ontop.model.vocabulary.RDF.LANGSTRING;
 
 @Singleton
 public class TypeFactoryImpl implements TypeFactory {
-
-	private final Map<TermType, DatatypePredicate> mapTypetoPredicate = new HashMap<>();
-	private final List<Predicate> predicateList = new LinkedList<>();
 
 	// Only builds these TermTypes once.
 	private final Map<IRI, RDFDatatype> datatypeCache = new ConcurrentHashMap<>();
@@ -146,37 +136,10 @@ public class TypeFactoryImpl implements TypeFactory {
 
 		xsdBase64Datatype = createSimpleRDFDatatype(XSD.BASE64BINARY, rdfsLiteralDatatype.getAncestry(), false);
 		registerDatatype(xsdBase64Datatype);
-
-		registerType(xsdIntegerDatatype);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
-		registerType( xsdDecimalDatatype);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
-		registerType(xsdDoubleDatatype);  // 6 "http://www.w3.org/2001/XMLSchema#double"
-		registerType(xsdStringDatatype);  // 7 "http://www.w3.org/2001/XMLSchema#string"
-		registerType(xsdDatetimeDatatype); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
-		registerType(xsdDatetimeStampDatatype);
-		registerType(xsdBooleanDatatype);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
-		registerType(xsdDateDatatype);  // 10 "http://www.w3.org/2001/XMLSchema#date";
-		registerType(xsdTimeDatatype);  // 11 "http://www.w3.org/2001/XMLSchema#time";
-		registerType(xsdGYearDatatype);  // 12 "http://www.w3.org/2001/XMLSchema#gYear";
-		registerType(xsdLongDatatype);  // 13 "http://www.w3.org/2001/XMLSchema#long"
-		registerType(xsdFloatDatatype); // 14 "http://www.w3.org/2001/XMLSchema#float"
-		registerType(xsdNegativeIntegerDatatype); // 15 "http://www.w3.org/2001/XMLSchema#negativeInteger";
-		registerType(xsdNonNegativeIntegerDatatype); // 16 "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
-		registerType(xsdPositiveIntegerDatatype); // 17 "http://www.w3.org/2001/XMLSchema#positiveInteger"
-		registerType(xsdNonPositiveIntegerDatatype); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
-		registerType(xsdIntDatatype);  // 19 "http://www.w3.org/2001/XMLSchema#int"
-		registerType(xsdUnsignedIntDatatype);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
-
-		registerType(xsdBase64Datatype);
 	}
 
 	private void registerDatatype(RDFDatatype datatype) {
 		datatypeCache.put(datatype.getIRI(), datatype);
-	}
-
-	private void registerType(RDFDatatype type) {
-		DatatypePredicate predicate = new DatatypePredicateImpl(type, type);
-		mapTypetoPredicate.put(type, predicate);
-		predicateList.add(predicate);
 	}
 
 	@Override
@@ -187,29 +150,6 @@ public class TypeFactoryImpl implements TypeFactory {
 	@Override
 	public Optional<RDFDatatype> getOptionalDatatype(IRI iri) {
 		return Optional.ofNullable(datatypeCache.get(iri));
-	}
-
-	@Override
-	public DatatypePredicate getRequiredTypePredicate(TermType type) {
-		return getOptionalTypePredicate(type)
-				.orElseThrow(() -> new NoConstructorFunctionException(type));
-	}
-
-	@Override
-	public DatatypePredicate getRequiredTypePredicate(IRI datatypeIri) {
-		if (datatypeIri.equals(LANGSTRING))
-			throw new IllegalArgumentException("Lang string predicates are not unique (they depend on the language tag)");
-		return getRequiredTypePredicate(getDatatype(datatypeIri));
-	}
-
-	@Override
-	public Optional<DatatypePredicate> getOptionalTypePredicate(TermType type) {
-		return Optional.ofNullable(mapTypetoPredicate.get(type));
-	}
-
-	@Override
-	public URITemplatePredicate getURITemplatePredicate(int arity) {
-		return new URITemplatePredicateImpl(arity, this);
 	}
 
 	@Override
@@ -272,20 +212,7 @@ public class TypeFactoryImpl implements TypeFactory {
     }
 
     private RDFDatatype createLangStringDatatype(String languageTagString) {
-		RDFDatatype datatype = LangDatatype.createLangDatatype(
+		return LangDatatype.createLangDatatype(
 				new LanguageTagImpl(languageTagString), xsdStringDatatype.getAncestry(), this);
-
-		// Creates a predicate
-		mapTypetoPredicate.put(datatype, new DatatypePredicateImpl(datatype, datatype));
-
-		return datatype;
-	}
-
-
-    private static class NoConstructorFunctionException extends OntopInternalBugException {
-
-		private NoConstructorFunctionException(TermType type) {
-			super("No construction function found for " + type);
-		}
 	}
 }

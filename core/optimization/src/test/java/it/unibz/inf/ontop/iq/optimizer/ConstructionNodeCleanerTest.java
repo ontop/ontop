@@ -44,8 +44,8 @@ public class ConstructionNodeCleanerTest {
     private final static Variable Z2 = TERM_FACTORY.getVariable("Z2");
 
 
-    private URITemplatePredicate URI_PREDICATE = TYPE_FACTORY.getURITemplatePredicate(2);
-    private URITemplatePredicate URI_2PREDICATE = TYPE_FACTORY.getURITemplatePredicate(3);
+    private URITemplatePredicate URI_PREDICATE = TERM_FACTORY.getURITemplatePredicate(2);
+    private URITemplatePredicate URI_2PREDICATE = TERM_FACTORY.getURITemplatePredicate(3);
 
     private Constant URI_TEMPLATE_STR_1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private Constant URI_TEMPLATE_STR_2_2 = TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");

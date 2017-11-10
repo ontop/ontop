@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.type.impl;
+package it.unibz.inf.ontop.model.term.impl;
 
 /*
  * #%L
@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.model.type.impl;
  */
 
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
