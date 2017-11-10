@@ -980,7 +980,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 				objectTerm = termFactory.getImmutableTypedTerm(Y, languageTag.getFullString());
 			}
 			else {
-				objectTerm = termFactory.getImmutableTypedTerm(Y, type2);
+				objectTerm = termFactory.getImmutableTypedTerm(Y, datatype);
 			}
 		}
 
