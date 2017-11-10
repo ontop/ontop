@@ -1,0 +1,15 @@
+CREATE TABLE TABLE1 (
+	"T1C1" INT,
+	"T1C2" INT,
+	"T1C3" INT
+);              
+
+CREATE TABLE TABLE2 (
+	"T2C1" INT,
+	"T2C2" INT,
+	"T2C3" INT
+);     
+
+CREATE TABLE TABLE3 (
+	"T3C1" INT
+);     

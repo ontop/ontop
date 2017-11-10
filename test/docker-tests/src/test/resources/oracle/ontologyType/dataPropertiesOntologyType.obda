@@ -1,0 +1,11 @@
+[PrefixDeclaration]
+:		http://www.company.com/ARES#
+franz:	http://www.franz.com/
+
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-e250eda48e0e42e5a0624a86e2106fb1(0)
+target		:{ID} a :Assay ; :AssayID {ID} ; :assayName {SHORT_NAME}^^xsd:string ; :hasARESID {ID}^^xsd:integer ; :number {ID}^^xsd:long ; :hasDepartment {DEPARTMENT_CODE} ; :hasPTTName {PTT_REF}^^xsd:string ; franz:solrDocid {ID}^^xsd:long ; :hasSection {ID}^^xsd:positiveInteger .
+source		select   "SYSTEM"."T_ASSAY".ID, "SYSTEM"."T_ASSAY".SHORT_NAME,   "SYSTEM"."T_ASSAY".DESCRIPTION , "SYSTEM"."T_ASSAY".DEPARTMENT_CODE,    "SYSTEM"."T_ASSAY"."PTT_REF"   from "SYSTEM"."T_ASSAY"
+]]
+

@@ -1,0 +1,60 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+
+[MappingDeclaration] @collection [[
+mappingId	Countries
+target		:Country-{COUNTRY_NAME} a :Country . 
+source		select COUNTRY_NAME FROM "HR"."COUNTRIES"
+
+mappingId	Paises
+target		:Pais-{COUNTRY_NAME} a :Pais . 
+source		select COUNTRIES.COUNTRY_NAME FROM "HR"."COUNTRIES"
+
+mappingId	CountryPrefixNoQuote
+target		:CountryPrefixNQ-{COUNTRY_NAME} a :CountryPrefixNQ . 
+source		select COUNTRIES.COUNTRY_NAME FROM HR.COUNTRIES
+
+mappingId	Land
+target		:Land-{ALIAS} a :Land . 
+source		select COUNTRIES.COUNTRY_NAME ALIAS FROM HR.COUNTRIES
+
+mappingId	LandQuote
+target		:LandQuote-{countryNameAlias} a :LandQuote . 
+source		select "COUNTRIES".COUNTRY_NAME countryNameAlias FROM HR.COUNTRIES
+
+mappingId	CountryEgypt
+target		:CountryEgypt-{COUNTRY_NAME} a :CountryEgypt . 
+source		select COUNTRY_NAME FROM HR.COUNTRIES WHERE COUNTRIES.COUNTRY_NAME = 'Egypt'
+
+mappingId	CountryInRegion
+target		:CountryWithRegion-{NameOfCountry} :countryIsInRegion :Region-{REGION_NAME} . 
+source		SELECT REGION_NAME, COUNTRIES.COUNTRY_NAME NameOfCountry, COUNTRY_ID FROM HR.REGIONS, HR.COUNTRIES WHERE COUNTRIES.REGION_ID = REGIONS.REGION_ID
+
+mappingId	CountryNotEgypt
+target		:CountryNotEgypt-{COUNTRY_NAME} a :CountryNotEgypt . 
+source		select COUNTRY_NAME FROM HR.COUNTRIES WHERE COUNTRIES.COUNTRY_NAME != 'Egypt'
+
+mappingId	RegionID
+target		:RegionID-{RID} a :RegionID . 
+source		select to_char(REGION_ID) as RID FROM HR.REGIONS
+
+mappingId	NewCountry
+target		:NewCountry-{NAME} a :NewCountry . 
+source		select t1.owner NAME from "SYS"."ALL_TABLES" t1, SYS.ALL_TABLES t2, SYS.ALL_VIEWS where t1.table_name = t2.table_name and t1.owner = ALL_VIEWS.OWNER and all_views.view_name= 'MVIEW_WORKLOAD';
+
+mappingId	View
+target		:View-{name} a :View . 
+source		select t1.table_name NAME from SYS.ALL_TABLES t1, sys.all_views where t1.owner = ALL_VIEWS.owner and t1.table_name  = 'BROKERWORKSFOR_NEW' and all_views.view_name= 'MVIEW_WORKLOAD';
+
+mappingId	TwoViews
+target		:View2-{NAME}-{name2} a :View2 .
+source		select t1.table_name NAME, all_views.view_name name2 from SYS.ALL_TABLES t1, sys.all_views where t1.owner = ALL_VIEWS.owner and t1.table_name  = 'BROKERWORKSFOR_NEW' and all_views.view_name= 'MVIEW_WORKLOAD';
+
+mappingId	Something
+target		:Something-{NAME} a :Something . 
+source		select AT.table_name as NAME from sys.all_tables AT where AT.table_name  = 'BROKERWORKSFOR_NEW'
+
+
+]]
+

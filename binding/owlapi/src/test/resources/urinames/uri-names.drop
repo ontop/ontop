@@ -1,0 +1,2 @@
+DROP TABLE zoo;
+DROP TABLE entertainment;

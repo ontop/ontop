@@ -1,0 +1,23 @@
+[PrefixDeclaration]
+:		http://www.seriology.org/seriology#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+
+[MappingDeclaration] @collection [[
+
+mappingId	Series + Series_Title + Production_Year (for Series)
+target		:series-{tid} a :Series ; :Series_Title {title} ; :Production_Year {year} .
+source		SELECT t.id as tid, t.title as title, t.production_year as year
+			FROM title t
+			WHERE t.kind_id = 2
+
+mappingId	hasSeason
+target		:series-{fid} :hasSeason :series-{fid}-season-{fseason_nr} .
+source		SELECT DISTINCT se.id AS fid, te.season_nr AS fseason_nr
+			FROM title se, title te
+			WHERE se.kind_id=2 AND se.id = te.episode_of_id AND te.season_nr IS NOT NULL
+]]
+

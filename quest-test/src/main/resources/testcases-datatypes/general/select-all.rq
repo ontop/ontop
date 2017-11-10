@@ -1,5 +1,0 @@
-PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
-
-SELECT ?x ?y ?z
-WHERE { ?x ?y ?z
-}
