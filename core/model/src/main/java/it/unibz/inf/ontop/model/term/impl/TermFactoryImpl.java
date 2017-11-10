@@ -418,6 +418,9 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Optional<DatatypePredicate> getOptionalTypePredicate(RDFDatatype type) {
+		if (type.isAbstract())
+			throw new IllegalArgumentException("The datatype " + type + " is abstract and therefore cannot be constructed");
+
 		return Optional.of(type2FunctionSymbolMap
 				.computeIfAbsent(
 						type,
