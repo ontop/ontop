@@ -23,12 +23,15 @@ package it.unibz.inf.ontop.protege.gui.component;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DataTypeComboBox extends JComboBox {
 
@@ -42,8 +45,36 @@ public class DataTypeComboBox extends JComboBox {
 	}
 	
 	private static Predicate[] getQuestDataTypePredicates(TypeFactory typeFactory) {
-		
-		List<Predicate> prediacteList = typeFactory.getDatatypePredicates();
+
+		// TODO: complete?
+		List<Predicate> prediacteList = Stream.of(
+				XSD.BASE64BINARY,
+				XSD.BOOLEAN,
+				XSD.BYTE,
+				XSD.DATE,
+				XSD.DATETIME,
+				XSD.DATETIMESTAMP,
+				XSD.DECIMAL,
+				XSD.DOUBLE,
+				XSD.FLOAT,
+				XSD.GYEAR,
+				XSD.INT,
+				XSD.INTEGER,
+				XSD.LONG,
+				XSD.NEGATIVE_INTEGER,
+				XSD.NON_NEGATIVE_INTEGER,
+				XSD.NON_POSITIVE_INTEGER,
+				XSD.POSITIVE_INTEGER,
+				XSD.SHORT,
+				XSD.STRING,
+				XSD.TIME,
+				XSD.UNSIGNED_BYTE,
+				XSD.UNSIGNED_INT,
+				XSD.UNSIGNED_LONG,
+				XSD.UNSIGNED_SHORT)
+				.map(typeFactory::getRequiredTypePredicate)
+				.collect(Collectors.toList());
+
 		
 		int length = prediacteList.size() + 1;
 		Predicate[] dataTypes = new Predicate[length];

@@ -190,11 +190,6 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public ImmutableList<Predicate> getDatatypePredicates() {
-		return ImmutableList.copyOf(predicateList);
-	}
-
-	@Override
 	public DatatypePredicate getRequiredTypePredicate(TermType type) {
 		return getOptionalTypePredicate(type)
 				.orElseThrow(() -> new NoConstructorFunctionException(type));

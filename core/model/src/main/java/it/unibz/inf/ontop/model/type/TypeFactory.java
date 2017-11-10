@@ -23,8 +23,6 @@ public interface TypeFactory {
 	Optional<DatatypePredicate> getOptionalTypePredicate(TermType type);
 
 	URITemplatePredicate getURITemplatePredicate(int arity);
-	
-	ImmutableList<Predicate> getDatatypePredicates();
 
 	RDFDatatype getLangTermType(String languageTag);
 
