@@ -273,6 +273,8 @@ public class ExpressionEvaluator {
 				return evalLangMatches(term);
 			case REGEX:
 				return evalRegex(term);
+			case IF_ELSE_NULL:
+				return evalIfElseNull(term);
 			case UUID:
 			case STRUUID:
 			case MINUS:
@@ -650,6 +652,19 @@ public class ExpressionEvaluator {
         return expr;
 
     }
+
+	private Term evalIfElseNull(Function term) {
+		Term formerCondition = term.getTerm(0);
+		Term newCondition = eval(formerCondition);
+		if (newCondition.equals(formerCondition))
+			return term;
+		else if (newCondition.equals(TermConstants.FALSE))
+			return TermConstants.NULL;
+		else if (newCondition.equals(TermConstants.TRUE))
+			return term.getTerm(1);
+		else
+			return TERM_FACTORY.getFunction(term.getFunctionSymbol(), newCondition, term.getTerm(1));
+	}
 
 	private Term evalIsNullNotNull(Function term, boolean isnull) {
 		Term innerTerm = term.getTerms().get(0);
