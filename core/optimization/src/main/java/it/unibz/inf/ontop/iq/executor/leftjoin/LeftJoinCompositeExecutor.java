@@ -22,13 +22,11 @@ public class LeftJoinCompositeExecutor extends SimpleNodeCentricCompositeExecuto
 
     @Inject
     private LeftJoinCompositeExecutor(RedundantSelfLeftJoinExecutor selfLeftJoinExecutor,
-                                      ForeignKeyLeftJoinExecutor fkExecutor,
                                       LeftToInnerJoinExecutor leftToInnerJoinExecutor) {
         ImmutableList.Builder<SimpleNodeCentricExecutor<LeftJoinNode, LeftJoinOptimizationProposal>> executorBuilder = ImmutableList.builder();
 
         //executorBuilder.add(new LeftJoinBooleanExpressionExecutor());
         executorBuilder.add(selfLeftJoinExecutor);
-        //executorBuilder.add(fkExecutor);
         executorBuilder.add(leftToInnerJoinExecutor);
 
         executors = executorBuilder.build();
