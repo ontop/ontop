@@ -275,7 +275,9 @@ public class LeftJoinOptimizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(N, TermConstants.NULL));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
 
-        expectedQueryBuilder.addChild(constructionNode1, dataNode1);
+        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(
+                TABLE1_PREDICATE, M, NF1, ONE));
+        expectedQueryBuilder.addChild(constructionNode1, newDataNode);
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
