@@ -6,7 +6,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
+import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
@@ -250,14 +253,17 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          * Cleans the composite substitution by removing non-projected variables
          */
 
-        ImmutableMap.Builder<Variable, ImmutableTerm> newSubstitutionMapBuilder = ImmutableMap.builder();
-        compositeSubstitution.getImmutableMap().entrySet().stream()
-                .map(ConstructionNodeImpl::applyNullNormalization)
-                .filter(e -> projectedVariables.contains(e.getKey()))
-                .forEach(newSubstitutionMapBuilder::put);
+        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap =
+                compositeSubstitution.getImmutableMap().entrySet().stream()
+                    .map(ConstructionNodeImpl::applyNullNormalization)
+                    .filter(e -> projectedVariables.contains(e.getKey()))
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> simplifySubstitutionValue(e.getValue())
+                    ));
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
-                newSubstitutionMapBuilder.build());
+                newSubstitutionMap);
 
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
                 newSubstitution, getOptionalModifiers(), nullabilityEvaluator);
@@ -266,6 +272,24 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          * Stops to propagate the substitution
          */
         return DefaultSubstitutionResults.newNode(newConstructionNode);
+    }
+
+    private ImmutableTerm simplifySubstitutionValue(ImmutableTerm term) {
+        if (term instanceof ImmutableExpression) {
+            EvaluationResult evaluationResult = new ExpressionEvaluator().evaluateExpression((ImmutableExpression)term);
+            if (evaluationResult.isEffectiveTrue())
+                return TermConstants.TRUE;
+            else if (evaluationResult.isNull())
+                return TermConstants.NULL;
+            else if (evaluationResult.isEffectiveFalse())
+                return TermConstants.FALSE;
+            else
+                return evaluationResult.getOptionalExpression().orElseThrow(
+                        () -> new MinorOntopInternalBugException("Bug: no expression returned by the expression " +
+                                "evaluator while it is not effectively true or false or null"));
+        }
+        else
+            return term;
     }
 
     /**
