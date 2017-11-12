@@ -28,7 +28,7 @@ public class LeftJoinCompositeExecutor extends SimpleNodeCentricCompositeExecuto
 
         //executorBuilder.add(new LeftJoinBooleanExpressionExecutor());
         executorBuilder.add(selfLeftJoinExecutor);
-        executorBuilder.add(fkExecutor);
+        //executorBuilder.add(fkExecutor);
         executorBuilder.add(leftToInnerJoinExecutor);
 
         executors = executorBuilder.build();

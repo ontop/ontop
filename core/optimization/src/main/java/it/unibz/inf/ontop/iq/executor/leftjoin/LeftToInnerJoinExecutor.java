@@ -75,6 +75,8 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
 
         /*
          * No normalization (a DataNode is expected on the left)
+         *
+         * TODO: also support join (if it works with one "left child", that's fine)
          */
         if (!(leftChild instanceof DataNode))
             return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
@@ -228,6 +230,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                                                                              IntermediateQuery query,
                                                                              QueryTreeComponent treeComponent,
                                                                              DataNode leftDataNode, UnionNode rightChild) {
-        throw new RuntimeException("TODO: support the normalization with a right union node");
+        // NOT YET IMPLEMENTED --> no optimization YET
+        return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
     }
 }

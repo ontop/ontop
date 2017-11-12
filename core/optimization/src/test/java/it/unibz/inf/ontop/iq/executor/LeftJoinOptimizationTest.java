@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.term.TermConstants;
 
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.iq.proposal.impl.LeftJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.Constant;
@@ -23,6 +22,9 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
 import static junit.framework.TestCase.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -51,16 +53,21 @@ public class LeftJoinOptimizationTest {
     private final static Variable M1 = DATA_FACTORY.getVariable("m1");
     private final static Variable M2 = DATA_FACTORY.getVariable("m2");
     private final static Variable N = DATA_FACTORY.getVariable("n");
+    private final static Variable NF1 = DATA_FACTORY.getVariable("nf1");
     private final static Variable N1 = DATA_FACTORY.getVariable("n1");
+    private final static Variable N1F0 = DATA_FACTORY.getVariable("n1f0");
+    private final static Variable N1F1 = DATA_FACTORY.getVariable("n1f1");
     private final static Variable N2 = DATA_FACTORY.getVariable("n2");
     private final static Variable O = DATA_FACTORY.getVariable("o");
+    private final static Variable OF0 = DATA_FACTORY.getVariable("of0");
     private final static Variable O1 = DATA_FACTORY.getVariable("o1");
     private final static Variable O2 = DATA_FACTORY.getVariable("o2");
+    private final static Variable F0 = DATA_FACTORY.getVariable("f0");
 
     private final static ImmutableExpression EXPRESSION1 = DATA_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, M, N);
+            EQ, M, N);
     private final static ImmutableExpression EXPRESSION2 = DATA_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, N, M);
+            EQ, N, M);
 
     private static final DBMetadata DB_METADATA;
 
@@ -68,7 +75,7 @@ public class LeftJoinOptimizationTest {
         BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
-        /**
+        /*
          * Table 1: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1"));
@@ -78,7 +85,7 @@ public class LeftJoinOptimizationTest {
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Col1));
         TABLE1_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1Def);
 
-        /**
+        /*
          * Table 2: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
@@ -89,7 +96,7 @@ public class LeftJoinOptimizationTest {
         table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Col2, table1Col1));
         TABLE2_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table2Def);
 
-        /**
+        /*
          * Table 3: composite unique constraint over the first TWO columns
          */
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE3"));
@@ -99,7 +106,7 @@ public class LeftJoinOptimizationTest {
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Col1, table3Col2));
         TABLE3_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table3Def);
 
-        /**
+        /*
          * Table 1a: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table1aDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1A"));
@@ -110,7 +117,7 @@ public class LeftJoinOptimizationTest {
         table1aDef.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1aCol1));
         TABLE1a_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1aDef);
 
-        /**
+        /*
          * Table 2a: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table2aDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2A"));
@@ -128,9 +135,6 @@ public class LeftJoinOptimizationTest {
         DB_METADATA = dbMetadata;
     }
 
-    /**
-     *  TODO: explain
-     */
     @Test
     public void testSelfJoinElimination1() throws EmptyQueryException {
 
@@ -147,13 +151,6 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-                
-
-        System.out.println("\n After optimization: \n" +  query);
-
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
@@ -163,13 +160,39 @@ public class LeftJoinOptimizationTest {
         ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
         expectedQueryBuilder.addChild(constructionNode1, dataNode5);
 
-        IntermediateQuery query1 = expectedQueryBuilder.build();
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
+        optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
     @Test
     public void testSelfJoinElimination2() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, O));
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O1));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N1, O));
+
+        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
+        expectedQueryBuilder.init(projectionAtom1, constructionNode1);
+
+        ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
+        expectedQueryBuilder.addChild(constructionNode1, dataNode5);
+
+        optimizeAndCheck(query, expectedQueryBuilder.build());
+    }
+
+    @Test
+    public void testNoSelfLeftJoin3() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
@@ -184,11 +207,7 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
 
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -201,9 +220,7 @@ public class LeftJoinOptimizationTest {
         expectedQueryBuilder.addChild(leftJoinNode1, dataNode1, LEFT);
         expectedQueryBuilder.addChild(leftJoinNode1, dataNode2, RIGHT);
 
-        IntermediateQuery query1 = expectedQueryBuilder.build();
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
+        optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
     @Test
@@ -214,7 +231,7 @@ public class LeftJoinOptimizationTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(
-                ExpressionOperation.EQ, O, TWO));
+                EQ, O, TWO));
 
         queryBuilder.addChild(constructionNode, leftJoinNode);
         ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O1));
@@ -224,16 +241,15 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
+        IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(O, DATA_FACTORY.getImmutableExpression(
+                        IF_ELSE_NULL, DATA_FACTORY.getImmutableExpression(EQ, OF0, TWO), OF0)));
+        expectedQueryBuilder.init(projectionAtom, newConstructionNode);
+        expectedQueryBuilder.addChild(newConstructionNode,
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, OF0)));
 
-        IntermediateQuery expectedQuery = query.createSnapshot();
-
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
-
-        System.out.println("\n Expected query: \n" +  expectedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
     @Test
@@ -252,11 +268,6 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
@@ -265,15 +276,10 @@ public class LeftJoinOptimizationTest {
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
 
         expectedQueryBuilder.addChild(constructionNode1, dataNode1);
-
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-
-        System.out.println("\n Expected query: \n" +  expectedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
-    @Test
+    @Test(expected = EmptyQueryException.class)
     public void testSelfLeftJoinNonUnificationEmptyResult() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
@@ -294,21 +300,12 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        try {
-            query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-            System.out.println("\n After optimization: \n" +  query);
-            System.out.println("\n Expected query: \n" +  "empty query");
-            assertTrue(false);
-        } catch (EmptyQueryException e) {
-            System.out.println("\n After optimization: \n" +  "empty query");
-            System.out.println("\n Expected query: \n" +  "empty query");
-            assertTrue(true);
-        }
+        JOIN_LIKE_OPTIMIZER.optimize(query);
     }
 
 
     @Test
-    public void testSelfLeftJoinShouldNotUnify() throws EmptyQueryException {
+    public void testSelfLeftJoinIfElseNull1() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, M, N);
@@ -323,20 +320,20 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery expectedQuery = query.createSnapshot();
-        System.out.println("\n Expected query: \n" +  expectedQuery);
+        IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(N, DATA_FACTORY.getImmutableExpression(
+                        IF_ELSE_NULL, DATA_FACTORY.getImmutableExpression(EQ, F0, TWO), NF1)));
+        expectedQueryBuilder.init(projectionAtom, newConstructionNode);
+        expectedQueryBuilder.addChild(newConstructionNode,
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, NF1, F0)));
 
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
     @Test
-    public void testSelfLeftJoinShouldNotUnify2() throws EmptyQueryException {
+    public void testSelfLeftJoinIfElseNull2() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, M, N);
@@ -351,16 +348,16 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery expectedQuery = query.createSnapshot();
-        System.out.println("\n Expected query: \n" +  expectedQuery);
+        IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(N, DATA_FACTORY.getImmutableExpression(
+                        IF_ELSE_NULL, DATA_FACTORY.getImmutableExpression(EQ, F0, NF1), NF1)));
+        expectedQueryBuilder.init(projectionAtom, newConstructionNode);
+        expectedQueryBuilder.addChild(newConstructionNode,
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, NF1, F0)));
 
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
     @Test
@@ -379,17 +376,7 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        IntermediateQuery expectedQuery = query.createSnapshot();
-
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
-
-        System.out.println("\n Expected query: \n" +  expectedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        optimizeAndCheck(query, query.createSnapshot());
     }
 
     @Test
@@ -408,17 +395,7 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        IntermediateQuery expectedQuery = query.createSnapshot();
-
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
-
-        System.out.println("\n Expected query: \n" +  expectedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        optimizeAndCheck(query, query.createSnapshot());
     }
 
     @Test
@@ -437,11 +414,6 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -454,9 +426,7 @@ public class LeftJoinOptimizationTest {
         expectedQueryBuilder.addChild(joinNode, dataNode1);
         expectedQueryBuilder.addChild(joinNode, dataNode2);
 
-        IntermediateQuery query1 = expectedQueryBuilder.build();
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
+        optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
 
@@ -475,13 +445,6 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
-        IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
-
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, constructionNode);
@@ -491,9 +454,7 @@ public class LeftJoinOptimizationTest {
         expectedQueryBuilder.addChild(joinNode, dataNode1);
         expectedQueryBuilder.addChild(joinNode, dataNode2);
 
-        IntermediateQuery query1 = expectedQueryBuilder.build();
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
+        optimizeAndCheck(queryBuilder.build(), expectedQueryBuilder.build());
     }
 
     @Test
@@ -512,12 +473,6 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
-
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, constructionNode);
@@ -525,9 +480,7 @@ public class LeftJoinOptimizationTest {
         expectedQueryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
         expectedQueryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
-        IntermediateQuery query1 = expectedQueryBuilder.build();
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
+        optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
     @Test
@@ -546,11 +499,6 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -563,10 +511,7 @@ public class LeftJoinOptimizationTest {
         expectedQueryBuilder.addChild(joinNode, dataNode1);
         expectedQueryBuilder.addChild(joinNode, dataNode2);
 
-        IntermediateQuery query1 = expectedQueryBuilder.build();
-
-        System.out.println("\n Expected query: \n" +  query1);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
+        optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
     @Test
@@ -585,22 +530,16 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, constructionNode);
-        expectedQueryBuilder.addChild(constructionNode, leftJoinNode);
-        expectedQueryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
-        expectedQueryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        expectedQueryBuilder.addChild(constructionNode, joinNode);
+        expectedQueryBuilder.addChild(joinNode, dataNode1);
+        expectedQueryBuilder.addChild(joinNode, dataNode2);
 
-        IntermediateQuery query1 = expectedQueryBuilder.build();
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
+        optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
     @Test
@@ -609,8 +548,9 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(
-                        DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ, O1, TWO));
+
+        ImmutableExpression expression = DATA_FACTORY.getImmutableExpression(EQ, O1, TWO);
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(expression);
         ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, M, M1, O));
         ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N1, O1));
 
@@ -620,22 +560,68 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
-
-        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
-        expectedQueryBuilder.init(projectionAtom, constructionNode);
-        expectedQueryBuilder.addChild(constructionNode, leftJoinNode);
-        expectedQueryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
-        expectedQueryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(N1,
+                        DATA_FACTORY.getImmutableExpression(IF_ELSE_NULL, expression, N1F0)));
+        expectedQueryBuilder.init(projectionAtom, newConstructionNode);
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        expectedQueryBuilder.addChild(newConstructionNode, joinNode);
+        expectedQueryBuilder.addChild(joinNode, dataNode1);
+        ExtensionalDataNode newDataNode2 =  IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N1F0, O1));
+        expectedQueryBuilder.addChild(joinNode, newDataNode2);
 
-        IntermediateQuery query1 = expectedQueryBuilder.build();
+        optimizeAndCheck(query, expectedQueryBuilder.build());
+    }
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
+    @Test
+    public void testLeftJoinEliminationWithImplicitFilterCondition() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, M, M1, O));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N1, TWO));
+
+        queryBuilder.init(projectionAtom, constructionNode);
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        ImmutableExpression expression = DATA_FACTORY.getImmutableExpression(EQ, F0, TWO);
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(N1,
+                        DATA_FACTORY.getImmutableExpression(IF_ELSE_NULL, expression, N1F1)));
+        expectedQueryBuilder.init(projectionAtom, newConstructionNode);
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        expectedQueryBuilder.addChild(newConstructionNode, joinNode);
+        expectedQueryBuilder.addChild(joinNode, dataNode1);
+        ExtensionalDataNode newDataNode2 =  IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N1F1, F0));
+        expectedQueryBuilder.addChild(joinNode, newDataNode2);
+
+        optimizeAndCheck(query, expectedQueryBuilder.build());
+    }
+
+    private void optimizeAndCheck(IntermediateQuery query, IntermediateQuery expectedQuery) throws EmptyQueryException {
+        System.out.println("\nBefore optimization: \n" +  query);
+        System.out.println("\nExpected query: \n" +  expectedQuery);
+
+        IntermediateQuery newQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+
+        System.out.println("\n After optimization: \n" +  newQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(newQuery, expectedQuery));
+
     }
 
 
