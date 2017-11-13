@@ -1,0 +1,12 @@
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+	<title><fmt:message key="application.name" /> - <fmt:message key="${view.parent.i18n}" /></title>
+	
+	<meta name="DC.title" content="<fmt:message key="${view.parent.i18n}" /> <fmt:message key="${view.i18n}" />" />
+
+<%@ include file="/WEB-INF/includes/stylesheets.html.jspf" %>
+
+	<link rel="shortcut icon" href="${path}/favicon.ico" type="image/ico" />
+	<link rel="icon" href="${path}/favicon.png" type="image/png" />
+</head>

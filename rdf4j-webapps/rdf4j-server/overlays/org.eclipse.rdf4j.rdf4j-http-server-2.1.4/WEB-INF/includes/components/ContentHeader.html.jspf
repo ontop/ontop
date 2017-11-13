@@ -1,0 +1,4 @@
+<div id="contentheader">
+	<p>&nbsp;</p>
+<%@ include file="/WEB-INF/includes/components/tabs.html.jspf" %>
+</div>

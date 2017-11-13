@@ -1,0 +1,11 @@
+<p>
+		<br/>
+		<c:if test="${offset > 0}">
+		<a href="?count=${count}&offset=${offset-count}">&lt;&lt;&nbsp;<fmt:message key="system.logging.overview.pagination.prev"/>&nbsp;${count}</a>
+		&nbsp;&nbsp;&nbsp;&nbsp;
+		</c:if>
+		<c:if test="${logreader.moreAvailable}">
+		<a href="?count=${count}&offset=${offset+count}"><fmt:message key="system.logging.overview.pagination.next"/>&nbsp;${count}&nbsp&gt;&gt;</a>
+		</c:if>
+		<br/>
+</p>

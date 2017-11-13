@@ -1,0 +1,84 @@
+<div id="navigation">
+	<ul class="maingroup">
+<c:forEach var="maingroup" items="${sessionScope['navigation-model'].groups}">
+	<c:if test="${!maingroup.hidden}">
+		<c:choose>
+			<c:when test="${nav:isParent(maingroup, view)}">
+		<li class="current">
+			</c:when>
+			<c:when test="${!maingroup.enabled}">
+		<li class="disabled">
+			</c:when>
+			<c:otherwise>
+		<li>
+			</c:otherwise>
+		</c:choose>
+		<c:choose>
+			<c:when test="${!maingroup.enabled}">
+			<fmt:message key="${maingroup.i18n}" />
+			</c:when>
+			<c:otherwise>
+			<a href="${path}${maingroup.views[0].path}"><fmt:message key="${maingroup.i18n}" /></a>
+			</c:otherwise>
+		</c:choose>
+		<c:if test="${nav:isParent(maingroup, view) && fn:length(maingroup.groups) > 0}">
+			<ul class="group">
+			<c:forEach var="group" items="${maingroup.groups}">
+				<c:if test="${!group.hidden}">
+					<c:choose>
+						<c:when test="${nav:isParent(group, view)}">
+				<li class="current">
+						</c:when>
+						<c:when test="${!maingroup.enabled || !group.enabled}">
+				<li class="disabled">
+						</c:when>
+						<c:otherwise>
+				<li>
+						</c:otherwise>
+					</c:choose>
+					<c:choose>
+						<c:when test="${view == group.views[0] || !maingroup.enabled || !group.enabled}">
+					<fmt:message key="${group.i18n}" />
+						</c:when>
+						<c:otherwise>
+					<a href="${path}${group.views[0].path}"><fmt:message key="${group.i18n}" /></a>
+						</c:otherwise>
+					</c:choose>
+					<c:if test="${nav:isParent(group, view) && fn:length(group.groups) > 0}">
+					<ul class="subgroup">
+						<c:forEach var="subgroup" items="${group.groups}">
+							<c:if test="${!subgroup.hidden}">
+								<c:choose>
+									<c:when test="${nav:isParent(subgroup, view)}">
+						<li class="current">
+									</c:when>
+									<c:when test="${!maingroup.enabled || !group.enabled || !subgroup.enabled}">
+						<li class="disabled">
+									</c:when>
+									<c:otherwise>
+						<li>
+									</c:otherwise>
+								</c:choose>
+								<c:choose>
+									<c:when test="${view == subgroup.views[0] || !maingroup.enabled || !group.enabled || !subgroup.enabled}">
+							<fmt:message key="${subgroup.i18n}" />
+									</c:when>
+									<c:otherwise>
+							<a href="${path}${subgroup.views[0].path}"><fmt:message key="${subgroup.i18n}" /></a>
+									</c:otherwise>
+								</c:choose>
+						</li>
+							</c:if>
+						</c:forEach>
+					</ul>
+					</c:if>
+				</li>
+				</c:if>
+			</c:forEach>
+			</ul>
+		</c:if>
+		</li>
+	</c:if>
+</c:forEach>
+	</ul>
+</div>
