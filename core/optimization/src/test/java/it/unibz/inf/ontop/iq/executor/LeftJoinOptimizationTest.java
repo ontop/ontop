@@ -648,6 +648,80 @@ public class LeftJoinOptimizationTest {
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
+    @Ignore("TODO: support it")
+    @Test
+    public void testSelfLeftJoinWithJoinOnLeft1() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O1));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N1, O));
+        ExtensionalDataNode dataNode3 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, M1, N2, O2));
+
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        queryBuilder.addChild(leftJoinNode, joinNode, LEFT);
+        queryBuilder.addChild(joinNode, dataNode1);
+        queryBuilder.addChild(joinNode, dataNode3);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
+        expectedQueryBuilder.init(projectionAtom1, constructionNode1);
+
+        expectedQueryBuilder.addChild(constructionNode1, joinNode);
+        ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
+        expectedQueryBuilder.addChild(joinNode, dataNode5);
+        expectedQueryBuilder.addChild(joinNode, dataNode3);
+
+        optimizeAndCheck(query, expectedQueryBuilder.build());
+    }
+
+    @Ignore("TODO: support it")
+    @Test
+    public void testSelfLeftJoinWithJoinOnLeft2() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O1));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N1, O));
+        ExtensionalDataNode dataNode3 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, M1, N1, O2));
+
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        queryBuilder.addChild(leftJoinNode, joinNode, LEFT);
+        queryBuilder.addChild(joinNode, dataNode1);
+        queryBuilder.addChild(joinNode, dataNode3);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(O,
+                        DATA_FACTORY.getImmutableExpression(IF_ELSE_NULL,
+                            DATA_FACTORY.getImmutableExpression(EQ, N, N1),
+                            OF0)));
+        expectedQueryBuilder.init(projectionAtom1, constructionNode1);
+
+        expectedQueryBuilder.addChild(constructionNode1, joinNode);
+        ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, OF0));
+        expectedQueryBuilder.addChild(joinNode, dataNode5);
+        expectedQueryBuilder.addChild(joinNode, dataNode3);
+
+        optimizeAndCheck(query, expectedQueryBuilder.build());
+    }
+
     private void optimizeAndCheck(IntermediateQuery query, IntermediateQuery expectedQuery) throws EmptyQueryException {
         System.out.println("\nBefore optimization: \n" +  query);
         System.out.println("\nExpected query: \n" +  expectedQuery);

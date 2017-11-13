@@ -209,8 +209,33 @@ public class LeftJoinProfTest {
 
         System.out.println("SQL Query: \n" + sql);
 
-        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"professors\""));
-        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"PROFESSORS\""));
+        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql.toLowerCase(), "\"professors\""));
+    }
+
+    @Ignore("TODO: optimize join on the left")
+    @Test
+    public void testNicknameAndCourse() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?v ?f\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor ;\n" +
+                "      :firstName ?f ;\n" +
+                "      :teaches ?c .\n" +
+                "   OPTIONAL {\n" +
+                "     ?p :nickname ?v\n" +
+                "  }\n" +
+                "}";
+
+        List<String> expectedValues = ImmutableList.of(
+                "Rog", "Rog", "Johnny"
+        );
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+
+        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql.toLowerCase(), "\"professors\""));
     }
 
     @Test
