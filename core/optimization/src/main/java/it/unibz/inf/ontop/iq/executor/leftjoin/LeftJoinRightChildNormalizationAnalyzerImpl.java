@@ -119,7 +119,9 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
                                  ImmutableList<? extends VariableOrGroundTerm> rightArguments) {
         return foreignKey.getComponents().stream()
                 .allMatch(c -> leftArguments.get(c.getAttribute().getIndex() - 1)
-                        .equals(rightArguments.get(c.getReference().getIndex() - 1)));
+                        .equals(rightArguments.get(c.getReference().getIndex() - 1))
+                        // Excludes nullable attributes for the moment. TODO: reconsider it
+                        &&  (!c.getAttribute().canNull()));
     }
 
     private ImmutableSet<Integer> extractNonMatchedRightAttributeIndexes(ImmutableList<UniqueConstraint> matchedUCs,
