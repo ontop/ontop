@@ -41,6 +41,7 @@ public class LeftJoinOptimizationTest {
     private final static AtomPredicate TABLE2_PREDICATE;
     private final static AtomPredicate TABLE2a_PREDICATE;
     private final static AtomPredicate TABLE3_PREDICATE;
+    private final static AtomPredicate TABLE4_PREDICATE;
     private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
     private final static AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 4);
@@ -131,6 +132,17 @@ public class LeftJoinOptimizationTest {
         fkBuilder.add(table2aCol3, table1aCol2);
         table2aDef.addForeignKeyConstraint(fkBuilder.build("composite-fk"));
         TABLE2a_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table2aDef);
+
+        /*
+         * Table 4: non-composite unique constraint and nullable fk
+         */
+        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE4"));
+        Attribute table4Col1 = table4Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        table4Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        Attribute table4Col3 = table4Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, true);
+        table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table4Col1));
+        table4Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk4-1", table4Col3, table1Col1));
+        TABLE4_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table4Def);
 
         dbMetadata.freeze();
         DB_METADATA = dbMetadata;
@@ -548,6 +560,25 @@ public class LeftJoinOptimizationTest {
         expectedQueryBuilder.addChild(joinNode, dataNode2);
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
+    }
+
+    @Test
+    public void testLeftJoinNonElimination1() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, M, N1, O));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, O, N, M1));
+
+        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+        optimizeAndCheck(query, query.createSnapshot());
     }
 
     @Test
