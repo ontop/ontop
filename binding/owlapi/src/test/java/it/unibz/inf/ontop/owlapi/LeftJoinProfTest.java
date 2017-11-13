@@ -186,7 +186,7 @@ public class LeftJoinProfTest {
 
         System.out.println("SQL Query: \n" + sql);
 
-        assertTrue(containsMoreThanOneOccurrence(sql, "\"PROFESSORS\""));
+        assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
     @Test
