@@ -4,10 +4,11 @@ import it.unibz.inf.ontop.datalog.TargetAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 
 public class TargetAtomImpl implements TargetAtom {
-    private final DistinctVariableOnlyDataAtom atom;
-    private final ImmutableSubstitution<ImmutableTerm> substitution;
+    protected final DistinctVariableOnlyDataAtom atom;
+    protected final ImmutableSubstitution<ImmutableTerm> substitution;
 
     public TargetAtomImpl(DistinctVariableOnlyDataAtom atom, ImmutableSubstitution<ImmutableTerm> substitution) {
         this.atom = atom;
@@ -23,4 +24,11 @@ public class TargetAtomImpl implements TargetAtom {
     public ImmutableSubstitution<ImmutableTerm> getSubstitution() {
         return substitution;
     }
+
+    @Override
+    public TargetAtom rename(InjectiveVar2VarSubstitution renamingSubstitution) {
+        return new TargetAtomImpl(renamingSubstitution.applyToDistinctVariableOnlyDataAtom(atom),
+                renamingSubstitution.applyRenaming(substitution));
+    }
+
 }

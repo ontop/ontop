@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+	<!-- RESOURCES -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>org.eclipse.rdf4j.http.server.messages</value>
+				<value>org.eclipse.rdf4j.common.webapp.system.messages</value>
+				<value>org.eclipse.rdf4j.common.webapp.messages</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="commonAppConfig" class="org.eclipse.rdf4j.common.app.AppConfiguration"
+		init-method="init" destroy-method="destroy">
+		<property name="applicationId" value="Server" />
+		<property name="longName" value="RDF4J Server" />
+		<!--  'version' property no longer declared here, but read at runtime from META-INF maven properties -->
+	</bean>
+
+	<bean id="commonWebappNavigation" class="org.eclipse.rdf4j.common.webapp.navigation.NavigationModel">
+		<property name="navigationModels">
+			<list>
+				<value>/org/eclipse/rdf4j/http/server/navigation.xml</value>
+				<value>/org/eclipse/rdf4j/common/webapp/system/navigation.xml</value>
+				<value>/org/eclipse/rdf4j/common/webapp/navigation.xml</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="rdf4jRepositoryManager" class="org.eclipse.rdf4j.repository.manager.LocalRepositoryManager"
+		init-method="initialize" destroy-method="shutDown" scope="singleton">
+		<constructor-arg>
+			<bean factory-bean="commonAppConfig" factory-method="getDataDir" />
+		</constructor-arg>
+	</bean>
+
+	<!-- INTERCEPTORS -->
+	<bean id="rdf4jRepositoryInterceptor"
+		class="org.eclipse.rdf4j.http.server.repository.RepositoryInterceptor"
+		scope="request">
+		<property name="repositoryManager" ref="rdf4jRepositoryManager" />
+		<aop:scoped-proxy />
+	</bean>
+
+	<!-- MAPPINGS -->
+	<bean id="rdf4jProtocolUrlMapping"
+		class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="order" value="0" />
+		<property name="alwaysUseFullPath" value="true" />
+		<property name="mappings">
+			<props>
+				<prop key="/protocol">rdf4jProtocolController</prop>
+			</props>
+		</property>
+		<property name="interceptors">
+			<list>
+				<bean class="org.eclipse.rdf4j.http.server.protocol.ProtocolInterceptor" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="rdf4jRepositoryListUrlMapping"
+		class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="order" value="1" />
+		<property name="alwaysUseFullPath" value="true" />
+		<property name="mappings">
+			<props>
+				<prop key="/repositories">rdf4jRepositoryListController</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="rdf4jRepositoryUrlMapping"
+		class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="order" value="2" />
+		<property name="alwaysUseFullPath" value="true" />
+		<property name="mappings">
+			<props>
+				<prop key="/repositories/*/namespaces/*">rdf4jRepositoryNamespaceController</prop>
+				<prop key="/repositories/*/namespaces">rdf4jRepositoryNamespacesController</prop>
+				<prop key="/repositories/*/contexts">rdf4jRepositoryContextsController</prop>
+				<prop key="/repositories/*/statements">rdf4jRepositoryStatementsController</prop>
+				<prop key="/repositories/*/rdf-graphs">rdf4jRepositoryContextsController</prop>
+				<prop key="/repositories/*/rdf-graphs/*">rdf4jRepositoryGraphController</prop>
+				<prop key="/repositories/*/size">rdf4jRepositorySizeController</prop>
+				<prop key="/repositories/*/transactions">rdf4jRepositoryTransactionStartController</prop>
+				<prop key="/repositories/*/transactions/*">rdf4jRepositoryTransactionController</prop>
+				<prop key="/repositories/*">rdf4jRepositoryController</prop>
+			</props>
+		</property>
+		<property name="interceptors">
+			<list>
+				<ref bean="rdf4jRepositoryInterceptor" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="rdf4jServerHomeUrlMapping"
+		class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="order" value="3" />
+		<property name="alwaysUseFullPath" value="true" />
+		<property name="mappings">
+			<props>
+				<prop key="/overview.view">filenameViewController</prop>
+				<prop key="/home/overview.view">filenameViewController</prop>
+			</props>
+		</property>
+		<property name="interceptors">
+			<list>
+				<ref bean="commonWebappCommonValuesInserter" />
+				<ref bean="commonWebappNavigationInserter" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- EXCEPTION RESOLVERS -->
+	<bean id="rdf4jHandlerExceptionResolver" class="org.eclipse.rdf4j.http.server.ProtocolExceptionResolver" />
+
+	<!-- CONTROLLERS -->
+	<bean id="rdf4jProtocolController" class="org.eclipse.rdf4j.http.server.protocol.ProtocolController" />
+
+	<bean id="rdf4jRepositoryListController"
+		class="org.eclipse.rdf4j.http.server.repository.RepositoryListController">
+		<property name="repositoryManager" ref="rdf4jRepositoryManager" />
+	</bean>
+	<bean id="rdf4jRepositoryController" class="org.eclipse.rdf4j.http.server.repository.RepositoryController">
+		<property name="repositoryManager" ref="rdf4jRepositoryManager" />
+	</bean>
+	<bean id="rdf4jRepositoryContextsController"
+		class="org.eclipse.rdf4j.http.server.repository.contexts.ContextsController" />
+	<bean id="rdf4jRepositoryNamespacesController"
+		class="org.eclipse.rdf4j.http.server.repository.namespaces.NamespacesController" />
+	<bean id="rdf4jRepositoryNamespaceController"
+		class="org.eclipse.rdf4j.http.server.repository.namespaces.NamespaceController" />
+	<bean id="rdf4jRepositorySizeController" class="org.eclipse.rdf4j.http.server.repository.size.SizeController" />
+	<bean id="rdf4jRepositoryStatementsController"
+		class="org.eclipse.rdf4j.http.server.repository.statements.StatementsController" />
+	<bean id="rdf4jRepositoryGraphController"
+		class="org.eclipse.rdf4j.http.server.repository.graph.GraphController" />
+	<bean id="rdf4jRepositoryTransactionController"
+		class="org.eclipse.rdf4j.http.server.repository.transaction.TransactionController" />
+	<bean id="rdf4jRepositoryTransactionStartController"
+		class="org.eclipse.rdf4j.http.server.repository.transaction.TransactionStartController" />
+</beans>

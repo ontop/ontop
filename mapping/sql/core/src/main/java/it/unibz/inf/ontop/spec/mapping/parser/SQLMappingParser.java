@@ -9,7 +9,7 @@ import org.apache.commons.rdf.api.Graph;
 import java.io.File;
 import java.io.Reader;
 
-public interface SQLMappingParser {
+public interface SQLMappingParser extends MappingParser {
 
     SQLPPMapping parse(File file) throws InvalidMappingException, DuplicateMappingException, MappingIOException;
 
