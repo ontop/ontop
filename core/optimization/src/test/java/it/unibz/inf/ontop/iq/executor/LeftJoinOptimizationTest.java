@@ -42,6 +42,7 @@ public class LeftJoinOptimizationTest {
     private final static AtomPredicate TABLE2a_PREDICATE;
     private final static AtomPredicate TABLE3_PREDICATE;
     private final static AtomPredicate TABLE4_PREDICATE;
+    private final static AtomPredicate TABLE5_PREDICATE;
     private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
     private final static AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 4);
@@ -143,6 +144,18 @@ public class LeftJoinOptimizationTest {
         table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table4Col1));
         table4Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk4-1", table4Col3, table1Col1));
         TABLE4_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table4Def);
+
+        /*
+         * Table 5: nullable unique constraint
+         */
+        DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE5"));
+        Attribute table5Col1 = table5Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
+        table5Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table5Def.addUniqueConstraint(
+                UniqueConstraint.builder(table5Def)
+                    .add(table5Col1)
+                    .build("uc5", false));
+        TABLE5_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table5Def);
 
         dbMetadata.freeze();
         DB_METADATA = dbMetadata;
@@ -751,6 +764,26 @@ public class LeftJoinOptimizationTest {
         expectedQueryBuilder.addChild(joinNode, dataNode3);
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
+    }
+
+    @Test
+    public void testSelfJoinNullableUniqueConstraint() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, M, N);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE5_PREDICATE, M, N1));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE5_PREDICATE, M, N));
+
+        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+
+        optimizeAndCheck(query, query.createSnapshot());
     }
 
     private void optimizeAndCheck(IntermediateQuery query, IntermediateQuery expectedQuery) throws EmptyQueryException {
