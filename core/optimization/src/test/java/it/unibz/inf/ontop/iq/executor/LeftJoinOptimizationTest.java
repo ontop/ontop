@@ -692,7 +692,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
-    @Ignore("TODO: support it")
     @Test
     public void testSelfLeftJoinWithJoinOnLeft1() throws EmptyQueryException {
 
@@ -727,7 +726,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
-    @Ignore("TODO: support it")
     @Test
     public void testSelfLeftJoinWithJoinOnLeft2() throws EmptyQueryException {
 
@@ -755,12 +753,11 @@ public class LeftJoinOptimizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(O,
                         DATA_FACTORY.getImmutableExpression(IF_ELSE_NULL,
                             DATA_FACTORY.getImmutableExpression(EQ, N, N1),
-                            OF0)));
+                            O1)));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
         expectedQueryBuilder.addChild(constructionNode1, joinNode);
-        ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, OF0));
-        expectedQueryBuilder.addChild(joinNode, dataNode5);
+        expectedQueryBuilder.addChild(joinNode, dataNode1);
         expectedQueryBuilder.addChild(joinNode, dataNode3);
 
         optimizeAndCheck(query, expectedQueryBuilder.build());

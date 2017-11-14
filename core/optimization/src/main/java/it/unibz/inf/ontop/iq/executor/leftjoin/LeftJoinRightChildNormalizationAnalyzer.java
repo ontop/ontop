@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.executor.leftjoin;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -14,12 +15,12 @@ import java.util.Optional;
  */
 public interface LeftJoinRightChildNormalizationAnalyzer {
 
-    LeftJoinRightChildNormalizationAnalysis analyze(DataNode leftDataNode, DataNode rightDataNode, DBMetadata dbMetadata,
-                                                    VariableGenerator variableGenerator);
+    LeftJoinRightChildNormalizationAnalysis analyze(ImmutableList<DataNode> leftDataNodes, DataNode rightDataNode,
+                                                    DBMetadata dbMetadata, VariableGenerator variableGenerator);
 
     interface LeftJoinRightChildNormalizationAnalysis {
         /**
-         * Returns true if its matches a unique constraint or a foreign key
+         * Returns true if its matches a non-nullable unique constraint or a foreign key
          */
         boolean isMatchingAConstraint();
         /**

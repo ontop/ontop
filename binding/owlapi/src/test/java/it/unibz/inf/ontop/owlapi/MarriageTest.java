@@ -45,7 +45,7 @@ import static org.junit.Assert.assertTrue;
 
 public class MarriageTest {
 
-	private Connection conn;;
+	private Connection conn;
 
 	private static final String ONTOLOGY_FILE = "src/test/resources/marriage/marriage.ttl";
 	private static final String OBDA_FILE = "src/test/resources/marriage/marriage.obda";

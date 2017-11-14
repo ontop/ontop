@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.executor.leftjoin;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
@@ -74,39 +75,56 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                 .orElseThrow(() -> new InvalidIntermediateQueryException("A LJ must have a right child"));
 
         /*
-         * No normalization (a DataNode is expected on the left)
-         *
-         * TODO: also support join (if it works with one "left child", that's fine)
+         * Only when the left can be reduced to set of joined data nodes
          */
-        if (!(leftChild instanceof DataNode))
-            return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
+        Optional<ImmutableList<DataNode>> optionalLeftDataNodes = extractLeftDataNodes(query, leftChild);
+        if (optionalLeftDataNodes.isPresent()) {
+            ImmutableList<DataNode> leftDataNodes = optionalLeftDataNodes.get();
 
-        DataNode leftDataNode = (DataNode) leftChild;
-
-        if (rightChild instanceof DataNode) {
-            return optimizeRightDataNode(leftJoinNode, query, treeComponent, leftDataNode, (DataNode) rightChild);
-        } else if (rightChild instanceof UnionNode) {
-            return optimizeRightUnion(leftJoinNode, query, treeComponent, leftDataNode, (UnionNode) rightChild);
+            if (rightChild instanceof DataNode) {
+                return optimizeRightDataNode(leftJoinNode, query, treeComponent, leftChild, leftDataNodes, (DataNode) rightChild);
+            } else if (rightChild instanceof UnionNode) {
+                return optimizeRightUnion(leftJoinNode, query, treeComponent, leftChild, leftDataNodes, (UnionNode) rightChild);
+            }
         }
         /*
          * No normalization
          *
          * TODO: support more cases (like joins on the right)
          */
-        else {
-            return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
+        return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
+    }
+
+    private Optional<ImmutableList<DataNode>> extractLeftDataNodes(IntermediateQuery query, QueryNode leftNode) {
+        if (leftNode instanceof DataNode)
+            return Optional.of(ImmutableList.of((DataNode)leftNode));
+
+        else if (leftNode instanceof InnerJoinNode) {
+            ImmutableList<QueryNode> children = query.getChildren(leftNode);
+
+            /*
+             * ONLY if all the children of the join are data nodes
+             */
+            if (children.stream().allMatch(c -> c instanceof DataNode))
+                return Optional.of(children.stream()
+                        .map(c -> (DataNode) c)
+                        .collect(ImmutableCollectors.toList()));
         }
+
+        return Optional.empty();
     }
 
 
     private  NodeCentricOptimizationResults<LeftJoinNode> optimizeRightDataNode(LeftJoinNode leftJoinNode,
                                                                                 IntermediateQuery query,
                                                                                 QueryTreeComponent treeComponent,
-                                                                                DataNode leftChild, DataNode rightChild) {
+                                                                                QueryNode leftChild,
+                                                                                ImmutableList<DataNode> leftChildren,
+                                                                                DataNode rightChild) {
 
         VariableGenerator variableGenerator = new VariableGenerator(query.getKnownVariables());
 
-        LeftJoinRightChildNormalizationAnalysis analysis = normalizer.analyze(leftChild, rightChild,
+        LeftJoinRightChildNormalizationAnalysis analysis = normalizer.analyze(leftChildren, rightChild,
                 query.getDBMetadata(), variableGenerator);
 
         if (!analysis.isMatchingAConstraint())
@@ -156,7 +174,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         return newLeftJoinNode;
     }
 
-    private LeftJoinNode liftCondition(LeftJoinNode leftJoinNode, DataNode leftChild, DataNode rightChild,
+    private LeftJoinNode liftCondition(LeftJoinNode leftJoinNode, QueryNode leftChild, DataNode rightChild,
                                        IntermediateQuery query, QueryTreeComponent treeComponent,
                                        VariableGenerator variableGenerator) {
         ImmutableExpression ljCondition = leftJoinNode.getOptionalFilterCondition()
@@ -229,7 +247,9 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
     private  NodeCentricOptimizationResults<LeftJoinNode> optimizeRightUnion(LeftJoinNode leftJoinNode,
                                                                              IntermediateQuery query,
                                                                              QueryTreeComponent treeComponent,
-                                                                             DataNode leftDataNode, UnionNode rightChild) {
+                                                                             QueryNode leftChild,
+                                                                             ImmutableList<DataNode> leftDataNodes,
+                                                                             UnionNode rightChild) {
         // NOT YET IMPLEMENTED --> no optimization YET
         return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
     }
