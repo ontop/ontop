@@ -214,6 +214,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
                 return properties(p);
 
             } catch (IOException e) {
+//                System.out.println(e);
                 throw new InvalidOntopConfigurationException("Cannot reach the property file: " + propertyFile);
             }
         }

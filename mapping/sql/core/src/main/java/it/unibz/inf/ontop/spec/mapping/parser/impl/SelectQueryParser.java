@@ -4,7 +4,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -87,8 +86,8 @@ public class SelectQueryParser {
         if (plainSelect.getGroupByColumnReferences() != null || plainSelect.getHaving() != null)
             throw new UnsupportedSelectQueryRuntimeException("GROUP BY / HAVING are not supported", selectBody);
 
-        if (plainSelect.getLimit() != null || plainSelect.getTop() != null)
-            throw new UnsupportedSelectQueryRuntimeException("LIMIT / TOP are not supported", selectBody);
+        if (plainSelect.getLimit() != null || plainSelect.getTop() != null || plainSelect.getOffset()!= null)
+            throw new UnsupportedSelectQueryRuntimeException("LIMIT / OFFSET / TOP are not supported", selectBody);
 
         if (plainSelect.getOrderByElements() != null)
             throw new UnsupportedSelectQueryRuntimeException("ORDER BY is not supported", selectBody);

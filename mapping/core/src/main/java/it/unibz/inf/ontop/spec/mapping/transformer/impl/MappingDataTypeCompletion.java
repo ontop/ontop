@@ -213,6 +213,8 @@ public class MappingDataTypeCompletion {
         RelationID tableId = relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom
                 .getFunctionSymbol());
         RelationDefinition td = metadata.getRelation(tableId);
+        
+        
         Attribute attribute = td.getAttribute(ip.pos);
         Optional<RDFDatatype>  type;
         //we want to assign the default value or throw an exception when the type of the attribute is missing (case of view)
@@ -239,7 +241,7 @@ public class MappingDataTypeCompletion {
 
     }
 
-    private static class IndexedPosition {
+	private static class IndexedPosition {
         final Function atom;
         final int pos;
 
@@ -262,7 +264,7 @@ public class MappingDataTypeCompletion {
                         aux = new LinkedList<>();
                     aux.add(new IndexedPosition(a, i));
                     termOccurenceIndex.put(var.getName(), aux);
-                    i++; // increase the position index for the next variable
+                    
                 } else if (t instanceof FunctionalTermImpl) {
                     // NO-OP
                 } else if (t instanceof ValueConstant) {
@@ -270,6 +272,11 @@ public class MappingDataTypeCompletion {
                 } else if (t instanceof URIConstant) {
                     // NO-OP
                 }
+                // fabad (4 Oct 2017) Quick fix if there are constants in arguments.
+                // Increase i in all cases. If there are terms that are not variables
+                // and i is not incremented then indexedPosition.pos contains a wrong
+                // index that may points to terms that are not variables.
+                i++; // increase the position index for the next variable
             }
         }
         return termOccurenceIndex;

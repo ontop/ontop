@@ -70,7 +70,9 @@ public class MappingNormalizerImpl implements MappingNormalizer {
                                                                  IntermediateQuery query, int suffix) {
         Map<Variable, Variable> substitutionMap =
                 query.getKnownVariables().stream()
-                        .collect(Collectors.toMap(v -> v, v -> termFactory.getVariable(v.getName()+"m"+suffix)));
+                        .collect(Collectors.toMap(
+                                v -> v,
+                                v -> termFactory.getVariable(v.getName()+"m"+suffix)));
         QueryRenamer queryRenamer = transformerFactory.createRenamer(substitutionFactory.getInjectiveVar2VarSubstitution(substitutionMap));
         return queryRenamer.transform(query);
     }

@@ -67,10 +67,10 @@ public class R2rmlCheckerTest {
 	private OWLOntology owlOntology;
 	private Ontology onto;
 
-	final String owlFile = "/mysql/example/npd-v2-ql_a.owl";
-	final String obdaFile = "/mysql/example/npd-v2-ql_a.obda";
-	final String propertyFile = "/mysql/example/npd-v2-ql_a.properties";
-	final String r2rmlFile = "/mysql/example/npd-v2-ql_a.ttl";
+	final String owlFile = "/mysql/npd/npd-v2-ql_a.owl";
+	final String obdaFile = "/mysql/npd/npd-v2-ql_a.obda";
+	final String propertyFile = "/mysql/npd/npd-v2-ql_a.properties";
+	final String r2rmlFile = "/mysql/npd/npd-v2-ql_a.ttl";
 
 	final InputStream owlFileName =  this.getClass().getResourceAsStream(owlFile);
 	final String obdaFileName =  this.getClass().getResource(obdaFile).toString();

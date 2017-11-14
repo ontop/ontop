@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.protege.views;
 
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -181,6 +182,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public void run(String query){
 				removeResultTable();
 				super.run(query);
+
+
+
+
 			}
 			@Override
 			public int getNumberOfRows() {
@@ -197,7 +202,16 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public TupleOWLResultSet executeQuery(OntopOWLStatement st,
 												  String queryString) throws OWLException {
-				return st.executeSelectQuery(queryString);
+				if(queryEditorPanel.isFetchAllSelect()) {
+					return st.executeSelectQuery(queryString);
+				}
+				else {
+
+					DefaultOntopOWLStatement defaultOntopOWLStatement = (DefaultOntopOWLStatement) st;
+					defaultOntopOWLStatement.setMaxRows(queryEditorPanel.getFetchSize());
+					return defaultOntopOWLStatement.executeSelectQuery(queryString);
+				}
+
 			}
 
 		});
@@ -230,7 +244,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public BooleanOWLResultSet executeQuery(OntopOWLStatement st,
 												  String queryString) throws OWLException {
 				removeResultTable();
-				return st.executeAskQuery(queryString);
+
+				if(queryEditorPanel.isFetchAllSelect())
+					return st.executeAskQuery(queryString);
+
+				DefaultOntopOWLStatement defaultOntopOWLStatement = (DefaultOntopOWLStatement) st;
+				defaultOntopOWLStatement.setMaxRows(queryEditorPanel.getFetchSize());
+				return defaultOntopOWLStatement.executeAskQuery(queryString);
 			}
 
 		});
@@ -247,7 +267,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public GraphOWLResultSet executeQuery(OntopOWLStatement st, String queryString) throws OWLException {
 				removeResultTable();
-				return st.executeGraphQuery(queryString);
+				if(queryEditorPanel.isFetchAllSelect())
+					return st.executeGraphQuery(queryString);
+
+				DefaultOntopOWLStatement defaultOntopOWLStatement = (DefaultOntopOWLStatement) st;
+				defaultOntopOWLStatement.setMaxRows(queryEditorPanel.getFetchSize());
+				return defaultOntopOWLStatement.executeGraphQuery(queryString);
 			}
 
 			@Override
