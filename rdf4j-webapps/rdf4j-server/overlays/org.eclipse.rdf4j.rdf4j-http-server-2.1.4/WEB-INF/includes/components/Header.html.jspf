@@ -1,6 +1,0 @@
-<div id="header">
-	<div id="logo">
-		<img src="${path}/images/logo.png" alt="rdf4j" /> <img
-			class="product" src="${path}/images/product.png" alt="server" />
-	</div>
-</div>
