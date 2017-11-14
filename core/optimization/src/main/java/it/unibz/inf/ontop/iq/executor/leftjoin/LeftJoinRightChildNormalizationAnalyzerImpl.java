@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.executor.leftjoin;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
@@ -18,6 +17,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -37,33 +38,41 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
     }
 
     @Override
-    public LeftJoinRightChildNormalizationAnalysis analyze(DataNode leftDataNode, DataNode rightDataNode, DBMetadata dbMetadata,
+    public LeftJoinRightChildNormalizationAnalysis analyze(ImmutableList<DataNode> leftDataNodes, DataNode rightDataNode,
+                                                           DBMetadata dbMetadata,
                                                            VariableGenerator variableGenerator) {
-        DataAtom leftProjectionAtom = leftDataNode.getProjectionAtom();
-        DataAtom rightProjectionAtom = rightDataNode.getProjectionAtom();
+        ImmutableSet<Variable> leftVariables = leftDataNodes.stream()
+                .flatMap(n -> n.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<? extends VariableOrGroundTerm> leftArguments = leftProjectionAtom.getArguments();
+        ImmutableMultimap<DatabaseRelationDefinition, ImmutableList<? extends VariableOrGroundTerm>>
+                leftRelationArgumentMultimap = leftDataNodes.stream()
+                .map(DataNode::getProjectionAtom)
+                .flatMap(a -> dbMetadata.getDatabaseRelationByPredicate(a.getPredicate())
+                        .map(r -> Stream.of(new SimpleEntry<DatabaseRelationDefinition,
+                                ImmutableList<? extends VariableOrGroundTerm>>(r, a.getArguments())))
+                        .orElseGet(Stream::empty))
+                .collect(ImmutableCollectors.toMultimap());
+
+        DataAtom rightProjectionAtom = rightDataNode.getProjectionAtom();
         ImmutableList<? extends VariableOrGroundTerm> rightArguments = rightProjectionAtom.getArguments();
 
-        Optional<DatabaseRelationDefinition> optionalLeftRelation = dbMetadata.getDatabaseRelationByPredicate(
-                leftProjectionAtom.getPredicate());
         Optional<DatabaseRelationDefinition> optionalRightRelation = dbMetadata.getDatabaseRelationByPredicate(
                 rightProjectionAtom.getPredicate());
 
-        if (!(optionalLeftRelation.isPresent() && optionalRightRelation.isPresent())) {
+        if (leftRelationArgumentMultimap.isEmpty() || (!optionalRightRelation.isPresent())) {
             // TODO: print a warning
             return new LeftJoinRightChildNormalizationAnalysisImpl(false);
         }
-
-        DatabaseRelationDefinition leftRelation = optionalLeftRelation.get();
         DatabaseRelationDefinition rightRelation = optionalRightRelation.get();
 
-        ImmutableList<UniqueConstraint> matchedUCs = leftRelation.equals(rightRelation)
-                ? extractMatchedUCs(leftRelation, leftArguments, rightArguments)
-                : ImmutableList.of();
-
-        ImmutableList<ForeignKeyConstraint> matchedFKs = extractMatchedFKs(leftRelation, rightRelation, leftArguments,
-                rightArguments);
+        /*
+         * Matched UCs and FKs
+         */
+        ImmutableSet<UniqueConstraint> matchedUCs = extractMatchedUCs(leftRelationArgumentMultimap, rightArguments,
+                rightRelation);
+        ImmutableSet<ForeignKeyConstraint> matchedFKs = extractMatchedFKs(leftRelationArgumentMultimap, rightArguments,
+                rightRelation);
 
         if (matchedUCs.isEmpty() && matchedFKs.isEmpty()) {
             return new LeftJoinRightChildNormalizationAnalysisImpl(false);
@@ -72,7 +81,7 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
         ImmutableSet<Integer> nonMatchedRightAttributeIndexes = extractNonMatchedRightAttributeIndexes(matchedUCs,
                 matchedFKs, rightArguments.size());
         ImmutableList<Integer> conflictingRightArgumentIndexes = nonMatchedRightAttributeIndexes.stream()
-                .filter(i -> isRightArgumentConflicting(i, leftArguments, rightArguments, nonMatchedRightAttributeIndexes))
+                .filter(i -> isRightArgumentConflicting(i, leftVariables, rightArguments, nonMatchedRightAttributeIndexes))
                 .collect(ImmutableCollectors.toList());
 
         if (!conflictingRightArgumentIndexes.isEmpty()) {
@@ -88,12 +97,17 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
         }
     }
 
-    private ImmutableList<UniqueConstraint> extractMatchedUCs(DatabaseRelationDefinition relation,
-                                                              ImmutableList<? extends VariableOrGroundTerm> leftArguments,
-                                                              ImmutableList<? extends VariableOrGroundTerm> rightArguments) {
-        return relation.getUniqueConstraints().stream()
-                .filter(uc -> isUcMatching(uc, leftArguments, rightArguments))
-                .collect(ImmutableCollectors.toList());
+    private ImmutableSet<UniqueConstraint> extractMatchedUCs(
+            ImmutableMultimap<DatabaseRelationDefinition, ImmutableList<? extends VariableOrGroundTerm>> leftRelationArgumentMultimap,
+            ImmutableList<? extends VariableOrGroundTerm> rightArguments,
+            DatabaseRelationDefinition rightRelation) {
+        /*
+         * When the left and right relations are the same
+         */
+        return leftRelationArgumentMultimap.get(rightRelation).stream()
+                .flatMap(leftArguments -> rightRelation.getUniqueConstraints().stream()
+                        .filter(uc -> isUcMatching(uc, leftArguments, rightArguments)))
+                .collect(ImmutableCollectors.toSet());
     }
 
     private boolean isUcMatching(UniqueConstraint uniqueConstraint,
@@ -106,15 +120,28 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
                         && !a.canNull());
     }
 
-    private ImmutableList<ForeignKeyConstraint> extractMatchedFKs(DatabaseRelationDefinition leftRelation,
-                                                                  DatabaseRelationDefinition rightRelation,
-                                                                  ImmutableList<? extends VariableOrGroundTerm> leftArguments,
-                                                                  ImmutableList<? extends VariableOrGroundTerm> rightArguments) {
-        return leftRelation.getForeignKeys().stream()
-                .filter(fk -> fk.getReferencedRelation().equals(rightRelation))
-                .filter(fk -> isFkMatching(fk, leftArguments, rightArguments))
-                .collect(ImmutableCollectors.toList());
+    private ImmutableSet<ForeignKeyConstraint> extractMatchedFKs(
+            ImmutableMultimap<DatabaseRelationDefinition, ImmutableList<? extends VariableOrGroundTerm>> leftRelationArgumentMultimap,
+            ImmutableList<? extends VariableOrGroundTerm> rightArguments,
+            DatabaseRelationDefinition rightRelation) {
+
+        return leftRelationArgumentMultimap.asMap().entrySet().stream()
+                .flatMap(e -> extractMatchedFKsForARelation(e.getKey(), e.getValue(), rightArguments, rightRelation))
+                .collect(ImmutableCollectors.toSet());
     }
+
+    private Stream<ForeignKeyConstraint> extractMatchedFKsForARelation(
+            DatabaseRelationDefinition leftRelation,
+            Collection<ImmutableList<? extends VariableOrGroundTerm>> leftArgumentLists,
+            ImmutableList<? extends VariableOrGroundTerm> rightArguments,
+            DatabaseRelationDefinition rightRelation) {
+
+        return leftRelation.getForeignKeys().stream()
+             .filter(fk -> fk.getReferencedRelation().equals(rightRelation))
+             .filter(fk -> leftArgumentLists.stream()
+                     .anyMatch(leftArguments -> isFkMatching(fk, leftArguments, rightArguments)));
+    }
+
 
     private boolean isFkMatching(ForeignKeyConstraint foreignKey,
                                  ImmutableList<? extends VariableOrGroundTerm> leftArguments,
@@ -126,8 +153,8 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
                         &&  (!c.getAttribute().canNull()));
     }
 
-    private ImmutableSet<Integer> extractNonMatchedRightAttributeIndexes(ImmutableList<UniqueConstraint> matchedUCs,
-                                                                          ImmutableList<ForeignKeyConstraint> matchedFKs,
+    private ImmutableSet<Integer> extractNonMatchedRightAttributeIndexes(ImmutableCollection<UniqueConstraint> matchedUCs,
+                                                                          ImmutableCollection<ForeignKeyConstraint> matchedFKs,
                                                                           int arity) {
         return IntStream.range(0, arity)
                 .filter(i -> (matchedUCs.stream()
@@ -142,7 +169,7 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private boolean isRightArgumentConflicting(int rightArgumentIndex, ImmutableList<? extends VariableOrGroundTerm> leftArguments,
+    private boolean isRightArgumentConflicting(int rightArgumentIndex, ImmutableCollection<Variable> leftVariables,
                                                ImmutableList<? extends VariableOrGroundTerm> rightArguments,
                                                ImmutableSet<Integer> nonMatchedRightAttributeIndexes) {
         VariableOrGroundTerm rightArgument = rightArguments.get(rightArgumentIndex);
@@ -156,7 +183,7 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
         /*
          * Is conflicting if the variable occurs in the left atom or occurs more than once in the right atom.
          */
-        if (leftArguments.contains(rightVariable))
+        if (leftVariables.contains(rightVariable))
             return true;
         return IntStream.range(0, rightArguments.size())
                 // In case of an equality between two nonMatchedRightAttributeIndexes: count it once
