@@ -1186,6 +1186,7 @@ public class BindingLiftTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateInt(TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype())) )));
 
         queryBuilder.addChild(joinNode, otherNode);
+        queryBuilder.addChild(otherNode, IQ_FACTORY.createTrueNode());
 
         //build unoptimized query
         IntermediateQuery unOptimizedQuery = queryBuilder.build();

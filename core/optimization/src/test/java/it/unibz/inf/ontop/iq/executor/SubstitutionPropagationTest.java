@@ -1005,6 +1005,7 @@ public class SubstitutionPropagationTest {
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(ONE, TWO)));
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
+        initialQueryBuilder.addChild(rightConstructionNode, IQ_FACTORY.createTrueNode());
 
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
@@ -1021,6 +1022,7 @@ public class SubstitutionPropagationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(A, ONE, B, TWO));
 
         expectedQueryBuilder.addChild(joinNode, newRightConstructionNode);
+        expectedQueryBuilder.addChild(newRightConstructionNode, IQ_FACTORY.createTrueNode());
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
     }

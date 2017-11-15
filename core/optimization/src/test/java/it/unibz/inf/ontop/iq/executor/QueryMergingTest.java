@@ -1087,6 +1087,7 @@ public class QueryMergingTest {
                         ImmutableMap.of(X, TERM_FACTORY.getConstantLiteral("1", XSD.INTEGER))),
                 Optional.empty());
         mappingBuilder.init(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P3_PREDICATE, X), mappingRootNode);
+        mappingBuilder.addChild(mappingRootNode, IQ_FACTORY.createTrueNode());
         IntermediateQuery mapping = mappingBuilder.build();
         System.out.println("query to be merged:\n" +mapping);
 

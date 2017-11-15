@@ -27,9 +27,6 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
  * and n is its left child,
  * then no action is taken either.
  * <p>
- * If p is a construction,
- * then n is removed.
- * <p>
  * If p is an inner join node,
  * or if p is a left join node and n is not its left child,
  * then n is removed,
@@ -70,9 +67,7 @@ public class TrueNodesRemovalOptimizer extends NodeCentricDepthFirstOptimizer<Tr
                 (parentNode instanceof LeftJoinNode &&
                         query.getOptionalPosition(node)
                                 .orElseThrow(() -> new IllegalStateException("Children of a LJ must have positions"))
-                                == RIGHT) ||
-                (parentNode instanceof ConstructionNode);
-//                        && (query.getRootConstructionNode() != parentNode));
+                                == RIGHT);
     }
 
     /**

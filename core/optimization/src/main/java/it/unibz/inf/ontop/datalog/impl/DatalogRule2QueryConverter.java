@@ -162,6 +162,7 @@ public class DatalogRule2QueryConverter {
                                                 IntermediateQueryFactory modelFactory) {
         IntermediateQueryBuilder queryBuilder = modelFactory.createIQBuilder(dbMetadata, executorRegistry);
         queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.addChild(rootNode, modelFactory.createTrueNode());
         return queryBuilder.build();
     }
 
