@@ -39,7 +39,7 @@ import java.util.*;
 public class ParserViewDefinition extends RelationDefinition {
 
 	private final List<Attribute> attributes = new ArrayList<>();
-	private final Map<QuotedID, Attribute> attributeMap = new HashMap<>();
+	private final Map<QualifiedAttributeID, Attribute> attributeMap = new HashMap<>();
 	
 	private final String statement;
 	
@@ -56,11 +56,11 @@ public class ParserViewDefinition extends RelationDefinition {
 
 	/**
 	 * adds a new attribute
-	 *
+	 * ROMAN: QualifiedAttributeID is to be REPLACED by QuotedID
 	 * @param name
 	 */
-	public void addAttribute(QuotedID name) {
-		Attribute att = new Attribute(this, new QualifiedAttributeID(null, name), attributes.size() + 1, 0, null, true);
+	public void addAttribute(QualifiedAttributeID name) {
+		Attribute att = new Attribute(this, name, attributes.size() + 1, 0, null, true);
 		Attribute prev = attributeMap.put(name, att);
 		if (prev != null) 
 			throw new IllegalArgumentException("Duplicate attribute names");
