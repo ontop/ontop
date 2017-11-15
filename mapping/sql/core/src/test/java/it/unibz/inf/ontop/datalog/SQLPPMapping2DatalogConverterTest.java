@@ -39,10 +39,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
 
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
@@ -103,10 +100,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 				.collect(ImmutableCollectors.toList());
 
 		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), target);
-		ArrayList<SQLPPTriplesMap> mappingList = new ArrayList<SQLPPTriplesMap>();
-		mappingList.add(mappingAxiom);
-
-		List<CQIE> dp = SQLPPMapping2DatalogConverter.constructDatalogProgram(mappingList, md);
+		Set<CQIE> dp = SQLPPMapping2DatalogConverter.convert(ImmutableList.of(mappingAxiom), md).keySet();
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

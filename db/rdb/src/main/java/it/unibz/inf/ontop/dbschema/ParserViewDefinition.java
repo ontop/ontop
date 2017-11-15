@@ -39,7 +39,7 @@ import java.util.*;
 public class ParserViewDefinition extends RelationDefinition {
 
 	private final List<Attribute> attributes = new ArrayList<>();
-	private final Map<QualifiedAttributeID, Attribute> attributeMap = new HashMap<>();
+	private final Map<QuotedID, Attribute> attributeMap = new HashMap<>();
 	
 	private final String statement;
 	
@@ -56,14 +56,11 @@ public class ParserViewDefinition extends RelationDefinition {
 
 	/**
 	 * adds a new attribute
-	 * <p>
-	 * (note that attributes may have fully qualified names because 
-	 * attributes in the sub-query do not necessarily have aliases)
-	 * 
+	 *
 	 * @param name
 	 */
-	public void addAttribute(QualifiedAttributeID name) {
-		Attribute att = new Attribute(this, name, attributes.size() + 1, 0, null, true);
+	public void addAttribute(QuotedID name) {
+		Attribute att = new Attribute(this, new QualifiedAttributeID(null, name), attributes.size() + 1, 0, null, true);
 		Attribute prev = attributeMap.put(name, att);
 		if (prev != null) 
 			throw new IllegalArgumentException("Duplicate attribute names");
@@ -84,8 +81,7 @@ public class ParserViewDefinition extends RelationDefinition {
 	@Override
 	public Attribute getAttribute(int index) {
 		// positions start at 1
-		Attribute attribute = attributes.get(index - 1);
-		return attribute;
+		return attributes.get(index - 1);
 	}
 
 	@Override
