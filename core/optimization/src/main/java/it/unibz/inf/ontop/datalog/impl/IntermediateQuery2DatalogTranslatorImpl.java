@@ -279,13 +279,16 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			//DataAtom projectionAtom = generateProjectionAtom(ImmutableSet.of());
 			//heads.add(new RuleHead(new ImmutableSubstitutionImpl<>(ImmutableMap.of()), projectionAtom,Optional.empty()));
 			//return body;
-			body.add(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-					ATOM_FACTORY.getAtomPredicate(
-							"dummy"+(++dummyPredCounter),
-							0
-					),
-					ImmutableList.of()
-			));
+			if (isNested) {
+				body.add(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+						ATOM_FACTORY.getAtomPredicate(
+								"dummy" + (++dummyPredCounter),
+								0
+						),
+						ImmutableList.of()
+				));
+			}
+			// Otherwise, ignores it
 			return body;
 
 		} else {
