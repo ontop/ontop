@@ -36,7 +36,6 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.MappingSameAsPredicateExtractor;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -99,7 +98,7 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
     }
 
     private ImmutableSet<ImmutableTerm> getIRIs(IntermediateQuery definition) {
-        return getIRIs(definition.getRootConstructionNode(), definition)
+        return getIRIs(definition.getRootNode(), definition)
                 .collect(ImmutableCollectors.toSet());
     }
 

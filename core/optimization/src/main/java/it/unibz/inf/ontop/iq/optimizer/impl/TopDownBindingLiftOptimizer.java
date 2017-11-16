@@ -42,7 +42,7 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
     public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
         // Non-final
         NextNodeAndQuery nextNodeAndQuery = new NextNodeAndQuery(
-                query.getFirstChild(query.getRootConstructionNode()),
+                query.getFirstChild(query.getRootNode()),
                 query);
 
         //explore the tree lifting the bindings when it is possible

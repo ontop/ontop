@@ -30,7 +30,7 @@ public class DefaultTree implements QueryTree {
     private int versionNumber;
 
 
-    protected DefaultTree(ConstructionNode rootQueryNode) {
+    protected DefaultTree(QueryNode rootQueryNode) {
         nodeIndex = new HashMap<>();
         childrenIndex = new HashMap<>();
         parentIndex = new HashMap<>();
@@ -66,8 +66,8 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public ConstructionNode getRootNode() {
-        return (ConstructionNode) rootNode.getQueryNode();
+    public QueryNode getRootNode() {
+        return rootNode.getQueryNode();
     }
 
     @Override

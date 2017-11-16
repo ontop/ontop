@@ -122,7 +122,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
      */
     private ImmutableSubstitution<? extends ImmutableTerm> normalizeInputSubstitution(
             N originalFocusNode, IntermediateQuery query, ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-        if (query.getRootConstructionNode() == originalFocusNode)
+        if (query.getRootNode() == originalFocusNode)
             return substitution;
 
         ExplicitVariableProjectionNode closestProjectionAncestor = query.getAncestors(originalFocusNode).stream()

@@ -63,7 +63,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
     private IntermediateQuery pullOutSomeVariables(IntermediateQuery initialQuery)
             throws EmptyQueryException {
         // Non-final
-        Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode());
+        Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootNode());
 
         // Non-final
         IntermediateQuery currentQuery = initialQuery;

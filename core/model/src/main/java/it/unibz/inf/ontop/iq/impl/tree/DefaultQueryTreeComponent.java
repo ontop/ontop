@@ -53,7 +53,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ConstructionNode getRootConstructionNode() {
+    public QueryNode getRootNode() {
         return tree.getRootNode();
     }
 

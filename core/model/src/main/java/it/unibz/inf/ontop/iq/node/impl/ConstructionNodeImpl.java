@@ -433,7 +433,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
     @Override
     public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
-        if (this.getVariables().isEmpty() && !this.equals(query.getRootConstructionNode())){
+        if (this.getVariables().isEmpty() && !this.equals(query.getRootNode())){
            return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_TRUE, ImmutableSet.of());
         }
        return new NodeTransformationProposalImpl(NodeTransformationProposedState.NO_LOCAL_CHANGE, ImmutableSet.of());
