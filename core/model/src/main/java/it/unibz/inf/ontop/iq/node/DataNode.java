@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node;
 
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.LeafIQ;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -8,7 +9,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 /**
  * TODO: describe
  */
-public interface DataNode extends ExplicitVariableProjectionNode {
+public interface DataNode extends LeafIQ {
 
     /**
      * Data atom containing the projected variables

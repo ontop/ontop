@@ -12,10 +12,10 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
-public class TrueNodeImpl implements TrueNode {
-
+public class TrueNodeImpl extends LeafIQImpl implements TrueNode {
 
     private static final String PREFIX = "TRUE";
+    private static final ImmutableSet<Variable> EMPTY_VARIABLE_SET = ImmutableSet.of();
 
     @AssistedInject
     private TrueNodeImpl() {
@@ -101,5 +101,10 @@ public class TrueNodeImpl implements TrueNode {
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariables() {
+        return EMPTY_VARIABLE_SET;
     }
 }

@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
+public class EmptyNodeImpl extends LeafIQImpl implements EmptyNode {
 
     private static final String PREFIX = "EMPTY ";
     private final ImmutableSet<Variable> projectedVariables;

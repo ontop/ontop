@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.LeafIQ;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -17,7 +18,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 /**
  *
  */
-public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
+public abstract class DataNodeImpl extends LeafIQImpl implements DataNode {
 
     private DataAtom atom;
 
