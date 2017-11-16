@@ -35,9 +35,9 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
 
         @Override
         public void visit(ConstructionNode constructionNode) {
-            if (query.getChildren(constructionNode).size() > 1) {
+            if (query.getChildren(constructionNode).size() != 1) {
                 throw new InvalidIntermediateQueryException("CONSTRUCTION node " + constructionNode
-                        + " has more than one child.\n" + query);
+                        + " must have ONE and ONLY ONE child.\n" + query);
             }
 
             ImmutableSet<Variable> requiredChildVariables = constructionNode.getChildVariables();
