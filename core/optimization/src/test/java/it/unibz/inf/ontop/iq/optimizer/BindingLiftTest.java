@@ -598,12 +598,8 @@ public class BindingLiftTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
 
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-
-        queryBuilder.init(projectionAtom, rootNode);
-
         UnionNode unionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y));
-        queryBuilder.addChild(rootNode, unionNode);
+        queryBuilder.init(projectionAtom, unionNode);
 
         ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( Y, generateURI1(B))));
@@ -656,12 +652,8 @@ public class BindingLiftTest {
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
-        ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-
-        expectedQueryBuilder.init(projectionAtom, expectedRootNode);
-
         UnionNode expectedUnionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y));
-        expectedQueryBuilder.addChild(expectedRootNode, expectedUnionNode);
+        expectedQueryBuilder.init(projectionAtom, expectedUnionNode);
 
         //first child of UnionNode
         ConstructionNode expSubQueryUnionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
@@ -1166,13 +1158,11 @@ public class BindingLiftTest {
         //Construct unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of()));
-        queryBuilder.init(projectionAtom, rootNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(EQ,
                 buildSparqlDatatype(X), buildSparqlDatatype(Y)));
-        queryBuilder.addChild(rootNode,joinNode);
+
+        queryBuilder.init(projectionAtom, joinNode);
 
         UnionNode unionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         queryBuilder.addChild(joinNode, unionNode);
@@ -1209,7 +1199,7 @@ public class BindingLiftTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        /**
+        /*
          * TODO: remove this double call
          */
         IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(
@@ -1339,13 +1329,11 @@ public class BindingLiftTest {
         //Construct unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
-        queryBuilder.init(projectionAtom, rootNode);
 
         //construct
-        joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        QueryNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        queryBuilder.init(projectionAtom, joinNode);
 
         //construct left side join
         LeftJoinNode leftJoinNode =  IQ_FACTORY.createLeftJoinNode();
