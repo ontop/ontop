@@ -435,12 +435,8 @@ public class BindingLiftTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ANS1_ARITY_1_PREDICATE, X);
 
-        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-
-        initialQueryBuilder.init(projectionAtom, initialRootNode);
-
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
-        initialQueryBuilder.addChild(initialRootNode, unionNode);
+        initialQueryBuilder.init(projectionAtom, unionNode);
 
 
         ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),

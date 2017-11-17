@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.executor.substitution;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -10,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.SubstitutionResults;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -23,10 +25,12 @@ import it.unibz.inf.ontop.iq.proposal.impl.NodeTrackingResultsImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.executor.substitution.DescendingPropagationTools.propagateSubstitutionDownToNodes;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 /**
  * These methods are only accessible by InternalProposalExecutors (requires access to the QueryTreeComponent).
@@ -125,6 +129,13 @@ public class AscendingPropagationTools {
         ImmutableSubstitution<? extends ImmutableTerm> currentSubstitution = substitutionToPropagate;
 
         /*
+         * Special case: the focus node is the root
+         */
+        if (!optionalCurrentAncestor.isPresent()) {
+            insertRootConstructionNode(query, treeComponent, substitutionToPropagate, iqFactory);
+        }
+
+        /*
          * Iterates over the ancestors until nothing needs to be propagated
          * or an ancestor is declared as empty (it is then immediately removed).
          */
@@ -140,14 +151,6 @@ public class AscendingPropagationTools {
             else if (results.optionalNextAncestor.isPresent()) {
                 ancestorChild = results.optionalChildOfNextAncestor.get();
                 currentSubstitution = results.optionalSubstitutionToPropagate.get();
-
-                /*
-                 * Inserts a root construction node for the remaining substitution
-                 */
-                if ((!optionalCurrentAncestor.isPresent()) && (!currentSubstitution.isEmpty())) {
-
-                }
-
             }
             /*
              * Case 3: stops the propagation and inserts a top construction node if necessary
@@ -155,9 +158,7 @@ public class AscendingPropagationTools {
             else {
                 results.optionalSubstitutionToPropagate
                         .filter(s -> !s.isEmpty())
-                        .map(s -> (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)s)
-                        .map(s -> iqFactory.createConstructionNode(query.getProjectionAtom().getVariables(), s))
-                        .ifPresent(root -> treeComponent.insertParent(treeComponent.getRootNode(), root));
+                        .ifPresent(s -> insertRootConstructionNode(query, treeComponent, s, iqFactory));
             }
 
             results.optionalDescendingPropagParams
@@ -169,6 +170,24 @@ public class AscendingPropagationTools {
 
         return applyDescendingPropagations(descendingPropagParamBuilder.build(), query, treeComponent,
                 focusNode, optionalAncestryTracker);
+    }
+
+    private static void insertRootConstructionNode(IntermediateQuery query,
+                                                   QueryTreeComponent treeComponent,
+                                                   ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution,
+                                                   IntermediateQueryFactory iqFactory) {
+        ImmutableSet<Variable> projectedVariables = query.getProjectionAtom().getVariables();
+
+        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = propagatedSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> projectedVariables.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (ImmutableTerm) e.getValue()));
+
+        ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables,
+                SUBSTITUTION_FACTORY.getSubstitution(newSubstitutionMap));
+
+        treeComponent.insertParent(treeComponent.getRootNode(), newRootNode);
     }
 
     /**
