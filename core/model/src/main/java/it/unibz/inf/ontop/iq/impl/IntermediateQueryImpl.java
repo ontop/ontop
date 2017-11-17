@@ -135,9 +135,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public ConstructionNode getRootConstructionNode() throws InconsistentIntermediateQueryException{
+    public QueryNode getRootNode() throws InconsistentIntermediateQueryException{
         try {
-            return treeComponent.getRootConstructionNode();
+            return treeComponent.getRootNode();
         } catch (IllegalTreeException e) {
             throw new InconsistentIntermediateQueryException(e.getMessage());
         }

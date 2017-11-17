@@ -125,7 +125,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     @Override
     public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
 
-        /**
+        /*
          * All the children expected the given empty child
          */
         ImmutableList<QueryNode> children = query.getChildrenStream(this)
@@ -139,8 +139,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
                 return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD, children.get(0),
                         ImmutableSet.of());
             default:
-                return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE,
-                        ImmutableSet.of());
+                return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE, ImmutableSet.of());
         }
     }
 

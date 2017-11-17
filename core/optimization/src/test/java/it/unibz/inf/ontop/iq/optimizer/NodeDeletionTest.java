@@ -95,7 +95,7 @@ public class NodeDeletionTest {
         IntermediateQuery optimizedQuery = INNER_JOIN_OPTIMIZER.optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
-        QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootConstructionNode()).get();
+        QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
         assertTrue(viceRootNode instanceof ExtensionalDataNode);
         assertEquals(((ExtensionalDataNode) viceRootNode).getProjectionAtom().getPredicate().getName(), table1Name);
         assertTrue(optimizedQuery.getChildren(viceRootNode).isEmpty());
@@ -162,7 +162,7 @@ public class NodeDeletionTest {
         IntermediateQuery optimizedQuery = INNER_JOIN_OPTIMIZER.optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
-        QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootConstructionNode()).get();
+        QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
         assertTrue(viceRootNode instanceof ConstructionNode);
         assertEquals(optimizedQuery.getChildren(viceRootNode).size(), 1);
 
@@ -234,7 +234,7 @@ public class NodeDeletionTest {
         IntermediateQuery optimizedQuery = INNER_JOIN_OPTIMIZER.optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
-        QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootConstructionNode()).get();
+        QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
         assertTrue(viceRootNode instanceof UnionNode);
         assertEquals(optimizedQuery.getChildren(viceRootNode).size(), 2);
     }

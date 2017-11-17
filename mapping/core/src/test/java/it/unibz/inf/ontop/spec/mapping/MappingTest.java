@@ -157,7 +157,7 @@ public class MappingTest {
                     .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
 
             System.out.println(mappingAssertion);
-            ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getVariables(mappingAssertion.getRootConstructionNode());
+            ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
             if(Stream.of(mappingAssertionVariables)
                     .anyMatch(variableUnion::contains)){
                 fail();

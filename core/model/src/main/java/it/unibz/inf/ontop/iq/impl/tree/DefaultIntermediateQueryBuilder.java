@@ -6,7 +6,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -54,17 +54,19 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
 
 
     @Override
-    public void init(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode rootConstructionNode){
+    public void init(DistinctVariableOnlyDataAtom projectionAtom, QueryNode rootNode){
         if (tree != null)
             throw new IllegalArgumentException("Already initialized IntermediateQueryBuilder.");
 
-        if (!projectionAtom.getVariables().equals(rootConstructionNode.getVariables())) {
-            throw new IllegalArgumentException("The root construction node " + rootConstructionNode
+        if ((rootNode instanceof ExplicitVariableProjectionNode)
+            && !projectionAtom.getVariables().equals(((ExplicitVariableProjectionNode)rootNode).getVariables())) {
+            throw new IllegalArgumentException("The root node " + rootNode
                     + " is not consistent with the projection atom " + projectionAtom);
         }
 
+
         // TODO: use Guice to construct this tree
-        tree = new DefaultTree(rootConstructionNode);
+        tree = new DefaultTree(rootNode);
         this.projectionAtom = projectionAtom;
         canEdit = true;
     }
@@ -136,7 +138,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     }
 
     @Override
-    public ConstructionNode getRootConstructionNode() throws IntermediateQueryBuilderException {
+    public QueryNode getRootNode() throws IntermediateQueryBuilderException {
         checkInitialization();
         return tree.getRootNode();
     }

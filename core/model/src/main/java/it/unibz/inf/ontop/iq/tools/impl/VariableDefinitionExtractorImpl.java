@@ -56,7 +56,7 @@ public class VariableDefinitionExtractorImpl implements VariableDefinitionExtrac
 
     @Override
     public ImmutableSet<ImmutableTerm> extract(Variable variable, IntermediateQuery query) {
-        return extract(variable, query.getRootConstructionNode(), query);
+        return extract(variable, query.getRootNode(), query);
     }
 
     /**

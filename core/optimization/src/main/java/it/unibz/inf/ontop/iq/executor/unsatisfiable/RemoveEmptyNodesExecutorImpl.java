@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.proposal.NodeTracker;
 import it.unibz.inf.ontop.iq.proposal.NodeTrackingResults;
 import it.unibz.inf.ontop.iq.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeTrackingResultsImpl;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 
 import java.util.Optional;
@@ -31,11 +32,14 @@ import static it.unibz.inf.ontop.iq.executor.substitution.AscendingPropagationTo
 public class RemoveEmptyNodesExecutorImpl implements RemoveEmptyNodesExecutor {
 
     private final IntermediateQueryFactory iqFactory;
+    private final SubstitutionFactory substitutionFactory;
     private final ImmutableSubstitutionTools substitutionTools;
 
     @Inject
-    private RemoveEmptyNodesExecutorImpl(IntermediateQueryFactory iqFactory, ImmutableSubstitutionTools substitutionTools) {
+    private RemoveEmptyNodesExecutorImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+                                         ImmutableSubstitutionTools substitutionTools) {
         this.iqFactory = iqFactory;
+        this.substitutionFactory = substitutionFactory;
         this.substitutionTools = substitutionTools;
     }
 
@@ -127,7 +131,7 @@ public class RemoveEmptyNodesExecutorImpl implements RemoveEmptyNodesExecutor {
              * After removing the empty node(s), second phase: propagates the null variables
              */
             return propagateNullVariables(query, optionalClosestAncestorNode.get(), optionalNewNextSibling, treeComponent,
-                    transformationProposal.getNullVariables(), propagatingNode, optionalTracker);
+                    transformationProposal.getNullVariables(), propagatingNode, iqFactory, optionalTracker);
         }
         /**
          * Special case: the promoted child is now the root the query
@@ -185,6 +189,7 @@ public class RemoveEmptyNodesExecutorImpl implements RemoveEmptyNodesExecutor {
                                                                          QueryTreeComponent treeComponent,
                                                                          ImmutableSet<Variable> nullVariables,
                                                                          QueryNode propagatingNode,
+                                                                         IntermediateQueryFactory iqFactory,
                                                                          Optional<NodeTracker> optionalAncestorTracker)
             throws EmptyQueryException {
 
@@ -196,7 +201,8 @@ public class RemoveEmptyNodesExecutorImpl implements RemoveEmptyNodesExecutor {
         ImmutableSubstitution<Constant> ascendingSubstitution = substitutionTools.computeNullSubstitution(nullVariables);
 
         NodeTrackingResults<QueryNode> propagationResults =
-                propagateSubstitutionUp(propagatingNode, ascendingSubstitution, query, treeComponent, optionalAncestorTracker);
+                propagateSubstitutionUp(propagatingNode, ascendingSubstitution, query, treeComponent, iqFactory,
+                        substitutionFactory, optionalAncestorTracker);
 
         QueryNode closestRemainingAncestor = propagationResults.getOptionalNewNode()
                 /**
