@@ -65,7 +65,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) {
         try {
-            query = pushUpFromSubtree(query.getRootConstructionNode(), query);
+            query = pushUpFromSubtree(query.getRootNode(), query);
             return pushAboveUnions ?
                     pushAboveUnions(query) :
                     query;
@@ -206,7 +206,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
     private boolean canPropagate(ConstructionNode constructionNode,
                                  boolean propagateThroughNextUnionNodeAncestor,
                                  IntermediateQuery query) {
-        if (constructionNode == query.getRootConstructionNode()) {
+        if (constructionNode == query.getRootNode()) {
             return false;
         }
         QueryNode parent = query.getParent(constructionNode)

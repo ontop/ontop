@@ -8,10 +8,10 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -107,11 +107,14 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         if (optionalObjectVariable.isPresent()) {
             Variable objectVariable = optionalObjectVariable.get();
 
-            ImmutableTerm constructionTerm = Optional.ofNullable(
-                        mappingAssertion.getRootConstructionNode().getDirectBindingSubstitution()
-                                .get(objectVariable))
+            ImmutableTerm constructionTerm = Optional.of(mappingAssertion.getRootNode())
+                    .filter(n -> n instanceof ConstructionNode)
+                    .map((n) -> (ConstructionNode) n)
+                    .map(ConstructionNode::getDirectBindingSubstitution)
+                    .flatMap(s -> Optional.ofNullable(s.get(objectVariable)))
                     .orElseThrow(() -> new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
-                            "Not defined in the root construction node (expected for a mapping assertion)"));
+                            "Not defined in the root node (expected for a mapping assertion)"));
+
             if (constructionTerm instanceof ImmutableFunctionalTerm) {
                 ImmutableFunctionalTerm constructionFunctionalTerm = ((ImmutableFunctionalTerm) constructionTerm);
                 Predicate functionSymbol = constructionFunctionalTerm.getFunctionSymbol();

@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  * TODO: describe
  */
 public interface QueryTree {
-    ConstructionNode getRootNode();
+    QueryNode getRootNode();
 
     void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,
                   boolean mustBeNew, boolean canReplace) throws IllegalTreeUpdateException;

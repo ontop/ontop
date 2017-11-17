@@ -36,6 +36,8 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
@@ -54,8 +56,9 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	private static final String SUBQUERY_PRED_PREFIX = "ansSQ";
 	private final IntermediateQueryFactory iqFactory;
 	private final AtomFactory atomFactory;
+	private final SubstitutionFactory substitutionFactory;
 	private final DatalogFactory datalogFactory;
-	private final ImmutabilityTools immutabilityTools;
+	private final ImmutabilityTools immutabilityTools;;
 
 	private static class RuleHead {
 		public final ImmutableSubstitution<ImmutableTerm> substitution;
@@ -70,7 +73,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	}
 
 
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(IntermediateQuery2DatalogTranslatorImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(IntermediateQuery2DatalogTranslatorImpl.class);
 
 	// Incremented
 	private int subQueryCounter;
@@ -78,9 +81,11 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 
 	@Inject
 	private IntermediateQuery2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
-													DatalogFactory datalogFactory, ImmutabilityTools immutabilityTools) {
+													SubstitutionFactory substitutionFactory, DatalogFactory datalogFactory,
+													ImmutabilityTools immutabilityTools) {
 		this.iqFactory = iqFactory;
 		this.atomFactory = atomFactory;
+		this.substitutionFactory = substitutionFactory;
 		this.datalogFactory = datalogFactory;
 		this.immutabilityTools = immutabilityTools;
 		this.subQueryCounter = 0;
@@ -96,9 +101,12 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 */
 	@Override
 	public DatalogProgram translate(IntermediateQuery query) {
-		ConstructionNode root = query.getRootConstructionNode();
+		QueryNode root = query.getRootNode();
 		
-		Optional<ImmutableQueryModifiers> optionalModifiers =  root.getOptionalModifiers();
+		Optional<ImmutableQueryModifiers> optionalModifiers =  Optional.of(root)
+				.filter(r -> r instanceof ConstructionNode)
+				.map(r -> (ConstructionNode)r)
+				.flatMap(ConstructionNode::getOptionalModifiers);
 
         DatalogProgram dProgram;
 		if (optionalModifiers.isPresent()){
@@ -126,13 +134,20 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 * @return Datalog program that represents the construction of the SPARQL
 	 *         query.
 	 */
-	private void translate(IntermediateQuery query, DatalogProgram pr, ConstructionNode root) {
+	private void translate(IntermediateQuery query, DatalogProgram pr, QueryNode root) {
 
 		Queue<RuleHead> heads = new LinkedList<>();
-		heads.add(new RuleHead(root.getSubstitution(), query.getProjectionAtom(),query.getFirstChild(root)));
+
+		ImmutableSubstitution<ImmutableTerm> topSubstitution = Optional.of(root)
+				.filter(r -> r instanceof ConstructionNode)
+				.map(r -> (ConstructionNode) r)
+				.map(ConstructionNode::getSubstitution)
+				.orElseGet(substitutionFactory::getSubstitution);
+
+		heads.add(new RuleHead(topSubstitution, query.getProjectionAtom(),query.getFirstChild(root)));
 
 		// Mutable (append-only)
-		Map<ConstructionNode, DataAtom> subQueryProjectionAtoms = new HashMap<>();
+		Map<QueryNode, DataAtom> subQueryProjectionAtoms = new HashMap<>();
 		subQueryProjectionAtoms.put(root, query.getProjectionAtom());
 
 		//In heads we keep the heads of the sub-rules in the program, e.g. ans5() :- LeftJoin(....)
@@ -167,7 +182,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 * Usually it will be a single atom, but it is different for the filter case.
 	 */
 	private List<Function> getAtomFrom(IntermediateQuery te, QueryNode node, Queue<RuleHead> heads,
-									   Map<ConstructionNode, DataAtom> subQueryProjectionAtoms,
+									   Map<QueryNode, DataAtom> subQueryProjectionAtoms,
 									   boolean isNested) {
 		
 		List<Function> body = new ArrayList<>();
@@ -280,13 +295,16 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			//DataAtom projectionAtom = generateProjectionAtom(ImmutableSet.of());
 			//heads.add(new RuleHead(new ImmutableSubstitutionImpl<>(ImmutableMap.of()), projectionAtom,Optional.empty()));
 			//return body;
-			body.add(atomFactory.getDistinctVariableOnlyDataAtom(
-					atomFactory.getAtomPredicate(
-							"dummy"+(++dummyPredCounter),
-							ImmutableList.of()
-					),
-					ImmutableList.of()
-			));
+			if (isNested) {
+				body.add(atomFactory.getDistinctVariableOnlyDataAtom(
+						atomFactory.getAtomPredicate(
+								"dummy" + (++dummyPredCounter),
+								0
+						),
+						ImmutableList.of()
+				));
+			}
+			// Otherwise, ignores it
 			return body;
 
 		} else {
@@ -296,7 +314,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	}
 
 	private List<Function> getAtomsFromJoinNode(InnerJoinNode node, IntermediateQuery te, Queue<RuleHead> heads,
-												Map<ConstructionNode, DataAtom> subQueryProjectionAtoms,
+												Map<QueryNode, DataAtom> subQueryProjectionAtoms,
 												boolean isNested) {
 		List<Function> body = new ArrayList<>();
 		Optional<ImmutableExpression> filter = node.getOptionalFilterCondition();

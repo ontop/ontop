@@ -450,11 +450,8 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
-        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        initialQueryBuilder.init(projectionAtom, initialRootNode);
-
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        initialQueryBuilder.addChild(initialRootNode, joinNode);
+        initialQueryBuilder.init(projectionAtom, joinNode);
 
         ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 SUBSTITUTION_FACTORY.getSubstitution(
@@ -748,11 +745,8 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
-        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        initialQueryBuilder.init(projectionAtom, initialRootNode);
-
         LeftJoinNode leftJoin = IQ_FACTORY.createLeftJoinNode();
-        initialQueryBuilder.addChild(initialRootNode, leftJoin);
+        initialQueryBuilder.init(projectionAtom, leftJoin);
 
         ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 SUBSTITUTION_FACTORY.getSubstitution(
@@ -778,23 +772,17 @@ public class SubstitutionPropagationTest {
                 new SubstitutionPropagationProposalImpl<>(rightConstructionNode, rightConstructionNode.getSubstitution());
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
-        expectedQueryBuilder.init(projectionAtom, initialRootNode);
-        expectedQueryBuilder.addChild(initialRootNode, leftConstructionNode);
+        expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
         expectedQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
         NodeCentricOptimizationResults<? extends QueryNode> results = propagateAndCompare(initialQuery,
                 expectedQueryBuilder.build(), propagationProposal);
 
-        /**
+        /*
          * Results
          */
         assertFalse(results.getNewNodeOrReplacingChild().isPresent());
         assertFalse(results.getOptionalNextSibling().isPresent());
-
-        Optional<QueryNode> optionalAncestor = results.getOptionalClosestAncestor();
-        assertTrue(optionalAncestor.isPresent());
-        assertTrue(optionalAncestor.get().isSyntacticallyEquivalentTo(initialRootNode));
-
     }
 
     @Test
@@ -991,11 +979,8 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, X);
 
-        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        initialQueryBuilder.init(projectionAtom, initialRootNode);
-
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        initialQueryBuilder.addChild(initialRootNode, joinNode);
+        initialQueryBuilder.init(projectionAtom, joinNode);
 
         ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(A, B)));
@@ -1064,15 +1049,45 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
+    public void testEx19NoRootConstructionNode() throws EmptyQueryException {
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, X);
+
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        initialQueryBuilder.init(projectionAtom, joinNode);
+
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(A, B)));
+        initialQueryBuilder.addChild(joinNode, leftConstructionNode);
+        initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
+
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(C, D)));
+        initialQueryBuilder.addChild(joinNode, rightConstructionNode);
+        initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
+
+        IntermediateQuery initialQuery = initialQueryBuilder.build();
+
+        SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
+                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getSubstitution());
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
+        expectedQueryBuilder.addChild(leftConstructionNode, joinNode);
+        expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(joinNode,
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, A, B)));
+
+        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+    }
+
+    @Test
     public void testEx20() throws EmptyQueryException {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
-        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        initialQueryBuilder.init(projectionAtom, initialRootNode);
-
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        initialQueryBuilder.addChild(initialRootNode, joinNode);
+        initialQueryBuilder.init(projectionAtom, joinNode);
 
         ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 SUBSTITUTION_FACTORY.getSubstitution(X, Y));
@@ -1274,12 +1289,9 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
 
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-
-        initialQueryBuilder.init(projectionAtom, rootNode);
-
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
-        initialQueryBuilder.addChild(rootNode, unionNode);
+        initialQueryBuilder.init(projectionAtom, unionNode);
+
         initialQueryBuilder.addChild(unionNode, DATA_NODE_1);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -1297,9 +1309,8 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, unionNode);
 
-        expectedQueryBuilder.addChild(rootNode, unionNode);
         expectedQueryBuilder.addChild(unionNode, DATA_NODE_1);
         expectedQueryBuilder.addChild(unionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(

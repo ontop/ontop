@@ -97,7 +97,7 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
     }
 
     private ImmutableSet<ImmutableTerm> getIRIs(IntermediateQuery definition) {
-        return getIRIs(definition.getRootConstructionNode(), definition)
+        return getIRIs(definition.getRootNode(), definition)
                 .collect(ImmutableCollectors.toSet());
     }
 

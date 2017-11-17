@@ -28,7 +28,7 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
          * Immutable only for safety (updated in practice).
          * Question: shall we keep it as immutable ?
          */
-        ConstructionNode rootNode = query.getRootConstructionNode();
+        QueryNode rootNode = query.getRootNode();
         Optional<QueryNode> rootChild = query.getFirstChild(rootNode);
         if (rootChild.isPresent()) {
             return optimizeSubtree(

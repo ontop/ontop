@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.iq.executor.substitution;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -20,8 +22,10 @@ import it.unibz.inf.ontop.iq.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeTrackerImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeTrackingResultsImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -112,8 +116,9 @@ public class AscendingPropagationTools {
     public static <N extends QueryNode> NodeTrackingResults<N> propagateSubstitutionUp(
             N focusNode, ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
             IntermediateQuery query, QueryTreeComponent treeComponent,
-            Optional<NodeTracker> optionalAncestryTracker) throws QueryNodeSubstitutionException,
-            EmptyQueryException {
+            IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+            Optional<NodeTracker> optionalAncestryTracker)
+            throws QueryNodeSubstitutionException, EmptyQueryException {
 
         // Substitutions to be propagated down into branches after the ascendant one
         ImmutableList.Builder<DescendingPropagationParams> descendingPropagParamBuilder = ImmutableList.builder();
@@ -123,7 +128,14 @@ public class AscendingPropagationTools {
         QueryNode ancestorChild = focusNode;
         ImmutableSubstitution<? extends ImmutableTerm> currentSubstitution = substitutionToPropagate;
 
-        /**
+        /*
+         * Special case: the focus node is the root
+         */
+        if (!optionalCurrentAncestor.isPresent()) {
+            insertRootConstructionNode(query, treeComponent, substitutionToPropagate, iqFactory, substitutionFactory);
+        }
+
+        /*
          * Iterates over the ancestors until nothing needs to be propagated
          * or an ancestor is declared as empty (it is then immediately removed).
          */
@@ -139,19 +151,43 @@ public class AscendingPropagationTools {
             else if (results.optionalNextAncestor.isPresent()) {
                 ancestorChild = results.optionalChildOfNextAncestor.get();
                 currentSubstitution = results.optionalSubstitutionToPropagate.get();
-
+            }
+            /*
+             * Case 3: stops the propagation and inserts a top construction node if necessary
+             */
+            else {
+                results.optionalSubstitutionToPropagate
+                        .filter(s -> !s.isEmpty())
+                        .ifPresent(s -> insertRootConstructionNode(query, treeComponent, s, iqFactory, substitutionFactory));
             }
 
             results.optionalDescendingPropagParams
                     .ifPresent(descendingPropagParamBuilder::add);
 
-            // May stop the propagation (case 3)
+            // May stop the propagation (case 3)
             optionalCurrentAncestor = results.optionalNextAncestor;
-
         }
 
         return applyDescendingPropagations(descendingPropagParamBuilder.build(), query, treeComponent,
                 focusNode, optionalAncestryTracker);
+    }
+
+    private static void insertRootConstructionNode(IntermediateQuery query,
+                                                   QueryTreeComponent treeComponent,
+                                                   ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution,
+                                                   IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
+        ImmutableSet<Variable> projectedVariables = query.getProjectionAtom().getVariables();
+
+        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = propagatedSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> projectedVariables.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (ImmutableTerm) e.getValue()));
+
+        ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables,
+                substitutionFactory.getSubstitution(newSubstitutionMap));
+
+        treeComponent.insertParent(treeComponent.getRootNode(), newRootNode);
     }
 
     /**

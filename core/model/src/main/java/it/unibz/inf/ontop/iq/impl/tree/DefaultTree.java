@@ -17,10 +17,7 @@ import java.util.stream.Stream;
  */
 public class DefaultTree implements QueryTree {
 
-    /**
-     * Final but MUTABLE attributes
-     */
-    private final TreeNode rootNode;
+    private TreeNode rootNode;
     private final Map<QueryNode, TreeNode> nodeIndex;
     private final Map<TreeNode, ChildrenRelation> childrenIndex;
     private final Map<TreeNode, TreeNode> parentIndex;
@@ -30,7 +27,7 @@ public class DefaultTree implements QueryTree {
     private int versionNumber;
 
 
-    protected DefaultTree(ConstructionNode rootQueryNode) {
+    protected DefaultTree(QueryNode rootQueryNode) {
         nodeIndex = new HashMap<>();
         childrenIndex = new HashMap<>();
         parentIndex = new HashMap<>();
@@ -66,8 +63,8 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public ConstructionNode getRootNode() {
-        return (ConstructionNode) rootNode.getQueryNode();
+    public QueryNode getRootNode() {
+        return rootNode.getQueryNode();
     }
 
     @Override
@@ -262,10 +259,19 @@ public class DefaultTree implements QueryTree {
             // May be null
             TreeNode grandParentTreeNode = getParentTreeNode(parentTreeNode);
             parentIndex.remove(parentTreeNode);
-            parentIndex.put(childTreeNode, grandParentTreeNode);
 
-            ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
-            grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
+            /*
+             * When the child node becomes the new root
+             */
+            if (grandParentTreeNode == null) {
+                rootNode = childTreeNode;
+                parentIndex.remove(childTreeNode);
+            }
+            else {
+                parentIndex.put(childTreeNode, grandParentTreeNode);
+                ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
+                grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
+            }
             return childTreeNode.getQueryNode();
         }
         else {
@@ -321,17 +327,18 @@ public class DefaultTree implements QueryTree {
 
         TreeNode childTreeNode = accessTreeNode(childNode);
 
-        Optional<QueryNode> optionalFormerParent = getParent(childNode);
-        if (!optionalFormerParent.isPresent()) {
-            throw new IllegalTreeUpdateException("Inserting a parent to the current root is not supported");
-        }
-        QueryNode grandParentNode = optionalFormerParent.get();
-        TreeNode grandParentTreeNode = accessTreeNode(grandParentNode);
-
         TreeNode newParentTreeNode = new TreeNode(newParentNode);
         insertNodeIntoIndex(newParentNode, newParentTreeNode);
         childrenIndex.put(newParentTreeNode, createChildrenRelation(newParentTreeNode));
-        changeChild(grandParentTreeNode, childTreeNode, newParentTreeNode);
+
+        Optional<QueryNode> optionalFormerParent = getParent(childNode);
+        if (!optionalFormerParent.isPresent()) {
+            rootNode = newParentTreeNode;
+        } else {
+            QueryNode grandParentNode = optionalFormerParent.get();
+            TreeNode grandParentTreeNode = accessTreeNode(grandParentNode);
+            changeChild(grandParentTreeNode, childTreeNode, newParentTreeNode);
+        }
 
         addChild(newParentNode, childNode, optionalPosition, false, false);
     }
@@ -388,10 +395,16 @@ public class DefaultTree implements QueryTree {
         // May be null
         TreeNode grandParentTreeNode = getParentTreeNode(parentTreeNode);
         parentIndex.remove(parentTreeNode);
-        parentIndex.put(childTreeNode, grandParentTreeNode);
 
-        ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
-        grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
+        if (grandParentTreeNode == null) {
+            rootNode = childTreeNode;
+            parentIndex.remove(childTreeNode);
+        }
+        else {
+            parentIndex.put(childTreeNode, grandParentTreeNode);
+            ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
+            grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
+        }
         return childTreeNode.getQueryNode();
     }
 

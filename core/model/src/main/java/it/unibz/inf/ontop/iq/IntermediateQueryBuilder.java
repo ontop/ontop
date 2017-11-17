@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
  */
 public interface IntermediateQueryBuilder {
 
-    void init(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode rootConstructionNode)
+    void init(DistinctVariableOnlyDataAtom projectionAtom, QueryNode rootNode)
             throws IntermediateQueryBuilderException;
 
     /**
@@ -40,7 +40,7 @@ public interface IntermediateQueryBuilder {
 
     IntermediateQuery build() throws IntermediateQueryBuilderException;
 
-    ConstructionNode getRootConstructionNode() throws IntermediateQueryBuilderException;
+    QueryNode getRootNode() throws IntermediateQueryBuilderException;
 
     ImmutableList<QueryNode> getSubNodesOf(QueryNode node) throws IntermediateQueryBuilderException;
 
