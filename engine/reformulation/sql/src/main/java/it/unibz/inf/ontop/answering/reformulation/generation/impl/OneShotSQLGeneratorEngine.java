@@ -502,7 +502,7 @@ public class OneShotSQLGeneratorEngine {
 		for (Function atom : body) {
 			if (atom.getFunctionSymbol().equals(SPARQL_GROUP)) {
 				for (Variable var : atom.getVariables()) {
-					index.columnReferences.get(var).stream()
+					index.getColumnReferences(var).stream()
 							.map(QualifiedAttributeID::getSQLRendering)
 							.forEach(groupReferences::add);
 				}
@@ -1412,7 +1412,7 @@ public class OneShotSQLGeneratorEngine {
 
 			String[] split = template.split("[{][}]");
 
-			List<String> vex = new LinkedList<>();
+			List<String> vex = new ArrayList<>();
 			if (split.length > 0 && !split[0].isEmpty()) {
 				vex.add(sqladapter.getSQLLexicalFormString(split[0]));
 			}
@@ -1428,21 +1428,18 @@ public class OneShotSQLGeneratorEngine {
 //				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {
 					Term currentTerm = ov.getTerms().get(termIndex);
-					String repl = "";
+					final String repl;
 					if (isStringColType(currentTerm, index)) {
 						//empty place holders: the correct uri is in the column of DB no need to replace
-						if(split.length == 0)
-						{
+						if(split.length == 0) {
 							repl = getSQLString(currentTerm, index, false) ;
 						}
-						else
-						{
-							repl = replace1 + (getSQLString(currentTerm, index, false)) + replace2;
+						else {
+							repl = replace1 + getSQLString(currentTerm, index, false) + replace2;
 						}
 
 					} else {
-						if(split.length == 0)
-						{
+						if(split.length == 0) {
 							repl = sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) ;
 						}
 						else {
@@ -1457,25 +1454,18 @@ public class OneShotSQLGeneratorEngine {
 			}
 
 			if (vex.size() == 1) {
-
 				return vex.get(0);
 			}
-			String[] params = new String[vex.size()];
-			int i = 0;
-			for (String param : vex) {
-				params[i] = param;
-				i += 1;
-			}
-			return getStringConcatenation(params);
-
-		} else if (t instanceof Variable) {
+			return getStringConcatenation(vex.toArray(new String[0]));
+		}
+		else if (t instanceof Variable) {
 			/*
 			 * The function is of the form uri(x), we need to simply return the
 			 * value of X
 			 */
-			return getSQLString(((Variable) t), index, false);
-
-		} else if (t instanceof URIConstant) {
+			return getSQLString(t, index, false);
+		}
+		else if (t instanceof URIConstant) {
 			/*
 			 * The function is of the form uri("http://some.uri/"), i.e., a
 			 * concrete URI, we return the string representing that URI.
@@ -1522,7 +1512,8 @@ public class OneShotSQLGeneratorEngine {
 				 * column type.
 				 */
 				return !hasIRIDictionary();
-			} else {
+			}
+			else {
 				if (functionSymbol.getArity() == 1) {
 					if (functionSymbol.getName().equals("Count")) {
 						return false;
@@ -1535,7 +1526,8 @@ public class OneShotSQLGeneratorEngine {
 					return isStringColType(term, index);
 				}
 			}
-		} else if (term instanceof Variable) {
+		}
+		else if (term instanceof Variable) {
 			Set<QualifiedAttributeID> viewdef = index
 					.getColumnReferences((Variable) term);
 			QualifiedAttributeID def = viewdef.iterator().next();
@@ -1626,7 +1618,8 @@ public class OneShotSQLGeneratorEngine {
 				}
 			}
 			return getSQLLexicalForm(ct);
-		} else if (term instanceof URIConstant) {
+		}
+		else if (term instanceof URIConstant) {
 			if (hasIRIDictionary()) {
 				String uri = term.toString();
 				int id = getUriid(uri);
@@ -1634,13 +1627,13 @@ public class OneShotSQLGeneratorEngine {
 			}
 			URIConstant uc = (URIConstant) term;
 			return sqladapter.getSQLLexicalFormString(uc.toString());
-		} else if (term instanceof Variable) {
+		}
+		else if (term instanceof Variable) {
 			Variable var = (Variable) term;
 			Set<QualifiedAttributeID> posList = index.getColumnReferences(var);
-			if (posList == null || posList.size() == 0) {
-				throw new RuntimeException(
-						"Unbound variable found in WHERE clause: " + term);
-			}
+			if (posList == null || posList.size() == 0)
+				throw new RuntimeException("Unbound variable found in WHERE clause: " + term);
+
 			return posList.iterator().next().getSQLRendering();
 		}
 
@@ -1652,14 +1645,14 @@ public class OneShotSQLGeneratorEngine {
 
 		if (function.isDataTypeFunction()) {
 			if (functionSymbol.getType(0) == UNSUPPORTED) {
-				throw new RuntimeException("Unsupported type in the query: "
-						+ function);
+				throw new RuntimeException("Unsupported type in the query: " + function);
 			}
 			if (size == 1) {
 				// atoms of the form integer(x)
 				Term term1 = function.getTerm(0);
 				return getSQLString(term1, index, false);
-			} else {
+			}
+			else {
 				return getSQLStringForTemplateFunction(function, index);
 			}
 		}
@@ -1702,45 +1695,38 @@ public class OneShotSQLGeneratorEngine {
 				throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
 		}
 		else if (functionSymbol == ExpressionOperation.REGEX) {
-					boolean caseinSensitive = false;
-					boolean multiLine = false;
-					boolean dotAllMode = false;
-					if (function.getArity() == 3) {
-						if (function.getTerm(2).toString().contains("i")) {
-							caseinSensitive = true;
-						}
-						if (function.getTerm(2).toString().contains("m")) {
-							multiLine = true;
-						}
-						if (function.getTerm(2).toString().contains("s")) {
-							dotAllMode = true;
-						}
-					}
-					Term p1 = function.getTerm(0);
-					Term p2 = function.getTerm(1);
+			boolean caseinSensitive = false;
+			boolean multiLine = false;
+			boolean dotAllMode = false;
+			if (function.getArity() == 3) {
+				String options = function.getTerm(2).toString();
+				caseinSensitive = options.contains("i");
+				multiLine = options.contains("m");
+				dotAllMode = options.contains("s");
+			}
+			Term p1 = function.getTerm(0);
+			Term p2 = function.getTerm(1);
 
-					String column = getSQLString(p1, index, false);
-					String pattern = getSQLString(p2, index, false);
-					return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
-				}
+			String column = getSQLString(p1, index, false);
+			String pattern = getSQLString(p2, index, false);
+			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
+		}
 		else if (functionSymbol == ExpressionOperation.SPARQL_LANG) {
 			Variable var = (Variable) function.getTerm(0);
 			Set<QualifiedAttributeID> posList = index.getColumnReferences(var);
 
-			if (posList == null || posList.size() == 0) {
-				throw new RuntimeException(
-						"Unbound variable found in WHERE clause: " + term);
-			}
+			if (posList == null || posList.size() == 0)
+				throw new RuntimeException("Unbound variable found in WHERE clause: " + term);
 
 			String langC = posList.iterator().next().getSQLRendering();
 			String langColumn = langC.replaceAll("`$", "Lang`");
 			return langColumn;
 
-
 			/**
 			 * TODO: replace by a switch
 			 */
-		}else {
+		}
+		else {
 			if (functionSymbol == ExpressionOperation.QUEST_CAST) {
 				String columnName = getSQLString(function.getTerm(0), index,
 						false);
@@ -1751,18 +1737,21 @@ public class OneShotSQLGeneratorEngine {
 				}
 				if (isStringColType(function, index)) {
 					return columnName;
-				} else {
+				}
+				else {
 					return sqladapter.sqlCast(columnName, sqlDatatype);
 				}
-			} else if (functionSymbol == ExpressionOperation.SPARQL_STR) {
-				String columnName = getSQLString(function.getTerm(0), index,
-						false);
+			}
+			else if (functionSymbol == ExpressionOperation.SPARQL_STR) {
+				String columnName = getSQLString(function.getTerm(0), index, false);
 				if (isStringColType(function, index)) {
 					return columnName;
-				} else {
+				}
+				else {
 					return sqladapter.sqlCast(columnName, Types.VARCHAR);
 				}
-			}else if (functionSymbol == ExpressionOperation.REPLACE) {
+			}
+			else if (functionSymbol == ExpressionOperation.REPLACE) {
                 String orig = getSQLString(function.getTerm(0), index, false);
                 String out_str = getSQLString(function.getTerm(1), index, false);
                 String in_str = getSQLString(function.getTerm(2), index, false);
@@ -1773,83 +1762,67 @@ public class OneShotSQLGeneratorEngine {
             else if (functionSymbol == ExpressionOperation.CONCAT) {
                 String left = getSQLString(function.getTerm(0), index, false);
                 String right = getSQLString(function.getTerm(1), index, false);
-                String result = sqladapter.strConcat(new String[]{left, right});
-                return result;
+                return sqladapter.strConcat(new String[]{left, right});
             }
 			else if (functionSymbol == ExpressionOperation.STRLEN) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.strLength(literal);
-				return result;
+				return sqladapter.strLength(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.YEAR) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateYear(literal);
-				return result;
+				return sqladapter.dateYear(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.MINUTES) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateMinutes(literal);
-				return result;
+				return sqladapter.dateMinutes(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.DAY) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateDay(literal);
-				return result;
+				return sqladapter.dateDay(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.MONTH) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateMonth(literal);
-				return result;
+				return sqladapter.dateMonth(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.SECONDS) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateSeconds(literal);
-				return result;
+				return sqladapter.dateSeconds(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.HOURS) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateHours(literal);
-				return result;
+				return sqladapter.dateHours(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.TZ) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.dateTZ(literal);
-				return result;
+				return sqladapter.dateTZ(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.ENCODE_FOR_URI) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.strEncodeForUri(literal);
-				return result;
+				return sqladapter.strEncodeForUri(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.UCASE) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.strUcase(literal);
-				return result;
+				return sqladapter.strUcase(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.MD5) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.MD5(literal);
-				return result;
+				return sqladapter.MD5(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.SHA1) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.SHA1(literal);
-				return result;
+				return sqladapter.SHA1(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.SHA256) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.SHA256(literal);
-				return result;
+				return sqladapter.SHA256(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.SHA512) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.SHA512(literal); //TODO FIX
-				return result;
+				return sqladapter.SHA512(literal); //TODO FIX
 			}
 			else if (functionSymbol == ExpressionOperation.LCASE) {
 				String literal = getSQLString(function.getTerm(0), index, false);
-				String result = sqladapter.strLcase(literal);
-				return result;
+				return sqladapter.strLcase(literal);
 			}
 			else if (functionSymbol == ExpressionOperation.SUBSTR2) {
 				String string = getSQLString(function.getTerm(0), index, false);
@@ -1860,21 +1833,17 @@ public class OneShotSQLGeneratorEngine {
 				String string = getSQLString(function.getTerm(0), index, false);
 				String start = getSQLString(function.getTerm(1), index, false);
 				String end = getSQLString(function.getTerm(2), index, false);
-				String result = sqladapter.strSubstr(string, start, end);
-
-				return result;
+				return sqladapter.strSubstr(string, start, end);
 			}
 			else if (functionSymbol == ExpressionOperation.STRBEFORE) {
 				String string = getSQLString(function.getTerm(0), index, false);
 				String before = getSQLString(function.getTerm(1), index, false);
-				String result = sqladapter.strBefore(string, before);
-				return result;
+				return sqladapter.strBefore(string, before);
 			}
 			else if (functionSymbol == ExpressionOperation.STRAFTER) {
 				String string = getSQLString(function.getTerm(0), index, false);
 				String after = getSQLString(function.getTerm(1), index, false);
-				String result = sqladapter.strAfter(string, after);
-				return result;
+				return sqladapter.strAfter(string, after);
 			}
 			else if (functionSymbol == ExpressionOperation.COUNT) {
 				if (function.getTerm(0).toString().equals("*")) {
@@ -1883,11 +1852,13 @@ public class OneShotSQLGeneratorEngine {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "COUNT(" + columnName + ")";
-			} else if (functionSymbol == ExpressionOperation.AVG) {
+			}
+			else if (functionSymbol == ExpressionOperation.AVG) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "AVG(" + columnName + ")";
-			} else if (functionSymbol == ExpressionOperation.SUM) {
+			}
+			else if (functionSymbol == ExpressionOperation.SUM) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "SUM(" + columnName + ")";
@@ -1900,10 +1871,9 @@ public class OneShotSQLGeneratorEngine {
 		if (functionSymbol instanceof URITemplatePredicate
 				|| functionSymbol instanceof BNodePredicate) {
 			return getSQLStringForTemplateFunction(function, index);
-		} else {
-			throw new RuntimeException("Unexpected function in the query: "
-					+ functionSymbol);
 		}
+
+		throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
 	}
 
 	/***
@@ -1961,12 +1931,10 @@ public class OneShotSQLGeneratorEngine {
 	 * @return
 	 */
 	private int getUriid(String uri) {
-
 		Integer id = uriRefIds.getId(uri);
 		if (id != null)
 			return id;
 		return -2;
-
 	}
 
 	/**
@@ -2016,7 +1984,8 @@ public class OneShotSQLGeneratorEngine {
 												 Map<Predicate, ParserViewDefinition> subQueryDefinitions) {
 			if (atom.isOperation()) {
 				return;
-			} else if (atom.isAlgebraFunction()){
+			}
+			else if (atom.isAlgebraFunction()){
 				List<Term> lit = atom.getTerms();
 				for (Term subatom : lit) {
 					if (subatom instanceof Function) {
@@ -2030,9 +1999,7 @@ public class OneShotSQLGeneratorEngine {
 					predicate);
 			RelationDefinition def = metadata.getRelation(tableId);
 
-
 			final RelationID relationId;
-
 			if (def == null) {
 				/*
 				 * There is no definition for this atom, its not a database
@@ -2043,12 +2010,14 @@ public class OneShotSQLGeneratorEngine {
 				if (def == null) {
 					isEmpty = true;
 					return;
-				} else {
+				}
+				else {
 					RelationID viewId = def.getID();
 					viewNames.put(atom, viewId);
 					relationId = viewId;
 				}
-			} else {
+			}
+			else {
 				relationId = tableId;
 
 				String suffix = VIEW_SUFFIX + String.valueOf(dataTableCount);
@@ -2082,21 +2051,19 @@ public class OneShotSQLGeneratorEngine {
 					/*
 					 * the index of attributes of the definition starts from 1
 					 */
-					Attribute column;
-
+					final Attribute column;
 					if (ruleIndex.containsKey(atom.getFunctionSymbol())) {
 						// If I am here it means that it is not a database table
 						// but a view from an Ans predicate
-						int attPos = 3 * (index + 1);
-						column = def.getAttribute(attPos);
-					} else {
+						column = def.getAttribute(3 * (index + 1));
+					}
+					else {
 						column = def.getAttribute(index + 1);
 					}
 
 					QualifiedAttributeID qualifiedId = new QualifiedAttributeID(viewName, column.getID());
 					references.add(qualifiedId);
 				}
-
 			}
 		}
 
@@ -2135,7 +2102,7 @@ public class OneShotSQLGeneratorEngine {
 			/**
 			 * Special case of nullary atoms
 			 */
-			else if(atom.getArity() == 0){
+			else if(atom.getArity() == 0) {
 				return "(" + sqladapter.getDummyTable() + ") tdummy";
 			}
 
@@ -2157,8 +2124,7 @@ public class OneShotSQLGeneratorEngine {
 					return formatView;
 				}
 				throw new RuntimeException(
-						"Impossible to get data definition for: " + atom
-								+ ", type: " + def);
+						"Impossible to get data definition for: " + atom + ", type: " + def);
 			}
 		}
 
