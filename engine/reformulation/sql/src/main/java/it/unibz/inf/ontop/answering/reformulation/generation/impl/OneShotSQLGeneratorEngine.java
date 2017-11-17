@@ -49,6 +49,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.EncodeForURI;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
@@ -79,13 +80,9 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
  */
 public class OneShotSQLGeneratorEngine {
 
-	private static final long serialVersionUID = 7477161929752147045L;
-
 	/**
 	 * Formatting template
 	 */
-    //private static final String VIEW_NAME = "Q%sVIEW%s";
-    //private static final String VIEW_ANS_NAME = "Q%sView";
     private static final String VIEW_PREFIX = "Q";
     private static final String VIEW_SUFFIX = "VIEW";
     private static final String VIEW_ANS_SUFFIX = "View";
@@ -123,8 +120,7 @@ public class OneShotSQLGeneratorEngine {
 
 	private final ImmutableMap<ExpressionOperation, String> operations;
 
-	private static final org.slf4j.Logger log = LoggerFactory
-			.getLogger(OneShotSQLGeneratorEngine.class);
+	private static final org.slf4j.Logger log = LoggerFactory.getLogger(OneShotSQLGeneratorEngine.class);
 	private final JdbcTypeMapper jdbcTypeMapper;
 
 	OneShotSQLGeneratorEngine(DBMetadata metadata,
@@ -221,7 +217,6 @@ public class OneShotSQLGeneratorEngine {
 				.put(ExpressionOperation.STR_STARTS, sqladapter.strStartsOperator())
 				.put(ExpressionOperation.STR_ENDS, sqladapter.strEndsOperator())
 				.put(ExpressionOperation.CONTAINS, sqladapter.strContainsOperator())
-
 				.put(ExpressionOperation.NOW, sqladapter.dateNow());
 
 		try {
@@ -274,23 +269,22 @@ public class OneShotSQLGeneratorEngine {
 
 		ruleIndex = depGraph.getRuleIndex();
 
-		List<Predicate> predicatesInBottomUp = depGraph
-				.getPredicatesInBottomUp();
+		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();
+		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 
-		List<Predicate> extensionalPredicates = depGraph
-				.getExtensionalPredicates();
+		MutableQueryModifiers queryModifiers = queryProgram.getQueryModifiers();
+		isDistinct = queryModifiers.hasModifiers()
+						&& queryModifiers.isDistinct();
 
-		isDistinct = hasSelectDistinctStatement(queryProgram);
-		isOrderBy = hasOrderByClause(queryProgram);
-		if (queryProgram.getQueryModifiers().hasModifiers()) {
+		isOrderBy = queryModifiers.hasModifiers()
+						&& !queryModifiers.getSortConditions().isEmpty();
+
+		if (queryModifiers.hasModifiers()) {
 			final String outerViewName = "SUB_QVIEW";
 			String subquery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
 
-			String modifier;
 
-			List<OrderCondition> conditions = queryProgram.getQueryModifiers().getSortConditions();
-
-			List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
+			//List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
 			// if (!groupby.isEmpty()) {
 			// subquery += "\n" + sqladapter.sqlGroupBy(groupby, "") + " " +
 			// havingStr + "\n";
@@ -298,12 +292,13 @@ public class OneShotSQLGeneratorEngine {
 			// List<OrderCondition> conditions =
 			// query.getQueryModifiers().getSortConditions();
 
-			long limit = queryProgram.getQueryModifiers().getLimit();
-			long offset = queryProgram.getQueryModifiers().getOffset();
+			long limit = queryModifiers.getLimit();
+			long offset = queryModifiers.getOffset();
+			List<OrderCondition> conditions = queryModifiers.getSortConditions();
 
+			String modifier;
 			if (!conditions.isEmpty()) {
-				modifier = sqladapter.sqlOrderByAndSlice(conditions, outerViewName, limit, offset)
-						+ "\n";
+				modifier = sqladapter.sqlOrderByAndSlice(conditions, outerViewName, limit, offset) + "\n";
 			}
 			else if (limit != -1 || offset != -1) {
 				modifier = sqladapter.sqlSlice(limit, offset) + "\n";
@@ -312,13 +307,14 @@ public class OneShotSQLGeneratorEngine {
 				modifier = "";
 			}
 
-			String sql = "SELECT *\n";
-			sql += "FROM (\n";
-			sql += subquery + "\n";
-			sql += ") " + outerViewName + "\n";
-			sql += modifier;
+			String sql = "SELECT *\n" +
+					"FROM (\n" +
+					subquery + "\n" +
+					") " + outerViewName + "\n" +
+					modifier;
 			return new SQLExecutableQuery(sql, signature);
-		} else {
+		}
+		else {
 			String sqlQuery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
 			return new SQLExecutableQuery(sqlQuery, signature);
 		}
@@ -336,23 +332,6 @@ public class OneShotSQLGeneratorEngine {
 		return queryAfterPullOut;
 	}
 
-    private boolean hasSelectDistinctStatement(DatalogProgram query) {
-		boolean toReturn = false;
-		if (query.getQueryModifiers().hasModifiers()) {
-			toReturn = query.getQueryModifiers().isDistinct();
-		}
-		return toReturn;
-	}
-
-	private boolean hasOrderByClause(DatalogProgram query) {
-		boolean toReturn = false;
-		if (query.getQueryModifiers().hasModifiers()) {
-			final List<OrderCondition> conditions = query.getQueryModifiers()
-					.getSortConditions();
-			toReturn = (!conditions.isEmpty());
-		}
-		return toReturn;
-	}
 
 	/**
 	 * Main method. Generates the full SQL query, taking into account
@@ -427,7 +406,6 @@ public class OneShotSQLGeneratorEngine {
 		/* Main loop, constructing the SPJ query for each CQ */
 
 		for (CQIE cq : ansrules) {
-
 			/*
 			 * Here we normalize so that the form of the CQ is as close to the
 			 * form of a normal SQL algebra as possible,
@@ -439,41 +417,26 @@ public class OneShotSQLGeneratorEngine {
 			queryStrings.add(querystr);
 		}
 
-		StringBuilder result = createUnionFromSQLList(queryStrings);
-
-		return result.toString();
+		return createUnion(queryStrings, isDistinct && !distinctResultSet ? "UNION" : "UNION ALL");
 	}
 
 
 
 	/**
-	 * Takes a list of SQL strings, and returns SQL1 UNION SQL 2 UNION.... This
-	 * method complements {@link #generateQueryFromSingleRule}
+	 * Takes a list of SQL strings, and returns SQL1 UNION SQL 2 UNION....
 	 *
-	 * @param queriesStrings list
+	 * @param sqls list
 	 *                       of SQL strings
 	 * @return Union of sql queries
 	 */
-	private StringBuilder createUnionFromSQLList(List<String> queriesStrings) {
-		Iterator<String> queryStringIterator = queriesStrings.iterator();
-		StringBuilder result = new StringBuilder();
-		if (queryStringIterator.hasNext()) {
-			result.append(queryStringIterator.next());
-		}
-
-		String UNION;
-		if (isDistinct && !distinctResultSet) {
-			UNION = "UNION";
+	private static String createUnion(List<String> sqls, String UNION) {
+		String unionView;
+		if (sqls.size() == 1) {
+			unionView = sqls.iterator().next();
 		} else {
-			UNION = "UNION ALL";
+			unionView = "(" + Joiner.on(")\n " + UNION + "\n (").join(sqls) + ")";
 		}
-		while (queryStringIterator.hasNext()) {
-			result.append("\n");
-			result.append(UNION);
-			result.append("\n");
-			result.append(queryStringIterator.next());
-		}
-		return result;
+		return unionView;
 	}
 
 	/**
@@ -512,10 +475,7 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 	private String getHaving(List<Function> body, QueryAliasIndex index) {
-		StringBuilder result = new StringBuilder();
-		List <Term> conditions = new LinkedList<Term> ();
-		List <Function> condFunctions = new LinkedList<Function> ();
-		//List<Variable> varsInHaving = Lists.newArrayList();
+		List <Term> conditions = Collections.EMPTY_LIST;
 		for (Function atom : body) {
 			if (atom.getFunctionSymbol().equals(DatalogAlgebraOperatorPredicates.SPARQL_HAVING)) {
 				conditions = atom.getTerms();
@@ -526,10 +486,8 @@ public class OneShotSQLGeneratorEngine {
 			return "";
 		}
 
-		for(Term cond : conditions){
-			condFunctions.add((Function) cond);
-		}
-
+		List<Function> condFunctions = conditions.stream()
+				.map(c -> (Function)c).collect(ImmutableCollectors.toList());
 		Set<String> condSet = getBooleanConditionsString(condFunctions, index);
 
 //		List<String> groupReferences = Lists.newArrayList();
@@ -544,56 +502,39 @@ public class OneShotSQLGeneratorEngine {
 //			Joiner.on(" , ").appendTo(result, groupReferences);
 //		}
 
-		result.append(" HAVING ( ");
-		for (String c: condSet) {
-			result.append(c);
-		}
-		result.append(" ) ");
-		return result.toString();
+		return " HAVING ( " + Joiner.on("").join(condSet) + " ) ";
 	}
 
 	private String getGroupBy(List<Function> body, QueryAliasIndex index) {
-		StringBuilder result = new StringBuilder();
 
-		List<Variable> varsInGroupBy = Lists.newArrayList();
+		List<String> groupReferences = Lists.newArrayList();
 		for (Function atom : body) {
 			if (atom.getFunctionSymbol().equals(SPARQL_GROUP)) {
-				varsInGroupBy.addAll(atom.getVariables());
+				for (Variable var : atom.getVariables()) {
+					index.columnReferences.get(var).stream()
+							.map(QualifiedAttributeID::getSQLRendering)
+							.forEach(groupReferences::add);
+				}
 			}
 		}
 
-		List<String> groupReferences = Lists.newArrayList();
-
-		for(Variable var : varsInGroupBy) {
-			index.columnReferences.get(var).stream()
-					.map(QualifiedAttributeID::getSQLRendering)
-					.forEach(groupReferences::add);
+		if (!groupReferences.isEmpty()) {
+			return " GROUP BY " + Joiner.on(" , ").join(groupReferences);
 		}
 
-		if(!groupReferences.isEmpty()) {
-			result.append(" GROUP BY " );
-			Joiner.on(" , ").appendTo(result, groupReferences);
-		}
-
-		return result.toString();
+		return "";
 	}
+
 
 	/**
 	 * Normalizations of the Datalog program requirend by the Datalog to SQL translator
-	 */
-	private void normalizeRule(CQIE cq) {
-
-		DatalogNormalizer.foldJoinTrees(cq);
-
-		DatalogNormalizer.addMinimalEqualityToLeftJoin(cq);
-	}
-
-	/**
+	 *
 	 * @param program
 	 */
 	private void normalizeProgram(DatalogProgram program) {
 		for (CQIE rule : program.getRules()) {
-			normalizeRule(rule);
+			DatalogNormalizer.foldJoinTrees(rule);
+			DatalogNormalizer.addMinimalEqualityToLeftJoin(rule);
 		}
 		log.debug("Program normalized for SQL translation: \n"+program);
 	}
@@ -646,12 +587,8 @@ public class OneShotSQLGeneratorEngine {
 			sqls.add(sqlQuery);
 		}
 
-		String unionView;
-		if (sqls.size() == 1) {
-			unionView = sqls.iterator().next();
-		} else {
-			unionView = "(" + Joiner.on(")\n UNION ALL \n (").join(sqls) + ")";
-		}
+		String unionView = createUnion(sqls, "UNION ALL");
+		sqlAnsViewMap.put(pred, unionView);
 
 		QuotedIDFactory idFactory = metadata.getQuotedIDFactory();
 
@@ -666,24 +603,18 @@ public class OneShotSQLGeneratorEngine {
 
 		// all have the same arity
 		int headArity = ruleList.iterator().next().getHead().getTerms().size();
-		List<QualifiedAttributeID> columnIds = Lists.newArrayListWithExpectedSize(3 * headArity);
 
-		// Hard coded variable names
+		// creates a view outside the DBMetadata (specific to this sub-query)
+		ParserViewDefinition view = new ParserViewDefinition(viewId, unionView);
 		for (int i = 0; i < headArity; i++) {
-			columnIds.add(new QualifiedAttributeID(viewId,
+			// hard-coded variable names
+			view.addAttribute(new QualifiedAttributeID(viewId,
 					idFactory.createAttributeID(sqladapter.sqlQuote("v" + i + TYPE_SUFFIX))));
-			columnIds.add(new QualifiedAttributeID(viewId,
+			view.addAttribute(new QualifiedAttributeID(viewId,
 					idFactory.createAttributeID(sqladapter.sqlQuote("v" + i + LANG_SUFFIX))));
-			columnIds.add(new QualifiedAttributeID(viewId,
+			view.addAttribute(new QualifiedAttributeID(viewId,
 					idFactory.createAttributeID(sqladapter.sqlQuote("v" + i))));
 		}
-
-		// Creates a view outside the DBMetadata (specific to this sub-query)
-		ParserViewDefinition view = new ParserViewDefinition(viewId, unionView);
-		columnIds.stream().forEach(view::addAttribute);
-
-		sqlAnsViewMap.put(pred, unionView);
-
 		return view;
 	}
 
@@ -691,27 +622,27 @@ public class OneShotSQLGeneratorEngine {
 	 * Escapes view names.
 	 */
 	private static String escapeName(String name) {
-		return name.replace('.', '_').replace(':', '_').replace('/', '_').replace(' ', '_');
+		return name
+				.replace('.', '_')
+				.replace(':', '_')
+				.replace('/', '_')
+				.replace(' ', '_');
 	}
 
 	/***
 	 * Returns a string with boolean conditions formed with the boolean atoms
 	 * found in the atoms list.
 	 */
-	private Set<String> getBooleanConditionsString(
-			List<Function> atoms, QueryAliasIndex index) {
-		Set<String> conditions = new LinkedHashSet<String>();
-		for (int atomidx = 0; atomidx < atoms.size(); atomidx++) {
-			Term innerAtom = atoms.get(atomidx);
-			Function innerAtomAsFunction = (Function) innerAtom;
+	private Set<String> getBooleanConditionsString(List<Function> atoms, QueryAliasIndex index) {
+		Set<String> conditions = new LinkedHashSet<>();
+		for (Function atom : atoms) {
 			// Boolean expression
-			if (innerAtomAsFunction.isOperation()) {
-				String condition = getSQLCondition(innerAtomAsFunction, index);
-
+			if (atom.isOperation()) {
+				String condition = getSQLCondition(atom, index);
 				conditions.add(condition);
-			} else if (innerAtomAsFunction.isDataTypeFunction()) {
-
-				String condition = getSQLString(innerAtom, index, false);
+			}
+			else if (atom.isDataTypeFunction()) {
+				String condition = getSQLString(atom, index, false);
 				conditions.add(condition);
 			}
 		}
@@ -723,7 +654,7 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private String getSQLCondition(Function atom, QueryAliasIndex index) {
 		Predicate functionSymbol = atom.getFunctionSymbol();
-		if (isUnary(atom)) {
+		if (functionSymbol.getArity() == 1) {
 			// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
 			// added also for IS TRUE
 			String expressionFormat = operations.get(functionSymbol);
@@ -770,18 +701,18 @@ public class OneShotSQLGeneratorEngine {
 				}
 			}
 			return String.format(expressionFormat, column);
-		} else if (isBinary(atom)) {
+		}
+		else if (functionSymbol.getArity() == 2) {
 			// For binary boolean operators, e.g., AND, OR, EQ, GT, LT, etc.
-			// _
 			String expressionFormat = operations.get(functionSymbol);
 			Term left = atom.getTerm(0);
 			Term right = atom.getTerm(1);
 			String leftOp = getSQLString(left, index, true);
 			String rightOp = getSQLString(right, index, true);
 
-			return String.format("(" + expressionFormat + ")", leftOp,
-					rightOp);
-		} else {
+			return String.format("(" + expressionFormat + ")", leftOp, rightOp);
+		}
+		else {
 			if (functionSymbol == ExpressionOperation.REGEX) {
 				boolean caseinSensitive = false;
 				boolean multiLine = false;
@@ -805,7 +736,8 @@ public class OneShotSQLGeneratorEngine {
 				String sqlRegex = sqladapter.sqlRegex(column, pattern, caseinSensitive,
 						multiLine, dotAllMode);
 				return sqlRegex;
-			} else {
+			}
+			else {
 				throw new RuntimeException("The builtin function "
 						+ functionSymbol.toString() + " is not supported yet!");
 			}
@@ -881,19 +813,14 @@ public class OneShotSQLGeneratorEngine {
 			 * This is actually a Join or LeftJoin, so we form the JOINs/LEFT
 			 * JOINs and the ON clauses
 			 */
-			String JOIN_KEYWORD;
-			if (isLeftJoin) {
-				JOIN_KEYWORD = "LEFT OUTER JOIN";
-			} else {
-				JOIN_KEYWORD = "JOIN";
-			}
-			String JOIN;
+			String JOIN_KEYWORD = isLeftJoin ? "LEFT OUTER JOIN" : "JOIN";
 
 			//add parenthesis
 			String NESTEDJOIN = "" + indent + "" + indent + "%s\n" + indent
 					+ JOIN_KEYWORD + "\n" + indent + "(%s)" + indent + "";
 
-			if(parenthesis){
+			String JOIN;
+			if (parenthesis) {
 				JOIN = NESTEDJOIN;
 			}
 			else {
@@ -967,36 +894,31 @@ public class OneShotSQLGeneratorEngine {
 									  String indent) {
 		Predicate predicate = atom.getFunctionSymbol();
 
-		if (atom.isOperation()
-				|| atom.isDataTypeFunction()) {
+		if (atom.isOperation() || atom.isDataTypeFunction()) {
 			// These don't participate in the FROM clause
 			return "";
-		} else if (atom.isAlgebraFunction()) {
+		}
+		else if (atom.isAlgebraFunction()) {
 
 			if (predicate == SPARQL_GROUP) {
 				return "";
 			}
-			List<Function> innerTerms = new ArrayList<>(atom.getTerms().size());
 
-			boolean parenthesis = false;
+			if (predicate == DatalogAlgebraOperatorPredicates.SPARQL_JOIN ||
+					predicate == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
 
+				boolean isLeftJoin = (predicate == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN);
+				List<Function> innerTerms = new ArrayList<>(atom.getTerms().size());
+				boolean parenthesis = false;
 
-			if (predicate == DatalogAlgebraOperatorPredicates.SPARQL_JOIN || predicate == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
-
-				boolean isLeftJoin = false;
-
-				if (predicate == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
-					isLeftJoin = true;
-				}
-
-				int i =0;
+				int i = 0;
 				for (Term term : atom.getTerms()){
 					Function innerTerm1 = (Function) term;
-					if(innerTerm1.isAlgebraFunction()){
+					if (innerTerm1.isAlgebraFunction()){
 						//nested joins we need to add parenthesis later
 						parenthesis = true;
 					}
-					else if(isLeftJoin && i == 1){
+					else if (isLeftJoin && i == 1){
 						//in case of left join we  want to add the parenthesis
 						// only for the right tables
 						//we ignore nested joins from the left tables
@@ -1012,7 +934,6 @@ public class OneShotSQLGeneratorEngine {
 			}
 
 		}
-
 
 		/*
 		 * This is a data atom
@@ -1039,38 +960,19 @@ public class OneShotSQLGeneratorEngine {
 	private String getConditionsString(List<Function> atoms,
 									   QueryAliasIndex index, boolean processShared, String indent) {
 
-		Set<String> equalityConditions = new LinkedHashSet<>();
+		Set<String> conditions = new LinkedHashSet<>();
 
 		// if (processShared)
-
 		// guohui: After normalization, do we have shared variables?
 		// TODO: should we remove this ??
 		Set<String> conditionsSharedVariablesAndConstants = getConditionsSharedVariablesAndConstants(
 				atoms, index, processShared);
-		equalityConditions.addAll(conditionsSharedVariablesAndConstants);
-		Set<String> booleanConditions = getBooleanConditionsString(
-				atoms, index);
+		conditions.addAll(conditionsSharedVariablesAndConstants);
 
-		Set<String> conditions = new LinkedHashSet<>();
-		conditions.addAll(equalityConditions);
+		Set<String> booleanConditions = getBooleanConditionsString(atoms, index);
 		conditions.addAll(booleanConditions);
 
-		/*
-		 * Collecting all the conditions in a single string for the ON or WHERE
-		 * clause
-		 */
-		StringBuilder conditionsString = new StringBuilder();
-		Iterator<String> conditionsIterator = conditions.iterator();
-		if (conditionsIterator.hasNext()) {
-			conditionsString.append(indent);
-			conditionsString.append(conditionsIterator.next());
-		}
-		while (conditionsIterator.hasNext()) {
-			conditionsString.append(" AND\n");
-			conditionsString.append(indent);
-			conditionsString.append(conditionsIterator.next());
-		}
-		return conditionsString.toString();
+		return conditions.isEmpty() ? "" : indent + Joiner.on(" AND\n" + indent).join(conditions);
 	}
 
 	/**
@@ -1099,12 +1001,9 @@ public class OneShotSQLGeneratorEngine {
 		 * to collect all the variables of each nested atom., if its a left
 		 * join, only of the first data/algebra atom (the left atom).
 		 */
-		boolean isLeftJoin = false;
+		boolean isLeftJoin = atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN;
 		boolean foundFirstDataAtom = false;
 
-		if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
-			isLeftJoin = true;
-		}
 		Set<Variable> innerVariables = new LinkedHashSet<>();
 		for (Term t : atom.getTerms()) {
 			if (isLeftJoin && foundFirstDataAtom) {
@@ -1138,7 +1037,6 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private Set<String> getConditionsSharedVariablesAndConstants(
 			List<Function> atoms, QueryAliasIndex index, boolean processShared) {
-		Set<String> equalities = new LinkedHashSet<>();
 
 		Set<Variable> currentLevelVariables = new LinkedHashSet<>();
 		if (processShared) {
@@ -1153,6 +1051,7 @@ public class OneShotSQLGeneratorEngine {
 		 * (due to repeated positions of the variable). then we form atoms of
 		 * the form "COL1 = COL2"
 		 */
+		Set<String> equalities = new LinkedHashSet<>();
 		for (Variable var : currentLevelVariables) {
 			Set<QualifiedAttributeID> references = index.getColumnReferences(var);
 			if (references.size() < 2) {
@@ -1193,7 +1092,7 @@ public class OneShotSQLGeneratorEngine {
 	// return variable SQL data type
 	private int getVariableDataType(Term term, QueryAliasIndex idx) {
 
-		if (term instanceof Function){
+		if (term instanceof Function) {
 			Function f = (Function) term;
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
@@ -1202,7 +1101,8 @@ public class OneShotSQLGeneratorEngine {
 			}
 			// Return varchar for unknown
 			return Types.VARCHAR;
-		}else if (term instanceof Variable){
+		}
+		else if (term instanceof Variable) {
 			throw new RuntimeException("Cannot return the SQL type for: "
 					+ term.toString());
 		}
@@ -1571,7 +1471,6 @@ public class OneShotSQLGeneratorEngine {
 			} else {
 				literalValue = ((ValueConstant) t).getValue();
 			}
-			Predicate pred = ov.getFunctionSymbol();
 
 			String template = trimLiteral(literalValue);
 
@@ -1688,7 +1587,7 @@ public class OneShotSQLGeneratorEngine {
 				 */
 				return !hasIRIDictionary();
 			} else {
-				if (isUnary(function)) {
+				if (functionSymbol.getArity() == 1) {
 					if (functionSymbol.getName().equals("Count")) {
 						return false;
 					}
@@ -1757,20 +1656,6 @@ public class OneShotSQLGeneratorEngine {
 			string = string.substring(1, string.length() - 1);
 		}
 		return string;
-	}
-
-	/**
-	 * Determines if it is a unary function.
-	 */
-	private boolean isUnary(Function fun) {
-		return fun.getArity() == 1;
-	}
-
-	/**
-	 * Determines if it is a binary function.
-	 */
-	private boolean isBinary(Function fun) {
-		return fun.getArity() == 2;
 	}
 
 	/**
