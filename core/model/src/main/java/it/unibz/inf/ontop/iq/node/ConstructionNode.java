@@ -17,7 +17,7 @@ import java.util.Optional;
  * TODO: further explain
  *
  */
-public interface ConstructionNode extends ExplicitVariableProjectionNode {
+public interface ConstructionNode extends ExplicitVariableProjectionNode, UnaryOperatorNode {
 
     /**
      * (Some) projected variable --> transformed variable

@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 /**
  * All its children are expected to project its projected variables
  */
-public interface UnionNode extends ExplicitVariableProjectionNode {
+public interface UnionNode extends ExplicitVariableProjectionNode, NaryOperatorNode {
 
     @Override
     UnionNode clone();
