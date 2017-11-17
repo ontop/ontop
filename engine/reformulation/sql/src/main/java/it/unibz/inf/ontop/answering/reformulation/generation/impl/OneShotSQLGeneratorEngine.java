@@ -378,10 +378,7 @@ public class OneShotSQLGeneratorEngine {
 								 List<Predicate> predicatesInBottomUp,
 								 List<Predicate> extensionalPredicates) throws OntopReformulationException {
 
-		int numPreds = predicatesInBottomUp.size();
-		int i = 0;
-
-		 Map<Predicate, ParserViewDefinition> subQueryDefinitions = new HashMap<>();
+		Map<Predicate, ParserViewDefinition> subQueryDefinitions = new HashMap<>();
 
 		TypeExtractor.TypeResults typeResults;
 		try {
@@ -401,7 +398,8 @@ public class OneShotSQLGeneratorEngine {
 		 */
 
 		// create a view for every ans predicate in the Datalog input program.
-		while (i < numPreds - 1) {
+		int numPreds = predicatesInBottomUp.size();
+		for (int i = 0; i < numPreds - 1; i++) {
 			Predicate pred = predicatesInBottomUp.get(i);
 			if (extensionalPredicates.contains(pred)) {
 				/*
@@ -413,7 +411,6 @@ public class OneShotSQLGeneratorEngine {
 
 				subQueryDefinitions.put(pred, view);
 			}
-			i++;
 		}
 
 		/**
@@ -421,11 +418,10 @@ public class OneShotSQLGeneratorEngine {
 		 */
 
 		// This should be ans1, and the rules defining it.
-		Predicate predAns1 = predicatesInBottomUp.get(i);
+		Predicate predAns1 = predicatesInBottomUp.get(numPreds - 1);
 		Collection<CQIE> ansrules = ruleIndex.get(predAns1);
 
-		List<String> queryStrings = Lists.newArrayListWithCapacity(ansrules
-				.size());
+		List<String> queryStrings = Lists.newArrayListWithCapacity(ansrules.size());
 
 		
 		/* Main loop, constructing the SPJ query for each CQ */
@@ -621,7 +617,7 @@ public class OneShotSQLGeneratorEngine {
 	 * @param ruleIndex
 	 * @param subQueryDefinitions
 	 * @param termTypeMap
-	 *@param castTypes @throws OBDAException
+	 * @param castTypes
 	 *
 	 * @throws Exception
 	 */
@@ -636,18 +632,10 @@ public class OneShotSQLGeneratorEngine {
 
 		Collection<CQIE> ruleList = ruleIndex.get(pred);
 
-		String unionView;
-
 		List<String> sqls = Lists.newArrayListWithExpectedSize(ruleList.size());
 
-		int headArity = 0;
-
 		for (CQIE rule : ruleList) {
-			Function cqHead = rule.getHead();
-
-			headArity = cqHead.getTerms().size();
-
-			List<String> varContainer = cqHead.getVariables().stream()
+			List<String> varContainer = rule.getHead().getVariables().stream()
 					.map(Variable::getName)
 					.collect(Collectors.toList());
 
@@ -658,6 +646,7 @@ public class OneShotSQLGeneratorEngine {
 			sqls.add(sqlQuery);
 		}
 
+		String unionView;
 		if (sqls.size() == 1) {
 			unionView = sqls.iterator().next();
 		} else {
@@ -675,6 +664,8 @@ public class OneShotSQLGeneratorEngine {
 				alreadyAllocatedViewNames);
 		RelationID viewId = idFactory.createRelationID(null, viewname);
 
+		// all have the same arity
+		int headArity = ruleList.iterator().next().getHead().getTerms().size();
 		List<QualifiedAttributeID> columnIds = Lists.newArrayListWithExpectedSize(3 * headArity);
 
 		// Hard coded variable names
