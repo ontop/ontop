@@ -20,7 +20,7 @@ public interface QueryTreeComponent {
 
     Stream<QueryNode> getChildrenStream(QueryNode node);
 
-    ConstructionNode getRootConstructionNode() throws IllegalTreeException;
+    QueryNode getRootNode() throws IllegalTreeException;
 
     ImmutableList<QueryNode> getNodesInBottomUpOrder() throws IllegalTreeException;
 

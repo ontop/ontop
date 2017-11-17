@@ -15,7 +15,7 @@ public class BasicQueryTreePrinter implements IntermediateQueryPrinter {
     @Override
     public String stringify(IntermediateQuery query) {
         return  query.getProjectionAtom() + "\n"
-                + stringifySubTree(query, query.getRootConstructionNode(), "");
+                + stringifySubTree(query, query.getRootNode(), "");
     }
 
 

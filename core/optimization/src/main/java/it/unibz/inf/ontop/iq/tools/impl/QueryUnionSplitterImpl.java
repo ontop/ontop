@@ -40,7 +40,7 @@ public class QueryUnionSplitterImpl implements QueryUnionSplitter {
     }
 
     private Optional<UnionNode> findFirstSplittableUnion(IntermediateQuery query) {
-        Queue<QueryNode> nodesToVisit = new LinkedList<>(query.getChildren(query.getRootConstructionNode()));
+        Queue<QueryNode> nodesToVisit = new LinkedList<>(query.getChildren(query.getRootNode()));
 
         while(!nodesToVisit.isEmpty()) {
             QueryNode node = nodesToVisit.poll();
@@ -80,7 +80,7 @@ public class QueryUnionSplitterImpl implements QueryUnionSplitter {
 
     private IntermediateQuery split(IntermediateQuery originalQuery, UnionNode unionNode, QueryNode replacingChildNode) {
         IntermediateQueryBuilder queryBuilder = originalQuery.newBuilder();
-        ConstructionNode rootNode = originalQuery.getRootConstructionNode();
+        QueryNode rootNode = originalQuery.getRootNode();
         queryBuilder.init(originalQuery.getProjectionAtom(), rootNode);
 
         Queue<QueryNode> parentNodes = new LinkedList<>();

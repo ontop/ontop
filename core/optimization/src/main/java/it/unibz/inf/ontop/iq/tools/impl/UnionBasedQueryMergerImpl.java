@@ -132,7 +132,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                                               IntermediateQuery subQuery) {
 
         // First add the root of the sub-query
-        queryBuilder.addChild(topUnionNode, subQuery.getRootConstructionNode());
+        queryBuilder.addChild(topUnionNode, subQuery.getRootNode());
 
         subQuery.getNodesInTopDownOrder().stream()
                 .skip(1)
@@ -161,7 +161,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
          * Adds the renamed root of the definition
          */
 
-        queryBuilder.addChild(unionNode, renamedNodeMap.get(definition.getRootConstructionNode()));
+        queryBuilder.addChild(unionNode, renamedNodeMap.get(definition.getRootNode()));
 
         /**
          * Add the other renamed nodes

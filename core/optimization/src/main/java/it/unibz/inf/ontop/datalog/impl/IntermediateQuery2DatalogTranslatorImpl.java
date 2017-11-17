@@ -44,6 +44,7 @@ import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertToMutableFunction;
 
 /***
@@ -95,9 +96,12 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 */
 	@Override
 	public DatalogProgram translate(IntermediateQuery query) {
-		ConstructionNode root = query.getRootConstructionNode();
+		QueryNode root = query.getRootNode();
 		
-		Optional<ImmutableQueryModifiers> optionalModifiers =  root.getOptionalModifiers();
+		Optional<ImmutableQueryModifiers> optionalModifiers =  Optional.of(root)
+				.filter(r -> r instanceof ConstructionNode)
+				.map(r -> (ConstructionNode)r)
+				.flatMap(ConstructionNode::getOptionalModifiers);
 
         DatalogProgram dProgram;
 		if (optionalModifiers.isPresent()){
@@ -125,13 +129,20 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 * @return Datalog program that represents the construction of the SPARQL
 	 *         query.
 	 */
-	private void translate(IntermediateQuery query, DatalogProgram pr, ConstructionNode root) {
+	private void translate(IntermediateQuery query, DatalogProgram pr, QueryNode root) {
 
 		Queue<RuleHead> heads = new LinkedList<>();
-		heads.add(new RuleHead(root.getSubstitution(), query.getProjectionAtom(),query.getFirstChild(root)));
+
+		ImmutableSubstitution<ImmutableTerm> topSubstitution = Optional.of(root)
+				.filter(r -> r instanceof ConstructionNode)
+				.map(r -> (ConstructionNode) r)
+				.map(ConstructionNode::getSubstitution)
+				.orElseGet(SUBSTITUTION_FACTORY::getSubstitution);
+
+		heads.add(new RuleHead(topSubstitution, query.getProjectionAtom(),query.getFirstChild(root)));
 
 		// Mutable (append-only)
-		Map<ConstructionNode, DataAtom> subQueryProjectionAtoms = new HashMap<>();
+		Map<QueryNode, DataAtom> subQueryProjectionAtoms = new HashMap<>();
 		subQueryProjectionAtoms.put(root, query.getProjectionAtom());
 
 		//In heads we keep the heads of the sub-rules in the program, e.g. ans5() :- LeftJoin(....)
@@ -166,7 +177,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 * Usually it will be a single atom, but it is different for the filter case.
 	 */
 	private List<Function> getAtomFrom(IntermediateQuery te, QueryNode node, Queue<RuleHead> heads,
-									   Map<ConstructionNode, DataAtom> subQueryProjectionAtoms,
+									   Map<QueryNode, DataAtom> subQueryProjectionAtoms,
 									   boolean isNested) {
 		
 		List<Function> body = new ArrayList<>();
@@ -298,7 +309,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	}
 
 	private List<Function> getAtomsFromJoinNode(InnerJoinNode node, IntermediateQuery te, Queue<RuleHead> heads,
-												Map<ConstructionNode, DataAtom> subQueryProjectionAtoms,
+												Map<QueryNode, DataAtom> subQueryProjectionAtoms,
 												boolean isNested) {
 		List<Function> body = new ArrayList<>();
 		Optional<ImmutableExpression> filter = node.getOptionalFilterCondition();
