@@ -93,7 +93,6 @@ public class OneShotSQLGeneratorEngine {
     private static final String LANG_SUFFIX = "Lang";
     private static final String MAIN_COLUMN_SUFFIX = "";
 
-
 	private static final String INDENT = "    ";
 
 	private final RDBMetadata metadata;
@@ -279,10 +278,10 @@ public class OneShotSQLGeneratorEngine {
 		isOrderBy = queryModifiers.hasModifiers()
 						&& !queryModifiers.getSortConditions().isEmpty();
 
+		final String sqlQuery;
+		String subquery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
 		if (queryModifiers.hasModifiers()) {
 			final String outerViewName = "SUB_QVIEW";
-			String subquery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
-
 
 			//List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
 			// if (!groupby.isEmpty()) {
@@ -296,7 +295,7 @@ public class OneShotSQLGeneratorEngine {
 			long offset = queryModifiers.getOffset();
 			List<OrderCondition> conditions = queryModifiers.getSortConditions();
 
-			String modifier;
+			final String modifier;
 			if (!conditions.isEmpty()) {
 				modifier = sqladapter.sqlOrderByAndSlice(conditions, outerViewName, limit, offset) + "\n";
 			}
@@ -307,17 +306,14 @@ public class OneShotSQLGeneratorEngine {
 				modifier = "";
 			}
 
-			String sql = "SELECT *\n" +
-					"FROM (\n" +
-					subquery + "\n" +
-					") " + outerViewName + "\n" +
+			sqlQuery = "SELECT *\n" +
+					"FROM (\n" + subquery + "\n" + ") " + outerViewName + "\n" +
 					modifier;
-			return new SQLExecutableQuery(sql, signature);
 		}
 		else {
-			String sqlQuery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
-			return new SQLExecutableQuery(sqlQuery, signature);
+			sqlQuery = subquery;
 		}
+		return new SQLExecutableQuery(sqlQuery, signature);
 	}
 
 	private IntermediateQuery normalizeIQ(IntermediateQuery intermediateQuery) {
@@ -380,11 +376,9 @@ public class OneShotSQLGeneratorEngine {
 		int numPreds = predicatesInBottomUp.size();
 		for (int i = 0; i < numPreds - 1; i++) {
 			Predicate pred = predicatesInBottomUp.get(i);
-			if (extensionalPredicates.contains(pred)) {
-				/*
-				 * extensional predicates are defined by DBs
-				 */
-			} else {
+			if (!extensionalPredicates.contains(pred)) {
+				// extensional predicates are defined by DBs
+				// so, we skip them
 				ParserViewDefinition view = createViewFrom(pred, metadata, ruleIndex, subQueryDefinitions,
 						termTypeMap, castTypeMap.get(pred));
 
@@ -401,10 +395,8 @@ public class OneShotSQLGeneratorEngine {
 		Collection<CQIE> ansrules = ruleIndex.get(predAns1);
 
 		List<String> queryStrings = Lists.newArrayListWithCapacity(ansrules.size());
-
 		
 		/* Main loop, constructing the SPJ query for each CQ */
-
 		for (CQIE cq : ansrules) {
 			/*
 			 * Here we normalize so that the form of the CQ is as close to the
@@ -456,22 +448,21 @@ public class OneShotSQLGeneratorEngine {
 											  ImmutableList<Optional<TermType>> termTypes) {
 		QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions);
 
-		boolean innerdistincts = false;
-
 		// && numberOfQueries == 1
-		if (isDistinct && !distinctResultSet) {
-			innerdistincts = true;
-		}
+		boolean innerdistincts = isDistinct && !distinctResultSet;
 
-		String FROM = getFROM(cq.getBody(), index);
-		String WHERE = getWHERE(cq.getBody(), index);
+		String tableDefinitions = getTableDefinitions(cq.getBody(), index, true,
+				false, false, "");
+		String FROM = "\n FROM \n" + tableDefinitions;
+
+		String conditions = getConditionsString(cq.getBody(), index, false, "");
+		String WHERE = conditions.isEmpty() ? "" : "\nWHERE \n" + conditions;
 
 		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1, castDatatypes, termTypes);
 		String GROUP = getGroupBy(cq.getBody(), index);
 		String HAVING = getHaving(cq.getBody(), index);
 
-		String querystr = SELECT + FROM + WHERE + GROUP + HAVING;
-		return querystr;
+		return SELECT + FROM + WHERE + GROUP + HAVING;
 	}
 
 	private String getHaving(List<Function> body, QueryAliasIndex index) {
@@ -518,11 +509,7 @@ public class OneShotSQLGeneratorEngine {
 			}
 		}
 
-		if (!groupReferences.isEmpty()) {
-			return " GROUP BY " + Joiner.on(" , ").join(groupReferences);
-		}
-
-		return "";
+		return groupReferences.isEmpty() ? "" : " GROUP BY " + Joiner.on(" , ").join(groupReferences);
 	}
 
 
@@ -718,15 +705,10 @@ public class OneShotSQLGeneratorEngine {
 				boolean multiLine = false;
 				boolean dotAllMode = false;
 				if (atom.getArity() == 3) {
-					if (atom.getTerm(2).toString().contains("i")) {
-						caseinSensitive = true;
-					}
-					if (atom.getTerm(2).toString().contains("m")) {
-						multiLine = true;
-					}
-					if (atom.getTerm(2).toString().contains("s")) {
-						dotAllMode = true;
-					}
+					String options = atom.getTerm(2).toString();
+					caseinSensitive = options.contains("i");
+					multiLine = options.contains("m");
+					dotAllMode = options.contains("s");
 				}
 				Term p1 = atom.getTerm(0);
 				Term p2 = atom.getTerm(1);
@@ -737,10 +719,9 @@ public class OneShotSQLGeneratorEngine {
 						multiLine, dotAllMode);
 				return sqlRegex;
 			}
-			else {
+			else
 				throw new RuntimeException("The builtin function "
-						+ functionSymbol.toString() + " is not supported yet!");
-			}
+						+ functionSymbol + " is not supported yet!");
 		}
 	}
 
@@ -774,7 +755,7 @@ public class OneShotSQLGeneratorEngine {
 		 * We now collect the view definitions for each data atom each
 		 * condition, and each each nested Join/LeftJoin
 		 */
-		List<String> tableDefinitions = new LinkedList<>();
+		List<String> tableDefinitions = Lists.newArrayListWithCapacity(atoms.size());
 		for (Function a : atoms) {
 			String definition = getTableDefinition(a, index, indent + INDENT);
 			if (!definition.isEmpty()) {
@@ -793,22 +774,14 @@ public class OneShotSQLGeneratorEngine {
 		int size = tableDefinitions.size();
 		if (isTopLevel) {
 			if (size == 0) {
-				tableDefinitionsString.append("(" + sqladapter.getDummyTable()
-						+ ") tdummy ");
-
-			} else {
-				Iterator<String> tableDefinitionsIterator = tableDefinitions
-						.iterator();
-				tableDefinitionsString.append(indent);
-				tableDefinitionsString.append(tableDefinitionsIterator.next());
-				while (tableDefinitionsIterator.hasNext()) {
-					tableDefinitionsString.append(",\n");
-					tableDefinitionsString.append(indent);
-					tableDefinitionsString.append(tableDefinitionsIterator
-							.next());
-				}
+				tableDefinitionsString.append("(").append(sqladapter.getDummyTable()).append(") tdummy ");
 			}
-		} else {
+			else {
+				tableDefinitionsString.append(indent);
+				Joiner.on(",\n" + indent).appendTo(tableDefinitionsString, tableDefinitions);
+			}
+		}
+		else {
 			/*
 			 * This is actually a Join or LeftJoin, so we form the JOINs/LEFT
 			 * JOINs and the ON clauses
@@ -829,8 +802,7 @@ public class OneShotSQLGeneratorEngine {
 			}
 
 			if (size == 0) {
-				throw new RuntimeException(
-						"Cannot generate definition for empty data");
+				throw new RuntimeException("Cannot generate definition for empty data");
 			}
 			if (size == 1) {
 				return tableDefinitions.get(0);
@@ -855,31 +827,16 @@ public class OneShotSQLGeneratorEngine {
 				currentSize = tableDefinitions.size();
 			}
 			tableDefinitions.add(currentJoin);
-
 			tableDefinitionsString.append(currentJoin);
-
 
 			/*
 			 * If there are ON conditions we add them now. We need to remove the
 			 * last parenthesis ')' and replace it with ' ON %s)' where %s are
 			 * all the conditions
 			 */
-			String conditions = getConditionsString(atoms, index, true,
-					indent);
+			String conditions = getConditionsString(atoms, index, true, indent);
 
-//			if (conditions.length() > 0
-//					&& tableDefinitionsString.lcastIndexOf(")") != -1) {
-//				int lastidx = tableDefinitionsString.lastIndexOf(")");
-//				tableDefinitionsString.delete(lastidx,
-//						tableDefinitionsString.length());
-//				String ON_CLAUSE = String.format("ON\n%s\n " + indent + ")",
-//						conditions);
-//				tableDefinitionsString.append(ON_CLAUSE);
-//			}
-			String ON_CLAUSE = String.format(" ON\n%s\n " + indent, conditions);
-			tableDefinitionsString.append(ON_CLAUSE);
-
-
+			tableDefinitionsString.append(" ON\n").append(conditions).append("\n").append(indent);
 		}
 		return  tableDefinitionsString.toString() ;
 	}
@@ -942,12 +899,6 @@ public class OneShotSQLGeneratorEngine {
 		return def;
 	}
 
-	private String getFROM(List<Function> atoms, QueryAliasIndex index) {
-		String tableDefinitions = getTableDefinitions(atoms, index, true,
-				false, false, "");
-		return "\n FROM \n" + tableDefinitions;
-	}
-
 	/**
 	 * Generates all the conditions on the given atoms, e.g., shared variables
 	 * and boolean conditions. This string can then be used to form a WHERE or
@@ -965,8 +916,8 @@ public class OneShotSQLGeneratorEngine {
 		// if (processShared)
 		// guohui: After normalization, do we have shared variables?
 		// TODO: should we remove this ??
-		Set<String> conditionsSharedVariablesAndConstants = getConditionsSharedVariablesAndConstants(
-				atoms, index, processShared);
+		Set<String> conditionsSharedVariablesAndConstants =
+				getConditionsSharedVariablesAndConstants(atoms, index, processShared);
 		conditions.addAll(conditionsSharedVariablesAndConstants);
 
 		Set<String> booleanConditions = getBooleanConditionsString(atoms, index);
@@ -1084,7 +1035,6 @@ public class OneShotSQLGeneratorEngine {
 							value));
 				}
 			}
-
 		}
 		return equalities;
 	}
@@ -1103,8 +1053,7 @@ public class OneShotSQLGeneratorEngine {
 			return Types.VARCHAR;
 		}
 		else if (term instanceof Variable) {
-			throw new RuntimeException("Cannot return the SQL type for: "
-					+ term.toString());
+			throw new RuntimeException("Cannot return the SQL type for: " + term);
 		}
 		/**
 		 * Boolean constant
@@ -1115,14 +1064,6 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		return Types.VARCHAR;
-	}
-
-	private String getWHERE(List<Function> atoms, QueryAliasIndex index) {
-		String conditions = getConditionsString(atoms, index, false, "");
-		if (conditions.isEmpty()) {
-			return "";
-		}
-		return "\nWHERE \n" + conditions;
 	}
 
 	/**
@@ -1140,13 +1081,14 @@ public class OneShotSQLGeneratorEngine {
 		/*
 		 * If the head has size 0 this is a boolean query.
 		 */
-		List<Term> headterms = query.getHead().getTerms();
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");
 		if (distinct && !distinctResultSet) {
 			sb.append("DISTINCT ");
 		}
+
+		List<Term> headterms = query.getHead().getTerms();
 		//Only for ASK
 		if (headterms.size() == 0) {
 			sb.append("'true' as x");
@@ -1220,23 +1162,25 @@ public class OneShotSQLGeneratorEngine {
 
 		String mainColumn;
 
-		String mainTemplate = "%s AS %s";
-
 		if (ht instanceof URIConstant) {
 			URIConstant uc = (URIConstant) ht;
-			mainColumn = sqladapter.getSQLLexicalFormString(uc.getURI().toString());
+			mainColumn = sqladapter.getSQLLexicalFormString(uc.getURI());
+		}
+		else if (ht == TermConstants.NULL) {
 			/**
-			 * TODO: we should not have to treat NULL as a special case! It is because this constant is currently
+			 * TODO: we should not have to treat NULL as a special case!
+			 * It is because this constant is currently
 			 * a STRING!
 			 */
-		} else if (ht == TermConstants.NULL) {
 			mainColumn = "NULL";
-		} else if (ht instanceof ValueConstant) {
+		}
+		else if (ht instanceof ValueConstant) {
 			mainColumn = getSQLLexicalForm((ValueConstant) ht);
-		} else if (ht instanceof Variable) {
-			Variable termVar = (Variable) ht;
-			mainColumn = getSQLString(termVar, index, false);
-		} else if (ht instanceof Function) {
+		}
+		else if (ht instanceof Variable) {
+			mainColumn = getSQLString(ht, index, false);
+		}
+		else if (ht instanceof Function) {
 			/*
 			 * if it's a function we need to get the nested value if its a
 			 * datatype function or we need to do the CONCAT if its URI(....).
@@ -1252,20 +1196,19 @@ public class OneShotSQLGeneratorEngine {
 				 * Case where we have a typing function in the head (this is the
 				 * case for all literal columns
 				 */
-				String termStr = null;
 				int size = ov.getTerms().size();
 				if ((functionSymbol instanceof Literal) || size > 2) {
-					termStr = getSQLStringForTemplateFunction(ov, index);
-				} else {
+					mainColumn = getSQLStringForTemplateFunction(ov, index);
+				}
+				else {
 					Term term = ov.getTerms().get(0);
 					if (term instanceof ValueConstant) {
-						termStr = getSQLLexicalForm((ValueConstant) term);
-					} else {
-						termStr = getSQLString(term, index, false);
+						mainColumn = getSQLLexicalForm((ValueConstant) term);
+					}
+					else {
+						mainColumn = getSQLString(term, index, false);
 					}
 				}
-				mainColumn = termStr;
-
 			}
 			else if (functionSymbol instanceof URITemplatePredicate) {
 				// New template based URI building functions
@@ -1278,23 +1221,20 @@ public class OneShotSQLGeneratorEngine {
 			else if (ov.isOperation()) {
 				mainColumn = getSQLString(ov, index, false);
 			}
-			else {
+			else
 				throw new IllegalArgumentException(
-						"Error generating SQL query. Found an invalid function during translation: "
-								+ ov.toString());
-			}
-		} else {
-			throw new RuntimeException("Cannot generate SELECT for term: "
-					+ ht.toString());
+						"Error generating SQL query. Found an invalid function during translation: " + ov);
 		}
+		else
+			throw new RuntimeException("Cannot generate SELECT for term: " + ht);
+
 
 		/*
 		 * If the we have a column we need to still CAST to VARCHAR
 		 */
 		if (mainColumn.charAt(0) != '\'' && mainColumn.charAt(0) != '(') {
 
-			if (castDataType != null){
-
+			if (castDataType != null) {
 				mainColumn = sqladapter.sqlCast(mainColumn, jdbcTypeMapper.getSQLType(castDataType));
 			}
 
@@ -1303,13 +1243,9 @@ public class OneShotSQLGeneratorEngine {
 //			if(sqlType != Types.NULL){
 //				mainColumn = sqladapter.sqlCast(mainColumn, sqlType);	
 //			}
-
-
 		}
 
-
-		String format = String.format(mainTemplate, mainColumn, varName);
-
+		String format = String.format("%s AS %s", mainColumn, varName);
 		return format;
 	}
 
