@@ -375,7 +375,7 @@ public class OneShotSQLGeneratorEngine {
 			if (!extensionalPredicates.contains(pred)) {
 				// extensional predicates are defined by DBs
 				// so, we skip them
-				ParserViewDefinition view = createViewFrom(pred, metadata, ruleIndex, subQueryDefinitions,
+				ParserViewDefinition view = createViewFrom(pred, ruleIndex, subQueryDefinitions,
 						termTypeMap, castTypeMap.get(pred));
 
 				subQueryDefinitions.put(pred, view);
@@ -547,7 +547,7 @@ public class OneShotSQLGeneratorEngine {
 	 * @throws Exception
 	 */
 
-	private ParserViewDefinition createViewFrom(Predicate pred, RDBMetadata metadata,
+	private ParserViewDefinition createViewFrom(Predicate pred,
 												Multimap<Predicate, CQIE> ruleIndex,
 												Map<Predicate, ParserViewDefinition> subQueryDefinitions,
 												ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
@@ -580,10 +580,7 @@ public class OneShotSQLGeneratorEngine {
 				.map(ParserViewDefinition::getID)
 				.collect(Collectors.toSet());
 
-		String safePredicateName = escapeName(pred.getName());
-		String viewname = sqladapter.nameView(VIEW_PREFIX, safePredicateName, VIEW_ANS_SUFFIX,
-				alreadyAllocatedViewNames);
-		RelationID viewId = idFactory.createRelationID(null, viewname);
+		RelationID viewId = createViewId(pred.getName(), VIEW_ANS_SUFFIX, alreadyAllocatedViewNames);
 
 		// all have the same arity
 		int headArity = ruleList.iterator().next().getHead().getTerms().size();
@@ -602,15 +599,16 @@ public class OneShotSQLGeneratorEngine {
 		return view;
 	}
 
-	/**
-	 * Escapes view names.
-	 */
-	private static String escapeName(String name) {
-		return name
+	private RelationID createViewId(String predicateName, String suffix, Collection<RelationID> alreadyAllocatedViewNames) {
+		// Escapes view names.
+		String safePredicateName = predicateName
 				.replace('.', '_')
 				.replace(':', '_')
 				.replace('/', '_')
 				.replace(' ', '_');
+		String viewname = sqladapter.nameView(VIEW_PREFIX, safePredicateName, suffix, alreadyAllocatedViewNames);
+		RelationID viewId = metadata.getQuotedIDFactory().createRelationID(null, viewname);
+		return viewId;
 	}
 
 	/***
@@ -1381,14 +1379,12 @@ public class OneShotSQLGeneratorEngine {
 		return Optional.empty();
 	}
 
-	public String getSQLStringForTemplateFunction(Function ov,
-												  QueryAliasIndex index) {
+	private String getSQLStringForTemplateFunction(Function ov, QueryAliasIndex index) {
 		/*
 		 * The first inner term determines the form of the result
 		 */
-		Term t = ov.getTerms().get(0);
-
-		String literalValue = "";
+		List<Term> terms = ov.getTerms();
+		Term t = terms.get(0);
 
 		if (t instanceof ValueConstant || t instanceof BNode) {
 			/*
@@ -1398,15 +1394,16 @@ public class OneShotSQLGeneratorEngine {
 			 * place of the place holders. We need to tokenize and form the
 			 * CONCAT
 			 */
+			final String literalValue;
 			if (t instanceof BNode) {
 				//TODO: why getValue and not getName(). Change coming from v1.
 				literalValue = ((BNode) t).getName();
-			} else {
+			}
+			else {
 				literalValue = ((ValueConstant) t).getValue();
 			}
 
 			String template = trimLiteral(literalValue);
-
 			String[] split = template.split("[{][}]");
 
 			List<String> vex = new ArrayList<>();
@@ -1418,31 +1415,19 @@ public class OneShotSQLGeneratorEngine {
 			 * New we concat the rest of the function, note that if there is
 			 * only 1 element there is nothing to concatenate
 			 */
-			if (ov.getTerms().size() > 1) {
-				int size = ov.getTerms().size();
+			int size = terms.size();
+			if (size > 1) {
 //				if (TYPE_FACTORY.isLiteral(pred)) {
 //					size--;
 //				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {
-					Term currentTerm = ov.getTerms().get(termIndex);
-					final String repl;
-					if (isStringColType(currentTerm, index)) {
-						//empty place holders: the correct uri is in the column of DB no need to replace
-						if(split.length == 0) {
-							repl = getSQLString(currentTerm, index, false) ;
-						}
-						else {
-							repl = replace1 + getSQLString(currentTerm, index, false) + replace2;
-						}
-
-					} else {
-						if(split.length == 0) {
-							repl = sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) ;
-						}
-						else {
-							repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) + replace2;
-						}
-					}
+					Term currentTerm = terms.get(termIndex);
+					String repl0 = getSQLString(currentTerm, index, false);
+					String repl1 = isStringColType(currentTerm, index)
+							? repl0
+							: sqladapter.sqlCast(repl0, Types.VARCHAR);
+					//empty place holders: the correct uri is in the column of DB no need to replace
+					String repl = (split.length == 0) ? repl1 : replace1 + repl1 + replace2;
 					vex.add(repl);
 					if (termIndex < split.length) {
 						vex.add(sqladapter.getSQLLexicalFormString(split[termIndex]));
@@ -2008,10 +1993,7 @@ public class OneShotSQLGeneratorEngine {
 				}
 			}
 			else {
-				String suffix = VIEW_SUFFIX + String.valueOf(dataTableCount);
-				String safePredicateName = escapeName(predicate.getName());
-				String simpleViewName = sqladapter.nameView(VIEW_PREFIX, safePredicateName, suffix, viewNames.values());
-				viewName = metadata.getQuotedIDFactory().createRelationID(null, simpleViewName);
+				viewName = createViewId(predicate.getName(), VIEW_SUFFIX + String.valueOf(dataTableCount), viewNames.values());
 				relationId = tableId;
 			}
 			dataTableCount++;
@@ -2100,10 +2082,8 @@ public class OneShotSQLGeneratorEngine {
 				String view = sqlAnsViewMap.get(pred);
 				if (view != null) {
 					// TODO: check if it is correct not to consider other view names.
-					final String viewName = sqladapter.sqlQuote(sqladapter.nameView(VIEW_PREFIX, pred.getName(),
-							VIEW_ANS_SUFFIX, ImmutableSet.of()));
-					String formatView = String.format("(%s) %s", view, viewName);
-					return formatView;
+					RelationID viewName = createViewId(pred.getName(), VIEW_ANS_SUFFIX, ImmutableSet.of());
+					return String.format("(%s) %s", view, viewName.getSQLRendering());
 				}
 				throw new RuntimeException(
 						"Impossible to get data definition for: " + atom + ", type: " + def);
