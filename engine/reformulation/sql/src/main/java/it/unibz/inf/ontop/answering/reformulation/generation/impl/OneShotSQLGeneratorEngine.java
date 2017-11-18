@@ -63,7 +63,6 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates.SPARQL_GROUP;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
 
@@ -251,7 +250,6 @@ public class OneShotSQLGeneratorEngine {
 
 		sqlAnsViewMap = new HashMap<>();
 
-
 		IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
 
 		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedQuery);
@@ -432,7 +430,7 @@ public class OneShotSQLGeneratorEngine {
 			String conditions = getConditionsString(cq.getBody(), index, false, "");
 			String WHERE = conditions.isEmpty() ? "" : "\nWHERE \n" + conditions;
 
-			String SELECT = getSelectClause(signature, cq.getHead(), index, castTypes, termTypeMap.get(cq));
+			String SELECT = getSelectClause(signature, cq.getHead().getTerms(), index, castTypes, termTypeMap.get(cq));
 			String GROUP = getGroupBy(cq.getBody(), index);
 			String HAVING = getHaving(cq.getBody(), index);
 
@@ -444,10 +442,14 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 
+	private List<Function> convert(List<Term> terms) {
+		return terms.stream().map(c -> (Function)c).collect(ImmutableCollectors.toList());
+	}
+
 	private String getHaving(List<Function> body, QueryAliasIndex index) {
-		List <Term> conditions = Collections.EMPTY_LIST;
+		List <Term> conditions = Collections.emptyList();
 		for (Function atom : body) {
-			if (atom.getFunctionSymbol().equals(DatalogAlgebraOperatorPredicates.SPARQL_HAVING)) {
+			if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_HAVING) {
 				conditions = atom.getTerms();
 				break;
 			}
@@ -456,9 +458,7 @@ public class OneShotSQLGeneratorEngine {
 			return "";
 		}
 
-		List<Function> condFunctions = conditions.stream()
-				.map(c -> (Function)c).collect(ImmutableCollectors.toList());
-		Set<String> condSet = getBooleanConditionsString(condFunctions, index);
+		Set<String> condSet = getBooleanConditionsString(convert(conditions), index);
 
 //		List<String> groupReferences = Lists.newArrayList();
 
@@ -479,7 +479,7 @@ public class OneShotSQLGeneratorEngine {
 
 		List<String> groupReferences = Lists.newArrayList();
 		for (Function atom : body) {
-			if (atom.getFunctionSymbol().equals(SPARQL_GROUP)) {
+			if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_GROUP) {
 				for (Variable var : atom.getVariables()) {
 					index.getColumnReferences(var).stream()
 							.map(QualifiedAttributeID::getSQLRendering)
@@ -772,17 +772,16 @@ public class OneShotSQLGeneratorEngine {
 	 * QueryAliasIndex. If the atom is a Join or Left Join, it will call
 	 * getTableDefinitions on the nested term list.
 	 */
-	private String getTableDefinition(Function atom, QueryAliasIndex index,
-									  String indent) {
-		Predicate predicate = atom.getFunctionSymbol();
+	private String getTableDefinition(Function atom, QueryAliasIndex index, String indent) {
 
 		if (atom.isOperation() || atom.isDataTypeFunction()) {
 			// These don't participate in the FROM clause
 			return "";
 		}
 		else if (atom.isAlgebraFunction()) {
+			Predicate predicate = atom.getFunctionSymbol();
 
-			if (predicate == SPARQL_GROUP) {
+			if (predicate == DatalogAlgebraOperatorPredicates.SPARQL_GROUP) {
 				return "";
 			}
 
@@ -790,13 +789,11 @@ public class OneShotSQLGeneratorEngine {
 					predicate == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
 
 				boolean isLeftJoin = (predicate == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN);
-				List<Function> innerTerms = new ArrayList<>(atom.getTerms().size());
 				boolean parenthesis = false;
 
 				int i = 0;
-				for (Term term : atom.getTerms()){
-					Function innerTerm1 = (Function) term;
-					if (innerTerm1.isAlgebraFunction()) {
+				for (Term term : atom.getTerms()) {
+					if (((Function) term).isAlgebraFunction()) {
 						//nested joins we need to add parenthesis later
 						parenthesis = true;
 					}
@@ -806,11 +803,10 @@ public class OneShotSQLGeneratorEngine {
 						//we ignore nested joins from the left tables
 						parenthesis = false;
 					}
-					innerTerms.add(innerTerm1);
 					i++;
 				}
-				String tableDefinitions =  getTableDefinitions(innerTerms, index,
-						isLeftJoin ? "LEFT OUTER JOIN" : "JOIN", parenthesis, indent + INDENT );
+				String tableDefinitions =  getTableDefinitions(convert(atom.getTerms()), index,
+						isLeftJoin ? "LEFT OUTER JOIN" : "JOIN", parenthesis, indent + INDENT);
 				return tableDefinitions;
 			}
 		}
@@ -892,7 +888,6 @@ public class OneShotSQLGeneratorEngine {
 			foundFirstDataAtom = true;
 		}
 		return innerVariables;
-
 	}
 
 	/**
@@ -945,17 +940,14 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		for (Function atom : atoms) {
-			if (!atom.isDataFunction()) {
-				continue;
-			}
-			for (int idx = 0; idx < atom.getArity(); idx++) {
-				Term l = atom.getTerm(idx);
-				if (l instanceof Constant) {
-					String value = getSQLString(l, index, false);
-					String columnReference = index
-							.getColumnReference(atom, idx);
-					equalities.add(String.format("(%s = %s)", columnReference,
-							value));
+			if (atom.isDataFunction())  {
+				for (int idx = 0; idx < atom.getArity(); idx++) {
+					Term l = atom.getTerm(idx);
+					if (l instanceof Constant) {
+						String value = getSQLString(l, index, false);
+						String columnReference = index.getColumnReference(atom, idx);
+						equalities.add(String.format("(%s = %s)", columnReference, value));
+					}
 				}
 			}
 		}
@@ -992,12 +984,12 @@ public class OneShotSQLGeneratorEngine {
 	/**
 	 * produces the select clause of the sql query for the given CQIE
 	 *
-	 * @param head the query head atom
+	 * @param headterms
 	 * @param castTypes
 	 * @param termTypes
 	 * @return the sql select clause
 	 */
-	private String getSelectClause(List<String> signature, Function head,
+	private String getSelectClause(List<String> signature, List<Term> headterms,
 								   QueryAliasIndex index,
 								   ImmutableList<COL_TYPE> castTypes,
 								   ImmutableList<Optional<TermType>> termTypes) {
@@ -1011,7 +1003,6 @@ public class OneShotSQLGeneratorEngine {
 			sb.append("DISTINCT ");
 		}
 
-		List<Term> headterms = head.getTerms();
 		//Only for ASK
 		if (headterms.size() == 0) {
 			sb.append("'true' AS x");
@@ -1379,8 +1370,7 @@ public class OneShotSQLGeneratorEngine {
 			}
 		}
 		else if (term instanceof Variable) {
-			Set<QualifiedAttributeID> viewdef = index
-					.getColumnReferences((Variable) term);
+			Set<QualifiedAttributeID> viewdef = index.getColumnReferences((Variable) term);
 			QualifiedAttributeID def = viewdef.iterator().next();
 
 			RelationID relationId = def.getRelation();
