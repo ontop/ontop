@@ -398,7 +398,7 @@ public class OneShotSQLGeneratorEngine {
 			 * Here we normalize so that the form of the CQ is as close to the
 			 * form of a normal SQL algebra as possible,
 			 */
-			String querystr = generateQueryFromSingleRule(cq, signature, true,
+			String querystr = generateQueryFromSingleRule(cq, signature,
 					subQueryDefinitions, castTypeMap.get(predAns1), termTypeMap.get(cq), ruleIndex);
 
 			queryStrings.add(querystr);
@@ -432,13 +432,11 @@ public class OneShotSQLGeneratorEngine {
 	 * {@link #generateQuery}
 	 *
 	 * @param cq
-	 * @param signature
 	 * @param castDatatypes
 	 * @param subQueryDefinitions
 	 * @param termTypes
 	 */
 	public String generateQueryFromSingleRule(CQIE cq, List<String> signature,
-											  boolean isAns1,
 											  Map<Predicate, ParserViewDefinition> subQueryDefinitions,
 											  ImmutableList<COL_TYPE> castDatatypes,
 											  ImmutableList<Optional<TermType>> termTypes,
@@ -452,7 +450,7 @@ public class OneShotSQLGeneratorEngine {
 		String conditions = getConditionsString(cq.getBody(), index, false, "");
 		String WHERE = conditions.isEmpty() ? "" : "\nWHERE \n" + conditions;
 
-		String SELECT = getSelectClause(signature, cq, index, isAns1, castDatatypes, termTypes);
+		String SELECT = getSelectClause(signature, cq.getHead(), index, castDatatypes, termTypes);
 		String GROUP = getGroupBy(cq.getBody(), index);
 		String HAVING = getHaving(cq.getBody(), index);
 
@@ -556,14 +554,15 @@ public class OneShotSQLGeneratorEngine {
 
 		List<String> sqls = Lists.newArrayListWithExpectedSize(ruleList.size());
 
-		for (CQIE rule : ruleList) {
-			List<String> varContainer = rule.getHead().getVariables().stream()
-					.map(Variable::getName)
-					.collect(Collectors.toList());
+		int count = ruleList.iterator().next().getHead().getTerms().size();
+		List<String> signature = Lists.newArrayListWithCapacity(count);
+		for (int i = 0; i < count; i++)
+			signature.add("v" + i);
 
+		for (CQIE rule : ruleList) {
 			/* Creates the SQL for the View */
-			String sqlQuery = generateQueryFromSingleRule(rule, varContainer,
-					false, subQueryDefinitions, castTypes, termTypeMap.get(rule), ruleIndex);
+			String sqlQuery = generateQueryFromSingleRule(rule, signature,
+					subQueryDefinitions, castTypes, termTypeMap.get(rule), ruleIndex);
 
 			sqls.add(sqlQuery);
 		}
@@ -1061,14 +1060,13 @@ public class OneShotSQLGeneratorEngine {
 	/**
 	 * produces the select clause of the sql query for the given CQIE
 	 *
-	 * @param query
-	 *            the query
+	 * @param head the query head atom
 	 * @param castTypes
 	 * @param termTypes
 	 * @return the sql select clause
 	 */
-	private String getSelectClause(List<String> signature, CQIE query,
-								   QueryAliasIndex index, boolean isAns1,
+	private String getSelectClause(List<String> signature, Function head,
+								   QueryAliasIndex index,
 								   ImmutableList<COL_TYPE> castTypes,
 								   ImmutableList<Optional<TermType>> termTypes) {
 		/*
@@ -1081,7 +1079,7 @@ public class OneShotSQLGeneratorEngine {
 			sb.append("DISTINCT ");
 		}
 
-		List<Term> headterms = query.getHead().getTerms();
+		List<Term> headterms = head.getTerms();
 		//Only for ASK
 		if (headterms.size() == 0) {
 			sb.append("'true' as x");
@@ -1089,8 +1087,7 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		Iterator<Term> hit = headterms.iterator();
-		int hpos = 0;
-
+		Iterator<String> varIter = signature.iterator();
 		Iterator<COL_TYPE> castTypeIter = castTypes.iterator();
 		Iterator<Optional<TermType>> termTypeIter = termTypes.iterator();
 
@@ -1116,17 +1113,7 @@ public class OneShotSQLGeneratorEngine {
 
 			Optional<TermType> optionalTermType = termTypeIter.next();
 
-			String varName;
-
-			/*
-			 * When isAns1 is true, we need to use the <code>signature</code>
-			 * for the varName
-			 */
-			if (isAns1) {
-				varName = signature.get(hpos);
-			} else {
-				varName = "v" + hpos;
-			}
+			String varName = varIter.next();
 
 			String typeColumn = getTypeColumnForSELECT(ht, varName, index, sqlVariableNames, optionalTermType);
 			String mainColumn = getMainColumnForSELECT(ht, varName, index, castType, sqlVariableNames);
@@ -1141,7 +1128,6 @@ public class OneShotSQLGeneratorEngine {
 			if (hit.hasNext()) {
 				sb.append(", ");
 			}
-			hpos++;
 		}
 		return sb.toString();
 	}
