@@ -1378,13 +1378,11 @@ public class OneShotSQLGeneratorEngine {
 
 			// Non-final TODO: understand
 			String table = relationId.getTableName();
-
 			if (relationId.getTableName().startsWith("QVIEW")) {
-				Map<Function, RelationID> views = index.viewNames;
-				for (Function func : views.keySet()) {
-					RelationID knownViewId = views.get(func);
+				for (Entry<Function, DataDefinition> e : index.dataDefinitions.entrySet()) {
+					RelationID knownViewId = e.getValue().name;
 					if (knownViewId.equals(relationId)) {
-						table = func.getFunctionSymbol().toString();
+						table = e.getKey().getFunctionSymbol().toString();
 						break;
 					}
 				}
@@ -1766,19 +1764,29 @@ public class OneShotSQLGeneratorEngine {
 		return -2;
 	}
 
+	private static final class DataDefinition {
+		private final RelationDefinition def;
+		private final RelationID name;
+		DataDefinition(RelationID name, RelationDefinition def) {
+			this.name = name;
+			this.def = def;
+		}
+		@Override
+		public String toString() {
+			return name + " " + def;
+		}
+	}
+
 	/**
 	 * Utility class to resolve "database" atoms to view definitions ready to be
 	 * used in a FROM clause, and variables, to column references defined over
 	 * the existing view definitions of a query.
 	 */
-	public class QueryAliasIndex {
+	public final class QueryAliasIndex {
 
-		final Map<Function, RelationID> viewNames = new HashMap<>();
-		final Map<Function, RelationDefinition> dataDefinitions = new HashMap<>();
+		final Map<Function, DataDefinition> dataDefinitions = new HashMap<>();
 		final Map<RelationID, RelationDefinition> dataDefinitionsById = new HashMap<>();
 		final Map<Variable, Set<QualifiedAttributeID>> columnReferences = new HashMap<>();
-
-		int dataTableCount = 0;
 
 		public QueryAliasIndex(CQIE query, Map<Predicate, ParserViewDefinition> subQueryDefinitions, Multimap<Predicate, CQIE> ruleIndex) {
 			for (Function atom : query.getBody()) {
@@ -1810,8 +1818,7 @@ public class OneShotSQLGeneratorEngine {
 				return;
 			}
 			else if (atom.isAlgebraFunction()){
-				List<Term> lit = atom.getTerms();
-				for (Term subatom : lit) {
+				for (Term subatom : atom.getTerms()) {
 					if (subatom instanceof Function) {
 						generateViewsIndexVariables((Function) subatom, subQueryDefinitions, ruleIndex);
 					}
@@ -1827,8 +1834,7 @@ public class OneShotSQLGeneratorEngine {
 			if (def == null) {
 				/*
 				 * There is no definition for this atom, its not a database
-				 * predicate. We check if it is an ans predicate and it has a
-				 * view:
+				 * predicate. Check if it is an ans predicate and has a view:
 				 */
 				def = subQueryDefinitions.get(predicate);
 				if (def == null) {
@@ -1840,13 +1846,14 @@ public class OneShotSQLGeneratorEngine {
 				}
 			}
 			else {
-				viewName = createViewId(predicate.getName(), VIEW_SUFFIX + String.valueOf(dataTableCount), viewNames.values());
+				viewName = createViewId(predicate.getName(),
+						VIEW_SUFFIX + dataDefinitions.size(),
+						dataDefinitions.entrySet().stream()
+								.map(e -> e.getValue().name).collect(Collectors.toList()));
 				relationId = tableId;
 			}
-			dataTableCount++;
-			dataDefinitions.put(atom, def);
+			dataDefinitions.put(atom, new DataDefinition(viewName, def));
 			dataDefinitionsById.put(relationId, def);
-			viewNames.put(atom, viewName);
 
 			for (int index = 0; index < atom.getTerms().size(); index++) {
 				Term term = atom.getTerms().get(index);
@@ -1897,17 +1904,17 @@ public class OneShotSQLGeneratorEngine {
 			/**
 			 * Normal case
 			 */
-			RelationDefinition def = dataDefinitions.get(atom);
-			if (def != null) {
-				if (def instanceof DatabaseRelationDefinition) {
-					return sqladapter.sqlTableName(def.getID().getSQLRendering(),
-							viewNames.get(atom).getSQLRendering());
+			DataDefinition dd = dataDefinitions.get(atom);
+			if (dd != null) {
+				if (dd.def instanceof DatabaseRelationDefinition) {
+					return sqladapter.sqlTableName(dd.def.getID().getSQLRendering(),
+							dd.name.getSQLRendering());
 				}
-				else if (def instanceof ParserViewDefinition) {
-					return String.format("(%s) %s", ((ParserViewDefinition) def).getStatement(),
-							viewNames.get(atom).getSQLRendering());
+				else if (dd.def instanceof ParserViewDefinition) {
+					return String.format("(%s) %s", ((ParserViewDefinition) dd.def).getStatement(),
+							dd.name.getSQLRendering());
 				}
-				throw new RuntimeException("Impossible to get data definition for: " + atom + ", type: " + def);
+				throw new RuntimeException("Impossible to get data definition for: " + atom + ", type: " + dd);
 			}
 
 			/**
@@ -1933,7 +1940,7 @@ public class OneShotSQLGeneratorEngine {
 					return String.format("(%s) %s", view, viewName.getSQLRendering());
 				}
 				throw new RuntimeException(
-						"Impossible to get data definition for: " + atom + ", type: " + def);
+						"Impossible to get data definition for: " + atom + ", type: " + dd);
 			}
 		}
 
@@ -1942,10 +1949,9 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		public String getColumnReference(Function atom, int column) {
-			RelationID viewName = viewNames.get(atom);
-			RelationDefinition def = dataDefinitions.get(atom);
-			QuotedID columnname = def.getAttribute(column + 1).getID(); // indexes from 1
-			return new QualifiedAttributeID(viewName, columnname).getSQLRendering();
+			DataDefinition dd = dataDefinitions.get(atom);
+			QuotedID columnname = dd.def.getAttribute(column + 1).getID(); // indexes from 1
+			return new QualifiedAttributeID(dd.name, columnname).getSQLRendering();
 		}
 	}
 }
