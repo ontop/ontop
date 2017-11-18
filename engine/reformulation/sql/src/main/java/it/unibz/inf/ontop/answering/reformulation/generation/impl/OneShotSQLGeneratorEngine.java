@@ -99,10 +99,17 @@ public class OneShotSQLGeneratorEngine {
 	private final SQLDialectAdapter sqladapter;
 	private final IntermediateQuery2DatalogTranslator iq2DatalogTranslator;
 
-
-	private boolean generatingREPLACE = true;
 	private final boolean distinctResultSet;
+	private final boolean generatingREPLACE;
 	private final String replace1, replace2;
+
+	@Nullable
+	private final IRIDictionary uriRefIds;
+
+	private final ImmutableMap<ExpressionOperation, String> operations;
+
+	private static final org.slf4j.Logger log = LoggerFactory.getLogger(OneShotSQLGeneratorEngine.class);
+	private final JdbcTypeMapper jdbcTypeMapper;
 
 	/**
 	 * Mutable (query-dependent)
@@ -110,17 +117,8 @@ public class OneShotSQLGeneratorEngine {
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 
-	@Nullable
-	private IRIDictionary uriRefIds;
-
-	private Multimap<Predicate, CQIE> ruleIndex;
-
 	private Map<Predicate, String> sqlAnsViewMap;
 
-	private final ImmutableMap<ExpressionOperation, String> operations;
-
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(OneShotSQLGeneratorEngine.class);
-	private final JdbcTypeMapper jdbcTypeMapper;
 
 	OneShotSQLGeneratorEngine(DBMetadata metadata,
 							  IRIDictionary iriDictionary,
@@ -132,7 +130,8 @@ public class OneShotSQLGeneratorEngine {
 				.orElseGet(() -> {
 					try {
 						return DriverManager.getDriver(settings.getJdbcUrl()).getClass().getCanonicalName();
-					} catch (SQLException e) {
+					}
+					catch (SQLException e) {
 						// TODO: find a better exception
 						throw new RuntimeException("Impossible to get the JDBC driver. Reason: " + e.getMessage());
 					}
@@ -147,7 +146,6 @@ public class OneShotSQLGeneratorEngine {
 		this.operations = buildOperations(sqladapter);
 		this.distinctResultSet = settings.isDistinctPostProcessingEnabled();
 		this.iq2DatalogTranslator = iq2DatalogTranslator;
-
 
 		this.generatingREPLACE = settings.isIRISafeEncodingEnabled();
 
@@ -228,9 +226,7 @@ public class OneShotSQLGeneratorEngine {
 		} catch (UnsupportedOperationException e) {
 			// ignore
 		}
-		return builder.build(
-
-		);
+		return builder.build();
 	}
 
 	/**
@@ -255,18 +251,17 @@ public class OneShotSQLGeneratorEngine {
 	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
 			throws OntopReformulationException {
 
+		sqlAnsViewMap = new HashMap<>();
+
+
 		IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
 
 		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedQuery);
 
 		normalizeProgram(queryProgram);
 
-		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(
-				queryProgram);
-
-		sqlAnsViewMap = new HashMap<>();
-
-		ruleIndex = depGraph.getRuleIndex();
+		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(queryProgram);
+		Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
 
 		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();
 		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
@@ -361,7 +356,8 @@ public class OneShotSQLGeneratorEngine {
 			/*
 			 * Currently, incompatible terms are treated as a reformulation error
 			 */
-		} catch (IncompatibleTermException e) {
+		}
+		catch (IncompatibleTermException e) {
 			throw new OntopTypingException(e.getMessage());
 		}
 
@@ -404,7 +400,7 @@ public class OneShotSQLGeneratorEngine {
 			 */
 			boolean isAns1 = true;
 			String querystr = generateQueryFromSingleRule(cq, signature, isAns1, castTypeMap.get(predAns1),
-					subQueryDefinitions, termTypeMap.get(cq));
+					subQueryDefinitions, termTypeMap.get(cq), ruleIndex);
 
 			queryStrings.add(querystr);
 		}
@@ -443,10 +439,11 @@ public class OneShotSQLGeneratorEngine {
 	 * @param termTypes
 	 */
 	public String generateQueryFromSingleRule(CQIE cq, List<String> signature,
-											  boolean isAns1, List<COL_TYPE> castDatatypes,
+											  boolean isAns1, ImmutableList<COL_TYPE> castDatatypes,
 											  Map<Predicate, ParserViewDefinition> subQueryDefinitions,
-											  ImmutableList<Optional<TermType>> termTypes) {
-		QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions);
+											  ImmutableList<Optional<TermType>> termTypes,
+											  Multimap<Predicate, CQIE> ruleIndex) {
+		QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions, ruleIndex);
 
 		// && numberOfQueries == 1
 		boolean innerdistincts = isDistinct && !distinctResultSet;
@@ -569,7 +566,7 @@ public class OneShotSQLGeneratorEngine {
 
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(rule, varContainer,
-					false, castTypes, subQueryDefinitions, termTypeMap.get(rule));
+					false, castTypes, subQueryDefinitions, termTypeMap.get(rule), ruleIndex);
 
 			sqls.add(sqlQuery);
 		}
@@ -655,7 +652,7 @@ public class OneShotSQLGeneratorEngine {
 					if (!f.isDataTypeFunction())
 						return String.format(expressionFormat, column);
 				}
-				int type = getVariableDataType(term, index);
+				int type = getVariableDataType(term);
 				switch (type) {
 					case Types.INTEGER:
 					case Types.BIGINT:
@@ -672,7 +669,7 @@ public class OneShotSQLGeneratorEngine {
 			}
 			if (expressionFormat.contains("IS TRUE")) {
 				// find data type of term and evaluate accordingly
-				int type = getVariableDataType(term, index);
+				int type = getVariableDataType(term);
 				switch (type) {
 					case Types.INTEGER:
 					case Types.BIGINT:
@@ -1040,7 +1037,7 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 	// return variable SQL data type
-	private int getVariableDataType(Term term, QueryAliasIndex idx) {
+	private int getVariableDataType(Term term) {
 
 		if (term instanceof Function) {
 			Function f = (Function) term;
@@ -1666,7 +1663,7 @@ public class OneShotSQLGeneratorEngine {
 				if (functionSymbol == ExpressionOperation.IS_TRUE) {
 					// find data type of term and evaluate accordingly
 					String column = getSQLString(term1, index, false);
-					int type = getVariableDataType(term1, index);
+					int type = getVariableDataType(term1);
 					if (type == Types.INTEGER || type == Types.BIGINT || type == Types.DOUBLE || type == Types.FLOAT)
 						return String.format("%s > 0", column);
 					else if (type == Types.BOOLEAN)
@@ -1950,19 +1947,13 @@ public class OneShotSQLGeneratorEngine {
 		final Map<Variable, Set<QualifiedAttributeID>> columnReferences = new HashMap<>();
 
 		int dataTableCount = 0;
-		boolean isEmpty = false;
 
-		public QueryAliasIndex(CQIE query, Map<Predicate, ParserViewDefinition> subQueryDefinitions) {
-			List<Function> body = query.getBody();
-			generateViews(body, subQueryDefinitions);
-		}
-
-		private void generateViews(List<Function> atoms, Map<Predicate, ParserViewDefinition> subQueryDefinitions) {
-			for (Function atom : atoms) {
+		public QueryAliasIndex(CQIE query, Map<Predicate, ParserViewDefinition> subQueryDefinitions, Multimap<Predicate, CQIE> ruleIndex) {
+			for (Function atom : query.getBody()) {
 				/*
 				 * This will be called recursively if necessary
 				 */
-				generateViewsIndexVariables(atom, subQueryDefinitions);
+				generateViewsIndexVariables(atom, subQueryDefinitions, ruleIndex);
 			}
 		}
 
@@ -1981,7 +1972,8 @@ public class OneShotSQLGeneratorEngine {
 		 * @param subQueryDefinitions
 		 */
 		private void generateViewsIndexVariables(Function atom,
-												 Map<Predicate, ParserViewDefinition> subQueryDefinitions) {
+												 Map<Predicate, ParserViewDefinition> subQueryDefinitions,
+												 Multimap<Predicate, CQIE> ruleIndex) {
 			if (atom.isOperation()) {
 				return;
 			}
@@ -1989,7 +1981,7 @@ public class OneShotSQLGeneratorEngine {
 				List<Term> lit = atom.getTerms();
 				for (Term subatom : lit) {
 					if (subatom instanceof Function) {
-						generateViewsIndexVariables((Function) subatom, subQueryDefinitions);
+						generateViewsIndexVariables((Function) subatom, subQueryDefinitions, ruleIndex);
 					}
 				}
 			}
@@ -1999,7 +1991,7 @@ public class OneShotSQLGeneratorEngine {
 					predicate);
 			RelationDefinition def = metadata.getRelation(tableId);
 
-			final RelationID relationId;
+			final RelationID relationId, viewName;
 			if (def == null) {
 				/*
 				 * There is no definition for this atom, its not a database
@@ -2008,34 +2000,24 @@ public class OneShotSQLGeneratorEngine {
 				 */
 				def = subQueryDefinitions.get(predicate);
 				if (def == null) {
-					isEmpty = true;
-					return;
+					return; // empty
 				}
 				else {
-					RelationID viewId = def.getID();
-					viewNames.put(atom, viewId);
-					relationId = viewId;
+					viewName = def.getID();
+					relationId = viewName;
 				}
 			}
 			else {
-				relationId = tableId;
-
 				String suffix = VIEW_SUFFIX + String.valueOf(dataTableCount);
-
 				String safePredicateName = escapeName(predicate.getName());
 				String simpleViewName = sqladapter.nameView(VIEW_PREFIX, safePredicateName, suffix, viewNames.values());
-				viewNames.put(atom, metadata.getQuotedIDFactory().createRelationID(null, simpleViewName));
+				viewName = metadata.getQuotedIDFactory().createRelationID(null, simpleViewName);
+				relationId = tableId;
 			}
 			dataTableCount++;
 			dataDefinitions.put(atom, def);
 			dataDefinitionsById.put(relationId, def);
-
-			indexVariables(atom);
-		}
-
-		private void indexVariables(Function atom) {
-			RelationDefinition def = dataDefinitions.get(atom);
-			RelationID viewName = viewNames.get(atom);
+			viewNames.put(atom, viewName);
 
 			for (int index = 0; index < atom.getTerms().size(); index++) {
 				Term term = atom.getTerms().get(index);
@@ -2089,7 +2071,7 @@ public class OneShotSQLGeneratorEngine {
 			RelationDefinition def = dataDefinitions.get(atom);
 			if (def != null) {
 				if (def instanceof DatabaseRelationDefinition) {
-					return sqladapter.sqlTableName(dataDefinitions.get(atom).getID().getSQLRendering(),
+					return sqladapter.sqlTableName(def.getID().getSQLRendering(),
 							viewNames.get(atom).getSQLRendering());
 				}
 				else if (def instanceof ParserViewDefinition) {
@@ -2102,7 +2084,7 @@ public class OneShotSQLGeneratorEngine {
 			/**
 			 * Special case of nullary atoms
 			 */
-			else if(atom.getArity() == 0) {
+			else if (atom.getArity() == 0) {
 				return "(" + sqladapter.getDummyTable() + ") tdummy";
 			}
 
