@@ -398,9 +398,8 @@ public class OneShotSQLGeneratorEngine {
 			 * Here we normalize so that the form of the CQ is as close to the
 			 * form of a normal SQL algebra as possible,
 			 */
-			boolean isAns1 = true;
-			String querystr = generateQueryFromSingleRule(cq, signature, isAns1, castTypeMap.get(predAns1),
-					subQueryDefinitions, termTypeMap.get(cq), ruleIndex);
+			String querystr = generateQueryFromSingleRule(cq, signature, true,
+					subQueryDefinitions, castTypeMap.get(predAns1), termTypeMap.get(cq), ruleIndex);
 
 			queryStrings.add(querystr);
 		}
@@ -439,14 +438,12 @@ public class OneShotSQLGeneratorEngine {
 	 * @param termTypes
 	 */
 	public String generateQueryFromSingleRule(CQIE cq, List<String> signature,
-											  boolean isAns1, ImmutableList<COL_TYPE> castDatatypes,
+											  boolean isAns1,
 											  Map<Predicate, ParserViewDefinition> subQueryDefinitions,
+											  ImmutableList<COL_TYPE> castDatatypes,
 											  ImmutableList<Optional<TermType>> termTypes,
 											  Multimap<Predicate, CQIE> ruleIndex) {
 		QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions, ruleIndex);
-
-		// && numberOfQueries == 1
-		boolean innerdistincts = isDistinct && !distinctResultSet;
 
 		String tableDefinitions = getTableDefinitions(cq.getBody(), index, true,
 				false, false, "");
@@ -455,7 +452,7 @@ public class OneShotSQLGeneratorEngine {
 		String conditions = getConditionsString(cq.getBody(), index, false, "");
 		String WHERE = conditions.isEmpty() ? "" : "\nWHERE \n" + conditions;
 
-		String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1, castDatatypes, termTypes);
+		String SELECT = getSelectClause(signature, cq, index, isAns1, castDatatypes, termTypes);
 		String GROUP = getGroupBy(cq.getBody(), index);
 		String HAVING = getHaving(cq.getBody(), index);
 
@@ -566,7 +563,7 @@ public class OneShotSQLGeneratorEngine {
 
 			/* Creates the SQL for the View */
 			String sqlQuery = generateQueryFromSingleRule(rule, varContainer,
-					false, castTypes, subQueryDefinitions, termTypeMap.get(rule), ruleIndex);
+					false, subQueryDefinitions, castTypes, termTypeMap.get(rule), ruleIndex);
 
 			sqls.add(sqlQuery);
 		}
@@ -1071,15 +1068,16 @@ public class OneShotSQLGeneratorEngine {
 	 * @return the sql select clause
 	 */
 	private String getSelectClause(List<String> signature, CQIE query,
-								   QueryAliasIndex index, boolean distinct, boolean isAns1,
-								   List<COL_TYPE> castTypes, ImmutableList<Optional<TermType>> termTypes) {
+								   QueryAliasIndex index, boolean isAns1,
+								   ImmutableList<COL_TYPE> castTypes,
+								   ImmutableList<Optional<TermType>> termTypes) {
 		/*
 		 * If the head has size 0 this is a boolean query.
 		 */
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");
-		if (distinct && !distinctResultSet) {
+		if (isDistinct && !distinctResultSet) {
 			sb.append("DISTINCT ");
 		}
 
@@ -1584,8 +1582,8 @@ public class OneShotSQLGeneratorEngine {
 	 * <p>
 	 * If its a boolean comparison, it returns the corresponding SQL comparison.
 	 */
-	public String getSQLString(Term term, QueryAliasIndex index,
-							   boolean useBrackets) {
+	private String getSQLString(Term term, QueryAliasIndex index, boolean useBrackets) {
+
 		if (term == null) {
 			return "";
 		}
@@ -1710,28 +1708,16 @@ public class OneShotSQLGeneratorEngine {
 		}
 		else {
 			if (functionSymbol == ExpressionOperation.QUEST_CAST) {
-				String columnName = getSQLString(function.getTerm(0), index,
-						false);
+				String columnName = getSQLString(function.getTerm(0), index, false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
-				int sqlDatatype = -1;
-				if (datatype.equals(XMLSchema.STRING.stringValue())){
-					sqlDatatype = Types.VARCHAR;
-				}
-				if (isStringColType(function, index)) {
-					return columnName;
-				}
-				else {
-					return sqladapter.sqlCast(columnName, sqlDatatype);
-				}
+				int sqlDatatype = datatype.equals(XMLSchema.STRING.stringValue())
+						? Types.VARCHAR
+						: Types.LONGVARCHAR;
+				return isStringColType(function, index) ? columnName : sqladapter.sqlCast(columnName, sqlDatatype);
 			}
 			else if (functionSymbol == ExpressionOperation.SPARQL_STR) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
-				if (isStringColType(function, index)) {
-					return columnName;
-				}
-				else {
-					return sqladapter.sqlCast(columnName, Types.VARCHAR);
-				}
+				return isStringColType(function, index) ? columnName : sqladapter.sqlCast(columnName, Types.VARCHAR);
 			}
 			else if (functionSymbol == ExpressionOperation.REPLACE) {
                 String orig = getSQLString(function.getTerm(0), index, false);
