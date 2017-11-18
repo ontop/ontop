@@ -388,74 +388,58 @@ public class OneShotSQLGeneratorEngine {
 
 		// This should be ans1, and the rules defining it.
 		Predicate predAns1 = predicatesInBottomUp.get(numPreds - 1);
-		Collection<CQIE> ansrules = ruleIndex.get(predAns1);
 
-		List<String> queryStrings = Lists.newArrayListWithCapacity(ansrules.size());
-		
-		/* Main loop, constructing the SPJ query for each CQ */
-		for (CQIE cq : ansrules) {
-			/*
-			 * Here we normalize so that the form of the CQ is as close to the
-			 * form of a normal SQL algebra as possible,
-			 */
-			String querystr = generateQueryFromSingleRule(cq, signature,
-					subQueryDefinitions, castTypeMap.get(predAns1), termTypeMap.get(cq), ruleIndex);
-
-			queryStrings.add(querystr);
-		}
-
-		return createUnion(queryStrings, isDistinct && !distinctResultSet ? "UNION" : "UNION ALL");
+		return generateQueryFromRules(ruleIndex.get(predAns1), signature, ruleIndex,
+				subQueryDefinitions, termTypeMap, castTypeMap.get(predAns1),
+				isDistinct && !distinctResultSet ? "UNION" : "UNION ALL");
 	}
 
 
 
-	/**
-	 * Takes a list of SQL strings, and returns SQL1 UNION SQL 2 UNION....
-	 *
-	 * @param sqls list
-	 *                       of SQL strings
-	 * @return Union of sql queries
-	 */
-	private static String createUnion(List<String> sqls, String UNION) {
-		String unionView;
-		if (sqls.size() == 1) {
-			unionView = sqls.iterator().next();
-		} else {
-			unionView = "(" + Joiner.on(")\n " + UNION + "\n (").join(sqls) + ")";
-		}
-		return unionView;
-	}
 
 	/**
-	 * Takes 1 single Datalog rule <code> cq </code> and return the SQL
-	 * translation of that rule. It is a helper method for
-	 * {@link #generateQuery}
+	 * Takes a collection of Datalog rules <code> cqs </code> and returns the SQL
+	 * translation of the rules. It is a helper method for{@link #generateQuery}
 	 *
-	 * @param cq
-	 * @param castDatatypes
+	 * @param cqs
+	 * @param signature
+	 * @param ruleIndex
 	 * @param subQueryDefinitions
-	 * @param termTypes
+	 * @param termTypeMap
+	 * @param castTypes
+	 * @param union_string
 	 */
-	public String generateQueryFromSingleRule(CQIE cq, List<String> signature,
-											  Map<Predicate, ParserViewDefinition> subQueryDefinitions,
-											  ImmutableList<COL_TYPE> castDatatypes,
-											  ImmutableList<Optional<TermType>> termTypes,
-											  Multimap<Predicate, CQIE> ruleIndex) {
-		QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions, ruleIndex);
+	private String generateQueryFromRules(Collection<CQIE> cqs,
+										  List<String> signature,
+										  Multimap<Predicate, CQIE> ruleIndex,
+										  Map<Predicate, ParserViewDefinition> subQueryDefinitions,
+										  ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
+										  ImmutableList<COL_TYPE> castTypes,
+										  String union_string) {
 
-		String tableDefinitions = getTableDefinitions(cq.getBody(), index, true,
-				false, false, "");
-		String FROM = "\n FROM \n" + tableDefinitions;
+		List<String> sqls = Lists.newArrayListWithExpectedSize(cqs.size());
+		for (CQIE cq : cqs) {
+		/* Main loop, constructing the SPJ query for each CQ */
+			QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions, ruleIndex);
 
-		String conditions = getConditionsString(cq.getBody(), index, false, "");
-		String WHERE = conditions.isEmpty() ? "" : "\nWHERE \n" + conditions;
+			String tableDefinitions = getTableDefinitions(cq.getBody(), index, true,
+					false, false, "");
+			String FROM = "\n FROM \n" + tableDefinitions;
 
-		String SELECT = getSelectClause(signature, cq.getHead(), index, castDatatypes, termTypes);
-		String GROUP = getGroupBy(cq.getBody(), index);
-		String HAVING = getHaving(cq.getBody(), index);
+			String conditions = getConditionsString(cq.getBody(), index, false, "");
+			String WHERE = conditions.isEmpty() ? "" : "\nWHERE \n" + conditions;
 
-		return SELECT + FROM + WHERE + GROUP + HAVING;
+			String SELECT = getSelectClause(signature, cq.getHead(), index, castTypes, termTypeMap.get(cq));
+			String GROUP = getGroupBy(cq.getBody(), index);
+			String HAVING = getHaving(cq.getBody(), index);
+
+			sqls.add(SELECT + FROM + WHERE + GROUP + HAVING);
+		}
+		return sqls.size() == 1
+				? sqls.get(0)
+				: "(" + Joiner.on(")\n " + union_string + "\n (").join(sqls) + ")";
 	}
+
 
 	private String getHaving(List<Function> body, QueryAliasIndex index) {
 		List <Term> conditions = Collections.EMPTY_LIST;
@@ -518,6 +502,7 @@ public class OneShotSQLGeneratorEngine {
 		log.debug("Program normalized for SQL translation: \n"+program);
 	}
 
+
 	/**
 	 * This Method was created to handle the semantics of OPTIONAL when there
 	 * are multiple mappings or Unions. It will take mappings of the form
@@ -552,22 +537,14 @@ public class OneShotSQLGeneratorEngine {
 
 		Collection<CQIE> ruleList = ruleIndex.get(pred);
 
-		List<String> sqls = Lists.newArrayListWithExpectedSize(ruleList.size());
-
+		// create the signature
 		int count = ruleList.iterator().next().getHead().getTerms().size();
 		List<String> signature = Lists.newArrayListWithCapacity(count);
 		for (int i = 0; i < count; i++)
 			signature.add("v" + i);
 
-		for (CQIE rule : ruleList) {
-			/* Creates the SQL for the View */
-			String sqlQuery = generateQueryFromSingleRule(rule, signature,
-					subQueryDefinitions, castTypes, termTypeMap.get(rule), ruleIndex);
-
-			sqls.add(sqlQuery);
-		}
-
-		String unionView = createUnion(sqls, "UNION ALL");
+		String unionView = generateQueryFromRules(ruleList, signature, ruleIndex,
+				subQueryDefinitions, termTypeMap, castTypes, "UNION ALL");
 		sqlAnsViewMap.put(pred, unionView);
 
 		QuotedIDFactory idFactory = metadata.getQuotedIDFactory();
