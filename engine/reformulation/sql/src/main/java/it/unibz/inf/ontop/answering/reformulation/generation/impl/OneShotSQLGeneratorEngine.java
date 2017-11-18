@@ -87,9 +87,7 @@ public class OneShotSQLGeneratorEngine {
     private static final String VIEW_SUFFIX = "VIEW";
     private static final String VIEW_ANS_SUFFIX = "View";
 
-    private static final String TYPE_STR = "%s AS %s" ;
     private static final String TYPE_SUFFIX = "QuestType";
-    private static final String LANG_STR = "%s AS %s";
     private static final String LANG_SUFFIX = "Lang";
     private static final String MAIN_COLUMN_SUFFIX = "";
 
@@ -537,10 +535,11 @@ public class OneShotSQLGeneratorEngine {
 
 		Collection<CQIE> ruleList = ruleIndex.get(pred);
 
+		// all have the same arity
+		int headArity = ruleList.iterator().next().getHead().getTerms().size();
 		// create the signature
-		int count = ruleList.iterator().next().getHead().getTerms().size();
-		List<String> signature = Lists.newArrayListWithCapacity(count);
-		for (int i = 0; i < count; i++)
+		List<String> signature = Lists.newArrayListWithCapacity(headArity);
+		for (int i = 0; i < headArity; i++)
 			signature.add("v" + i);
 
 		String unionView = generateQueryFromRules(ruleList, signature, ruleIndex,
@@ -555,19 +554,15 @@ public class OneShotSQLGeneratorEngine {
 
 		RelationID viewId = createViewId(pred.getName(), VIEW_ANS_SUFFIX, alreadyAllocatedViewNames);
 
-		// all have the same arity
-		int headArity = ruleList.iterator().next().getHead().getTerms().size();
-
 		// creates a view outside the DBMetadata (specific to this sub-query)
 		ParserViewDefinition view = new ParserViewDefinition(viewId, unionView);
-		for (int i = 0; i < headArity; i++) {
-			// hard-coded variable names
+		for (String var : signature) {
 			view.addAttribute(new QualifiedAttributeID(viewId,
-					idFactory.createAttributeID(sqladapter.sqlQuote("v" + i + TYPE_SUFFIX))));
+					idFactory.createAttributeID(sqladapter.sqlQuote(var + TYPE_SUFFIX))));
 			view.addAttribute(new QualifiedAttributeID(viewId,
-					idFactory.createAttributeID(sqladapter.sqlQuote("v" + i + LANG_SUFFIX))));
+					idFactory.createAttributeID(sqladapter.sqlQuote(var + LANG_SUFFIX))));
 			view.addAttribute(new QualifiedAttributeID(viewId,
-					idFactory.createAttributeID(sqladapter.sqlQuote("v" + i))));
+					idFactory.createAttributeID(sqladapter.sqlQuote(var))));
 		}
 		return view;
 	}
@@ -757,17 +752,11 @@ public class OneShotSQLGeneratorEngine {
 			String JOIN_KEYWORD = isLeftJoin ? "LEFT OUTER JOIN" : "JOIN";
 
 			//add parenthesis
-			String NESTEDJOIN = "" + indent + "" + indent + "%s\n" + indent
-					+ JOIN_KEYWORD + "\n" + indent + "(%s)" + indent + "";
+			String NESTEDJOIN = indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n" + indent + "(%s)" + indent;
 
-			String JOIN;
-			if (parenthesis) {
-				JOIN = NESTEDJOIN;
-			}
-			else {
-				JOIN = "" + indent + "" + indent + "%s\n" + indent
-						+ JOIN_KEYWORD + "\n" + indent + "%s" + indent + "";
-			}
+			String JOIN = (parenthesis)
+					? NESTEDJOIN
+					: indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n" + indent + "%s" + indent;
 
 			if (size == 0) {
 				throw new RuntimeException("Cannot generate definition for empty data");
@@ -1059,7 +1048,7 @@ public class OneShotSQLGeneratorEngine {
 		List<Term> headterms = head.getTerms();
 		//Only for ASK
 		if (headterms.size() == 0) {
-			sb.append("'true' as x");
+			sb.append("'true' AS x");
 			return sb.toString();
 		}
 
@@ -1092,16 +1081,23 @@ public class OneShotSQLGeneratorEngine {
 
 			String varName = varIter.next();
 
-			String typeColumn = getTypeColumnForSELECT(ht, varName, index, sqlVariableNames, optionalTermType);
-			String mainColumn = getMainColumnForSELECT(ht, varName, index, castType, sqlVariableNames);
-			String langColumn = getLangColumnForSELECT(ht, varName, index, sqlVariableNames, optionalTermType);
+			// Creates alias names that satisfy the restrictions of the SQL dialect.
+			String typeAlias = sqladapter.nameTopVariable(varName, TYPE_SUFFIX, sqlVariableNames);
+			sqlVariableNames.add(typeAlias);
+			String typeColumn = getTypeColumnForSELECT(ht, index, optionalTermType);
 
-			sb.append("\n   ");
-			sb.append(typeColumn);
-			sb.append(", ");
-			sb.append(langColumn);
-			sb.append(", ");
-			sb.append(mainColumn);
+			String langAlias = sqladapter.nameTopVariable(varName, LANG_SUFFIX, sqlVariableNames);
+			sqlVariableNames.add(langAlias);
+			String langColumn = getLangColumnForSELECT(ht, index, optionalTermType);
+
+			String mainAlias = sqladapter.nameTopVariable(varName, MAIN_COLUMN_SUFFIX, sqlVariableNames);
+			sqlVariableNames.add(mainAlias);
+			String mainColumn = getMainColumnForSELECT(ht, index, castType);
+
+			sb.append("\n   ")
+					.append(typeColumn).append(" AS ").append(typeAlias).append(", ")
+					.append(langColumn).append(" AS ").append(langAlias).append(", ")
+					.append(mainColumn).append(" AS ").append(mainAlias);
 			if (hit.hasNext()) {
 				sb.append(", ");
 			}
@@ -1109,15 +1105,9 @@ public class OneShotSQLGeneratorEngine {
 		return sb.toString();
 	}
 
-	private String getMainColumnForSELECT(Term ht, String signatureVarName,
-										  QueryAliasIndex index, COL_TYPE castDataType,
-										  Set<String> sqlVariableNames) {
-
-		final String varName = sqladapter.nameTopVariable(signatureVarName, MAIN_COLUMN_SUFFIX, sqlVariableNames);
-		sqlVariableNames.add(varName);
+	private String getMainColumnForSELECT(Term ht, QueryAliasIndex index, COL_TYPE castDataType) {
 
 		String mainColumn;
-
 		if (ht instanceof URIConstant) {
 			URIConstant uc = (URIConstant) ht;
 			mainColumn = sqladapter.getSQLLexicalFormString(uc.getURI());
@@ -1184,43 +1174,25 @@ public class OneShotSQLGeneratorEngine {
 		else
 			throw new RuntimeException("Cannot generate SELECT for term: " + ht);
 
-
 		/*
 		 * If the we have a column we need to still CAST to VARCHAR
 		 */
-		if (mainColumn.charAt(0) != '\'' && mainColumn.charAt(0) != '(') {
-
-			if (castDataType != null) {
-				mainColumn = sqladapter.sqlCast(mainColumn, jdbcTypeMapper.getSQLType(castDataType));
-			}
-
-			//int sqlType = getSQLTypeForTerm(ht,index );
-//			
-//			if(sqlType != Types.NULL){
-//				mainColumn = sqladapter.sqlCast(mainColumn, sqlType);	
-//			}
+		if (mainColumn.charAt(0) != '\'' && mainColumn.charAt(0) != '(' && castDataType != null) {
+			mainColumn = sqladapter.sqlCast(mainColumn, jdbcTypeMapper.getSQLType(castDataType));
 		}
 
-		String format = String.format("%s AS %s", mainColumn, varName);
-		return format;
+		return mainColumn;
 	}
 
-	private String getLangColumnForSELECT(Term ht, String signatureVarName, QueryAliasIndex index,
-										  Set<String> sqlVariableNames, Optional<TermType> optionalTermType) {
-
-        /**
-         * Creates a variable name that fits to the restrictions of the SQL dialect.
-         */
-        String langVariableName = sqladapter.nameTopVariable(signatureVarName, LANG_SUFFIX, sqlVariableNames);
-        sqlVariableNames.add(langVariableName);
-
-		final String lang;
+	private String getLangColumnForSELECT(Term ht, QueryAliasIndex index, Optional<TermType> optionalTermType) {
 
 		if (ht instanceof Variable) {
-			lang = getLangFromVariable((Variable) ht, index);
+			return getNonMainColumnId((Variable) ht, index, -1)
+					.map(QualifiedAttributeID::getSQLRendering)
+					.orElse("NULL");
 		}
 		else {
-			lang = optionalTermType
+			return optionalTermType
 					.filter(t -> t.getColType() == LANG_STRING)
 					.map(t -> t.getLanguageTagConstant()
 								.map(tag -> "'" + tag.getFullString() + "'")
@@ -1231,7 +1203,6 @@ public class OneShotSQLGeneratorEngine {
 														"for any LANG_STRING"))))
 					.orElse("NULL");
 		}
-		return String.format(LANG_STR, lang, langVariableName);
     }
 
 	/**
@@ -1239,22 +1210,22 @@ public class OneShotSQLGeneratorEngine {
 	 *
 	 * Note this type may differ from the one used for casting the main column (in some special cases).
 	 * This type will appear as the RDF datatype.
-	 *  @param projectedTerm
-	 * @param signatureVarName Name of the variable
+	 *
+	 * @param ht
 	 * @param index Used when the term correspond to a column name
-	 * @param sqlVariableNames Used for creating non conflicting variable names (when they have to be shorten)  @return A string like "5 AS ageQuestType"
 	 * @param optionalTermType
 	 */
-	private String getTypeColumnForSELECT(Term projectedTerm, String signatureVarName,
-										  QueryAliasIndex index,
-										  Set<String> sqlVariableNames, Optional<TermType> optionalTermType) {
+	private String getTypeColumnForSELECT(Term ht, QueryAliasIndex index, Optional<TermType> optionalTermType) {
 
-		final String varName = sqladapter.nameTopVariable(signatureVarName, TYPE_SUFFIX, sqlVariableNames);
-		sqlVariableNames.add(varName);
-
-		final String typeString;
-		if (projectedTerm instanceof Variable) {
-			typeString = getTypeFromVariable((Variable) projectedTerm, index);
+		if (ht instanceof Variable) {
+	        // Such variable does not hold this information, so we have to look
+	        // at the database metadata.
+			return getNonMainColumnId((Variable) ht, index, -2)
+					.map(QualifiedAttributeID::getSQLRendering)
+					/*
+					 * By default, we assume that the variable is an IRI.
+					 */
+					.orElseGet(() -> String.format("%d", OBJECT.getQuestCode()));
 		}
 		else {
 			COL_TYPE colType = optionalTermType
@@ -1264,39 +1235,10 @@ public class OneShotSQLGeneratorEngine {
 					 */
 					.orElse(STRING);
 
-			typeString = String.format("%d", colType.getQuestCode());
+			return String.format("%d", colType.getQuestCode());
 		}
-
-		return String.format(TYPE_STR, typeString, varName);
 	}
 
-	/**
-	 * Gets the type of a variable.
-	 *
-	 * Such variable does not hold this information, so we have to look
-	 * at the database metadata.
-	 *
-	 *
-	 * @param var
-	 * @param index
-	 * @return
-	 */
-	private String getTypeFromVariable(Variable var, QueryAliasIndex index) {
-
-		return getNonMainColumnId(var, index, -2)
-				.map(QualifiedAttributeID::getSQLRendering)
-				/**
-				 * By default, we assume that the variable is an IRI.
-				 *
-				 */
-				.orElseGet(() -> String.format("%d", OBJECT.getQuestCode()));
-	}
-
-	private static String getLangFromVariable(Variable var, QueryAliasIndex index) {
-		return getNonMainColumnId(var, index, -1)
-				.map(QualifiedAttributeID::getSQLRendering)
-				.orElse("NULL");
-	}
 
 	private static Optional<QualifiedAttributeID> getNonMainColumnId(Variable var, QueryAliasIndex index,
 																	 int relativeIndexWrtMainColumn) {
