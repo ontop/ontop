@@ -420,9 +420,14 @@ public class OneShotSQLGeneratorEngine {
 		/* Main loop, constructing the SPJ query for each CQ */
 			QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions, ruleIndex);
 
-			String tableDefinitions = getTableDefinitions(cq.getBody(), index, true,
-					false, false, "");
-			String FROM = "\n FROM \n" + tableDefinitions;
+			List<String> tableDefinitions = getTableDefs(cq.getBody(), index, "");
+			final String FROM;
+			if (tableDefinitions.isEmpty()) {
+				FROM = "\n FROM \n(" + sqladapter.getDummyTable() + ") tdummy ";
+			}
+			else {
+				FROM = "\n FROM \n" + Joiner.on(",\n").join(tableDefinitions);
+			}
 
 			String conditions = getConditionsString(cq.getBody(), index, false, "");
 			String WHERE = conditions.isEmpty() ? "" : "\nWHERE \n" + conditions;
@@ -688,6 +693,21 @@ public class OneShotSQLGeneratorEngine {
 		}
 	}
 
+	private List<String> getTableDefs(List<Function> atoms, QueryAliasIndex index, String indent) {
+		/*
+		 * We now collect the view definitions for each data atom each
+		 * condition, and each each nested Join/LeftJoin
+		 */
+		List<String> tableDefinitions = Lists.newArrayListWithCapacity(atoms.size());
+		for (Function a : atoms) {
+			String definition = getTableDefinition(a, index, indent + INDENT);
+			if (!definition.isEmpty()) {
+				tableDefinitions.add(definition);
+			}
+		}
+		return tableDefinitions;
+	}
+
 	/**
 	 * Returns the table definition for these atoms. By default, a list of atoms
 	 * represents JOIN or LEFT JOIN of all the atoms, left to right. All boolean
@@ -703,99 +723,47 @@ public class OneShotSQLGeneratorEngine {
 	 *
 	 * @param atoms
 	 * @param index
-	 * @param isTopLevel
-	 *            indicates if the list of atoms is actually the main body of
-	 *            the conjunctive query. If it is, no JOIN is generated, but a
-	 *            cross product with WHERE clause. Moreover, the isLeftJoin
-	 *            argument will be ignored.
 	 *
 	 * @return
 	 */
 	private String getTableDefinitions(List<Function> atoms,
-									   QueryAliasIndex index, boolean isTopLevel, boolean isLeftJoin, boolean parenthesis,
+									   QueryAliasIndex index, String JOIN_KEYWORD, boolean parenthesis,
 									   String indent) {
-		/*
-		 * We now collect the view definitions for each data atom each
-		 * condition, and each each nested Join/LeftJoin
-		 */
-		List<String> tableDefinitions = Lists.newArrayListWithCapacity(atoms.size());
-		for (Function a : atoms) {
-			String definition = getTableDefinition(a, index, indent + INDENT);
-			if (!definition.isEmpty()) {
-				tableDefinitions.add(definition);
-			}
-		}
 
-		/*
-		 * Now we generate the table definition, this will be either a comma
-		 * separated list for TOP level (FROM clause) or a Join/LeftJoin
-		 * (possibly nested if there are more than 2 table definitions in the
-		 * current list) in case this method was called recursively.
-		 */
-		StringBuilder tableDefinitionsString = new StringBuilder();
+		List<String> tableDefinitions = getTableDefs(atoms, index, indent);
 
 		int size = tableDefinitions.size();
-		if (isTopLevel) {
-			if (size == 0) {
-				tableDefinitionsString.append("(").append(sqladapter.getDummyTable()).append(") tdummy ");
-			}
-			else {
-				tableDefinitionsString.append(indent);
-				Joiner.on(",\n" + indent).appendTo(tableDefinitionsString, tableDefinitions);
-			}
+		if (size == 0) {
+			throw new RuntimeException("Cannot generate definition for empty data");
 		}
-		else {
-			/*
-			 * This is actually a Join or LeftJoin, so we form the JOINs/LEFT
-			 * JOINs and the ON clauses
-			 */
-			String JOIN_KEYWORD = isLeftJoin ? "LEFT OUTER JOIN" : "JOIN";
-
-			//add parenthesis
-			String NESTEDJOIN = indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n" + indent + "(%s)" + indent;
-
-			String JOIN = (parenthesis)
-					? NESTEDJOIN
-					: indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n" + indent + "%s" + indent;
-
-			if (size == 0) {
-				throw new RuntimeException("Cannot generate definition for empty data");
-			}
-			if (size == 1) {
-				return tableDefinitions.get(0);
-			}
-
-			/*
-			 * To form the JOIN we will cycle through each data definition,
-			 * nesting the JOINs as we go. The conditions in the ON clause will
-			 * go on the TOP level only.
-			 */
-			String currentJoin = String.format(JOIN,
-					tableDefinitions.get(size - 2),
-					tableDefinitions.get(size - 1));
-			tableDefinitions.remove(size - 1);
-			tableDefinitions.remove(size - 2);
-
-			int currentSize = tableDefinitions.size();
-			while (currentSize > 0) {
-				currentJoin = String.format(NESTEDJOIN,
-						tableDefinitions.get(currentSize - 1), currentJoin);
-				tableDefinitions.remove(currentSize - 1);
-				currentSize = tableDefinitions.size();
-			}
-			tableDefinitions.add(currentJoin);
-			tableDefinitionsString.append(currentJoin);
-
-			/*
-			 * If there are ON conditions we add them now. We need to remove the
-			 * last parenthesis ')' and replace it with ' ON %s)' where %s are
-			 * all the conditions
-			 */
-			String conditions = getConditionsString(atoms, index, true, indent);
-
-			tableDefinitionsString.append(" ON\n").append(conditions).append("\n").append(indent);
+		if (size == 1) {
+			return tableDefinitions.get(0);
 		}
-		return  tableDefinitionsString.toString() ;
+
+		String JOIN_WITH_PARENTHESIS = indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n" + indent + "(%s)" + indent;
+		String JOIN_NO_PARENTHESIS = indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n" + indent + "%s" + indent;
+		/*
+		 * Now we generate the table definition: Join/LeftJoin
+		 * (possibly nested if there are more than 2 table definitions in the
+		 * current list) in case this method was called recursively.
+		 *
+		 * To form the JOIN we will cycle through each data definition,
+		 * nesting the JOINs as we go. The conditions in the ON clause will
+		 * go on the TOP level only.
+		 */
+		String currentJoin = String.format(parenthesis ? JOIN_WITH_PARENTHESIS : JOIN_NO_PARENTHESIS,
+				tableDefinitions.get(size - 2), tableDefinitions.get(size - 1));
+
+		for (int i = size - 3; i >= 0; i--) {
+			currentJoin = String.format(JOIN_WITH_PARENTHESIS, tableDefinitions.get(i), currentJoin);
+		}
+
+	    // If there are ON conditions we add them now.
+		String conditions = getConditionsString(atoms, index, true, indent);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(currentJoin).append(" ON\n").append(conditions).append("\n").append(indent);
+		return sb.toString();
 	}
 
 	/**
@@ -828,25 +796,23 @@ public class OneShotSQLGeneratorEngine {
 				int i = 0;
 				for (Term term : atom.getTerms()){
 					Function innerTerm1 = (Function) term;
-					if (innerTerm1.isAlgebraFunction()){
+					if (innerTerm1.isAlgebraFunction()) {
 						//nested joins we need to add parenthesis later
 						parenthesis = true;
 					}
-					else if (isLeftJoin && i == 1){
+					else if (isLeftJoin && i == 1) {
 						//in case of left join we  want to add the parenthesis
 						// only for the right tables
 						//we ignore nested joins from the left tables
-
 						parenthesis = false;
 					}
 					innerTerms.add(innerTerm1);
 					i++;
 				}
-				String tableDefinitions =  getTableDefinitions(innerTerms,
-						index, false, isLeftJoin, parenthesis, indent + INDENT );
+				String tableDefinitions =  getTableDefinitions(innerTerms, index,
+						isLeftJoin ? "LEFT OUTER JOIN" : "JOIN", parenthesis, indent + INDENT );
 				return tableDefinitions;
 			}
-
 		}
 
 		/*
