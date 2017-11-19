@@ -1,0 +1,547 @@
+package it.unibz.inf.ontop.spec.mapping.parser.impl;
+
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.spec.mapping.parser.TurtleOBDA_tmpVisitor;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.antlr.v4.runtime.*;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
+public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements TurtleOBDA_tmpVisitor{
+
+    /**
+     * Map of directives
+     */
+    protected HashMap<String, String> directives = new HashMap<String, String>();
+
+    /**
+     * The current subject term
+     */
+    protected Term currentSubject;
+
+    /**
+     * All variables
+     */
+    protected Set<Term> variableSet = new HashSet<Term>();
+
+    protected String error = "";
+
+
+    public String getError() {
+        return error;
+    }
+
+    private String removeBrackets(String text) {
+        return text.substring(1, text.length() - 1);
+    }
+
+    private Term typeTerm(String text, COL_TYPE col_type) {
+        ValueConstant integerConstant = TERM_FACTORY.getConstantLiteral(text, COL_TYPE.LITERAL);
+        return TERM_FACTORY.getTypedTerm(integerConstant, col_type);
+    }
+
+    protected Term construct(String text) {
+        Term toReturn = null;
+        final String PLACEHOLDER = "{}";
+        List<Term> terms = new LinkedList<>();
+        List<FormatString> tokens = parse(text);
+        int size = tokens.size();
+        if (size == 1) {
+            FormatString token = tokens.get(0);
+            if (token instanceof FixedString) {
+                ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(token.toString()); // a single URI template
+                toReturn = TERM_FACTORY.getUriTemplate(uriTemplate);
+            } else if (token instanceof ColumnString) {
+                // a single URI template
+                Variable column = TERM_FACTORY.getVariable(token.toString());
+                toReturn = TERM_FACTORY.getUriTemplate(column);
+            }
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for (FormatString token : tokens) {
+                if (token instanceof FixedString) { // if part of URI template
+                    sb.append(token.toString());
+                } else if (token instanceof ColumnString) {
+                    sb.append(PLACEHOLDER);
+                    Variable column = TERM_FACTORY.getVariable(token.toString());
+                    terms.add(column);
+                }
+            }
+            ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
+            terms.add(0, uriTemplate);
+            toReturn = TERM_FACTORY.getUriTemplate(terms);
+        }
+        return toReturn;
+    }
+
+    // Column placeholder pattern
+    private static final String formatSpecifier = "\\{([^\\}]+)?\\}";
+    private static Pattern chPattern = Pattern.compile(formatSpecifier);
+
+    private List<FormatString> parse(String text) {
+        List<FormatString> toReturn = new ArrayList<FormatString>();
+        Matcher m = chPattern.matcher(text);
+        int i = 0;
+        while (i < text.length()) {
+            if (m.find(i)) {
+                if (m.start() != i) {
+                    toReturn.add(new FixedString(text.substring(i, m.start())));
+                }
+                String value = m.group(1);
+                if (value.contains(".")) {
+                    throw new IllegalArgumentException("Fully qualified columns are not accepted.");
+                }
+                toReturn.add(new ColumnString(value));
+                i = m.end();
+            } else {
+                toReturn.add(new FixedString(text.substring(i)));
+                break;
+            }
+        }
+        return toReturn;
+    }
+
+    private interface FormatString {
+        int index();
+
+        String toString();
+    }
+
+    private class FixedString implements FormatString {
+        private String s;
+
+        FixedString(String s) {
+            this.s = s;
+        }
+
+        @Override
+        public int index() {
+            return -1;
+        }  // flag code for fixed string
+
+        @Override
+        public String toString() {
+            return s;
+        }
+    }
+
+    private class ColumnString implements FormatString {
+        private String s;
+
+        ColumnString(String s) {
+            this.s = s;
+        }
+
+        @Override
+        public int index() {
+            return 0;
+        }  // flag code for column string
+
+        @Override
+        public String toString() {
+            return s;
+        }
+    }
+
+    //this function distinguishes curly bracket with
+    //back slash "\{" from curly bracket "{"
+    private int getIndexOfCurlyB(String str) {
+        int i;
+        int j;
+        i = str.indexOf("{");
+        j = str.indexOf("\\{");
+        while ((i - 1 == j) && (j != -1)) {
+            i = str.indexOf("{", i + 1);
+            j = str.indexOf("\\{", j + 1);
+        }
+        return i;
+    }
+
+    //in case of concat this function parses the literal
+    //and adds parsed constant literals and template literal to terms list
+    private ArrayList<Term> addToTermsList(String str) {
+        ArrayList<Term> terms = new ArrayList<Term>();
+        int i, j;
+        String st;
+        str = str.substring(1, str.length() - 1);
+        while (str.contains("{")) {
+            i = getIndexOfCurlyB(str);
+            if (i > 0) {
+                st = str.substring(0, i);
+                st = st.replace("\\\\", "");
+                terms.add(TERM_FACTORY.getConstantLiteral(st));
+                str = str.substring(str.indexOf("{", i), str.length());
+            } else if (i == 0) {
+                j = str.indexOf("}");
+                terms.add(TERM_FACTORY.getVariable(str.substring(1, j)));
+                str = str.substring(j + 1, str.length());
+            } else {
+                break;
+            }
+        }
+        if (!str.equals("")) {
+            str = str.replace("\\\\", "");
+            terms.add(TERM_FACTORY.getConstantLiteral(str));
+        }
+        return terms;
+    }
+
+    //this function returns nested concats
+    //in case of more than two terms need to be concatted
+    protected Term getNestedConcat(String str) {
+        ArrayList<Term> terms = new ArrayList<Term>();
+        terms = addToTermsList(str);
+        if (terms.size() == 1) {
+            Variable v = (Variable) terms.get(0);
+            variableSet.add(v);
+            return v;
+        }
+
+        Function f = TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
+        for (int j = 2; j < terms.size(); j++) {
+            f = TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
+        }
+        return f;
+    }
+
+    /**
+     * This methods construct an atom from a triple
+     * <p>
+     * For the input (subject, pred, object), the result is
+     * <ul>
+     * <li> object(subject), if pred == rdf:type and subject is grounded ; </li>
+     * <li> predicate(subject, object), if pred != rdf:type and predicate is grounded ; </li>
+     * <li> triple(subject, pred, object), otherwise (it is a higher order atom). </li>
+     * </ul>
+     */
+    protected Function makeAtom(Term subject, Term pred, Term object) {
+        Function atom = null;
+
+        if (isRDFType(pred)) {
+            if (object instanceof Function) {
+                if (QueryUtils.isGrounded(object)) {
+                    ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
+                    Predicate predicate = TERM_FACTORY.getClassPredicate(c.getValue());
+                    atom = TERM_FACTORY.getFunction(predicate, subject);
+                } else {
+                    atom = ATOM_FACTORY.getTripleAtom(subject, pred, object);
+                }
+            } else if (object instanceof Variable) {
+                Term uriOfPred = TERM_FACTORY.getUriTemplate(pred);
+                Term uriOfObject = TERM_FACTORY.getUriTemplate(object);
+                atom = ATOM_FACTORY.getTripleAtom(subject, uriOfPred, uriOfObject);
+            } else {
+                throw new IllegalArgumentException("parser cannot handle object " + object);
+            }
+        } else if (!QueryUtils.isGrounded(pred)) {
+            atom = ATOM_FACTORY.getTripleAtom(subject, pred, object);
+        } else {
+            //Predicate predicate = TERM_FACTORY.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+            Predicate predicate;
+            if (pred instanceof Function) {
+                ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
+                if (object instanceof Variable) {
+                    predicate = TERM_FACTORY.getDataPropertyPredicate(pr.getValue());
+                } else {
+                    if (object instanceof Function) {
+                        if (((Function) object).getFunctionSymbol() instanceof URITemplatePredicate) {
+
+                            predicate = TERM_FACTORY.getObjectPropertyPredicate(pr.getValue());
+                        } else {
+                            predicate = TERM_FACTORY.getDataPropertyPredicate(pr.getValue());
+                        }
+                    } else {
+                        throw new IllegalArgumentException("parser cannot handle object " + object);
+                    }
+                }
+            } else {
+                throw new IllegalArgumentException("predicate should be a URI Function");
+            }
+            atom = TERM_FACTORY.getFunction(predicate, subject, object);
+        }
+        return atom;
+    }
+
+
+    private static boolean isRDFType(Term pred) {
+//		if (pred instanceof Constant && ((Constant) pred).getValue().equals(RDF_TYPE)) {
+//			return true;
+//		}
+        if (pred instanceof Function && ((Function) pred).getTerm(0) instanceof Constant) {
+            String c = ((Constant) ((Function) pred).getTerm(0)).getValue();
+            return c.equals(RDF_TYPE);
+        }
+        return false;
+    }
+
+    @Override
+    public List<Function> visitParse(TurtleOBDA_tmpParser.ParseContext ctx) {
+        return ctx.triplesStatement().stream()
+                .flatMap(c -> visitTriplesStatement(c).stream())
+                .collect(ImmutableCollectors.toList());
+    }
+
+    @Override
+    public List<Function> visitTriplesStatement(TurtleOBDA_tmpParser.TriplesStatementContext ctx) {
+        return visitTriples(ctx.triples());
+    }
+
+    @Override
+    public Void visitPrefixID_1(TurtleOBDA_tmpParser.PrefixID_1Context ctx) {
+        String prefix = ctx.namespace().getText();
+        String uriref = visitUriref(ctx.uriref());
+        directives.put(prefix.substring(0, prefix.length() - 1), uriref); // remove the end colon
+        return null;
+    }
+
+    @Override
+    public Void visitPrefixID_2(TurtleOBDA_tmpParser.PrefixID_2Context ctx) {
+        String prefix = ctx.defaultNamespace().getText();
+        String uriref = visitUriref(ctx.uriref());
+        directives.put(prefix.substring(0, prefix.length() - 1), uriref); // remove the end colon
+        return null;
+    }
+
+    @Override
+    public List<Function> visitTriples(TurtleOBDA_tmpParser.TriplesContext ctx) {
+        currentSubject = visitSubject(ctx.subject());
+        return visitPredicateObjectList(ctx.predicateObjectList());
+    }
+
+    @Override
+    public List<Function> visitPredicateObjectList(TurtleOBDA_tmpParser.PredicateObjectListContext ctx) {
+        return ctx.predicateObject().stream()
+                .flatMap(c -> visitPredicateObject(c).stream())
+                .collect(ImmutableCollectors.toList());
+    }
+
+    @Override
+    public List<Function> visitPredicateObject(TurtleOBDA_tmpParser.PredicateObjectContext ctx) {
+        return visitObjectList(ctx.objectList()).stream()
+                .map(t -> makeAtom(currentSubject, visitVerb(ctx.verb()), t))
+                .collect(ImmutableCollectors.toList());
+    }
+
+    @Override
+    public Term visitVerb(TurtleOBDA_tmpParser.VerbContext ctx) {
+        TurtleOBDA_tmpParser.ResourceContext rc = ctx.resource();
+        if (rc != null) {
+            return visitResource(rc);
+        }
+        return TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(RDF_TYPE));
+    }
+
+    @Override
+    public List<Term> visitObjectList(TurtleOBDA_tmpParser.ObjectListContext ctx) {
+        return ctx.object().stream()
+                .map(c -> visitObject(c))
+                .collect(ImmutableCollectors.toList());
+    }
+
+    @Override
+    public Term visitSubject(TurtleOBDA_tmpParser.SubjectContext ctx) {
+        TurtleOBDA_tmpParser.ResourceContext rc = ctx.resource();
+        if (rc != null) {
+            return visitResource(rc);
+        }
+        TurtleOBDA_tmpParser.VariableContext vc = ctx.variable();
+        if (vc != null) {
+            return visitVariable(vc);
+        }
+        return null;
+    }
+
+    @Override
+    public Term visitObject(TurtleOBDA_tmpParser.ObjectContext ctx) {
+        return (Term) visit(ctx.children.iterator().next());
+    }
+
+    @Override
+    public Term visitResource(TurtleOBDA_tmpParser.ResourceContext ctx) {
+        if (ctx.uriref() != null) {
+            return construct(visitUriref(ctx.uriref()));
+        }
+        return construct(visitQname(ctx.qname()));
+    }
+
+    @Override
+    public String visitUriref(TurtleOBDA_tmpParser.UrirefContext ctx) {
+        return removeBrackets(ctx.STRING_WITH_BRACKET().getText());
+    }
+
+    @Override
+    public String visitQname(TurtleOBDA_tmpParser.QnameContext ctx) {
+        String[] tokens = ctx.PREFIXED_NAME().getText().split(":", 2);
+        String uri = directives.get(tokens[0]);  // the first token is the prefix
+        return uri + tokens[1];  // the second token is the local name
+    }
+
+    @Override
+    public Function visitTypedLiteral_1(TurtleOBDA_tmpParser.TypedLiteral_1Context ctx) {
+        return TERM_FACTORY.getTypedTerm(visitVariable(ctx.variable()), visitLanguage(ctx.language()));
+    }
+
+    @Override
+    public Function visitTypedLiteral_2(TurtleOBDA_tmpParser.TypedLiteral_2Context ctx) {
+        Variable var = visitVariable(ctx.variable());
+        Term term = visitResource(ctx.resource());
+        if (term instanceof Function) {
+            String functionName = ((ValueConstant) ((Function) term).getTerm(0)).getValue();
+            Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(functionName);
+            if (type.isPresent()) {
+                return TERM_FACTORY.getTypedTerm(var, type.get());
+            }
+            throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
+        }
+        throw new IllegalArgumentException("$resource.value should be an URI");
+    }
+
+    @Override
+    public Variable visitVariable(TurtleOBDA_tmpParser.VariableContext ctx) {
+        Variable variable = TERM_FACTORY.getVariable(removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText()));
+        variableSet.add(variable);
+        return variable;
+    }
+
+    @Override
+    public Function visitFunction(TurtleOBDA_tmpParser.FunctionContext ctx) {
+        String functionName = visitResource(ctx.resource()).toString();
+        ImmutableList<Term> terms = visitTerms(ctx.terms());
+        Predicate functionSymbol = TERM_FACTORY.getPredicate(functionName, terms.size());
+        return TERM_FACTORY.getFunction(functionSymbol, terms);
+    }
+
+    @Override
+    public Term visitLanguage(TurtleOBDA_tmpParser.LanguageContext ctx) {
+        TurtleOBDA_tmpParser.LanguageTagContext ltc = ctx.languageTag();
+        if (ltc != null) {
+            return TERM_FACTORY.getConstantLiteral(ltc.getText().toLowerCase(), COL_TYPE.STRING);
+        }
+        return visitVariable(ctx.variable());
+    }
+
+    @Override
+    public ImmutableList<Term> visitTerms(TurtleOBDA_tmpParser.TermsContext ctx) {
+        return ctx.term().stream()
+                .map(c -> visitTerm(c))
+                .collect(ImmutableCollectors.toList());
+    }
+
+    @Override
+    public Term visitTerm(TurtleOBDA_tmpParser.TermContext ctx) {
+        return (Term) visitChildren(ctx);
+    }
+
+    @Override
+    public Term visitLiteral(TurtleOBDA_tmpParser.LiteralContext ctx) {
+        TurtleOBDA_tmpParser.StringLiteralContext slc = ctx.stringLiteral();
+        if (slc != null) {
+            Term literal = visitStringLiteral(slc);
+            TurtleOBDA_tmpParser.LanguageContext lc = ctx.language();
+            //if variable we cannot assign a datatype yet
+            if (literal instanceof Variable) {
+                return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
+            }
+            if (lc != null) {
+                return TERM_FACTORY.getTypedTerm(literal, visitLanguage(lc));
+            }
+            return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
+        }
+        return (Term) visitChildren(ctx);
+    }
+
+    @Override
+    public Term visitStringLiteral(TurtleOBDA_tmpParser.StringLiteralContext ctx) {
+        String str = ctx.STRING_WITH_QUOTE_DOUBLE().getText();
+        if (str.contains("{")) {
+            return getNestedConcat(str);
+        }
+        return TERM_FACTORY.getConstantLiteral(str.substring(1, str.length() - 1), COL_TYPE.STRING); // without the double quotes
+    }
+
+    @Override
+    public Term visitDataTypeString(TurtleOBDA_tmpParser.DataTypeStringContext ctx) {
+        Term stringValue = visitStringLiteral(ctx.stringLiteral());
+        Term resource = visitResource(ctx.resource());
+        if (resource instanceof Function) {
+            String functionName = ((ValueConstant) ((Function) resource).getTerm(0)).getValue();
+
+            Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(functionName);
+            if (!type.isPresent()) {
+                throw new RuntimeException("Unsupported datatype: " + functionName);
+            }
+            return TERM_FACTORY.getTypedTerm(stringValue, type.get());
+        }
+        return TERM_FACTORY.getTypedTerm(stringValue, COL_TYPE.STRING);
+    }
+
+    @Override
+    public Term visitNumericLiteral(TurtleOBDA_tmpParser.NumericLiteralContext ctx) {
+        return (Term) visitChildren(ctx);
+    }
+
+    @Override
+    public Term visitBooleanLiteral(TurtleOBDA_tmpParser.BooleanLiteralContext ctx) {
+        TerminalNode token = ctx.TRUE();
+        if (token != null) {
+            return typeTerm(token.getText(), COL_TYPE.BOOLEAN);
+        }
+        return typeTerm(ctx.FALSE().getText(), COL_TYPE.BOOLEAN);
+    }
+
+    @Override
+    public Term visitNumericUnsigned(TurtleOBDA_tmpParser.NumericUnsignedContext ctx) {
+        TerminalNode token;
+        token = ctx.INTEGER();
+        if (token != null) {
+            return typeTerm(token.getText(), COL_TYPE.INTEGER);
+        }
+        token = ctx.DOUBLE();
+        if (token != null) {
+            return typeTerm(token.getText(), COL_TYPE.DOUBLE);
+        }
+        return typeTerm(token.getText(), COL_TYPE.DECIMAL);
+    }
+
+    @Override
+    public Term visitNumericPositive(TurtleOBDA_tmpParser.NumericPositiveContext ctx) {
+        TerminalNode token;
+        token = ctx.INTEGER_POSITIVE();
+        if (token != null) {
+            return typeTerm(token.getText(), COL_TYPE.INTEGER);
+        }
+        token = ctx.DOUBLE_POSITIVE();
+        if (token != null) {
+            return typeTerm(token.getText(), COL_TYPE.DOUBLE);
+        }
+        return typeTerm(token.getText(), COL_TYPE.DECIMAL);
+    }
+
+    @Override
+    public Term visitNumericNegative(TurtleOBDA_tmpParser.NumericNegativeContext ctx) {
+        TerminalNode token;
+        token = ctx.INTEGER_NEGATIVE();
+        if (token != null) {
+            return typeTerm(token.getText(), COL_TYPE.INTEGER);
+        }
+        token = ctx.DOUBLE_NEGATIVE();
+        if (token != null) {
+            return typeTerm(token.getText(), COL_TYPE.DOUBLE);
+        }
+        return typeTerm(token.getText(), COL_TYPE.DECIMAL);
+    }
+}

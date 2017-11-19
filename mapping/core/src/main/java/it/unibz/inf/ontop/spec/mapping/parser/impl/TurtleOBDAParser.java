@@ -1,18 +1,18 @@
-// $ANTLR 3.5.2 TurtleOBDA.g 2017-10-27 11:40:00
 
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
-import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import org.antlr.runtime.BitSet;
-import org.antlr.runtime.*;
+//import it.unibz.inf.ontop.model.term.*;
+//import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+//import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+//import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+//import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.antlr.v4.runtime.Parser;
+
 
 import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.*;

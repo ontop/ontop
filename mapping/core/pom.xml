@@ -64,6 +64,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-rdf-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.7</version>
+        </dependency>
     </dependencies>
 
 
