@@ -113,8 +113,6 @@ public class OneShotSQLGeneratorEngine {
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 
-	private Map<Predicate, String> sqlAnsViewMap;
-
 
 	OneShotSQLGeneratorEngine(DBMetadata metadata,
 							  IRIDictionary iriDictionary,
@@ -243,8 +241,6 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
 			throws OntopReformulationException {
-
-		sqlAnsViewMap = new HashMap<>();
 
 		IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
 
@@ -381,7 +377,6 @@ public class OneShotSQLGeneratorEngine {
 				// Creates BODY of the view query
 				String unionView = generateQueryFromRules(ruleIndex.get(pred), signature0, ruleIndex,
 						subQueryDefinitions, termTypeMap, "UNION ALL");
-				sqlAnsViewMap.put(pred, unionView);
 
 				ParserViewDefinition view = createViewFrom(pred, signature0, unionView, subQueryDefinitions);
 				subQueryDefinitions.put(pred, view);
@@ -1826,7 +1821,7 @@ public class OneShotSQLGeneratorEngine {
 			if (atom.isOperation()) {
 				return;
 			}
-			else if (atom.isAlgebraFunction()){
+			else if (atom.isAlgebraFunction()) {
 				for (Term subatom : atom.getTerms()) {
 					if (subatom instanceof Function) {
 						generateViewsIndexVariables((Function) subatom, subQueryDefinitions, ruleIndex);
@@ -1910,9 +1905,7 @@ public class OneShotSQLGeneratorEngine {
 		 * Generates the view definition, i.e., "tablename viewname".
 		 */
 		public String getViewDefinition(Function atom) {
-			/**
-			 * Normal case
-			 */
+
 			DataDefinition dd = dataDefinitions.get(atom);
 			if (dd != null) {
 				if (dd.def instanceof DatabaseRelationDefinition) {
@@ -1925,32 +1918,12 @@ public class OneShotSQLGeneratorEngine {
 				}
 				throw new RuntimeException("Impossible to get data definition for: " + atom + ", type: " + dd);
 			}
-
-			/**
-			 * Special case of nullary atoms
-			 */
 			else if (atom.getArity() == 0) {
+				 // Special case of nullary atoms
 				return "(" + sqladapter.getDummyTable() + ") tdummy";
 			}
-
-			/**
-			 * Special case.
-			 * For atoms nested in a LJ.
-			 *
-			 * TODO: unify with the normal case?
-			 */
-			else {
-				// Should be an ans atom.
-				Predicate pred = atom.getFunctionSymbol();
-				String view = sqlAnsViewMap.get(pred);
-				if (view != null) {
-					// TODO: check if it is correct not to consider other view names.
-					RelationID viewName = createViewId(pred.getName(), VIEW_ANS_SUFFIX, ImmutableSet.of());
-					return String.format("(%s) %s", view, viewName.getSQLRendering());
-				}
-				throw new RuntimeException(
+			throw new RuntimeException(
 						"Impossible to get data definition for: " + atom + ", type: " + dd);
-			}
 		}
 
 		public Optional<RelationDefinition> getDefinition(RelationID relationId) {
