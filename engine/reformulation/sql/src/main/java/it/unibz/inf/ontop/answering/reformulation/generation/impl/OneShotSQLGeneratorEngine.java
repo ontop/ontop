@@ -402,7 +402,7 @@ public class OneShotSQLGeneratorEngine {
 				for (SignatureVariableBase var : signature0) {
 					for (String alias : generator.getThreeColumns(var.alias)) {
 						view.addAttribute(new QualifiedAttributeID(viewId,
-								metadata.getQuotedIDFactory().createAttributeID(sqladapter.sqlQuote(alias))));
+								metadata.getQuotedIDFactory().createAttributeID(alias)));
 					}
 				}
 				alreadyAllocatedViewNames.add(viewId);
