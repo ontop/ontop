@@ -97,7 +97,6 @@ public class OneShotSQLGeneratorEngine {
 	private final IntermediateQuery2DatalogTranslator iq2DatalogTranslator;
 
 	private final boolean distinctResultSet;
-	private final boolean generatingREPLACE;
 	private final String replace1, replace2;
 
 	@Nullable
@@ -144,9 +143,7 @@ public class OneShotSQLGeneratorEngine {
 		this.distinctResultSet = settings.isDistinctPostProcessingEnabled();
 		this.iq2DatalogTranslator = iq2DatalogTranslator;
 
-		this.generatingREPLACE = settings.isIRISafeEncodingEnabled();
-
-		if (generatingREPLACE) {
+		if (settings.isIRISafeEncodingEnabled()) {
 			StringBuilder sb1 = new StringBuilder();
 			StringBuilder sb2 = new StringBuilder();
 			for (Entry<String, String> e : EncodeForURI.TABLE.entrySet()) {
@@ -167,7 +164,7 @@ public class OneShotSQLGeneratorEngine {
 	/**
 	 * For clone purposes only
 	 */
-	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
+	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter,
                                       String replace1, String replace2, boolean distinctResultSet,
                                       IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
                                       ImmutableMap<ExpressionOperation, String> operations,
@@ -175,7 +172,6 @@ public class OneShotSQLGeneratorEngine {
 		this.metadata = metadata;
 		this.sqladapter = sqlAdapter;
 		this.operations = operations;
-		this.generatingREPLACE = generatingReplace;
 		this.replace1 = replace1;
 		this.replace2 = replace2;
 		this.distinctResultSet = distinctResultSet;
@@ -234,7 +230,7 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	@Override
 	public OneShotSQLGeneratorEngine clone() {
-		return new OneShotSQLGeneratorEngine(metadata, sqladapter, generatingREPLACE,
+		return new OneShotSQLGeneratorEngine(metadata, sqladapter, 
 				replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator);
 	}
 
