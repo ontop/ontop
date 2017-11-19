@@ -315,7 +315,7 @@ public class OneShotSQLGeneratorEngine {
 	/**
 	 * Main method. Generates the full SQL query, taking into account
 	 * limit/offset/order by. An important part of this program is
-	 * {@link #createViewFrom}
+	 * {@link #generateQueryFromRules}
 	 * that will create a view for every ans predicate in the Datalog input
 	 * program.
 	 *
@@ -336,8 +336,6 @@ public class OneShotSQLGeneratorEngine {
 								 List<Predicate> predicatesInBottomUp,
 								 List<Predicate> extensionalPredicates) throws OntopReformulationException {
 
-		Map<Predicate, ParserViewDefinition> subQueryDefinitions = new HashMap<>();
-
 		TypeExtractor.TypeResults typeResults;
 		try {
 			typeResults = TypeExtractor.extractTypes(ruleIndex, predicatesInBottomUp, metadata);
@@ -356,6 +354,8 @@ public class OneShotSQLGeneratorEngine {
 		 * ANS i > 1
 		 */
 
+		ImmutableMap.Builder<Predicate, ParserViewDefinition> subQueryDefinitionsBuilder = ImmutableMap.builder();
+		Set<RelationID> alreadyAllocatedViewNames = new HashSet<>();
 		// create a view for every ans predicate in the Datalog input program.
 		int numPreds = predicatesInBottomUp.size();
 		for (int i = 0; i < numPreds - 1; i++) {
@@ -363,6 +363,22 @@ public class OneShotSQLGeneratorEngine {
 			if (!extensionalPredicates.contains(pred)) {
 				// extensional predicates are defined by DBs
 				// so, we skip them
+				/**
+				 * handle the semantics of OPTIONAL when there
+				 * are multiple mappings or Unions. It will take mappings of the form
+				 * <ul>
+				 * <li>Concept <- definition1</li>
+				 * <li>Concept <- definition2</li>
+				 * </ul>
+				 * And will generate a view of the form
+				 * <ul>
+				 * <li>QConceptView = definition1 UNION definition2
+				 * </ul>
+				 * This view is stored in the <code>metadata </code>. See DBMetadata
+				 *
+				 * The idea is to use the view definition in the case of Union in the
+				 * Optionals/LeftJoins
+				 */
 
 				ImmutableList.Builder<SignatureVariableBase> builder = ImmutableList.builder();
 				ImmutableList<COL_TYPE> castTypes = castTypeMap.get(pred);
@@ -376,10 +392,21 @@ public class OneShotSQLGeneratorEngine {
 
 				// Creates BODY of the view query
 				String unionView = generateQueryFromRules(ruleIndex.get(pred), signature0, ruleIndex,
-						subQueryDefinitions, termTypeMap, "UNION ALL");
+						subQueryDefinitionsBuilder.build(), termTypeMap, "UNION ALL");
 
-				ParserViewDefinition view = createViewFrom(pred, signature0, unionView, subQueryDefinitions);
-				subQueryDefinitions.put(pred, view);
+				RelationID viewId = createViewId(pred.getName(), VIEW_ANS_SUFFIX, alreadyAllocatedViewNames);
+
+				// creates a view outside the DBMetadata (specific to this sub-query)
+				SqlAliasGenerator generator = new SqlAliasGenerator();
+				ParserViewDefinition view = new ParserViewDefinition(viewId, unionView);
+				for (SignatureVariableBase var : signature0) {
+					for (String alias : generator.getThreeColumns(var.alias)) {
+						view.addAttribute(new QualifiedAttributeID(viewId,
+								metadata.getQuotedIDFactory().createAttributeID(sqladapter.sqlQuote(alias))));
+					}
+				}
+				alreadyAllocatedViewNames.add(viewId);
+				subQueryDefinitionsBuilder.put(pred, view);
 			}
 		}
 
@@ -396,7 +423,7 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		return generateQueryFromRules(ruleIndex.get(predAns1), builder.build(), ruleIndex,
-				subQueryDefinitions, termTypeMap,
+				subQueryDefinitionsBuilder.build(), termTypeMap,
 				isDistinct && !distinctResultSet ? "UNION" : "UNION ALL");
 	}
 
@@ -417,7 +444,7 @@ public class OneShotSQLGeneratorEngine {
 	private String generateQueryFromRules(Collection<CQIE> cqs,
 										  ImmutableList<SignatureVariableBase> signature,
 										  Multimap<Predicate, CQIE> ruleIndex,
-										  Map<Predicate, ParserViewDefinition> subQueryDefinitions,
+										  ImmutableMap<Predicate, ParserViewDefinition> subQueryDefinitions,
 										  ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
 										  String union_string) {
 
@@ -522,53 +549,6 @@ public class OneShotSQLGeneratorEngine {
 		log.debug("Program normalized for SQL translation: \n"+program);
 	}
 
-
-	/**
-	 * This Method was created to handle the semantics of OPTIONAL when there
-	 * are multiple mappings or Unions. It will take mappings of the form
-	 * <ul>
-	 * <li>Concept <- definition1</li>
-	 * <li>Concept <- definition2</li>
-	 * </ul>
-	 * And will generate a view of the form
-	 * <ul>
-	 * <li>QConceptView = definition1 UNION definition2
-	 * </ul>
-	 * This view is stored in the <code>metadata </code>. See DBMetadata
-	 *
-	 * The idea is to use the view definition in the case of Union in the
-	 * Optionals/LeftJoins
-	 *
-	 * @param subQueryDefinitions
-	 *
-	 * @throws Exception
-	 */
-
-	private ParserViewDefinition createViewFrom(Predicate pred,
-												ImmutableList<SignatureVariableBase> signature,
-												String unionView,
-												Map<Predicate, ParserViewDefinition> subQueryDefinitions) {
-
-		QuotedIDFactory idFactory = metadata.getQuotedIDFactory();
-
-		Set<RelationID> alreadyAllocatedViewNames = subQueryDefinitions.values().stream()
-				.map(ParserViewDefinition::getID)
-				.collect(Collectors.toSet());
-
-		RelationID viewId = createViewId(pred.getName(), VIEW_ANS_SUFFIX, alreadyAllocatedViewNames);
-
-		// creates a view outside the DBMetadata (specific to this sub-query)
-		ParserViewDefinition view = new ParserViewDefinition(viewId, unionView);
-		for (SignatureVariableBase var : signature) {
-			view.addAttribute(new QualifiedAttributeID(viewId,
-					idFactory.createAttributeID(sqladapter.sqlQuote(var.alias + TYPE_SUFFIX))));
-			view.addAttribute(new QualifiedAttributeID(viewId,
-					idFactory.createAttributeID(sqladapter.sqlQuote(var.alias + LANG_SUFFIX))));
-			view.addAttribute(new QualifiedAttributeID(viewId,
-					idFactory.createAttributeID(sqladapter.sqlQuote(var.alias))));
-		}
-		return view;
-	}
 
 	private RelationID createViewId(String predicateName, String suffix, Collection<RelationID> alreadyAllocatedViewNames) {
 		// Escapes view names.
@@ -1024,14 +1004,8 @@ public class OneShotSQLGeneratorEngine {
 			return sb.toString();
 		}
 
-		/**
-		 * Set that contains all the variable names created on the top query.
-		 * It helps the dialect adapter to generate variable names according to its possible restrictions.
-		 * Currently, this is needed for the Oracle adapter (max. length of 30 characters).
-		 */
-		Set<String> sqlVariableNames = new HashSet<>();
-
-		List<String> list = Lists.newArrayList();
+		SqlAliasGenerator generator = new SqlAliasGenerator();
+		List<String> list = Lists.newArrayListWithCapacity(signature.size());
 		for (SignatureVariable var : signature) {
 
 			/**
@@ -1042,28 +1016,43 @@ public class OneShotSQLGeneratorEngine {
 			 * one datatype per column. If the sub-queries are producing results of different types,
 			 * them there will be a difference between the type in the main column and the RDF one.
 			 */
-
-			// Creates alias names that satisfy the restrictions of the SQL dialect.
-			String typeAlias = sqladapter.nameTopVariable(var.alias, TYPE_SUFFIX, sqlVariableNames);
-			sqlVariableNames.add(typeAlias);
 			String typeColumn = getTypeColumnForSELECT(var.term, index, var.termType);
-
-			String langAlias = sqladapter.nameTopVariable(var.alias, LANG_SUFFIX, sqlVariableNames);
-			sqlVariableNames.add(langAlias);
 			String langColumn = getLangColumnForSELECT(var.term, index, var.termType);
-
-			String mainAlias = sqladapter.nameTopVariable(var.alias, MAIN_COLUMN_SUFFIX, sqlVariableNames);
-			sqlVariableNames.add(mainAlias);
 			String mainColumn = getMainColumnForSELECT(var.term, index, var.castType);
 
+			ImmutableList<String> aliases = generator.getThreeColumns(var.alias);
+
 			list.add(new StringBuffer().append("\n   ")
-					.append(typeColumn).append(" AS ").append(typeAlias).append(", ")
-					.append(langColumn).append(" AS ").append(langAlias).append(", ")
-					.append(mainColumn).append(" AS ").append(mainAlias)
+					.append(typeColumn).append(" AS ").append(aliases.get(0)).append(", ")
+					.append(langColumn).append(" AS ").append(aliases.get(1)).append(", ")
+					.append(mainColumn).append(" AS ").append(aliases.get(2))
 					.toString());
 		}
 		Joiner.on(", ").appendTo(sb, list);
 		return sb.toString();
+	}
+
+	private final class SqlAliasGenerator {
+		/**
+		 * Set that contains all the variable names created on the top query.
+		 * It helps the dialect adapter to generate variable names according to its possible restrictions.
+		 * Currently, this is needed for the Oracle adapter (max. length of 30 characters).
+		 */
+		Set<String> sqlVariableNames = new HashSet<>();
+
+		// Creates alias names that satisfy the restrictions of the SQL dialect.
+		ImmutableList<String> getThreeColumns(String signatureName) {
+			String typeAlias = sqladapter.nameTopVariable(signatureName, TYPE_SUFFIX, sqlVariableNames);
+			sqlVariableNames.add(typeAlias);
+
+			String langAlias = sqladapter.nameTopVariable(signatureName, LANG_SUFFIX, sqlVariableNames);
+			sqlVariableNames.add(langAlias);
+
+			String mainAlias = sqladapter.nameTopVariable(signatureName, MAIN_COLUMN_SUFFIX, sqlVariableNames);
+			sqlVariableNames.add(mainAlias);
+
+			return ImmutableList.of(typeAlias, langAlias, mainAlias);
+		}
 	}
 
 	private String getMainColumnForSELECT(Term ht, QueryAliasIndex index, COL_TYPE castDataType) {
@@ -1206,8 +1195,7 @@ public class OneShotSQLGeneratorEngine {
 		Set<QualifiedAttributeID> columnRefs = index.getColumnReferences(var);
 
 		if (columnRefs == null || columnRefs.size() == 0) {
-			throw new RuntimeException(
-					"Unbound variable found in WHERE clause: " + var);
+			throw new RuntimeException("Unbound variable found in WHERE clause: " + var);
 		}
 
 		/**
@@ -1792,7 +1780,7 @@ public class OneShotSQLGeneratorEngine {
 		final Map<RelationID, RelationDefinition> dataDefinitionsById = new HashMap<>();
 		final Map<Variable, Set<QualifiedAttributeID>> columnReferences = new HashMap<>();
 
-		public QueryAliasIndex(CQIE query, Map<Predicate, ParserViewDefinition> subQueryDefinitions, Multimap<Predicate, CQIE> ruleIndex) {
+		public QueryAliasIndex(CQIE query, ImmutableMap<Predicate, ParserViewDefinition> subQueryDefinitions, Multimap<Predicate, CQIE> ruleIndex) {
 			for (Function atom : query.getBody()) {
 				/*
 				 * This will be called recursively if necessary
