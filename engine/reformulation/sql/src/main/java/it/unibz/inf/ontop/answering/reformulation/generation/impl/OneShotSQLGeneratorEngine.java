@@ -230,7 +230,7 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	@Override
 	public OneShotSQLGeneratorEngine clone() {
-		return new OneShotSQLGeneratorEngine(metadata, sqladapter, 
+		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
 				replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator);
 	}
 
@@ -367,9 +367,23 @@ public class OneShotSQLGeneratorEngine {
 			if (!extensionalPredicates.contains(pred)) {
 				// extensional predicates are defined by DBs
 				// so, we skip them
-				ParserViewDefinition view = createViewFrom(pred, ruleIndex, subQueryDefinitions,
-						termTypeMap, castTypeMap.get(pred));
 
+				ImmutableList.Builder<SignatureVariableBase> builder = ImmutableList.builder();
+				ImmutableList<COL_TYPE> castTypes = castTypeMap.get(pred);
+				// all have the same arity
+				int size = ruleIndex.get(pred).iterator().next().getHead().getArity();
+				// create signature
+				for (int k = 0; k < size; k++) {
+					builder.add(new SignatureVariableBase("v" + k, castTypes.get(k)));
+				}
+				ImmutableList<SignatureVariableBase> signature0 = builder.build();
+
+				// Creates BODY of the view query
+				String unionView = generateQueryFromRules(ruleIndex.get(pred), signature0, ruleIndex,
+						subQueryDefinitions, termTypeMap, "UNION ALL");
+				sqlAnsViewMap.put(pred, unionView);
+
+				ParserViewDefinition view = createViewFrom(pred, signature0, unionView, subQueryDefinitions);
 				subQueryDefinitions.put(pred, view);
 			}
 		}
@@ -380,9 +394,14 @@ public class OneShotSQLGeneratorEngine {
 
 		// This should be ans1, and the rules defining it.
 		Predicate predAns1 = predicatesInBottomUp.get(numPreds - 1);
+		ImmutableList<COL_TYPE> castType = castTypeMap.get(predAns1);
+		ImmutableList.Builder<SignatureVariableBase> builder = ImmutableList.builder();
+		for (int i = 0; i < signature.size(); i++) {
+			builder.add(new SignatureVariableBase(signature.get(i), castType.get(i)));
+		}
 
-		return generateQueryFromRules(ruleIndex.get(predAns1), signature, ruleIndex,
-				subQueryDefinitions, termTypeMap, castTypeMap.get(predAns1),
+		return generateQueryFromRules(ruleIndex.get(predAns1), builder.build(), ruleIndex,
+				subQueryDefinitions, termTypeMap,
 				isDistinct && !distinctResultSet ? "UNION" : "UNION ALL");
 	}
 
@@ -398,16 +417,16 @@ public class OneShotSQLGeneratorEngine {
 	 * @param ruleIndex
 	 * @param subQueryDefinitions
 	 * @param termTypeMap
-	 * @param castTypes
 	 * @param union_string
 	 */
 	private String generateQueryFromRules(Collection<CQIE> cqs,
-										  List<String> signature,
+										  ImmutableList<SignatureVariableBase> signature,
 										  Multimap<Predicate, CQIE> ruleIndex,
 										  Map<Predicate, ParserViewDefinition> subQueryDefinitions,
 										  ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
-										  ImmutableList<COL_TYPE> castTypes,
 										  String union_string) {
+
+
 
 		List<String> sqls = Lists.newArrayListWithExpectedSize(cqs.size());
 		for (CQIE cq : cqs) {
@@ -426,7 +445,14 @@ public class OneShotSQLGeneratorEngine {
 			String conditions = getConditionsString(cq.getBody(), index, false, "");
 			String WHERE = conditions.isEmpty() ? "" : "\nWHERE \n" + conditions;
 
-			String SELECT = getSelectClause(signature, cq.getHead().getTerms(), index, castTypes, termTypeMap.get(cq));
+			List<Term> terms = cq.getHead().getTerms();
+			List<Optional<TermType>> termTypes = termTypeMap.get(cq);
+			ImmutableList.Builder<SignatureVariable> builder = ImmutableList.builder();
+			for (int i = 0; i < signature.size(); i++) {
+				builder.add(new SignatureVariable(terms.get(i), signature.get(i), termTypes.get(i)));
+			}
+			String SELECT = getSelectClause(builder.build(), index);
+
 			String GROUP = getGroupBy(cq.getBody(), index);
 			String HAVING = getHaving(cq.getBody(), index);
 
@@ -518,34 +544,15 @@ public class OneShotSQLGeneratorEngine {
 	 * The idea is to use the view definition in the case of Union in the
 	 * Optionals/LeftJoins
 	 *
-	 * @param ruleIndex
 	 * @param subQueryDefinitions
-	 * @param termTypeMap
-	 * @param castTypes
 	 *
 	 * @throws Exception
 	 */
 
 	private ParserViewDefinition createViewFrom(Predicate pred,
-												Multimap<Predicate, CQIE> ruleIndex,
-												Map<Predicate, ParserViewDefinition> subQueryDefinitions,
-												ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
-												ImmutableList<COL_TYPE> castTypes) {
-
-		/* Creates BODY of the view query */
-
-		Collection<CQIE> ruleList = ruleIndex.get(pred);
-
-		// all have the same arity
-		int headArity = ruleList.iterator().next().getHead().getTerms().size();
-		// create the signature
-		List<String> signature = Lists.newArrayListWithCapacity(headArity);
-		for (int i = 0; i < headArity; i++)
-			signature.add("v" + i);
-
-		String unionView = generateQueryFromRules(ruleList, signature, ruleIndex,
-				subQueryDefinitions, termTypeMap, castTypes, "UNION ALL");
-		sqlAnsViewMap.put(pred, unionView);
+												ImmutableList<SignatureVariableBase> signature,
+												String unionView,
+												Map<Predicate, ParserViewDefinition> subQueryDefinitions) {
 
 		QuotedIDFactory idFactory = metadata.getQuotedIDFactory();
 
@@ -557,13 +564,13 @@ public class OneShotSQLGeneratorEngine {
 
 		// creates a view outside the DBMetadata (specific to this sub-query)
 		ParserViewDefinition view = new ParserViewDefinition(viewId, unionView);
-		for (String var : signature) {
+		for (SignatureVariableBase var : signature) {
 			view.addAttribute(new QualifiedAttributeID(viewId,
-					idFactory.createAttributeID(sqladapter.sqlQuote(var + TYPE_SUFFIX))));
+					idFactory.createAttributeID(sqladapter.sqlQuote(var.alias + TYPE_SUFFIX))));
 			view.addAttribute(new QualifiedAttributeID(viewId,
-					idFactory.createAttributeID(sqladapter.sqlQuote(var + LANG_SUFFIX))));
+					idFactory.createAttributeID(sqladapter.sqlQuote(var.alias + LANG_SUFFIX))));
 			view.addAttribute(new QualifiedAttributeID(viewId,
-					idFactory.createAttributeID(sqladapter.sqlQuote(var))));
+					idFactory.createAttributeID(sqladapter.sqlQuote(var.alias))));
 		}
 		return view;
 	}
@@ -977,18 +984,35 @@ public class OneShotSQLGeneratorEngine {
 		return Types.VARCHAR;
 	}
 
+	private static final class SignatureVariableBase {
+		private final String alias;
+		private final COL_TYPE castType;
+		SignatureVariableBase(String alias, COL_TYPE castType) {
+			this.alias = alias;
+			this.castType = castType;
+		}
+	}
+
+	private static final class SignatureVariable {
+		private final Term term;
+		private final String alias;
+		private final COL_TYPE castType;
+		private final Optional<TermType> termType;
+		SignatureVariable(Term term, SignatureVariableBase base, Optional<TermType> termType) {
+			this.term = term;
+			this.alias = base.alias;
+			this.castType = base.castType;
+			this.termType = termType;
+		}
+	}
+
 	/**
 	 * produces the select clause of the sql query for the given CQIE
 	 *
-	 * @param headterms
-	 * @param castTypes
-	 * @param termTypes
 	 * @return the sql select clause
 	 */
-	private String getSelectClause(List<String> signature, List<Term> headterms,
-								   QueryAliasIndex index,
-								   ImmutableList<COL_TYPE> castTypes,
-								   ImmutableList<Optional<TermType>> termTypes) {
+	private String getSelectClause(ImmutableList<SignatureVariable> signature,
+								   QueryAliasIndex index) {
 		/*
 		 * If the head has size 0 this is a boolean query.
 		 */
@@ -1000,15 +1024,10 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		//Only for ASK
-		if (headterms.size() == 0) {
+		if (signature.size() == 0) {
 			sb.append("'true' AS x");
 			return sb.toString();
 		}
-
-		Iterator<Term> hit = headterms.iterator();
-		Iterator<String> varIter = signature.iterator();
-		Iterator<COL_TYPE> castTypeIter = castTypes.iterator();
-		Iterator<Optional<TermType>> termTypeIter = termTypes.iterator();
 
 		/**
 		 * Set that contains all the variable names created on the top query.
@@ -1017,8 +1036,8 @@ public class OneShotSQLGeneratorEngine {
 		 */
 		Set<String> sqlVariableNames = new HashSet<>();
 
-		while (hit.hasNext()) {
-			Term ht = hit.next();
+		List<String> list = Lists.newArrayList();
+		for (SignatureVariable var : signature) {
 
 			/**
 			 * Datatype for the main column (to which it is cast).
@@ -1028,33 +1047,27 @@ public class OneShotSQLGeneratorEngine {
 			 * one datatype per column. If the sub-queries are producing results of different types,
 			 * them there will be a difference between the type in the main column and the RDF one.
 			 */
-			COL_TYPE castType = castTypeIter.next();
-
-			Optional<TermType> optionalTermType = termTypeIter.next();
-
-			String varName = varIter.next();
 
 			// Creates alias names that satisfy the restrictions of the SQL dialect.
-			String typeAlias = sqladapter.nameTopVariable(varName, TYPE_SUFFIX, sqlVariableNames);
+			String typeAlias = sqladapter.nameTopVariable(var.alias, TYPE_SUFFIX, sqlVariableNames);
 			sqlVariableNames.add(typeAlias);
-			String typeColumn = getTypeColumnForSELECT(ht, index, optionalTermType);
+			String typeColumn = getTypeColumnForSELECT(var.term, index, var.termType);
 
-			String langAlias = sqladapter.nameTopVariable(varName, LANG_SUFFIX, sqlVariableNames);
+			String langAlias = sqladapter.nameTopVariable(var.alias, LANG_SUFFIX, sqlVariableNames);
 			sqlVariableNames.add(langAlias);
-			String langColumn = getLangColumnForSELECT(ht, index, optionalTermType);
+			String langColumn = getLangColumnForSELECT(var.term, index, var.termType);
 
-			String mainAlias = sqladapter.nameTopVariable(varName, MAIN_COLUMN_SUFFIX, sqlVariableNames);
+			String mainAlias = sqladapter.nameTopVariable(var.alias, MAIN_COLUMN_SUFFIX, sqlVariableNames);
 			sqlVariableNames.add(mainAlias);
-			String mainColumn = getMainColumnForSELECT(ht, index, castType);
+			String mainColumn = getMainColumnForSELECT(var.term, index, var.castType);
 
-			sb.append("\n   ")
+			list.add(new StringBuffer().append("\n   ")
 					.append(typeColumn).append(" AS ").append(typeAlias).append(", ")
 					.append(langColumn).append(" AS ").append(langAlias).append(", ")
-					.append(mainColumn).append(" AS ").append(mainAlias);
-			if (hit.hasNext()) {
-				sb.append(", ");
-			}
+					.append(mainColumn).append(" AS ").append(mainAlias)
+					.toString());
 		}
+		Joiner.on(", ").appendTo(sb, list);
 		return sb.toString();
 	}
 
