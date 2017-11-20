@@ -392,9 +392,10 @@ public class OneShotSQLGeneratorEngine {
 
 				// Creates BODY of the view query
 				String unionView = generateQueryFromRules(ruleIndex.get(pred), s, ruleIndex,
-						subQueryDefinitionsBuilder.build(), termTypeMap, "UNION ALL");
+						subQueryDefinitionsBuilder.build(), termTypeMap, false);
 
 				RelationID viewId = createViewId(pred.getName(), VIEW_ANS_SUFFIX, alreadyAllocatedViewNames);
+				alreadyAllocatedViewNames.add(viewId);
 
 				// creates a view outside the DBMetadata (specific to this sub-query)
 				ParserViewDefinition view = new ParserViewDefinition(viewId, unionView);
@@ -404,7 +405,6 @@ public class OneShotSQLGeneratorEngine {
 								metadata.getQuotedIDFactory().createAttributeID(alias)));
 					}
 				}
-				alreadyAllocatedViewNames.add(viewId);
 				subQueryDefinitionsBuilder.put(pred, view);
 			}
 		}
@@ -419,7 +419,7 @@ public class OneShotSQLGeneratorEngine {
 
 		return generateQueryFromRules(ruleIndex.get(predAns1), s, ruleIndex,
 				subQueryDefinitionsBuilder.build(), termTypeMap,
-				isDistinct && !distinctResultSet ? "UNION" : "UNION ALL");
+				isDistinct && !distinctResultSet);
 	}
 
 
@@ -434,14 +434,14 @@ public class OneShotSQLGeneratorEngine {
 	 * @param ruleIndex
 	 * @param subQueryDefinitions
 	 * @param termTypeMap
-	 * @param union_string
+	 * @param unionNoDuplicates
 	 */
 	private String generateQueryFromRules(Collection<CQIE> cqs,
 										  ImmutableList<SignatureVariableBase> signature,
 										  Multimap<Predicate, CQIE> ruleIndex,
 										  ImmutableMap<Predicate, ParserViewDefinition> subQueryDefinitions,
 										  ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
-										  String union_string) {
+										  boolean unionNoDuplicates) {
 
 
 
@@ -450,34 +450,46 @@ public class OneShotSQLGeneratorEngine {
 		/* Main loop, constructing the SPJ query for each CQ */
 			QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions, ruleIndex);
 
-			List<String> tableDefinitions = getTableDefs(cq.getBody(), index, "");
-			final String FROM;
-			if (tableDefinitions.isEmpty()) {
-				FROM = "\n FROM \n(" + sqladapter.getDummyTable() + ") tdummy ";
+			StringBuilder sb = new StringBuilder();
+			sb.append("SELECT ");
+			if (isDistinct && !distinctResultSet) {
+				sb.append("DISTINCT ");
 			}
-			else {
-				FROM = "\n FROM \n" + Joiner.on(",\n").join(tableDefinitions);
-			}
-
-			String conditions = getConditionsString(cq.getBody(), index, false, "");
-			String WHERE = conditions.isEmpty() ? "" : "\nWHERE \n" + conditions;
 
 			List<Term> terms = cq.getHead().getTerms();
 			List<Optional<TermType>> termTypes = termTypeMap.get(cq);
-			ImmutableList.Builder<SignatureVariable> builder = ImmutableList.builder();
+
+			List<String> selectList = Lists.newArrayListWithCapacity(signature.size());
 			for (int i = 0; i < signature.size(); i++) {
-				builder.add(new SignatureVariable(terms.get(i), signature.get(i), termTypes.get(i)));
+				selectList.add(getSelectClauseFragment(signature.get(i), terms.get(i),  termTypes.get(i), index));
 			}
-			String SELECT = getSelectClause(builder.build(), index);
 
-			String GROUP = getGroupBy(cq.getBody(), index);
-			String HAVING = getHaving(cq.getBody(), index);
+			if (selectList.isEmpty())
+				sb.append("'true' AS x"); 				//Only for ASK
+			else
+				Joiner.on(", ").appendTo(sb, selectList);
 
-			sqls.add(SELECT + FROM + WHERE + GROUP + HAVING);
+			List<String> tableDefinitions = getTableDefs(cq.getBody(), index, "");
+			if (tableDefinitions.isEmpty()) {
+				sb.append("\n FROM \n(" + sqladapter.getDummyTable() + ") tdummy ");
+			}
+			else {
+				sb.append("\n FROM \n" + Joiner.on(",\n").join(tableDefinitions));
+			}
+
+			String conditions = getConditionsString(cq.getBody(), index, false, "");
+			if (!conditions.isEmpty())
+				sb.append("\nWHERE \n").append(conditions);
+
+			sb.append(getGroupBy(cq.getBody(), index));
+			sb.append(getHaving(cq.getBody(), index));
+
+			sqls.add(sb.toString());
 		}
 		return sqls.size() == 1
 				? sqls.get(0)
-				: "(" + Joiner.on(")\n " + union_string + "\n (").join(sqls) + ")";
+				: "(" + Joiner.on(")\n " + (unionNoDuplicates ? "UNION" : "UNION ALL") + "\n (")
+						.join(sqls) + ")";
 	}
 
 
@@ -896,19 +908,18 @@ public class OneShotSQLGeneratorEngine {
 		Set<String> equalities = new LinkedHashSet<>();
 		for (Variable var : currentLevelVariables) {
 			Set<QualifiedAttributeID> references = index.getColumnReferences(var);
-			if (references.size() < 2) {
-				// No need for equality
-				continue;
-			}
-			Iterator<QualifiedAttributeID> referenceIterator = references.iterator();
-			QualifiedAttributeID leftColumnReference = referenceIterator.next();
-			while (referenceIterator.hasNext()) {
-				QualifiedAttributeID rightColumnReference = referenceIterator.next();
-				String equality = String.format("(%s = %s)",
-						leftColumnReference.getSQLRendering(),
-						rightColumnReference.getSQLRendering());
-				equalities.add(equality);
-				leftColumnReference = rightColumnReference;
+			if (references.size() >= 2) {
+				// if 1, tnen no need for equality
+				Iterator<QualifiedAttributeID> referenceIterator = references.iterator();
+				QualifiedAttributeID leftColumnReference = referenceIterator.next();
+				while (referenceIterator.hasNext()) {
+					QualifiedAttributeID rightColumnReference = referenceIterator.next();
+					String equality = String.format("(%s = %s)",
+							leftColumnReference.getSQLRendering(),
+							rightColumnReference.getSQLRendering());
+					equalities.add(equality);
+					leftColumnReference = rightColumnReference;
+				}
 			}
 		}
 
@@ -985,47 +996,27 @@ public class OneShotSQLGeneratorEngine {
 	 *
 	 * @return the sql select clause
 	 */
-	private String getSelectClause(ImmutableList<SignatureVariable> signature,
-								   QueryAliasIndex index) {
+	private String getSelectClauseFragment(SignatureVariableBase var,
+										   Term term,
+										   Optional<TermType> termType,
+								   			QueryAliasIndex index) {
 		/*
-		 * If the head has size 0 this is a boolean query.
+		 * Datatype for the main column (to which it is cast).
+		 * Beware, it may defer the RDF datatype (the one of the type column).
+		 *
+		 * Why? Because most DBs (if not all) require the result table to have
+		 * one datatype per column. If the sub-queries are producing results of different types,
+		 * them there will be a difference between the type in the main column and the RDF one.
 		 */
-		StringBuilder sb = new StringBuilder();
+		String typeColumn = getTypeColumnForSELECT(term, index, termType);
+		String langColumn = getLangColumnForSELECT(term, index, termType);
+		String mainColumn = getMainColumnForSELECT(term, index, var.castType);
 
-		sb.append("SELECT ");
-		if (isDistinct && !distinctResultSet) {
-			sb.append("DISTINCT ");
-		}
-
-		//Only for ASK
-		if (signature.size() == 0) {
-			sb.append("'true' AS x");
-			return sb.toString();
-		}
-
-		List<String> list = Lists.newArrayListWithCapacity(signature.size());
-		for (SignatureVariable var : signature) {
-
-			/**
-			 * Datatype for the main column (to which it is cast).
-			 * Beware, it may defer the RDF datatype (the one of the type column).
-			 *
-			 * Why? Because most DBs (if not all) require the result table to have
-			 * one datatype per column. If the sub-queries are producing results of different types,
-			 * them there will be a difference between the type in the main column and the RDF one.
-			 */
-			String typeColumn = getTypeColumnForSELECT(var.term, index, var.termType);
-			String langColumn = getLangColumnForSELECT(var.term, index, var.termType);
-			String mainColumn = getMainColumnForSELECT(var.term, index, var.castType);
-
-			list.add(new StringBuffer().append("\n   ")
-					.append(typeColumn).append(" AS ").append(var.aliases.get(0)).append(", ")
-					.append(langColumn).append(" AS ").append(var.aliases.get(1)).append(", ")
-					.append(mainColumn).append(" AS ").append(var.aliases.get(2))
-					.toString());
-		}
-		Joiner.on(", ").appendTo(sb, list);
-		return sb.toString();
+		return new StringBuffer().append("\n   ")
+				.append(typeColumn).append(" AS ").append(var.aliases.get(0)).append(", ")
+				.append(langColumn).append(" AS ").append(var.aliases.get(1)).append(", ")
+				.append(mainColumn).append(" AS ").append(var.aliases.get(2))
+				.toString();
 	}
 
 	private ImmutableList<SignatureVariableBase> createSignature(List<String> names, ImmutableList<COL_TYPE> castTypes) {
