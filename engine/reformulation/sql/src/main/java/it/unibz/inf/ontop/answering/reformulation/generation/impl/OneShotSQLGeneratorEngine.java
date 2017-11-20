@@ -467,12 +467,13 @@ public class OneShotSQLGeneratorEngine {
 			else
 				Joiner.on(", ").appendTo(sb, selectList);
 
+			sb.append("\n FROM \n");
 			List<String> tableDefinitions = getTableDefs(cq.getBody(), index, "");
 			if (tableDefinitions.isEmpty()) {
-				sb.append("\n FROM \n(" + sqladapter.getDummyTable() + ") tdummy ");
+				sb.append("(" + sqladapter.getDummyTable() + ") tdummy");
 			}
 			else {
-				sb.append("\n FROM \n" + Joiner.on(",\n").join(tableDefinitions));
+				Joiner.on(",\n").appendTo(sb, tableDefinitions);
 			}
 
 			String conditions = getConditionsString(cq.getBody(), index, false, "");
@@ -481,11 +482,11 @@ public class OneShotSQLGeneratorEngine {
 
 			List<String> groupBy = getGroupBy(cq.getBody(), index);
 			if (!groupBy.isEmpty())
-				sb.append(" GROUP BY " + Joiner.on(" , ").join(groupBy));
+				sb.append("\nGROUP BY " + Joiner.on(", ").join(groupBy));
 
 			List<Function> having = getHaving(cq.getBody());
 			if (!having.isEmpty())
-				sb.append(" HAVING ( " + Joiner.on("").join(getBooleanConditionsString(having, index)) + " ) ");
+				sb.append("\nHAVING (" + Joiner.on(" AND ").join(getBooleanConditionsString(having, index)) + ") ");
 
 			sqls.add(sb.toString());
 		}
@@ -1273,11 +1274,11 @@ public class OneShotSQLGeneratorEngine {
 			}
 		}
 		else if (term instanceof Variable) {
-			Set<QualifiedAttributeID> viewdef = index.getColumnReferences((Variable) term);
-			QualifiedAttributeID def = viewdef.iterator().next();
+			Set<QualifiedAttributeID> attrs = index.getColumnReferences((Variable) term);
+			QualifiedAttributeID attr0 = attrs.iterator().next();
 
-			RelationID relationId = def.getRelation();
-			QuotedID colId = def.getAttribute();
+			RelationID relationId = attr0.getRelation();
+			QuotedID colId = attr0.getAttribute();
 
 			// Non-final TODO: understand
 			String table = relationId.getTableName();
@@ -1290,8 +1291,7 @@ public class OneShotSQLGeneratorEngine {
 					}
 				}
 			}
-			Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
-			for (DatabaseRelationDefinition tabledef : tables) {
+			for (DatabaseRelationDefinition tabledef :  metadata.getDatabaseRelations()) {
 				if (tabledef.getID().getTableName().equals(table)) {
 					List<Attribute> attr = tabledef.getAttributes();
 					for (Attribute a : attr) {
@@ -1373,9 +1373,6 @@ public class OneShotSQLGeneratorEngine {
 		else if (term instanceof Variable) {
 			Variable var = (Variable) term;
 			Set<QualifiedAttributeID> posList = index.getColumnReferences(var);
-			if (posList == null || posList.size() == 0)
-				throw new RuntimeException("Unbound variable found in WHERE clause: " + term);
-
 			return posList.iterator().next().getSQLRendering();
 		}
 
@@ -1457,9 +1454,7 @@ public class OneShotSQLGeneratorEngine {
 			Variable var = (Variable) function.getTerm(0);
 			Set<QualifiedAttributeID> posList = index.getColumnReferences(var);
 
-			if (posList == null || posList.size() == 0)
-				throw new RuntimeException("Unbound variable found in WHERE clause: " + term);
-
+			// TODO: fix the hack
 			String langC = posList.iterator().next().getSQLRendering();
 			String langColumn = langC.replaceAll("`$", "Lang`");
 			return langColumn;
@@ -1796,7 +1791,10 @@ public class OneShotSQLGeneratorEngine {
 		 *            The variable we want the referenced columns.
 		 */
 		public Set<QualifiedAttributeID> getColumnReferences(Variable var) {
-			return columnReferences.get(var);
+			Set<QualifiedAttributeID> attrs = columnReferences.get(var);
+			if (attrs == null || attrs.size() == 0)
+				throw new RuntimeException("Unbound variable found in WHERE clause: " + var);
+			return attrs;
 		}
 
 		/***
