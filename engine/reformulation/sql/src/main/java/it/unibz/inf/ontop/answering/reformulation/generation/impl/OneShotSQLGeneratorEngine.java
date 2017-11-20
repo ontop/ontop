@@ -394,13 +394,13 @@ public class OneShotSQLGeneratorEngine {
 				String unionView = generateQueryFromRules(ruleIndex.get(pred), s, ruleIndex,
 						subQueryDefinitionsBuilder.build(), termTypeMap, false);
 
-				RelationID viewId = createViewId(pred.getName(), VIEW_ANS_SUFFIX, alreadyAllocatedViewNames);
+				RelationID viewId = createAlias(pred.getName(), VIEW_ANS_SUFFIX, alreadyAllocatedViewNames);
 				alreadyAllocatedViewNames.add(viewId);
 
 				// creates a view outside the DBMetadata (specific to this sub-query)
 				ParserViewDefinition view = new ParserViewDefinition(viewId, unionView);
 				for (SignatureVariable var : s) {
-					for (String alias : var.aliases) {
+					for (String alias : var.columnAliases) {
 						view.addAttribute(new QualifiedAttributeID(viewId,
 								metadata.getQuotedIDFactory().createAttributeID(alias)));
 					}
@@ -443,8 +443,6 @@ public class OneShotSQLGeneratorEngine {
 										  ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
 										  boolean unionNoDuplicates) {
 
-
-
 		List<String> sqls = Lists.newArrayListWithExpectedSize(cqs.size());
 		for (CQIE cq : cqs) {
 		/* Main loop, constructing the SPJ query for each CQ */
@@ -481,8 +479,13 @@ public class OneShotSQLGeneratorEngine {
 			if (!conditions.isEmpty())
 				sb.append("\nWHERE \n").append(conditions);
 
-			sb.append(getGroupBy(cq.getBody(), index));
-			sb.append(getHaving(cq.getBody(), index));
+			List<String> groupBy = getGroupBy(cq.getBody(), index);
+			if (!groupBy.isEmpty())
+				sb.append(" GROUP BY " + Joiner.on(" , ").join(groupBy));
+
+			List<Function> having = getHaving(cq.getBody());
+			if (!having.isEmpty())
+				sb.append(" HAVING ( " + Joiner.on("").join(getBooleanConditionsString(having, index)) + " ) ");
 
 			sqls.add(sb.toString());
 		}
@@ -497,37 +500,16 @@ public class OneShotSQLGeneratorEngine {
 		return terms.stream().map(c -> (Function)c).collect(ImmutableCollectors.toList());
 	}
 
-	private String getHaving(List<Function> body, QueryAliasIndex index) {
-		List <Term> conditions = Collections.emptyList();
+	private List<Function> getHaving(List<Function> body) {
 		for (Function atom : body) {
 			if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_HAVING) {
-				conditions = atom.getTerms();
-				break;
+				return convert(atom.getTerms());
 			}
 		}
-		if (conditions.isEmpty()) {
-			return "";
-		}
-
-		Set<String> condSet = getBooleanConditionsString(convert(conditions), index);
-
-//		List<String> groupReferences = Lists.newArrayList();
-
-//		for(Variable var : varsInGroupBy) {
-//			Collection<String> references = index.columnReferences.get(var);
-//			groupReferences.addAll(references);
-//		}
-//		
-//		if(!groupReferences.isEmpty()) {
-//			result.append(" GROUP BY " );
-//			Joiner.on(" , ").appendTo(result, groupReferences);
-//		}
-
-		return " HAVING ( " + Joiner.on("").join(condSet) + " ) ";
+		return Collections.emptyList();
 	}
 
-	private String getGroupBy(List<Function> body, QueryAliasIndex index) {
-
+	private List<String> getGroupBy(List<Function> body, QueryAliasIndex index) {
 		List<String> groupReferences = Lists.newArrayList();
 		for (Function atom : body) {
 			if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_GROUP) {
@@ -538,8 +520,7 @@ public class OneShotSQLGeneratorEngine {
 				}
 			}
 		}
-
-		return groupReferences.isEmpty() ? "" : " GROUP BY " + Joiner.on(" , ").join(groupReferences);
+		return groupReferences;
 	}
 
 
@@ -557,16 +538,15 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 
-	private RelationID createViewId(String predicateName, String suffix, Collection<RelationID> alreadyAllocatedViewNames) {
+	private RelationID createAlias(String predicateName, String suffix, Collection<RelationID> alreadyAllocatedViewNames) {
 		// Escapes view names.
 		String safePredicateName = predicateName
 				.replace('.', '_')
 				.replace(':', '_')
 				.replace('/', '_')
 				.replace(' ', '_');
-		String viewname = sqladapter.nameView(VIEW_PREFIX, safePredicateName, suffix, alreadyAllocatedViewNames);
-		RelationID viewId = metadata.getQuotedIDFactory().createRelationID(null, viewname);
-		return viewId;
+		String alias = sqladapter.nameView(VIEW_PREFIX, safePredicateName, suffix, alreadyAllocatedViewNames);
+		return metadata.getQuotedIDFactory().createRelationID(null, alias);
 	}
 
 	/***
@@ -799,8 +779,7 @@ public class OneShotSQLGeneratorEngine {
 		/*
 		 * This is a data atom
 		 */
-		String def = index.getViewDefinition(atom);
-		return def;
+		return index.getViewDefinition(atom);
 	}
 
 	/**
@@ -967,11 +946,11 @@ public class OneShotSQLGeneratorEngine {
 
 	private static final class SignatureVariable {
 		private final String name;
-		private final ImmutableList<String> aliases;
+		private final ImmutableList<String> columnAliases;
 		private final COL_TYPE castType;
-		SignatureVariable(String name, ImmutableList<String> aliases, COL_TYPE castType) {
+		SignatureVariable(String name, ImmutableList<String> columnAliases, COL_TYPE castType) {
 			this.name = name;
-			this.aliases = aliases;
+			this.columnAliases = columnAliases;
 			this.castType = castType;
 		}
 	}
@@ -998,9 +977,9 @@ public class OneShotSQLGeneratorEngine {
 		String mainColumn = getMainColumnForSELECT(term, index, var.castType);
 
 		return new StringBuffer().append("\n   ")
-				.append(typeColumn).append(" AS ").append(var.aliases.get(0)).append(", ")
-				.append(langColumn).append(" AS ").append(var.aliases.get(1)).append(", ")
-				.append(mainColumn).append(" AS ").append(var.aliases.get(2))
+				.append(typeColumn).append(" AS ").append(var.columnAliases.get(0)).append(", ")
+				.append(langColumn).append(" AS ").append(var.columnAliases.get(1)).append(", ")
+				.append(mainColumn).append(" AS ").append(var.columnAliases.get(2))
 				.toString();
 	}
 
@@ -1349,7 +1328,7 @@ public class OneShotSQLGeneratorEngine {
 			String table = relationId.getTableName();
 			if (relationId.getTableName().startsWith("QVIEW")) {
 				for (Entry<Function, DataDefinition> e : index.dataDefinitions.entrySet()) {
-					RelationID knownViewId = e.getValue().name;
+					RelationID knownViewId = e.getValue().alias;
 					if (knownViewId.equals(relationId)) {
 						table = e.getKey().getFunctionSymbol().toString();
 						break;
@@ -1735,14 +1714,14 @@ public class OneShotSQLGeneratorEngine {
 
 	private static final class DataDefinition {
 		private final RelationDefinition def;
-		private final RelationID name;
-		DataDefinition(RelationID name, RelationDefinition def) {
-			this.name = name;
+		private final RelationID alias;
+		DataDefinition(RelationID alias, RelationDefinition def) {
+			this.alias = alias;
 			this.def = def;
 		}
 		@Override
 		public String toString() {
-			return name + " " + def;
+			return alias + " " + def;
 		}
 	}
 
@@ -1799,7 +1778,7 @@ public class OneShotSQLGeneratorEngine {
 					predicate);
 			RelationDefinition def = metadata.getRelation(tableId);
 
-			final RelationID relationId, viewName;
+			final RelationID relationId, relationAlias;
 			if (def == null) {
 				/*
 				 * There is no definition for this atom, its not a database
@@ -1810,18 +1789,17 @@ public class OneShotSQLGeneratorEngine {
 					return; // empty
 				}
 				else {
-					viewName = def.getID();
-					relationId = viewName;
+					relationId = relationAlias = def.getID();
 				}
 			}
 			else {
-				viewName = createViewId(predicate.getName(),
+				relationAlias = createAlias(predicate.getName(),
 						VIEW_SUFFIX + dataDefinitions.size(),
 						dataDefinitions.entrySet().stream()
-								.map(e -> e.getValue().name).collect(Collectors.toList()));
+								.map(e -> e.getValue().alias).collect(Collectors.toList()));
 				relationId = tableId;
 			}
-			dataDefinitions.put(atom, new DataDefinition(viewName, def));
+			dataDefinitions.put(atom, new DataDefinition(relationAlias, def));
 			dataDefinitionsById.put(relationId, def);
 
 			for (int index = 0; index < atom.getTerms().size(); index++) {
@@ -1848,7 +1826,7 @@ public class OneShotSQLGeneratorEngine {
 						column = def.getAttribute(index + 1);
 					}
 
-					QualifiedAttributeID qualifiedId = new QualifiedAttributeID(viewName, column.getID());
+					QualifiedAttributeID qualifiedId = new QualifiedAttributeID(relationAlias, column.getID());
 					references.add(qualifiedId);
 				}
 			}
@@ -1875,11 +1853,11 @@ public class OneShotSQLGeneratorEngine {
 			if (dd != null) {
 				if (dd.def instanceof DatabaseRelationDefinition) {
 					return sqladapter.sqlTableName(dd.def.getID().getSQLRendering(),
-							dd.name.getSQLRendering());
+							dd.alias.getSQLRendering());
 				}
 				else if (dd.def instanceof ParserViewDefinition) {
 					return String.format("(%s) %s", ((ParserViewDefinition) dd.def).getStatement(),
-							dd.name.getSQLRendering());
+							dd.alias.getSQLRendering());
 				}
 				throw new RuntimeException("Impossible to get data definition for: " + atom + ", type: " + dd);
 			}
@@ -1898,7 +1876,7 @@ public class OneShotSQLGeneratorEngine {
 		public String getColumnReference(Function atom, int column) {
 			DataDefinition dd = dataDefinitions.get(atom);
 			QuotedID columnname = dd.def.getAttribute(column + 1).getID(); // indexes from 1
-			return new QualifiedAttributeID(dd.name, columnname).getSQLRendering();
+			return new QualifiedAttributeID(dd.alias, columnname).getSQLRendering();
 		}
 	}
 }
