@@ -355,7 +355,7 @@ public class OneShotSQLGeneratorEngine {
 		 */
 
 		ImmutableMap.Builder<Predicate, ParserViewDefinition> subQueryDefinitionsBuilder = ImmutableMap.builder();
-		Set<RelationID> alreadyAllocatedViewNames = new HashSet<>();
+		Set<RelationID> usedAliases = new HashSet<>();
 		// create a view for every ans predicate in the Datalog input program.
 		int numPreds = predicatesInBottomUp.size();
 		for (int i = 0; i < numPreds - 1; i++) {
@@ -391,17 +391,17 @@ public class OneShotSQLGeneratorEngine {
 						createSignature(builder.build(), castTypeMap.get(pred));
 
 				// Creates BODY of the view query
-				String unionView = generateQueryFromRules(ruleIndex.get(pred), s, ruleIndex,
+				String subquery = generateQueryFromRules(ruleIndex.get(pred), s, ruleIndex,
 						subQueryDefinitionsBuilder.build(), termTypeMap, false);
 
-				RelationID viewId = createAlias(pred.getName(), VIEW_ANS_SUFFIX, alreadyAllocatedViewNames);
-				alreadyAllocatedViewNames.add(viewId);
+				RelationID subqueryAlias = createAlias(pred.getName(), VIEW_ANS_SUFFIX, usedAliases);
+				usedAliases.add(subqueryAlias);
 
 				// creates a view outside the DBMetadata (specific to this sub-query)
-				ParserViewDefinition view = new ParserViewDefinition(viewId, unionView);
+				ParserViewDefinition view = new ParserViewDefinition(subqueryAlias, subquery);
 				for (SignatureVariable var : s) {
 					for (String alias : var.columnAliases) {
-						view.addAttribute(new QualifiedAttributeID(viewId,
+						view.addAttribute(new QualifiedAttributeID(subqueryAlias,
 								metadata.getQuotedIDFactory().createAttributeID(alias)));
 					}
 				}
@@ -445,7 +445,7 @@ public class OneShotSQLGeneratorEngine {
 
 		List<String> sqls = Lists.newArrayListWithExpectedSize(cqs.size());
 		for (CQIE cq : cqs) {
-		/* Main loop, constructing the SPJ query for each CQ */
+		    /* Main loop, constructing the SPJ query for each CQ */
 			QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions, ruleIndex);
 
 			StringBuilder sb = new StringBuilder();
@@ -1093,7 +1093,7 @@ public class OneShotSQLGeneratorEngine {
 	private String getLangColumnForSELECT(Term ht, QueryAliasIndex index, Optional<TermType> optionalTermType) {
 
 		if (ht instanceof Variable) {
-			return getNonMainColumnId((Variable) ht, index, -1)
+			return index.getLangColumn((Variable) ht)
 					.map(QualifiedAttributeID::getSQLRendering)
 					.orElse("NULL");
 		}
@@ -1105,8 +1105,7 @@ public class OneShotSQLGeneratorEngine {
 								.orElseGet(() -> t.getLanguageTagTerm()
 										.map(tag -> getSQLString(tag, index, false))
 										.orElseThrow(() -> new IllegalStateException(
-												"Inconsistent term type: the language tag must be defined " +
-														"for any LANG_STRING"))))
+												"Inconsistent term type: the language tag must be defined for any LANG_STRING"))))
 					.orElse("NULL");
 		}
     }
@@ -1126,19 +1125,15 @@ public class OneShotSQLGeneratorEngine {
 		if (ht instanceof Variable) {
 	        // Such variable does not hold this information, so we have to look
 	        // at the database metadata.
-			return getNonMainColumnId((Variable) ht, index, -2)
+			return index.getTypeColumn((Variable) ht)
 					.map(QualifiedAttributeID::getSQLRendering)
-					/*
-					 * By default, we assume that the variable is an IRI.
-					 */
+					// By default, we assume that the variable is an IRI.
 					.orElseGet(() -> String.format("%d", OBJECT.getQuestCode()));
 		}
 		else {
 			COL_TYPE colType = optionalTermType
 					.map(TermType::getColType)
-					/**
-					 * By default, we apply the "most" general COL_TYPE
-					 */
+					// By default, we apply the "most" general COL_TYPE
 					.orElse(STRING);
 
 			return String.format("%d", colType.getQuestCode());
@@ -1146,46 +1141,6 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 
-	private static Optional<QualifiedAttributeID> getNonMainColumnId(Variable var, QueryAliasIndex index,
-																	 int relativeIndexWrtMainColumn) {
-		Set<QualifiedAttributeID> columnRefs = index.getColumnReferences(var);
-
-		if (columnRefs == null || columnRefs.size() == 0) {
-			throw new RuntimeException("Unbound variable found in WHERE clause: " + var);
-		}
-
-		/**
-		 * For each column reference corresponding to the variable.
-		 *
-		 * For instance, columnRef is `Qans4View`.`v1` .
-		 */
-		for (QualifiedAttributeID mainColumn : columnRefs) {
-			RelationID relationId = mainColumn.getRelation();
-
-			/**
-			 * If the var is defined in a ViewDefinition, then there is a
-			 * column for the type and we just need to refer to that column.
-			 *
-			 * For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
-			 */
-			Optional<RelationDefinition> optionalViewDefinition = index.getDefinition(relationId);
-
-			if (optionalViewDefinition.isPresent()
-					&& (optionalViewDefinition.get() instanceof ParserViewDefinition)) {
-				ParserViewDefinition viewDefinition = (ParserViewDefinition) optionalViewDefinition.get();
-
-				List<QualifiedAttributeID> columnIds = viewDefinition.getAttributes().stream()
-						.map(Attribute::getQualifiedID)
-						.collect(Collectors.toList());
-				int mainColumnIndex = columnIds.indexOf(mainColumn) + 1;
-
-				Attribute typeColumn = viewDefinition.getAttribute(mainColumnIndex + relativeIndexWrtMainColumn);
-				return Optional.of(typeColumn.getQualifiedID());
-			}
-		}
-
-		return Optional.empty();
-	}
 
 	private String getSQLStringForTemplateFunction(Function ov, QueryAliasIndex index) {
 		/*
@@ -1869,14 +1824,58 @@ public class OneShotSQLGeneratorEngine {
 						"Impossible to get data definition for: " + atom + ", type: " + dd);
 		}
 
-		public Optional<RelationDefinition> getDefinition(RelationID relationId) {
-			return Optional.ofNullable(dataDefinitionsById.get(relationId));
-		}
-
 		public String getColumnReference(Function atom, int column) {
 			DataDefinition dd = dataDefinitions.get(atom);
 			QuotedID columnname = dd.def.getAttribute(column + 1).getID(); // indexes from 1
 			return new QualifiedAttributeID(dd.alias, columnname).getSQLRendering();
 		}
+
+		public Optional<QualifiedAttributeID> getTypeColumn(Variable var) {
+			return getNonMainColumn(var, -2);
+		}
+
+		public Optional<QualifiedAttributeID> getLangColumn(Variable var) {
+			return getNonMainColumn(var, -1);
+		}
+
+		private Optional<QualifiedAttributeID> getNonMainColumn(Variable var, int relativeIndexWrtMainColumn) {
+
+			Set<QualifiedAttributeID> columnRefs = columnReferences.get(var);
+			if (columnRefs == null || columnRefs.size() == 0) {
+				throw new RuntimeException("Unbound variable found in WHERE clause: " + var);
+			}
+
+			/*
+			 * For each column reference corresponding to the variable.
+			 *
+			 * For instance, columnRef is `Qans4View`.`v1` .
+			 */
+			for (QualifiedAttributeID mainColumn : columnRefs) {
+				RelationID relationId = mainColumn.getRelation();
+
+				/*
+				 * If the var is defined in a ViewDefinition, then there is a
+				 * column for the type and we just need to refer to that column.
+				 *
+				 * For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
+				 */
+				RelationDefinition def = dataDefinitionsById.get(relationId);
+
+				if (def != null && (def instanceof ParserViewDefinition)) {
+					ParserViewDefinition viewDefinition = (ParserViewDefinition)def;
+
+					List<QualifiedAttributeID> columnIds = viewDefinition.getAttributes().stream()
+							.map(Attribute::getQualifiedID)
+							.collect(Collectors.toList());
+					int mainColumnIndex = columnIds.indexOf(mainColumn) + 1;
+
+					Attribute typeColumn = viewDefinition.getAttribute(mainColumnIndex + relativeIndexWrtMainColumn);
+					return Optional.of(typeColumn.getQualifiedID());
+				}
+			}
+
+			return Optional.empty();
+		}
+
 	}
 }
