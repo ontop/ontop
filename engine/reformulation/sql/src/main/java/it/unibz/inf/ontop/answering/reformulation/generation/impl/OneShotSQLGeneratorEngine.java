@@ -387,7 +387,7 @@ public class OneShotSQLGeneratorEngine {
 				for (int k = 0; k < size; k++) {
 					builder.add("v" + k);
 				}
-				ImmutableList<SignatureVariableBase> s =
+				ImmutableList<SignatureVariable> s =
 						createSignature(builder.build(), castTypeMap.get(pred));
 
 				// Creates BODY of the view query
@@ -399,7 +399,7 @@ public class OneShotSQLGeneratorEngine {
 
 				// creates a view outside the DBMetadata (specific to this sub-query)
 				ParserViewDefinition view = new ParserViewDefinition(viewId, unionView);
-				for (SignatureVariableBase var : s) {
+				for (SignatureVariable var : s) {
 					for (String alias : var.aliases) {
 						view.addAttribute(new QualifiedAttributeID(viewId,
 								metadata.getQuotedIDFactory().createAttributeID(alias)));
@@ -415,7 +415,7 @@ public class OneShotSQLGeneratorEngine {
 
 		// This should be ans1, and the rules defining it.
 		Predicate predAns1 = predicatesInBottomUp.get(numPreds - 1);
-		ImmutableList<SignatureVariableBase> s = createSignature(signature, castTypeMap.get(predAns1));
+		ImmutableList<SignatureVariable> s = createSignature(signature, castTypeMap.get(predAns1));
 
 		return generateQueryFromRules(ruleIndex.get(predAns1), s, ruleIndex,
 				subQueryDefinitionsBuilder.build(), termTypeMap,
@@ -437,7 +437,7 @@ public class OneShotSQLGeneratorEngine {
 	 * @param unionNoDuplicates
 	 */
 	private String generateQueryFromRules(Collection<CQIE> cqs,
-										  ImmutableList<SignatureVariableBase> signature,
+										  ImmutableList<SignatureVariable> signature,
 										  Multimap<Predicate, CQIE> ruleIndex,
 										  ImmutableMap<Predicate, ParserViewDefinition> subQueryDefinitions,
 										  ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
@@ -965,29 +965,14 @@ public class OneShotSQLGeneratorEngine {
 		return Types.VARCHAR;
 	}
 
-	private static final class SignatureVariableBase {
+	private static final class SignatureVariable {
 		private final String name;
 		private final ImmutableList<String> aliases;
 		private final COL_TYPE castType;
-		SignatureVariableBase(String name, ImmutableList<String> aliases, COL_TYPE castType) {
+		SignatureVariable(String name, ImmutableList<String> aliases, COL_TYPE castType) {
 			this.name = name;
 			this.aliases = aliases;
 			this.castType = castType;
-		}
-	}
-
-	private static final class SignatureVariable {
-		private final Term term;
-		private final String name;
-		private final ImmutableList<String> aliases;
-		private final COL_TYPE castType;
-		private final Optional<TermType> termType;
-		SignatureVariable(Term term, SignatureVariableBase base, Optional<TermType> termType) {
-			this.term = term;
-			this.name = base.name;
-			this.aliases = base.aliases;
-			this.castType = base.castType;
-			this.termType = termType;
 		}
 	}
 
@@ -996,10 +981,10 @@ public class OneShotSQLGeneratorEngine {
 	 *
 	 * @return the sql select clause
 	 */
-	private String getSelectClauseFragment(SignatureVariableBase var,
+	private String getSelectClauseFragment(SignatureVariable var,
 										   Term term,
 										   Optional<TermType> termType,
-								   			QueryAliasIndex index) {
+										   QueryAliasIndex index) {
 		/*
 		 * Datatype for the main column (to which it is cast).
 		 * Beware, it may defer the RDF datatype (the one of the type column).
@@ -1019,14 +1004,14 @@ public class OneShotSQLGeneratorEngine {
 				.toString();
 	}
 
-	private ImmutableList<SignatureVariableBase> createSignature(List<String> names, ImmutableList<COL_TYPE> castTypes) {
+	private ImmutableList<SignatureVariable> createSignature(List<String> names, ImmutableList<COL_TYPE> castTypes) {
 		/**
 		 * Set that contains all the variable names created on the top query.
 		 * It helps the dialect adapter to generate variable names according to its possible restrictions.
 		 * Currently, this is needed for the Oracle adapter (max. length of 30 characters).
 		 */
 		Set<String> sqlVariableNames = new HashSet<>();
-		ImmutableList.Builder<SignatureVariableBase> builder = ImmutableList.builder();
+		ImmutableList.Builder<SignatureVariable> builder = ImmutableList.builder();
 		for (int i = 0; i < names.size(); i++) {
 			String name = names.get(i);
 
@@ -1040,7 +1025,7 @@ public class OneShotSQLGeneratorEngine {
 			String mainAlias = sqladapter.nameTopVariable(name, MAIN_COLUMN_SUFFIX, sqlVariableNames);
 			sqlVariableNames.add(mainAlias);
 
-			builder.add(new SignatureVariableBase(name,
+			builder.add(new SignatureVariable(name,
 					ImmutableList.of(typeAlias, langAlias, mainAlias),
 					castTypes.get(i)));
 		}
