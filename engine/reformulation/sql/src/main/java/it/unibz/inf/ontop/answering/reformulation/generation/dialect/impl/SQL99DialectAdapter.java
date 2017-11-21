@@ -438,6 +438,12 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return buildDefaultName(prefix, tableName, suffix);
 	}
 
+	@Override
+	public String ifElseNull(String condition, String valueIfTrue) {
+		return "CASE WHEN " + condition + " THEN " + valueIfTrue + "\n"
+				+ "ELSE NULL END ";
+	}
+
 	/**
 	 * Concatenates the strings.
 	 * Default way to name a variable or a view.

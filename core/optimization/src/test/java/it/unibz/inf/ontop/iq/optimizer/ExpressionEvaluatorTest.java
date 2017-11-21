@@ -393,6 +393,47 @@ public class ExpressionEvaluatorTest {
         assertTrue(result.isEffectiveFalse());
     }
 
+    @Test
+    public void testIfElseNull1() {
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
+                IS_NOT_NULL,
+                TERM_FACTORY.getImmutableExpression(
+                    IF_ELSE_NULL,
+                    TERM_FACTORY.getImmutableExpression(EQ, TRUE, TRUE), Y));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
+                .evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertTrue(optionalExpression.isPresent());
+        assertEquals(TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, Y), optionalExpression.get());
+    }
+
+    @Test
+    public void testIfElseNull2() {
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
+                IS_NOT_NULL,
+                TERM_FACTORY.getImmutableExpression(
+                        IF_ELSE_NULL,
+                        TERM_FACTORY.getImmutableExpression(EQ, X, TRUE), Y));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
+                .evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertTrue(optionalExpression.isPresent());
+        assertEquals(initialExpression, optionalExpression.get());
+    }
+
+    @Test
+    public void testIfElseNull3() {
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
+                IS_NOT_NULL,
+                TERM_FACTORY.getImmutableExpression(
+                        IF_ELSE_NULL,
+                        TERM_FACTORY.getImmutableExpression(EQ, TRUE, FALSE), Y));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
+                .evaluateExpression(initialExpression);
+        assertFalse(result.getOptionalExpression().isPresent());
+        assertTrue(result.isEffectiveFalse());
+    }
+
     private ImmutableFunctionalTerm generateURI1(ImmutableTerm argument) {
         return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }

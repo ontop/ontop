@@ -76,11 +76,13 @@ public interface DBMetadata extends Serializable {
 
     Optional<TermType> getTermType(Attribute attribute);
 
+    Optional<DatabaseRelationDefinition> getDatabaseRelationByPredicate(AtomPredicate predicate);
+
+    Relation2Predicate getRelation2Predicate();
+
     /**
      * After calling this method, the DBMetadata cannot be modified
      */
     void freeze();
 
-
-    Relation2Predicate getRelation2Predicate();
 }
