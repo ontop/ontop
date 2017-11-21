@@ -467,8 +467,9 @@ public class OneShotSQLGeneratorEngine {
 			else
 				Joiner.on(", ").appendTo(sb, selectList);
 
+			List<Function> body = cq.getBody();
 			sb.append("\n FROM \n");
-			List<String> tableDefinitions = getTableDefs(cq.getBody(), index, "");
+			List<String> tableDefinitions = getTableDefs(body, index, "");
 			if (tableDefinitions.isEmpty()) {
 				sb.append("(" + sqladapter.getDummyTable() + ") tdummy");
 			}
@@ -476,15 +477,15 @@ public class OneShotSQLGeneratorEngine {
 				Joiner.on(",\n").appendTo(sb, tableDefinitions);
 			}
 
-			String conditions = getConditionsString(cq.getBody(), index, false, "");
+			Set<String> conditions = getConditionsSet(body, index, false);
 			if (!conditions.isEmpty())
-				sb.append("\nWHERE \n").append(conditions);
+				sb.append("\nWHERE \n").append(Joiner.on(" AND\n").join(conditions));
 
-			List<String> groupBy = getGroupBy(cq.getBody(), index);
+			List<String> groupBy = getGroupBy(body, index);
 			if (!groupBy.isEmpty())
 				sb.append("\nGROUP BY " + Joiner.on(", ").join(groupBy));
 
-			List<Function> having = getHaving(cq.getBody());
+			List<Function> having = getHaving(body);
 			if (!having.isEmpty())
 				sb.append("\nHAVING (" + Joiner.on(" AND ").join(getBooleanConditionsString(having, index)) + ") ");
 
@@ -725,10 +726,12 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 	    // If there are ON conditions we add them now.
-		String conditions = getConditionsString(atoms, index, true, indent);
+		Set<String> conditions = getConditionsSet(atoms, index, true);
 
 		StringBuilder sb = new StringBuilder();
-		sb.append(currentJoin).append(" ON\n").append(conditions).append("\n").append(indent);
+		sb.append(currentJoin).append(" ON\n").append(indent);
+		Joiner.on(" AND\n" + indent).appendTo(sb, conditions);
+		sb.append("\n").append(indent);
 		return sb.toString();
 	}
 
@@ -792,28 +795,36 @@ public class OneShotSQLGeneratorEngine {
 	 * The method assumes that no variable in this list (or nested ones) referes
 	 * to an upper level one.
 	 */
-	private String getConditionsString(List<Function> atoms,
-									   QueryAliasIndex index, boolean processShared, String indent) {
+	private Set<String> getConditionsSet(List<Function> atoms, QueryAliasIndex index, boolean processShared) {
 
 		Set<String> conditions = new LinkedHashSet<>();
+		if (processShared) {
+			// guohui: After normalization, do we have shared variables?
+			// TODO: should we remove this ??
+			Set<Variable> currentLevelVariables = new LinkedHashSet<>();
+			for (Function atom : atoms) {
+	 			// assume that no variables are shared across deeper levels of
+	 			// nesting (through Join or LeftJoin atoms), it will not call itself
+	 			// recursively. Nor across upper levels.
+				currentLevelVariables.addAll(getVariableReferencesWithLeftJoin(atom));
+			}
+			Set<String> conditionsSharedVariables = getConditionsSharedVariables(currentLevelVariables, index);
+			conditions.addAll(conditionsSharedVariables);
+		}
 
-		// if (processShared)
-		// guohui: After normalization, do we have shared variables?
-		// TODO: should we remove this ??
-		Set<String> conditionsSharedVariablesAndConstants =
-				getConditionsSharedVariablesAndConstants(atoms, index, processShared);
-		conditions.addAll(conditionsSharedVariablesAndConstants);
+		Set<String> eqConstants = getEqConditionsForConstants(atoms, index);
+		conditions.addAll(eqConstants);
 
 		Set<String> booleanConditions = getBooleanConditionsString(atoms, index);
 		conditions.addAll(booleanConditions);
 
-		return conditions.isEmpty() ? "" : indent + Joiner.on(" AND\n" + indent).join(conditions);
+		return conditions;
 	}
 
 	/**
 	 * Returns the set of variables that participate data atoms (either in this
 	 * atom directly or in nested ones). This will recursively collect the
-	 * variables references in in this atom, exlcuding those on the right side
+	 * variables references in in this atom, excluding those on the right side
 	 * of left joins.
 	 *
 	 * @param atom
@@ -832,9 +843,9 @@ public class OneShotSQLGeneratorEngine {
 			return Collections.emptySet();
 		}
 		/*
-		 * we have an algebra operator (join or left join) if its a join, we need
-		 * to collect all the variables of each nested atom., if its a left
-		 * join, only of the first data/algebra atom (the left atom).
+		 * we have an algebra operator (join or left join)
+		 * if it's a join, we need to collect all the variables of each nested atom;
+		 * if it's a left join, only of the first data/algebra atom (the left atom)
 		 */
 		boolean isLeftJoin = atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN;
 		boolean foundFirstDataAtom = false;
@@ -848,8 +859,7 @@ public class OneShotSQLGeneratorEngine {
 			if (asFunction.isOperation()) {
 				continue;
 			}
-			innerVariables
-					.addAll(getVariableReferencesWithLeftJoin(asFunction));
+			innerVariables.addAll(getVariableReferencesWithLeftJoin(asFunction));
 			foundFirstDataAtom = true;
 		}
 		return innerVariables;
@@ -859,34 +869,19 @@ public class OneShotSQLGeneratorEngine {
 	 * Returns a list of equality conditions that reflect the semantics of the
 	 * shared variables in the list of atoms.
 	 * <p>
-	 * The method assumes that no variables are shared across deeper levels of
-	 * nesting (through Join or LeftJoin atoms), it will not call itself
-	 * recursively. Nor across upper levels.
-	 *
-	 * <p>
 	 * When generating equalities recursively, we will also generate a minimal
 	 * number of equalities. E.g., if we have A(x), Join(R(x,y), Join(R(y,
 	 * x),B(x))
 	 *
 	 */
-	private Set<String> getConditionsSharedVariablesAndConstants(
-			List<Function> atoms, QueryAliasIndex index, boolean processShared) {
-
-		Set<Variable> currentLevelVariables = new LinkedHashSet<>();
-		if (processShared) {
-			for (Function atom : atoms) {
-				currentLevelVariables
-						.addAll(getVariableReferencesWithLeftJoin(atom));
-			}
-		}
-
+	private Set<String> getConditionsSharedVariables(Set<Variable> vars, QueryAliasIndex index) {
 		/*
-		 * For each variable we collect all the columns that shold be equated
-		 * (due to repeated positions of the variable). then we form atoms of
-		 * the form "COL1 = COL2"
+		 * For each variable we collect all the columns that should be equated
+		 * (due to repeated positions of the variable)
+		 * then we create atoms of the form "COL1 = COL2"
 		 */
 		Set<String> equalities = new LinkedHashSet<>();
-		for (Variable var : currentLevelVariables) {
+		for (Variable var : vars) {
 			Set<QualifiedAttributeID> references = index.getColumnReferences(var);
 			if (references.size() >= 2) {
 				// if 1, tnen no need for equality
@@ -902,7 +897,11 @@ public class OneShotSQLGeneratorEngine {
 				}
 			}
 		}
+		return equalities;
+	}
 
+	private Set<String> getEqConditionsForConstants(List<Function> atoms, QueryAliasIndex index) {
+		Set<String> equalities = new LinkedHashSet<>();
 		for (Function atom : atoms) {
 			if (atom.isDataFunction())  {
 				for (int idx = 0; idx < atom.getArity(); idx++) {
@@ -990,20 +989,20 @@ public class OneShotSQLGeneratorEngine {
 		 * It helps the dialect adapter to generate variable names according to its possible restrictions.
 		 * Currently, this is needed for the Oracle adapter (max. length of 30 characters).
 		 */
-		Set<String> sqlVariableNames = new HashSet<>();
+		Set<String> columnAliases = new HashSet<>();
 		ImmutableList.Builder<SignatureVariable> builder = ImmutableList.builder();
 		for (int i = 0; i < names.size(); i++) {
 			String name = names.get(i);
 
 			// Creates name names that satisfy the restrictions of the SQL dialect.
-			String typeAlias = sqladapter.nameTopVariable(name, TYPE_SUFFIX, sqlVariableNames);
-			sqlVariableNames.add(typeAlias);
+			String typeAlias = sqladapter.nameTopVariable(name, TYPE_SUFFIX, columnAliases);
+			columnAliases.add(typeAlias);
 
-			String langAlias = sqladapter.nameTopVariable(name, LANG_SUFFIX, sqlVariableNames);
-			sqlVariableNames.add(langAlias);
+			String langAlias = sqladapter.nameTopVariable(name, LANG_SUFFIX, columnAliases);
+			columnAliases.add(langAlias);
 
-			String mainAlias = sqladapter.nameTopVariable(name, MAIN_COLUMN_SUFFIX, sqlVariableNames);
-			sqlVariableNames.add(mainAlias);
+			String mainAlias = sqladapter.nameTopVariable(name, MAIN_COLUMN_SUFFIX, columnAliases);
+			columnAliases.add(mainAlias);
 
 			builder.add(new SignatureVariable(name,
 					ImmutableList.of(typeAlias, langAlias, mainAlias),
@@ -1792,7 +1791,7 @@ public class OneShotSQLGeneratorEngine {
 		 */
 		public Set<QualifiedAttributeID> getColumnReferences(Variable var) {
 			Set<QualifiedAttributeID> attrs = columnReferences.get(var);
-			if (attrs == null || attrs.size() == 0)
+			if (attrs == null || attrs.isEmpty())
 				throw new RuntimeException("Unbound variable found in WHERE clause: " + var);
 			return attrs;
 		}
@@ -1839,13 +1838,12 @@ public class OneShotSQLGeneratorEngine {
 		private Optional<QualifiedAttributeID> getNonMainColumn(Variable var, int relativeIndexWrtMainColumn) {
 
 			Set<QualifiedAttributeID> columnRefs = columnReferences.get(var);
-			if (columnRefs == null || columnRefs.size() == 0) {
+			if (columnRefs == null || columnRefs.isEmpty()) {
 				throw new RuntimeException("Unbound variable found in WHERE clause: " + var);
 			}
 
 			/*
 			 * For each column reference corresponding to the variable.
-			 *
 			 * For instance, columnRef is `Qans4View`.`v1` .
 			 */
 			for (QualifiedAttributeID mainColumn : columnRefs) {
@@ -1874,6 +1872,5 @@ public class OneShotSQLGeneratorEngine {
 
 			return Optional.empty();
 		}
-
 	}
 }
