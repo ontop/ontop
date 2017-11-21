@@ -90,6 +90,21 @@ public abstract class AbstractDBMetadata implements DBMetadata {
                                                             Map<Predicate, AtomPredicate> knownPredicateMap);
 
     @Override
+    public Optional<DatabaseRelationDefinition> getDatabaseRelationByPredicate(AtomPredicate predicate) {
+
+        RelationID relationId = relation2Predicate.createRelationFromPredicateName(getQuotedIDFactory(),
+                predicate);
+
+        return Optional.ofNullable(getRelation(relationId))
+                /*
+                 * Here we only consider DB relations
+                 */
+                .filter(r -> r instanceof DatabaseRelationDefinition)
+                .map(r -> (DatabaseRelationDefinition) r);
+    }
+
+
+    @Override
     public Relation2Predicate getRelation2Predicate() {
         return relation2Predicate;
     }

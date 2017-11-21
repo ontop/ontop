@@ -2117,6 +2117,10 @@ public class OneShotSQLGeneratorEngine {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				//havingCond = true;
 				return "SUM(" + columnName + ")";
+			} else if (functionSymbol.equals(ExpressionOperation.IF_ELSE_NULL)) {
+				String condition = getSQLString(function.getTerm(0), index, false);
+				String value = getSQLString(function.getTerm(1), index, false);
+				return sqladapter.ifElseNull(condition, value);
 			}
 		}
 

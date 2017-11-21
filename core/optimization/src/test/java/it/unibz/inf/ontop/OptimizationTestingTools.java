@@ -41,7 +41,7 @@ public class OptimizationTestingTools {
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
     public static final DatalogTools DATALOG_TOOLS;
     public static final ExpressionEvaluator DEFAULT_EXPRESSION_EVALUATOR;
-    public static final ValueConstant NULL;
+    public static final ValueConstant NULL, TRUE, FALSE;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     static {
@@ -74,6 +74,8 @@ public class OptimizationTestingTools {
         IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
 
         NULL = TERM_FACTORY.getNullConstant();
+        TRUE = TERM_FACTORY.getBooleanConstant(true);
+        FALSE = TERM_FACTORY.getBooleanConstant(false);
     }
 
     public static IntermediateQueryBuilder createQueryBuilder(DBMetadata metadata) {
