@@ -24,6 +24,8 @@ import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
+import static it.unibz.inf.ontop.model.term.TermConstants.FALSE;
+import static it.unibz.inf.ontop.model.term.TermConstants.TRUE;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.*;
@@ -460,6 +462,44 @@ public class ExpressionEvaluatorTest {
         ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertFalse(optionalExpression.isPresent());
+        assertTrue(result.isEffectiveFalse());
+    }
+
+    @Test
+    public void testIfElseNull1() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(
+                IS_NOT_NULL,
+                DATA_FACTORY.getImmutableExpression(
+                    IF_ELSE_NULL,
+                    DATA_FACTORY.getImmutableExpression(EQ, TRUE, TRUE), Y));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertTrue(optionalExpression.isPresent());
+        assertEquals(DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, Y), optionalExpression.get());
+    }
+
+    @Test
+    public void testIfElseNull2() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(
+                IS_NOT_NULL,
+                DATA_FACTORY.getImmutableExpression(
+                        IF_ELSE_NULL,
+                        DATA_FACTORY.getImmutableExpression(EQ, X, TRUE), Y));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertTrue(optionalExpression.isPresent());
+        assertEquals(initialExpression, optionalExpression.get());
+    }
+
+    @Test
+    public void testIfElseNull3() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(
+                IS_NOT_NULL,
+                DATA_FACTORY.getImmutableExpression(
+                        IF_ELSE_NULL,
+                        DATA_FACTORY.getImmutableExpression(EQ, TRUE, FALSE), Y));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        assertFalse(result.getOptionalExpression().isPresent());
         assertTrue(result.isEffectiveFalse());
     }
 
