@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.injection;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
@@ -50,4 +52,10 @@ public interface IntermediateQueryFactory {
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
 
     TrueNode createTrueNode();
+
+    UnaryIQ createUnaryIQ(UnaryOperatorNode rootNode, IQ child);
+    BinaryNonCommutativeIQ createBinaryNonCommutativeIQ(BinaryNonCommutativeOperatorNode rootNode,
+                                                        @Assisted("left") IQ leftChild,
+                                                        @Assisted("right") IQ rightChild);
+    NaryIQ createUnaryIQ(NaryOperatorNode rootNode, ImmutableList<IQ> children);
 }

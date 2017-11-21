@@ -7,7 +7,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.UnaryIQ;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
@@ -67,6 +70,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private final ConstructionNodeTools constructionNodeTools;
     private final ImmutableSubstitutionTools substitutionTools;
     private final SubstitutionFactory substitutionFactory;
+    private final IntermediateQueryFactory iqFactory;
 
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
     private final TermFactory termFactory;
@@ -78,7 +82,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  @Assisted Optional<ImmutableQueryModifiers> optionalQueryModifiers,
                                  TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
-                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
+                                 TermFactory termFactory, IntermediateQueryFactory iqFactory) {
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.optionalModifiers = optionalQueryModifiers;
@@ -89,6 +94,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.nullValue = termFactory.getNullConstant();
+        this.iqFactory = iqFactory;
 
         validate();
     }
@@ -120,13 +126,15 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools,
                                  ConstructionNodeTools constructionNodeTools,
-                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
+                                 TermFactory termFactory, IntermediateQueryFactory iqFactory) {
         this.projectedVariables = projectedVariables;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.unificationTools = unificationTools;
         this.substitutionTools = substitutionTools;
         this.substitution = substitutionFactory.getSubstitution();
         this.termFactory = termFactory;
+        this.iqFactory = iqFactory;
         this.optionalModifiers = Optional.empty();
         this.constructionNodeTools = constructionNodeTools;
         this.substitutionFactory = substitutionFactory;
@@ -140,7 +148,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  @Assisted ImmutableSubstitution<ImmutableTerm> substitution,
                                  TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
-                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
+                                 TermFactory termFactory, IntermediateQueryFactory iqFactory) {
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.nullabilityEvaluator = nullabilityEvaluator;
@@ -149,6 +158,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.substitutionTools = substitutionTools;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
+        this.iqFactory = iqFactory;
         this.optionalModifiers = Optional.empty();
         this.nullValue = termFactory.getNullConstant();
 
@@ -176,7 +186,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     @Override
     public ConstructionNode clone() {
         return new ConstructionNodeImpl(projectedVariables, substitution, optionalModifiers, nullabilityEvaluator,
-                unificationTools, constructionNodeTools, substitutionTools, substitutionFactory, termFactory);
+                unificationTools, constructionNodeTools, substitutionTools, substitutionFactory, termFactory,
+                iqFactory);
     }
 
     @Override
@@ -251,20 +262,39 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
     /**
      * Creates a new ConstructionNode with a new substitution.
-     * This substitution is obtained by composition and then cleaned (only defines the projected variables)
      *
      * Stops the propagation.
      *
-     * Note that expects that the substitution does not rename a projected variable
-     * into a non-projected one (this would produce an invalid construction node).
-     * That is the responsibility of the SubstitutionPropagationExecutor
-     * to prevent such bindings from appearing.
      */
     @Override
     public SubstitutionResults<ConstructionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitutionToApply,
             QueryNode childNode, IntermediateQuery query) {
 
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = mergeWithAscendingSubstitution(substitutionToApply);
+
+        ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
+                newSubstitution, getOptionalModifiers(), nullabilityEvaluator, unificationTools, constructionNodeTools,
+                substitutionTools, substitutionFactory, termFactory, iqFactory);
+
+        /*
+         * Stops to propagate the substitution
+         */
+        return DefaultSubstitutionResults.newNode(newConstructionNode);
+    }
+
+    /**
+     * Merges the current substitution with the ascending one
+     *
+     * This substitution is obtained by composition and then cleaned (only defines the projected variables)
+     *
+     * Note that expects that the substitution does not rename a projected variable
+     * into a non-projected one (this would produce an invalid construction node).
+     * That is the responsibility of the SubstitutionPropagationExecutor
+     * to prevent such bindings from appearing.
+     */
+    private ImmutableSubstitution<ImmutableTerm> mergeWithAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitutionToApply) {
         ImmutableSubstitution<ImmutableTerm> localSubstitution = getSubstitution();
         ImmutableSet<Variable> boundVariables = localSubstitution.getImmutableMap().keySet();
 
@@ -285,16 +315,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .filter(e -> projectedVariables.contains(e.getKey()))
                 .forEach(newSubstitutionMapBuilder::put);
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
-                newSubstitutionMapBuilder.build());
+         return substitutionFactory.getSubstitution(newSubstitutionMapBuilder.build());
 
-        ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
-                newSubstitution, getOptionalModifiers(), nullabilityEvaluator, unificationTools, constructionNodeTools, substitutionTools, substitutionFactory, termFactory);
-
-        /*
-         * Stops to propagate the substitution
-         */
-        return DefaultSubstitutionResults.newNode(newConstructionNode);
     }
 
     /**
@@ -366,7 +388,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(relevantSubstitution,
                 getVariables());
 
-        /**
+        /*
          * TODO: avoid using an exception
          */
         NewSubstitutionPair newSubstitutions;
@@ -382,7 +404,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         Optional<ImmutableQueryModifiers> newOptionalModifiers = updateOptionalModifiers(optionalModifiers,
                 descendingSubstitution, substitutionToPropagate);
 
-        /**
+        /*
          * The construction node is not needed anymore
          *
          * Currently, the root construction node is still required.
@@ -394,13 +416,13 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             return DefaultSubstitutionResults.replaceByUniqueChild(substitutionToPropagate);
         }
 
-        /**
+        /*
          * New construction node
          */
         else {
             ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
                     newSubstitutions.bindings, newOptionalModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
-                    substitutionTools, substitutionFactory, termFactory);
+                    substitutionTools, substitutionFactory, termFactory, iqFactory);
 
             return DefaultSubstitutionResults.newNode(newConstructionNode, substitutionToPropagate);
         }
@@ -455,7 +477,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
     @Override
     public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        /**
+        /*
          * A construction node has only one child
          */
         return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY, projectedVariables);
@@ -493,6 +515,66 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     public String toString() {
         // TODO: display the query modifiers
         return CONSTRUCTION_NODE_STR + " " + projectedVariables + " " + "[" + substitution + "]" ;
+    }
+
+    @Override
+    public IQ liftBinding(IQ liftedChildTree) {
+        QueryNode liftedChildRoot = liftedChildTree.getRootNode();
+        if (liftedChildRoot instanceof ConstructionNode)
+            return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQ) liftedChildTree);
+        else
+            return iqFactory.createUnaryIQ(this, liftedChildTree);
+    }
+
+    private IQ liftBinding(ConstructionNode childConstructionNode, UnaryIQ childIQ) {
+        IQ grandChildIQ = childIQ.getChild();
+
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = mergeWithAscendingSubstitution(
+                childConstructionNode.getSubstitution());
+
+        /*
+         * TODO: what about updating the query modifiers? Clarify
+         */
+        Optional<ImmutableQueryModifiers> formerModifiers = getOptionalModifiers();
+        if (formerModifiers.isPresent()) {
+            Optional<ImmutableQueryModifiers> topModifiers = formerModifiers
+                    .flatMap(m1 -> childConstructionNode.getOptionalModifiers()
+                            .flatMap(m2 -> ImmutableQueryModifiersImpl.merge(m1, m2)));
+            if (topModifiers.isPresent()) {
+                ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
+                        newSubstitution, topModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
+                        substitutionTools, substitutionFactory, termFactory, iqFactory);
+
+                return iqFactory.createUnaryIQ(newConstructionNode, grandChildIQ);
+            }
+            /*
+             * Not mergeable query modifiers --> keeps two nodes
+             */
+            else {
+                ConstructionNode newTopConstructionNode = new ConstructionNodeImpl(projectedVariables,
+                        newSubstitution, formerModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
+                        substitutionTools, substitutionFactory, termFactory, iqFactory);
+
+                ConstructionNode newChildConstructionNode = new ConstructionNodeImpl(grandChildIQ.getVariables(),
+                        substitutionFactory.getSubstitution(), childConstructionNode.getOptionalModifiers(),
+                        nullabilityEvaluator, unificationTools, constructionNodeTools,
+                        substitutionTools, substitutionFactory, termFactory, iqFactory);
+
+                UnaryIQ newChildIQ = iqFactory.createUnaryIQ(newChildConstructionNode, grandChildIQ);
+                return iqFactory.createUnaryIQ(newTopConstructionNode, newChildIQ);
+            }
+        }
+        /*
+         * No top query modifier
+         */
+        else {
+            ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
+                    newSubstitution, childConstructionNode.getOptionalModifiers(), nullabilityEvaluator,
+                    unificationTools, constructionNodeTools,
+                    substitutionTools, substitutionFactory, termFactory, iqFactory);
+
+            return iqFactory.createUnaryIQ(newConstructionNode, grandChildIQ);
+        }
     }
 
     /**

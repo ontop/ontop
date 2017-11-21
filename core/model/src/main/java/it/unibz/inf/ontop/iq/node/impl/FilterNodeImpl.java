@@ -138,4 +138,9 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     public String toString() {
         return FILTER_NODE_STR + getOptionalFilterString();
     }
+
+    @Override
+    public IQ liftBinding(IQ liftedChildTree) {
+        throw new RuntimeException("TODO: implement it");
+    }
 }

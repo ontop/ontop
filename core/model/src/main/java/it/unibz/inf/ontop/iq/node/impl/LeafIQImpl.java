@@ -14,7 +14,12 @@ public abstract class LeafIQImpl extends QueryNodeImpl implements LeafIQ {
     }
 
     @Override
-    public ImmutableList<IQ> getSubTrees() {
+    public ImmutableList<IQ> getChildren() {
         return EMPTY_LIST;
+    }
+
+    @Override
+    public IQ liftBinding() {
+        return this;
     }
 }
