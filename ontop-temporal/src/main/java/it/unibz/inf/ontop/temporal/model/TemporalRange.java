@@ -4,9 +4,9 @@ import java.time.Duration;
 
 public interface TemporalRange {
 
-    boolean isBeginInclusive();
+    Boolean isBeginInclusive();
 
-    boolean isEndInclusive();
+    Boolean isEndInclusive();
 
     Duration getBegin();
 

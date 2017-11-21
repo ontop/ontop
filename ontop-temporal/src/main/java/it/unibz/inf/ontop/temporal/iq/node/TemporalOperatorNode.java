@@ -2,22 +2,23 @@ package it.unibz.inf.ontop.temporal.iq.node;
 
 
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface TemporalOperatorNode extends InnerJoinNode {
+public interface TemporalOperatorNode extends QueryNode {
 
-    /**
-     * non-temporal join condition
-     *
-     */
-    @Override
-    InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
-
-
-    List<IntervalColumnsProjection> getInputIntervalColumnsProjections();
-
-    IntervalColumnsProjection getInputIntervalColumnsProjection();
+//    /**
+//     * non-temporal join condition
+//     *
+//     */
+//    @Override
+//    InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
+//
+//
+//    List<IntervalColumnsProjection> getInputIntervalColumnsProjections();
+//
+//    IntervalColumnsProjection getInputIntervalColumnsProjection();
 }

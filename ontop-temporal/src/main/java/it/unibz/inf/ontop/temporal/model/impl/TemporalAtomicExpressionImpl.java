@@ -3,10 +3,11 @@ package it.unibz.inf.ontop.temporal.model.impl;
 
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.TemporalAtomicExpression;
-import it.unibz.inf.ontop.temporal.model.TemporalExpression;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
@@ -33,8 +34,8 @@ public class TemporalAtomicExpressionImpl implements TemporalAtomicExpression {
     }
 
     @Override
-    public Iterable<TemporalExpression> getChildNodes() {
-        return null;
+    public Iterable<DatalogMTLExpression> getChildNodes() {
+        return Collections.<DatalogMTLExpression>emptyList();
     }
 
     @Override

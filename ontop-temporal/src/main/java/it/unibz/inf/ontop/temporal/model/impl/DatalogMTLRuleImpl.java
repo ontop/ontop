@@ -1,24 +1,24 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
 import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
-import it.unibz.inf.ontop.temporal.model.TemporalExpression;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 
 public class DatalogMTLRuleImpl implements DatalogMTLRule {
-    DatalogMTLRuleImpl(TemporalExpression head, TemporalExpression body) {
+    DatalogMTLRuleImpl(DatalogMTLExpression head, DatalogMTLExpression body) {
         this.head = head;
         this.body = body;
     }
 
-    private final TemporalExpression head;
-    private final TemporalExpression body;
+    private final DatalogMTLExpression head;
+    private final DatalogMTLExpression body;
 
     @Override
-    public TemporalExpression getHead() {
+    public DatalogMTLExpression getHead() {
         return head;
     }
 
     @Override
-    public TemporalExpression getBody() {
+    public DatalogMTLExpression getBody() {
         return body;
     }
 

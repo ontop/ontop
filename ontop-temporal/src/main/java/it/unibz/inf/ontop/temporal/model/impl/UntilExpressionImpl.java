@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
-import it.unibz.inf.ontop.temporal.model.TemporalExpression;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
 import it.unibz.inf.ontop.temporal.model.UntilExpression;
 
 public class UntilExpressionImpl extends AbstractBinaryTemporalExpressionWithRange implements UntilExpression{
-    UntilExpressionImpl(TemporalRange range, TemporalExpression leftOperand, TemporalExpression rightOperand) {
+    UntilExpressionImpl(TemporalRange range, DatalogMTLExpression leftOperand, DatalogMTLExpression rightOperand) {
         super(range, leftOperand, rightOperand);
     }
 

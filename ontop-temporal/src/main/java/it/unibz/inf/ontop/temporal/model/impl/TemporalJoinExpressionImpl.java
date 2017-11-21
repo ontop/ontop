@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
-import it.unibz.inf.ontop.temporal.model.NAryTemporalExpression;
-import it.unibz.inf.ontop.temporal.model.TemporalExpression;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
+import it.unibz.inf.ontop.temporal.model.NAryDatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.TemporalJoinExpression;
 
 import java.util.Arrays;
@@ -9,21 +9,21 @@ import java.util.List;
 
 import static java.util.stream.Collectors.joining;
 
-public class TemporalJoinExpressionImpl implements TemporalJoinExpression, NAryTemporalExpression {
+public class TemporalJoinExpressionImpl implements TemporalJoinExpression {
 
-    private final List<TemporalExpression> operands;
+    private final List<DatalogMTLExpression> operands;
 
-    TemporalJoinExpressionImpl(List<TemporalExpression> operands) {
+    TemporalJoinExpressionImpl(List<DatalogMTLExpression> operands) {
         this.operands = operands;
     }
 
-    TemporalJoinExpressionImpl(TemporalExpression... operands) {
+    TemporalJoinExpressionImpl(DatalogMTLExpression... operands) {
         this.operands = Arrays.asList(operands);
     }
 
 
     @Override
-    public List<TemporalExpression> getOperands() {
+    public List<DatalogMTLExpression> getOperands() {
         return operands;
     }
 
@@ -36,11 +36,11 @@ public class TemporalJoinExpressionImpl implements TemporalJoinExpression, NAryT
 
     @Override
     public String render() {
-        return operands.stream().map(TemporalExpression::render).collect(joining(", "));
+        return operands.stream().map(DatalogMTLExpression::render).collect(joining(", "));
     }
 
     @Override
-    public Iterable<TemporalExpression> getChildNodes() {
+    public Iterable<DatalogMTLExpression> getChildNodes() {
         return operands;
     }
 }

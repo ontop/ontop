@@ -2,7 +2,7 @@
 //
 //import it.unibz.inf.ontop.model.Predicate;
 //import it.unibz.inf.ontop.temporal.model.NormalizedRule;
-//import it.unibz.inf.ontop.temporal.model.TemporalExpression;
+//import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 //import it.unibz.inf.ontop.temporal.model.TemporalPredicate;
 //
 //import java.util.ArrayList;
@@ -10,12 +10,12 @@
 //
 //public class NormalizedRuleImpl implements NormalizedRule {
 //    @Override
-//    public TemporalExpression getHead() {
+//    public DatalogMTLExpression getHead() {
 //        return null;
 //    }
 //
 //    @Override
-//    public TemporalExpression getBody() {
+//    public DatalogMTLExpression getBody() {
 //        return null;
 //    }
 ////

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.temporal.model.impl;
 import it.unibz.inf.ontop.temporal.model.*;
 
 public class DiamondPlusExpressionImpl extends AbstractUnaryTemporalExpressionWithRange implements DiamondPlusExpression {
-    DiamondPlusExpressionImpl(TemporalRange range, TemporalExpression operand) {
+    DiamondPlusExpressionImpl(TemporalRange range, DatalogMTLExpression operand) {
         super(range, operand);
     }
 

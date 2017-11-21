@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.temporal.model.impl;
 import it.unibz.inf.ontop.temporal.model.*;
 
 public class BoxMinusExpressionImpl extends AbstractUnaryTemporalExpressionWithRange implements BoxMinusExpression {
-    BoxMinusExpressionImpl(TemporalRange range, TemporalExpression operand) {
+    BoxMinusExpressionImpl(TemporalRange range, DatalogMTLExpression operand) {
         super(range, operand);
     }
 

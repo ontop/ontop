@@ -2,20 +2,8 @@ package it.unibz.inf.ontop.temporal.model.impl;
 
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.temporal.model.BoxMinusExpression;
-import it.unibz.inf.ontop.temporal.model.BoxPlusExpression;
-import it.unibz.inf.ontop.temporal.model.DatalogMTLFactory;
-import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
-import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
-import it.unibz.inf.ontop.temporal.model.DiamondMinusExpression;
-import it.unibz.inf.ontop.temporal.model.DiamondPlusExpression;
-import it.unibz.inf.ontop.temporal.model.SinceExpression;
-import it.unibz.inf.ontop.temporal.model.TemporalAtomicExpression;
-import it.unibz.inf.ontop.temporal.model.TemporalExpression;
-import it.unibz.inf.ontop.temporal.model.TemporalInterval;
-import it.unibz.inf.ontop.temporal.model.TemporalJoinExpression;
-import it.unibz.inf.ontop.temporal.model.TemporalRange;
-import it.unibz.inf.ontop.temporal.model.UntilExpression;
+import it.unibz.inf.ontop.temporal.model.*;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -39,47 +27,47 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     }
 
     @Override
-    public TemporalJoinExpression createTemporalJoinExpression(TemporalExpression... expressions) {
+    public TemporalJoinExpression createTemporalJoinExpression(DatalogMTLExpression... expressions) {
         return new TemporalJoinExpressionImpl(expressions);
     }
 
     @Override
-    public TemporalJoinExpression createTemporalJoinExpression(List<TemporalExpression> expressions) {
+    public TemporalJoinExpression createTemporalJoinExpression(List<DatalogMTLExpression> expressions) {
         return new TemporalJoinExpressionImpl(expressions);
     }
 
     @Override
-    public BoxPlusExpression createBoxPlusExpression(TemporalRange range, TemporalExpression expression) {
+    public BoxPlusExpression createBoxPlusExpression(TemporalRange range, DatalogMTLExpression expression) {
         return new BoxPlusExpressionImpl(range, expression);
     }
 
     @Override
-    public BoxMinusExpression createBoxMinusExpression(TemporalRange range, TemporalExpression expression) {
+    public BoxMinusExpression createBoxMinusExpression(TemporalRange range, DatalogMTLExpression expression) {
         return new BoxMinusExpressionImpl(range, expression);
     }
 
     @Override
-    public DiamondPlusExpression createDiamondPlusExpression(TemporalRange range, TemporalExpression expression) {
+    public DiamondPlusExpression createDiamondPlusExpression(TemporalRange range, DatalogMTLExpression expression) {
         return new DiamondPlusExpressionImpl(range, expression);
     }
 
     @Override
-    public DiamondMinusExpression createDiamondMinusExpression(TemporalRange range, TemporalExpression expression) {
+    public DiamondMinusExpression createDiamondMinusExpression(TemporalRange range, DatalogMTLExpression expression) {
         return new DiamondMinusExpressionImpl(range, expression);
     }
 
     @Override
-    public SinceExpression createSinceExpression(TemporalRange range, TemporalExpression left, TemporalExpression right) {
+    public SinceExpression createSinceExpression(TemporalRange range, DatalogMTLExpression left, DatalogMTLExpression right) {
         return new SinceExpressionImpl(range, left, right);
     }
 
     @Override
-    public UntilExpression createUntilExpression(TemporalRange range, TemporalExpression left, TemporalExpression right) {
+    public UntilExpression createUntilExpression(TemporalRange range, DatalogMTLExpression left, DatalogMTLExpression right) {
         return new UntilExpressionImpl(range, left, right);
     }
 
     @Override
-    public DatalogMTLRule createRule(TemporalExpression head, TemporalExpression body) {
+    public DatalogMTLRule createRule(DatalogMTLExpression head, DatalogMTLExpression body) {
         return new DatalogMTLRuleImpl(head, body);
     }
 
@@ -102,5 +90,25 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     @Override
     public TemporalInterval createTemporalInterval(boolean beginInclusive, boolean endInclusive, Instant begin, Instant end) {
         return new TemporalIntervalImpl(beginInclusive, endInclusive, begin, end);
+    }
+
+    @Override
+    public StaticAtomicExpression createStaticAtomicExpression(Predicate predicate, List<Term> terms) {
+        return new StaticAtomicExpressionImpl(predicate, terms);
+    }
+
+    @Override
+    public StaticAtomicExpression createStaticAtomicExpression(Predicate predicate, Term... terms) {
+        return new StaticAtomicExpressionImpl(predicate, terms);
+    }
+
+    @Override
+    public StaticJoinExpression createStaticJoinExpression(StaticExpression... expressions) {
+        return new StaticJoinExpressionImpl(expressions);
+    }
+
+    @Override
+    public StaticJoinExpression createStaticJoinExpression(List<StaticExpression> expressions) {
+        return new StaticJoinExpressionImpl(expressions);
     }
 }

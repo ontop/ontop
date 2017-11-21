@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.temporal.model;
 
-public interface BinaryTemporalExpression extends TemporalExpression{
+public interface BinaryTemporalExpression extends DatalogMTLExpression {
 
-    TemporalExpression getLeftOperand();
+    DatalogMTLExpression getLeftOperand();
 
-    TemporalExpression getRightOperand();
+    DatalogMTLExpression getRightOperand();
 }

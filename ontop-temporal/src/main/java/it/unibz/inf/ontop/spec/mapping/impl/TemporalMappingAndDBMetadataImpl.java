@@ -7,10 +7,8 @@ import it.unibz.inf.ontop.spec.mapping.TemporalMappingExtractor;
 public class TemporalMappingAndDBMetadataImpl implements TemporalMappingExtractor.MappingAndDBMetadata {
     private final Mapping mapping;
     private final DBMetadata dbMetadata;
-    private final Mapping temporalMapping;
 
-    public TemporalMappingAndDBMetadataImpl(Mapping temporalMapping, Mapping mapping, DBMetadata dbMetadata) {
-        this.temporalMapping = temporalMapping;
+    public TemporalMappingAndDBMetadataImpl(Mapping mapping,  DBMetadata dbMetadata) {
         this.mapping = mapping;
         this.dbMetadata = dbMetadata;
     }
@@ -27,6 +25,6 @@ public class TemporalMappingAndDBMetadataImpl implements TemporalMappingExtracto
 
     @Override
     public Mapping getTemporalMapping() {
-        return temporalMapping;
+        return mapping;
     }
 }

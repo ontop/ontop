@@ -4,9 +4,9 @@ package it.unibz.inf.ontop.temporal.model;
 
 public interface DatalogMTLRule {
 
-    TemporalExpression getHead();
+    DatalogMTLExpression getHead();
 
-    TemporalExpression getBody();
+    DatalogMTLExpression getBody();
 
     String render();
 }

@@ -1,24 +1,26 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
 
 import java.time.Duration;
 
 public class TemporalRangeImpl implements TemporalRange {
 
-    private boolean beginInclusive;
-    private boolean endInclusive;
+    private Boolean beginInclusive;
+    private Boolean endInclusive;
 
     private Duration begin;
     private Duration end;
 
     @Override
-    public boolean isBeginInclusive() {
+    public Boolean isBeginInclusive() {
         return beginInclusive;
     }
 
     @Override
-    public boolean isEndInclusive() {
+    public Boolean isEndInclusive() {
         return endInclusive;
     }
 
@@ -38,7 +40,8 @@ public class TemporalRangeImpl implements TemporalRange {
 
     }
 
-    public TemporalRangeImpl(boolean beginInclusive, boolean endInclusive, Duration begin, Duration end) {
+    //@Inject
+    public TemporalRangeImpl(Boolean beginInclusive, Boolean endInclusive, Duration begin, Duration end) {
         this.beginInclusive = beginInclusive;
         this.endInclusive = endInclusive;
         this.begin = begin;

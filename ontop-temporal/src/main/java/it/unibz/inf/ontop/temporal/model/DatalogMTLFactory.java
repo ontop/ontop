@@ -14,23 +14,23 @@ public interface DatalogMTLFactory {
 
     TemporalAtomicExpression createTemporalAtomicExpression(Predicate predicate, Term... terms);
 
-    TemporalJoinExpression createTemporalJoinExpression(TemporalExpression... expressions);
+    TemporalJoinExpression createTemporalJoinExpression(DatalogMTLExpression... expressions);
 
-    TemporalJoinExpression createTemporalJoinExpression(List<TemporalExpression> expressions);
+    TemporalJoinExpression createTemporalJoinExpression(List<DatalogMTLExpression> expressions);
 
-    BoxPlusExpression createBoxPlusExpression(TemporalRange range, TemporalExpression expression);
+    BoxPlusExpression createBoxPlusExpression(TemporalRange range, DatalogMTLExpression expression);
 
-    BoxMinusExpression createBoxMinusExpression(TemporalRange range, TemporalExpression expression);
+    BoxMinusExpression createBoxMinusExpression(TemporalRange range, DatalogMTLExpression expression);
 
-    DiamondPlusExpression createDiamondPlusExpression(TemporalRange range, TemporalExpression expression);
+    DiamondPlusExpression createDiamondPlusExpression(TemporalRange range, DatalogMTLExpression expression);
 
-    DiamondMinusExpression createDiamondMinusExpression(TemporalRange range, TemporalExpression expression);
+    DiamondMinusExpression createDiamondMinusExpression(TemporalRange range, DatalogMTLExpression expression);
 
-    SinceExpression createSinceExpression(TemporalRange range, TemporalExpression left, TemporalExpression right);
+    SinceExpression createSinceExpression(TemporalRange range, DatalogMTLExpression left, DatalogMTLExpression right);
 
-    UntilExpression createUntilExpression(TemporalRange range, TemporalExpression left, TemporalExpression right);
+    UntilExpression createUntilExpression(TemporalRange range, DatalogMTLExpression left, DatalogMTLExpression right);
 
-    DatalogMTLRule createRule(TemporalExpression head, TemporalExpression body);
+    DatalogMTLRule createRule(DatalogMTLExpression head, DatalogMTLExpression body);
 
     DatalogMTLProgram createProgram(List<DatalogMTLRule> rules);
 
@@ -39,4 +39,12 @@ public interface DatalogMTLFactory {
     TemporalRange createTemporalRange(boolean beginInclusive, boolean endInclusive, Duration begin, Duration end);
 
     TemporalInterval createTemporalInterval(boolean beginInclusive, boolean endInclusive, Instant begin, Instant end);
+
+    StaticAtomicExpression createStaticAtomicExpression(Predicate predicate, List<Term> terms);
+
+    StaticAtomicExpression createStaticAtomicExpression(Predicate predicate, Term... terms);
+
+    StaticJoinExpression createStaticJoinExpression(StaticExpression... expressions);
+
+    StaticJoinExpression createStaticJoinExpression(List<StaticExpression> expressions);
 }

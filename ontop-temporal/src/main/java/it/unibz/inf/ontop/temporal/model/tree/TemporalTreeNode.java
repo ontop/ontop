@@ -1,37 +1,54 @@
 package it.unibz.inf.ontop.temporal.model.tree;
 
-import it.unibz.inf.ontop.temporal.model.TemporalExpression;
+import com.google.common.collect.TreeTraverser;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 
-public class TreeNode {
-        private TemporalExpression temporalExpression;
-        private TreeNode leftNode;
-        private TreeNode rightNode;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-        public TreeNode(TemporalExpression _temporalExpression){
-            temporalExpression = _temporalExpression;
+public class TemporalTreeNode {
+    private DatalogMTLExpression datalogMTLExpression;
+    private List<TemporalTreeNode> childNodesList;
+
+    public TemporalTreeNode(DatalogMTLExpression _datalogMTLExpression){
+            datalogMTLExpression = _datalogMTLExpression;
         }
 
-        public TemporalExpression getTemporalExpression() {
-            return temporalExpression;
+    public DatalogMTLExpression getDatalogMTLExpression() {
+            return datalogMTLExpression;
         }
 
-        public void setTemporalExpression(TemporalExpression temporalExpression) {
-            this.temporalExpression = temporalExpression;
+    public void setDatalogMTLExpression(DatalogMTLExpression datalogMTLExpression) {
+        this.datalogMTLExpression = datalogMTLExpression;
+    }
+
+    public void addChildNodes(TemporalTreeNode ... childNodes) {
+        if(childNodesList == null) {
+            childNodesList = new ArrayList<TemporalTreeNode>();
+        }
+        childNodesList.addAll(Arrays.asList(childNodes));
+    }
+
+    public void addChildNode(TemporalTreeNode childNode) {
+        if(childNodesList == null) {
+            childNodesList = new ArrayList<TemporalTreeNode>();
+        }
+        childNodesList.add(childNode);
+    }
+
+    public Iterable<TemporalTreeNode> getChildNodes(){
+            return childNodesList;
         }
 
-        public TreeNode getLeftNode() {
-            return leftNode;
-        }
-
-        public void setLeftNode(TreeNode leftNode) {
-            this.leftNode = leftNode;
-        }
-
-        public TreeNode getRightNode() {
-            return rightNode;
-        }
-
-        public void setRightNode(TreeNode rightNode) {
-            this.rightNode = rightNode;
+        //TODO: move this function into where it will be used
+        public TreeTraverser<TemporalTreeNode> getTreeTraverser(){
+            return TreeTraverser.using(TemporalTreeNode::getChildNodes);
+            /*return new TreeTraverser<TemporalTreeNode>() {
+                @Override
+                public Iterable<TemporalTreeNode> children(TemporalTreeNode o) {
+                    return () -> Iterators.forArray(o.leftNode, o.rightNode);
+                }
+            };*/
         }
 }

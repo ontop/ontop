@@ -80,7 +80,7 @@ public class TemporalMappingTransformerImpl implements TemporalMappingTransforme
         Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tBox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
-        Mapping temporalSaturatedMapping = temporalMappingSaturator.saturate(normalizedMapping, dbMetadata, temporalMapping, temporalDBMetadata);
+        Mapping temporalSaturatedMapping = temporalMappingSaturator.saturate(normalizedMapping, dbMetadata, temporalMapping, temporalDBMetadata, datalogMTLProgram);
 
         return specificationFactory.createSpecification(temporalSaturatedMapping, dbMetadata, tBox, ontology.getVocabulary());
     }

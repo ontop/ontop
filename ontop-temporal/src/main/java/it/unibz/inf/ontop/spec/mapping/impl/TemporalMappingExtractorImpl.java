@@ -120,7 +120,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
 
         validateMapping(optionalOntology, optionalSaturatedTBox, filledProvMapping);
 
-        return new TemporalMappingAndDBMetadataImpl(null, filledProvMapping.toRegularMapping(), dbMetadata);
+        return new TemporalMappingAndDBMetadataImpl(filledProvMapping.toRegularMapping(), dbMetadata);
     }
 
     private SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
