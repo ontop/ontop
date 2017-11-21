@@ -8,7 +8,8 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 
 
-public class BinaryNonCommutativeIQImpl extends AbstractCompositeIQ implements BinaryNonCommutativeIQ {
+public class BinaryNonCommutativeIQImpl extends AbstractCompositeIQ<BinaryNonCommutativeOperatorNode>
+        implements BinaryNonCommutativeIQ {
 
     private final IQ leftIQ;
     private final IQ rightIQ;

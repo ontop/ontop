@@ -10,14 +10,11 @@ import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.model.term.Variable;
 
-public class UnaryIQImpl extends AbstractCompositeIQ implements UnaryIQ {
-
-    private final UnaryOperatorNode rootNode;
+public class UnaryIQImpl extends AbstractCompositeIQ<UnaryOperatorNode> implements UnaryIQ {
 
     @AssistedInject
     private UnaryIQImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQ child) {
         super(rootNode, ImmutableList.of(child));
-        this.rootNode = rootNode;
     }
 
     @Override
@@ -26,11 +23,12 @@ public class UnaryIQImpl extends AbstractCompositeIQ implements UnaryIQ {
         IQ liftedChild = initialChild.liftBinding();
         return initialChild.equals(liftedChild)
                 ? this
-                :rootNode.liftBinding(liftedChild);
+                :getRootNode().liftBinding(liftedChild);
     }
 
     @Override
     public ImmutableSet<Variable> getVariables() {
+        UnaryOperatorNode rootNode = getRootNode();
         if (rootNode instanceof ExplicitVariableProjectionNode)
             return ((ExplicitVariableProjectionNode) rootNode).getVariables();
         else

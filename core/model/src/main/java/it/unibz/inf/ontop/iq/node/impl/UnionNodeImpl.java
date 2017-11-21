@@ -177,4 +177,9 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
     }
+
+    @Override
+    public IQ liftBinding(ImmutableList<IQ> children) {
+        throw new RuntimeException("TODO: implement");
+    }
 }

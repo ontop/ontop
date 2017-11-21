@@ -9,12 +9,12 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-public abstract class AbstractCompositeIQ implements CompositeIQ {
+public abstract class AbstractCompositeIQ<N extends QueryNode> implements CompositeIQ<N> {
 
-    private final QueryNode rootNode;
+    private final N rootNode;
     private final ImmutableList<IQ> subTrees;
 
-    protected AbstractCompositeIQ(QueryNode rootNode, ImmutableList<IQ> subTrees) {
+    protected AbstractCompositeIQ(N rootNode, ImmutableList<IQ> subTrees) {
         if (subTrees.isEmpty())
             throw new IllegalArgumentException("A composite IQ must have at least one child");
         this.rootNode = rootNode;
@@ -22,7 +22,7 @@ public abstract class AbstractCompositeIQ implements CompositeIQ {
     }
 
     @Override
-    public QueryNode getRootNode() {
+    public N getRootNode() {
         return rootNode;
     }
 

@@ -7,5 +7,5 @@ import it.unibz.inf.ontop.iq.IQ;
  */
 public interface UnaryOperatorNode extends QueryNode {
 
-    IQ liftBinding(IQ liftedChildTree);
+    IQ liftBinding(IQ liftedChildIQ);
 }

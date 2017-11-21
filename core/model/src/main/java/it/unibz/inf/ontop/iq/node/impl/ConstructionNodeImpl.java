@@ -518,12 +518,15 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public IQ liftBinding(IQ liftedChildTree) {
-        QueryNode liftedChildRoot = liftedChildTree.getRootNode();
+    public IQ liftBinding(IQ liftedChildIQ) {
+        QueryNode liftedChildRoot = liftedChildIQ.getRootNode();
         if (liftedChildRoot instanceof ConstructionNode)
-            return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQ) liftedChildTree);
+            return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQ) liftedChildIQ);
+        else if (liftedChildRoot instanceof EmptyNode) {
+            return iqFactory.createEmptyNode(projectedVariables);
+        }
         else
-            return iqFactory.createUnaryIQ(this, liftedChildTree);
+            return iqFactory.createUnaryIQ(this, liftedChildIQ);
     }
 
     private IQ liftBinding(ConstructionNode childConstructionNode, UnaryIQ childIQ) {

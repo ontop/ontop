@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq;
 
-public interface BinaryNonCommutativeIQ extends CompositeIQ {
+import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
+
+public interface BinaryNonCommutativeIQ extends CompositeIQ<BinaryNonCommutativeOperatorNode> {
 
     IQ getLeftChild();
 

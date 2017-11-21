@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq;
 
-public interface UnaryIQ extends CompositeIQ {
+import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
+
+public interface UnaryIQ extends CompositeIQ<UnaryOperatorNode> {
 
     IQ getChild();
 }

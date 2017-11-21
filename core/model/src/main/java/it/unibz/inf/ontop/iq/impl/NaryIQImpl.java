@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.NaryIQ;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
 
-public class NaryIQImpl extends AbstractCompositeIQ implements NaryIQ {
+public class NaryIQImpl extends AbstractCompositeIQ<NaryOperatorNode> implements NaryIQ {
 
     @AssistedInject
     private NaryIQImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQ> subTrees) {
@@ -18,6 +18,6 @@ public class NaryIQImpl extends AbstractCompositeIQ implements NaryIQ {
 
     @Override
     public IQ liftBinding() {
-        throw new RuntimeException("TODO: implement it");
+        return getRootNode().liftBinding(getChildren());
     }
 }

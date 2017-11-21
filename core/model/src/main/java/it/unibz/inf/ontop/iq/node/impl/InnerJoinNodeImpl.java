@@ -177,19 +177,14 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toList());
         switch (remainingChildren.size()) {
             case 0:
-                return new NodeTransformationProposalImpl(DECLARE_AS_TRUE,
-                        ImmutableSet.of());
+                return new NodeTransformationProposalImpl(DECLARE_AS_TRUE, ImmutableSet.of());
             case 1:
-                Optional<ImmutableExpression> condition = getOptionalFilterCondition();
-                if (condition.isPresent()) {
-                    return new NodeTransformationProposalImpl(
-                            REPLACE_BY_NEW_NODE,
-                            query.getFactory().createFilterNode(condition.get()),
-                            ImmutableSet.of()
-                    );
-                }
-                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
-                            remainingChildren.get(0),ImmutableSet.of());
+                return getOptionalFilterCondition()
+                        .map(immutableExpression -> new NodeTransformationProposalImpl(REPLACE_BY_NEW_NODE,
+                                query.getFactory().createFilterNode(immutableExpression),
+                                ImmutableSet.of()))
+                        .orElseGet(() -> new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
+                                remainingChildren.get(0), ImmutableSet.of()));
             default:
                 return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE, ImmutableSet.of());
         }
@@ -205,4 +200,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return JOIN_NODE_STR + getOptionalFilterString();
     }
 
+    @Override
+    public IQ liftBinding(ImmutableList<IQ> children) {
+        throw new RuntimeException("TODO: implement");
+    }
 }

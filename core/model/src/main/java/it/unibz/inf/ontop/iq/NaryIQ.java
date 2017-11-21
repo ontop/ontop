@@ -1,4 +1,6 @@
 package it.unibz.inf.ontop.iq;
 
-public interface NaryIQ extends CompositeIQ {
+import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
+
+public interface NaryIQ extends CompositeIQ<NaryOperatorNode> {
 }
