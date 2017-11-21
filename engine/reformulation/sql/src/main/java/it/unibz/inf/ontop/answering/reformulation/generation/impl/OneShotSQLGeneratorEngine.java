@@ -571,17 +571,16 @@ public class OneShotSQLGeneratorEngine {
 		return conditions;
 	}
 
-	/***
+	/**
 	 * Returns the SQL for an atom representing an SQL condition (booleans).
 	 */
 	private String getSQLCondition(Function atom, QueryAliasIndex index) {
 		Predicate functionSymbol = atom.getFunctionSymbol();
 		if (functionSymbol.getArity() == 1) {
 			// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
-			// added also for IS TRUE
-			String expressionFormat = operations.get(functionSymbol);
 			Term term = atom.getTerm(0);
 			if (functionSymbol == ExpressionOperation.NOT) {
+				String expressionFormat = operations.get(functionSymbol);
 				if (term instanceof Function) {
 					Function f = (Function) term;
 					if (!f.isDataTypeFunction()) {
@@ -590,13 +589,14 @@ public class OneShotSQLGeneratorEngine {
 					}
 				}
 				// find data type of term and evaluate accordingly
-				String column = toBooleanValue(term, index);
+				String column = effectiveBooleanValue(term, index);
 				return String.format(expressionFormat, column);
 			}
-			else if (expressionFormat.contains("IS TRUE")) {
-				return toBooleanValue(term, index);
+			else if (functionSymbol == ExpressionOperation.IS_TRUE) {
+				return effectiveBooleanValue(term, index);
 			}
 			else {
+				String expressionFormat = operations.get(functionSymbol);
 				String column = getSQLString(term, index, false);
 				return String.format(expressionFormat, column);
 			}
@@ -882,27 +882,27 @@ public class OneShotSQLGeneratorEngine {
 		return equalities;
 	}
 
-	private String toBooleanValue(Term term, QueryAliasIndex index) {
+	private String effectiveBooleanValue(Term term, QueryAliasIndex index) {
 
 		String column = getSQLString(term, index, false);
 		// find data type of term and evaluate accordingly
-		switch (getVariableDataType(term)) {
+		switch (getDataType(term)) {
 			case Types.INTEGER:
 			case Types.BIGINT:
 			case Types.DOUBLE:
 			case Types.FLOAT:
-				return String.format("%s > 0", column);
+				return String.format("%s != 0", column);
+			case Types.VARCHAR:
+				return String.format("LENGTH(%s) > 0", column);
 			case Types.BOOLEAN:
 				return column;
-			case Types.VARCHAR:
-				String.format("LENGTH(%s) > 0", column);
 			default:
 				return "1";
 		}
 	}
 
-	// return variable SQL data type
-	private int getVariableDataType(Term term) {
+	// return the SQL data type
+	private int getDataType(Term term) {
 
 		if (term instanceof Function) {
 			Function f = (Function) term;
@@ -911,7 +911,7 @@ public class OneShotSQLGeneratorEngine {
 				COL_TYPE type = TYPE_FACTORY.getDatatype(p.getName()).get();
 				return jdbcTypeMapper.getSQLType(type);
 			}
-			// Return varchar for unknown
+			// return varchar for unknown
 			return Types.VARCHAR;
 		}
 		else if (term instanceof Variable) {
@@ -1360,7 +1360,7 @@ public class OneShotSQLGeneratorEngine {
 		}
 		else if (functionSymbol == ExpressionOperation.IS_TRUE) {
 			// ABOVE operations.containsKey
-			return toBooleanValue(function.getTerm(0), index);
+			return effectiveBooleanValue(function.getTerm(0), index);
 		}
 		else if (operations.containsKey(functionSymbol)) {
 			String expressionFormat = operations.get(functionSymbol);
