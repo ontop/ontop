@@ -661,18 +661,10 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 	private List<String> getTableDefs(List<Function> atoms, QueryAliasIndex index, String indent) {
-		/*
-		 * We now collect the view definitions for each data atom each
-		 * condition, and each each nested Join/LeftJoin
-		 */
-		List<String> tableDefinitions = Lists.newArrayListWithCapacity(atoms.size());
-		for (Function a : atoms) {
-			String definition = getTableDefinition(a, index, indent + INDENT);
-			if (!definition.isEmpty()) {
-				tableDefinitions.add(definition);
-			}
-		}
-		return tableDefinitions;
+		return atoms.stream()
+				.map(a -> getTableDefinition(a, index, indent + INDENT))
+				.filter(d -> !d.isEmpty())
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -698,41 +690,43 @@ public class OneShotSQLGeneratorEngine {
 									   String indent) {
 
 		List<String> tableDefinitions = getTableDefs(atoms, index, indent);
+		switch (tableDefinitions.size()) {
+			case 0:
+				throw new RuntimeException("Cannot generate definition for empty data");
 
-		int size = tableDefinitions.size();
-		if (size == 0) {
-			throw new RuntimeException("Cannot generate definition for empty data");
+			case 1:
+				return tableDefinitions.get(0);
+
+			default:
+				String JOIN_WITH_PARENTHESIS = indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n"
+						+ indent + "(%s)" + indent;
+				String JOIN_NO_PARENTHESIS = indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n"
+						+ indent + "%s" + indent;
+				/*
+		 		 * Now we generate the table definition: Join/LeftJoin
+				 * (possibly nested if there are more than 2 table definitions in the
+				 * current list) in case this method was called recursively.
+				 *
+				 * To form the JOIN we will cycle through each data definition,
+				 * nesting the JOINs as we go. The conditions in the ON clause will
+				 * go on the TOP level only.
+				 */
+				int size = tableDefinitions.size();
+				String currentJoin = String.format(parenthesis ? JOIN_WITH_PARENTHESIS : JOIN_NO_PARENTHESIS,
+						tableDefinitions.get(size - 2), tableDefinitions.get(size - 1));
+
+				for (int i = size - 3; i >= 0; i--) {
+					currentJoin = String.format(JOIN_WITH_PARENTHESIS, tableDefinitions.get(i), currentJoin);
+				}
+
+				Set<String> conditions = getConditionsSet(atoms, index, true);
+
+				StringBuilder sb = new StringBuilder();
+				sb.append(currentJoin).append(" ON\n").append(indent);
+				Joiner.on(" AND\n" + indent).appendTo(sb, conditions);
+				sb.append("\n").append(indent);
+				return sb.toString();
 		}
-		if (size == 1) {
-			return tableDefinitions.get(0);
-		}
-
-		String JOIN_WITH_PARENTHESIS = indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n" + indent + "(%s)" + indent;
-		String JOIN_NO_PARENTHESIS = indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n" + indent + "%s" + indent;
-		/*
-		 * Now we generate the table definition: Join/LeftJoin
-		 * (possibly nested if there are more than 2 table definitions in the
-		 * current list) in case this method was called recursively.
-		 *
-		 * To form the JOIN we will cycle through each data definition,
-		 * nesting the JOINs as we go. The conditions in the ON clause will
-		 * go on the TOP level only.
-		 */
-		String currentJoin = String.format(parenthesis ? JOIN_WITH_PARENTHESIS : JOIN_NO_PARENTHESIS,
-				tableDefinitions.get(size - 2), tableDefinitions.get(size - 1));
-
-		for (int i = size - 3; i >= 0; i--) {
-			currentJoin = String.format(JOIN_WITH_PARENTHESIS, tableDefinitions.get(i), currentJoin);
-		}
-
-	    // If there are ON conditions we add them now.
-		Set<String> conditions = getConditionsSet(atoms, index, true);
-
-		StringBuilder sb = new StringBuilder();
-		sb.append(currentJoin).append(" ON\n").append(indent);
-		Joiner.on(" AND\n" + indent).appendTo(sb, conditions);
-		sb.append("\n").append(indent);
-		return sb.toString();
 	}
 
 	/**
@@ -743,21 +737,12 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private String getTableDefinition(Function atom, QueryAliasIndex index, String indent) {
 
-		if (atom.isOperation() || atom.isDataTypeFunction()) {
-			// These don't participate in the FROM clause
-			return "";
-		}
-		else if (atom.isAlgebraFunction()) {
-			Predicate predicate = atom.getFunctionSymbol();
+		if (atom.isAlgebraFunction()) {
+			Predicate functionSymbol = atom.getFunctionSymbol();
+			if (functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_JOIN ||
+					functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
 
-			if (predicate == DatalogAlgebraOperatorPredicates.SPARQL_GROUP) {
-				return "";
-			}
-
-			if (predicate == DatalogAlgebraOperatorPredicates.SPARQL_JOIN ||
-					predicate == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
-
-				boolean isLeftJoin = (predicate == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN);
+				boolean isLeftJoin = (functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN);
 				boolean parenthesis = false;
 
 				int i = 0;
@@ -778,12 +763,16 @@ public class OneShotSQLGeneratorEngine {
 						isLeftJoin ? "LEFT OUTER JOIN" : "JOIN", parenthesis, indent + INDENT);
 				return tableDefinitions;
 			}
+			else
+				return "";
 		}
-
-		/*
-		 * This is a data atom
-		 */
-		return index.getViewDefinition(atom);
+		else if (atom.isOperation() || atom.isDataTypeFunction()) {
+			// These don't participate in the FROM clause
+			return "";
+		}
+		else
+			// a data atom
+			return index.getViewDefinition(atom);
 	}
 
 	/**
@@ -1062,12 +1051,9 @@ public class OneShotSQLGeneratorEngine {
 					}
 				}
 			}
-			else if (functionSymbol instanceof URITemplatePredicate) {
-				// New template based URI building functions
-				mainColumn = getSQLStringForTemplateFunction(ov, index);
-			}
-            else if (functionSymbol instanceof BNodePredicate) {
-				// New template based BNODE building functions
+			else if (functionSymbol instanceof URITemplatePredicate
+					|| functionSymbol instanceof BNodePredicate) {
+				// New template based URI/BNODE building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 			}
 			else if (ov.isOperation()) {
@@ -1157,14 +1143,9 @@ public class OneShotSQLGeneratorEngine {
 			 * place of the place holders. We need to tokenize and form the
 			 * CONCAT
 			 */
-			final String literalValue;
-			if (t instanceof BNode) {
-				//TODO: why getValue and not getName(). Change coming from v1.
-				literalValue = ((BNode) t).getName();
-			}
-			else {
-				literalValue = ((ValueConstant) t).getValue();
-			}
+			String literalValue = (t instanceof BNode)
+					? ((BNode) t).getName()   // getValue should be removed from Constant
+					: ((ValueConstant) t).getValue();
 
 			String template = trimLiteral(literalValue);
 			String[] split = template.split("[{][}]");
@@ -1179,29 +1160,21 @@ public class OneShotSQLGeneratorEngine {
 			 * only 1 element there is nothing to concatenate
 			 */
 			int size = terms.size();
-			if (size > 1) {
-//				if (TYPE_FACTORY.isLiteral(pred)) {
-//					size--;
-//				}
-				for (int termIndex = 1; termIndex < size; termIndex++) {
-					Term currentTerm = terms.get(termIndex);
-					String repl0 = getSQLString(currentTerm, index, false);
-					String repl1 = isStringColType(currentTerm, index)
-							? repl0
-							: sqladapter.sqlCast(repl0, Types.VARCHAR);
-					//empty place holders: the correct uri is in the column of DB no need to replace
-					String repl = (split.length == 0) ? repl1 : replace1 + repl1 + replace2;
-					vex.add(repl);
-					if (termIndex < split.length) {
-						vex.add(sqladapter.getSQLLexicalFormString(split[termIndex]));
-					}
+			for (int termIndex = 1; termIndex < size; termIndex++) {
+				Term currentTerm = terms.get(termIndex);
+				String repl0 = getSQLString(currentTerm, index, false);
+				String repl1 = isStringColType(currentTerm, index)
+						? repl0
+						: sqladapter.sqlCast(repl0, Types.VARCHAR);
+				//empty place holders: the correct uri is in the column of DB no need to replace
+				String repl = (split.length == 0) ? repl1 : replace1 + repl1 + replace2;
+				vex.add(repl);
+				if (termIndex < split.length) {
+					vex.add(sqladapter.getSQLLexicalFormString(split[termIndex]));
 				}
 			}
 
-			if (vex.size() == 1) {
-				return vex.get(0);
-			}
-			return getStringConcatenation(vex.toArray(new String[0]));
+			return (vex.size() == 1) ? vex.get(0) : getStringConcatenation(vex.toArray(new String[0]));
 		}
 		else if (t instanceof Variable) {
 			/*
