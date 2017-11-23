@@ -1,2745 +1,2191 @@
-
+// Generated from /home/jcorman/workspace/ontop/v3/mapping/core/src/main/java/it/unibz/inf/ontop/spec/mapping/parser/impl/TurtleOBDA.g4 by ANTLR 4.7
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
-//import it.unibz.inf.ontop.model.term.*;
-//import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-//import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-//import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-//import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.*;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.antlr.v4.runtime.atn.*;
+import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
+import org.antlr.v4.runtime.tree.*;
+import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
-import org.antlr.v4.runtime.Parser;
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
+public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
+	static { RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION); }
 
-
-import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
-
-@SuppressWarnings("all")
-public class TurtleOBDAParser extends Parser {
-	public static final String[] tokenNames = new String[] {
-		"<invalid>", "<EOR>", "<DOWN>", "<UP>", "ALPHA", "ALPHANUM", "AMPERSAND", 
-		"APOSTROPHE", "ASTERISK", "AT", "BACKSLASH", "BASE", "BLANK", "BLANK_PREFIX", 
-		"CARET", "CHAR", "COLON", "COMMA", "DECIMAL", "DECIMAL_NEGATIVE", "DECIMAL_POSITIVE", 
-		"DIGIT", "DOLLAR", "DOUBLE", "DOUBLE_NEGATIVE", "DOUBLE_POSITIVE", "DOUBLE_SLASH", 
-		"ECHAR", "EQUALS", "EXCLAMATION", "FALSE", "GREATER", "HASH", "ID", "ID_CORE", 
-		"ID_START", "INTEGER", "INTEGER_NEGATIVE", "INTEGER_POSITIVE", "LCR_BRACKET", 
-		"LESS", "LPAREN", "LSQ_BRACKET", "LTSIGN", "MINUS", "NAMESPACE", "NAME_CHAR", 
-		"NAME_START_CHAR", "NCNAME", "NCNAME_EXT", "PERCENT", "PERIOD", "PLUS", 
-		"PREFIX", "PREFIXED_NAME", "QUESTION", "QUOTE_DOUBLE", "QUOTE_SINGLE", 
-		"RCR_BRACKET", "REFERENCE", "RPAREN", "RSQ_BRACKET", "RTSIGN", "SCHEMA", 
-		"SEMI", "SLASH", "STRING_URI", "STRING_WITH_BRACKET", "STRING_WITH_CURLY_BRACKET", 
-		"STRING_WITH_QUOTE", "STRING_WITH_QUOTE_DOUBLE", "TILDE", "TRUE", "UNDERSCORE", 
-		"URI_PATH", "VARNAME", "WS", "'a'"
+	protected static final DFA[] _decisionToDFA;
+	protected static final PredictionContextCache _sharedContextCache =
+		new PredictionContextCache();
+	public static final int
+		T__0=1, BASE_KW=2, PREFIX_KW=3, FALSE=4, TRUE=5, REFERENCE=6, LTSIGN=7, 
+		RTSIGN=8, SEMI=9, PERIOD=10, COMMA=11, LSQ_BRACKET=12, RSQ_BRACKET=13, 
+		LCR_BRACKET=14, RCR_BRACKET=15, LPAREN=16, RPAREN=17, QUESTION=18, DOLLAR=19, 
+		QUOTE_DOUBLE=20, QUOTE_SINGLE=21, APOSTROPHE=22, UNDERSCORE=23, MINUS=24, 
+		ASTERISK=25, AMPERSAND=26, AT=27, EXCLAMATION=28, HASH=29, PERCENT=30, 
+		PLUS=31, EQUALS=32, COLON=33, LESS=34, GREATER=35, SLASH=36, DOUBLE_SLASH=37, 
+		BACKSLASH=38, BLANK=39, BLANK_PREFIX=40, TILDE=41, CARET=42, INTEGER=43, 
+		DOUBLE=44, DECIMAL=45, INTEGER_POSITIVE=46, INTEGER_NEGATIVE=47, DOUBLE_POSITIVE=48, 
+		DOUBLE_NEGATIVE=49, DECIMAL_POSITIVE=50, DECIMAL_NEGATIVE=51, PREFIXED_NAME=52, 
+		NCNAME_EXT=53, PREFIX=54, STRING_WITH_QUOTE_DOUBLE=55, STRING_WITH_CURLY_BRACKET=56, 
+		URI_REF=57, WS=58, NAME_CHAR=59, VARNAME=60;
+	public static final int
+		RULE_parse = 0, RULE_directiveStatement = 1, RULE_triplesStatement = 2, 
+		RULE_directive = 3, RULE_base = 4, RULE_prefixID = 5, RULE_prefix = 6, 
+		RULE_triples = 7, RULE_predicateObjectList = 8, RULE_predicateObject = 9, 
+		RULE_verb = 10, RULE_objectList = 11, RULE_subject = 12, RULE_object = 13, 
+		RULE_resource = 14, RULE_uriref = 15, RULE_prefixedName = 16, RULE_blank = 17, 
+		RULE_variable = 18, RULE_function = 19, RULE_typedLiteral = 20, RULE_language = 21, 
+		RULE_terms = 22, RULE_term = 23, RULE_literal = 24, RULE_stringLiteral = 25, 
+		RULE_dataTypeString = 26, RULE_numericLiteral = 27, RULE_languageTag = 28, 
+		RULE_booleanLiteral = 29, RULE_numericUnsigned = 30, RULE_numericPositive = 31, 
+		RULE_numericNegative = 32;
+	public static final String[] ruleNames = {
+		"parse", "directiveStatement", "triplesStatement", "directive", "base", 
+		"prefixID", "prefix", "triples", "predicateObjectList", "predicateObject", 
+		"verb", "objectList", "subject", "object", "resource", "uriref", "prefixedName", 
+		"blank", "variable", "function", "typedLiteral", "language", "terms", 
+		"term", "literal", "stringLiteral", "dataTypeString", "numericLiteral", 
+		"languageTag", "booleanLiteral", "numericUnsigned", "numericPositive", 
+		"numericNegative"
 	};
-	public static final int EOF=-1;
-	public static final int T__77=77;
-	public static final int ALPHA=4;
-	public static final int ALPHANUM=5;
-	public static final int AMPERSAND=6;
-	public static final int APOSTROPHE=7;
-	public static final int ASTERISK=8;
-	public static final int AT=9;
-	public static final int BACKSLASH=10;
-	public static final int BASE=11;
-	public static final int BLANK=12;
-	public static final int BLANK_PREFIX=13;
-	public static final int CARET=14;
-	public static final int CHAR=15;
-	public static final int COLON=16;
-	public static final int COMMA=17;
-	public static final int DECIMAL=18;
-	public static final int DECIMAL_NEGATIVE=19;
-	public static final int DECIMAL_POSITIVE=20;
-	public static final int DIGIT=21;
-	public static final int DOLLAR=22;
-	public static final int DOUBLE=23;
-	public static final int DOUBLE_NEGATIVE=24;
-	public static final int DOUBLE_POSITIVE=25;
-	public static final int DOUBLE_SLASH=26;
-	public static final int ECHAR=27;
-	public static final int EQUALS=28;
-	public static final int EXCLAMATION=29;
-	public static final int FALSE=30;
-	public static final int GREATER=31;
-	public static final int HASH=32;
-	public static final int ID=33;
-	public static final int ID_CORE=34;
-	public static final int ID_START=35;
-	public static final int INTEGER=36;
-	public static final int INTEGER_NEGATIVE=37;
-	public static final int INTEGER_POSITIVE=38;
-	public static final int LCR_BRACKET=39;
-	public static final int LESS=40;
-	public static final int LPAREN=41;
-	public static final int LSQ_BRACKET=42;
-	public static final int LTSIGN=43;
-	public static final int MINUS=44;
-	public static final int NAMESPACE=45;
-	public static final int NAME_CHAR=46;
-	public static final int NAME_START_CHAR=47;
-	public static final int NCNAME=48;
-	public static final int NCNAME_EXT=49;
-	public static final int PERCENT=50;
-	public static final int PERIOD=51;
-	public static final int PLUS=52;
-	public static final int PREFIX=53;
-	public static final int PREFIXED_NAME=54;
-	public static final int QUESTION=55;
-	public static final int QUOTE_DOUBLE=56;
-	public static final int QUOTE_SINGLE=57;
-	public static final int RCR_BRACKET=58;
-	public static final int REFERENCE=59;
-	public static final int RPAREN=60;
-	public static final int RSQ_BRACKET=61;
-	public static final int RTSIGN=62;
-	public static final int SCHEMA=63;
-	public static final int SEMI=64;
-	public static final int SLASH=65;
-	public static final int STRING_URI=66;
-	public static final int STRING_WITH_BRACKET=67;
-	public static final int STRING_WITH_CURLY_BRACKET=68;
-	public static final int STRING_WITH_QUOTE=69;
-	public static final int STRING_WITH_QUOTE_DOUBLE=70;
-	public static final int TILDE=71;
-	public static final int TRUE=72;
-	public static final int UNDERSCORE=73;
-	public static final int URI_PATH=74;
-	public static final int VARNAME=75;
-	public static final int WS=76;
 
-	// delegates
-	public Parser[] getDelegates() {
-		return new Parser[] {};
-	}
-
-	// delegators
-
-
-	public TurtleOBDAParser(TokenStream input) {
-		this(input, new RecognizerSharedState());
-	}
-	public TurtleOBDAParser(TokenStream input, RecognizerSharedState state) {
-		super(input, state);
-	}
-
-	@Override public String[] getTokenNames() { return TurtleOBDAParser.tokenNames; }
-	@Override public String getGrammarFileName() { return "TurtleOBDA.g"; }
-
-
-	/** Map of directives */
-	private HashMap<String, String> directives = new HashMap<String, String>();
-
-	/** The current subject term */
-	private Term currentSubject;
-
-	/** All variables */
-	private Set<Term> variableSet = new HashSet<Term>();
-
-	private String error = "";
-
-	public String getError() {
-	   return error;
-	}
-
-	protected void mismatch(IntStream input, int ttype, BitSet follow) throws RecognitionException {
-	   throw new MismatchedTokenException(ttype, input);
-	}
-
-	public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow) throws RecognitionException {
-	   throw e;
-	}
-
-	@Override
-	public void recover(IntStream input, RecognitionException re) {
-	   throw new RuntimeException(error);
-	}
-
-	@Override
-	public void displayRecognitionError(String[] tokenNames, RecognitionException e) {
-	   String hdr = getErrorHeader(e);
-	   String msg = getErrorMessage(e, tokenNames);
-	   emitErrorMessage("Syntax error: " + msg + " Location: " + hdr);
-	}
-
-	@Override
-	public void emitErrorMessage(String msg) {
-	   error = msg;
-	}
-
-	@Override
-	public Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException {
-	   throw new RecognitionException(input);
-	}
-
-	private String removeBrackets(String text) {
-	   return text.substring(1, text.length()-1);
-	}
-
-		private Term construct(String text) {
-		   Term toReturn = null;
-		   final String PLACEHOLDER = "{}";
-		   List<Term> terms = new LinkedList<Term>();
-		   List<FormatString> tokens = parse(text);
-		   int size = tokens.size();
-		   if (size == 1) {
-		      FormatString token = tokens.get(0);
-		      if (token instanceof FixedString) {
-		          ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(token.toString()); // a single URI template
-		          toReturn = TERM_FACTORY.getUriTemplate(uriTemplate);
-		      }
-		      else if (token instanceof ColumnString) {
-		         // a single URI template
-		         Variable column = TERM_FACTORY.getVariable(token.toString());
-		         toReturn = TERM_FACTORY.getUriTemplate(column);
-		      }
-		   }
-		   else {
-		      StringBuilder sb = new StringBuilder();
-		      for(FormatString token : tokens) {
-		         if (token instanceof FixedString) { // if part of URI template
-		            sb.append(token.toString());
-		         }
-		         else if (token instanceof ColumnString) {
-		            sb.append(PLACEHOLDER);
-		            Variable column = TERM_FACTORY.getVariable(token.toString());
-		            terms.add(column);
-		         }
-		      }
-		      ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
-		      terms.add(0, uriTemplate);
-		      toReturn = TERM_FACTORY.getUriTemplate(terms);
-		   }
-		   return toReturn;
-		}
-		
-	// Column placeholder pattern
-	private static final String formatSpecifier = "\\{([^\\}]+)?\\}";
-	private static Pattern chPattern = Pattern.compile(formatSpecifier);
-
-	private List<FormatString> parse(String text) {
-	   List<FormatString> toReturn = new ArrayList<FormatString>();
-	   Matcher m = chPattern.matcher(text);
-	   int i = 0;
-	   while (i < text.length()) {
-	      if (m.find(i)) {
-	         if (m.start() != i) {
-	            toReturn.add(new FixedString(text.substring(i, m.start())));
-	         }
-	         String value = m.group(1);
-	         if(value.contains(".")){
-	         	throw new IllegalArgumentException("Fully qualified columns are not accepted.");
-	         }
-	         toReturn.add(new ColumnString(value));
-	         i = m.end();
-	      }
-	      else {
-	         toReturn.add(new FixedString(text.substring(i)));
-	         break;
-	      }
-	   }
-	   return toReturn;
-	}
-
-	private interface FormatString {
-	   int index();
-	   String toString();
-	}
-
-	private class FixedString implements FormatString {
-	   private String s;
-	   FixedString(String s) { this.s = s; }
-	   @Override public int index() { return -1; }  // flag code for fixed string
-	   @Override public String toString() { return s; }
-	}
-
-	private class ColumnString implements FormatString {
-	   private String s;
-	   ColumnString(String s) { this.s = s; }
-	   @Override public int index() { return 0; }  // flag code for column string
-	   @Override public String toString() { return s; }
-	}
-
-		//this function distinguishes curly bracket with 
-		//back slash "\{" from curly bracket "{" 
-		private int getIndexOfCurlyB(String str){
-		   int i;
-		   int j;
-		   i = str.indexOf("{");
-		   j = str.indexOf("\\{");
-		      while((i-1 == j) &&(j != -1)){		
-			i = str.indexOf("{",i+1);
-			j = str.indexOf("\\{",j+1);		
-		      }	
-		  return i;
-		}
-		
-		//in case of concat this function parses the literal 
-		//and adds parsed constant literals and template literal to terms list
-		private ArrayList<Term> addToTermsList(String str){
-		   ArrayList<Term> terms = new ArrayList<Term>();
-		   int i,j;
-		   String st;
-		   str = str.substring(1, str.length()-1);
-		   while(str.contains("{")){
-		      i = getIndexOfCurlyB(str);
-		      if (i > 0){
-		    	 st = str.substring(0,i);
-		    	 st = st.replace("\\\\", "");
-		         terms.add(TERM_FACTORY.getConstantLiteral(st));
-		         str = str.substring(str.indexOf("{", i), str.length());
-		      }else if (i == 0){
-		         j = str.indexOf("}");
-		         terms.add(TERM_FACTORY.getVariable(str.substring(1,j)));
-		         str = str.substring(j+1,str.length());
-		      } else {
-		    	  break;
-		      }
-		   }
-		   if(!str.equals("")){
-		      str = str.replace("\\\\", "");
-		      terms.add(TERM_FACTORY.getConstantLiteral(str));
-		   }
-		   return terms;
-		}
-		
-		//this function returns nested concats 
-		//in case of more than two terms need to be concatted
-		private Term getNestedConcat(String str){
-		   ArrayList<Term> terms = new ArrayList<Term>();
-		   terms = addToTermsList(str);
-		   if(terms.size() == 1){
-		      Variable v = (Variable) terms.get(0);
-	          variableSet.add(v);
-	          return v;
-		   }
-
-	       Function f = TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
-	       for(int j=2;j<terms.size();j++) {
-	          f = TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
-	       }
-	       return f;
-		}
+	private static final String[] _LITERAL_NAMES = {
+		null, "'a'", null, null, null, null, "'^^'", "'<\"'", "'\">'", "';'", 
+		"'.'", "','", "'['", "']'", "'{'", "'}'", "'('", "')'", "'?'", "'$'", 
+		"'\"'", "'''", "'`'", "'_'", "'-'", "'*'", "'&'", "'@'", "'!'", "'#'", 
+		"'%'", "'+'", "'='", "':'", "'<'", "'>'", "'/'", "'//'", "'\\'", "'[]'", 
+		"'_:'", "'~'", "'^'"
+	};
+	private static final String[] _SYMBOLIC_NAMES = {
+		null, null, "BASE_KW", "PREFIX_KW", "FALSE", "TRUE", "REFERENCE", "LTSIGN", 
+		"RTSIGN", "SEMI", "PERIOD", "COMMA", "LSQ_BRACKET", "RSQ_BRACKET", "LCR_BRACKET", 
+		"RCR_BRACKET", "LPAREN", "RPAREN", "QUESTION", "DOLLAR", "QUOTE_DOUBLE", 
+		"QUOTE_SINGLE", "APOSTROPHE", "UNDERSCORE", "MINUS", "ASTERISK", "AMPERSAND", 
+		"AT", "EXCLAMATION", "HASH", "PERCENT", "PLUS", "EQUALS", "COLON", "LESS", 
+		"GREATER", "SLASH", "DOUBLE_SLASH", "BACKSLASH", "BLANK", "BLANK_PREFIX", 
+		"TILDE", "CARET", "INTEGER", "DOUBLE", "DECIMAL", "INTEGER_POSITIVE", 
+		"INTEGER_NEGATIVE", "DOUBLE_POSITIVE", "DOUBLE_NEGATIVE", "DECIMAL_POSITIVE", 
+		"DECIMAL_NEGATIVE", "PREFIXED_NAME", "NCNAME_EXT", "PREFIX", "STRING_WITH_QUOTE_DOUBLE", 
+		"STRING_WITH_CURLY_BRACKET", "URI_REF", "WS", "NAME_CHAR", "VARNAME"
+	};
+	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
 	/**
-	 * This methods construct an atom from a triple 
-	 * 
-	 * For the input (subject, pred, object), the result is 
-	 * <ul>
-	 *  <li> object(subject), if pred == rdf:type and subject is grounded ; </li>
-	 *  <li> predicate(subject, object), if pred != rdf:type and predicate is grounded ; </li>
-	 *  <li> triple(subject, pred, object), otherwise (it is a higher order atom). </li>
-	 * </ul>
+	 * @deprecated Use {@link #VOCABULARY} instead.
 	 */
-		private Function makeAtom(Term subject, Term pred, Term object) {
-		     Function atom = null;
+	@Deprecated
+	public static final String[] tokenNames;
+	static {
+		tokenNames = new String[_SYMBOLIC_NAMES.length];
+		for (int i = 0; i < tokenNames.length; i++) {
+			tokenNames[i] = VOCABULARY.getLiteralName(i);
+			if (tokenNames[i] == null) {
+				tokenNames[i] = VOCABULARY.getSymbolicName(i);
+			}
 
-		        if (isRDFType(pred)) {
-			             if (object instanceof  Function) {
-			                  if(QueryUtils.isGrounded(object)) {
-			                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
-			                      Predicate predicate = TERM_FACTORY.getClassPredicate(c.getValue());
-			                      atom = TERM_FACTORY.getFunction(predicate, subject);
-			                  } else {
-			                       atom = ATOM_FACTORY.getTripleAtom(subject, pred, object);
-			                  }
-			             }
-			             else if (object instanceof  Variable){
-			                  Term uriOfPred = TERM_FACTORY.getUriTemplate(pred);
-			                  Term uriOfObject = TERM_FACTORY.getUriTemplate(object);
-			                  atom = ATOM_FACTORY.getTripleAtom(subject, uriOfPred,  uriOfObject);
-			              }
-			             else {
-			                  throw new IllegalArgumentException("parser cannot handle object " + object);
-			              }
-			        } else if( ! QueryUtils.isGrounded(pred) ){
-			             atom = ATOM_FACTORY.getTripleAtom(subject, pred,  object);
-			        } else {
-	                			             //Predicate predicate = TERM_FACTORY.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
-	                			             Predicate predicate;
-	                			             if(pred instanceof Function) {
-	                							 ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
-	                							 if (object instanceof Variable) {
-	                								 predicate = TERM_FACTORY.getDataPropertyPredicate(pr.getValue());
-	                							 } else {
-	                								 if (object instanceof Function) {
-	                									 if (((Function) object).getFunctionSymbol() instanceof URITemplatePredicate) {
-
-	                										 predicate = TERM_FACTORY.getObjectPropertyPredicate(pr.getValue());
-	                									 } else {
-	                										 predicate = TERM_FACTORY.getDataPropertyPredicate(pr.getValue());
-	                									 }
-	                								 }
-	                									 else {
-	                										 throw new IllegalArgumentException("parser cannot handle object " + object);
-	                									 }
-	                							 }
-	                						 }else {
-	                			                  throw new IllegalArgumentException("predicate should be a URI Function");
-	                			             }
-	                			             atom = TERM_FACTORY.getFunction(predicate, subject, object);
-	                			       }
-	                			       return atom;
-		  }
-
-
-	private static boolean isRDFType(Term pred) {
-	//		if (pred instanceof Constant && ((Constant) pred).getValue().equals(RDF_TYPE)) {
-	//			return true;
-	//		}
-			if (pred instanceof Function && ((Function) pred).getTerm(0) instanceof Constant ) {
-				String c= ((Constant) ((Function) pred).getTerm(0)).getValue();
-				return c.equals(RDF_TYPE);
-			}	
-			return false;
+			if (tokenNames[i] == null) {
+				tokenNames[i] = "<INVALID>";
+			}
 		}
+	}
 
+	@Override
+	@Deprecated
+	public String[] getTokenNames() {
+		return tokenNames;
+	}
 
+	@Override
 
+	public Vocabulary getVocabulary() {
+		return VOCABULARY;
+	}
 
-	// $ANTLR start "parse"
-	// TurtleOBDA.g:368:1: parse returns [List<Function> value] : ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF ;
-	public final List<Function> parse() throws RecognitionException {
-		List<Function> value = null;
+	@Override
+	public String getGrammarFileName() { return "TurtleOBDA.g4"; }
 
+	@Override
+	public String[] getRuleNames() { return ruleNames; }
 
-		List<Function> t1 =null;
-		List<Function> t2 =null;
+	@Override
+	public String getSerializedATN() { return _serializedATN; }
 
+	@Override
+	public ATN getATN() { return _ATN; }
+
+	public TurtleOBDAParser(TokenStream input) {
+		super(input);
+		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
+	}
+	public static class ParseContext extends ParserRuleContext {
+		public TerminalNode EOF() { return getToken(TurtleOBDAParser.EOF, 0); }
+		public List<DirectiveStatementContext> directiveStatement() {
+			return getRuleContexts(DirectiveStatementContext.class);
+		}
+		public DirectiveStatementContext directiveStatement(int i) {
+			return getRuleContext(DirectiveStatementContext.class,i);
+		}
+		public List<TriplesStatementContext> triplesStatement() {
+			return getRuleContexts(TriplesStatementContext.class);
+		}
+		public TriplesStatementContext triplesStatement(int i) {
+			return getRuleContext(TriplesStatementContext.class,i);
+		}
+		public ParseContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_parse; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterParse(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitParse(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitParse(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ParseContext parse() throws RecognitionException {
+		ParseContext _localctx = new ParseContext(_ctx, getState());
+		enterRule(_localctx, 0, RULE_parse);
+		int _la;
 		try {
-			// TurtleOBDA.g:369:3: ( ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF )
-			// TurtleOBDA.g:369:5: ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF
+			enterOuterAlt(_localctx, 1);
 			{
-			// TurtleOBDA.g:369:5: ( directiveStatement )*
-			loop1:
-			while (true) {
-				int alt1=2;
-				int LA1_0 = input.LA(1);
-				if ( (LA1_0==AT) ) {
-					alt1=1;
+			setState(69);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			while (_la==AT) {
+				{
+				{
+				setState(66);
+				directiveStatement();
 				}
-
-				switch (alt1) {
-				case 1 :
-					// TurtleOBDA.g:369:5: directiveStatement
-					{
-					pushFollow(FOLLOW_directiveStatement_in_parse58);
-					directiveStatement();
-					state._fsp--;
-
-					}
-					break;
-
-				default :
-					break loop1;
 				}
+				setState(71);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
 			}
-
-			pushFollow(FOLLOW_triplesStatement_in_parse67);
-			t1=triplesStatement();
-			state._fsp--;
-
-
-			      value =  t1;
-			    
-			// TurtleOBDA.g:373:7: (t2= triplesStatement )*
-			loop2:
-			while (true) {
-				int alt2=2;
-				int LA2_0 = input.LA(1);
-				if ( (LA2_0==PREFIXED_NAME||(LA2_0 >= STRING_WITH_BRACKET && LA2_0 <= STRING_WITH_CURLY_BRACKET)) ) {
-					alt2=1;
+			setState(73); 
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			do {
+				{
+				{
+				setState(72);
+				triplesStatement();
 				}
-
-				switch (alt2) {
-				case 1 :
-					// TurtleOBDA.g:373:8: t2= triplesStatement
-					{
-					pushFollow(FOLLOW_triplesStatement_in_parse80);
-					t2=triplesStatement();
-					state._fsp--;
-
-
-					      List<Function> additionalTriples = t2;
-					      if (additionalTriples != null) {
-					        // If there are additional triple statements then just add to the existing body
-					        List<Function> existingBody = value;
-					        existingBody.addAll(additionalTriples);
-					      }
-					    
-					}
-					break;
-
-				default :
-					break loop2;
 				}
+				setState(75); 
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << BLANK) | (1L << BLANK_PREFIX) | (1L << PREFIXED_NAME) | (1L << STRING_WITH_CURLY_BRACKET) | (1L << URI_REF))) != 0) );
+			setState(77);
+			match(EOF);
 			}
-
-			match(input,EOF,FOLLOW_EOF_in_parse87); 
-			}
-
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
 		}
-		return value;
+		return _localctx;
 	}
-	// $ANTLR end "parse"
 
+	public static class DirectiveStatementContext extends ParserRuleContext {
+		public DirectiveContext directive() {
+			return getRuleContext(DirectiveContext.class,0);
+		}
+		public TerminalNode PERIOD() { return getToken(TurtleOBDAParser.PERIOD, 0); }
+		public DirectiveStatementContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_directiveStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterDirectiveStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitDirectiveStatement(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitDirectiveStatement(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 
-
-	// $ANTLR start "directiveStatement"
-	// TurtleOBDA.g:383:1: directiveStatement : directive PERIOD ;
-	public final void directiveStatement() throws RecognitionException {
+	public final DirectiveStatementContext directiveStatement() throws RecognitionException {
+		DirectiveStatementContext _localctx = new DirectiveStatementContext(_ctx, getState());
+		enterRule(_localctx, 2, RULE_directiveStatement);
 		try {
-			// TurtleOBDA.g:384:3: ( directive PERIOD )
-			// TurtleOBDA.g:384:5: directive PERIOD
+			enterOuterAlt(_localctx, 1);
 			{
-			pushFollow(FOLLOW_directive_in_directiveStatement100);
+			setState(79);
 			directive();
-			state._fsp--;
-
-			match(input,PERIOD,FOLLOW_PERIOD_in_directiveStatement102); 
+			setState(80);
+			match(PERIOD);
 			}
-
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class TriplesStatementContext extends ParserRuleContext {
+		public TriplesContext triples() {
+			return getRuleContext(TriplesContext.class,0);
+		}
+		public TerminalNode PERIOD() { return getToken(TurtleOBDAParser.PERIOD, 0); }
+		public TriplesStatementContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_triplesStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterTriplesStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitTriplesStatement(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitTriplesStatement(this);
+			else return visitor.visitChildren(this);
 		}
 	}
-	// $ANTLR end "directiveStatement"
 
-
-
-	// $ANTLR start "triplesStatement"
-	// TurtleOBDA.g:387:1: triplesStatement returns [List<Function> value] : triples ( WS )* PERIOD ;
-	public final List<Function> triplesStatement() throws RecognitionException {
-		List<Function> value = null;
-
-
-		List<Function> triples1 =null;
-
+	public final TriplesStatementContext triplesStatement() throws RecognitionException {
+		TriplesStatementContext _localctx = new TriplesStatementContext(_ctx, getState());
+		enterRule(_localctx, 4, RULE_triplesStatement);
 		try {
-			// TurtleOBDA.g:388:3: ( triples ( WS )* PERIOD )
-			// TurtleOBDA.g:388:5: triples ( WS )* PERIOD
+			enterOuterAlt(_localctx, 1);
 			{
-			pushFollow(FOLLOW_triples_in_triplesStatement119);
-			triples1=triples();
-			state._fsp--;
-
-			// TurtleOBDA.g:388:13: ( WS )*
-			loop3:
-			while (true) {
-				int alt3=2;
-				int LA3_0 = input.LA(1);
-				if ( (LA3_0==WS) ) {
-					alt3=1;
-				}
-
-				switch (alt3) {
-				case 1 :
-					// TurtleOBDA.g:388:13: WS
-					{
-					match(input,WS,FOLLOW_WS_in_triplesStatement121); 
-					}
-					break;
-
-				default :
-					break loop3;
-				}
-			}
-
-			match(input,PERIOD,FOLLOW_PERIOD_in_triplesStatement124); 
-			 value = triples1; 
-			}
-
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return value;
-	}
-	// $ANTLR end "triplesStatement"
-
-
-
-	// $ANTLR start "directive"
-	// TurtleOBDA.g:391:1: directive : ( base | prefixID );
-	public final void directive() throws RecognitionException {
-		try {
-			// TurtleOBDA.g:392:3: ( base | prefixID )
-			int alt4=2;
-			int LA4_0 = input.LA(1);
-			if ( (LA4_0==AT) ) {
-				int LA4_1 = input.LA(2);
-				if ( (LA4_1==BASE) ) {
-					alt4=1;
-				}
-				else if ( (LA4_1==PREFIX) ) {
-					alt4=2;
-				}
-
-				else {
-					int nvaeMark = input.mark();
-					try {
-						input.consume();
-						NoViableAltException nvae =
-							new NoViableAltException("", 4, 1, input);
-						throw nvae;
-					} finally {
-						input.rewind(nvaeMark);
-					}
-				}
-
-			}
-
-			else {
-				NoViableAltException nvae =
-					new NoViableAltException("", 4, 0, input);
-				throw nvae;
-			}
-
-			switch (alt4) {
-				case 1 :
-					// TurtleOBDA.g:392:5: base
-					{
-					pushFollow(FOLLOW_base_in_directive139);
-					base();
-					state._fsp--;
-
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:393:5: prefixID
-					{
-					pushFollow(FOLLOW_prefixID_in_directive145);
-					prefixID();
-					state._fsp--;
-
-					}
-					break;
-
+			setState(82);
+			triples();
+			setState(83);
+			match(PERIOD);
 			}
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class DirectiveContext extends ParserRuleContext {
+		public BaseContext base() {
+			return getRuleContext(BaseContext.class,0);
+		}
+		public PrefixIDContext prefixID() {
+			return getRuleContext(PrefixIDContext.class,0);
+		}
+		public DirectiveContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_directive; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterDirective(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitDirective(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitDirective(this);
+			else return visitor.visitChildren(this);
 		}
 	}
-	// $ANTLR end "directive"
 
-
-
-	// $ANTLR start "base"
-	// TurtleOBDA.g:396:1: base : AT BASE uriref ;
-	public final void base() throws RecognitionException {
+	public final DirectiveContext directive() throws RecognitionException {
+		DirectiveContext _localctx = new DirectiveContext(_ctx, getState());
+		enterRule(_localctx, 6, RULE_directive);
 		try {
-			// TurtleOBDA.g:397:3: ( AT BASE uriref )
-			// TurtleOBDA.g:397:5: AT BASE uriref
+			setState(87);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,2,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(85);
+				base();
+				}
+				break;
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(86);
+				prefixID();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class BaseContext extends ParserRuleContext {
+		public TerminalNode AT() { return getToken(TurtleOBDAParser.AT, 0); }
+		public TerminalNode BASE_KW() { return getToken(TurtleOBDAParser.BASE_KW, 0); }
+		public UrirefContext uriref() {
+			return getRuleContext(UrirefContext.class,0);
+		}
+		public BaseContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_base; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterBase(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitBase(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitBase(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final BaseContext base() throws RecognitionException {
+		BaseContext _localctx = new BaseContext(_ctx, getState());
+		enterRule(_localctx, 8, RULE_base);
+		try {
+			enterOuterAlt(_localctx, 1);
 			{
-			match(input,AT,FOLLOW_AT_in_base158); 
-			match(input,BASE,FOLLOW_BASE_in_base160); 
-			pushFollow(FOLLOW_uriref_in_base162);
+			setState(89);
+			match(AT);
+			setState(90);
+			match(BASE_KW);
+			setState(91);
 			uriref();
-			state._fsp--;
-
 			}
-
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class PrefixIDContext extends ParserRuleContext {
+		public TerminalNode AT() { return getToken(TurtleOBDAParser.AT, 0); }
+		public TerminalNode PREFIX_KW() { return getToken(TurtleOBDAParser.PREFIX_KW, 0); }
+		public PrefixContext prefix() {
+			return getRuleContext(PrefixContext.class,0);
+		}
+		public UrirefContext uriref() {
+			return getRuleContext(UrirefContext.class,0);
+		}
+		public PrefixIDContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_prefixID; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterPrefixID(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitPrefixID(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitPrefixID(this);
+			else return visitor.visitChildren(this);
 		}
 	}
-	// $ANTLR end "base"
 
-
-
-	// $ANTLR start "prefixID"
-	// TurtleOBDA.g:400:1: prefixID : AT PREFIX ( namespace | defaultNamespace ) uriref ;
-	public final void prefixID() throws RecognitionException {
-		ParserRuleReturnScope namespace2 =null;
-		ParserRuleReturnScope defaultNamespace3 =null;
-		String uriref4 =null;
-
-
-		  String prefix = "";
-
+	public final PrefixIDContext prefixID() throws RecognitionException {
+		PrefixIDContext _localctx = new PrefixIDContext(_ctx, getState());
+		enterRule(_localctx, 10, RULE_prefixID);
 		try {
-			// TurtleOBDA.g:404:3: ( AT PREFIX ( namespace | defaultNamespace ) uriref )
-			// TurtleOBDA.g:404:5: AT PREFIX ( namespace | defaultNamespace ) uriref
+			enterOuterAlt(_localctx, 1);
 			{
-			match(input,AT,FOLLOW_AT_in_prefixID180); 
-			match(input,PREFIX,FOLLOW_PREFIX_in_prefixID182); 
-			// TurtleOBDA.g:404:15: ( namespace | defaultNamespace )
-			int alt5=2;
-			int LA5_0 = input.LA(1);
-			if ( (LA5_0==NAMESPACE) ) {
-				alt5=1;
+			setState(93);
+			match(AT);
+			setState(94);
+			match(PREFIX_KW);
+			setState(95);
+			prefix();
+			setState(96);
+			uriref();
 			}
-			else if ( (LA5_0==COLON) ) {
-				alt5=2;
-			}
-
-			else {
-				NoViableAltException nvae =
-					new NoViableAltException("", 5, 0, input);
-				throw nvae;
-			}
-
-			switch (alt5) {
-				case 1 :
-					// TurtleOBDA.g:404:16: namespace
-					{
-					pushFollow(FOLLOW_namespace_in_prefixID185);
-					namespace2=namespace();
-					state._fsp--;
-
-					 prefix = (namespace2!=null?input.toString(namespace2.start,namespace2.stop):null); 
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:404:58: defaultNamespace
-					{
-					pushFollow(FOLLOW_defaultNamespace_in_prefixID191);
-					defaultNamespace3=defaultNamespace();
-					state._fsp--;
-
-					 prefix = (defaultNamespace3!=null?input.toString(defaultNamespace3.start,defaultNamespace3.stop):null); 
-					}
-					break;
-
-			}
-
-			pushFollow(FOLLOW_uriref_in_prefixID196);
-			uriref4=uriref();
-			state._fsp--;
-
-
-			      String uriref = uriref4;
-			      directives.put(prefix.substring(0, prefix.length()-1), uriref); // remove the end colon
-			    
-			}
-
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class PrefixContext extends ParserRuleContext {
+		public TerminalNode PREFIX() { return getToken(TurtleOBDAParser.PREFIX, 0); }
+		public PrefixContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_prefix; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterPrefix(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitPrefix(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitPrefix(this);
+			else return visitor.visitChildren(this);
 		}
 	}
-	// $ANTLR end "prefixID"
 
-
-
-	// $ANTLR start "triples"
-	// TurtleOBDA.g:410:1: triples returns [List<Function> value] : subject predicateObjectList ;
-	public final List<Function> triples() throws RecognitionException {
-		List<Function> value = null;
-
-
-		Term subject5 =null;
-		List<Function> predicateObjectList6 =null;
-
+	public final PrefixContext prefix() throws RecognitionException {
+		PrefixContext _localctx = new PrefixContext(_ctx, getState());
+		enterRule(_localctx, 12, RULE_prefix);
 		try {
-			// TurtleOBDA.g:411:3: ( subject predicateObjectList )
-			// TurtleOBDA.g:411:5: subject predicateObjectList
+			enterOuterAlt(_localctx, 1);
 			{
-			pushFollow(FOLLOW_subject_in_triples215);
-			subject5=subject();
-			state._fsp--;
-
-			 currentSubject = subject5; 
-			pushFollow(FOLLOW_predicateObjectList_in_triples219);
-			predicateObjectList6=predicateObjectList();
-			state._fsp--;
-
-
-			      value = predicateObjectList6;
-			    
+			setState(98);
+			match(PREFIX);
 			}
-
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
 		}
-		return value;
+		return _localctx;
 	}
-	// $ANTLR end "triples"
 
+	public static class TriplesContext extends ParserRuleContext {
+		public SubjectContext subject() {
+			return getRuleContext(SubjectContext.class,0);
+		}
+		public PredicateObjectListContext predicateObjectList() {
+			return getRuleContext(PredicateObjectListContext.class,0);
+		}
+		public TriplesContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_triples; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterTriples(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitTriples(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitTriples(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 
-
-	// $ANTLR start "predicateObjectList"
-	// TurtleOBDA.g:416:1: predicateObjectList returns [List<Function> value] : v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* ;
-	public final List<Function> predicateObjectList() throws RecognitionException {
-		List<Function> value = null;
-
-
-		Term v1 =null;
-		List<Term> l1 =null;
-		Term v2 =null;
-		List<Term> l2 =null;
-
-
-		   value = new LinkedList<Function>();
-
+	public final TriplesContext triples() throws RecognitionException {
+		TriplesContext _localctx = new TriplesContext(_ctx, getState());
+		enterRule(_localctx, 14, RULE_triples);
 		try {
-			// TurtleOBDA.g:420:3: (v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* )
-			// TurtleOBDA.g:420:5: v1= verb l1= objectList ( SEMI v2= verb l2= objectList )*
+			enterOuterAlt(_localctx, 1);
 			{
-			pushFollow(FOLLOW_verb_in_predicateObjectList245);
-			v1=verb();
-			state._fsp--;
-
-			pushFollow(FOLLOW_objectList_in_predicateObjectList251);
-			l1=objectList();
-			state._fsp--;
-
-
-			      for (Term object : l1) {
-			        Function atom = makeAtom(currentSubject, v1, object);
-			        value.add(atom);
-			      }
-			    
-			// TurtleOBDA.g:426:5: ( SEMI v2= verb l2= objectList )*
-			loop6:
-			while (true) {
-				int alt6=2;
-				int LA6_0 = input.LA(1);
-				if ( (LA6_0==SEMI) ) {
-					alt6=1;
-				}
-
-				switch (alt6) {
-				case 1 :
-					// TurtleOBDA.g:426:6: SEMI v2= verb l2= objectList
-					{
-					match(input,SEMI,FOLLOW_SEMI_in_predicateObjectList260); 
-					pushFollow(FOLLOW_verb_in_predicateObjectList264);
-					v2=verb();
-					state._fsp--;
-
-					pushFollow(FOLLOW_objectList_in_predicateObjectList268);
-					l2=objectList();
-					state._fsp--;
-
-
-					      for (Term object : l2) {
-					        Function atom = makeAtom(currentSubject, v2, object);
-					        value.add(atom);
-					      }
-					    
-					}
-					break;
-
-				default :
-					break loop6;
-				}
-			}
-
-			}
-
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return value;
-	}
-	// $ANTLR end "predicateObjectList"
-
-
-
-	// $ANTLR start "verb"
-	// TurtleOBDA.g:435:1: verb returns [Term value] : ( predicate | 'a' );
-	public final Term verb() throws RecognitionException {
-		Term value = null;
-
-
-		Term predicate7 =null;
-
-		try {
-			// TurtleOBDA.g:436:3: ( predicate | 'a' )
-			int alt7=2;
-			int LA7_0 = input.LA(1);
-			if ( (LA7_0==PREFIXED_NAME||LA7_0==STRING_WITH_BRACKET) ) {
-				alt7=1;
-			}
-			else if ( (LA7_0==77) ) {
-				alt7=2;
-			}
-
-			else {
-				NoViableAltException nvae =
-					new NoViableAltException("", 7, 0, input);
-				throw nvae;
-			}
-
-			switch (alt7) {
-				case 1 :
-					// TurtleOBDA.g:436:5: predicate
-					{
-					pushFollow(FOLLOW_predicate_in_verb292);
-					predicate7=predicate();
-					state._fsp--;
-
-					 value = predicate7; 
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:437:5: 'a'
-					{
-					match(input,77,FOLLOW_77_in_verb300); 
-
-					  Term constant = TERM_FACTORY.getConstantLiteral(RDF_TYPE);
-					  value = TERM_FACTORY.getUriTemplate(constant);
-					  
-					}
-					break;
-
+			setState(100);
+			subject();
+			setState(101);
+			predicateObjectList();
 			}
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
 		}
-		return value;
+		return _localctx;
 	}
-	// $ANTLR end "verb"
 
+	public static class PredicateObjectListContext extends ParserRuleContext {
+		public List<PredicateObjectContext> predicateObject() {
+			return getRuleContexts(PredicateObjectContext.class);
+		}
+		public PredicateObjectContext predicateObject(int i) {
+			return getRuleContext(PredicateObjectContext.class,i);
+		}
+		public List<TerminalNode> SEMI() { return getTokens(TurtleOBDAParser.SEMI); }
+		public TerminalNode SEMI(int i) {
+			return getToken(TurtleOBDAParser.SEMI, i);
+		}
+		public PredicateObjectListContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_predicateObjectList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterPredicateObjectList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitPredicateObjectList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitPredicateObjectList(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 
-
-	// $ANTLR start "objectList"
-	// TurtleOBDA.g:443:1: objectList returns [List<Term> value] : o1= object ( COMMA o2= object )* ;
-	public final List<Term> objectList() throws RecognitionException {
-		List<Term> value = null;
-
-
-		Term o1 =null;
-		Term o2 =null;
-
-
-		  value = new ArrayList<Term>();
-
+	public final PredicateObjectListContext predicateObjectList() throws RecognitionException {
+		PredicateObjectListContext _localctx = new PredicateObjectListContext(_ctx, getState());
+		enterRule(_localctx, 16, RULE_predicateObjectList);
+		int _la;
 		try {
-			// TurtleOBDA.g:447:3: (o1= object ( COMMA o2= object )* )
-			// TurtleOBDA.g:447:5: o1= object ( COMMA o2= object )*
+			enterOuterAlt(_localctx, 1);
 			{
-			pushFollow(FOLLOW_object_in_objectList326);
-			o1=object();
-			state._fsp--;
-
-			 value.add(o1); 
-			// TurtleOBDA.g:447:42: ( COMMA o2= object )*
-			loop8:
-			while (true) {
-				int alt8=2;
-				int LA8_0 = input.LA(1);
-				if ( (LA8_0==COMMA) ) {
-					alt8=1;
-				}
-
-				switch (alt8) {
-				case 1 :
-					// TurtleOBDA.g:447:43: COMMA o2= object
-					{
-					match(input,COMMA,FOLLOW_COMMA_in_objectList331); 
-					pushFollow(FOLLOW_object_in_objectList335);
-					o2=object();
-					state._fsp--;
-
-					 value.add(o2); 
-					}
-					break;
-
-				default :
-					break loop8;
-				}
-			}
-
-			}
-
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return value;
-	}
-	// $ANTLR end "objectList"
-
-
-
-	// $ANTLR start "subject"
-	// TurtleOBDA.g:450:1: subject returns [Term value] : ( resource | variable );
-	public final Term subject() throws RecognitionException {
-		Term value = null;
-
-
-		Term resource8 =null;
-		Variable variable9 =null;
-
-		try {
-			// TurtleOBDA.g:451:3: ( resource | variable )
-			int alt9=2;
-			int LA9_0 = input.LA(1);
-			if ( (LA9_0==PREFIXED_NAME||LA9_0==STRING_WITH_BRACKET) ) {
-				alt9=1;
-			}
-			else if ( (LA9_0==STRING_WITH_CURLY_BRACKET) ) {
-				alt9=2;
-			}
-
-			else {
-				NoViableAltException nvae =
-					new NoViableAltException("", 9, 0, input);
-				throw nvae;
-			}
-
-			switch (alt9) {
-				case 1 :
-					// TurtleOBDA.g:451:5: resource
-					{
-					pushFollow(FOLLOW_resource_in_subject357);
-					resource8=resource();
-					state._fsp--;
-
-					 value = resource8; 
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:452:5: variable
-					{
-					pushFollow(FOLLOW_variable_in_subject365);
-					variable9=variable();
-					state._fsp--;
-
-					 value = variable9; 
-					}
-					break;
-
-			}
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return value;
-	}
-	// $ANTLR end "subject"
-
-
-
-	// $ANTLR start "predicate"
-	// TurtleOBDA.g:457:1: predicate returns [Term value] : resource ;
-	public final Term predicate() throws RecognitionException {
-		Term value = null;
-
-
-		Term resource10 =null;
-
-		try {
-			// TurtleOBDA.g:458:3: ( resource )
-			// TurtleOBDA.g:458:5: resource
-			{
-			pushFollow(FOLLOW_resource_in_predicate386);
-			resource10=resource();
-			state._fsp--;
-
-
-			  	value = resource10; 
-			//      Term nl = resource10;
-			//      if (nl instanceof URIConstant) {
-			//        URIConstant c = (URIConstant) nl;
-			//        value = c.getValue();
-			//      } else {
-			//        throw new RuntimeException("Unsupported predicate syntax: " + nl.toString());
-			//      }
-			    
-			}
-
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return value;
-	}
-	// $ANTLR end "predicate"
-
-
-
-	// $ANTLR start "object"
-	// TurtleOBDA.g:470:1: object returns [Term value] : ( resource | literal | typedLiteral | variable );
-	public final Term object() throws RecognitionException {
-		Term value = null;
-
-
-		Term resource11 =null;
-		Term literal12 =null;
-		Function typedLiteral13 =null;
-		Variable variable14 =null;
-
-		try {
-			// TurtleOBDA.g:471:3: ( resource | literal | typedLiteral | variable )
-			int alt10=4;
-			switch ( input.LA(1) ) {
-			case PREFIXED_NAME:
-			case STRING_WITH_BRACKET:
+			setState(103);
+			predicateObject();
+			setState(108);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			while (_la==SEMI) {
 				{
-				alt10=1;
+				{
+				setState(104);
+				match(SEMI);
+				setState(105);
+				predicateObject();
+				}
+				}
+				setState(110);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class PredicateObjectContext extends ParserRuleContext {
+		public VerbContext verb() {
+			return getRuleContext(VerbContext.class,0);
+		}
+		public ObjectListContext objectList() {
+			return getRuleContext(ObjectListContext.class,0);
+		}
+		public PredicateObjectContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_predicateObject; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterPredicateObject(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitPredicateObject(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitPredicateObject(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final PredicateObjectContext predicateObject() throws RecognitionException {
+		PredicateObjectContext _localctx = new PredicateObjectContext(_ctx, getState());
+		enterRule(_localctx, 18, RULE_predicateObject);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(111);
+			verb();
+			setState(112);
+			objectList();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class VerbContext extends ParserRuleContext {
+		public ResourceContext resource() {
+			return getRuleContext(ResourceContext.class,0);
+		}
+		public VerbContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_verb; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterVerb(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitVerb(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitVerb(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final VerbContext verb() throws RecognitionException {
+		VerbContext _localctx = new VerbContext(_ctx, getState());
+		enterRule(_localctx, 20, RULE_verb);
+		try {
+			setState(116);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case PREFIXED_NAME:
+			case URI_REF:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(114);
+				resource();
 				}
 				break;
-			case DECIMAL:
-			case DECIMAL_NEGATIVE:
-			case DECIMAL_POSITIVE:
-			case DOUBLE:
-			case DOUBLE_NEGATIVE:
-			case DOUBLE_POSITIVE:
-			case FALSE:
-			case INTEGER:
-			case INTEGER_NEGATIVE:
-			case INTEGER_POSITIVE:
-			case STRING_WITH_QUOTE_DOUBLE:
-			case TRUE:
+			case T__0:
+				enterOuterAlt(_localctx, 2);
 				{
-				alt10=2;
+				setState(115);
+				match(T__0);
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ObjectListContext extends ParserRuleContext {
+		public List<ObjectContext> object() {
+			return getRuleContexts(ObjectContext.class);
+		}
+		public ObjectContext object(int i) {
+			return getRuleContext(ObjectContext.class,i);
+		}
+		public List<TerminalNode> COMMA() { return getTokens(TurtleOBDAParser.COMMA); }
+		public TerminalNode COMMA(int i) {
+			return getToken(TurtleOBDAParser.COMMA, i);
+		}
+		public ObjectListContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_objectList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterObjectList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitObjectList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitObjectList(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ObjectListContext objectList() throws RecognitionException {
+		ObjectListContext _localctx = new ObjectListContext(_ctx, getState());
+		enterRule(_localctx, 22, RULE_objectList);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(118);
+			object();
+			setState(123);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			while (_la==COMMA) {
+				{
+				{
+				setState(119);
+				match(COMMA);
+				setState(120);
+				object();
+				}
+				}
+				setState(125);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class SubjectContext extends ParserRuleContext {
+		public ResourceContext resource() {
+			return getRuleContext(ResourceContext.class,0);
+		}
+		public VariableContext variable() {
+			return getRuleContext(VariableContext.class,0);
+		}
+		public BlankContext blank() {
+			return getRuleContext(BlankContext.class,0);
+		}
+		public SubjectContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_subject; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterSubject(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitSubject(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitSubject(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final SubjectContext subject() throws RecognitionException {
+		SubjectContext _localctx = new SubjectContext(_ctx, getState());
+		enterRule(_localctx, 24, RULE_subject);
+		try {
+			setState(129);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case PREFIXED_NAME:
+			case URI_REF:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(126);
+				resource();
 				}
 				break;
 			case STRING_WITH_CURLY_BRACKET:
+				enterOuterAlt(_localctx, 2);
 				{
-				int LA10_3 = input.LA(2);
-				if ( (LA10_3==AT||LA10_3==REFERENCE) ) {
-					alt10=3;
+				setState(127);
+				variable();
 				}
-				else if ( (LA10_3==COMMA||LA10_3==PERIOD||LA10_3==SEMI||LA10_3==WS) ) {
-					alt10=4;
-				}
-
-				else {
-					int nvaeMark = input.mark();
-					try {
-						input.consume();
-						NoViableAltException nvae =
-							new NoViableAltException("", 10, 3, input);
-						throw nvae;
-					} finally {
-						input.rewind(nvaeMark);
-					}
-				}
-
+				break;
+			case BLANK:
+			case BLANK_PREFIX:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(128);
+				blank();
 				}
 				break;
 			default:
-				NoViableAltException nvae =
-					new NoViableAltException("", 10, 0, input);
-				throw nvae;
-			}
-			switch (alt10) {
-				case 1 :
-					// TurtleOBDA.g:471:5: resource
-					{
-					pushFollow(FOLLOW_resource_in_object405);
-					resource11=resource();
-					state._fsp--;
-
-					 value = resource11; 
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:472:5: literal
-					{
-					pushFollow(FOLLOW_literal_in_object413);
-					literal12=literal();
-					state._fsp--;
-
-					 value = literal12; 
-					}
-					break;
-				case 3 :
-					// TurtleOBDA.g:473:5: typedLiteral
-					{
-					pushFollow(FOLLOW_typedLiteral_in_object422);
-					typedLiteral13=typedLiteral();
-					state._fsp--;
-
-					 value = typedLiteral13; 
-					}
-					break;
-				case 4 :
-					// TurtleOBDA.g:474:5: variable
-					{
-					pushFollow(FOLLOW_variable_in_object430);
-					variable14=variable();
-					state._fsp--;
-
-					 value = variable14; 
-					}
-					break;
-
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
 		}
-		return value;
+		return _localctx;
 	}
-	// $ANTLR end "object"
 
-
-
-	// $ANTLR start "resource"
-	// TurtleOBDA.g:478:1: resource returns [Term value] : ( uriref | qname );
-	public final Term resource() throws RecognitionException {
-		Term value = null;
-
-
-		String uriref15 =null;
-		String qname16 =null;
-
-		try {
-			// TurtleOBDA.g:479:4: ( uriref | qname )
-			int alt11=2;
-			int LA11_0 = input.LA(1);
-			if ( (LA11_0==STRING_WITH_BRACKET) ) {
-				alt11=1;
-			}
-			else if ( (LA11_0==PREFIXED_NAME) ) {
-				alt11=2;
-			}
-
-			else {
-				NoViableAltException nvae =
-					new NoViableAltException("", 11, 0, input);
-				throw nvae;
-			}
-
-			switch (alt11) {
-				case 1 :
-					// TurtleOBDA.g:479:6: uriref
-					{
-					pushFollow(FOLLOW_uriref_in_resource451);
-					uriref15=uriref();
-					state._fsp--;
-
-					 value = construct(uriref15); 
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:480:6: qname
-					{
-					pushFollow(FOLLOW_qname_in_resource460);
-					qname16=qname();
-					state._fsp--;
-
-					 value = construct(qname16); 
-					}
-					break;
-
-			}
+	public static class ObjectContext extends ParserRuleContext {
+		public ResourceContext resource() {
+			return getRuleContext(ResourceContext.class,0);
 		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+		public LiteralContext literal() {
+			return getRuleContext(LiteralContext.class,0);
 		}
-		finally {
-			// do for sure before leaving
+		public TypedLiteralContext typedLiteral() {
+			return getRuleContext(TypedLiteralContext.class,0);
 		}
-		return value;
-	}
-	// $ANTLR end "resource"
-
-
-
-	// $ANTLR start "uriref"
-	// TurtleOBDA.g:485:1: uriref returns [String value] : STRING_WITH_BRACKET ;
-	public final String uriref() throws RecognitionException {
-		String value = null;
-
-
-		Token STRING_WITH_BRACKET17=null;
-
-		try {
-			// TurtleOBDA.g:486:3: ( STRING_WITH_BRACKET )
-			// TurtleOBDA.g:486:5: STRING_WITH_BRACKET
-			{
-			STRING_WITH_BRACKET17=(Token)match(input,STRING_WITH_BRACKET,FOLLOW_STRING_WITH_BRACKET_in_uriref485); 
-			 value = removeBrackets((STRING_WITH_BRACKET17!=null?STRING_WITH_BRACKET17.getText():null)); 
-			}
-
+		public VariableContext variable() {
+			return getRuleContext(VariableContext.class,0);
 		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+		public ObjectContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
 		}
-		finally {
-			// do for sure before leaving
+		@Override public int getRuleIndex() { return RULE_object; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterObject(this);
 		}
-		return value;
-	}
-	// $ANTLR end "uriref"
-
-
-
-	// $ANTLR start "qname"
-	// TurtleOBDA.g:489:1: qname returns [String value] : PREFIXED_NAME ;
-	public final String qname() throws RecognitionException {
-		String value = null;
-
-
-		Token PREFIXED_NAME18=null;
-
-		try {
-			// TurtleOBDA.g:490:3: ( PREFIXED_NAME )
-			// TurtleOBDA.g:490:5: PREFIXED_NAME
-			{
-			PREFIXED_NAME18=(Token)match(input,PREFIXED_NAME,FOLLOW_PREFIXED_NAME_in_qname504); 
-
-			      String[] tokens = (PREFIXED_NAME18!=null?PREFIXED_NAME18.getText():null).split(":", 2);
-			      String uri = directives.get(tokens[0]);  // the first token is the prefix
-			      value = uri + tokens[1];  // the second token is the local name
-			    
-			}
-
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitObject(this);
 		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return value;
-	}
-	// $ANTLR end "qname"
-
-
-
-	// $ANTLR start "blank"
-	// TurtleOBDA.g:497:1: blank : ( nodeID | BLANK );
-	public final void blank() throws RecognitionException {
-		try {
-			// TurtleOBDA.g:498:3: ( nodeID | BLANK )
-			int alt12=2;
-			int LA12_0 = input.LA(1);
-			if ( (LA12_0==BLANK_PREFIX) ) {
-				alt12=1;
-			}
-			else if ( (LA12_0==BLANK) ) {
-				alt12=2;
-			}
-
-			else {
-				NoViableAltException nvae =
-					new NoViableAltException("", 12, 0, input);
-				throw nvae;
-			}
-
-			switch (alt12) {
-				case 1 :
-					// TurtleOBDA.g:498:5: nodeID
-					{
-					pushFollow(FOLLOW_nodeID_in_blank519);
-					nodeID();
-					state._fsp--;
-
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:499:5: BLANK
-					{
-					match(input,BLANK,FOLLOW_BLANK_in_blank525); 
-					}
-					break;
-
-			}
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitObject(this);
+			else return visitor.visitChildren(this);
 		}
 	}
-	// $ANTLR end "blank"
 
-
-
-	// $ANTLR start "variable"
-	// TurtleOBDA.g:502:1: variable returns [Variable value] : STRING_WITH_CURLY_BRACKET ;
-	public final Variable variable() throws RecognitionException {
-		Variable value = null;
-
-
-		Token STRING_WITH_CURLY_BRACKET19=null;
-
+	public final ObjectContext object() throws RecognitionException {
+		ObjectContext _localctx = new ObjectContext(_ctx, getState());
+		enterRule(_localctx, 26, RULE_object);
 		try {
-			// TurtleOBDA.g:503:3: ( STRING_WITH_CURLY_BRACKET )
-			// TurtleOBDA.g:503:5: STRING_WITH_CURLY_BRACKET
-			{
-			STRING_WITH_CURLY_BRACKET19=(Token)match(input,STRING_WITH_CURLY_BRACKET,FOLLOW_STRING_WITH_CURLY_BRACKET_in_variable542); 
-
-			      value = TERM_FACTORY.getVariable(removeBrackets((STRING_WITH_CURLY_BRACKET19!=null?STRING_WITH_CURLY_BRACKET19.getText():null)));
-			      variableSet.add(value);
-			    
-			}
-
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return value;
-	}
-	// $ANTLR end "variable"
-
-
-
-	// $ANTLR start "function"
-	// TurtleOBDA.g:509:1: function returns [Function value] : resource LPAREN terms RPAREN ;
-	public final Function function() throws RecognitionException {
-		Function value = null;
-
-
-		Term resource20 =null;
-		Vector<Term> terms21 =null;
-
-		try {
-			// TurtleOBDA.g:510:3: ( resource LPAREN terms RPAREN )
-			// TurtleOBDA.g:510:5: resource LPAREN terms RPAREN
-			{
-			pushFollow(FOLLOW_resource_in_function563);
-			resource20=resource();
-			state._fsp--;
-
-			match(input,LPAREN,FOLLOW_LPAREN_in_function565); 
-			pushFollow(FOLLOW_terms_in_function567);
-			terms21=terms();
-			state._fsp--;
-
-			match(input,RPAREN,FOLLOW_RPAREN_in_function569); 
-
-			      String functionName = resource20.toString();
-			      int arity = terms21.size();
-			      Predicate functionSymbol = TERM_FACTORY.getPredicate(functionName, arity);
-			      value = TERM_FACTORY.getFunction(functionSymbol, terms21);
-			    
-			}
-
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return value;
-	}
-	// $ANTLR end "function"
-
-
-
-	// $ANTLR start "typedLiteral"
-	// TurtleOBDA.g:518:1: typedLiteral returns [Function value] : ( variable AT language | variable REFERENCE resource );
-	public final Function typedLiteral() throws RecognitionException {
-		Function value = null;
-
-
-		Variable variable22 =null;
-		Term language23 =null;
-		Variable variable24 =null;
-		Term resource25 =null;
-
-		try {
-			// TurtleOBDA.g:519:3: ( variable AT language | variable REFERENCE resource )
-			int alt13=2;
-			int LA13_0 = input.LA(1);
-			if ( (LA13_0==STRING_WITH_CURLY_BRACKET) ) {
-				int LA13_1 = input.LA(2);
-				if ( (LA13_1==AT) ) {
-					alt13=1;
-				}
-				else if ( (LA13_1==REFERENCE) ) {
-					alt13=2;
-				}
-
-				else {
-					int nvaeMark = input.mark();
-					try {
-						input.consume();
-						NoViableAltException nvae =
-							new NoViableAltException("", 13, 1, input);
-						throw nvae;
-					} finally {
-						input.rewind(nvaeMark);
-					}
-				}
-
-			}
-
-			else {
-				NoViableAltException nvae =
-					new NoViableAltException("", 13, 0, input);
-				throw nvae;
-			}
-
-			switch (alt13) {
-				case 1 :
-					// TurtleOBDA.g:519:5: variable AT language
-					{
-					pushFollow(FOLLOW_variable_in_typedLiteral588);
-					variable22=variable();
-					state._fsp--;
-
-					match(input,AT,FOLLOW_AT_in_typedLiteral590); 
-					pushFollow(FOLLOW_language_in_typedLiteral592);
-					language23=language();
-					state._fsp--;
-
-
-					      Variable var = variable22;
-					      Term lang = language23;   
-					      value = TERM_FACTORY.getTypedTerm(var, lang);
-
-					    
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:525:5: variable REFERENCE resource
-					{
-					pushFollow(FOLLOW_variable_in_typedLiteral600);
-					variable24=variable();
-					state._fsp--;
-
-					match(input,REFERENCE,FOLLOW_REFERENCE_in_typedLiteral602); 
-					pushFollow(FOLLOW_resource_in_typedLiteral604);
-					resource25=resource();
-					state._fsp--;
-
-
-					      Variable var = variable24;
-					      //String functionName = resource25.toString();
-					      // resource25 must be a URIConstant
-					    String functionName = null;
-					    if (resource25 instanceof Function){
-					       functionName = ((ValueConstant) ((Function)resource25).getTerm(0)).getValue();
-					    } else {
-					        throw new IllegalArgumentException("resource25 should be an URI");
-					    }
-					    Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(functionName);
-					    if (!type.isPresent())
-					 	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
-					    
-					      value = TERM_FACTORY.getTypedTerm(var, type.get());
-
-						
-					     
-					}
-					break;
-
-			}
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return value;
-	}
-	// $ANTLR end "typedLiteral"
-
-
-
-	// $ANTLR start "language"
-	// TurtleOBDA.g:545:1: language returns [Term value] : ( languageTag | variable );
-	public final Term language() throws RecognitionException {
-		Term value = null;
-
-
-		ParserRuleReturnScope languageTag26 =null;
-		Variable variable27 =null;
-
-		try {
-			// TurtleOBDA.g:546:3: ( languageTag | variable )
-			int alt14=2;
-			int LA14_0 = input.LA(1);
-			if ( (LA14_0==VARNAME) ) {
-				alt14=1;
-			}
-			else if ( (LA14_0==STRING_WITH_CURLY_BRACKET) ) {
-				alt14=2;
-			}
-
-			else {
-				NoViableAltException nvae =
-					new NoViableAltException("", 14, 0, input);
-				throw nvae;
-			}
-
-			switch (alt14) {
-				case 1 :
-					// TurtleOBDA.g:546:5: languageTag
-					{
-					pushFollow(FOLLOW_languageTag_in_language623);
-					languageTag26=languageTag();
-					state._fsp--;
-
-
-					    	value = TERM_FACTORY.getConstantLiteral((languageTag26!=null?input.toString(languageTag26.start,languageTag26.stop):null).toLowerCase(), COL_TYPE.STRING);
-					    
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:549:5: variable
-					{
-					pushFollow(FOLLOW_variable_in_language631);
-					variable27=variable();
-					state._fsp--;
-
-
-					    	value = variable27;
-					    
-					}
-					break;
-
-			}
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return value;
-	}
-	// $ANTLR end "language"
-
-
-
-	// $ANTLR start "terms"
-	// TurtleOBDA.g:554:1: terms returns [Vector<Term> value] : t1= term ( COMMA t2= term )* ;
-	public final Vector<Term> terms() throws RecognitionException {
-		Vector<Term> value = null;
-
-
-		Term t1 =null;
-		Term t2 =null;
-
-
-		  value = new Vector<Term>();
-
-		try {
-			// TurtleOBDA.g:558:3: (t1= term ( COMMA t2= term )* )
-			// TurtleOBDA.g:558:5: t1= term ( COMMA t2= term )*
-			{
-			pushFollow(FOLLOW_term_in_terms657);
-			t1=term();
-			state._fsp--;
-
-			 value.add(t1); 
-			// TurtleOBDA.g:558:40: ( COMMA t2= term )*
-			loop15:
-			while (true) {
-				int alt15=2;
-				int LA15_0 = input.LA(1);
-				if ( (LA15_0==COMMA) ) {
-					alt15=1;
-				}
-
-				switch (alt15) {
-				case 1 :
-					// TurtleOBDA.g:558:41: COMMA t2= term
-					{
-					match(input,COMMA,FOLLOW_COMMA_in_terms662); 
-					pushFollow(FOLLOW_term_in_terms666);
-					t2=term();
-					state._fsp--;
-
-					 value.add(t2); 
-					}
-					break;
-
-				default :
-					break loop15;
-				}
-			}
-
-			}
-
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return value;
-	}
-	// $ANTLR end "terms"
-
-
-
-	// $ANTLR start "term"
-	// TurtleOBDA.g:561:1: term returns [Term value] : ( function | variable | literal );
-	public final Term term() throws RecognitionException {
-		Term value = null;
-
-
-		Function function28 =null;
-		Variable variable29 =null;
-		Term literal30 =null;
-
-		try {
-			// TurtleOBDA.g:562:3: ( function | variable | literal )
-			int alt16=3;
-			switch ( input.LA(1) ) {
-			case PREFIXED_NAME:
-			case STRING_WITH_BRACKET:
+			setState(135);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,7,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
 				{
-				alt16=1;
+				setState(131);
+				resource();
+				}
+				break;
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(132);
+				literal();
+				}
+				break;
+			case 3:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(133);
+				typedLiteral();
+				}
+				break;
+			case 4:
+				enterOuterAlt(_localctx, 4);
+				{
+				setState(134);
+				variable();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ResourceContext extends ParserRuleContext {
+		public UrirefContext uriref() {
+			return getRuleContext(UrirefContext.class,0);
+		}
+		public PrefixedNameContext prefixedName() {
+			return getRuleContext(PrefixedNameContext.class,0);
+		}
+		public ResourceContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_resource; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterResource(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitResource(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitResource(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ResourceContext resource() throws RecognitionException {
+		ResourceContext _localctx = new ResourceContext(_ctx, getState());
+		enterRule(_localctx, 28, RULE_resource);
+		try {
+			setState(139);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case URI_REF:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(137);
+				uriref();
+				}
+				break;
+			case PREFIXED_NAME:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(138);
+				prefixedName();
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class UrirefContext extends ParserRuleContext {
+		public TerminalNode URI_REF() { return getToken(TurtleOBDAParser.URI_REF, 0); }
+		public UrirefContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_uriref; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterUriref(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitUriref(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitUriref(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final UrirefContext uriref() throws RecognitionException {
+		UrirefContext _localctx = new UrirefContext(_ctx, getState());
+		enterRule(_localctx, 30, RULE_uriref);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(141);
+			match(URI_REF);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class PrefixedNameContext extends ParserRuleContext {
+		public TerminalNode PREFIXED_NAME() { return getToken(TurtleOBDAParser.PREFIXED_NAME, 0); }
+		public PrefixedNameContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_prefixedName; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterPrefixedName(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitPrefixedName(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitPrefixedName(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final PrefixedNameContext prefixedName() throws RecognitionException {
+		PrefixedNameContext _localctx = new PrefixedNameContext(_ctx, getState());
+		enterRule(_localctx, 32, RULE_prefixedName);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(143);
+			match(PREFIXED_NAME);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class BlankContext extends ParserRuleContext {
+		public TerminalNode BLANK_PREFIX() { return getToken(TurtleOBDAParser.BLANK_PREFIX, 0); }
+		public List<TerminalNode> NAME_CHAR() { return getTokens(TurtleOBDAParser.NAME_CHAR); }
+		public TerminalNode NAME_CHAR(int i) {
+			return getToken(TurtleOBDAParser.NAME_CHAR, i);
+		}
+		public TerminalNode BLANK() { return getToken(TurtleOBDAParser.BLANK, 0); }
+		public BlankContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_blank; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterBlank(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitBlank(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitBlank(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final BlankContext blank() throws RecognitionException {
+		BlankContext _localctx = new BlankContext(_ctx, getState());
+		enterRule(_localctx, 34, RULE_blank);
+		int _la;
+		try {
+			setState(152);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case BLANK_PREFIX:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(145);
+				match(BLANK_PREFIX);
+				setState(147); 
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+				do {
+					{
+					{
+					setState(146);
+					match(NAME_CHAR);
+					}
+					}
+					setState(149); 
+					_errHandler.sync(this);
+					_la = _input.LA(1);
+				} while ( _la==NAME_CHAR );
+				}
+				break;
+			case BLANK:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(151);
+				match(BLANK);
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class VariableContext extends ParserRuleContext {
+		public TerminalNode STRING_WITH_CURLY_BRACKET() { return getToken(TurtleOBDAParser.STRING_WITH_CURLY_BRACKET, 0); }
+		public VariableContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_variable; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterVariable(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitVariable(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitVariable(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final VariableContext variable() throws RecognitionException {
+		VariableContext _localctx = new VariableContext(_ctx, getState());
+		enterRule(_localctx, 36, RULE_variable);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(154);
+			match(STRING_WITH_CURLY_BRACKET);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class FunctionContext extends ParserRuleContext {
+		public ResourceContext resource() {
+			return getRuleContext(ResourceContext.class,0);
+		}
+		public TerminalNode LPAREN() { return getToken(TurtleOBDAParser.LPAREN, 0); }
+		public TermsContext terms() {
+			return getRuleContext(TermsContext.class,0);
+		}
+		public TerminalNode RPAREN() { return getToken(TurtleOBDAParser.RPAREN, 0); }
+		public FunctionContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_function; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterFunction(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitFunction(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitFunction(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final FunctionContext function() throws RecognitionException {
+		FunctionContext _localctx = new FunctionContext(_ctx, getState());
+		enterRule(_localctx, 38, RULE_function);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(156);
+			resource();
+			setState(157);
+			match(LPAREN);
+			setState(158);
+			terms();
+			setState(159);
+			match(RPAREN);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class TypedLiteralContext extends ParserRuleContext {
+		public TypedLiteralContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_typedLiteral; }
+	 
+		public TypedLiteralContext() { }
+		public void copyFrom(TypedLiteralContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class TypedLiteral_2Context extends TypedLiteralContext {
+		public VariableContext variable() {
+			return getRuleContext(VariableContext.class,0);
+		}
+		public TerminalNode REFERENCE() { return getToken(TurtleOBDAParser.REFERENCE, 0); }
+		public ResourceContext resource() {
+			return getRuleContext(ResourceContext.class,0);
+		}
+		public TypedLiteral_2Context(TypedLiteralContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterTypedLiteral_2(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitTypedLiteral_2(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitTypedLiteral_2(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class TypedLiteral_1Context extends TypedLiteralContext {
+		public VariableContext variable() {
+			return getRuleContext(VariableContext.class,0);
+		}
+		public TerminalNode AT() { return getToken(TurtleOBDAParser.AT, 0); }
+		public LanguageContext language() {
+			return getRuleContext(LanguageContext.class,0);
+		}
+		public TypedLiteral_1Context(TypedLiteralContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterTypedLiteral_1(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitTypedLiteral_1(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitTypedLiteral_1(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final TypedLiteralContext typedLiteral() throws RecognitionException {
+		TypedLiteralContext _localctx = new TypedLiteralContext(_ctx, getState());
+		enterRule(_localctx, 40, RULE_typedLiteral);
+		try {
+			setState(169);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,11,_ctx) ) {
+			case 1:
+				_localctx = new TypedLiteral_1Context(_localctx);
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(161);
+				variable();
+				setState(162);
+				match(AT);
+				setState(163);
+				language();
+				}
+				break;
+			case 2:
+				_localctx = new TypedLiteral_2Context(_localctx);
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(165);
+				variable();
+				setState(166);
+				match(REFERENCE);
+				setState(167);
+				resource();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class LanguageContext extends ParserRuleContext {
+		public LanguageTagContext languageTag() {
+			return getRuleContext(LanguageTagContext.class,0);
+		}
+		public VariableContext variable() {
+			return getRuleContext(VariableContext.class,0);
+		}
+		public LanguageContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_language; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterLanguage(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitLanguage(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitLanguage(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final LanguageContext language() throws RecognitionException {
+		LanguageContext _localctx = new LanguageContext(_ctx, getState());
+		enterRule(_localctx, 42, RULE_language);
+		try {
+			setState(173);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case VARNAME:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(171);
+				languageTag();
 				}
 				break;
 			case STRING_WITH_CURLY_BRACKET:
+				enterOuterAlt(_localctx, 2);
 				{
-				alt16=2;
+				setState(172);
+				variable();
 				}
 				break;
-			case DECIMAL:
-			case DECIMAL_NEGATIVE:
-			case DECIMAL_POSITIVE:
-			case DOUBLE:
-			case DOUBLE_NEGATIVE:
-			case DOUBLE_POSITIVE:
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class TermsContext extends ParserRuleContext {
+		public List<TermContext> term() {
+			return getRuleContexts(TermContext.class);
+		}
+		public TermContext term(int i) {
+			return getRuleContext(TermContext.class,i);
+		}
+		public List<TerminalNode> COMMA() { return getTokens(TurtleOBDAParser.COMMA); }
+		public TerminalNode COMMA(int i) {
+			return getToken(TurtleOBDAParser.COMMA, i);
+		}
+		public TermsContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_terms; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterTerms(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitTerms(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitTerms(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final TermsContext terms() throws RecognitionException {
+		TermsContext _localctx = new TermsContext(_ctx, getState());
+		enterRule(_localctx, 44, RULE_terms);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(175);
+			term();
+			setState(180);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			while (_la==COMMA) {
+				{
+				{
+				setState(176);
+				match(COMMA);
+				setState(177);
+				term();
+				}
+				}
+				setState(182);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class TermContext extends ParserRuleContext {
+		public FunctionContext function() {
+			return getRuleContext(FunctionContext.class,0);
+		}
+		public VariableContext variable() {
+			return getRuleContext(VariableContext.class,0);
+		}
+		public LiteralContext literal() {
+			return getRuleContext(LiteralContext.class,0);
+		}
+		public TermContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_term; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterTerm(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitTerm(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitTerm(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final TermContext term() throws RecognitionException {
+		TermContext _localctx = new TermContext(_ctx, getState());
+		enterRule(_localctx, 46, RULE_term);
+		try {
+			setState(186);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case PREFIXED_NAME:
+			case URI_REF:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(183);
+				function();
+				}
+				break;
+			case STRING_WITH_CURLY_BRACKET:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(184);
+				variable();
+				}
+				break;
 			case FALSE:
-			case INTEGER:
-			case INTEGER_NEGATIVE:
-			case INTEGER_POSITIVE:
-			case STRING_WITH_QUOTE_DOUBLE:
 			case TRUE:
-				{
-				alt16=3;
-				}
-				break;
-			default:
-				NoViableAltException nvae =
-					new NoViableAltException("", 16, 0, input);
-				throw nvae;
-			}
-			switch (alt16) {
-				case 1 :
-					// TurtleOBDA.g:562:5: function
-					{
-					pushFollow(FOLLOW_function_in_term687);
-					function28=function();
-					state._fsp--;
-
-					 value = function28; 
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:563:5: variable
-					{
-					pushFollow(FOLLOW_variable_in_term695);
-					variable29=variable();
-					state._fsp--;
-
-					 value = variable29; 
-					}
-					break;
-				case 3 :
-					// TurtleOBDA.g:564:5: literal
-					{
-					pushFollow(FOLLOW_literal_in_term703);
-					literal30=literal();
-					state._fsp--;
-
-					 value = literal30; 
-					}
-					break;
-
-			}
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return value;
-	}
-	// $ANTLR end "term"
-
-
-
-	// $ANTLR start "literal"
-	// TurtleOBDA.g:567:1: literal returns [Term value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
-	public final Term literal() throws RecognitionException {
-		Term value = null;
-
-
-		Term language31 =null;
-		Term stringLiteral32 =null;
-		Term dataTypeString33 =null;
-		Term numericLiteral34 =null;
-		Term booleanLiteral35 =null;
-
-		try {
-			// TurtleOBDA.g:568:3: ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral )
-			int alt18=4;
-			switch ( input.LA(1) ) {
+			case INTEGER:
+			case DOUBLE:
+			case DECIMAL:
+			case INTEGER_POSITIVE:
+			case INTEGER_NEGATIVE:
+			case DOUBLE_POSITIVE:
+			case DOUBLE_NEGATIVE:
+			case DECIMAL_POSITIVE:
+			case DECIMAL_NEGATIVE:
 			case STRING_WITH_QUOTE_DOUBLE:
+				enterOuterAlt(_localctx, 3);
 				{
-				int LA18_1 = input.LA(2);
-				if ( (LA18_1==AT||LA18_1==COMMA||LA18_1==PERIOD||LA18_1==RPAREN||LA18_1==SEMI||LA18_1==WS) ) {
-					alt18=1;
-				}
-				else if ( (LA18_1==REFERENCE) ) {
-					alt18=2;
-				}
-
-				else {
-					int nvaeMark = input.mark();
-					try {
-						input.consume();
-						NoViableAltException nvae =
-							new NoViableAltException("", 18, 1, input);
-						throw nvae;
-					} finally {
-						input.rewind(nvaeMark);
-					}
-				}
-
-				}
-				break;
-			case DECIMAL:
-			case DECIMAL_NEGATIVE:
-			case DECIMAL_POSITIVE:
-			case DOUBLE:
-			case DOUBLE_NEGATIVE:
-			case DOUBLE_POSITIVE:
-			case INTEGER:
-			case INTEGER_NEGATIVE:
-			case INTEGER_POSITIVE:
-				{
-				alt18=3;
-				}
-				break;
-			case FALSE:
-			case TRUE:
-				{
-				alt18=4;
+				setState(185);
+				literal();
 				}
 				break;
 			default:
-				NoViableAltException nvae =
-					new NoViableAltException("", 18, 0, input);
-				throw nvae;
-			}
-			switch (alt18) {
-				case 1 :
-					// TurtleOBDA.g:568:5: stringLiteral ( AT language )?
-					{
-					pushFollow(FOLLOW_stringLiteral_in_literal722);
-					stringLiteral32=stringLiteral();
-					state._fsp--;
-
-					// TurtleOBDA.g:568:19: ( AT language )?
-					int alt17=2;
-					int LA17_0 = input.LA(1);
-					if ( (LA17_0==AT) ) {
-						alt17=1;
-					}
-					switch (alt17) {
-						case 1 :
-							// TurtleOBDA.g:568:20: AT language
-							{
-							match(input,AT,FOLLOW_AT_in_literal725); 
-							pushFollow(FOLLOW_language_in_literal727);
-							language31=language();
-							state._fsp--;
-
-							}
-							break;
-
-					}
-
-
-					       Term lang = language31;
-					       Term literal = stringLiteral32;
-					       if (literal instanceof Function){
-					          Function f = (Function)stringLiteral32;
-					          if (lang != null){
-					             value = TERM_FACTORY.getTypedTerm(f,lang);
-					          }else{
-					             value = TERM_FACTORY.getTypedTerm(f, COL_TYPE.STRING);
-					          }       
-					       }else{
-
-					       //if variable we cannot assign a datatype yet
-					       if (literal instanceof Variable)
-					       {
-					            value = TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
-					       }
-					       else{
-					          ValueConstant constant = (ValueConstant)stringLiteral32;
-					          if (lang != null) {
-						     value = TERM_FACTORY.getTypedTerm(constant, lang);
-					          } else {
-					      	     value = TERM_FACTORY.getTypedTerm(constant, COL_TYPE.STRING);
-					          }
-					       }
-					       }
-					    
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:595:5: dataTypeString
-					{
-					pushFollow(FOLLOW_dataTypeString_in_literal737);
-					dataTypeString33=dataTypeString();
-					state._fsp--;
-
-					 value = dataTypeString33; 
-					}
-					break;
-				case 3 :
-					// TurtleOBDA.g:596:5: numericLiteral
-					{
-					pushFollow(FOLLOW_numericLiteral_in_literal745);
-					numericLiteral34=numericLiteral();
-					state._fsp--;
-
-					 value = numericLiteral34; 
-					}
-					break;
-				case 4 :
-					// TurtleOBDA.g:597:5: booleanLiteral
-					{
-					pushFollow(FOLLOW_booleanLiteral_in_literal753);
-					booleanLiteral35=booleanLiteral();
-					state._fsp--;
-
-					 value = booleanLiteral35; 
-					}
-					break;
-
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
 		}
-		return value;
+		return _localctx;
 	}
-	// $ANTLR end "literal"
 
+	public static class LiteralContext extends ParserRuleContext {
+		public StringLiteralContext stringLiteral() {
+			return getRuleContext(StringLiteralContext.class,0);
+		}
+		public TerminalNode AT() { return getToken(TurtleOBDAParser.AT, 0); }
+		public LanguageContext language() {
+			return getRuleContext(LanguageContext.class,0);
+		}
+		public DataTypeStringContext dataTypeString() {
+			return getRuleContext(DataTypeStringContext.class,0);
+		}
+		public NumericLiteralContext numericLiteral() {
+			return getRuleContext(NumericLiteralContext.class,0);
+		}
+		public BooleanLiteralContext booleanLiteral() {
+			return getRuleContext(BooleanLiteralContext.class,0);
+		}
+		public LiteralContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_literal; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterLiteral(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitLiteral(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitLiteral(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 
-
-	// $ANTLR start "stringLiteral"
-	// TurtleOBDA.g:600:1: stringLiteral returns [Term value] : STRING_WITH_QUOTE_DOUBLE ;
-	public final Term stringLiteral() throws RecognitionException {
-		Term value = null;
-
-
-		Token STRING_WITH_QUOTE_DOUBLE36=null;
-
+	public final LiteralContext literal() throws RecognitionException {
+		LiteralContext _localctx = new LiteralContext(_ctx, getState());
+		enterRule(_localctx, 48, RULE_literal);
+		int _la;
 		try {
-			// TurtleOBDA.g:601:3: ( STRING_WITH_QUOTE_DOUBLE )
-			// TurtleOBDA.g:601:5: STRING_WITH_QUOTE_DOUBLE
+			setState(196);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,16,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(188);
+				stringLiteral();
+				setState(191);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+				if (_la==AT) {
+					{
+					setState(189);
+					match(AT);
+					setState(190);
+					language();
+					}
+				}
+
+				}
+				break;
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(193);
+				dataTypeString();
+				}
+				break;
+			case 3:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(194);
+				numericLiteral();
+				}
+				break;
+			case 4:
+				enterOuterAlt(_localctx, 4);
+				{
+				setState(195);
+				booleanLiteral();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class StringLiteralContext extends ParserRuleContext {
+		public TerminalNode STRING_WITH_QUOTE_DOUBLE() { return getToken(TurtleOBDAParser.STRING_WITH_QUOTE_DOUBLE, 0); }
+		public StringLiteralContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_stringLiteral; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterStringLiteral(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitStringLiteral(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitStringLiteral(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final StringLiteralContext stringLiteral() throws RecognitionException {
+		StringLiteralContext _localctx = new StringLiteralContext(_ctx, getState());
+		enterRule(_localctx, 50, RULE_stringLiteral);
+		try {
+			enterOuterAlt(_localctx, 1);
 			{
-			STRING_WITH_QUOTE_DOUBLE36=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_stringLiteral772); 
-
-			      String str = (STRING_WITH_QUOTE_DOUBLE36!=null?STRING_WITH_QUOTE_DOUBLE36.getText():null);
-			      if (str.contains("{")){
-			      	value = getNestedConcat(str);
-			      }else{
-			      	value = TERM_FACTORY.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.STRING); // without the double quotes
-			      }
-			    
+			setState(198);
+			match(STRING_WITH_QUOTE_DOUBLE);
 			}
-
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
 		}
-		return value;
+		return _localctx;
 	}
-	// $ANTLR end "stringLiteral"
 
+	public static class DataTypeStringContext extends ParserRuleContext {
+		public StringLiteralContext stringLiteral() {
+			return getRuleContext(StringLiteralContext.class,0);
+		}
+		public TerminalNode REFERENCE() { return getToken(TurtleOBDAParser.REFERENCE, 0); }
+		public ResourceContext resource() {
+			return getRuleContext(ResourceContext.class,0);
+		}
+		public DataTypeStringContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_dataTypeString; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterDataTypeString(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitDataTypeString(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitDataTypeString(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 
-
-	// $ANTLR start "dataTypeString"
-	// TurtleOBDA.g:611:1: dataTypeString returns [Term value] : stringLiteral REFERENCE resource ;
-	public final Term dataTypeString() throws RecognitionException {
-		Term value = null;
-
-
-		Term stringLiteral37 =null;
-		Term resource38 =null;
-
+	public final DataTypeStringContext dataTypeString() throws RecognitionException {
+		DataTypeStringContext _localctx = new DataTypeStringContext(_ctx, getState());
+		enterRule(_localctx, 52, RULE_dataTypeString);
 		try {
-			// TurtleOBDA.g:612:3: ( stringLiteral REFERENCE resource )
-			// TurtleOBDA.g:612:6: stringLiteral REFERENCE resource
+			enterOuterAlt(_localctx, 1);
 			{
-			pushFollow(FOLLOW_stringLiteral_in_dataTypeString792);
-			stringLiteral37=stringLiteral();
-			state._fsp--;
-
-			match(input,REFERENCE,FOLLOW_REFERENCE_in_dataTypeString794); 
-			pushFollow(FOLLOW_resource_in_dataTypeString796);
-			resource38=resource();
-			state._fsp--;
-
-
-			      Term stringValue = stringLiteral37;
-
-			          if (resource38 instanceof Function){
-			          	    String functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
-
-			                    Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(functionName);
-			                    if (!type.isPresent()) {
-			                      throw new RuntimeException("Unsupported datatype: " + functionName);
-			                    }
-			                    value = TERM_FACTORY.getTypedTerm(stringValue, type.get());
-			                    }
-			           else {
-			          value = TERM_FACTORY.getTypedTerm(stringValue, COL_TYPE.STRING);
-			          }
-
-			  
+			setState(200);
+			stringLiteral();
+			setState(201);
+			match(REFERENCE);
+			setState(202);
+			resource();
 			}
-
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
 		}
-		return value;
+		return _localctx;
 	}
-	// $ANTLR end "dataTypeString"
 
+	public static class NumericLiteralContext extends ParserRuleContext {
+		public NumericUnsignedContext numericUnsigned() {
+			return getRuleContext(NumericUnsignedContext.class,0);
+		}
+		public NumericPositiveContext numericPositive() {
+			return getRuleContext(NumericPositiveContext.class,0);
+		}
+		public NumericNegativeContext numericNegative() {
+			return getRuleContext(NumericNegativeContext.class,0);
+		}
+		public NumericLiteralContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_numericLiteral; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterNumericLiteral(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitNumericLiteral(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitNumericLiteral(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 
-
-	// $ANTLR start "numericLiteral"
-	// TurtleOBDA.g:630:1: numericLiteral returns [Term value] : ( numericUnsigned | numericPositive | numericNegative );
-	public final Term numericLiteral() throws RecognitionException {
-		Term value = null;
-
-
-		Term numericUnsigned39 =null;
-		Term numericPositive40 =null;
-		Term numericNegative41 =null;
-
+	public final NumericLiteralContext numericLiteral() throws RecognitionException {
+		NumericLiteralContext _localctx = new NumericLiteralContext(_ctx, getState());
+		enterRule(_localctx, 54, RULE_numericLiteral);
 		try {
-			// TurtleOBDA.g:631:3: ( numericUnsigned | numericPositive | numericNegative )
-			int alt19=3;
-			switch ( input.LA(1) ) {
-			case DECIMAL:
-			case DOUBLE:
+			setState(207);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
 			case INTEGER:
+			case DOUBLE:
+			case DECIMAL:
+				enterOuterAlt(_localctx, 1);
 				{
-				alt19=1;
+				setState(204);
+				numericUnsigned();
 				}
 				break;
-			case DECIMAL_POSITIVE:
-			case DOUBLE_POSITIVE:
 			case INTEGER_POSITIVE:
+			case DOUBLE_POSITIVE:
+			case DECIMAL_POSITIVE:
+				enterOuterAlt(_localctx, 2);
 				{
-				alt19=2;
+				setState(205);
+				numericPositive();
 				}
 				break;
-			case DECIMAL_NEGATIVE:
-			case DOUBLE_NEGATIVE:
 			case INTEGER_NEGATIVE:
+			case DOUBLE_NEGATIVE:
+			case DECIMAL_NEGATIVE:
+				enterOuterAlt(_localctx, 3);
 				{
-				alt19=3;
+				setState(206);
+				numericNegative();
 				}
 				break;
 			default:
-				NoViableAltException nvae =
-					new NoViableAltException("", 19, 0, input);
-				throw nvae;
-			}
-			switch (alt19) {
-				case 1 :
-					// TurtleOBDA.g:631:5: numericUnsigned
-					{
-					pushFollow(FOLLOW_numericUnsigned_in_numericLiteral812);
-					numericUnsigned39=numericUnsigned();
-					state._fsp--;
-
-					 value = numericUnsigned39; 
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:632:5: numericPositive
-					{
-					pushFollow(FOLLOW_numericPositive_in_numericLiteral820);
-					numericPositive40=numericPositive();
-					state._fsp--;
-
-					 value = numericPositive40; 
-					}
-					break;
-				case 3 :
-					// TurtleOBDA.g:633:5: numericNegative
-					{
-					pushFollow(FOLLOW_numericNegative_in_numericLiteral828);
-					numericNegative41=numericNegative();
-					state._fsp--;
-
-					 value = numericNegative41; 
-					}
-					break;
-
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
 		}
-		return value;
+		return _localctx;
 	}
-	// $ANTLR end "numericLiteral"
 
+	public static class LanguageTagContext extends ParserRuleContext {
+		public TerminalNode VARNAME() { return getToken(TurtleOBDAParser.VARNAME, 0); }
+		public LanguageTagContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_languageTag; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterLanguageTag(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitLanguageTag(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitLanguageTag(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 
-
-	// $ANTLR start "nodeID"
-	// TurtleOBDA.g:636:1: nodeID : BLANK_PREFIX name ;
-	public final void nodeID() throws RecognitionException {
+	public final LanguageTagContext languageTag() throws RecognitionException {
+		LanguageTagContext _localctx = new LanguageTagContext(_ctx, getState());
+		enterRule(_localctx, 56, RULE_languageTag);
 		try {
-			// TurtleOBDA.g:637:3: ( BLANK_PREFIX name )
-			// TurtleOBDA.g:637:5: BLANK_PREFIX name
+			enterOuterAlt(_localctx, 1);
 			{
-			match(input,BLANK_PREFIX,FOLLOW_BLANK_PREFIX_in_nodeID843); 
-			pushFollow(FOLLOW_name_in_nodeID845);
-			name();
-			state._fsp--;
-
+			setState(209);
+			match(VARNAME);
 			}
-
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class BooleanLiteralContext extends ParserRuleContext {
+		public TerminalNode TRUE() { return getToken(TurtleOBDAParser.TRUE, 0); }
+		public TerminalNode FALSE() { return getToken(TurtleOBDAParser.FALSE, 0); }
+		public BooleanLiteralContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_booleanLiteral; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterBooleanLiteral(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitBooleanLiteral(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitBooleanLiteral(this);
+			else return visitor.visitChildren(this);
 		}
 	}
-	// $ANTLR end "nodeID"
 
-
-
-	// $ANTLR start "relativeURI"
-	// TurtleOBDA.g:640:1: relativeURI : STRING_URI ;
-	public final void relativeURI() throws RecognitionException {
+	public final BooleanLiteralContext booleanLiteral() throws RecognitionException {
+		BooleanLiteralContext _localctx = new BooleanLiteralContext(_ctx, getState());
+		enterRule(_localctx, 58, RULE_booleanLiteral);
+		int _la;
 		try {
-			// TurtleOBDA.g:641:3: ( STRING_URI )
-			// TurtleOBDA.g:641:5: STRING_URI
+			enterOuterAlt(_localctx, 1);
 			{
-			match(input,STRING_URI,FOLLOW_STRING_URI_in_relativeURI859); 
+			setState(211);
+			_la = _input.LA(1);
+			if ( !(_la==FALSE || _la==TRUE) ) {
+			_errHandler.recoverInline(this);
 			}
-
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-	}
-	// $ANTLR end "relativeURI"
-
-
-	public static class namespace_return extends ParserRuleReturnScope {
-	};
-
-
-	// $ANTLR start "namespace"
-	// TurtleOBDA.g:644:1: namespace : NAMESPACE ;
-	public final TurtleOBDAParser.namespace_return namespace() throws RecognitionException {
-		TurtleOBDAParser.namespace_return retval = new TurtleOBDAParser.namespace_return();
-		retval.start = input.LT(1);
-
-		try {
-			// TurtleOBDA.g:645:3: ( NAMESPACE )
-			// TurtleOBDA.g:645:5: NAMESPACE
-			{
-			match(input,NAMESPACE,FOLLOW_NAMESPACE_in_namespace872); 
-			}
-
-			retval.stop = input.LT(-1);
-
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return retval;
-	}
-	// $ANTLR end "namespace"
-
-
-	public static class defaultNamespace_return extends ParserRuleReturnScope {
-	};
-
-
-	// $ANTLR start "defaultNamespace"
-	// TurtleOBDA.g:648:1: defaultNamespace : COLON ;
-	public final TurtleOBDAParser.defaultNamespace_return defaultNamespace() throws RecognitionException {
-		TurtleOBDAParser.defaultNamespace_return retval = new TurtleOBDAParser.defaultNamespace_return();
-		retval.start = input.LT(1);
-
-		try {
-			// TurtleOBDA.g:649:3: ( COLON )
-			// TurtleOBDA.g:649:5: COLON
-			{
-			match(input,COLON,FOLLOW_COLON_in_defaultNamespace887); 
-			}
-
-			retval.stop = input.LT(-1);
-
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return retval;
-	}
-	// $ANTLR end "defaultNamespace"
-
-
-
-	// $ANTLR start "name"
-	// TurtleOBDA.g:652:1: name : VARNAME ;
-	public final void name() throws RecognitionException {
-		try {
-			// TurtleOBDA.g:653:3: ( VARNAME )
-			// TurtleOBDA.g:653:5: VARNAME
-			{
-			match(input,VARNAME,FOLLOW_VARNAME_in_name900); 
-			}
-
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-	}
-	// $ANTLR end "name"
-
-
-	public static class languageTag_return extends ParserRuleReturnScope {
-	};
-
-
-	// $ANTLR start "languageTag"
-	// TurtleOBDA.g:656:1: languageTag : VARNAME ;
-	public final TurtleOBDAParser.languageTag_return languageTag() throws RecognitionException {
-		TurtleOBDAParser.languageTag_return retval = new TurtleOBDAParser.languageTag_return();
-		retval.start = input.LT(1);
-
-		try {
-			// TurtleOBDA.g:657:3: ( VARNAME )
-			// TurtleOBDA.g:657:5: VARNAME
-			{
-			match(input,VARNAME,FOLLOW_VARNAME_in_languageTag913); 
-			}
-
-			retval.stop = input.LT(-1);
-
-		}
-		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
-		}
-		finally {
-			// do for sure before leaving
-		}
-		return retval;
-	}
-	// $ANTLR end "languageTag"
-
-
-
-	// $ANTLR start "booleanLiteral"
-	// TurtleOBDA.g:660:1: booleanLiteral returns [Term value] : ( TRUE | FALSE );
-	public final Term booleanLiteral() throws RecognitionException {
-		Term value = null;
-
-
-		Token TRUE42=null;
-		Token FALSE43=null;
-
-		try {
-			// TurtleOBDA.g:661:3: ( TRUE | FALSE )
-			int alt20=2;
-			int LA20_0 = input.LA(1);
-			if ( (LA20_0==TRUE) ) {
-				alt20=1;
-			}
-			else if ( (LA20_0==FALSE) ) {
-				alt20=2;
-			}
-
 			else {
-				NoViableAltException nvae =
-					new NoViableAltException("", 20, 0, input);
-				throw nvae;
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
+				consume();
 			}
-
-			switch (alt20) {
-				case 1 :
-					// TurtleOBDA.g:661:5: TRUE
-					{
-					TRUE42=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral930); 
-
-					  ValueConstant trueConstant = TERM_FACTORY.getConstantLiteral((TRUE42!=null?TRUE42.getText():null), COL_TYPE.LITERAL);
-					  value = TERM_FACTORY.getTypedTerm(trueConstant, COL_TYPE.BOOLEAN); 
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:664:5: FALSE
-					{
-					FALSE43=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral939); 
-
-					  ValueConstant falseConstant = TERM_FACTORY.getConstantLiteral((FALSE43!=null?FALSE43.getText():null), COL_TYPE.LITERAL);
-					  value = TERM_FACTORY.getTypedTerm(falseConstant, COL_TYPE.BOOLEAN);
-					  
-					}
-					break;
-
 			}
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
 		}
-		return value;
+		return _localctx;
 	}
-	// $ANTLR end "booleanLiteral"
 
+	public static class NumericUnsignedContext extends ParserRuleContext {
+		public TerminalNode INTEGER() { return getToken(TurtleOBDAParser.INTEGER, 0); }
+		public TerminalNode DOUBLE() { return getToken(TurtleOBDAParser.DOUBLE, 0); }
+		public TerminalNode DECIMAL() { return getToken(TurtleOBDAParser.DECIMAL, 0); }
+		public NumericUnsignedContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_numericUnsigned; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterNumericUnsigned(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitNumericUnsigned(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitNumericUnsigned(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 
-
-	// $ANTLR start "numericUnsigned"
-	// TurtleOBDA.g:670:1: numericUnsigned returns [Term value] : ( INTEGER | DOUBLE | DECIMAL );
-	public final Term numericUnsigned() throws RecognitionException {
-		Term value = null;
-
-
-		Token INTEGER44=null;
-		Token DOUBLE45=null;
-		Token DECIMAL46=null;
-
+	public final NumericUnsignedContext numericUnsigned() throws RecognitionException {
+		NumericUnsignedContext _localctx = new NumericUnsignedContext(_ctx, getState());
+		enterRule(_localctx, 60, RULE_numericUnsigned);
+		int _la;
 		try {
-			// TurtleOBDA.g:671:3: ( INTEGER | DOUBLE | DECIMAL )
-			int alt21=3;
-			switch ( input.LA(1) ) {
-			case INTEGER:
-				{
-				alt21=1;
-				}
-				break;
-			case DOUBLE:
-				{
-				alt21=2;
-				}
-				break;
-			case DECIMAL:
-				{
-				alt21=3;
-				}
-				break;
-			default:
-				NoViableAltException nvae =
-					new NoViableAltException("", 21, 0, input);
-				throw nvae;
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(213);
+			_la = _input.LA(1);
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INTEGER) | (1L << DOUBLE) | (1L << DECIMAL))) != 0)) ) {
+			_errHandler.recoverInline(this);
 			}
-			switch (alt21) {
-				case 1 :
-					// TurtleOBDA.g:671:5: INTEGER
-					{
-					INTEGER44=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned958); 
-
-					  ValueConstant integerConstant = TERM_FACTORY.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.LITERAL);
-					  value = TERM_FACTORY.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
-					  
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:675:5: DOUBLE
-					{
-					DOUBLE45=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned966); 
-
-					  ValueConstant doubleConstant = TERM_FACTORY.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.LITERAL);
-					  value = TERM_FACTORY.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
-					  
-					}
-					break;
-				case 3 :
-					// TurtleOBDA.g:679:5: DECIMAL
-					{
-					DECIMAL46=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned975); 
-
-					  ValueConstant decimalConstant = TERM_FACTORY.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.LITERAL);
-					  value = TERM_FACTORY.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
-					   
-					}
-					break;
-
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
+				consume();
+			}
 			}
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
 		}
-		return value;
+		return _localctx;
 	}
-	// $ANTLR end "numericUnsigned"
 
+	public static class NumericPositiveContext extends ParserRuleContext {
+		public TerminalNode INTEGER_POSITIVE() { return getToken(TurtleOBDAParser.INTEGER_POSITIVE, 0); }
+		public TerminalNode DOUBLE_POSITIVE() { return getToken(TurtleOBDAParser.DOUBLE_POSITIVE, 0); }
+		public TerminalNode DECIMAL_POSITIVE() { return getToken(TurtleOBDAParser.DECIMAL_POSITIVE, 0); }
+		public NumericPositiveContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_numericPositive; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterNumericPositive(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitNumericPositive(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitNumericPositive(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 
-
-	// $ANTLR start "numericPositive"
-	// TurtleOBDA.g:685:1: numericPositive returns [Term value] : ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE );
-	public final Term numericPositive() throws RecognitionException {
-		Term value = null;
-
-
-		Token INTEGER_POSITIVE47=null;
-		Token DOUBLE_POSITIVE48=null;
-		Token DECIMAL_POSITIVE49=null;
-
+	public final NumericPositiveContext numericPositive() throws RecognitionException {
+		NumericPositiveContext _localctx = new NumericPositiveContext(_ctx, getState());
+		enterRule(_localctx, 62, RULE_numericPositive);
+		int _la;
 		try {
-			// TurtleOBDA.g:686:3: ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE )
-			int alt22=3;
-			switch ( input.LA(1) ) {
-			case INTEGER_POSITIVE:
-				{
-				alt22=1;
-				}
-				break;
-			case DOUBLE_POSITIVE:
-				{
-				alt22=2;
-				}
-				break;
-			case DECIMAL_POSITIVE:
-				{
-				alt22=3;
-				}
-				break;
-			default:
-				NoViableAltException nvae =
-					new NoViableAltException("", 22, 0, input);
-				throw nvae;
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(215);
+			_la = _input.LA(1);
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INTEGER_POSITIVE) | (1L << DOUBLE_POSITIVE) | (1L << DECIMAL_POSITIVE))) != 0)) ) {
+			_errHandler.recoverInline(this);
 			}
-			switch (alt22) {
-				case 1 :
-					// TurtleOBDA.g:686:5: INTEGER_POSITIVE
-					{
-					INTEGER_POSITIVE47=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive994); 
-
-					   ValueConstant integerConstant = TERM_FACTORY.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.LITERAL);
-					   value = TERM_FACTORY.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
-					  
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:690:5: DOUBLE_POSITIVE
-					{
-					DOUBLE_POSITIVE48=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive1002); 
-
-					  ValueConstant doubleConstant = TERM_FACTORY.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.LITERAL);
-					  value = TERM_FACTORY.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
-					  
-					}
-					break;
-				case 3 :
-					// TurtleOBDA.g:694:5: DECIMAL_POSITIVE
-					{
-					DECIMAL_POSITIVE49=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive1011); 
-
-					  ValueConstant decimalConstant = TERM_FACTORY.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.LITERAL);
-					  value = TERM_FACTORY.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
-					   
-					}
-					break;
-
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
+				consume();
+			}
 			}
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
 		}
-		return value;
+		return _localctx;
 	}
-	// $ANTLR end "numericPositive"
 
+	public static class NumericNegativeContext extends ParserRuleContext {
+		public TerminalNode INTEGER_NEGATIVE() { return getToken(TurtleOBDAParser.INTEGER_NEGATIVE, 0); }
+		public TerminalNode DOUBLE_NEGATIVE() { return getToken(TurtleOBDAParser.DOUBLE_NEGATIVE, 0); }
+		public TerminalNode DECIMAL_NEGATIVE() { return getToken(TurtleOBDAParser.DECIMAL_NEGATIVE, 0); }
+		public NumericNegativeContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_numericNegative; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterNumericNegative(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitNumericNegative(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitNumericNegative(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 
-
-	// $ANTLR start "numericNegative"
-	// TurtleOBDA.g:700:1: numericNegative returns [Term value] : ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE );
-	public final Term numericNegative() throws RecognitionException {
-		Term value = null;
-
-
-		Token INTEGER_NEGATIVE50=null;
-		Token DOUBLE_NEGATIVE51=null;
-		Token DECIMAL_NEGATIVE52=null;
-
+	public final NumericNegativeContext numericNegative() throws RecognitionException {
+		NumericNegativeContext _localctx = new NumericNegativeContext(_ctx, getState());
+		enterRule(_localctx, 64, RULE_numericNegative);
+		int _la;
 		try {
-			// TurtleOBDA.g:701:3: ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE )
-			int alt23=3;
-			switch ( input.LA(1) ) {
-			case INTEGER_NEGATIVE:
-				{
-				alt23=1;
-				}
-				break;
-			case DOUBLE_NEGATIVE:
-				{
-				alt23=2;
-				}
-				break;
-			case DECIMAL_NEGATIVE:
-				{
-				alt23=3;
-				}
-				break;
-			default:
-				NoViableAltException nvae =
-					new NoViableAltException("", 23, 0, input);
-				throw nvae;
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(217);
+			_la = _input.LA(1);
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INTEGER_NEGATIVE) | (1L << DOUBLE_NEGATIVE) | (1L << DECIMAL_NEGATIVE))) != 0)) ) {
+			_errHandler.recoverInline(this);
 			}
-			switch (alt23) {
-				case 1 :
-					// TurtleOBDA.g:701:5: INTEGER_NEGATIVE
-					{
-					INTEGER_NEGATIVE50=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1030); 
-
-					  ValueConstant integerConstant = TERM_FACTORY.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.LITERAL);
-					  value = TERM_FACTORY.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
-					  
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:705:5: DOUBLE_NEGATIVE
-					{
-					DOUBLE_NEGATIVE51=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1038); 
-
-					   ValueConstant doubleConstant = TERM_FACTORY.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.LITERAL);
-					   value = TERM_FACTORY.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
-					  
-					}
-					break;
-				case 3 :
-					// TurtleOBDA.g:709:5: DECIMAL_NEGATIVE
-					{
-					DECIMAL_NEGATIVE52=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1047); 
-
-					  ValueConstant decimalConstant = TERM_FACTORY.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.LITERAL);
-					  value = TERM_FACTORY.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
-					  
-					}
-					break;
-
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
+				consume();
+			}
 			}
 		}
 		catch (RecognitionException re) {
-			reportError(re);
-			recover(input,re);
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
 		}
 		finally {
-			// do for sure before leaving
+			exitRule();
 		}
-		return value;
+		return _localctx;
 	}
-	// $ANTLR end "numericNegative"
 
-	// Delegated rules
-
-
-
-	public static final BitSet FOLLOW_directiveStatement_in_parse58 = new BitSet(new long[]{0x0040000000000200L,0x0000000000000018L});
-	public static final BitSet FOLLOW_triplesStatement_in_parse67 = new BitSet(new long[]{0x0040000000000000L,0x0000000000000018L});
-	public static final BitSet FOLLOW_triplesStatement_in_parse80 = new BitSet(new long[]{0x0040000000000000L,0x0000000000000018L});
-	public static final BitSet FOLLOW_EOF_in_parse87 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_directive_in_directiveStatement100 = new BitSet(new long[]{0x0008000000000000L});
-	public static final BitSet FOLLOW_PERIOD_in_directiveStatement102 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_triples_in_triplesStatement119 = new BitSet(new long[]{0x0008000000000000L,0x0000000000001000L});
-	public static final BitSet FOLLOW_WS_in_triplesStatement121 = new BitSet(new long[]{0x0008000000000000L,0x0000000000001000L});
-	public static final BitSet FOLLOW_PERIOD_in_triplesStatement124 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_base_in_directive139 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_prefixID_in_directive145 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_AT_in_base158 = new BitSet(new long[]{0x0000000000000800L});
-	public static final BitSet FOLLOW_BASE_in_base160 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000008L});
-	public static final BitSet FOLLOW_uriref_in_base162 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_AT_in_prefixID180 = new BitSet(new long[]{0x0020000000000000L});
-	public static final BitSet FOLLOW_PREFIX_in_prefixID182 = new BitSet(new long[]{0x0000200000010000L});
-	public static final BitSet FOLLOW_namespace_in_prefixID185 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000008L});
-	public static final BitSet FOLLOW_defaultNamespace_in_prefixID191 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000008L});
-	public static final BitSet FOLLOW_uriref_in_prefixID196 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_subject_in_triples215 = new BitSet(new long[]{0x0040000000000000L,0x0000000000002008L});
-	public static final BitSet FOLLOW_predicateObjectList_in_triples219 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_verb_in_predicateObjectList245 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
-	public static final BitSet FOLLOW_objectList_in_predicateObjectList251 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000001L});
-	public static final BitSet FOLLOW_SEMI_in_predicateObjectList260 = new BitSet(new long[]{0x0040000000000000L,0x0000000000002008L});
-	public static final BitSet FOLLOW_verb_in_predicateObjectList264 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
-	public static final BitSet FOLLOW_objectList_in_predicateObjectList268 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000001L});
-	public static final BitSet FOLLOW_predicate_in_verb292 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_77_in_verb300 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_object_in_objectList326 = new BitSet(new long[]{0x0000000000020002L});
-	public static final BitSet FOLLOW_COMMA_in_objectList331 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
-	public static final BitSet FOLLOW_object_in_objectList335 = new BitSet(new long[]{0x0000000000020002L});
-	public static final BitSet FOLLOW_resource_in_subject357 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_variable_in_subject365 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_resource_in_predicate386 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_resource_in_object405 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_literal_in_object413 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_typedLiteral_in_object422 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_variable_in_object430 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_uriref_in_resource451 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_qname_in_resource460 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_STRING_WITH_BRACKET_in_uriref485 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_PREFIXED_NAME_in_qname504 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_nodeID_in_blank519 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_BLANK_in_blank525 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_STRING_WITH_CURLY_BRACKET_in_variable542 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_resource_in_function563 = new BitSet(new long[]{0x0000020000000000L});
-	public static final BitSet FOLLOW_LPAREN_in_function565 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
-	public static final BitSet FOLLOW_terms_in_function567 = new BitSet(new long[]{0x1000000000000000L});
-	public static final BitSet FOLLOW_RPAREN_in_function569 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_variable_in_typedLiteral588 = new BitSet(new long[]{0x0000000000000200L});
-	public static final BitSet FOLLOW_AT_in_typedLiteral590 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000810L});
-	public static final BitSet FOLLOW_language_in_typedLiteral592 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_variable_in_typedLiteral600 = new BitSet(new long[]{0x0800000000000000L});
-	public static final BitSet FOLLOW_REFERENCE_in_typedLiteral602 = new BitSet(new long[]{0x0040000000000000L,0x0000000000000008L});
-	public static final BitSet FOLLOW_resource_in_typedLiteral604 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_languageTag_in_language623 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_variable_in_language631 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_term_in_terms657 = new BitSet(new long[]{0x0000000000020002L});
-	public static final BitSet FOLLOW_COMMA_in_terms662 = new BitSet(new long[]{0x00400070439C0000L,0x0000000000000158L});
-	public static final BitSet FOLLOW_term_in_terms666 = new BitSet(new long[]{0x0000000000020002L});
-	public static final BitSet FOLLOW_function_in_term687 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_variable_in_term695 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_literal_in_term703 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_stringLiteral_in_literal722 = new BitSet(new long[]{0x0000000000000202L});
-	public static final BitSet FOLLOW_AT_in_literal725 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000810L});
-	public static final BitSet FOLLOW_language_in_literal727 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_dataTypeString_in_literal737 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_numericLiteral_in_literal745 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_booleanLiteral_in_literal753 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_stringLiteral772 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_stringLiteral_in_dataTypeString792 = new BitSet(new long[]{0x0800000000000000L});
-	public static final BitSet FOLLOW_REFERENCE_in_dataTypeString794 = new BitSet(new long[]{0x0040000000000000L,0x0000000000000008L});
-	public static final BitSet FOLLOW_resource_in_dataTypeString796 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_numericUnsigned_in_numericLiteral812 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_numericPositive_in_numericLiteral820 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_numericNegative_in_numericLiteral828 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_BLANK_PREFIX_in_nodeID843 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
-	public static final BitSet FOLLOW_name_in_nodeID845 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_STRING_URI_in_relativeURI859 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_NAMESPACE_in_namespace872 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_COLON_in_defaultNamespace887 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_VARNAME_in_name900 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_VARNAME_in_languageTag913 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_TRUE_in_booleanLiteral930 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_FALSE_in_booleanLiteral939 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_INTEGER_in_numericUnsigned958 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DOUBLE_in_numericUnsigned966 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DECIMAL_in_numericUnsigned975 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_INTEGER_POSITIVE_in_numericPositive994 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DOUBLE_POSITIVE_in_numericPositive1002 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DECIMAL_POSITIVE_in_numericPositive1011 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_INTEGER_NEGATIVE_in_numericNegative1030 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1038 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1047 = new BitSet(new long[]{0x0000000000000002L});
+	public static final String _serializedATN =
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3>\u00de\4\2\t\2\4"+
+		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
+		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
+		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
+		"\4\32\t\32\4\33\t\33\4\34\t\34\4\35\t\35\4\36\t\36\4\37\t\37\4 \t \4!"+
+		"\t!\4\"\t\"\3\2\7\2F\n\2\f\2\16\2I\13\2\3\2\6\2L\n\2\r\2\16\2M\3\2\3\2"+
+		"\3\3\3\3\3\3\3\4\3\4\3\4\3\5\3\5\5\5Z\n\5\3\6\3\6\3\6\3\6\3\7\3\7\3\7"+
+		"\3\7\3\7\3\b\3\b\3\t\3\t\3\t\3\n\3\n\3\n\7\nm\n\n\f\n\16\np\13\n\3\13"+
+		"\3\13\3\13\3\f\3\f\5\fw\n\f\3\r\3\r\3\r\7\r|\n\r\f\r\16\r\177\13\r\3\16"+
+		"\3\16\3\16\5\16\u0084\n\16\3\17\3\17\3\17\3\17\5\17\u008a\n\17\3\20\3"+
+		"\20\5\20\u008e\n\20\3\21\3\21\3\22\3\22\3\23\3\23\6\23\u0096\n\23\r\23"+
+		"\16\23\u0097\3\23\5\23\u009b\n\23\3\24\3\24\3\25\3\25\3\25\3\25\3\25\3"+
+		"\26\3\26\3\26\3\26\3\26\3\26\3\26\3\26\5\26\u00ac\n\26\3\27\3\27\5\27"+
+		"\u00b0\n\27\3\30\3\30\3\30\7\30\u00b5\n\30\f\30\16\30\u00b8\13\30\3\31"+
+		"\3\31\3\31\5\31\u00bd\n\31\3\32\3\32\3\32\5\32\u00c2\n\32\3\32\3\32\3"+
+		"\32\5\32\u00c7\n\32\3\33\3\33\3\34\3\34\3\34\3\34\3\35\3\35\3\35\5\35"+
+		"\u00d2\n\35\3\36\3\36\3\37\3\37\3 \3 \3!\3!\3\"\3\"\3\"\2\2#\2\4\6\b\n"+
+		"\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668:<>@B\2\6\3\2\6\7\3"+
+		"\2-/\5\2\60\60\62\62\64\64\5\2\61\61\63\63\65\65\2\u00d5\2G\3\2\2\2\4"+
+		"Q\3\2\2\2\6T\3\2\2\2\bY\3\2\2\2\n[\3\2\2\2\f_\3\2\2\2\16d\3\2\2\2\20f"+
+		"\3\2\2\2\22i\3\2\2\2\24q\3\2\2\2\26v\3\2\2\2\30x\3\2\2\2\32\u0083\3\2"+
+		"\2\2\34\u0089\3\2\2\2\36\u008d\3\2\2\2 \u008f\3\2\2\2\"\u0091\3\2\2\2"+
+		"$\u009a\3\2\2\2&\u009c\3\2\2\2(\u009e\3\2\2\2*\u00ab\3\2\2\2,\u00af\3"+
+		"\2\2\2.\u00b1\3\2\2\2\60\u00bc\3\2\2\2\62\u00c6\3\2\2\2\64\u00c8\3\2\2"+
+		"\2\66\u00ca\3\2\2\28\u00d1\3\2\2\2:\u00d3\3\2\2\2<\u00d5\3\2\2\2>\u00d7"+
+		"\3\2\2\2@\u00d9\3\2\2\2B\u00db\3\2\2\2DF\5\4\3\2ED\3\2\2\2FI\3\2\2\2G"+
+		"E\3\2\2\2GH\3\2\2\2HK\3\2\2\2IG\3\2\2\2JL\5\6\4\2KJ\3\2\2\2LM\3\2\2\2"+
+		"MK\3\2\2\2MN\3\2\2\2NO\3\2\2\2OP\7\2\2\3P\3\3\2\2\2QR\5\b\5\2RS\7\f\2"+
+		"\2S\5\3\2\2\2TU\5\20\t\2UV\7\f\2\2V\7\3\2\2\2WZ\5\n\6\2XZ\5\f\7\2YW\3"+
+		"\2\2\2YX\3\2\2\2Z\t\3\2\2\2[\\\7\35\2\2\\]\7\4\2\2]^\5 \21\2^\13\3\2\2"+
+		"\2_`\7\35\2\2`a\7\5\2\2ab\5\16\b\2bc\5 \21\2c\r\3\2\2\2de\78\2\2e\17\3"+
+		"\2\2\2fg\5\32\16\2gh\5\22\n\2h\21\3\2\2\2in\5\24\13\2jk\7\13\2\2km\5\24"+
+		"\13\2lj\3\2\2\2mp\3\2\2\2nl\3\2\2\2no\3\2\2\2o\23\3\2\2\2pn\3\2\2\2qr"+
+		"\5\26\f\2rs\5\30\r\2s\25\3\2\2\2tw\5\36\20\2uw\7\3\2\2vt\3\2\2\2vu\3\2"+
+		"\2\2w\27\3\2\2\2x}\5\34\17\2yz\7\r\2\2z|\5\34\17\2{y\3\2\2\2|\177\3\2"+
+		"\2\2}{\3\2\2\2}~\3\2\2\2~\31\3\2\2\2\177}\3\2\2\2\u0080\u0084\5\36\20"+
+		"\2\u0081\u0084\5&\24\2\u0082\u0084\5$\23\2\u0083\u0080\3\2\2\2\u0083\u0081"+
+		"\3\2\2\2\u0083\u0082\3\2\2\2\u0084\33\3\2\2\2\u0085\u008a\5\36\20\2\u0086"+
+		"\u008a\5\62\32\2\u0087\u008a\5*\26\2\u0088\u008a\5&\24\2\u0089\u0085\3"+
+		"\2\2\2\u0089\u0086\3\2\2\2\u0089\u0087\3\2\2\2\u0089\u0088\3\2\2\2\u008a"+
+		"\35\3\2\2\2\u008b\u008e\5 \21\2\u008c\u008e\5\"\22\2\u008d\u008b\3\2\2"+
+		"\2\u008d\u008c\3\2\2\2\u008e\37\3\2\2\2\u008f\u0090\7;\2\2\u0090!\3\2"+
+		"\2\2\u0091\u0092\7\66\2\2\u0092#\3\2\2\2\u0093\u0095\7*\2\2\u0094\u0096"+
+		"\7=\2\2\u0095\u0094\3\2\2\2\u0096\u0097\3\2\2\2\u0097\u0095\3\2\2\2\u0097"+
+		"\u0098\3\2\2\2\u0098\u009b\3\2\2\2\u0099\u009b\7)\2\2\u009a\u0093\3\2"+
+		"\2\2\u009a\u0099\3\2\2\2\u009b%\3\2\2\2\u009c\u009d\7:\2\2\u009d\'\3\2"+
+		"\2\2\u009e\u009f\5\36\20\2\u009f\u00a0\7\22\2\2\u00a0\u00a1\5.\30\2\u00a1"+
+		"\u00a2\7\23\2\2\u00a2)\3\2\2\2\u00a3\u00a4\5&\24\2\u00a4\u00a5\7\35\2"+
+		"\2\u00a5\u00a6\5,\27\2\u00a6\u00ac\3\2\2\2\u00a7\u00a8\5&\24\2\u00a8\u00a9"+
+		"\7\b\2\2\u00a9\u00aa\5\36\20\2\u00aa\u00ac\3\2\2\2\u00ab\u00a3\3\2\2\2"+
+		"\u00ab\u00a7\3\2\2\2\u00ac+\3\2\2\2\u00ad\u00b0\5:\36\2\u00ae\u00b0\5"+
+		"&\24\2\u00af\u00ad\3\2\2\2\u00af\u00ae\3\2\2\2\u00b0-\3\2\2\2\u00b1\u00b6"+
+		"\5\60\31\2\u00b2\u00b3\7\r\2\2\u00b3\u00b5\5\60\31\2\u00b4\u00b2\3\2\2"+
+		"\2\u00b5\u00b8\3\2\2\2\u00b6\u00b4\3\2\2\2\u00b6\u00b7\3\2\2\2\u00b7/"+
+		"\3\2\2\2\u00b8\u00b6\3\2\2\2\u00b9\u00bd\5(\25\2\u00ba\u00bd\5&\24\2\u00bb"+
+		"\u00bd\5\62\32\2\u00bc\u00b9\3\2\2\2\u00bc\u00ba\3\2\2\2\u00bc\u00bb\3"+
+		"\2\2\2\u00bd\61\3\2\2\2\u00be\u00c1\5\64\33\2\u00bf\u00c0\7\35\2\2\u00c0"+
+		"\u00c2\5,\27\2\u00c1\u00bf\3\2\2\2\u00c1\u00c2\3\2\2\2\u00c2\u00c7\3\2"+
+		"\2\2\u00c3\u00c7\5\66\34\2\u00c4\u00c7\58\35\2\u00c5\u00c7\5<\37\2\u00c6"+
+		"\u00be\3\2\2\2\u00c6\u00c3\3\2\2\2\u00c6\u00c4\3\2\2\2\u00c6\u00c5\3\2"+
+		"\2\2\u00c7\63\3\2\2\2\u00c8\u00c9\79\2\2\u00c9\65\3\2\2\2\u00ca\u00cb"+
+		"\5\64\33\2\u00cb\u00cc\7\b\2\2\u00cc\u00cd\5\36\20\2\u00cd\67\3\2\2\2"+
+		"\u00ce\u00d2\5> \2\u00cf\u00d2\5@!\2\u00d0\u00d2\5B\"\2\u00d1\u00ce\3"+
+		"\2\2\2\u00d1\u00cf\3\2\2\2\u00d1\u00d0\3\2\2\2\u00d29\3\2\2\2\u00d3\u00d4"+
+		"\7>\2\2\u00d4;\3\2\2\2\u00d5\u00d6\t\2\2\2\u00d6=\3\2\2\2\u00d7\u00d8"+
+		"\t\3\2\2\u00d8?\3\2\2\2\u00d9\u00da\t\4\2\2\u00daA\3\2\2\2\u00db\u00dc"+
+		"\t\5\2\2\u00dcC\3\2\2\2\24GMYnv}\u0083\u0089\u008d\u0097\u009a\u00ab\u00af"+
+		"\u00b6\u00bc\u00c1\u00c6\u00d1";
+	public static final ATN _ATN =
+		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
+	static {
+		_decisionToDFA = new DFA[_ATN.getNumberOfDecisions()];
+		for (int i = 0; i < _ATN.getNumberOfDecisions(); i++) {
+			_decisionToDFA[i] = new DFA(_ATN.getDecisionState(i), i);
+		}
+	}
 }

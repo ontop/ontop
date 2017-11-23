@@ -4,29 +4,25 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.spec.mapping.parser.TurtleOBDA_tmpVisitor;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDAParser.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
-public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements TurtleOBDA_tmpVisitor{
+public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
 
     /**
      * Map of directives
      */
-    protected HashMap<String, String> directives = new HashMap<String, String>();
+    protected HashMap<String, String> directives = new HashMap<>();
 
     /**
      * The current subject term
@@ -36,7 +32,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
     /**
      * All variables
      */
-    protected Set<Term> variableSet = new HashSet<Term>();
+    protected Set<Term> variableSet = new HashSet<>();
 
     protected String error = "";
 
@@ -289,56 +285,61 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
     }
 
     @Override
-    public List<Function> visitParse(TurtleOBDA_tmpParser.ParseContext ctx) {
+    public List<Function> visitParse(ParseContext ctx) {
+        ctx.directiveStatement().forEach(c -> visit(c));
         return ctx.triplesStatement().stream()
                 .flatMap(c -> visitTriplesStatement(c).stream())
                 .collect(ImmutableCollectors.toList());
     }
 
     @Override
-    public List<Function> visitTriplesStatement(TurtleOBDA_tmpParser.TriplesStatementContext ctx) {
+    public Void visitDirectiveStatement(DirectiveStatementContext ctx) {
+        visit(ctx.directive());
+        return null;
+    }
+
+    @Override
+    public Void visitDirective(DirectiveContext ctx) {
+        visit(ctx.prefixID());
+        return null;
+    }
+
+    @Override
+    public List<Function> visitTriplesStatement(TriplesStatementContext ctx) {
         return visitTriples(ctx.triples());
     }
 
     @Override
-    public Void visitPrefixID_1(TurtleOBDA_tmpParser.PrefixID_1Context ctx) {
-        String prefix = ctx.namespace().getText();
+    public Void visitPrefixID(PrefixIDContext ctx) {
         String uriref = visitUriref(ctx.uriref());
-        directives.put(prefix.substring(0, prefix.length() - 1), uriref); // remove the end colon
+        String ns = ctx.prefix().getText();
+        directives.put(ns.substring(0, ns.length() - 1), uriref); // remove the end colon
         return null;
     }
 
     @Override
-    public Void visitPrefixID_2(TurtleOBDA_tmpParser.PrefixID_2Context ctx) {
-        String prefix = ctx.defaultNamespace().getText();
-        String uriref = visitUriref(ctx.uriref());
-        directives.put(prefix.substring(0, prefix.length() - 1), uriref); // remove the end colon
-        return null;
-    }
-
-    @Override
-    public List<Function> visitTriples(TurtleOBDA_tmpParser.TriplesContext ctx) {
+    public List<Function> visitTriples(TriplesContext ctx) {
         currentSubject = visitSubject(ctx.subject());
         return visitPredicateObjectList(ctx.predicateObjectList());
     }
 
     @Override
-    public List<Function> visitPredicateObjectList(TurtleOBDA_tmpParser.PredicateObjectListContext ctx) {
+    public List<Function> visitPredicateObjectList(PredicateObjectListContext ctx) {
         return ctx.predicateObject().stream()
                 .flatMap(c -> visitPredicateObject(c).stream())
                 .collect(ImmutableCollectors.toList());
     }
 
     @Override
-    public List<Function> visitPredicateObject(TurtleOBDA_tmpParser.PredicateObjectContext ctx) {
+    public List<Function> visitPredicateObject(PredicateObjectContext ctx) {
         return visitObjectList(ctx.objectList()).stream()
                 .map(t -> makeAtom(currentSubject, visitVerb(ctx.verb()), t))
                 .collect(ImmutableCollectors.toList());
     }
 
     @Override
-    public Term visitVerb(TurtleOBDA_tmpParser.VerbContext ctx) {
-        TurtleOBDA_tmpParser.ResourceContext rc = ctx.resource();
+    public Term visitVerb(VerbContext ctx) {
+        ResourceContext rc = ctx.resource();
         if (rc != null) {
             return visitResource(rc);
         }
@@ -346,19 +347,19 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
     }
 
     @Override
-    public List<Term> visitObjectList(TurtleOBDA_tmpParser.ObjectListContext ctx) {
+    public List<Term> visitObjectList(ObjectListContext ctx) {
         return ctx.object().stream()
                 .map(c -> visitObject(c))
                 .collect(ImmutableCollectors.toList());
     }
 
     @Override
-    public Term visitSubject(TurtleOBDA_tmpParser.SubjectContext ctx) {
-        TurtleOBDA_tmpParser.ResourceContext rc = ctx.resource();
+    public Term visitSubject(SubjectContext ctx) {
+        ResourceContext rc = ctx.resource();
         if (rc != null) {
             return visitResource(rc);
         }
-        TurtleOBDA_tmpParser.VariableContext vc = ctx.variable();
+        VariableContext vc = ctx.variable();
         if (vc != null) {
             return visitVariable(vc);
         }
@@ -366,37 +367,36 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
     }
 
     @Override
-    public Term visitObject(TurtleOBDA_tmpParser.ObjectContext ctx) {
+    public Term visitObject(ObjectContext ctx) {
         return (Term) visit(ctx.children.iterator().next());
     }
 
     @Override
-    public Term visitResource(TurtleOBDA_tmpParser.ResourceContext ctx) {
+    public Term visitResource(ResourceContext ctx) {
         if (ctx.uriref() != null) {
             return construct(visitUriref(ctx.uriref()));
         }
-        return construct(visitQname(ctx.qname()));
+        return construct(this.visitPrefixedName(ctx.prefixedName()));
     }
 
     @Override
-    public String visitUriref(TurtleOBDA_tmpParser.UrirefContext ctx) {
-        return removeBrackets(ctx.STRING_WITH_BRACKET().getText());
+    public String visitUriref(UrirefContext ctx) {
+        return removeBrackets(ctx.URI_REF().getText());
     }
 
-    @Override
-    public String visitQname(TurtleOBDA_tmpParser.QnameContext ctx) {
+    public String visitPrefixedName(PrefixedNameContext ctx) {
         String[] tokens = ctx.PREFIXED_NAME().getText().split(":", 2);
         String uri = directives.get(tokens[0]);  // the first token is the prefix
         return uri + tokens[1];  // the second token is the local name
     }
 
     @Override
-    public Function visitTypedLiteral_1(TurtleOBDA_tmpParser.TypedLiteral_1Context ctx) {
+    public Function visitTypedLiteral_1(TypedLiteral_1Context ctx) {
         return TERM_FACTORY.getTypedTerm(visitVariable(ctx.variable()), visitLanguage(ctx.language()));
     }
 
     @Override
-    public Function visitTypedLiteral_2(TurtleOBDA_tmpParser.TypedLiteral_2Context ctx) {
+    public Function visitTypedLiteral_2(TypedLiteral_2Context ctx) {
         Variable var = visitVariable(ctx.variable());
         Term term = visitResource(ctx.resource());
         if (term instanceof Function) {
@@ -411,14 +411,14 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
     }
 
     @Override
-    public Variable visitVariable(TurtleOBDA_tmpParser.VariableContext ctx) {
+    public Variable visitVariable(VariableContext ctx) {
         Variable variable = TERM_FACTORY.getVariable(removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText()));
         variableSet.add(variable);
         return variable;
     }
 
     @Override
-    public Function visitFunction(TurtleOBDA_tmpParser.FunctionContext ctx) {
+    public Function visitFunction(FunctionContext ctx) {
         String functionName = visitResource(ctx.resource()).toString();
         ImmutableList<Term> terms = visitTerms(ctx.terms());
         Predicate functionSymbol = TERM_FACTORY.getPredicate(functionName, terms.size());
@@ -426,8 +426,8 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
     }
 
     @Override
-    public Term visitLanguage(TurtleOBDA_tmpParser.LanguageContext ctx) {
-        TurtleOBDA_tmpParser.LanguageTagContext ltc = ctx.languageTag();
+    public Term visitLanguage(LanguageContext ctx) {
+        LanguageTagContext ltc = ctx.languageTag();
         if (ltc != null) {
             return TERM_FACTORY.getConstantLiteral(ltc.getText().toLowerCase(), COL_TYPE.STRING);
         }
@@ -435,23 +435,23 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
     }
 
     @Override
-    public ImmutableList<Term> visitTerms(TurtleOBDA_tmpParser.TermsContext ctx) {
+    public ImmutableList<Term> visitTerms(TermsContext ctx) {
         return ctx.term().stream()
                 .map(c -> visitTerm(c))
                 .collect(ImmutableCollectors.toList());
     }
 
     @Override
-    public Term visitTerm(TurtleOBDA_tmpParser.TermContext ctx) {
+    public Term visitTerm(TermContext ctx) {
         return (Term) visitChildren(ctx);
     }
 
     @Override
-    public Term visitLiteral(TurtleOBDA_tmpParser.LiteralContext ctx) {
-        TurtleOBDA_tmpParser.StringLiteralContext slc = ctx.stringLiteral();
+    public Term visitLiteral(LiteralContext ctx) {
+        StringLiteralContext slc = ctx.stringLiteral();
         if (slc != null) {
             Term literal = visitStringLiteral(slc);
-            TurtleOBDA_tmpParser.LanguageContext lc = ctx.language();
+            LanguageContext lc = ctx.language();
             //if variable we cannot assign a datatype yet
             if (literal instanceof Variable) {
                 return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
@@ -465,7 +465,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
     }
 
     @Override
-    public Term visitStringLiteral(TurtleOBDA_tmpParser.StringLiteralContext ctx) {
+    public Term visitStringLiteral(StringLiteralContext ctx) {
         String str = ctx.STRING_WITH_QUOTE_DOUBLE().getText();
         if (str.contains("{")) {
             return getNestedConcat(str);
@@ -474,7 +474,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
     }
 
     @Override
-    public Term visitDataTypeString(TurtleOBDA_tmpParser.DataTypeStringContext ctx) {
+    public Term visitDataTypeString(DataTypeStringContext ctx) {
         Term stringValue = visitStringLiteral(ctx.stringLiteral());
         Term resource = visitResource(ctx.resource());
         if (resource instanceof Function) {
@@ -490,12 +490,12 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
     }
 
     @Override
-    public Term visitNumericLiteral(TurtleOBDA_tmpParser.NumericLiteralContext ctx) {
+    public Term visitNumericLiteral(NumericLiteralContext ctx) {
         return (Term) visitChildren(ctx);
     }
 
     @Override
-    public Term visitBooleanLiteral(TurtleOBDA_tmpParser.BooleanLiteralContext ctx) {
+    public Term visitBooleanLiteral(BooleanLiteralContext ctx) {
         TerminalNode token = ctx.TRUE();
         if (token != null) {
             return typeTerm(token.getText(), COL_TYPE.BOOLEAN);
@@ -504,9 +504,9 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
     }
 
     @Override
-    public Term visitNumericUnsigned(TurtleOBDA_tmpParser.NumericUnsignedContext ctx) {
-        TerminalNode token;
-        token = ctx.INTEGER();
+    public Term visitNumericUnsigned(NumericUnsignedContext ctx) {
+
+        TerminalNode token = ctx.INTEGER();
         if (token != null) {
             return typeTerm(token.getText(), COL_TYPE.INTEGER);
         }
@@ -514,13 +514,12 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
         if (token != null) {
             return typeTerm(token.getText(), COL_TYPE.DOUBLE);
         }
-        return typeTerm(token.getText(), COL_TYPE.DECIMAL);
+        return typeTerm(ctx.DECIMAL().getText(), COL_TYPE.DECIMAL);
     }
 
     @Override
-    public Term visitNumericPositive(TurtleOBDA_tmpParser.NumericPositiveContext ctx) {
-        TerminalNode token;
-        token = ctx.INTEGER_POSITIVE();
+    public Term visitNumericPositive(NumericPositiveContext ctx) {
+        TerminalNode token = ctx.INTEGER_POSITIVE();
         if (token != null) {
             return typeTerm(token.getText(), COL_TYPE.INTEGER);
         }
@@ -528,13 +527,12 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
         if (token != null) {
             return typeTerm(token.getText(), COL_TYPE.DOUBLE);
         }
-        return typeTerm(token.getText(), COL_TYPE.DECIMAL);
+        return typeTerm(ctx.DECIMAL_POSITIVE().getText(), COL_TYPE.DECIMAL);
     }
 
     @Override
-    public Term visitNumericNegative(TurtleOBDA_tmpParser.NumericNegativeContext ctx) {
-        TerminalNode token;
-        token = ctx.INTEGER_NEGATIVE();
+    public Term visitNumericNegative(NumericNegativeContext ctx) {
+        TerminalNode token = ctx.INTEGER_NEGATIVE();
         if (token != null) {
             return typeTerm(token.getText(), COL_TYPE.INTEGER);
         }
@@ -542,6 +540,6 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDA_tmpBaseVisitor implements 
         if (token != null) {
             return typeTerm(token.getText(), COL_TYPE.DOUBLE);
         }
-        return typeTerm(token.getText(), COL_TYPE.DECIMAL);
+        return typeTerm(ctx.DECIMAL_NEGATIVE().getText(), COL_TYPE.DECIMAL);
     }
 }
