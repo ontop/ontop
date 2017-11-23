@@ -43,7 +43,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public IQTree getLeftRight() {
+    public IQTree getRightChild() {
         return rightIQTree;
     }
 

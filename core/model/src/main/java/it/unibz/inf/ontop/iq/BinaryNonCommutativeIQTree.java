@@ -6,5 +6,5 @@ public interface BinaryNonCommutativeIQTree extends CompositeIQTree<BinaryNonCom
 
     IQTree getLeftChild();
 
-    IQTree getLeftRight();
+    IQTree getRightChild();
 }
