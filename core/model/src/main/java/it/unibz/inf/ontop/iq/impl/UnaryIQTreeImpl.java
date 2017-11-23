@@ -48,7 +48,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint) {
-        throw new RuntimeException("TODO: implement it");
+        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChild());
     }
 
     @Override

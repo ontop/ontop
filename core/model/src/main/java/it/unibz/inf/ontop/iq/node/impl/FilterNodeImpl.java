@@ -12,12 +12,9 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
@@ -159,6 +156,30 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         }
         else
             return iqFactory.createUnaryIQTree(this, liftedChildIQTree, true);
+    }
+
+    /**
+     * TODO: consider the constraint
+     */
+    @Override
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint, IQTree child) {
+        SubstitutionResults<FilterNode> results = applySubstitution(descendingSubstitution);
+
+        switch (results.getLocalAction()) {
+            case NO_CHANGE:
+                return iqFactory.createUnaryIQTree(this,
+                        child.applyDescendingSubstitution(descendingSubstitution, constraint));
+            case NEW_NODE:
+                return iqFactory.createUnaryIQTree(results.getOptionalNewNode().get(),
+                        child.applyDescendingSubstitution(descendingSubstitution, constraint));
+            case REPLACE_BY_CHILD:
+                return child.applyDescendingSubstitution(descendingSubstitution, constraint);
+            case DECLARE_AS_EMPTY:
+                return iqFactory.createEmptyNode(child.getVariables());
+            default:
+                throw new MinorOntopInternalBugException("Unexpected local action: " + results.getLocalAction());
+        }
     }
 
     /**

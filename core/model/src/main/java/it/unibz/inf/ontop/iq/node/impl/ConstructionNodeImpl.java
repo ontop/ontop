@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -381,6 +382,13 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     @Override
     public SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, IntermediateQuery query) {
+        return applyDescendingSubstitution(descendingSubstitution,
+                !query.getChildren(this).isEmpty());
+    }
+
+    private SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution,
+            boolean hasChildren) {
 
         ImmutableSubstitution<ImmutableTerm> relevantSubstitution = constructionNodeTools.extractRelevantDescendingSubstitution(
                 descendingSubstitution, projectedVariables);
@@ -410,10 +418,9 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          * Currently, the root construction node is still required.
          */
         if (newSubstitutions.bindings.isEmpty() && !newOptionalModifiers.isPresent()) {
-            if(query.getChildren(this).isEmpty()){
-                return DefaultSubstitutionResults.declareAsTrue();
-            }
-            return DefaultSubstitutionResults.replaceByUniqueChild(substitutionToPropagate);
+            return hasChildren
+                    ? DefaultSubstitutionResults.declareAsTrue()
+                    : DefaultSubstitutionResults.replaceByUniqueChild(substitutionToPropagate);
         }
 
         /*
@@ -527,6 +534,41 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         }
         else
             return iqFactory.createUnaryIQTree(this, liftedChildIQTree, true);
+    }
+
+    /**
+     * TODO: refactor
+     *
+     * TODO: handle the constraint
+     *
+     */
+    @Override
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint, IQTree child) {
+        SubstitutionResults<ConstructionNode> results = applyDescendingSubstitution(descendingSubstitution, true);
+
+        IQTree updatedChild = results.getSubstitutionToPropagate()
+                .map(s -> (ImmutableSubstitution<? extends VariableOrGroundTerm>) (ImmutableSubstitution<?>) s)
+                .map(s -> child.applyDescendingSubstitution(s, constraint))
+                .orElse(child);
+
+        switch (results.getLocalAction()) {
+            case NO_CHANGE:
+                return iqFactory.createUnaryIQTree(this, updatedChild);
+            case NEW_NODE:
+                return iqFactory.createUnaryIQTree(results.getOptionalNewNode().get(), updatedChild);
+            case REPLACE_BY_CHILD:
+                return updatedChild;
+            case DECLARE_AS_TRUE:
+                return iqFactory.createTrueNode();
+            case DECLARE_AS_EMPTY:
+                return iqFactory.createEmptyNode(
+                        projectedVariables.stream()
+                                .flatMap(v -> descendingSubstitution.apply(v).getVariableStream())
+                                .collect(ImmutableCollectors.toSet()));
+            default:
+                throw new MinorOntopInternalBugException("Unexpected local action: " + results.getLocalAction());
+        }
     }
 
     private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree childIQ) {
