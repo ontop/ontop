@@ -18,18 +18,30 @@ import java.util.Optional;
 
 public class UnaryIQImpl extends AbstractCompositeIQ<UnaryOperatorNode> implements UnaryIQ {
 
+    private final boolean isLifted;
+
+    @AssistedInject
+    private UnaryIQImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQ child, @Assisted boolean isLifted) {
+        super(rootNode, ImmutableList.of(child));
+        this.isLifted = isLifted;
+    }
+
     @AssistedInject
     private UnaryIQImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQ child) {
-        super(rootNode, ImmutableList.of(child));
+        this(rootNode, child, false);
     }
 
     @Override
     public IQ liftBinding(VariableGenerator variableGenerator) {
-        IQ initialChild = getChild();
-        IQ liftedChild = initialChild.liftBinding(variableGenerator);
-        return initialChild.equals(liftedChild)
-                ? this
-                :getRootNode().liftBinding(liftedChild);
+        if (isLifted)
+            return this;
+        else {
+            IQ initialChild = getChild();
+            IQ liftedChild = initialChild.liftBinding(variableGenerator);
+            return initialChild.equals(liftedChild)
+                    ? this
+                    : getRootNode().liftBinding(liftedChild);
+        }
     }
 
     @Override

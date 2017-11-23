@@ -526,7 +526,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             return iqFactory.createEmptyNode(projectedVariables);
         }
         else
-            return iqFactory.createUnaryIQ(this, liftedChildIQ);
+            return iqFactory.createUnaryIQ(this, liftedChildIQ, true);
     }
 
     private IQ liftBinding(ConstructionNode childConstructionNode, UnaryIQ childIQ) {
@@ -548,7 +548,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                         newSubstitution, topModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
                         substitutionTools, substitutionFactory, termFactory, iqFactory);
 
-                return iqFactory.createUnaryIQ(newConstructionNode, grandChildIQ);
+                return iqFactory.createUnaryIQ(newConstructionNode, grandChildIQ, true);
             }
             /*
              * Not mergeable query modifiers --> keeps two nodes
@@ -563,8 +563,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                         nullabilityEvaluator, unificationTools, constructionNodeTools,
                         substitutionTools, substitutionFactory, termFactory, iqFactory);
 
-                UnaryIQ newChildIQ = iqFactory.createUnaryIQ(newChildConstructionNode, grandChildIQ);
-                return iqFactory.createUnaryIQ(newTopConstructionNode, newChildIQ);
+                UnaryIQ newChildIQ = iqFactory.createUnaryIQ(newChildConstructionNode, grandChildIQ, true);
+                return iqFactory.createUnaryIQ(newTopConstructionNode, newChildIQ, true);
             }
         }
         /*
@@ -576,7 +576,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                     unificationTools, constructionNodeTools,
                     substitutionTools, substitutionFactory, termFactory, iqFactory);
 
-            return iqFactory.createUnaryIQ(newConstructionNode, grandChildIQ);
+            return iqFactory.createUnaryIQ(newConstructionNode, grandChildIQ, true);
         }
     }
 

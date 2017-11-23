@@ -254,13 +254,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     ? this
                     : changeOptionalFilterCondition(currentJoiningCondition);
 
-            NaryIQ joinIQ = iqFactory.createNaryIQ(newJoinNode, currentChildren);
+            NaryIQ joinIQ = iqFactory.createNaryIQ(newJoinNode, currentChildren, true);
 
             return currentSubstitution.isEmpty()
                     ? joinIQ
                     : iqFactory.createUnaryIQ(
-                    iqFactory.createConstructionNode(projectedVariables, currentSubstitution),
-                    joinIQ);
+                            iqFactory.createConstructionNode(projectedVariables, currentSubstitution), joinIQ, true);
 
         } catch (EmptyIQException e) {
             return iqFactory.createEmptyNode(projectedVariables);

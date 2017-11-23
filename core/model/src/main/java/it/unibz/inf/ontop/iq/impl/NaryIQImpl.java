@@ -15,16 +15,27 @@ import java.util.Optional;
 
 public class NaryIQImpl extends AbstractCompositeIQ<NaryOperatorNode> implements NaryIQ {
 
+    private final boolean isLifted;
+
     @AssistedInject
-    private NaryIQImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQ> subTrees) {
-        super(rootNode, subTrees);
-        if (subTrees.size() < 2)
+    private NaryIQImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQ> children,
+                       @Assisted boolean isLifted) {
+        super(rootNode, children);
+        this.isLifted = isLifted;
+        if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
+    }
+
+    @AssistedInject
+    private NaryIQImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQ> children) {
+        this(rootNode, children, false);
     }
 
     @Override
     public IQ liftBinding(VariableGenerator variableGenerator) {
-        return getRootNode().liftBinding(getChildren(), variableGenerator);
+        return isLifted
+                ? this
+                : getRootNode().liftBinding(getChildren(), variableGenerator);
     }
 
     @Override

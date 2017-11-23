@@ -19,13 +19,22 @@ public class BinaryNonCommutativeIQImpl extends AbstractCompositeIQ<BinaryNonCom
 
     private final IQ leftIQ;
     private final IQ rightIQ;
+    private final boolean isLifted;
+
+    @AssistedInject
+    private BinaryNonCommutativeIQImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
+                                       @Assisted("left") IQ leftChild, @Assisted("right") IQ rightChild,
+                                       @Assisted boolean isLifted) {
+        super(rootNode, ImmutableList.of(leftChild, rightChild));
+        this.leftIQ = leftChild;
+        this.rightIQ = rightChild;
+        this.isLifted = isLifted;
+    }
 
     @AssistedInject
     private BinaryNonCommutativeIQImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                        @Assisted("left") IQ leftChild, @Assisted("right") IQ rightChild) {
-        super(rootNode, ImmutableList.of(leftChild, rightChild));
-        this.leftIQ = leftChild;
-        this.rightIQ = rightChild;
+        this(rootNode, leftChild, rightChild, false);
     }
 
     @Override
@@ -40,6 +49,8 @@ public class BinaryNonCommutativeIQImpl extends AbstractCompositeIQ<BinaryNonCom
 
     @Override
     public IQ liftBinding(VariableGenerator variableGenerator) {
+        if (isLifted)
+            return this;
         throw new RuntimeException("TODO: implement it");
     }
 

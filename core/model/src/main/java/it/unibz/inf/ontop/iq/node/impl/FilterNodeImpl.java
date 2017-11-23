@@ -158,7 +158,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             return liftedChildIQ;
         }
         else
-            return iqFactory.createUnaryIQ(this, liftedChildIQ);
+            return iqFactory.createUnaryIQ(this, liftedChildIQ, true);
     }
 
     /**
@@ -173,12 +173,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         switch (result.getLocalAction()) {
 
             case NO_CHANGE:
-                UnaryIQ filterIQ = iqFactory.createUnaryIQ(this, grandChildIQ);
-                return iqFactory.createUnaryIQ(childConstructionNode, filterIQ);
+                UnaryIQ filterIQ = iqFactory.createUnaryIQ(this, grandChildIQ, true);
+                return iqFactory.createUnaryIQ(childConstructionNode, filterIQ, true);
 
             case NEW_NODE:
-                UnaryIQ newFilterIQ = iqFactory.createUnaryIQ(result.getOptionalNewNode().get(), grandChildIQ);
-                return iqFactory.createUnaryIQ(childConstructionNode, newFilterIQ);
+                UnaryIQ newFilterIQ = iqFactory.createUnaryIQ(result.getOptionalNewNode().get(), grandChildIQ, true);
+                return iqFactory.createUnaryIQ(childConstructionNode, newFilterIQ, true);
 
             case REPLACE_BY_CHILD:
                 return liftedChildIQ;

@@ -53,9 +53,28 @@ public interface IntermediateQueryFactory {
 
     TrueNode createTrueNode();
 
+    UnaryIQ createUnaryIQ(UnaryOperatorNode rootNode, IQ child, boolean declareAsLifted);
+
+    /**
+     * Not declared as lifted
+     */
     UnaryIQ createUnaryIQ(UnaryOperatorNode rootNode, IQ child);
+
+    BinaryNonCommutativeIQ createBinaryNonCommutativeIQ(BinaryNonCommutativeOperatorNode rootNode,
+                                                        @Assisted("left") IQ leftChild,
+                                                        @Assisted("right") IQ rightChild,
+                                                        boolean declareAsLifted);
+    /**
+     * Not declared as lifted
+     */
     BinaryNonCommutativeIQ createBinaryNonCommutativeIQ(BinaryNonCommutativeOperatorNode rootNode,
                                                         @Assisted("left") IQ leftChild,
                                                         @Assisted("right") IQ rightChild);
+
+    NaryIQ createNaryIQ(NaryOperatorNode rootNode, ImmutableList<IQ> children, boolean declareAsLifted);
+
+    /**
+     * Not declared as lifted
+     */
     NaryIQ createNaryIQ(NaryOperatorNode rootNode, ImmutableList<IQ> children);
 }
