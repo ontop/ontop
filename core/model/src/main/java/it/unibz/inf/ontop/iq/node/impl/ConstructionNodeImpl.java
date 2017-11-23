@@ -8,9 +8,9 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.UnaryIQ;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
@@ -518,19 +518,19 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public IQ liftBinding(IQ liftedChildIQ) {
-        QueryNode liftedChildRoot = liftedChildIQ.getRootNode();
+    public IQTree liftBinding(IQTree liftedChildIQTree) {
+        QueryNode liftedChildRoot = liftedChildIQTree.getRootNode();
         if (liftedChildRoot instanceof ConstructionNode)
-            return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQ) liftedChildIQ);
+            return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQTree) liftedChildIQTree);
         else if (liftedChildRoot instanceof EmptyNode) {
             return iqFactory.createEmptyNode(projectedVariables);
         }
         else
-            return iqFactory.createUnaryIQ(this, liftedChildIQ, true);
+            return iqFactory.createUnaryIQTree(this, liftedChildIQTree, true);
     }
 
-    private IQ liftBinding(ConstructionNode childConstructionNode, UnaryIQ childIQ) {
-        IQ grandChildIQ = childIQ.getChild();
+    private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree childIQ) {
+        IQTree grandChildIQTree = childIQ.getChild();
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = mergeWithAscendingSubstitution(
                 childConstructionNode.getSubstitution());
@@ -548,7 +548,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                         newSubstitution, topModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
                         substitutionTools, substitutionFactory, termFactory, iqFactory);
 
-                return iqFactory.createUnaryIQ(newConstructionNode, grandChildIQ, true);
+                return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, true);
             }
             /*
              * Not mergeable query modifiers --> keeps two nodes
@@ -558,13 +558,13 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                         newSubstitution, formerModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
                         substitutionTools, substitutionFactory, termFactory, iqFactory);
 
-                ConstructionNode newChildConstructionNode = new ConstructionNodeImpl(grandChildIQ.getVariables(),
+                ConstructionNode newChildConstructionNode = new ConstructionNodeImpl(grandChildIQTree.getVariables(),
                         substitutionFactory.getSubstitution(), childConstructionNode.getOptionalModifiers(),
                         nullabilityEvaluator, unificationTools, constructionNodeTools,
                         substitutionTools, substitutionFactory, termFactory, iqFactory);
 
-                UnaryIQ newChildIQ = iqFactory.createUnaryIQ(newChildConstructionNode, grandChildIQ, true);
-                return iqFactory.createUnaryIQ(newTopConstructionNode, newChildIQ, true);
+                UnaryIQTree newChildIQ = iqFactory.createUnaryIQTree(newChildConstructionNode, grandChildIQTree, true);
+                return iqFactory.createUnaryIQTree(newTopConstructionNode, newChildIQ, true);
             }
         }
         /*
@@ -576,7 +576,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                     unificationTools, constructionNodeTools,
                     substitutionTools, substitutionFactory, termFactory, iqFactory);
 
-            return iqFactory.createUnaryIQ(newConstructionNode, grandChildIQ, true);
+            return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, true);
         }
     }
 

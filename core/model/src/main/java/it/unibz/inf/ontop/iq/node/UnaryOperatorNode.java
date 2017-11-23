@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.iq.node;
 
-import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 
 /**
  * Has ONE child
  */
 public interface UnaryOperatorNode extends QueryNode {
 
-    IQ liftBinding(IQ liftedChildIQ);
+    IQTree liftBinding(IQTree liftedChildIQTree);
 }

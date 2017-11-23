@@ -1,25 +1,29 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.NaryIQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
-public class NaryIQImpl extends AbstractCompositeIQ<NaryOperatorNode> implements NaryIQ {
+public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> implements NaryIQTree {
 
     private final boolean isLifted;
 
     @AssistedInject
-    private NaryIQImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQ> children,
-                       @Assisted boolean isLifted) {
+    private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
+                           @Assisted boolean isLifted) {
         super(rootNode, children);
         this.isLifted = isLifted;
         if (children.size() < 2)
@@ -27,20 +31,20 @@ public class NaryIQImpl extends AbstractCompositeIQ<NaryOperatorNode> implements
     }
 
     @AssistedInject
-    private NaryIQImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQ> children) {
+    private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children) {
         this(rootNode, children, false);
     }
 
     @Override
-    public IQ liftBinding(VariableGenerator variableGenerator) {
+    public IQTree liftBinding(VariableGenerator variableGenerator) {
         return isLifted
                 ? this
                 : getRootNode().liftBinding(getChildren(), variableGenerator);
     }
 
     @Override
-    public IQ applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                          Optional<ImmutableExpression> constraint) {
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint) {
         throw new RuntimeException("TODO: implement it");
     }
 }

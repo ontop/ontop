@@ -224,13 +224,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
      * TODO: explain
      */
     @Override
-    public IQ liftBinding(ImmutableList<IQ> initialChildren, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(ImmutableList<IQTree> initialChildren, VariableGenerator variableGenerator) {
         final ImmutableSet<Variable> projectedVariables = initialChildren.stream()
                 .flatMap(c -> c.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
 
         // Non-final
-        ImmutableList<IQ> currentChildren = initialChildren;
+        ImmutableList<IQTree> currentChildren = initialChildren;
         ImmutableSubstitution<ImmutableTerm> currentSubstitution = substitutionFactory.getSubstitution();
         Optional<ImmutableExpression> currentJoiningCondition = getOptionalFilterCondition();
         boolean hasConverged = false;
@@ -254,11 +254,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     ? this
                     : changeOptionalFilterCondition(currentJoiningCondition);
 
-            NaryIQ joinIQ = iqFactory.createNaryIQ(newJoinNode, currentChildren, true);
+            NaryIQTree joinIQ = iqFactory.createNaryIQTree(newJoinNode, currentChildren, true);
 
             return currentSubstitution.isEmpty()
                     ? joinIQ
-                    : iqFactory.createUnaryIQ(
+                    : iqFactory.createUnaryIQTree(
                             iqFactory.createConstructionNode(projectedVariables, currentSubstitution), joinIQ, true);
 
         } catch (EmptyIQException e) {
@@ -269,11 +269,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     /**
      * Lifts the binding OF AT MOST ONE child
      */
-    private LiftingStepResults liftChildBinding(ImmutableList<IQ> initialChildren,
+    private LiftingStepResults liftChildBinding(ImmutableList<IQTree> initialChildren,
                                                 Optional<ImmutableExpression> initialJoiningCondition,
                                                 VariableGenerator variableGenerator) throws EmptyIQException {
 
-        Optional<IQ> optionalSelectedLiftedChild = initialChildren.stream()
+        Optional<IQTree> optionalSelectedLiftedChild = initialChildren.stream()
                 .map(c -> c.liftBinding(variableGenerator))
                 .filter(iq -> iq.getRootNode() instanceof ConstructionNode)
                 .findFirst();
@@ -285,7 +285,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return new LiftingStepResults(substitutionFactory.getSubstitution(), initialChildren,
                     initialJoiningCondition, true);
 
-        UnaryIQ selectedLiftedChild = (UnaryIQ) optionalSelectedLiftedChild.get();
+        UnaryIQTree selectedLiftedChild = (UnaryIQTree) optionalSelectedLiftedChild.get();
         ConstructionNode selectedConstructionNode = (ConstructionNode) selectedLiftedChild.getRootNode();
 
         if (selectedConstructionNode.getOptionalModifiers().isPresent())
@@ -301,7 +301,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .getNonGroundFunctionalTermFragment();
 
 
-        ImmutableList<IQ> otherInitialChildren = initialChildren.stream()
+        ImmutableList<IQTree> otherInitialChildren = initialChildren.stream()
                 .filter(c -> c != selectedLiftedChild)
                 .collect(ImmutableCollectors.toList());
 
@@ -326,7 +326,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         /*
          * TODO: should we try to preserve the children order?
          */
-        ImmutableList<IQ> newChildren = Stream.concat(
+        ImmutableList<IQTree> newChildren = Stream.concat(
                 otherInitialChildren.stream()
                         .map(c -> c.applyDescendingSubstitution(descendingSubstitution, newCondition)),
                 Stream.of(selectedLiftedChild.getChild()))
@@ -387,12 +387,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     private static class LiftingStepResults {
         public final ImmutableSubstitution<ImmutableTerm> substitution;
-        public final ImmutableList<IQ> children;
+        public final ImmutableList<IQTree> children;
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         public final Optional<ImmutableExpression> joiningCondition;
         public final boolean hasConverged;
 
-        private LiftingStepResults(ImmutableSubstitution<ImmutableTerm> substitution, ImmutableList<IQ> children,
+        private LiftingStepResults(ImmutableSubstitution<ImmutableTerm> substitution, ImmutableList<IQTree> children,
                                    Optional<ImmutableExpression> joiningCondition, boolean hasConverged) {
             this.substitution = substitution;
             this.children = children;

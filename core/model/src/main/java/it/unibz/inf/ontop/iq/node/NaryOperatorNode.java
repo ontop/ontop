@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 /**
@@ -9,5 +9,5 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
  */
 public interface NaryOperatorNode extends QueryNode {
 
-    IQ liftBinding(ImmutableList<IQ> children, VariableGenerator variableGenerator);
+    IQTree liftBinding(ImmutableList<IQTree> children, VariableGenerator variableGenerator);
 }

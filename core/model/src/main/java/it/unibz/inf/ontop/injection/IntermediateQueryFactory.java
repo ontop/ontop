@@ -53,28 +53,28 @@ public interface IntermediateQueryFactory {
 
     TrueNode createTrueNode();
 
-    UnaryIQ createUnaryIQ(UnaryOperatorNode rootNode, IQ child, boolean declareAsLifted);
+    UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, boolean declareAsLifted);
 
     /**
      * Not declared as lifted
      */
-    UnaryIQ createUnaryIQ(UnaryOperatorNode rootNode, IQ child);
+    UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child);
 
-    BinaryNonCommutativeIQ createBinaryNonCommutativeIQ(BinaryNonCommutativeOperatorNode rootNode,
-                                                        @Assisted("left") IQ leftChild,
-                                                        @Assisted("right") IQ rightChild,
-                                                        boolean declareAsLifted);
+    BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
+                                                                @Assisted("left") IQTree leftChild,
+                                                                @Assisted("right") IQTree rightChild,
+                                                                boolean declareAsLifted);
     /**
      * Not declared as lifted
      */
-    BinaryNonCommutativeIQ createBinaryNonCommutativeIQ(BinaryNonCommutativeOperatorNode rootNode,
-                                                        @Assisted("left") IQ leftChild,
-                                                        @Assisted("right") IQ rightChild);
+    BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
+                                                                @Assisted("left") IQTree leftChild,
+                                                                @Assisted("right") IQTree rightChild);
 
-    NaryIQ createNaryIQ(NaryOperatorNode rootNode, ImmutableList<IQ> children, boolean declareAsLifted);
+    NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children, boolean declareAsLifted);
 
     /**
      * Not declared as lifted
      */
-    NaryIQ createNaryIQ(NaryOperatorNode rootNode, ImmutableList<IQ> children);
+    NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children);
 }

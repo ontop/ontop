@@ -19,7 +19,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class EmptyNodeImpl extends LeafIQImpl implements EmptyNode {
+public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     private static final String PREFIX = "EMPTY ";
     private final ImmutableSet<Variable> projectedVariables;
@@ -112,8 +112,8 @@ public class EmptyNodeImpl extends LeafIQImpl implements EmptyNode {
     }
 
     @Override
-    public IQ applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                          Optional<ImmutableExpression> constraint) {
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint) {
         ImmutableSet<Variable> substitutionDomain = descendingSubstitution.getDomain();
 
         ImmutableSet<Variable> newProjectedVariables = Stream.concat(
@@ -124,6 +124,11 @@ public class EmptyNodeImpl extends LeafIQImpl implements EmptyNode {
                 .filter(v -> !substitutionDomain.contains(v))
                 .collect(ImmutableCollectors.toSet());
         return new EmptyNodeImpl(newProjectedVariables);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return projectedVariables;
     }
 
     @Override

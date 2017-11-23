@@ -180,7 +180,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public IQ liftBinding(ImmutableList<IQ> children, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
         throw new RuntimeException("TODO: implement");
     }
 }

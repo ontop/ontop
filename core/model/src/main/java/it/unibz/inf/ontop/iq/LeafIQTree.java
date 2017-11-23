@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.iq;
 
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 
-public interface LeafIQ extends IQ, ExplicitVariableProjectionNode {
+public interface LeafIQTree extends IQTree, ExplicitVariableProjectionNode {
 
     @Override
-    LeafIQ getRootNode();
+    LeafIQTree getRootNode();
 }

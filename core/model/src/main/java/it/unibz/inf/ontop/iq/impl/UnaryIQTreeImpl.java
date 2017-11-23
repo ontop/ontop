@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.UnaryIQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -16,28 +16,29 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
-public class UnaryIQImpl extends AbstractCompositeIQ<UnaryOperatorNode> implements UnaryIQ {
+public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> implements UnaryIQTree {
 
     private final boolean isLifted;
 
     @AssistedInject
-    private UnaryIQImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQ child, @Assisted boolean isLifted) {
+    private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
+                            @Assisted boolean isLifted) {
         super(rootNode, ImmutableList.of(child));
         this.isLifted = isLifted;
     }
 
     @AssistedInject
-    private UnaryIQImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQ child) {
+    private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child) {
         this(rootNode, child, false);
     }
 
     @Override
-    public IQ liftBinding(VariableGenerator variableGenerator) {
+    public IQTree liftBinding(VariableGenerator variableGenerator) {
         if (isLifted)
             return this;
         else {
-            IQ initialChild = getChild();
-            IQ liftedChild = initialChild.liftBinding(variableGenerator);
+            IQTree initialChild = getChild();
+            IQTree liftedChild = initialChild.liftBinding(variableGenerator);
             return initialChild.equals(liftedChild)
                     ? this
                     : getRootNode().liftBinding(liftedChild);
@@ -45,8 +46,8 @@ public class UnaryIQImpl extends AbstractCompositeIQ<UnaryOperatorNode> implemen
     }
 
     @Override
-    public IQ applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                          Optional<ImmutableExpression> constraint) {
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint) {
         throw new RuntimeException("TODO: implement it");
     }
 
@@ -60,7 +61,7 @@ public class UnaryIQImpl extends AbstractCompositeIQ<UnaryOperatorNode> implemen
     }
 
     @Override
-    public IQ getChild() {
+    public IQTree getChild() {
         return getChildren().get(0);
     }
 }

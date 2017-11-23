@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
 import java.util.Optional;
 
-public class TrueNodeImpl extends LeafIQImpl implements TrueNode {
+public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
 
     private static final String PREFIX = "TRUE";
     private static final ImmutableSet<Variable> EMPTY_VARIABLE_SET = ImmutableSet.of();
@@ -113,8 +113,13 @@ public class TrueNodeImpl extends LeafIQImpl implements TrueNode {
     }
 
     @Override
-    public IQ applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                          Optional<ImmutableExpression> constraint) {
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint) {
         return this;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return ImmutableSet.of();
     }
 }

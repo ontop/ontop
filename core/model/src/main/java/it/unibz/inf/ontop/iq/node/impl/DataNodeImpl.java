@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -22,7 +22,7 @@ import java.util.Optional;
 /**
  *
  */
-public abstract class DataNodeImpl extends LeafIQImpl implements DataNode {
+public abstract class DataNodeImpl extends LeafIQTreeImpl implements DataNode {
 
     private DataAtom atom;
 
@@ -60,8 +60,8 @@ public abstract class DataNodeImpl extends LeafIQImpl implements DataNode {
     }
 
     @Override
-    public IQ applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                          Optional<ImmutableExpression> constraint) {
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint) {
         DataAtom newAtom = descendingSubstitution.applyToDataAtom(getProjectionAtom());
         return newAtom(newAtom);
     }
@@ -89,5 +89,10 @@ public abstract class DataNodeImpl extends LeafIQImpl implements DataNode {
     @Override
     public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
         return getLocallyRequiredVariables();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return getLocalVariables();
     }
 }
