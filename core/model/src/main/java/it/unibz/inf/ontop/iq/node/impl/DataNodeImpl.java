@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.LeafIQ;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -14,6 +16,8 @@ import it.unibz.inf.ontop.iq.node.NodeTransformationProposal;
 import it.unibz.inf.ontop.iq.node.SubstitutionResults;
 import it.unibz.inf.ontop.iq.node.TrueNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.Optional;
 
 /**
  *
@@ -45,13 +49,6 @@ public abstract class DataNodeImpl extends LeafIQImpl implements DataNode {
                 .filter(Variable.class::isInstance)
                 .map(Variable.class::cast)
                 .collect(ImmutableCollectors.toSet());
-
-//        ImmutableSet.Builder<Variable> variableBuilder = ImmutableSet.builder();
-//        for (VariableOrGroundTerm term : atom.getArguments()) {
-//            if (term instanceof Variable)
-//                variableBuilder.add((Variable)term);
-//        }
-//        return variableBuilder.build();
     }
 
     protected static <T extends DataNode> SubstitutionResults<T> applySubstitution(
@@ -60,6 +57,13 @@ public abstract class DataNodeImpl extends LeafIQImpl implements DataNode {
         DataAtom newAtom = substitution.applyToDataAtom(dataNode.getProjectionAtom());
         T newNode = (T) dataNode.newAtom(newAtom);
         return DefaultSubstitutionResults.newNode(newNode, substitution);
+    }
+
+    @Override
+    public IQ applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                          Optional<ImmutableExpression> constraint) {
+        DataAtom newAtom = descendingSubstitution.applyToDataAtom(getProjectionAtom());
+        return newAtom(newAtom);
     }
 
     @Override

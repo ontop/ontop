@@ -415,6 +415,29 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
     }
 
+    @Override
+    public ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment() {
+        ImmutableMap<Variable, VariableOrGroundTerm> newMap = getImmutableMap().entrySet().stream()
+                .filter(e -> e.getValue() instanceof VariableOrGroundTerm)
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (VariableOrGroundTerm) e.getValue()));
+
+        return new ImmutableSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory());
+    }
+
+    @Override
+    public ImmutableSubstitution<NonGroundFunctionalTerm> getNonGroundFunctionalTermFragment() {
+        ImmutableMap<Variable, NonGroundFunctionalTerm> newMap = getImmutableMap().entrySet().stream()
+                .filter(e -> e.getValue() instanceof NonGroundFunctionalTerm)
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (NonGroundFunctionalTerm) e.getValue()));
+
+        return new ImmutableSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory());
+    }
+
+
     protected AtomFactory getAtomFactory() {
         return atomFactory;
     }

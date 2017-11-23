@@ -8,7 +8,13 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.UnaryIQ;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.VariableGenerator;
+
+import java.util.Optional;
 
 public class UnaryIQImpl extends AbstractCompositeIQ<UnaryOperatorNode> implements UnaryIQ {
 
@@ -18,12 +24,18 @@ public class UnaryIQImpl extends AbstractCompositeIQ<UnaryOperatorNode> implemen
     }
 
     @Override
-    public IQ liftBinding() {
+    public IQ liftBinding(VariableGenerator variableGenerator) {
         IQ initialChild = getChild();
-        IQ liftedChild = initialChild.liftBinding();
+        IQ liftedChild = initialChild.liftBinding(variableGenerator);
         return initialChild.equals(liftedChild)
                 ? this
                 :getRootNode().liftBinding(liftedChild);
+    }
+
+    @Override
+    public IQ applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                          Optional<ImmutableExpression> constraint) {
+        throw new RuntimeException("TODO: implement it");
     }
 
     @Override

@@ -93,6 +93,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     Optional<ImmutableExpression> convertIntoBooleanExpression();
 
     Var2VarSubstitution getVar2VarFragment();
+    ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment();
+    ImmutableSubstitution<NonGroundFunctionalTerm> getNonGroundFunctionalTermFragment();
 
     ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment();
 
@@ -100,5 +102,4 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      * Reduces the substitution's domain to its intersection with the argument domain
      */
     ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
-
 }

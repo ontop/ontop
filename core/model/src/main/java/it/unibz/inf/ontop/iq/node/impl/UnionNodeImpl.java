@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
 
@@ -179,7 +180,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public IQ liftBinding(ImmutableList<IQ> children) {
+    public IQ liftBinding(ImmutableList<IQ> children, VariableGenerator variableGenerator) {
         throw new RuntimeException("TODO: implement");
     }
 }

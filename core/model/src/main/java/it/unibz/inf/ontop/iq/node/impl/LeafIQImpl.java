@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.LeafIQ;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 public abstract class LeafIQImpl extends QueryNodeImpl implements LeafIQ {
 
@@ -19,7 +20,7 @@ public abstract class LeafIQImpl extends QueryNodeImpl implements LeafIQ {
     }
 
     @Override
-    public IQ liftBinding() {
+    public IQ liftBinding(VariableGenerator variableGenerator) {
         return this;
     }
 }

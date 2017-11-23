@@ -6,6 +6,8 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -13,6 +15,9 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class EmptyNodeImpl extends LeafIQImpl implements EmptyNode {
 
@@ -104,6 +109,21 @@ public class EmptyNodeImpl extends LeafIQImpl implements EmptyNode {
     @Override
     public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
+    }
+
+    @Override
+    public IQ applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                          Optional<ImmutableExpression> constraint) {
+        ImmutableSet<Variable> substitutionDomain = descendingSubstitution.getDomain();
+
+        ImmutableSet<Variable> newProjectedVariables = Stream.concat(
+                projectedVariables.stream(),
+                descendingSubstitution.getImmutableMap().values().stream()
+                        .filter(val -> val instanceof Variable)
+                        .map(v -> (Variable) v))
+                .filter(v -> !substitutionDomain.contains(v))
+                .collect(ImmutableCollectors.toSet());
+        return new EmptyNodeImpl(newProjectedVariables);
     }
 
     @Override

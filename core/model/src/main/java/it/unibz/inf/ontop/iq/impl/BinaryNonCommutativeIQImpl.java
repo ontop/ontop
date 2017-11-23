@@ -6,6 +6,12 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQ;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.VariableGenerator;
+
+import java.util.Optional;
 
 
 public class BinaryNonCommutativeIQImpl extends AbstractCompositeIQ<BinaryNonCommutativeOperatorNode>
@@ -33,7 +39,13 @@ public class BinaryNonCommutativeIQImpl extends AbstractCompositeIQ<BinaryNonCom
     }
 
     @Override
-    public IQ liftBinding() {
+    public IQ liftBinding(VariableGenerator variableGenerator) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
+    @Override
+    public IQ applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                          Optional<ImmutableExpression> constraint) {
         throw new RuntimeException("TODO: implement it");
     }
 }

@@ -6,6 +6,12 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.NaryIQ;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.VariableGenerator;
+
+import java.util.Optional;
 
 public class NaryIQImpl extends AbstractCompositeIQ<NaryOperatorNode> implements NaryIQ {
 
@@ -17,7 +23,13 @@ public class NaryIQImpl extends AbstractCompositeIQ<NaryOperatorNode> implements
     }
 
     @Override
-    public IQ liftBinding() {
-        return getRootNode().liftBinding(getChildren());
+    public IQ liftBinding(VariableGenerator variableGenerator) {
+        return getRootNode().liftBinding(getChildren(), variableGenerator);
+    }
+
+    @Override
+    public IQ applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                          Optional<ImmutableExpression> constraint) {
+        throw new RuntimeException("TODO: implement it");
     }
 }

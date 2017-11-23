@@ -57,5 +57,5 @@ public interface IntermediateQueryFactory {
     BinaryNonCommutativeIQ createBinaryNonCommutativeIQ(BinaryNonCommutativeOperatorNode rootNode,
                                                         @Assisted("left") IQ leftChild,
                                                         @Assisted("right") IQ rightChild);
-    NaryIQ createUnaryIQ(NaryOperatorNode rootNode, ImmutableList<IQ> children);
+    NaryIQ createNaryIQ(NaryOperatorNode rootNode, ImmutableList<IQ> children);
 }
