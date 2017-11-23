@@ -65,6 +65,7 @@ public class BindingLiftTest {
     private final Variable M = TERM_FACTORY.getVariable("m");
     private final Variable N = TERM_FACTORY.getVariable("n");
 
+    private final Constant ONE = TERM_FACTORY.getConstantLiteral("1", XSD.INTEGER);
 
     private URITemplatePredicate URI_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
     private URITemplatePredicate URI_2PREDICATE =  TERM_FACTORY.getURITemplatePredicate(3);
@@ -1597,6 +1598,72 @@ public class BindingLiftTest {
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
+
+    @Test
+    public void testJoinTemplateAndFunctionalGroundTerm1() throws EmptyQueryException {
+        testJoinTemplateAndFunctionalGroundTerm(true);
+    }
+
+    @Test
+    public void testJoinTemplateAndFunctionalGroundTerm2() throws EmptyQueryException {
+        testJoinTemplateAndFunctionalGroundTerm(false);
+    }
+    private void testJoinTemplateAndFunctionalGroundTerm(boolean trueNodeOnTheLeft) throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
+
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        queryBuilder.init(projectionAtom, joinNode);
+
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
+                        X, generateURI1(A),
+                        Y, generateURI2(B))));
+
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
+                        X, generateURI1(ONE))));
+
+        if (trueNodeOnTheLeft) {
+            queryBuilder.addChild(joinNode, constructionNode2);
+            queryBuilder.addChild(joinNode, constructionNode1);
+        }
+        else {
+            queryBuilder.addChild(joinNode, constructionNode1);
+            queryBuilder.addChild(joinNode, constructionNode2);
+        }
+
+        queryBuilder.addChild(constructionNode1, DATA_NODE_1);
+        TrueNode trueNode = IQ_FACTORY.createTrueNode();
+        queryBuilder.addChild(constructionNode2, trueNode);
+
+        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        ImmutableMap.of(
+                                X, generateURI1(ONE),
+                                Y, generateURI2(B))));
+        expectedQueryBuilder.init(projectionAtom, newConstructionNode);
+        ExtensionalDataNode newLeftDataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(DATA_NODE_1.getProjectionAtom().getPredicate(), ONE, B));
+        expectedQueryBuilder.addChild(newConstructionNode, newLeftDataNode);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        System.out.println("\nExpected query: \n" +  expectedQuery);
+
+
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
+        System.out.println("\nOptimized query: \n" +  optimizedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+
 
     @Test
     public void testUnionWithJoin() throws EmptyQueryException {
