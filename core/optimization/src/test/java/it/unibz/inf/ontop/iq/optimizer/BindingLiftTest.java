@@ -723,11 +723,8 @@ public class BindingLiftTest {
         InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(expSubQueryUnionNode, expectedJoinNode);
 
-        expectedQueryBuilder.addChild(expectedJoinNode, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B)) );
-
-        //second child of JoinNode
-
         expectedQueryBuilder.addChild(expectedJoinNode, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, E, B)) );
+        expectedQueryBuilder.addChild(expectedJoinNode, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B)) );
 
         ConstructionNode expectedRightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -1212,8 +1209,8 @@ public class BindingLiftTest {
 
         expectedQueryBuilder.addChild(topUnionNode, constructionNode3);
         expectedQueryBuilder.addChild(constructionNode3, joinNode);
-        expectedQueryBuilder.addChild(joinNode, dataNode9);
         expectedQueryBuilder.addChild(joinNode, dataNode10);
+        expectedQueryBuilder.addChild(joinNode, dataNode9);
 
         //build expected query
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -1311,8 +1308,8 @@ public class BindingLiftTest {
                         X, generateURI1(D))));
         expectedQueryBuilder.addChild(topUnionNode, constructionNode3b);
         expectedQueryBuilder.addChild(constructionNode3b, joinNode);
-        expectedQueryBuilder.addChild(joinNode, dataNode9);
         expectedQueryBuilder.addChild(joinNode, dataNode10);
+        expectedQueryBuilder.addChild(joinNode, dataNode9);
 
         //build expected query
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -1595,6 +1592,7 @@ public class BindingLiftTest {
 
 
         IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
+        System.out.println("\nOptimized query: \n" +  optimizedQuery);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
