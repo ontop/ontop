@@ -199,7 +199,24 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
         ImmutableList<IQTree> liftedChildren = children.stream()
                 .map(c -> c.liftBinding(variableGenerator))
+                .filter(c -> !(c instanceof EmptyNode))
                 .collect(ImmutableCollectors.toList());
+
+        switch (liftedChildren.size()) {
+            case 0:
+                return iqFactory.createEmptyNode(projectedVariables);
+            case 1:
+                return liftedChildren.get(0);
+            default:
+                return liftBindingFromLiftedChildren(liftedChildren, variableGenerator);
+        }
+    }
+
+
+    /**
+     * Has at least two children
+     */
+    private IQTree liftBindingFromLiftedChildren(ImmutableList<IQTree> liftedChildren, VariableGenerator variableGenerator) {
 
         /*
          * Cannot lift anything if some children do not have a construction node
