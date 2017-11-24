@@ -256,10 +256,15 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
             NaryIQTree joinIQ = iqFactory.createNaryIQTree(newJoinNode, currentChildren, true);
 
-            return currentSubstitution.isEmpty()
+            ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = substitutionFactory
+                    .getSubstitution(currentSubstitution.getImmutableMap().entrySet().stream()
+                            .filter(e -> projectedVariables.contains(e.getKey()))
+                            .collect(ImmutableCollectors.toMap()));
+
+            return ascendingSubstitution.isEmpty()
                     ? joinIQ
                     : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(projectedVariables, currentSubstitution), joinIQ, true);
+                            iqFactory.createConstructionNode(projectedVariables, ascendingSubstitution), joinIQ, true);
 
         } catch (EmptyIQException e) {
             return iqFactory.createEmptyNode(projectedVariables);
@@ -340,15 +345,19 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                                           InjectiveVar2VarSubstitution freshRenaming)
             throws EmptyIQException {
 
-        Optional<ExpressionEvaluator.EvaluationResult> optionalEvaluationResults = initialJoiningCondition
-                .map(childSubstitution::applyToBooleanExpression)
-                .flatMap(e -> getImmutabilityTools().foldBooleanExpressions(
-                        Stream.concat(
-                                Stream.of(e),
-                                freshRenaming.getImmutableMap().entrySet().stream()
-                                        .map(r -> termFactory.getImmutableExpression(EQ,
-                                                childSubstitution.applyToVariable(r.getKey()),
-                                                r.getValue())))))
+        Stream<ImmutableExpression> expressions = Stream.concat(
+                initialJoiningCondition
+                        .map(childSubstitution::applyToBooleanExpression)
+                        .map(ImmutableExpression::flattenAND)
+                        .orElseGet(ImmutableSet::of)
+                        .stream(),
+                freshRenaming.getImmutableMap().entrySet().stream()
+                        .map(r -> termFactory.getImmutableExpression(EQ,
+                                childSubstitution.applyToVariable(r.getKey()),
+                                r.getValue())));
+
+        Optional<ExpressionEvaluator.EvaluationResult> optionalEvaluationResults =
+                getImmutabilityTools().foldBooleanExpressions(expressions)
                 .map(e -> createExpressionEvaluator().evaluateExpression(e));
 
         if (optionalEvaluationResults.isPresent()) {
