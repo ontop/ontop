@@ -117,6 +117,12 @@ public interface TurtleOBDAVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPrefixedName(TurtleOBDAParser.PrefixedNameContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TurtleOBDAParser#ncNameExt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNcNameExt(TurtleOBDAParser.NcNameExtContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TurtleOBDAParser#blank}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -190,12 +196,6 @@ public interface TurtleOBDAVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitNumericLiteral(TurtleOBDAParser.NumericLiteralContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TurtleOBDAParser#languageTag}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLanguageTag(TurtleOBDAParser.LanguageTagContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TurtleOBDAParser#booleanLiteral}.
 	 * @param ctx the parse tree

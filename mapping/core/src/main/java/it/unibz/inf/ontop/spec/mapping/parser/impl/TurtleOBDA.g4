@@ -67,8 +67,8 @@ prefixID
   : AT PREFIX_KW prefix uriref
   ;
 
-prefix //useless in the grammar, but used for code generation
-  : PREFIX
+prefix
+  : (UNDERSCORE? NAME_SBS+)? COLON
   ;
 
 triples
@@ -108,8 +108,12 @@ uriref //useless in the grammar, but used for code generation
   : URI_REF
   ;
 
-prefixedName //useless in the grammar, but used for code generation
-  : PREFIXED_NAME
+prefixedName
+  : prefix ncNameExt
+  ;
+
+ncNameExt
+  : (NAME_SBS | STRING_WITH_CURLY_BRACKET)+
   ;
 
 blank
@@ -130,7 +134,7 @@ typedLiteral
   ;
 
 language
-  : languageTag | variable
+  : LANGUAGE_STRING
   ;
 
 terms
@@ -169,10 +173,6 @@ numericLiteral
 //  : VARNAME
 //  ;
 
-languageTag
-  : VARNAME
-  ;
-
 booleanLiteral
   : TRUE | FALSE
   ;
@@ -191,7 +191,7 @@ numericNegative
 
 /*------------------------------------------------------------------
  * LEXER RULES
- Are applied for tokenization (before parsing), regardless of parser rules, as follows:
+ Applied for tokenization (before parsing), regardless of parser rules, as follows:
  - The rule matching the longest substring is applied
  - If there are several, the first of them is applied
  *------------------------------------------------------------------*/
@@ -204,29 +204,29 @@ FALSE: ('F'|'f')('A'|'a')('L'|'l')('S'|'s')('E'|'e');
 
 TRUE: ('T'|'t')('R'|'r')('U'|'u')('E'|'e');
 
-REFERENCE:     '^^';
-LTSIGN:        '<"';
-RTSIGN:        '">';
-SEMI:          ';';
+//REFERENCE:     '^^';
+//LTSIGN:        '<"';
+//RTSIGN:        '">';
+//SEMI:          ';';
 PERIOD:        '.';
-COMMA:         ',';
+//COMMA:         ',';
 LSQ_BRACKET:   '[';
 RSQ_BRACKET:   ']';
 LCR_BRACKET:   '{';
 RCR_BRACKET:   '}';
-LPAREN:        '(';
-RPAREN:        ')';
+//LPAREN:        '(';
+//RPAREN:        ')';
 QUESTION:      '?';
-DOLLAR:        '$';
+//DOLLAR:        '$';
 QUOTE_DOUBLE:  '"';
 QUOTE_SINGLE:  '\'';
-APOSTROPHE:    '`';
+//APOSTROPHE:    '`';
 UNDERSCORE:    '_';
 MINUS:         '-';
-ASTERISK:      '*';
-AMPERSAND:     '&';
-AT:            '@';
-EXCLAMATION:   '!';
+//ASTERISK:      '*';
+//AMPERSAND:     '&';
+//AT:            '@';
+//EXCLAMATION:   '!';
 HASH:          '#';
 PERCENT:       '%';
 PLUS:          '+';
@@ -235,37 +235,13 @@ COLON:         ':';
 LESS:          '<';
 GREATER:       '>';
 SLASH:         '/';
-DOUBLE_SLASH:  '//';
-BACKSLASH:     '\\';
+//DOUBLE_SLASH:  '//';
+//BACKSLASH:     '\\';
 BLANK:	       '[]';
 BLANK_PREFIX:  '_:';
-TILDE:         '~';
-CARET:         '^';
+//TILDE:         '~';
+//CARET:         '^';
 
-fragment ALPHA
-  : 'a'..'z'
-  | 'A'..'Z'
-  | '\u00C0'..'\u00D6'
-  | '\u00D8'..'\u00F6'
-  | '\u00F8'..'\u02FF'
-  | '\u0370'..'\u037D'
-  | '\u037F'..'\u1FFF'
-  | '\u200C'..'\u200D'
-  | '\u2070'..'\u218F'
-  | '\u2C00'..'\u2FEF'
-  | '\u3001'..'\uD7FF'
-  | '\uF900'..'\uFDCF'
-  | '\uFDF0'..'\uFFFD'
-  ;
-
-fragment DIGIT
-  : '0'..'9'
-  ;
-
-fragment ALPHANUM
-  : ALPHA
-  | DIGIT
-  ;
 
 //fragment CHAR
 //  : ALPHANUM
@@ -313,23 +289,15 @@ DECIMAL_NEGATIVE
   : MINUS DECIMAL
   ;
 
-//VARNAME
-//  : ALPHA CHAR*
-//  ;
+LANGUAGE_STRING
+    : [a-zA-Z] + (MINUS [a-zA-Z0-9] +)*
+    ;
 
+NAME_SBS
+    : NAME_CHAR+ | LANGUAGE_STRING
+    ;
 //NAME_START_CHAR: (ALPHA|UNDERSCORE);
 
-PREFIXED_NAME
-  : PREFIX NCNAME_EXT
-  ;
-
-//NCNAME
-//  : NAME_START_CHAR (NAME_CHAR)+
-//  ;
-
-NCNAME_EXT
-  : ((NAME_CHAR)+ | STRING_WITH_CURLY_BRACKET)+
-  ;
 
 //fragment SCHEMA: ALPHA (ALPHANUM|PLUS|MINUS|PERIOD)*;
 
@@ -341,11 +309,6 @@ NCNAME_EXT
 //
 //fragment ID: ID_START (ID_CORE)*;
 
-fragment NAME_CHAR: (ALPHANUM|DIGIT|UNDERSCORE|MINUS|PERIOD|HASH|QUESTION|SLASH|PERCENT|EQUALS);
-
-PREFIX
-  : (UNDERSCORE? NAME_CHAR+)? COLON
-  ;
 
 STRING_WITH_QUOTE_DOUBLE // No lexer ref allowed in complement
   : QUOTE_DOUBLE  ( ~(' '|'\t'|'\n'|'\r'|'\b'|'\f' | '\'' | '"' | '\\') )+ QUOTE_DOUBLE
@@ -358,6 +321,33 @@ STRING_WITH_CURLY_BRACKET // No lexer ref allowed in complement
 URI_REF // No lexer ref allowed in complement
   : LESS  ( ~(' '|'\t'|'\n'|'\r'|'\b'|'\f' | '\'' | '"' | '\\') )+? GREATER
   ;
+
+fragment ALPHA
+  : 'a'..'z'
+  | 'A'..'Z'
+  | '\u00C0'..'\u00D6'
+  | '\u00D8'..'\u00F6'
+  | '\u00F8'..'\u02FF'
+  | '\u0370'..'\u037D'
+  | '\u037F'..'\u1FFF'
+  | '\u200C'..'\u200D'
+  | '\u2070'..'\u218F'
+  | '\u2C00'..'\u2FEF'
+  | '\u3001'..'\uD7FF'
+  | '\uF900'..'\uFDCF'
+  | '\uFDF0'..'\uFFFD'
+  ;
+
+fragment DIGIT
+  : '0'..'9'
+  ;
+
+fragment ALPHANUM
+  : ALPHA
+  | DIGIT
+  ;
+
+NAME_CHAR: (ALPHANUM|DIGIT|UNDERSCORE|MINUS|PERIOD|HASH|QUESTION|SLASH|PERCENT|EQUALS);
 
 WS: (' '|'\t'|'\n'|'\r\n'|'\b'|'\f')+ -> channel(HIDDEN);
 

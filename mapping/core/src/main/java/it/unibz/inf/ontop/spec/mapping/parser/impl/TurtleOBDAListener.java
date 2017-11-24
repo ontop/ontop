@@ -182,6 +182,16 @@ public interface TurtleOBDAListener extends ParseTreeListener {
 	 */
 	void exitPrefixedName(TurtleOBDAParser.PrefixedNameContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link TurtleOBDAParser#ncNameExt}.
+	 * @param ctx the parse tree
+	 */
+	void enterNcNameExt(TurtleOBDAParser.NcNameExtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TurtleOBDAParser#ncNameExt}.
+	 * @param ctx the parse tree
+	 */
+	void exitNcNameExt(TurtleOBDAParser.NcNameExtContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link TurtleOBDAParser#blank}.
 	 * @param ctx the parse tree
 	 */
@@ -305,16 +315,6 @@ public interface TurtleOBDAListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNumericLiteral(TurtleOBDAParser.NumericLiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link TurtleOBDAParser#languageTag}.
-	 * @param ctx the parse tree
-	 */
-	void enterLanguageTag(TurtleOBDAParser.LanguageTagContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link TurtleOBDAParser#languageTag}.
-	 * @param ctx the parse tree
-	 */
-	void exitLanguageTag(TurtleOBDAParser.LanguageTagContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link TurtleOBDAParser#booleanLiteral}.
 	 * @param ctx the parse tree

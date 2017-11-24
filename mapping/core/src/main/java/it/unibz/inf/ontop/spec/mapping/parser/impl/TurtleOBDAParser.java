@@ -21,56 +21,49 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, BASE_KW=2, PREFIX_KW=3, FALSE=4, TRUE=5, REFERENCE=6, LTSIGN=7, 
-		RTSIGN=8, SEMI=9, PERIOD=10, COMMA=11, LSQ_BRACKET=12, RSQ_BRACKET=13, 
-		LCR_BRACKET=14, RCR_BRACKET=15, LPAREN=16, RPAREN=17, QUESTION=18, DOLLAR=19, 
-		QUOTE_DOUBLE=20, QUOTE_SINGLE=21, APOSTROPHE=22, UNDERSCORE=23, MINUS=24, 
-		ASTERISK=25, AMPERSAND=26, AT=27, EXCLAMATION=28, HASH=29, PERCENT=30, 
-		PLUS=31, EQUALS=32, COLON=33, LESS=34, GREATER=35, SLASH=36, DOUBLE_SLASH=37, 
-		BACKSLASH=38, BLANK=39, BLANK_PREFIX=40, TILDE=41, CARET=42, INTEGER=43, 
-		DOUBLE=44, DECIMAL=45, INTEGER_POSITIVE=46, INTEGER_NEGATIVE=47, DOUBLE_POSITIVE=48, 
-		DOUBLE_NEGATIVE=49, DECIMAL_POSITIVE=50, DECIMAL_NEGATIVE=51, PREFIXED_NAME=52, 
-		NCNAME_EXT=53, PREFIX=54, STRING_WITH_QUOTE_DOUBLE=55, STRING_WITH_CURLY_BRACKET=56, 
-		URI_REF=57, WS=58, NAME_CHAR=59, VARNAME=60;
+		T__0=1, BASE_KW=2, PREFIX_KW=3, FALSE=4, TRUE=5, PERIOD=6, LSQ_BRACKET=7, 
+		RSQ_BRACKET=8, LCR_BRACKET=9, RCR_BRACKET=10, QUESTION=11, QUOTE_DOUBLE=12, 
+		QUOTE_SINGLE=13, UNDERSCORE=14, MINUS=15, HASH=16, PERCENT=17, PLUS=18, 
+		EQUALS=19, COLON=20, LESS=21, GREATER=22, SLASH=23, BLANK=24, BLANK_PREFIX=25, 
+		INTEGER=26, DOUBLE=27, DECIMAL=28, INTEGER_POSITIVE=29, INTEGER_NEGATIVE=30, 
+		DOUBLE_POSITIVE=31, DOUBLE_NEGATIVE=32, DECIMAL_POSITIVE=33, DECIMAL_NEGATIVE=34, 
+		LANGUAGE_STRING=35, NAME_SBS=36, STRING_WITH_QUOTE_DOUBLE=37, STRING_WITH_CURLY_BRACKET=38, 
+		URI_REF=39, WS=40, AT=41, SEMI=42, COMMA=43, NAME_CHAR=44, LPAREN=45, 
+		RPAREN=46, REFERENCE=47;
 	public static final int
 		RULE_parse = 0, RULE_directiveStatement = 1, RULE_triplesStatement = 2, 
 		RULE_directive = 3, RULE_base = 4, RULE_prefixID = 5, RULE_prefix = 6, 
 		RULE_triples = 7, RULE_predicateObjectList = 8, RULE_predicateObject = 9, 
 		RULE_verb = 10, RULE_objectList = 11, RULE_subject = 12, RULE_object = 13, 
-		RULE_resource = 14, RULE_uriref = 15, RULE_prefixedName = 16, RULE_blank = 17, 
-		RULE_variable = 18, RULE_function = 19, RULE_typedLiteral = 20, RULE_language = 21, 
-		RULE_terms = 22, RULE_term = 23, RULE_literal = 24, RULE_stringLiteral = 25, 
-		RULE_dataTypeString = 26, RULE_numericLiteral = 27, RULE_languageTag = 28, 
+		RULE_resource = 14, RULE_uriref = 15, RULE_prefixedName = 16, RULE_ncNameExt = 17, 
+		RULE_blank = 18, RULE_variable = 19, RULE_function = 20, RULE_typedLiteral = 21, 
+		RULE_language = 22, RULE_terms = 23, RULE_term = 24, RULE_literal = 25, 
+		RULE_stringLiteral = 26, RULE_dataTypeString = 27, RULE_numericLiteral = 28, 
 		RULE_booleanLiteral = 29, RULE_numericUnsigned = 30, RULE_numericPositive = 31, 
 		RULE_numericNegative = 32;
 	public static final String[] ruleNames = {
 		"parse", "directiveStatement", "triplesStatement", "directive", "base", 
 		"prefixID", "prefix", "triples", "predicateObjectList", "predicateObject", 
 		"verb", "objectList", "subject", "object", "resource", "uriref", "prefixedName", 
-		"blank", "variable", "function", "typedLiteral", "language", "terms", 
-		"term", "literal", "stringLiteral", "dataTypeString", "numericLiteral", 
-		"languageTag", "booleanLiteral", "numericUnsigned", "numericPositive", 
-		"numericNegative"
+		"ncNameExt", "blank", "variable", "function", "typedLiteral", "language", 
+		"terms", "term", "literal", "stringLiteral", "dataTypeString", "numericLiteral", 
+		"booleanLiteral", "numericUnsigned", "numericPositive", "numericNegative"
 	};
 
 	private static final String[] _LITERAL_NAMES = {
-		null, "'a'", null, null, null, null, "'^^'", "'<\"'", "'\">'", "';'", 
-		"'.'", "','", "'['", "']'", "'{'", "'}'", "'('", "')'", "'?'", "'$'", 
-		"'\"'", "'''", "'`'", "'_'", "'-'", "'*'", "'&'", "'@'", "'!'", "'#'", 
-		"'%'", "'+'", "'='", "':'", "'<'", "'>'", "'/'", "'//'", "'\\'", "'[]'", 
-		"'_:'", "'~'", "'^'"
+		null, "'a'", null, null, null, null, "'.'", "'['", "']'", "'{'", "'}'", 
+		"'?'", "'\"'", "'''", "'_'", "'-'", "'#'", "'%'", "'+'", "'='", "':'", 
+		"'<'", "'>'", "'/'", "'[]'", "'_:'"
 	};
 	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, "BASE_KW", "PREFIX_KW", "FALSE", "TRUE", "REFERENCE", "LTSIGN", 
-		"RTSIGN", "SEMI", "PERIOD", "COMMA", "LSQ_BRACKET", "RSQ_BRACKET", "LCR_BRACKET", 
-		"RCR_BRACKET", "LPAREN", "RPAREN", "QUESTION", "DOLLAR", "QUOTE_DOUBLE", 
-		"QUOTE_SINGLE", "APOSTROPHE", "UNDERSCORE", "MINUS", "ASTERISK", "AMPERSAND", 
-		"AT", "EXCLAMATION", "HASH", "PERCENT", "PLUS", "EQUALS", "COLON", "LESS", 
-		"GREATER", "SLASH", "DOUBLE_SLASH", "BACKSLASH", "BLANK", "BLANK_PREFIX", 
-		"TILDE", "CARET", "INTEGER", "DOUBLE", "DECIMAL", "INTEGER_POSITIVE", 
-		"INTEGER_NEGATIVE", "DOUBLE_POSITIVE", "DOUBLE_NEGATIVE", "DECIMAL_POSITIVE", 
-		"DECIMAL_NEGATIVE", "PREFIXED_NAME", "NCNAME_EXT", "PREFIX", "STRING_WITH_QUOTE_DOUBLE", 
-		"STRING_WITH_CURLY_BRACKET", "URI_REF", "WS", "NAME_CHAR", "VARNAME"
+		null, null, "BASE_KW", "PREFIX_KW", "FALSE", "TRUE", "PERIOD", "LSQ_BRACKET", 
+		"RSQ_BRACKET", "LCR_BRACKET", "RCR_BRACKET", "QUESTION", "QUOTE_DOUBLE", 
+		"QUOTE_SINGLE", "UNDERSCORE", "MINUS", "HASH", "PERCENT", "PLUS", "EQUALS", 
+		"COLON", "LESS", "GREATER", "SLASH", "BLANK", "BLANK_PREFIX", "INTEGER", 
+		"DOUBLE", "DECIMAL", "INTEGER_POSITIVE", "INTEGER_NEGATIVE", "DOUBLE_POSITIVE", 
+		"DOUBLE_NEGATIVE", "DECIMAL_POSITIVE", "DECIMAL_NEGATIVE", "LANGUAGE_STRING", 
+		"NAME_SBS", "STRING_WITH_QUOTE_DOUBLE", "STRING_WITH_CURLY_BRACKET", "URI_REF", 
+		"WS", "AT", "SEMI", "COMMA", "NAME_CHAR", "LPAREN", "RPAREN", "REFERENCE"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -188,7 +181,7 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 				setState(75); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << BLANK) | (1L << BLANK_PREFIX) | (1L << PREFIXED_NAME) | (1L << STRING_WITH_CURLY_BRACKET) | (1L << URI_REF))) != 0) );
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << UNDERSCORE) | (1L << COLON) | (1L << BLANK) | (1L << BLANK_PREFIX) | (1L << NAME_SBS) | (1L << STRING_WITH_CURLY_BRACKET) | (1L << URI_REF))) != 0) );
 			setState(77);
 			match(EOF);
 			}
@@ -464,7 +457,12 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 	}
 
 	public static class PrefixContext extends ParserRuleContext {
-		public TerminalNode PREFIX() { return getToken(TurtleOBDAParser.PREFIX, 0); }
+		public TerminalNode COLON() { return getToken(TurtleOBDAParser.COLON, 0); }
+		public TerminalNode UNDERSCORE() { return getToken(TurtleOBDAParser.UNDERSCORE, 0); }
+		public List<TerminalNode> NAME_SBS() { return getTokens(TurtleOBDAParser.NAME_SBS); }
+		public TerminalNode NAME_SBS(int i) {
+			return getToken(TurtleOBDAParser.NAME_SBS, i);
+		}
 		public PrefixContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -487,11 +485,44 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 	public final PrefixContext prefix() throws RecognitionException {
 		PrefixContext _localctx = new PrefixContext(_ctx, getState());
 		enterRule(_localctx, 12, RULE_prefix);
+		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(98);
-			match(PREFIX);
+			setState(106);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==UNDERSCORE || _la==NAME_SBS) {
+				{
+				setState(99);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+				if (_la==UNDERSCORE) {
+					{
+					setState(98);
+					match(UNDERSCORE);
+					}
+				}
+
+				setState(102); 
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+				do {
+					{
+					{
+					setState(101);
+					match(NAME_SBS);
+					}
+					}
+					setState(104); 
+					_errHandler.sync(this);
+					_la = _input.LA(1);
+				} while ( _la==NAME_SBS );
+				}
+			}
+
+			setState(108);
+			match(COLON);
 			}
 		}
 		catch (RecognitionException re) {
@@ -537,9 +568,9 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(100);
+			setState(110);
 			subject();
-			setState(101);
+			setState(111);
 			predicateObjectList();
 			}
 		}
@@ -591,21 +622,21 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(103);
+			setState(113);
 			predicateObject();
-			setState(108);
+			setState(118);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==SEMI) {
 				{
 				{
-				setState(104);
+				setState(114);
 				match(SEMI);
-				setState(105);
+				setState(115);
 				predicateObject();
 				}
 				}
-				setState(110);
+				setState(120);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -654,9 +685,9 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(111);
+			setState(121);
 			verb();
-			setState(112);
+			setState(122);
 			objectList();
 			}
 		}
@@ -698,21 +729,23 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		VerbContext _localctx = new VerbContext(_ctx, getState());
 		enterRule(_localctx, 20, RULE_verb);
 		try {
-			setState(116);
+			setState(126);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case PREFIXED_NAME:
+			case UNDERSCORE:
+			case COLON:
+			case NAME_SBS:
 			case URI_REF:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(114);
+				setState(124);
 				resource();
 				}
 				break;
 			case T__0:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(115);
+				setState(125);
 				match(T__0);
 				}
 				break;
@@ -768,21 +801,21 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(118);
+			setState(128);
 			object();
-			setState(123);
+			setState(133);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA) {
 				{
 				{
-				setState(119);
+				setState(129);
 				match(COMMA);
-				setState(120);
+				setState(130);
 				object();
 				}
 				}
-				setState(125);
+				setState(135);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -832,21 +865,23 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		SubjectContext _localctx = new SubjectContext(_ctx, getState());
 		enterRule(_localctx, 24, RULE_subject);
 		try {
-			setState(129);
+			setState(139);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case PREFIXED_NAME:
+			case UNDERSCORE:
+			case COLON:
+			case NAME_SBS:
 			case URI_REF:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(126);
+				setState(136);
 				resource();
 				}
 				break;
 			case STRING_WITH_CURLY_BRACKET:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(127);
+				setState(137);
 				variable();
 				}
 				break;
@@ -854,7 +889,7 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 			case BLANK_PREFIX:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(128);
+				setState(138);
 				blank();
 				}
 				break;
@@ -909,34 +944,34 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		ObjectContext _localctx = new ObjectContext(_ctx, getState());
 		enterRule(_localctx, 26, RULE_object);
 		try {
-			setState(135);
+			setState(145);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,7,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,10,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(131);
+				setState(141);
 				resource();
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(132);
+				setState(142);
 				literal();
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(133);
+				setState(143);
 				typedLiteral();
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(134);
+				setState(144);
 				variable();
 				}
 				break;
@@ -983,20 +1018,22 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		ResourceContext _localctx = new ResourceContext(_ctx, getState());
 		enterRule(_localctx, 28, RULE_resource);
 		try {
-			setState(139);
+			setState(149);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case URI_REF:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(137);
+				setState(147);
 				uriref();
 				}
 				break;
-			case PREFIXED_NAME:
+			case UNDERSCORE:
+			case COLON:
+			case NAME_SBS:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(138);
+				setState(148);
 				prefixedName();
 				}
 				break;
@@ -1042,7 +1079,7 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(141);
+			setState(151);
 			match(URI_REF);
 			}
 		}
@@ -1058,7 +1095,12 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 	}
 
 	public static class PrefixedNameContext extends ParserRuleContext {
-		public TerminalNode PREFIXED_NAME() { return getToken(TurtleOBDAParser.PREFIXED_NAME, 0); }
+		public PrefixContext prefix() {
+			return getRuleContext(PrefixContext.class,0);
+		}
+		public NcNameExtContext ncNameExt() {
+			return getRuleContext(NcNameExtContext.class,0);
+		}
 		public PrefixedNameContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1084,8 +1126,87 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(143);
-			match(PREFIXED_NAME);
+			setState(153);
+			prefix();
+			setState(154);
+			ncNameExt();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class NcNameExtContext extends ParserRuleContext {
+		public List<TerminalNode> NAME_SBS() { return getTokens(TurtleOBDAParser.NAME_SBS); }
+		public TerminalNode NAME_SBS(int i) {
+			return getToken(TurtleOBDAParser.NAME_SBS, i);
+		}
+		public List<TerminalNode> STRING_WITH_CURLY_BRACKET() { return getTokens(TurtleOBDAParser.STRING_WITH_CURLY_BRACKET); }
+		public TerminalNode STRING_WITH_CURLY_BRACKET(int i) {
+			return getToken(TurtleOBDAParser.STRING_WITH_CURLY_BRACKET, i);
+		}
+		public NcNameExtContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_ncNameExt; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterNcNameExt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitNcNameExt(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitNcNameExt(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final NcNameExtContext ncNameExt() throws RecognitionException {
+		NcNameExtContext _localctx = new NcNameExtContext(_ctx, getState());
+		enterRule(_localctx, 34, RULE_ncNameExt);
+		int _la;
+		try {
+			int _alt;
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(157); 
+			_errHandler.sync(this);
+			_alt = 1;
+			do {
+				switch (_alt) {
+				case 1:
+					{
+					{
+					setState(156);
+					_la = _input.LA(1);
+					if ( !(_la==NAME_SBS || _la==STRING_WITH_CURLY_BRACKET) ) {
+					_errHandler.recoverInline(this);
+					}
+					else {
+						if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+						_errHandler.reportMatch(this);
+						consume();
+					}
+					}
+					}
+					break;
+				default:
+					throw new NoViableAltException(this);
+				}
+				setState(159); 
+				_errHandler.sync(this);
+				_alt = getInterpreter().adaptivePredict(_input,12,_ctx);
+			} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
 			}
 		}
 		catch (RecognitionException re) {
@@ -1127,28 +1248,28 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 
 	public final BlankContext blank() throws RecognitionException {
 		BlankContext _localctx = new BlankContext(_ctx, getState());
-		enterRule(_localctx, 34, RULE_blank);
+		enterRule(_localctx, 36, RULE_blank);
 		int _la;
 		try {
-			setState(152);
+			setState(168);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case BLANK_PREFIX:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(145);
+				setState(161);
 				match(BLANK_PREFIX);
-				setState(147); 
+				setState(163); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				do {
 					{
 					{
-					setState(146);
+					setState(162);
 					match(NAME_CHAR);
 					}
 					}
-					setState(149); 
+					setState(165); 
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				} while ( _la==NAME_CHAR );
@@ -1157,7 +1278,7 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 			case BLANK:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(151);
+				setState(167);
 				match(BLANK);
 				}
 				break;
@@ -1199,11 +1320,11 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 
 	public final VariableContext variable() throws RecognitionException {
 		VariableContext _localctx = new VariableContext(_ctx, getState());
-		enterRule(_localctx, 36, RULE_variable);
+		enterRule(_localctx, 38, RULE_variable);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(154);
+			setState(170);
 			match(STRING_WITH_CURLY_BRACKET);
 			}
 		}
@@ -1248,17 +1369,17 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 
 	public final FunctionContext function() throws RecognitionException {
 		FunctionContext _localctx = new FunctionContext(_ctx, getState());
-		enterRule(_localctx, 38, RULE_function);
+		enterRule(_localctx, 40, RULE_function);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(156);
+			setState(172);
 			resource();
-			setState(157);
+			setState(173);
 			match(LPAREN);
-			setState(158);
+			setState(174);
 			terms();
-			setState(159);
+			setState(175);
 			match(RPAREN);
 			}
 		}
@@ -1333,20 +1454,20 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 
 	public final TypedLiteralContext typedLiteral() throws RecognitionException {
 		TypedLiteralContext _localctx = new TypedLiteralContext(_ctx, getState());
-		enterRule(_localctx, 40, RULE_typedLiteral);
+		enterRule(_localctx, 42, RULE_typedLiteral);
 		try {
-			setState(169);
+			setState(185);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,11,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,15,_ctx) ) {
 			case 1:
 				_localctx = new TypedLiteral_1Context(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(161);
+				setState(177);
 				variable();
-				setState(162);
+				setState(178);
 				match(AT);
-				setState(163);
+				setState(179);
 				language();
 				}
 				break;
@@ -1354,11 +1475,11 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 				_localctx = new TypedLiteral_2Context(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(165);
+				setState(181);
 				variable();
-				setState(166);
+				setState(182);
 				match(REFERENCE);
-				setState(167);
+				setState(183);
 				resource();
 				}
 				break;
@@ -1376,12 +1497,7 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 	}
 
 	public static class LanguageContext extends ParserRuleContext {
-		public LanguageTagContext languageTag() {
-			return getRuleContext(LanguageTagContext.class,0);
-		}
-		public VariableContext variable() {
-			return getRuleContext(VariableContext.class,0);
-		}
+		public TerminalNode LANGUAGE_STRING() { return getToken(TurtleOBDAParser.LANGUAGE_STRING, 0); }
 		public LanguageContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1403,27 +1519,12 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 
 	public final LanguageContext language() throws RecognitionException {
 		LanguageContext _localctx = new LanguageContext(_ctx, getState());
-		enterRule(_localctx, 42, RULE_language);
+		enterRule(_localctx, 44, RULE_language);
 		try {
-			setState(173);
-			_errHandler.sync(this);
-			switch (_input.LA(1)) {
-			case VARNAME:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(171);
-				languageTag();
-				}
-				break;
-			case STRING_WITH_CURLY_BRACKET:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(172);
-				variable();
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(187);
+			match(LANGUAGE_STRING);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1469,26 +1570,26 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 
 	public final TermsContext terms() throws RecognitionException {
 		TermsContext _localctx = new TermsContext(_ctx, getState());
-		enterRule(_localctx, 44, RULE_terms);
+		enterRule(_localctx, 46, RULE_terms);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(175);
+			setState(189);
 			term();
-			setState(180);
+			setState(194);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA) {
 				{
 				{
-				setState(176);
+				setState(190);
 				match(COMMA);
-				setState(177);
+				setState(191);
 				term();
 				}
 				}
-				setState(182);
+				setState(196);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -1536,23 +1637,25 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 
 	public final TermContext term() throws RecognitionException {
 		TermContext _localctx = new TermContext(_ctx, getState());
-		enterRule(_localctx, 46, RULE_term);
+		enterRule(_localctx, 48, RULE_term);
 		try {
-			setState(186);
+			setState(200);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case PREFIXED_NAME:
+			case UNDERSCORE:
+			case COLON:
+			case NAME_SBS:
 			case URI_REF:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(183);
+				setState(197);
 				function();
 				}
 				break;
 			case STRING_WITH_CURLY_BRACKET:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(184);
+				setState(198);
 				variable();
 				}
 				break;
@@ -1570,7 +1673,7 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 			case STRING_WITH_QUOTE_DOUBLE:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(185);
+				setState(199);
 				literal();
 				}
 				break;
@@ -1627,25 +1730,25 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 
 	public final LiteralContext literal() throws RecognitionException {
 		LiteralContext _localctx = new LiteralContext(_ctx, getState());
-		enterRule(_localctx, 48, RULE_literal);
+		enterRule(_localctx, 50, RULE_literal);
 		int _la;
 		try {
-			setState(196);
+			setState(210);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,16,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,19,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(188);
+				setState(202);
 				stringLiteral();
-				setState(191);
+				setState(205);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==AT) {
 					{
-					setState(189);
+					setState(203);
 					match(AT);
-					setState(190);
+					setState(204);
 					language();
 					}
 				}
@@ -1655,21 +1758,21 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(193);
+				setState(207);
 				dataTypeString();
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(194);
+				setState(208);
 				numericLiteral();
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(195);
+				setState(209);
 				booleanLiteral();
 				}
 				break;
@@ -1709,11 +1812,11 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 
 	public final StringLiteralContext stringLiteral() throws RecognitionException {
 		StringLiteralContext _localctx = new StringLiteralContext(_ctx, getState());
-		enterRule(_localctx, 50, RULE_stringLiteral);
+		enterRule(_localctx, 52, RULE_stringLiteral);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(198);
+			setState(212);
 			match(STRING_WITH_QUOTE_DOUBLE);
 			}
 		}
@@ -1757,15 +1860,15 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 
 	public final DataTypeStringContext dataTypeString() throws RecognitionException {
 		DataTypeStringContext _localctx = new DataTypeStringContext(_ctx, getState());
-		enterRule(_localctx, 52, RULE_dataTypeString);
+		enterRule(_localctx, 54, RULE_dataTypeString);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(200);
+			setState(214);
 			stringLiteral();
-			setState(201);
+			setState(215);
 			match(REFERENCE);
-			setState(202);
+			setState(216);
 			resource();
 			}
 		}
@@ -1811,9 +1914,9 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 
 	public final NumericLiteralContext numericLiteral() throws RecognitionException {
 		NumericLiteralContext _localctx = new NumericLiteralContext(_ctx, getState());
-		enterRule(_localctx, 54, RULE_numericLiteral);
+		enterRule(_localctx, 56, RULE_numericLiteral);
 		try {
-			setState(207);
+			setState(221);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case INTEGER:
@@ -1821,7 +1924,7 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 			case DECIMAL:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(204);
+				setState(218);
 				numericUnsigned();
 				}
 				break;
@@ -1830,7 +1933,7 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 			case DECIMAL_POSITIVE:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(205);
+				setState(219);
 				numericPositive();
 				}
 				break;
@@ -1839,54 +1942,12 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 			case DECIMAL_NEGATIVE:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(206);
+				setState(220);
 				numericNegative();
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class LanguageTagContext extends ParserRuleContext {
-		public TerminalNode VARNAME() { return getToken(TurtleOBDAParser.VARNAME, 0); }
-		public LanguageTagContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_languageTag; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterLanguageTag(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitLanguageTag(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitLanguageTag(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final LanguageTagContext languageTag() throws RecognitionException {
-		LanguageTagContext _localctx = new LanguageTagContext(_ctx, getState());
-		enterRule(_localctx, 56, RULE_languageTag);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(209);
-			match(VARNAME);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1929,7 +1990,7 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(211);
+			setState(223);
 			_la = _input.LA(1);
 			if ( !(_la==FALSE || _la==TRUE) ) {
 			_errHandler.recoverInline(this);
@@ -1982,7 +2043,7 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(213);
+			setState(225);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INTEGER) | (1L << DOUBLE) | (1L << DECIMAL))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -2035,7 +2096,7 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(215);
+			setState(227);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INTEGER_POSITIVE) | (1L << DOUBLE_POSITIVE) | (1L << DECIMAL_POSITIVE))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -2088,7 +2149,7 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(217);
+			setState(229);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INTEGER_NEGATIVE) | (1L << DOUBLE_NEGATIVE) | (1L << DECIMAL_NEGATIVE))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -2112,74 +2173,79 @@ public class TurtleOBDAParser extends AbstractTurtleOBDAParser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3>\u00de\4\2\t\2\4"+
-		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
-		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\61\u00ea\4\2\t\2"+
+		"\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13"+
+		"\t\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
 		"\4\32\t\32\4\33\t\33\4\34\t\34\4\35\t\35\4\36\t\36\4\37\t\37\4 \t \4!"+
 		"\t!\4\"\t\"\3\2\7\2F\n\2\f\2\16\2I\13\2\3\2\6\2L\n\2\r\2\16\2M\3\2\3\2"+
 		"\3\3\3\3\3\3\3\4\3\4\3\4\3\5\3\5\5\5Z\n\5\3\6\3\6\3\6\3\6\3\7\3\7\3\7"+
-		"\3\7\3\7\3\b\3\b\3\t\3\t\3\t\3\n\3\n\3\n\7\nm\n\n\f\n\16\np\13\n\3\13"+
-		"\3\13\3\13\3\f\3\f\5\fw\n\f\3\r\3\r\3\r\7\r|\n\r\f\r\16\r\177\13\r\3\16"+
-		"\3\16\3\16\5\16\u0084\n\16\3\17\3\17\3\17\3\17\5\17\u008a\n\17\3\20\3"+
-		"\20\5\20\u008e\n\20\3\21\3\21\3\22\3\22\3\23\3\23\6\23\u0096\n\23\r\23"+
-		"\16\23\u0097\3\23\5\23\u009b\n\23\3\24\3\24\3\25\3\25\3\25\3\25\3\25\3"+
-		"\26\3\26\3\26\3\26\3\26\3\26\3\26\3\26\5\26\u00ac\n\26\3\27\3\27\5\27"+
-		"\u00b0\n\27\3\30\3\30\3\30\7\30\u00b5\n\30\f\30\16\30\u00b8\13\30\3\31"+
-		"\3\31\3\31\5\31\u00bd\n\31\3\32\3\32\3\32\5\32\u00c2\n\32\3\32\3\32\3"+
-		"\32\5\32\u00c7\n\32\3\33\3\33\3\34\3\34\3\34\3\34\3\35\3\35\3\35\5\35"+
-		"\u00d2\n\35\3\36\3\36\3\37\3\37\3 \3 \3!\3!\3\"\3\"\3\"\2\2#\2\4\6\b\n"+
-		"\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668:<>@B\2\6\3\2\6\7\3"+
-		"\2-/\5\2\60\60\62\62\64\64\5\2\61\61\63\63\65\65\2\u00d5\2G\3\2\2\2\4"+
-		"Q\3\2\2\2\6T\3\2\2\2\bY\3\2\2\2\n[\3\2\2\2\f_\3\2\2\2\16d\3\2\2\2\20f"+
-		"\3\2\2\2\22i\3\2\2\2\24q\3\2\2\2\26v\3\2\2\2\30x\3\2\2\2\32\u0083\3\2"+
-		"\2\2\34\u0089\3\2\2\2\36\u008d\3\2\2\2 \u008f\3\2\2\2\"\u0091\3\2\2\2"+
-		"$\u009a\3\2\2\2&\u009c\3\2\2\2(\u009e\3\2\2\2*\u00ab\3\2\2\2,\u00af\3"+
-		"\2\2\2.\u00b1\3\2\2\2\60\u00bc\3\2\2\2\62\u00c6\3\2\2\2\64\u00c8\3\2\2"+
-		"\2\66\u00ca\3\2\2\28\u00d1\3\2\2\2:\u00d3\3\2\2\2<\u00d5\3\2\2\2>\u00d7"+
-		"\3\2\2\2@\u00d9\3\2\2\2B\u00db\3\2\2\2DF\5\4\3\2ED\3\2\2\2FI\3\2\2\2G"+
+		"\3\7\3\7\3\b\5\bf\n\b\3\b\6\bi\n\b\r\b\16\bj\5\bm\n\b\3\b\3\b\3\t\3\t"+
+		"\3\t\3\n\3\n\3\n\7\nw\n\n\f\n\16\nz\13\n\3\13\3\13\3\13\3\f\3\f\5\f\u0081"+
+		"\n\f\3\r\3\r\3\r\7\r\u0086\n\r\f\r\16\r\u0089\13\r\3\16\3\16\3\16\5\16"+
+		"\u008e\n\16\3\17\3\17\3\17\3\17\5\17\u0094\n\17\3\20\3\20\5\20\u0098\n"+
+		"\20\3\21\3\21\3\22\3\22\3\22\3\23\6\23\u00a0\n\23\r\23\16\23\u00a1\3\24"+
+		"\3\24\6\24\u00a6\n\24\r\24\16\24\u00a7\3\24\5\24\u00ab\n\24\3\25\3\25"+
+		"\3\26\3\26\3\26\3\26\3\26\3\27\3\27\3\27\3\27\3\27\3\27\3\27\3\27\5\27"+
+		"\u00bc\n\27\3\30\3\30\3\31\3\31\3\31\7\31\u00c3\n\31\f\31\16\31\u00c6"+
+		"\13\31\3\32\3\32\3\32\5\32\u00cb\n\32\3\33\3\33\3\33\5\33\u00d0\n\33\3"+
+		"\33\3\33\3\33\5\33\u00d5\n\33\3\34\3\34\3\35\3\35\3\35\3\35\3\36\3\36"+
+		"\3\36\5\36\u00e0\n\36\3\37\3\37\3 \3 \3!\3!\3\"\3\"\3\"\2\2#\2\4\6\b\n"+
+		"\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668:<>@B\2\7\4\2&&((\3"+
+		"\2\6\7\3\2\34\36\5\2\37\37!!##\5\2  \"\"$$\2\u00e4\2G\3\2\2\2\4Q\3\2\2"+
+		"\2\6T\3\2\2\2\bY\3\2\2\2\n[\3\2\2\2\f_\3\2\2\2\16l\3\2\2\2\20p\3\2\2\2"+
+		"\22s\3\2\2\2\24{\3\2\2\2\26\u0080\3\2\2\2\30\u0082\3\2\2\2\32\u008d\3"+
+		"\2\2\2\34\u0093\3\2\2\2\36\u0097\3\2\2\2 \u0099\3\2\2\2\"\u009b\3\2\2"+
+		"\2$\u009f\3\2\2\2&\u00aa\3\2\2\2(\u00ac\3\2\2\2*\u00ae\3\2\2\2,\u00bb"+
+		"\3\2\2\2.\u00bd\3\2\2\2\60\u00bf\3\2\2\2\62\u00ca\3\2\2\2\64\u00d4\3\2"+
+		"\2\2\66\u00d6\3\2\2\28\u00d8\3\2\2\2:\u00df\3\2\2\2<\u00e1\3\2\2\2>\u00e3"+
+		"\3\2\2\2@\u00e5\3\2\2\2B\u00e7\3\2\2\2DF\5\4\3\2ED\3\2\2\2FI\3\2\2\2G"+
 		"E\3\2\2\2GH\3\2\2\2HK\3\2\2\2IG\3\2\2\2JL\5\6\4\2KJ\3\2\2\2LM\3\2\2\2"+
-		"MK\3\2\2\2MN\3\2\2\2NO\3\2\2\2OP\7\2\2\3P\3\3\2\2\2QR\5\b\5\2RS\7\f\2"+
-		"\2S\5\3\2\2\2TU\5\20\t\2UV\7\f\2\2V\7\3\2\2\2WZ\5\n\6\2XZ\5\f\7\2YW\3"+
-		"\2\2\2YX\3\2\2\2Z\t\3\2\2\2[\\\7\35\2\2\\]\7\4\2\2]^\5 \21\2^\13\3\2\2"+
-		"\2_`\7\35\2\2`a\7\5\2\2ab\5\16\b\2bc\5 \21\2c\r\3\2\2\2de\78\2\2e\17\3"+
-		"\2\2\2fg\5\32\16\2gh\5\22\n\2h\21\3\2\2\2in\5\24\13\2jk\7\13\2\2km\5\24"+
-		"\13\2lj\3\2\2\2mp\3\2\2\2nl\3\2\2\2no\3\2\2\2o\23\3\2\2\2pn\3\2\2\2qr"+
-		"\5\26\f\2rs\5\30\r\2s\25\3\2\2\2tw\5\36\20\2uw\7\3\2\2vt\3\2\2\2vu\3\2"+
-		"\2\2w\27\3\2\2\2x}\5\34\17\2yz\7\r\2\2z|\5\34\17\2{y\3\2\2\2|\177\3\2"+
-		"\2\2}{\3\2\2\2}~\3\2\2\2~\31\3\2\2\2\177}\3\2\2\2\u0080\u0084\5\36\20"+
-		"\2\u0081\u0084\5&\24\2\u0082\u0084\5$\23\2\u0083\u0080\3\2\2\2\u0083\u0081"+
-		"\3\2\2\2\u0083\u0082\3\2\2\2\u0084\33\3\2\2\2\u0085\u008a\5\36\20\2\u0086"+
-		"\u008a\5\62\32\2\u0087\u008a\5*\26\2\u0088\u008a\5&\24\2\u0089\u0085\3"+
-		"\2\2\2\u0089\u0086\3\2\2\2\u0089\u0087\3\2\2\2\u0089\u0088\3\2\2\2\u008a"+
-		"\35\3\2\2\2\u008b\u008e\5 \21\2\u008c\u008e\5\"\22\2\u008d\u008b\3\2\2"+
-		"\2\u008d\u008c\3\2\2\2\u008e\37\3\2\2\2\u008f\u0090\7;\2\2\u0090!\3\2"+
-		"\2\2\u0091\u0092\7\66\2\2\u0092#\3\2\2\2\u0093\u0095\7*\2\2\u0094\u0096"+
-		"\7=\2\2\u0095\u0094\3\2\2\2\u0096\u0097\3\2\2\2\u0097\u0095\3\2\2\2\u0097"+
-		"\u0098\3\2\2\2\u0098\u009b\3\2\2\2\u0099\u009b\7)\2\2\u009a\u0093\3\2"+
-		"\2\2\u009a\u0099\3\2\2\2\u009b%\3\2\2\2\u009c\u009d\7:\2\2\u009d\'\3\2"+
-		"\2\2\u009e\u009f\5\36\20\2\u009f\u00a0\7\22\2\2\u00a0\u00a1\5.\30\2\u00a1"+
-		"\u00a2\7\23\2\2\u00a2)\3\2\2\2\u00a3\u00a4\5&\24\2\u00a4\u00a5\7\35\2"+
-		"\2\u00a5\u00a6\5,\27\2\u00a6\u00ac\3\2\2\2\u00a7\u00a8\5&\24\2\u00a8\u00a9"+
-		"\7\b\2\2\u00a9\u00aa\5\36\20\2\u00aa\u00ac\3\2\2\2\u00ab\u00a3\3\2\2\2"+
-		"\u00ab\u00a7\3\2\2\2\u00ac+\3\2\2\2\u00ad\u00b0\5:\36\2\u00ae\u00b0\5"+
-		"&\24\2\u00af\u00ad\3\2\2\2\u00af\u00ae\3\2\2\2\u00b0-\3\2\2\2\u00b1\u00b6"+
-		"\5\60\31\2\u00b2\u00b3\7\r\2\2\u00b3\u00b5\5\60\31\2\u00b4\u00b2\3\2\2"+
-		"\2\u00b5\u00b8\3\2\2\2\u00b6\u00b4\3\2\2\2\u00b6\u00b7\3\2\2\2\u00b7/"+
-		"\3\2\2\2\u00b8\u00b6\3\2\2\2\u00b9\u00bd\5(\25\2\u00ba\u00bd\5&\24\2\u00bb"+
-		"\u00bd\5\62\32\2\u00bc\u00b9\3\2\2\2\u00bc\u00ba\3\2\2\2\u00bc\u00bb\3"+
-		"\2\2\2\u00bd\61\3\2\2\2\u00be\u00c1\5\64\33\2\u00bf\u00c0\7\35\2\2\u00c0"+
-		"\u00c2\5,\27\2\u00c1\u00bf\3\2\2\2\u00c1\u00c2\3\2\2\2\u00c2\u00c7\3\2"+
-		"\2\2\u00c3\u00c7\5\66\34\2\u00c4\u00c7\58\35\2\u00c5\u00c7\5<\37\2\u00c6"+
-		"\u00be\3\2\2\2\u00c6\u00c3\3\2\2\2\u00c6\u00c4\3\2\2\2\u00c6\u00c5\3\2"+
-		"\2\2\u00c7\63\3\2\2\2\u00c8\u00c9\79\2\2\u00c9\65\3\2\2\2\u00ca\u00cb"+
-		"\5\64\33\2\u00cb\u00cc\7\b\2\2\u00cc\u00cd\5\36\20\2\u00cd\67\3\2\2\2"+
-		"\u00ce\u00d2\5> \2\u00cf\u00d2\5@!\2\u00d0\u00d2\5B\"\2\u00d1\u00ce\3"+
-		"\2\2\2\u00d1\u00cf\3\2\2\2\u00d1\u00d0\3\2\2\2\u00d29\3\2\2\2\u00d3\u00d4"+
-		"\7>\2\2\u00d4;\3\2\2\2\u00d5\u00d6\t\2\2\2\u00d6=\3\2\2\2\u00d7\u00d8"+
-		"\t\3\2\2\u00d8?\3\2\2\2\u00d9\u00da\t\4\2\2\u00daA\3\2\2\2\u00db\u00dc"+
-		"\t\5\2\2\u00dcC\3\2\2\2\24GMYnv}\u0083\u0089\u008d\u0097\u009a\u00ab\u00af"+
-		"\u00b6\u00bc\u00c1\u00c6\u00d1";
+		"MK\3\2\2\2MN\3\2\2\2NO\3\2\2\2OP\7\2\2\3P\3\3\2\2\2QR\5\b\5\2RS\7\b\2"+
+		"\2S\5\3\2\2\2TU\5\20\t\2UV\7\b\2\2V\7\3\2\2\2WZ\5\n\6\2XZ\5\f\7\2YW\3"+
+		"\2\2\2YX\3\2\2\2Z\t\3\2\2\2[\\\7+\2\2\\]\7\4\2\2]^\5 \21\2^\13\3\2\2\2"+
+		"_`\7+\2\2`a\7\5\2\2ab\5\16\b\2bc\5 \21\2c\r\3\2\2\2df\7\20\2\2ed\3\2\2"+
+		"\2ef\3\2\2\2fh\3\2\2\2gi\7&\2\2hg\3\2\2\2ij\3\2\2\2jh\3\2\2\2jk\3\2\2"+
+		"\2km\3\2\2\2le\3\2\2\2lm\3\2\2\2mn\3\2\2\2no\7\26\2\2o\17\3\2\2\2pq\5"+
+		"\32\16\2qr\5\22\n\2r\21\3\2\2\2sx\5\24\13\2tu\7,\2\2uw\5\24\13\2vt\3\2"+
+		"\2\2wz\3\2\2\2xv\3\2\2\2xy\3\2\2\2y\23\3\2\2\2zx\3\2\2\2{|\5\26\f\2|}"+
+		"\5\30\r\2}\25\3\2\2\2~\u0081\5\36\20\2\177\u0081\7\3\2\2\u0080~\3\2\2"+
+		"\2\u0080\177\3\2\2\2\u0081\27\3\2\2\2\u0082\u0087\5\34\17\2\u0083\u0084"+
+		"\7-\2\2\u0084\u0086\5\34\17\2\u0085\u0083\3\2\2\2\u0086\u0089\3\2\2\2"+
+		"\u0087\u0085\3\2\2\2\u0087\u0088\3\2\2\2\u0088\31\3\2\2\2\u0089\u0087"+
+		"\3\2\2\2\u008a\u008e\5\36\20\2\u008b\u008e\5(\25\2\u008c\u008e\5&\24\2"+
+		"\u008d\u008a\3\2\2\2\u008d\u008b\3\2\2\2\u008d\u008c\3\2\2\2\u008e\33"+
+		"\3\2\2\2\u008f\u0094\5\36\20\2\u0090\u0094\5\64\33\2\u0091\u0094\5,\27"+
+		"\2\u0092\u0094\5(\25\2\u0093\u008f\3\2\2\2\u0093\u0090\3\2\2\2\u0093\u0091"+
+		"\3\2\2\2\u0093\u0092\3\2\2\2\u0094\35\3\2\2\2\u0095\u0098\5 \21\2\u0096"+
+		"\u0098\5\"\22\2\u0097\u0095\3\2\2\2\u0097\u0096\3\2\2\2\u0098\37\3\2\2"+
+		"\2\u0099\u009a\7)\2\2\u009a!\3\2\2\2\u009b\u009c\5\16\b\2\u009c\u009d"+
+		"\5$\23\2\u009d#\3\2\2\2\u009e\u00a0\t\2\2\2\u009f\u009e\3\2\2\2\u00a0"+
+		"\u00a1\3\2\2\2\u00a1\u009f\3\2\2\2\u00a1\u00a2\3\2\2\2\u00a2%\3\2\2\2"+
+		"\u00a3\u00a5\7\33\2\2\u00a4\u00a6\7.\2\2\u00a5\u00a4\3\2\2\2\u00a6\u00a7"+
+		"\3\2\2\2\u00a7\u00a5\3\2\2\2\u00a7\u00a8\3\2\2\2\u00a8\u00ab\3\2\2\2\u00a9"+
+		"\u00ab\7\32\2\2\u00aa\u00a3\3\2\2\2\u00aa\u00a9\3\2\2\2\u00ab\'\3\2\2"+
+		"\2\u00ac\u00ad\7(\2\2\u00ad)\3\2\2\2\u00ae\u00af\5\36\20\2\u00af\u00b0"+
+		"\7/\2\2\u00b0\u00b1\5\60\31\2\u00b1\u00b2\7\60\2\2\u00b2+\3\2\2\2\u00b3"+
+		"\u00b4\5(\25\2\u00b4\u00b5\7+\2\2\u00b5\u00b6\5.\30\2\u00b6\u00bc\3\2"+
+		"\2\2\u00b7\u00b8\5(\25\2\u00b8\u00b9\7\61\2\2\u00b9\u00ba\5\36\20\2\u00ba"+
+		"\u00bc\3\2\2\2\u00bb\u00b3\3\2\2\2\u00bb\u00b7\3\2\2\2\u00bc-\3\2\2\2"+
+		"\u00bd\u00be\7%\2\2\u00be/\3\2\2\2\u00bf\u00c4\5\62\32\2\u00c0\u00c1\7"+
+		"-\2\2\u00c1\u00c3\5\62\32\2\u00c2\u00c0\3\2\2\2\u00c3\u00c6\3\2\2\2\u00c4"+
+		"\u00c2\3\2\2\2\u00c4\u00c5\3\2\2\2\u00c5\61\3\2\2\2\u00c6\u00c4\3\2\2"+
+		"\2\u00c7\u00cb\5*\26\2\u00c8\u00cb\5(\25\2\u00c9\u00cb\5\64\33\2\u00ca"+
+		"\u00c7\3\2\2\2\u00ca\u00c8\3\2\2\2\u00ca\u00c9\3\2\2\2\u00cb\63\3\2\2"+
+		"\2\u00cc\u00cf\5\66\34\2\u00cd\u00ce\7+\2\2\u00ce\u00d0\5.\30\2\u00cf"+
+		"\u00cd\3\2\2\2\u00cf\u00d0\3\2\2\2\u00d0\u00d5\3\2\2\2\u00d1\u00d5\58"+
+		"\35\2\u00d2\u00d5\5:\36\2\u00d3\u00d5\5<\37\2\u00d4\u00cc\3\2\2\2\u00d4"+
+		"\u00d1\3\2\2\2\u00d4\u00d2\3\2\2\2\u00d4\u00d3\3\2\2\2\u00d5\65\3\2\2"+
+		"\2\u00d6\u00d7\7\'\2\2\u00d7\67\3\2\2\2\u00d8\u00d9\5\66\34\2\u00d9\u00da"+
+		"\7\61\2\2\u00da\u00db\5\36\20\2\u00db9\3\2\2\2\u00dc\u00e0\5> \2\u00dd"+
+		"\u00e0\5@!\2\u00de\u00e0\5B\"\2\u00df\u00dc\3\2\2\2\u00df\u00dd\3\2\2"+
+		"\2\u00df\u00de\3\2\2\2\u00e0;\3\2\2\2\u00e1\u00e2\t\3\2\2\u00e2=\3\2\2"+
+		"\2\u00e3\u00e4\t\4\2\2\u00e4?\3\2\2\2\u00e5\u00e6\t\5\2\2\u00e6A\3\2\2"+
+		"\2\u00e7\u00e8\t\6\2\2\u00e8C\3\2\2\2\27GMYejlx\u0080\u0087\u008d\u0093"+
+		"\u0097\u00a1\u00a7\u00aa\u00bb\u00c4\u00ca\u00cf\u00d4\u00df";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

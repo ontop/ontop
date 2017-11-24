@@ -224,6 +224,18 @@ public class TurtleOBDABaseListener implements TurtleOBDAListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterNcNameExt(TurtleOBDAParser.NcNameExtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNcNameExt(TurtleOBDAParser.NcNameExtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBlank(TurtleOBDAParser.BlankContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -363,18 +375,6 @@ public class TurtleOBDABaseListener implements TurtleOBDAListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitNumericLiteral(TurtleOBDAParser.NumericLiteralContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLanguageTag(TurtleOBDAParser.LanguageTagContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLanguageTag(TurtleOBDAParser.LanguageTagContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

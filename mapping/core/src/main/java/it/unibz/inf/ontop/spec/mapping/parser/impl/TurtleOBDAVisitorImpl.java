@@ -388,6 +388,9 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
         String[] tokens = ctx.PREFIXED_NAME().getText().split(":", 2);
         String uri = directives.get(tokens[0]);  // the first token is the prefix
         return uri + tokens[1];  // the second token is the local name
+//        String[] tokens = ctx.PREFIXED_NAME().getText().split(":", 2);
+//        String uri = directives.get(tokens[0]);  // the first token is the prefix
+//        return uri + tokens[1];  // the second token is the local name
     }
 
     @Override
