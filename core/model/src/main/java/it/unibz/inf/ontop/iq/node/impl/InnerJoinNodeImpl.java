@@ -262,25 +262,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         }
     }
 
-    private IQTree createJoinOrFilterOrTrue(ImmutableList<IQTree> currentChildren,
-                                            Optional<ImmutableExpression> currentJoiningCondition) {
-
-        switch (currentChildren.size()) {
-            case 0:
-                return iqFactory.createTrueNode();
-            case 1:
-                IQTree uniqueChild = currentChildren.get(0);
-                return currentJoiningCondition
-                        .map(e -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), uniqueChild))
-                        .orElse(uniqueChild);
-            default:
-                InnerJoinNode newJoinNode = currentJoiningCondition.equals(getOptionalFilterCondition())
-                        ? this
-                        : changeOptionalFilterCondition(currentJoiningCondition);
-                return iqFactory.createNaryIQTree(newJoinNode, currentChildren, true);
-        }
-    }
-
     /**
      * Lifts the binding OF AT MOST ONE child
      */
@@ -358,6 +339,24 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return new LiftingStepResults(ascendingSubstitution, newChildren, newCondition, false);
     }
 
+    private IQTree createJoinOrFilterOrTrue(ImmutableList<IQTree> currentChildren,
+                                            Optional<ImmutableExpression> currentJoiningCondition) {
+        switch (currentChildren.size()) {
+            case 0:
+                return iqFactory.createTrueNode();
+            case 1:
+                IQTree uniqueChild = currentChildren.get(0);
+                return currentJoiningCondition
+                        .map(e -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), uniqueChild))
+                        .orElse(uniqueChild);
+            default:
+                InnerJoinNode newJoinNode = currentJoiningCondition.equals(getOptionalFilterCondition())
+                        ? this
+                        : changeOptionalFilterCondition(currentJoiningCondition);
+                return iqFactory.createNaryIQTree(newJoinNode, currentChildren, true);
+        }
+    }
+
     private ExpressionAndSubstitution computeNewCondition(Optional<ImmutableExpression> initialJoiningCondition,
                                                           ImmutableSubstitution<ImmutableTerm> childSubstitution,
                                                           InjectiveVar2VarSubstitution freshRenaming)
@@ -393,11 +392,36 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return new ExpressionAndSubstitution(Optional.empty(), substitutionFactory.getSubstitution());
     }
 
-    /*
-     * TODO: implement it seriously
+
+    /**
+     * TODO: Fixed point instead?
      */
     private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression) {
-        return new ExpressionAndSubstitution(Optional.of(expression), substitutionFactory.getSubstitution());
+        ImmutableSet<ImmutableExpression> expressions = expression.flattenAND();
+        ImmutableSet<ImmutableExpression> substitutionExpressions = expressions.stream()
+                .filter(e -> e.getFunctionSymbol().equals(EQ))
+                .filter(e -> {
+                    ImmutableList<? extends ImmutableTerm> arguments = e.getArguments();
+                    return arguments.stream().allMatch(t -> t instanceof VariableOrGroundTerm)
+                            && arguments.stream().anyMatch(t -> t instanceof Variable);
+                })
+                .collect(ImmutableCollectors.toSet());
+
+        ImmutableMap<Variable, VariableOrGroundTerm> substitutionMap = substitutionExpressions.stream()
+                .map(ImmutableFunctionalTerm::getArguments)
+                .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
+                .collect(ImmutableCollectors.toMap(
+                        args -> (Variable) args.get(0),
+                        args -> (VariableOrGroundTerm) args.get(1)));
+
+        ImmutableSubstitution<VariableOrGroundTerm> newSubstitution = substitutionFactory.getSubstitution(substitutionMap);
+
+        Optional<ImmutableExpression> newExpression = getImmutabilityTools().foldBooleanExpressions(
+                expressions.stream()
+                        .filter(e -> !substitutionExpressions.contains(e)))
+                .map(newSubstitution::applyToBooleanExpression);
+
+        return new ExpressionAndSubstitution(newExpression, newSubstitution);
     }
 
     private InjectiveVar2VarSubstitution computeOtherChildrenRenaming(ImmutableSubstitution<NonGroundFunctionalTerm> nonDownPropagableFragment,
