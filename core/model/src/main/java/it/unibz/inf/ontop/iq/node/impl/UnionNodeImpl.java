@@ -212,6 +212,12 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
         }
     }
 
+    @Override
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
 
     /**
      * Has at least two children

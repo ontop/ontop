@@ -7,6 +7,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
@@ -36,17 +37,20 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     private static final String JOIN_NODE_STR = "JOIN" ;
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final ConstructionNodeTools constructionNodeTools;
 
     @AssistedInject
     protected InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition,
                                 TermNullabilityEvaluator nullabilityEvaluator,
                                 TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
                                 ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
-                                IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
+                                IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+                                ConstructionNodeTools constructionNodeTools) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator, immutabilityTools);
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
+        this.constructionNodeTools = constructionNodeTools;
     }
 
     @AssistedInject
@@ -54,22 +58,26 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               TermNullabilityEvaluator nullabilityEvaluator,
                               TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
                               ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
-                              IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
+                              IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+                              ConstructionNodeTools constructionNodeTools) {
         super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator, immutabilityTools);
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
+        this.constructionNodeTools = constructionNodeTools;
     }
 
     @AssistedInject
     private InnerJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
                               TypeFactory typeFactory, DatalogTools datalogTools,
                               ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
-                              IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
+                              IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+                              ConstructionNodeTools constructionNodeTools) {
         super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
                 immutabilityTools);
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
+        this.constructionNodeTools = constructionNodeTools;
     }
 
     @Override
@@ -80,7 +88,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public InnerJoinNode clone() {
         return new InnerJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(),
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory, substitutionFactory);
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory, substitutionFactory, constructionNodeTools);
     }
 
     @Override
@@ -92,7 +100,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new InnerJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator(),
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory, substitutionFactory);
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory, substitutionFactory, constructionNodeTools);
     }
 
     @Override
@@ -131,6 +139,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
+        return applyDescendingSubstitution(substitution);
+    }
+
+    private SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
 
         return getOptionalFilterCondition()
                 .map(cond -> transformBooleanExpression(substitution, cond))
@@ -259,6 +272,59 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         } catch (EmptyIQException e) {
             return iqFactory.createEmptyNode(projectedVariables);
         }
+    }
+
+    /**
+     * TODO: consider the constraint
+     */
+    @Override
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children) {
+        SubstitutionResults<InnerJoinNode> results = applyDescendingSubstitution(descendingSubstitution);
+
+        InnerJoinNode joinNode;
+        switch (results.getLocalAction()) {
+            case NO_CHANGE:
+                joinNode = this;
+                break;
+            case NEW_NODE:
+                joinNode = results.getOptionalNewNode().get();
+                break;
+            case DECLARE_AS_EMPTY:
+                return iqFactory.createEmptyNode(computeNewlyProjectedVariables(descendingSubstitution, children));
+            default:
+                throw new MinorOntopInternalBugException("Unexpected local action " +
+                        "after applying a descending substitution to a inner join: " + results.getLocalAction());
+        }
+
+        ImmutableList<IQTree> updatedChildren = children.stream()
+                .map(c -> c.applyDescendingSubstitution(descendingSubstitution, constraint))
+                .filter(c -> !(c instanceof TrueNode))
+                .collect(ImmutableCollectors.toList());
+
+        if (updatedChildren.stream()
+                .anyMatch(c -> c instanceof EmptyNode)) {
+            return iqFactory.createEmptyNode(computeNewlyProjectedVariables(descendingSubstitution, children));
+        }
+
+        switch (updatedChildren.size()) {
+            case 0:
+                return iqFactory.createTrueNode();
+            case 1:
+                return updatedChildren.get(0);
+            default:
+                return iqFactory.createNaryIQTree(joinNode, updatedChildren);
+        }
+    }
+
+    private ImmutableSet<Variable> computeNewlyProjectedVariables(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            ImmutableList<IQTree> children) {
+        ImmutableSet<Variable> formerProjectedVariables = children.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+
+        return constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, formerProjectedVariables);
     }
 
     /**
