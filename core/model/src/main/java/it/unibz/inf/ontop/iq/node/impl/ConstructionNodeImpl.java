@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.impl.ConstructionNodeTools.NewSubstitutionPair;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -40,23 +41,6 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
-
-    /**
-     * TODO: find a better name
-     */
-    private static class NewSubstitutionPair {
-        final ImmutableSubstitution<ImmutableTerm> bindings;
-        final ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution;
-
-        private NewSubstitutionPair(ImmutableSubstitution<ImmutableTerm> bindings,
-                                    ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution) {
-            this.bindings = bindings;
-            this.propagatedSubstitution = propagatedSubstitution;
-        }
-    }
-
-
-
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
     @SuppressWarnings("FieldCanBeLocal")
@@ -401,7 +385,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          */
         NewSubstitutionPair newSubstitutions;
         try {
-            newSubstitutions = traverseConstructionNode(relevantSubstitution, substitution, projectedVariables,
+            newSubstitutions = constructionNodeTools.traverseConstructionNode(relevantSubstitution, substitution, projectedVariables,
                     newProjectedVariables);
         } catch (QueryNodeSubstitutionException e) {
             return DefaultSubstitutionResults.declareAsEmpty();
@@ -620,69 +604,6 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
             return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, true);
         }
-    }
-
-    /**
-     *
-     * TODO: explain
-     *
-     */
-    private NewSubstitutionPair traverseConstructionNode(
-            ImmutableSubstitution<? extends ImmutableTerm> tau,
-            ImmutableSubstitution<? extends ImmutableTerm> formerTheta,
-            ImmutableSet<Variable> formerV, ImmutableSet<Variable> newV) throws QueryNodeSubstitutionException {
-
-        ImmutableSubstitution<ImmutableTerm> eta = unificationTools.computeMGUS(formerTheta, tau)
-                .orElseThrow(() -> new QueryNodeSubstitutionException("The descending substitution " + tau
-                        + " is incompatible with " + this));
-
-        // Due to the current implementation of MGUS, the normalization should have no effect
-        // (already in a normal form). Here for safety.
-        ImmutableSubstitution<? extends ImmutableTerm> normalizedEta = normalizeEta(eta, newV);
-        ImmutableSubstitution<ImmutableTerm> newTheta = extractNewTheta(normalizedEta, newV);
-
-        ImmutableSubstitution<? extends ImmutableTerm> delta = computeDelta(formerTheta, newTheta, normalizedEta, formerV);
-
-        return new NewSubstitutionPair(newTheta, delta);
-    }
-
-    /*
-     * Normalizes eta so as to avoid projected variables to be substituted by non-projected variables.
-     *
-     * This normalization can be understood as a way to select a MGU (eta) among a set of equivalent MGUs.
-     * Such a "selection" is done a posteriori.
-     *
-     */
-    private ImmutableSubstitution<? extends ImmutableTerm> normalizeEta(ImmutableSubstitution<ImmutableTerm> eta,
-                                                              ImmutableSet<Variable> newV) {
-        return substitutionTools.prioritizeRenaming(eta, newV);
-    }
-
-    private ImmutableSubstitution<ImmutableTerm> extractNewTheta(
-            ImmutableSubstitution<? extends ImmutableTerm> normalizedEta, ImmutableSet<Variable> newV) {
-
-        ImmutableMap<Variable, ImmutableTerm> newMap = normalizedEta.getImmutableMap().entrySet().stream()
-                .filter(e -> newV.contains(e.getKey()))
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue));
-
-        return substitutionFactory.getSubstitution(newMap);
-    }
-
-    private ImmutableSubstitution<? extends ImmutableTerm> computeDelta(
-            ImmutableSubstitution<? extends ImmutableTerm> formerTheta,
-            ImmutableSubstitution<? extends ImmutableTerm> newTheta,
-            ImmutableSubstitution<? extends ImmutableTerm> eta, ImmutableSet<Variable> formerV) {
-
-        ImmutableMap<Variable, ImmutableTerm> newMap = eta.getImmutableMap().entrySet().stream()
-                .filter(e -> !formerTheta.isDefining(e.getKey()))
-                .filter(e -> (!newTheta.isDefining(e.getKey()) || formerV.contains(e.getKey())))
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue));
-
-        return substitutionFactory.getSubstitution(newMap);
     }
 
     /**
