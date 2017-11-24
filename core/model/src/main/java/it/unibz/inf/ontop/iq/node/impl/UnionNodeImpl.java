@@ -354,17 +354,20 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
                 mergedSubstitution, constructionNode.getSubstitution(),
                 constructionNode.getVariables(), projectedVariables);
 
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
-                substitutionPair.bindings);
-
         // NB: this is expected to be ok given that the expected compatibility of the merged substitution with
         // this construction node
         ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution =
                 (ImmutableSubstitution<? extends VariableOrGroundTerm>) substitutionPair.propagatedSubstitution;
 
-        return iqFactory.createUnaryIQTree(newConstructionNode,
-                liftedChildTree.getChild().applyDescendingSubstitution(descendingSubstitution, Optional.empty()));
+        IQTree newChild = liftedChildTree.getChild()
+                .applyDescendingSubstitution(descendingSubstitution, Optional.empty());
 
+        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
+                    substitutionPair.bindings);
+
+        return substitutionPair.bindings.isEmpty()
+                ? newChild
+                : iqFactory.createUnaryIQTree(newConstructionNode, newChild);
     }
 
 }
