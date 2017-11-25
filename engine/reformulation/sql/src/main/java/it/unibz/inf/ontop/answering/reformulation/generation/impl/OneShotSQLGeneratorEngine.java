@@ -85,8 +85,10 @@ public class OneShotSQLGeneratorEngine {
     private static final String VIEW_PREFIX = "Q";
     private static final String VIEW_SUFFIX = "VIEW";
     private static final String VIEW_ANS_SUFFIX = "View";
+	private static final String OUTER_VIEW_NAME = "SUB_QVIEW";
 
-    private static final String TYPE_SUFFIX = "QuestType";
+
+	private static final String TYPE_SUFFIX = "QuestType";
     private static final String LANG_SUFFIX = "Lang";
     private static final String MAIN_COLUMN_SUFFIX = "";
 
@@ -246,13 +248,11 @@ public class OneShotSQLGeneratorEngine {
 
 		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedQuery);
 
-		normalizeProgram(queryProgram);
-
-		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(queryProgram);
-		Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
-
-		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();
-		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
+		for (CQIE rule : queryProgram.getRules()) {
+			DatalogNormalizer.foldJoinTrees(rule);
+			DatalogNormalizer.addMinimalEqualityToLeftJoin(rule);
+		}
+		log.debug("Program normalized for SQL translation:\n" + queryProgram);
 
 		MutableQueryModifiers queryModifiers = queryProgram.getQueryModifiers();
 		isDistinct = queryModifiers.hasModifiers()
@@ -261,11 +261,14 @@ public class OneShotSQLGeneratorEngine {
 		isOrderBy = queryModifiers.hasModifiers()
 						&& !queryModifiers.getSortConditions().isEmpty();
 
+		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(queryProgram);
+		Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
+		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();
+		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
+
 		final String sqlQuery;
 		String subquery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
 		if (queryModifiers.hasModifiers()) {
-			final String outerViewName = "SUB_QVIEW";
-
 			//List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
 			// if (!groupby.isEmpty()) {
 			// subquery += "\n" + sqladapter.sqlGroupBy(groupby, "") + " " +
@@ -280,7 +283,7 @@ public class OneShotSQLGeneratorEngine {
 
 			final String modifier;
 			if (!conditions.isEmpty()) {
-				modifier = sqladapter.sqlOrderByAndSlice(conditions, outerViewName, limit, offset) + "\n";
+				modifier = sqladapter.sqlOrderByAndSlice(conditions, OUTER_VIEW_NAME, limit, offset) + "\n";
 			}
 			else if (limit != -1 || offset != -1) {
 				modifier = sqladapter.sqlSlice(limit, offset) + "\n";
@@ -290,7 +293,7 @@ public class OneShotSQLGeneratorEngine {
 			}
 
 			sqlQuery = "SELECT *\n" +
-					"FROM (\n" + subquery + "\n" + ") " + outerViewName + "\n" +
+					"FROM (\n" + subquery + "\n" + ") " + OUTER_VIEW_NAME + "\n" +
 					modifier;
 		}
 		else {
@@ -523,19 +526,6 @@ public class OneShotSQLGeneratorEngine {
 		return groupReferences;
 	}
 
-
-	/**
-	 * Normalizations of the Datalog program requirend by the Datalog to SQL translator
-	 *
-	 * @param program
-	 */
-	private void normalizeProgram(DatalogProgram program) {
-		for (CQIE rule : program.getRules()) {
-			DatalogNormalizer.foldJoinTrees(rule);
-			DatalogNormalizer.addMinimalEqualityToLeftJoin(rule);
-		}
-		log.debug("Program normalized for SQL translation: \n"+program);
-	}
 
 
 	private RelationID createAlias(String predicateName, String suffix, Collection<RelationID> alreadyAllocatedViewNames) {
@@ -1597,15 +1587,17 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 	private static final class DataDefinition {
-		private final RelationDefinition def;
 		private final RelationID alias;
-		DataDefinition(RelationID alias, RelationDefinition def) {
+		private final String definition;
+		private final ImmutableList<QualifiedAttributeID> attributes;
+		DataDefinition(RelationID alias, String definition, ImmutableList<QualifiedAttributeID> attributes) {
 			this.alias = alias;
-			this.def = def;
+			this.definition = definition;
+			this.attributes = attributes;
 		}
 		@Override
 		public String toString() {
-			return alias + " " + def;
+			return alias + " " + definition;
 		}
 	}
 
@@ -1658,25 +1650,35 @@ public class OneShotSQLGeneratorEngine {
 
 			Predicate predicate = atom.getFunctionSymbol();
 			boolean isSubquery = subQueryDefinitions.containsKey(predicate);
-			final RelationDefinition def;
-			final RelationID relationAlias;
+			final DataDefinition definition;
 			if (isSubquery) {
-				def = subQueryDefinitions.get(predicate);
-				relationAlias = def.getID();
-				subQueries.put(def.getID(), subQueryDefinitions.get(predicate));
+				ParserViewDefinition subQuery = subQueryDefinitions.get(predicate);
+				subQueries.put(subQuery.getID(), subQuery);
+				definition = new DataDefinition(
+						subQuery.getID(),
+						"(" + subQuery.getStatement() + ")",
+						subQuery.getAttributes().stream()
+								.map(Attribute::getQualifiedID)
+								.collect(ImmutableCollectors.toList()));
 			}
 			else {
-				relationAlias = createAlias(predicate.getName(),
+				RelationID relationAlias = createAlias(predicate.getName(),
 						VIEW_SUFFIX + dataDefinitions.size(),
 						dataDefinitions.entrySet().stream()
 								.map(e -> e.getValue().alias).collect(Collectors.toList()));
-				def = metadata.getRelation(Relation2Predicate.createRelationFromPredicateName(
+				RelationDefinition relation = metadata.getRelation(Relation2Predicate.createRelationFromPredicateName(
 						metadata.getQuotedIDFactory(), predicate));
-			}
-			if (def == null)
-				return;   // because of dummyN - what exactly is that?
+				if (relation == null)
+					return;   // because of dummyN - what exactly is that?
 
-			dataDefinitions.put(atom, new DataDefinition(relationAlias, def));
+				definition = new DataDefinition(
+						relationAlias,
+						relation.getID().getSQLRendering(),
+						relation.getAttributes().stream()
+								.map(a -> new QualifiedAttributeID(relationAlias, a.getID()))
+								.collect(ImmutableCollectors.toList()));
+			}
+			dataDefinitions.put(atom, definition);
 
 			for (int index = 0; index < atom.getTerms().size(); index++) {
 				Term term = atom.getTerms().get(index);
@@ -1692,9 +1694,7 @@ public class OneShotSQLGeneratorEngine {
 							? 3 * (index + 1) // a view from an Ans predicate
 							: index + 1;      // a database relation
 
-					Attribute column = def.getAttribute(idx);
-					QualifiedAttributeID qualifiedId = new QualifiedAttributeID(relationAlias, column.getID());
-					references.add(qualifiedId);
+					references.add(definition.attributes.get(idx));
 				}
 			}
 		}
@@ -1721,15 +1721,7 @@ public class OneShotSQLGeneratorEngine {
 
 			DataDefinition dd = dataDefinitions.get(atom);
 			if (dd != null) {
-				if (dd.def instanceof DatabaseRelationDefinition) {
-					return sqladapter.sqlTableName(dd.def.getID().getSQLRendering(),
-							dd.alias.getSQLRendering());
-				}
-				else if (dd.def instanceof ParserViewDefinition) {
-					return String.format("(%s) %s", ((ParserViewDefinition) dd.def).getStatement(),
-							dd.alias.getSQLRendering());
-				}
-				throw new RuntimeException("Impossible to get data definition for: " + atom + ", type: " + dd);
+				return sqladapter.sqlTableName(dd.definition, dd.alias.getSQLRendering());
 			}
 			else if (atom.getArity() == 0) {
 				 // Special case of nullary atoms
@@ -1741,8 +1733,7 @@ public class OneShotSQLGeneratorEngine {
 
 		public QualifiedAttributeID getColumnReference(Function atom, int column) {
 			DataDefinition dd = dataDefinitions.get(atom);
-			QuotedID columnname = dd.def.getAttribute(column + 1).getID(); // indexes from 1
-			return new QualifiedAttributeID(dd.alias, columnname);
+			return dd.attributes.get(column);
 		}
 
 		public Optional<QualifiedAttributeID> getTypeColumn(Variable var) {
