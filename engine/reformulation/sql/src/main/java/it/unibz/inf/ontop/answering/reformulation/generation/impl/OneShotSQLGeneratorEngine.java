@@ -74,27 +74,27 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
  * Thus, an instance of this class should NOT BE SHARED between QuestStatements but be DUPLICATED.
  *
  *
- * @author mrezk, mariano, guohui
+ * @author mrezk, mariano, guohui, roman
  *
  */
 public class OneShotSQLGeneratorEngine {
 
 	/**
-	 * Formatting template
+	 * Formatting templates
 	 */
     private static final String VIEW_PREFIX = "Q";
     private static final String VIEW_SUFFIX = "VIEW";
     private static final String VIEW_ANS_SUFFIX = "View";
 	private static final String OUTER_VIEW_NAME = "SUB_QVIEW";
 
-
-	private static final String TYPE_SUFFIX = "QuestType";
-    private static final String LANG_SUFFIX = "Lang";
+	private static final String TYPE_COLUMN_SUFFIX = "QuestType";
+    private static final String LANG_COLUMN_SUFFIX = "Lang";
     private static final String MAIN_COLUMN_SUFFIX = "";
 
 	private static final String INDENT = "    ";
 
 	private final RDBMetadata metadata;
+	private final QuotedIDFactory idFactory;
 	private final SQLDialectAdapter sqladapter;
 	private final IntermediateQuery2DatalogTranslator iq2DatalogTranslator;
 
@@ -109,9 +109,8 @@ public class OneShotSQLGeneratorEngine {
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(OneShotSQLGeneratorEngine.class);
 	private final JdbcTypeMapper jdbcTypeMapper;
 
-	/**
-	 * Mutable (query-dependent)
-	 */
+
+	// the only two mutable (query-dependent) fields
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 
@@ -138,7 +137,8 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		this.metadata = (RDBMetadata)metadata;
-		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI,this.metadata.getDbmsVersion(), settings);
+		this.idFactory = metadata.getQuotedIDFactory();
+		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI, this.metadata.getDbmsVersion(), settings);
 		this.operations = buildOperations(sqladapter);
 		this.distinctResultSet = settings.isDistinctPostProcessingEnabled();
 		this.iq2DatalogTranslator = iq2DatalogTranslator;
@@ -170,6 +170,7 @@ public class OneShotSQLGeneratorEngine {
                                       ImmutableMap<ExpressionOperation, String> operations,
 									  IntermediateQuery2DatalogTranslator iq2DatalogTranslator) {
 		this.metadata = metadata;
+		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
 		this.operations = operations;
 		this.replace1 = replace1;
@@ -223,8 +224,10 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 	/**
-	 * SQLGenerator must not be shared between threads
-	 * but CLONED.
+	 * SQLGenerator must not be shared between threads but CLONED.
+	 *
+	 * roman: this is an incorrect way of overriding clone - see, e.g.,
+	 * https://docs.oracle.com/javase/tutorial/java/IandI/objectclass.html
 	 *
 	 * @return A cloned object without any query-dependent value
 	 */
@@ -237,9 +240,11 @@ public class OneShotSQLGeneratorEngine {
 	/**
 	 * Generates and SQL query ready to be executed by Quest. Each query is a
 	 * SELECT FROM WHERE query. To know more about each of these see the inner
-	 * method descriptions. Observe that the SQL itself will be done by
-	 * {@link #generateQuery}
+	 * method descriptions.
+	 * Observe that the SQL is produced by {@link #generateQuery}
 	 *
+	 * @param intermediateQuery
+	 * @param signature is the list of main columns in the ResultSet
 	 */
 	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
 			throws OntopReformulationException {
@@ -248,9 +253,9 @@ public class OneShotSQLGeneratorEngine {
 
 		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedQuery);
 
-		for (CQIE rule : queryProgram.getRules()) {
-			DatalogNormalizer.foldJoinTrees(rule);
-			DatalogNormalizer.addMinimalEqualityToLeftJoin(rule);
+		for (CQIE cq : queryProgram.getRules()) {
+			DatalogNormalizer.foldJoinTrees(cq);
+			DatalogNormalizer.addMinimalEqualityToLeftJoin(cq);
 		}
 		log.debug("Program normalized for SQL translation:\n" + queryProgram);
 
@@ -266,8 +271,8 @@ public class OneShotSQLGeneratorEngine {
 		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();
 		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 
-		final String sqlQuery;
-		String subquery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
+		final String resultingQuery;
+		String queryString = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
 		if (queryModifiers.hasModifiers()) {
 			//List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
 			// if (!groupby.isEmpty()) {
@@ -292,14 +297,14 @@ public class OneShotSQLGeneratorEngine {
 				modifier = "";
 			}
 
-			sqlQuery = "SELECT *\n" +
-					"FROM (\n" + subquery + "\n" + ") " + OUTER_VIEW_NAME + "\n" +
+			resultingQuery = "SELECT *\n" +
+					"FROM " + bracket("\n" + queryString + "\n") + " " + OUTER_VIEW_NAME + "\n" +
 					modifier;
 		}
 		else {
-			sqlQuery = subquery;
+			resultingQuery = queryString;
 		}
-		return new SQLExecutableQuery(sqlQuery, signature);
+		return new SQLExecutableQuery(resultingQuery, signature);
 	}
 
 	private IntermediateQuery normalizeIQ(IntermediateQuery intermediateQuery) {
@@ -316,22 +321,14 @@ public class OneShotSQLGeneratorEngine {
 
 
 	/**
-	 * Main method. Generates the full SQL query, taking into account
-	 * limit/offset/order by. An important part of this program is
-	 * {@link #generateQueryFromRules}
-	 * that will create a view for every ans predicate in the Datalog input
-	 * program.
+	 * Generates the full SQL query.
+	 * An important part of this program is {@link #generateQueryFromRules}
+	 * that will create a view for every ans predicate in the input Datalog program.
 	 *
-	 * @param signature
-	 *            The Select variables in the SPARQL query
-	 * @param ruleIndex
-	 *            The index that maps intentional predicates to its rules
-	 * @param predicatesInBottomUp
-	 *            The topologically ordered predicates in
-	 *            <code> query </code>.
-	 * @param extensionalPredicates
-	 *            The predicates that are not defined by any rule in <code>
-	 *            query </code>
+	 * @param signature is the list of main columns in the ResultSet
+	 * @param ruleIndex maps intentional predicates to its rules
+	 * @param predicatesInBottomUp the topologically ordered predicates in the program
+	 * @param extensionalPredicates are the predicates that are not defined by any rule
 	 * @return
 	 */
 	private String generateQuery(List<String> signature,
@@ -339,12 +336,10 @@ public class OneShotSQLGeneratorEngine {
 								 List<Predicate> predicatesInBottomUp,
 								 List<Predicate> extensionalPredicates) throws OntopReformulationException {
 
-		TypeExtractor.TypeResults typeResults;
+		final TypeExtractor.TypeResults typeResults;
 		try {
+			// Currently, incompatible terms are treated as a reformulation error
 			typeResults = TypeExtractor.extractTypes(ruleIndex, predicatesInBottomUp, metadata);
-			/*
-			 * Currently, incompatible terms are treated as a reformulation error
-			 */
 		}
 		catch (IncompatibleTermException e) {
 			throw new OntopTypingException(e.getMessage());
@@ -353,20 +348,17 @@ public class OneShotSQLGeneratorEngine {
 		ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = typeResults.getTermTypeMap();
 		ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap = typeResults.getCastTypeMap();
 
-		/**
-		 * ANS i > 1
-		 */
+		// non-top-level intensional predicates - need to create subqueries
 
 		ImmutableMap.Builder<Predicate, FromItem> subQueryDefinitionsBuilder = ImmutableMap.builder();
 		Set<RelationID> usedAliases = new HashSet<>();
 		// create a view for every ans predicate in the Datalog input program.
-		int numPreds = predicatesInBottomUp.size();
-		for (int i = 0; i < numPreds - 1; i++) {
+		int topLevel = predicatesInBottomUp.size() - 1;
+		for (int i = 0; i < topLevel; i++) {
 			Predicate pred = predicatesInBottomUp.get(i);
 			if (!extensionalPredicates.contains(pred)) {
-				// extensional predicates are defined by DBs
-				// so, we skip them
-				/**
+				// extensional predicates are defined by DBs, so, we skip them
+				/*
 				 * handle the semantics of OPTIONAL when there
 				 * are multiple mappings or Unions. It will take mappings of the form
 				 * <ul>
@@ -386,52 +378,44 @@ public class OneShotSQLGeneratorEngine {
 				// all have the same arity
 				int size = ruleIndex.get(pred).iterator().next().getHead().getArity();
 				// create signature
-				ImmutableList.Builder<String> builder = ImmutableList.builder();
+				ImmutableList.Builder<String> varListBuilder = ImmutableList.builder();
 				for (int k = 0; k < size; k++) {
-					builder.add("v" + k);
+					varListBuilder.add("v" + k);
 				}
-				ImmutableList<SignatureVariable> s =
-						createSignature(builder.build(), castTypeMap.get(pred));
+				ImmutableList<SignatureVariable> s = createSignature(varListBuilder.build(), castTypeMap.get(pred));
 
-				// Creates BODY of the view query
-				String subquery = generateQueryFromRules(ruleIndex.get(pred), s,
+				// Creates the body of the subquery
+				String subQuery = generateQueryFromRules(ruleIndex.get(pred), s,
 						subQueryDefinitionsBuilder.build(), termTypeMap, false);
 
-				RelationID subqueryAlias = createAlias(pred.getName(), VIEW_ANS_SUFFIX, usedAliases);
-				usedAliases.add(subqueryAlias);
+				RelationID subQueryAlias = createAlias(pred.getName(), VIEW_ANS_SUFFIX, usedAliases);
+				usedAliases.add(subQueryAlias);
 
-				// creates a view outside the DBMetadata (specific to this sub-query)
-				ImmutableList.Builder<QualifiedAttributeID> b = ImmutableList.builder();
+				ImmutableList.Builder<QualifiedAttributeID> columnsBuilder = ImmutableList.builder();
 				for (SignatureVariable var : s) {
 					for (String alias : var.columnAliases) {
-						b.add(new QualifiedAttributeID(subqueryAlias,
+						columnsBuilder.add(new QualifiedAttributeID(subQueryAlias,
 								metadata.getQuotedIDFactory().createAttributeID(alias)));
 					}
 				}
-				FromItem view = new FromItem(subqueryAlias, "(" + subquery + ")", b.build());
-				subQueryDefinitionsBuilder.put(pred, view);
+				FromItem item = new FromItem(subQueryAlias, bracket(subQuery), columnsBuilder.build());
+				subQueryDefinitionsBuilder.put(pred, item);
 			}
 		}
 
-		/**
-		 * ANS 1
-		 */
+		// top-level intensional predicate
+		Predicate topLevelPredicate = predicatesInBottomUp.get(topLevel);
+		ImmutableList<SignatureVariable> topSignature = createSignature(signature, castTypeMap.get(topLevelPredicate));
 
-		// This should be ans1, and the rules defining it.
-		Predicate predAns1 = predicatesInBottomUp.get(numPreds - 1);
-		ImmutableList<SignatureVariable> s = createSignature(signature, castTypeMap.get(predAns1));
-
-		return generateQueryFromRules(ruleIndex.get(predAns1), s,
+		return generateQueryFromRules(ruleIndex.get(topLevelPredicate), topSignature,
 				subQueryDefinitionsBuilder.build(), termTypeMap,
 				isDistinct && !distinctResultSet);
 	}
 
 
-
-
 	/**
-	 * Takes a collection of Datalog rules <code> cqs </code> and returns the SQL
-	 * translation of the rules. It is a helper method for{@link #generateQuery}
+	 * Takes a union of CQs and returns its SQL translation.
+	 * It is a helper method for{@link #generateQuery}
 	 *
 	 * @param cqs
 	 * @param signature
@@ -456,78 +440,79 @@ public class OneShotSQLGeneratorEngine {
 				sb.append("DISTINCT ");
 			}
 
-			List<Term> terms = cq.getHead().getTerms();
-			List<Optional<TermType>> termTypes = termTypeMap.get(cq);
-
-			List<String> selectList = Lists.newArrayListWithCapacity(signature.size());
-			for (int i = 0; i < signature.size(); i++) {
-				selectList.add(getSelectClauseFragment(signature.get(i), terms.get(i),  termTypes.get(i), index));
+			List<String> select;
+			if (!signature.isEmpty()) {
+				List<Term> terms = cq.getHead().getTerms();
+				List<Optional<TermType>> termTypes = termTypeMap.get(cq);
+				select = Lists.newArrayListWithCapacity(signature.size());
+				for (int i = 0; i < signature.size(); i++) {
+					select.add(getSelectClauseFragment(signature.get(i), terms.get(i), termTypes.get(i), index));
+				}
 			}
-
-			if (selectList.isEmpty())
-				sb.append("'true' AS x"); 				//Only for ASK
-			else
-				Joiner.on(", ").appendTo(sb, selectList);
+			else {
+				select = ImmutableList.of("'true' AS x"); // Only for ASK
+			}
+			Joiner.on(", ").appendTo(sb, select);
 
 			List<Function> body = cq.getBody();
 			sb.append("\n FROM \n");
-			List<String> tableDefinitions = getTableDefs(body, index, "");
-			if (tableDefinitions.isEmpty()) {
-				sb.append("(" + sqladapter.getDummyTable() + ") tdummy");
+			List<String> from = getTableDefs(body, index, "");
+			if (from.isEmpty()) {
+				from = ImmutableList.of(bracket(sqladapter.getDummyTable()) + " tdummy");
 			}
-			else {
-				Joiner.on(",\n").appendTo(sb, tableDefinitions);
+			Joiner.on(",\n").appendTo(sb, from);
+
+			Set<String> where = getConditionsSet(body, index, false);
+			if (!where.isEmpty()) {
+				sb.append("\nWHERE \n");
+				Joiner.on(" AND\n").appendTo(sb, where);
 			}
 
-			Set<String> conditions = getConditionsSet(body, index, false);
-			if (!conditions.isEmpty())
-				sb.append("\nWHERE \n").append(Joiner.on(" AND\n").join(conditions));
+			ImmutableList<QualifiedAttributeID> groupBy = getGroupBy(body, index);
+			if (!groupBy.isEmpty()) {
+				sb.append("\nGROUP BY ");
+				Joiner.on(", ").appendTo(sb, groupBy.stream()
+						.map(QualifiedAttributeID::getSQLRendering)
+						.collect(ImmutableCollectors.toList()));
+			}
 
-			List<String> groupBy = getGroupBy(body, index);
-			if (!groupBy.isEmpty())
-				sb.append("\nGROUP BY " + Joiner.on(", ").join(groupBy));
-
-			List<Function> having = getHaving(body);
-			if (!having.isEmpty())
-				sb.append("\nHAVING (" + Joiner.on(" AND ").join(getBooleanConditionsString(having, index)) + ") ");
+			ImmutableList<Function> having = getHaving(body);
+			if (!having.isEmpty()) {
+				sb.append("\nHAVING (");
+				Joiner.on(" AND ").appendTo(sb, getBooleanConditions(having, index));
+				sb.append(") ");
+			}
 
 			sqls.add(sb.toString());
 		}
 		return sqls.size() == 1
 				? sqls.get(0)
-				: "(" + Joiner.on(")\n " + (unionNoDuplicates ? "UNION" : "UNION ALL") + "\n (")
-						.join(sqls) + ")";
+				: bracket(Joiner.on(")\n " + (unionNoDuplicates ? "UNION" : "UNION ALL") + "\n (").join(sqls));
 	}
 
 
-	private List<Function> convert(List<Term> terms) {
+	private ImmutableList<Function> convert(List<Term> terms) {
 		return terms.stream().map(c -> (Function)c).collect(ImmutableCollectors.toList());
 	}
 
-	private List<Function> getHaving(List<Function> body) {
+	private ImmutableList<Function> getHaving(List<Function> body) {
 		for (Function atom : body) {
 			if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_HAVING) {
 				return convert(atom.getTerms());
 			}
 		}
-		return Collections.emptyList();
+		return ImmutableList.of();
 	}
 
-	private List<String> getGroupBy(List<Function> body, QueryAliasIndex index) {
-		List<String> groupReferences = Lists.newArrayList();
-		for (Function atom : body) {
-			if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_GROUP) {
-				for (Variable var : atom.getVariables()) {
-					index.getColumnReferences(var).stream()
-							.map(QualifiedAttributeID::getSQLRendering)
-							.forEach(groupReferences::add);
-				}
-			}
-		}
-		return groupReferences;
+	private ImmutableList<QualifiedAttributeID> getGroupBy(List<Function> body, QueryAliasIndex index) {
+		return body.stream()
+				.filter(a -> a.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_GROUP)
+				.map(a -> a.getVariables())
+				.flatMap(l -> l.stream())
+				.map(v -> index.getColumns(v))
+				.flatMap(l -> l.stream())
+				.collect(ImmutableCollectors.toList());
 	}
-
-
 
 	private RelationID createAlias(String predicateName, String suffix, Collection<RelationID> alreadyAllocatedViewNames) {
 		// Escapes view names.
@@ -537,18 +522,17 @@ public class OneShotSQLGeneratorEngine {
 				.replace('/', '_')
 				.replace(' ', '_');
 		String alias = sqladapter.nameView(VIEW_PREFIX, safePredicateName, suffix, alreadyAllocatedViewNames);
-		return metadata.getQuotedIDFactory().createRelationID(null, alias);
+		return idFactory.createRelationID(null, alias);
 	}
 
-	/***
+	/**
 	 * Returns a string with boolean conditions formed with the boolean atoms
 	 * found in the atoms list.
 	 */
-	private Set<String> getBooleanConditionsString(List<Function> atoms, QueryAliasIndex index) {
+	private Set<String> getBooleanConditions(List<Function> atoms, QueryAliasIndex index) {
 		Set<String> conditions = new LinkedHashSet<>();
 		for (Function atom : atoms) {
-			// Boolean expression
-			if (atom.isOperation()) {
+			if (atom.isOperation()) {  // Boolean expression
 				String condition = getSQLCondition(atom, index);
 				conditions.add(condition);
 			}
@@ -593,43 +577,33 @@ public class OneShotSQLGeneratorEngine {
 		else if (functionSymbol.getArity() == 2) {
 			// For binary boolean operators, e.g., AND, OR, EQ, GT, LT, etc.
 			String expressionFormat = operations.get(functionSymbol);
-			Term left = atom.getTerm(0);
-			Term right = atom.getTerm(1);
-			String leftOp = getSQLString(left, index, true);
-			String rightOp = getSQLString(right, index, true);
-			return String.format("(" + expressionFormat + ")", leftOp, rightOp);
+			String left = getSQLString(atom.getTerm(0), index, true);
+			String right = getSQLString(atom.getTerm(1), index, true);
+			return String.format(bracket(expressionFormat), left, right);
 		}
 		else {
 			if (functionSymbol == ExpressionOperation.REGEX) {
-				boolean caseinSensitive = false;
-				boolean multiLine = false;
-				boolean dotAllMode = false;
+				boolean caseinSensitive = false, multiLine = false, dotAllMode = false;
 				if (atom.getArity() == 3) {
 					String options = atom.getTerm(2).toString();
 					caseinSensitive = options.contains("i");
 					multiLine = options.contains("m");
 					dotAllMode = options.contains("s");
 				}
-				Term p1 = atom.getTerm(0);
-				Term p2 = atom.getTerm(1);
-
-				String column = getSQLString(p1, index, false);
-				String pattern = getSQLString(p2, index, false);
-				String sqlRegex = sqladapter.sqlRegex(column, pattern, caseinSensitive,
-						multiLine, dotAllMode);
-				return sqlRegex;
+				String column = getSQLString(atom.getTerm(0), index, false);
+				String pattern = getSQLString(atom.getTerm(1), index, false);
+				return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 			}
 			else
-				throw new RuntimeException("The builtin function "
-						+ functionSymbol + " is not supported yet!");
+				throw new RuntimeException("The builtin function " + functionSymbol + " is not supported yet!");
 		}
 	}
 
-	private List<String> getTableDefs(List<Function> atoms, QueryAliasIndex index, String indent) {
+	private ImmutableList<String> getTableDefs(List<Function> atoms, QueryAliasIndex index, String indent) {
 		return atoms.stream()
 				.map(a -> getTableDefinition(a, index, indent + INDENT))
 				.filter(d -> !d.isEmpty())
-				.collect(Collectors.toList());
+				.collect(ImmutableCollectors.toList());
 	}
 
 	/**
@@ -647,11 +621,16 @@ public class OneShotSQLGeneratorEngine {
 	 *
 	 * @param atoms
 	 * @param index
+	 * @param JOIN_KEYWORD
+	 * @param parenthesis
+	 * @param indent
 	 *
 	 * @return
 	 */
 	private String getTableDefinitions(List<Function> atoms,
-									   QueryAliasIndex index, String JOIN_KEYWORD, boolean parenthesis,
+									   QueryAliasIndex index,
+									   String JOIN_KEYWORD,
+									   boolean parenthesis,
 									   String indent) {
 
 		List<String> tableDefinitions = getTableDefs(atoms, index, indent);
@@ -684,11 +663,11 @@ public class OneShotSQLGeneratorEngine {
 					currentJoin = String.format(JOIN_WITH_PARENTHESIS, tableDefinitions.get(i), currentJoin);
 				}
 
-				Set<String> conditions = getConditionsSet(atoms, index, true);
+				Set<String> on = getConditionsSet(atoms, index, true);
 
 				StringBuilder sb = new StringBuilder();
 				sb.append(currentJoin).append(" ON\n").append(indent);
-				Joiner.on(" AND\n" + indent).appendTo(sb, conditions);
+				Joiner.on(" AND\n" + indent).appendTo(sb, on);
 				sb.append("\n").append(indent);
 				return sb.toString();
 		}
@@ -769,18 +748,18 @@ public class OneShotSQLGeneratorEngine {
 		Set<String> eqConstants = getEqConditionsForConstants(atoms, index);
 		conditions.addAll(eqConstants);
 
-		Set<String> booleanConditions = getBooleanConditionsString(atoms, index);
+		Set<String> booleanConditions = getBooleanConditions(atoms, index);
 		conditions.addAll(booleanConditions);
 
 		return conditions;
 	}
 
 	/**
-	 * Returns the set of variables that participate data atoms (either in this
-	 * atom directly or in nested ones). This will recursively collect the
-	 * variables references in in this atom, excluding those on the right side
-	 * of left joins.
+	 * Collects (recursively) the set of variables that participate in data atoms
+	 * (either in this atom directly or in nested ones, excluding those on the
+	 * right-hand side of left joins.
 	 *
+	 * @param vars
 	 * @param atom
 	 * @return
 	 */
@@ -825,13 +804,13 @@ public class OneShotSQLGeneratorEngine {
 		 */
 		Set<String> equalities = new LinkedHashSet<>();
 		for (Variable var : vars) {
-			Set<QualifiedAttributeID> references = index.getColumnReferences(var);
-			if (references.size() >= 2) {
+			Set<QualifiedAttributeID> columns = index.getColumns(var);
+			if (columns.size() >= 2) {
 				// if 1, tnen no need for equality
-				Iterator<QualifiedAttributeID> referenceIterator = references.iterator();
-				QualifiedAttributeID leftColumn = referenceIterator.next();
-				while (referenceIterator.hasNext()) {
-					QualifiedAttributeID rightColumn = referenceIterator.next();
+				Iterator<QualifiedAttributeID> iterator = columns.iterator();
+				QualifiedAttributeID leftColumn = iterator.next();
+				while (iterator.hasNext()) {
+					QualifiedAttributeID rightColumn = iterator.next();
 					String equality = String.format("(%s = %s)",
 							leftColumn.getSQLRendering(),
 							rightColumn.getSQLRendering());
@@ -851,7 +830,7 @@ public class OneShotSQLGeneratorEngine {
 					Term t = atom.getTerm(i);
 					if (t instanceof Constant) {
 						String value = getSQLString(t, index, false);
-						QualifiedAttributeID column = index.getColumnReference(atom, i);
+						QualifiedAttributeID column = index.getColumn(atom, i);
 						equalities.add(String.format("(%s = %s)", column.getSQLRendering(), value));
 					}
 				}
@@ -953,10 +932,10 @@ public class OneShotSQLGeneratorEngine {
 			String name = names.get(i);
 
 			// Creates name names that satisfy the restrictions of the SQL dialect.
-			String typeAlias = sqladapter.nameTopVariable(name, TYPE_SUFFIX, columnAliases);
+			String typeAlias = sqladapter.nameTopVariable(name, TYPE_COLUMN_SUFFIX, columnAliases);
 			columnAliases.add(typeAlias);
 
-			String langAlias = sqladapter.nameTopVariable(name, LANG_SUFFIX, columnAliases);
+			String langAlias = sqladapter.nameTopVariable(name, LANG_COLUMN_SUFFIX, columnAliases);
 			columnAliases.add(langAlias);
 
 			String mainAlias = sqladapter.nameTopVariable(name, MAIN_COLUMN_SUFFIX, columnAliases);
@@ -1096,6 +1075,7 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 
+	private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 
 	private String getSQLStringForTemplateFunction(Function ov, QueryAliasIndex index) {
 		/*
@@ -1112,11 +1092,13 @@ public class OneShotSQLGeneratorEngine {
 			 * place of the place holders. We need to tokenize and form the
 			 * CONCAT
 			 */
-			String literalValue = (t instanceof BNode)
+			String template = (t instanceof BNode)
 					? ((BNode) t).getName()   // getValue should be removed from Constant
 					: ((ValueConstant) t).getValue();
-
-			String template = trimLiteral(literalValue);
+			// trim template
+			while (pQuotes.matcher(template).matches()) {
+				template = template.substring(1, template.length() - 1);
+			}
 			String[] split = template.split("[{][}]");
 
 			List<String> vex = new ArrayList<>();
@@ -1215,14 +1197,14 @@ public class OneShotSQLGeneratorEngine {
 			}
 		}
 		else if (term instanceof Variable) {
-			Set<QualifiedAttributeID> attrs = index.getColumnReferences((Variable) term);
-			QualifiedAttributeID attr0 = attrs.iterator().next();
+			Set<QualifiedAttributeID> columns = index.getColumns((Variable) term);
+			QualifiedAttributeID column0 = columns.iterator().next();
 
-			RelationDefinition relation = index.invertedAlias.get(attr0.getRelation());
+			RelationDefinition relation = index.invertedAlias.get(column0.getRelation());
 			if (relation != null) {
-				QuotedID colId = attr0.getAttribute();
+				QuotedID columnId = column0.getAttribute();
 				for (Attribute a : relation.getAttributes()) {
-					if (a.getID().equals(colId)) {
+					if (a.getID().equals(columnId)) {
 						switch (a.getType()) {
 							case Types.VARCHAR:
 							case Types.CHAR:
@@ -1243,15 +1225,6 @@ public class OneShotSQLGeneratorEngine {
 
 	private boolean hasIRIDictionary() {
 		return uriRefIds != null;
-	}
-
-	private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
-
-	private static String trimLiteral(String string) {
-		while (pQuotes.matcher(string).matches()) {
-			string = string.substring(1, string.length() - 1);
-		}
-		return string;
 	}
 
 	/**
@@ -1297,9 +1270,8 @@ public class OneShotSQLGeneratorEngine {
 			return sqladapter.getSQLLexicalFormString(uc.toString());
 		}
 		else if (term instanceof Variable) {
-			Variable var = (Variable) term;
-			Set<QualifiedAttributeID> posList = index.getColumnReferences(var);
-			return posList.iterator().next().getSQLRendering();
+			Set<QualifiedAttributeID> columns = index.getColumns((Variable) term);
+			return columns.iterator().next().getSQLRendering();
 		}
 
 		/* If its not constant, or variable its a function */
@@ -1332,34 +1304,28 @@ public class OneShotSQLGeneratorEngine {
 					return expressionFormat;
 				case 1:
 					// for unary functions, e.g., NOT, IS NULL, IS NOT NULL
-					Term term1 = function.getTerm(0);
-					String op = getSQLString(term1, index, true);
-					return String.format(expressionFormat, op);
+					String arg = getSQLString(function.getTerm(0), index, true);
+					return String.format(expressionFormat, arg);
 				case 2:
 					// for binary functions, e.g., AND, OR, EQ, NEQ, GT etc.
-					String leftOp = getSQLString(function.getTerm(0), index, true);
-					String rightOp = getSQLString(function.getTerm(1), index, true);
-					String result = String.format(expressionFormat, leftOp, rightOp);
-					return useBrackets ? "(" + result + ")" : result;
+					String left = getSQLString(function.getTerm(0), index, true);
+					String right = getSQLString(function.getTerm(1), index, true);
+					String result = String.format(expressionFormat, left, right);
+					return useBrackets ? bracket(result) : result;
 				default:
 					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
 			}
 		}
 		else if (functionSymbol == ExpressionOperation.REGEX) {
-			boolean caseinSensitive = false;
-			boolean multiLine = false;
-			boolean dotAllMode = false;
+			boolean caseinSensitive = false, multiLine = false, dotAllMode = false;
 			if (function.getArity() == 3) {
 				String options = function.getTerm(2).toString();
 				caseinSensitive = options.contains("i");
 				multiLine = options.contains("m");
 				dotAllMode = options.contains("s");
 			}
-			Term p1 = function.getTerm(0);
-			Term p2 = function.getTerm(1);
-
-			String column = getSQLString(p1, index, false);
-			String pattern = getSQLString(p2, index, false);
+			String column = getSQLString(function.getTerm(0), index, false);
+			String pattern = getSQLString(function.getTerm(1), index, false);
 			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 		}
 		else if (functionSymbol == ExpressionOperation.SPARQL_LANG) {
@@ -1569,6 +1535,8 @@ public class OneShotSQLGeneratorEngine {
 		return -2;
 	}
 
+
+
 	private static final class FromItem {
 		private final RelationID alias;
 		private final String definition;
@@ -1599,9 +1567,7 @@ public class OneShotSQLGeneratorEngine {
 
 		public QueryAliasIndex(CQIE query, ImmutableMap<Predicate, FromItem> subQueryDefinitions) {
 			for (Function atom : query.getBody()) {
-				/*
-				 * This will be called recursively if necessary
-				 */
+				// This will be called recursively if necessary
 				generateViewsIndexVariables(atom, subQueryDefinitions);
 			}
 		}
@@ -1651,38 +1617,36 @@ public class OneShotSQLGeneratorEngine {
 						dataDefinitions.entrySet().stream()
 								.map(e -> e.getValue().alias).collect(Collectors.toList()));
 
-				invertedAlias.put(relationAlias, relation);
-
 				definition = new FromItem(
 						relationAlias,
 						relation instanceof DatabaseRelationDefinition
 								? relation.getID().getSQLRendering()
-								: "(" + ((ParserViewDefinition)relation).getStatement() + ")",
+								: bracket(((ParserViewDefinition)relation).getStatement()),
 						relation.getAttributes().stream()
 								.map(a -> new QualifiedAttributeID(relationAlias, a.getID()))
 								.collect(ImmutableCollectors.toList()));
+
+				invertedAlias.put(definition.alias, relation);
 			}
 			dataDefinitions.put(atom, definition);
 
 			for (int i = 0; i < atom.getTerms().size(); i++) {
 				Term term = atom.getTerms().get(i);
 				if (term instanceof Variable) {
-					Set<QualifiedAttributeID> references = columnReferences.get(term);
-					if (references == null) {
-						references = new LinkedHashSet<>();
-						columnReferences.put((Variable) term, references);
+					Set<QualifiedAttributeID> columns = columnReferences.get(term);
+					if (columns == null) {
+						columns = new LinkedHashSet<>();
+						columnReferences.put((Variable) term, columns);
 					}
-
 					int idx = isSubquery
 							? 3 * i + 2 // a view from an Ans predicate
 							: i;        // a database relation
-
-					references.add(definition.attributes.get(idx));
+					columns.add(definition.attributes.get(idx));
 				}
 			}
 		}
 
-		/***
+		/**
 		 * Returns all the column aliases that correspond to this variable,
 		 * across all the DATA atoms in the query (not algebra operators or
 		 * boolean conditions.
@@ -1690,14 +1654,14 @@ public class OneShotSQLGeneratorEngine {
 		 * @param var
 		 *            The variable we want the referenced columns.
 		 */
-		public Set<QualifiedAttributeID> getColumnReferences(Variable var) {
-			Set<QualifiedAttributeID> attrs = columnReferences.get(var);
-			if (attrs == null || attrs.isEmpty())
+		public Set<QualifiedAttributeID> getColumns(Variable var) {
+			Set<QualifiedAttributeID> columns = columnReferences.get(var);
+			if (columns == null || columns.isEmpty())
 				throw new RuntimeException("Unbound variable found in WHERE clause: " + var);
-			return attrs;
+			return columns;
 		}
 
-		/***
+		/**
 		 * Generates the view definition, i.e., "tablename viewname".
 		 */
 		public String getViewDefinition(Function atom) {
@@ -1708,13 +1672,13 @@ public class OneShotSQLGeneratorEngine {
 			}
 			else if (atom.getArity() == 0) {
 				 // Special case of nullary atoms
-				return "(" + sqladapter.getDummyTable() + ") tdummy";
+				return bracket(sqladapter.getDummyTable()) + " tdummy";
 			}
 			throw new RuntimeException(
 						"Impossible to get data definition for: " + atom + ", type: " + dd);
 		}
 
-		public QualifiedAttributeID getColumnReference(Function atom, int column) {
+		public QualifiedAttributeID getColumn(Function atom, int column) {
 			FromItem dd = dataDefinitions.get(atom);
 			return dd.attributes.get(column);
 		}
@@ -1728,11 +1692,10 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		private Optional<QualifiedAttributeID> getNonMainColumn(Variable var, int relativeIndexWrtMainColumn) {
-			/*
-			 * For each column reference corresponding to the variable.
-			 * For instance, columnRef is `Qans4View`.`v1` .
-			 */
-			for (QualifiedAttributeID mainColumn : getColumnReferences(var)) {
+
+			// For each column reference corresponding to the variable.
+			// For instance, columnRef is `Qans4View`.`v1` .
+			for (QualifiedAttributeID mainColumn : getColumns(var)) {
 				// If the var is defined in a ViewDefinition, then there is a
 				// column for the type and we just need to refer to that column.
 				//
@@ -1745,8 +1708,11 @@ public class OneShotSQLGeneratorEngine {
 							mainColumnIndex + relativeIndexWrtMainColumn));
 				}
 			}
-
 			return Optional.empty();
 		}
+	}
+
+	private static String bracket(String s) {
+		return "(" + s + ")";
 	}
 }
