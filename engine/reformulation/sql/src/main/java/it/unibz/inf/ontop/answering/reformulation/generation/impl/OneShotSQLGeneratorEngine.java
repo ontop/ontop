@@ -1671,33 +1671,26 @@ public class OneShotSQLGeneratorEngine {
 			}
 
 			Predicate predicate = atom.getFunctionSymbol();
-			RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
-					predicate);
-			RelationDefinition def = metadata.getRelation(tableId);
-
-			final RelationID relationId, relationAlias;
-			if (def == null) {
-				/*
-				 * There is no definition for this atom, its not a database
-				 * predicate. Check if it is an ans predicate and has a view:
-				 */
+			boolean isSubquery = subQueryDefinitions.containsKey(predicate);
+			final RelationDefinition def;
+			final RelationID relationAlias;
+			if (isSubquery) {
 				def = subQueryDefinitions.get(predicate);
-				if (def == null) {
-					return; // empty
-				}
-				else {
-					relationId = relationAlias = def.getID();
-				}
+				//relationId =
+				relationAlias = def.getID();
 			}
 			else {
+				RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
+						predicate);
+				def = metadata.getRelation(tableId);
 				relationAlias = createAlias(predicate.getName(),
 						VIEW_SUFFIX + dataDefinitions.size(),
 						dataDefinitions.entrySet().stream()
 								.map(e -> e.getValue().alias).collect(Collectors.toList()));
-				relationId = tableId;
+				//relationId = tableId;
 			}
 			dataDefinitions.put(atom, new DataDefinition(relationAlias, def));
-			dataDefinitionsById.put(relationId, def);
+			dataDefinitionsById.put(def.getID(), def);
 
 			for (int index = 0; index < atom.getTerms().size(); index++) {
 				Term term = atom.getTerms().get(index);
@@ -1709,7 +1702,7 @@ public class OneShotSQLGeneratorEngine {
 					}
 
 					// the index of attributes of the definition starts from 1
-					int idx = (subQueryDefinitions.containsKey(atom.getFunctionSymbol()))
+					int idx = isSubquery
 							? 3 * (index + 1) // a view from an Ans predicate
 							: index + 1;      // a database relation
 
