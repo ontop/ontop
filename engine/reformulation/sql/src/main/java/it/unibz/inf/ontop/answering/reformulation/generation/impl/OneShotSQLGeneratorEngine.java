@@ -1590,6 +1590,7 @@ public class OneShotSQLGeneratorEngine {
 		private final RelationID alias;
 		private final String definition;
 		private final ImmutableList<QualifiedAttributeID> attributes;
+		
 		DataDefinition(RelationID alias, String definition, ImmutableList<QualifiedAttributeID> attributes) {
 			this.alias = alias;
 			this.definition = definition;
@@ -1680,8 +1681,8 @@ public class OneShotSQLGeneratorEngine {
 			}
 			dataDefinitions.put(atom, definition);
 
-			for (int index = 0; index < atom.getTerms().size(); index++) {
-				Term term = atom.getTerms().get(index);
+			for (int i = 0; i < atom.getTerms().size(); i++) {
+				Term term = atom.getTerms().get(i);
 				if (term instanceof Variable) {
 					Set<QualifiedAttributeID> references = columnReferences.get(term);
 					if (references == null) {
@@ -1689,10 +1690,9 @@ public class OneShotSQLGeneratorEngine {
 						columnReferences.put((Variable) term, references);
 					}
 
-					// the index of attributes of the definition starts from 1
 					int idx = isSubquery
-							? 3 * (index + 1) // a view from an Ans predicate
-							: index + 1;      // a database relation
+							? 3 * i + 2 // a view from an Ans predicate
+							: i;        // a database relation
 
 					references.add(definition.attributes.get(idx));
 				}
