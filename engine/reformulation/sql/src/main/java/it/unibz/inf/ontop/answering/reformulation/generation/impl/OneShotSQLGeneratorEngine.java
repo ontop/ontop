@@ -769,7 +769,7 @@ public class OneShotSQLGeneratorEngine {
 	 			// assume that no variables are shared across deeper levels of
 	 			// nesting (through Join or LeftJoin atoms), it will not call itself
 	 			// recursively. Nor across upper levels.
-				currentLevelVariables.addAll(getVariableReferencesWithLeftJoin(atom));
+				collectVariableReferencesWithLeftJoin(currentLevelVariables, atom);
 			}
 			Set<String> conditionsSharedVariables = getConditionsSharedVariables(currentLevelVariables, index);
 			conditions.addAll(conditionsSharedVariables);
@@ -793,39 +793,28 @@ public class OneShotSQLGeneratorEngine {
 	 * @param atom
 	 * @return
 	 */
-	private Set<Variable> getVariableReferencesWithLeftJoin(Function atom) {
+	private void collectVariableReferencesWithLeftJoin(Set<Variable> vars, Function atom) {
 		if (atom.isDataFunction()) {
-			Set<Variable> variables = new LinkedHashSet<>();
-			TermUtils.addReferencedVariablesTo(variables, atom);
-			return variables;
+			TermUtils.addReferencedVariablesTo(vars, atom);
 		}
-		if (atom.isOperation()) {
-			return Collections.emptySet();
-		}
-		if (atom.isDataTypeFunction()) {
-			return Collections.emptySet();
-		}
-		/*
-		 * we have an algebra operator (join or left join)
-		 * if it's a join, we need to collect all the variables of each nested atom;
-		 * if it's a left join, only of the first data/algebra atom (the left atom)
-		 */
-		boolean isLeftJoin = atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN;
-		boolean foundFirstDataAtom = false;
+		else if (atom.isAlgebraFunction()) {
+			// if it's a join, we need to collect all the variables of each nested atom
+		    // if it's a left join, only of the first data/algebra atom (the left atom)
+			boolean isLeftJoin = atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN;
+			boolean foundFirstDataAtom = false;
 
-		Set<Variable> innerVariables = new LinkedHashSet<>();
-		for (Term t : atom.getTerms()) {
-			if (isLeftJoin && foundFirstDataAtom) {
-				break;
+			for (Term t : atom.getTerms()) {
+				if (isLeftJoin && foundFirstDataAtom) {
+					break;
+				}
+				Function asFunction = (Function) t;
+				if (asFunction.isOperation()) {
+					continue;
+				}
+				collectVariableReferencesWithLeftJoin(vars, asFunction);
+				foundFirstDataAtom = true;
 			}
-			Function asFunction = (Function) t;
-			if (asFunction.isOperation()) {
-				continue;
-			}
-			innerVariables.addAll(getVariableReferencesWithLeftJoin(asFunction));
-			foundFirstDataAtom = true;
 		}
-		return innerVariables;
 	}
 
 	/**
@@ -849,14 +838,14 @@ public class OneShotSQLGeneratorEngine {
 			if (references.size() >= 2) {
 				// if 1, tnen no need for equality
 				Iterator<QualifiedAttributeID> referenceIterator = references.iterator();
-				QualifiedAttributeID leftColumnReference = referenceIterator.next();
+				QualifiedAttributeID leftColumn = referenceIterator.next();
 				while (referenceIterator.hasNext()) {
-					QualifiedAttributeID rightColumnReference = referenceIterator.next();
+					QualifiedAttributeID rightColumn = referenceIterator.next();
 					String equality = String.format("(%s = %s)",
-							leftColumnReference.getSQLRendering(),
-							rightColumnReference.getSQLRendering());
+							leftColumn.getSQLRendering(),
+							rightColumn.getSQLRendering());
 					equalities.add(equality);
-					leftColumnReference = rightColumnReference;
+					leftColumn = rightColumn;
 				}
 			}
 		}
@@ -867,12 +856,12 @@ public class OneShotSQLGeneratorEngine {
 		Set<String> equalities = new LinkedHashSet<>();
 		for (Function atom : atoms) {
 			if (atom.isDataFunction())  {
-				for (int idx = 0; idx < atom.getArity(); idx++) {
-					Term l = atom.getTerm(idx);
-					if (l instanceof Constant) {
-						String value = getSQLString(l, index, false);
-						String columnReference = index.getColumnReference(atom, idx);
-						equalities.add(String.format("(%s = %s)", columnReference, value));
+				for (int i = 0; i < atom.getArity(); i++) {
+					Term t = atom.getTerm(i);
+					if (t instanceof Constant) {
+						String value = getSQLString(t, index, false);
+						QualifiedAttributeID column = index.getColumnReference(atom, i);
+						equalities.add(String.format("(%s = %s)", column.getSQLRendering(), value));
 					}
 				}
 			}
@@ -1750,10 +1739,10 @@ public class OneShotSQLGeneratorEngine {
 						"Impossible to get data definition for: " + atom + ", type: " + dd);
 		}
 
-		public String getColumnReference(Function atom, int column) {
+		public QualifiedAttributeID getColumnReference(Function atom, int column) {
 			DataDefinition dd = dataDefinitions.get(atom);
 			QuotedID columnname = dd.def.getAttribute(column + 1).getID(); // indexes from 1
-			return new QualifiedAttributeID(dd.alias, columnname).getSQLRendering();
+			return new QualifiedAttributeID(dd.alias, columnname);
 		}
 
 		public Optional<QualifiedAttributeID> getTypeColumn(Variable var) {
@@ -1776,23 +1765,20 @@ public class OneShotSQLGeneratorEngine {
 			 * For instance, columnRef is `Qans4View`.`v1` .
 			 */
 			for (QualifiedAttributeID mainColumn : columnRefs) {
-				RelationID relationId = mainColumn.getRelation();
+				// If the var is defined in a ViewDefinition, then there is a
+				// column for the type and we just need to refer to that column.
+				//
+				// For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
 
-				/*
-				 * If the var is defined in a ViewDefinition, then there is a
-				 * column for the type and we just need to refer to that column.
-				 *
-				 * For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
-				 */
-				ParserViewDefinition subQuery = subQueries.get(relationId);
+				ParserViewDefinition subQuery = subQueries.get(mainColumn.getRelation());
 				if (subQuery != null) {
 					List<QualifiedAttributeID> columnIds = subQuery.getAttributes().stream()
 							.map(Attribute::getQualifiedID)
 							.collect(Collectors.toList());
 					int mainColumnIndex = columnIds.indexOf(mainColumn) + 1;
 
-					Attribute typeColumn = subQuery.getAttribute(mainColumnIndex + relativeIndexWrtMainColumn);
-					return Optional.of(typeColumn.getQualifiedID());
+					Attribute column = subQuery.getAttribute(mainColumnIndex + relativeIndexWrtMainColumn);
+					return Optional.of(column.getQualifiedID());
 				}
 			}
 
