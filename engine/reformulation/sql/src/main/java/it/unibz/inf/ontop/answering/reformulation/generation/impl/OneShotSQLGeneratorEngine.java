@@ -357,7 +357,7 @@ public class OneShotSQLGeneratorEngine {
 		 * ANS i > 1
 		 */
 
-		ImmutableMap.Builder<Predicate, ParserViewDefinition> subQueryDefinitionsBuilder = ImmutableMap.builder();
+		ImmutableMap.Builder<Predicate, FromItem> subQueryDefinitionsBuilder = ImmutableMap.builder();
 		Set<RelationID> usedAliases = new HashSet<>();
 		// create a view for every ans predicate in the Datalog input program.
 		int numPreds = predicatesInBottomUp.size();
@@ -401,13 +401,14 @@ public class OneShotSQLGeneratorEngine {
 				usedAliases.add(subqueryAlias);
 
 				// creates a view outside the DBMetadata (specific to this sub-query)
-				ParserViewDefinition view = new ParserViewDefinition(subqueryAlias, subquery);
+				ImmutableList.Builder<QualifiedAttributeID> b = ImmutableList.builder();
 				for (SignatureVariable var : s) {
 					for (String alias : var.columnAliases) {
-						view.addAttribute(new QualifiedAttributeID(subqueryAlias,
+						b.add(new QualifiedAttributeID(subqueryAlias,
 								metadata.getQuotedIDFactory().createAttributeID(alias)));
 					}
 				}
+				FromItem view = new FromItem(subqueryAlias, "(" + subquery + ")", b.build());
 				subQueryDefinitionsBuilder.put(pred, view);
 			}
 		}
@@ -440,7 +441,7 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private String generateQueryFromRules(Collection<CQIE> cqs,
 										  ImmutableList<SignatureVariable> signature,
-										  ImmutableMap<Predicate, ParserViewDefinition> subQueryDefinitions,
+										  ImmutableMap<Predicate, FromItem> subQueryDefinitions,
 										  ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
 										  boolean unionNoDuplicates) {
 
@@ -1223,7 +1224,7 @@ public class OneShotSQLGeneratorEngine {
 			// Non-final TODO: understand
 			String table = relationId.getTableName();
 			if (relationId.getTableName().startsWith("QVIEW")) {
-				for (Entry<Function, DataDefinition> e : index.dataDefinitions.entrySet()) {
+				for (Entry<Function, FromItem> e : index.dataDefinitions.entrySet()) {
 					RelationID knownViewId = e.getValue().alias;
 					if (knownViewId.equals(relationId)) {
 						table = e.getKey().getFunctionSymbol().toString();
@@ -1586,12 +1587,12 @@ public class OneShotSQLGeneratorEngine {
 		return -2;
 	}
 
-	private static final class DataDefinition {
+	private static final class FromItem {
 		private final RelationID alias;
 		private final String definition;
 		private final ImmutableList<QualifiedAttributeID> attributes;
 
-		DataDefinition(RelationID alias, String definition, ImmutableList<QualifiedAttributeID> attributes) {
+		FromItem(RelationID alias, String definition, ImmutableList<QualifiedAttributeID> attributes) {
 			this.alias = alias;
 			this.definition = definition;
 			this.attributes = attributes;
@@ -1609,11 +1610,11 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	public final class QueryAliasIndex {
 
-		final Map<Function, DataDefinition> dataDefinitions = new HashMap<>();
-		final Map<RelationID, ParserViewDefinition> subQueries = new HashMap<>();
+		final Map<Function, FromItem> dataDefinitions = new HashMap<>();
+		final Map<RelationID, FromItem> subQueries = new HashMap<>();
 		final Map<Variable, Set<QualifiedAttributeID>> columnReferences = new HashMap<>();
 
-		public QueryAliasIndex(CQIE query, ImmutableMap<Predicate, ParserViewDefinition> subQueryDefinitions) {
+		public QueryAliasIndex(CQIE query, ImmutableMap<Predicate, FromItem> subQueryDefinitions) {
 			for (Function atom : query.getBody()) {
 				/*
 				 * This will be called recursively if necessary
@@ -1637,7 +1638,7 @@ public class OneShotSQLGeneratorEngine {
 		 * @param subQueryDefinitions
 		 */
 		private void generateViewsIndexVariables(Function atom,
-												 ImmutableMap<Predicate, ParserViewDefinition> subQueryDefinitions) {
+												 ImmutableMap<Predicate, FromItem> subQueryDefinitions) {
 			if (atom.isOperation()) {
 				return;
 			}
@@ -1651,28 +1652,23 @@ public class OneShotSQLGeneratorEngine {
 
 			Predicate predicate = atom.getFunctionSymbol();
 			boolean isSubquery = subQueryDefinitions.containsKey(predicate);
-			final DataDefinition definition;
+			final FromItem definition;
 			if (isSubquery) {
-				ParserViewDefinition subQuery = subQueryDefinitions.get(predicate);
-				subQueries.put(subQuery.getID(), subQuery);
-				definition = new DataDefinition(
-						subQuery.getID(),
-						"(" + subQuery.getStatement() + ")",
-						subQuery.getAttributes().stream()
-								.map(Attribute::getQualifiedID)
-								.collect(ImmutableCollectors.toList()));
+				definition = subQueryDefinitions.get(predicate);
+				subQueries.put(definition.alias, definition);
 			}
 			else {
-				RelationID relationAlias = createAlias(predicate.getName(),
-						VIEW_SUFFIX + dataDefinitions.size(),
-						dataDefinitions.entrySet().stream()
-								.map(e -> e.getValue().alias).collect(Collectors.toList()));
 				RelationDefinition relation = metadata.getRelation(Relation2Predicate.createRelationFromPredicateName(
 						metadata.getQuotedIDFactory(), predicate));
 				if (relation == null)
 					return;   // because of dummyN - what exactly is that?
 
-				definition = new DataDefinition(
+				RelationID relationAlias = createAlias(predicate.getName(),
+						VIEW_SUFFIX + dataDefinitions.size(),
+						dataDefinitions.entrySet().stream()
+								.map(e -> e.getValue().alias).collect(Collectors.toList()));
+
+				definition = new FromItem(
 						relationAlias,
 						relation instanceof DatabaseRelationDefinition
 								? relation.getID().getSQLRendering()
@@ -1721,7 +1717,7 @@ public class OneShotSQLGeneratorEngine {
 		 */
 		public String getViewDefinition(Function atom) {
 
-			DataDefinition dd = dataDefinitions.get(atom);
+			FromItem dd = dataDefinitions.get(atom);
 			if (dd != null) {
 				return sqladapter.sqlTableName(dd.definition, dd.alias.getSQLRendering());
 			}
@@ -1734,7 +1730,7 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		public QualifiedAttributeID getColumnReference(Function atom, int column) {
-			DataDefinition dd = dataDefinitions.get(atom);
+			FromItem dd = dataDefinitions.get(atom);
 			return dd.attributes.get(column);
 		}
 
@@ -1747,31 +1743,21 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		private Optional<QualifiedAttributeID> getNonMainColumn(Variable var, int relativeIndexWrtMainColumn) {
-
-			Set<QualifiedAttributeID> columnRefs = columnReferences.get(var);
-			if (columnRefs == null || columnRefs.isEmpty()) {
-				throw new RuntimeException("Unbound variable found in WHERE clause: " + var);
-			}
-
 			/*
 			 * For each column reference corresponding to the variable.
 			 * For instance, columnRef is `Qans4View`.`v1` .
 			 */
-			for (QualifiedAttributeID mainColumn : columnRefs) {
+			for (QualifiedAttributeID mainColumn : getColumnReferences(var)) {
 				// If the var is defined in a ViewDefinition, then there is a
 				// column for the type and we just need to refer to that column.
 				//
 				// For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
 
-				ParserViewDefinition subQuery = subQueries.get(mainColumn.getRelation());
+				FromItem subQuery = subQueries.get(mainColumn.getRelation());
 				if (subQuery != null) {
-					List<QualifiedAttributeID> columnIds = subQuery.getAttributes().stream()
-							.map(Attribute::getQualifiedID)
-							.collect(Collectors.toList());
-					int mainColumnIndex = columnIds.indexOf(mainColumn) + 1;
-
-					Attribute column = subQuery.getAttribute(mainColumnIndex + relativeIndexWrtMainColumn);
-					return Optional.of(column.getQualifiedID());
+					int mainColumnIndex = subQuery.attributes.indexOf(mainColumn);
+					return Optional.of(subQuery.attributes.get(
+							mainColumnIndex + relativeIndexWrtMainColumn));
 				}
 			}
 
