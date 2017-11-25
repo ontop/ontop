@@ -1701,28 +1701,19 @@ public class OneShotSQLGeneratorEngine {
 
 			for (int index = 0; index < atom.getTerms().size(); index++) {
 				Term term = atom.getTerms().get(index);
-
 				if (term instanceof Variable) {
-
 					Set<QualifiedAttributeID> references = columnReferences.get(term);
 					if (references == null) {
 						references = new LinkedHashSet<>();
 						columnReferences.put((Variable) term, references);
 					}
 
-					/*
-					 * the index of attributes of the definition starts from 1
-					 */
-					final Attribute column;
-					if (ruleIndex.containsKey(atom.getFunctionSymbol())) {
-						// If I am here it means that it is not a database table
-						// but a view from an Ans predicate
-						column = def.getAttribute(3 * (index + 1));
-					}
-					else {
-						column = def.getAttribute(index + 1);
-					}
+					// the index of attributes of the definition starts from 1
+					int idx = (subQueryDefinitions.containsKey(atom.getFunctionSymbol()))
+							? 3 * (index + 1) // a view from an Ans predicate
+							: index + 1;      // a database relation
 
+					Attribute column = def.getAttribute(idx);
 					QualifiedAttributeID qualifiedId = new QualifiedAttributeID(relationAlias, column.getID());
 					references.add(qualifiedId);
 				}
