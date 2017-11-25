@@ -1218,36 +1218,21 @@ public class OneShotSQLGeneratorEngine {
 			Set<QualifiedAttributeID> attrs = index.getColumnReferences((Variable) term);
 			QualifiedAttributeID attr0 = attrs.iterator().next();
 
-			RelationID relationId = attr0.getRelation();
-			QuotedID colId = attr0.getAttribute();
-
-			// Non-final TODO: understand
-			String table = relationId.getTableName();
-			if (relationId.getTableName().startsWith("QVIEW")) {
-				for (Entry<Function, FromItem> e : index.dataDefinitions.entrySet()) {
-					RelationID knownViewId = e.getValue().alias;
-					if (knownViewId.equals(relationId)) {
-						table = e.getKey().getFunctionSymbol().toString();
-						break;
-					}
-				}
-			}
-			for (DatabaseRelationDefinition tabledef :  metadata.getDatabaseRelations()) {
-				if (tabledef.getID().getTableName().equals(table)) {
-					List<Attribute> attr = tabledef.getAttributes();
-					for (Attribute a : attr) {
-						if (a.getID().equals(colId)) {
-							switch (a.getType()) {
-								case Types.VARCHAR:
-								case Types.CHAR:
-								case Types.LONGNVARCHAR:
-								case Types.LONGVARCHAR:
-								case Types.NVARCHAR:
-								case Types.NCHAR:
-									return true;
-								default:
-									return false;
-							}
+			RelationDefinition relation = index.invertedAlias.get(attr0.getRelation());
+			if (relation != null) {
+				QuotedID colId = attr0.getAttribute();
+				for (Attribute a : relation.getAttributes()) {
+					if (a.getID().equals(colId)) {
+						switch (a.getType()) {
+							case Types.VARCHAR:
+							case Types.CHAR:
+							case Types.LONGNVARCHAR:
+							case Types.LONGVARCHAR:
+							case Types.NVARCHAR:
+							case Types.NCHAR:
+								return true;
+							default:
+								return false;
 						}
 					}
 				}
@@ -1613,6 +1598,7 @@ public class OneShotSQLGeneratorEngine {
 		final Map<Function, FromItem> dataDefinitions = new HashMap<>();
 		final Map<RelationID, FromItem> subQueries = new HashMap<>();
 		final Map<Variable, Set<QualifiedAttributeID>> columnReferences = new HashMap<>();
+		final Map<RelationID, RelationDefinition> invertedAlias = new HashMap<>();
 
 		public QueryAliasIndex(CQIE query, ImmutableMap<Predicate, FromItem> subQueryDefinitions) {
 			for (Function atom : query.getBody()) {
@@ -1667,6 +1653,8 @@ public class OneShotSQLGeneratorEngine {
 						VIEW_SUFFIX + dataDefinitions.size(),
 						dataDefinitions.entrySet().stream()
 								.map(e -> e.getValue().alias).collect(Collectors.toList()));
+
+				invertedAlias.put(relationAlias, relation);
 
 				definition = new FromItem(
 						relationAlias,
