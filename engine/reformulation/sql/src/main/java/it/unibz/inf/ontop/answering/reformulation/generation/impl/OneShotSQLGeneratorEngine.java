@@ -1628,7 +1628,7 @@ public class OneShotSQLGeneratorEngine {
 	public final class QueryAliasIndex {
 
 		final Map<Function, DataDefinition> dataDefinitions = new HashMap<>();
-		final Map<RelationID, RelationDefinition> dataDefinitionsById = new HashMap<>();
+		final Map<RelationID, ParserViewDefinition> subQueries = new HashMap<>();
 		final Map<Variable, Set<QualifiedAttributeID>> columnReferences = new HashMap<>();
 
 		public QueryAliasIndex(CQIE query, ImmutableMap<Predicate, ParserViewDefinition> subQueryDefinitions) {
@@ -1674,20 +1674,20 @@ public class OneShotSQLGeneratorEngine {
 			if (isSubquery) {
 				def = subQueryDefinitions.get(predicate);
 				relationAlias = def.getID();
+				subQueries.put(def.getID(), subQueryDefinitions.get(predicate));
 			}
 			else {
-				def = metadata.getRelation(Relation2Predicate.createRelationFromPredicateName(
-						metadata.getQuotedIDFactory(), predicate));
 				relationAlias = createAlias(predicate.getName(),
 						VIEW_SUFFIX + dataDefinitions.size(),
 						dataDefinitions.entrySet().stream()
 								.map(e -> e.getValue().alias).collect(Collectors.toList()));
+				def = metadata.getRelation(Relation2Predicate.createRelationFromPredicateName(
+						metadata.getQuotedIDFactory(), predicate));
 			}
 			if (def == null)
 				return;   // because of dummyN - what exactly is that?
 
 			dataDefinitions.put(atom, new DataDefinition(relationAlias, def));
-			dataDefinitionsById.put(def.getID(), def);
 
 			for (int index = 0; index < atom.getTerms().size(); index++) {
 				Term term = atom.getTerms().get(index);
@@ -1784,17 +1784,14 @@ public class OneShotSQLGeneratorEngine {
 				 *
 				 * For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
 				 */
-				RelationDefinition def = dataDefinitionsById.get(relationId);
-
-				if (def != null && (def instanceof ParserViewDefinition)) {
-					ParserViewDefinition viewDefinition = (ParserViewDefinition)def;
-
-					List<QualifiedAttributeID> columnIds = viewDefinition.getAttributes().stream()
+				ParserViewDefinition subQuery = subQueries.get(relationId);
+				if (subQuery != null) {
+					List<QualifiedAttributeID> columnIds = subQuery.getAttributes().stream()
 							.map(Attribute::getQualifiedID)
 							.collect(Collectors.toList());
 					int mainColumnIndex = columnIds.indexOf(mainColumn) + 1;
 
-					Attribute typeColumn = viewDefinition.getAttribute(mainColumnIndex + relativeIndexWrtMainColumn);
+					Attribute typeColumn = subQuery.getAttribute(mainColumnIndex + relativeIndexWrtMainColumn);
 					return Optional.of(typeColumn.getQualifiedID());
 				}
 			}
