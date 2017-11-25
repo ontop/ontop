@@ -1364,17 +1364,14 @@ public class OneShotSQLGeneratorEngine {
 		}
 		else if (functionSymbol == ExpressionOperation.SPARQL_LANG) {
 			Variable var = (Variable) function.getTerm(0);
-			Set<QualifiedAttributeID> posList = index.getColumnReferences(var);
-
-			// TODO: fix the hack
-			String langC = posList.iterator().next().getSQLRendering();
-			String langColumn = langC.replaceAll("`$", "Lang`");
-			return langColumn;
-
-			/**
-			 * TODO: replace by a switch
-			 */
+			Optional<QualifiedAttributeID> lang = index.getLangColumn(var);
+			if (!lang.isPresent())
+				throw new RuntimeException("Cannot find LANG column for " + var);
+			return lang.get().getSQLRendering();
 		}
+		/**
+		 * TODO: replace by a switch
+		 */
 		else if (functionSymbol == ExpressionOperation.QUEST_CAST) {
 			String columnName = getSQLString(function.getTerm(0), index, false);
 			String datatype = ((Constant) function.getTerm(1)).getValue();
