@@ -391,7 +391,7 @@ public class OneShotSQLGeneratorEngine {
 						createSignature(builder.build(), castTypeMap.get(pred));
 
 				// Creates BODY of the view query
-				String subquery = generateQueryFromRules(ruleIndex.get(pred), s, ruleIndex,
+				String subquery = generateQueryFromRules(ruleIndex.get(pred), s,
 						subQueryDefinitionsBuilder.build(), termTypeMap, false);
 
 				RelationID subqueryAlias = createAlias(pred.getName(), VIEW_ANS_SUFFIX, usedAliases);
@@ -417,7 +417,7 @@ public class OneShotSQLGeneratorEngine {
 		Predicate predAns1 = predicatesInBottomUp.get(numPreds - 1);
 		ImmutableList<SignatureVariable> s = createSignature(signature, castTypeMap.get(predAns1));
 
-		return generateQueryFromRules(ruleIndex.get(predAns1), s, ruleIndex,
+		return generateQueryFromRules(ruleIndex.get(predAns1), s,
 				subQueryDefinitionsBuilder.build(), termTypeMap,
 				isDistinct && !distinctResultSet);
 	}
@@ -431,14 +431,12 @@ public class OneShotSQLGeneratorEngine {
 	 *
 	 * @param cqs
 	 * @param signature
-	 * @param ruleIndex
 	 * @param subQueryDefinitions
 	 * @param termTypeMap
 	 * @param unionNoDuplicates
 	 */
 	private String generateQueryFromRules(Collection<CQIE> cqs,
 										  ImmutableList<SignatureVariable> signature,
-										  Multimap<Predicate, CQIE> ruleIndex,
 										  ImmutableMap<Predicate, ParserViewDefinition> subQueryDefinitions,
 										  ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
 										  boolean unionNoDuplicates) {
@@ -446,7 +444,7 @@ public class OneShotSQLGeneratorEngine {
 		List<String> sqls = Lists.newArrayListWithExpectedSize(cqs.size());
 		for (CQIE cq : cqs) {
 		    /* Main loop, constructing the SPJ query for each CQ */
-			QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions, ruleIndex);
+			QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions);
 
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT ");
@@ -1633,17 +1631,17 @@ public class OneShotSQLGeneratorEngine {
 		final Map<RelationID, RelationDefinition> dataDefinitionsById = new HashMap<>();
 		final Map<Variable, Set<QualifiedAttributeID>> columnReferences = new HashMap<>();
 
-		public QueryAliasIndex(CQIE query, ImmutableMap<Predicate, ParserViewDefinition> subQueryDefinitions, Multimap<Predicate, CQIE> ruleIndex) {
+		public QueryAliasIndex(CQIE query, ImmutableMap<Predicate, ParserViewDefinition> subQueryDefinitions) {
 			for (Function atom : query.getBody()) {
 				/*
 				 * This will be called recursively if necessary
 				 */
-				generateViewsIndexVariables(atom, subQueryDefinitions, ruleIndex);
+				generateViewsIndexVariables(atom, subQueryDefinitions);
 			}
 		}
 
 		/***
-		 * We assiciate each atom to a view definition. This will be
+		 * We associate each atom to a view definition. This will be
 		 * <p>
 		 * "tablename" as "viewX" or
 		 * <p>
@@ -1657,15 +1655,14 @@ public class OneShotSQLGeneratorEngine {
 		 * @param subQueryDefinitions
 		 */
 		private void generateViewsIndexVariables(Function atom,
-												 Map<Predicate, ParserViewDefinition> subQueryDefinitions,
-												 Multimap<Predicate, CQIE> ruleIndex) {
+												 ImmutableMap<Predicate, ParserViewDefinition> subQueryDefinitions) {
 			if (atom.isOperation()) {
 				return;
 			}
 			else if (atom.isAlgebraFunction()) {
 				for (Term subatom : atom.getTerms()) {
 					if (subatom instanceof Function) {
-						generateViewsIndexVariables((Function) subatom, subQueryDefinitions, ruleIndex);
+						generateViewsIndexVariables((Function) subatom, subQueryDefinitions);
 					}
 				}
 			}
@@ -1676,19 +1673,19 @@ public class OneShotSQLGeneratorEngine {
 			final RelationID relationAlias;
 			if (isSubquery) {
 				def = subQueryDefinitions.get(predicate);
-				//relationId =
 				relationAlias = def.getID();
 			}
 			else {
-				RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
-						predicate);
-				def = metadata.getRelation(tableId);
+				def = metadata.getRelation(Relation2Predicate.createRelationFromPredicateName(
+						metadata.getQuotedIDFactory(), predicate));
 				relationAlias = createAlias(predicate.getName(),
 						VIEW_SUFFIX + dataDefinitions.size(),
 						dataDefinitions.entrySet().stream()
 								.map(e -> e.getValue().alias).collect(Collectors.toList()));
-				//relationId = tableId;
 			}
+			if (def == null)
+				return;   // because of dummyN - what exactly is that?
+
 			dataDefinitions.put(atom, new DataDefinition(relationAlias, def));
 			dataDefinitionsById.put(def.getID(), def);
 
