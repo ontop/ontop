@@ -1590,7 +1590,7 @@ public class OneShotSQLGeneratorEngine {
 		private final RelationID alias;
 		private final String definition;
 		private final ImmutableList<QualifiedAttributeID> attributes;
-		
+
 		DataDefinition(RelationID alias, String definition, ImmutableList<QualifiedAttributeID> attributes) {
 			this.alias = alias;
 			this.definition = definition;
@@ -1674,7 +1674,9 @@ public class OneShotSQLGeneratorEngine {
 
 				definition = new DataDefinition(
 						relationAlias,
-						relation.getID().getSQLRendering(),
+						relation instanceof DatabaseRelationDefinition
+								? relation.getID().getSQLRendering()
+								: "(" + ((ParserViewDefinition)relation).getStatement() + ")",
 						relation.getAttributes().stream()
 								.map(a -> new QualifiedAttributeID(relationAlias, a.getID()))
 								.collect(ImmutableCollectors.toList()));
