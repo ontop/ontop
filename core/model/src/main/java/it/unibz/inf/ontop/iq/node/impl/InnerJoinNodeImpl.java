@@ -264,7 +264,15 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                             .filter(e -> projectedVariables.contains(e.getKey()))
                             .collect(ImmutableCollectors.toMap()));
 
-            return ascendingSubstitution.isEmpty()
+            ImmutableSet<Variable> childrenVariables = currentChildren.stream()
+                    .flatMap(c -> c.getVariables().stream())
+                    .collect(ImmutableCollectors.toSet());
+
+            /*
+             * NB: creates a construction if a substitution needs to be propagated and/or if some variables
+             * have to be projected away
+             */
+            return projectedVariables.equals(childrenVariables) && ascendingSubstitution.isEmpty()
                     ? joinIQ
                     : iqFactory.createUnaryIQTree(
                             iqFactory.createConstructionNode(projectedVariables, ascendingSubstitution), joinIQ, true);

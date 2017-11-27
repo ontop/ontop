@@ -1765,7 +1765,7 @@ public class BindingLiftTest {
 
         System.out.println("\n Optimized query: \n" +  optimizedQuery);
 
-        /**
+        /*
          * Expected Query
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(EMPTY_METADATA);
@@ -1805,9 +1805,6 @@ public class BindingLiftTest {
         Assert.assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 
-    /**
-     * Does nothing since there is no substitution
-     */
     @Test
     public void testProjectionAwaySubQuery() throws EmptyQueryException {
         //Construct unoptimized query
@@ -1824,7 +1821,13 @@ public class BindingLiftTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\n Original query: \n" +  query);
 
-        IntermediateQuery expectedQuery = query.createSnapshot();
+        IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
+        expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
+        expectedQueryBuilder.addChild(leftConstructionNode, joinNode);
+        expectedQueryBuilder.addChild(joinNode, DATA_NODE_8);
+        expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query);
