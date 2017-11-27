@@ -286,7 +286,6 @@ public class OneShotSQLGeneratorEngine {
 		else {
 			resultingQuery = queryString;
 		}
-		System.out.println("SQL: " + resultingQuery);
 		return new SQLExecutableQuery(resultingQuery, signature);
 	}
 
