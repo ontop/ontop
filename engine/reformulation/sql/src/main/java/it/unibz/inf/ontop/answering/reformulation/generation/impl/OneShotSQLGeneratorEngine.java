@@ -245,11 +245,8 @@ public class OneShotSQLGeneratorEngine {
 		log.debug("Program normalized for SQL translation:\n" + queryProgram);
 
 		MutableQueryModifiers queryModifiers = queryProgram.getQueryModifiers();
-		isDistinct = queryModifiers.hasModifiers()
-						&& queryModifiers.isDistinct();
-
-		isOrderBy = queryModifiers.hasModifiers()
-						&& !queryModifiers.getSortConditions().isEmpty();
+		isDistinct = queryModifiers.hasModifiers() && queryModifiers.isDistinct();
+		isOrderBy = queryModifiers.hasModifiers() && !queryModifiers.getSortConditions().isEmpty();
 
 		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(queryProgram);
 		Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
@@ -289,6 +286,7 @@ public class OneShotSQLGeneratorEngine {
 		else {
 			resultingQuery = queryString;
 		}
+		System.out.println("SQL: " + resultingQuery);
 		return new SQLExecutableQuery(resultingQuery, signature);
 	}
 
@@ -440,17 +438,17 @@ public class OneShotSQLGeneratorEngine {
 			Joiner.on(", ").appendTo(sb, select);
 
 			List<Function> body = cq.getBody();
-			sb.append("\n FROM \n");
-			List<String> from = getTableDefs(body, index, "");
+			sb.append("\nFROM \n").append(INDENT);
+			List<String> from = getTableDefs(body, index, INDENT);
 			if (from.isEmpty()) {
 				from = ImmutableList.of(inBrackets(sqladapter.getDummyTable()) + " tdummy");
 			}
-			Joiner.on(",\n").appendTo(sb, from);
+			Joiner.on(",\n" + INDENT).appendTo(sb, from);
 
 			Set<String> where = getConditionsSet(body, index, false);
 			if (!where.isEmpty()) {
-				sb.append("\nWHERE \n");
-				Joiner.on(" AND\n").appendTo(sb, where);
+				sb.append("\nWHERE \n").append(INDENT);
+				Joiner.on(" AND\n" + INDENT).appendTo(sb, where);
 			}
 
 			ImmutableList<QualifiedAttributeID> groupBy = getGroupBy(body, index);
@@ -499,14 +497,14 @@ public class OneShotSQLGeneratorEngine {
 				.collect(ImmutableCollectors.toList());
 	}
 
-	private RelationID createAlias(String predicateName, String suffix, Collection<RelationID> alreadyAllocatedViewNames) {
-		// Escapes view names.
+	private RelationID createAlias(String predicateName, String suffix, Collection<RelationID> usedAliases) {
+		// escapes the predicate name
 		String safePredicateName = predicateName
 				.replace('.', '_')
 				.replace(':', '_')
 				.replace('/', '_')
 				.replace(' ', '_');
-		String alias = sqladapter.nameView(VIEW_PREFIX, safePredicateName, suffix, alreadyAllocatedViewNames);
+		String alias = sqladapter.nameView(VIEW_PREFIX, safePredicateName, suffix, usedAliases);
 		return idFactory.createRelationID(null, alias);
 	}
 
@@ -578,8 +576,8 @@ public class OneShotSQLGeneratorEngine {
 
 	private ImmutableList<String> getTableDefs(List<Function> atoms, AliasIndex index, String indent) {
 		return atoms.stream()
-				.map(a -> getTableDefinition(a, index, indent + INDENT))
-				.filter(d -> !d.isEmpty())
+				.map(a -> getTableDefinition(a, index, indent))
+				.filter(d -> d != null)
 				.collect(ImmutableCollectors.toList());
 	}
 
@@ -610,17 +608,16 @@ public class OneShotSQLGeneratorEngine {
 									   boolean parenthesis,
 									   String indent) {
 
-		List<String> tableDefinitions = getTableDefs(atoms, index, indent);
-		switch (tableDefinitions.size()) {
+		List<String> tables = getTableDefs(atoms, index, INDENT + indent);
+		switch (tables.size()) {
 			case 0:
 				throw new RuntimeException("Cannot generate definition for empty data");
 
 			case 1:
-				return tableDefinitions.get(0);
+				return tables.get(0);
 
 			default:
-				String JOIN = indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n"
-						+ indent + "%s" + indent;
+				String JOIN = "%s\n" + indent + JOIN_KEYWORD + "\n" + INDENT + indent + "%s";
 				/*
 		 		 * Now we generate the table definition: Join/LeftJoin
 				 * (possibly nested if there are more than 2 table definitions in the
@@ -630,22 +627,21 @@ public class OneShotSQLGeneratorEngine {
 				 * nesting the JOINs as we go. The conditions in the ON clause will
 				 * go on the TOP level only.
 				 */
-				int size = tableDefinitions.size();
-				String currentJoin = tableDefinitions.get(size - 1);
+				int size = tables.size();
+				String currentJoin = tables.get(size - 1);
 
-				currentJoin = String.format(JOIN, tableDefinitions.get(size - 2),
+				currentJoin = String.format(JOIN, tables.get(size - 2),
 						parenthesis ? inBrackets(currentJoin) : currentJoin);
 
 				for (int i = size - 3; i >= 0; i--) {
-					currentJoin = String.format(JOIN, tableDefinitions.get(i), inBrackets(currentJoin));
+					currentJoin = String.format(JOIN, tables.get(i), inBrackets(currentJoin));
 				}
 
 				Set<String> on = getConditionsSet(atoms, index, true);
 
 				StringBuilder sb = new StringBuilder();
-				sb.append(currentJoin).append(" ON\n").append(indent);
+				sb.append(currentJoin).append("\n").append(indent).append("ON ");
 				Joiner.on(" AND\n" + indent).appendTo(sb, on);
-				sb.append("\n").append(indent);
 				return sb.toString();
 		}
 	}
@@ -660,40 +656,30 @@ public class OneShotSQLGeneratorEngine {
 
 		if (atom.isAlgebraFunction()) {
 			Predicate functionSymbol = atom.getFunctionSymbol();
-			if (functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_JOIN ||
-					functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
+			ImmutableList<Function> joinAtoms = convert(atom.getTerms());
+			if (functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_JOIN) {
+				// nested joins we need to add parenthesis later
+				boolean parenthesis = joinAtoms.get(0).isAlgebraFunction()
+						|| joinAtoms.get(1).isAlgebraFunction();
 
-				boolean isLeftJoin = (functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN);
-				boolean parenthesis = false;
-
-				int i = 0;
-				for (Term term : atom.getTerms()) {
-					if (((Function) term).isAlgebraFunction()) {
-						//nested joins we need to add parenthesis later
-						parenthesis = true;
-					}
-					else if (isLeftJoin && i == 1) {
-						//in case of left join we  want to add the parenthesis
-						// only for the right tables
-						//we ignore nested joins from the left tables
-						parenthesis = false;
-					}
-					i++;
-				}
-				String tableDefinitions =  getTableDefinitions(convert(atom.getTerms()), index,
-						isLeftJoin ? "LEFT OUTER JOIN" : "JOIN", parenthesis, indent + INDENT);
-				return tableDefinitions;
+				String join =  getTableDefinitions(joinAtoms, index,
+						"JOIN", parenthesis, indent + INDENT);
+				return join;
 			}
-			else
-				return "";
+			else if (functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
+				// in case of left join we want to add the parenthesis only for the right tables
+				// we ignore nested joins from the left tables
+				boolean parenthesis = joinAtoms.get(1).isAlgebraFunction();
+
+				String join =  getTableDefinitions(joinAtoms, index,
+						"LEFT OUTER JOIN", parenthesis, indent + INDENT);
+				return join;
+			}
 		}
-		else if (atom.isOperation() || atom.isDataTypeFunction()) {
-			// These don't participate in the FROM clause
-			return "";
+		else if (!atom.isOperation() && !atom.isDataTypeFunction()) {
+			return index.getViewDefinition(atom);  // a database atom
 		}
-		else
-			// a data atom
-			return index.getViewDefinition(atom);
+		return null;
 	}
 
 	/**
@@ -746,20 +732,14 @@ public class OneShotSQLGeneratorEngine {
 		}
 		else if (atom.isAlgebraFunction()) {
 			// if it's a join, we need to collect all the variables of each nested atom
-		    // if it's a left join, only of the first data/algebra atom (the left atom)
-			boolean isLeftJoin = atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN;
-			boolean foundFirstDataAtom = false;
-
-			for (Term t : atom.getTerms()) {
-				if (isLeftJoin && foundFirstDataAtom) {
-					break;
-				}
-				Function asFunction = (Function) t;
-				if (asFunction.isOperation()) {
-					continue;
-				}
-				collectVariableReferencesWithLeftJoin(vars, asFunction);
-				foundFirstDataAtom = true;
+			if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_JOIN) {
+				convert(atom.getTerms()).stream()
+						.filter(f -> !f.isOperation())
+						.forEach(f -> collectVariableReferencesWithLeftJoin(vars, f));
+			}
+			else if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
+				// if it's a left join, only of the first data/algebra atom (the left atom)
+				collectVariableReferencesWithLeftJoin(vars, (Function) atom.getTerm(0));
 			}
 		}
 	}
