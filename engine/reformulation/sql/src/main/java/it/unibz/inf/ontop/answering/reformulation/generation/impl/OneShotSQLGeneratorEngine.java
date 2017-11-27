@@ -286,6 +286,7 @@ public class OneShotSQLGeneratorEngine {
 		else {
 			resultingQuery = queryString;
 		}
+		System.out.println("SQL: " + resultingQuery);
 		return new SQLExecutableQuery(resultingQuery, signature);
 	}
 
@@ -515,8 +516,17 @@ public class OneShotSQLGeneratorEngine {
 		Set<String> conditions = new LinkedHashSet<>();
 		for (Function atom : atoms) {
 			if (atom.isOperation()) {  // Boolean expression
-				String condition = getSQLCondition(atom, index);
-				conditions.add(condition);
+				if (atom.getFunctionSymbol() == ExpressionOperation.AND) {
+					// flatten ANDs
+					for (Term t : atom.getTerms()) {
+						Set<String> arg = getBooleanConditions(ImmutableList.of((Function)t), index);
+						conditions.addAll(arg);
+					}
+				}
+				else {
+					String condition = getSQLCondition(atom, index);
+					conditions.add(condition);
+				}
 			}
 			else if (atom.isDataTypeFunction()) {
 				String condition = getSQLString(atom, index, false);
@@ -730,13 +740,14 @@ public class OneShotSQLGeneratorEngine {
 			TermUtils.addReferencedVariablesTo(vars, atom);
 		}
 		else if (atom.isAlgebraFunction()) {
-			// if it's a join, we need to collect all the variables of each nested atom
-			if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_JOIN) {
+			Predicate functionSymbol = atom.getFunctionSymbol();
+			if (functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_JOIN) {
+				// if it's a join, we need to collect all the variables of each nested atom
 				convert(atom.getTerms()).stream()
 						.filter(f -> !f.isOperation())
 						.forEach(f -> collectVariableReferencesWithLeftJoin(vars, f));
 			}
-			else if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
+			else if (functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
 				// if it's a left join, only of the first data/algebra atom (the left atom)
 				collectVariableReferencesWithLeftJoin(vars, (Function) atom.getTerm(0));
 			}
@@ -762,7 +773,7 @@ public class OneShotSQLGeneratorEngine {
 		for (Variable var : vars) {
 			Set<QualifiedAttributeID> columns = index.getColumns(var);
 			if (columns.size() >= 2) {
-				// if 1, tnen no need for equality
+				// if 1, then no need for equality
 				Iterator<QualifiedAttributeID> iterator = columns.iterator();
 				QualifiedAttributeID leftColumn = iterator.next();
 				while (iterator.hasNext()) {
@@ -906,15 +917,12 @@ public class OneShotSQLGeneratorEngine {
 
 	private String getMainColumnForSELECT(Term ht, AliasIndex index, COL_TYPE castDataType) {
 
-		String mainColumn =  getSQLString(ht, index, false);
-		/*
-		 * If the we have a column we need to still CAST to VARCHAR
-		 */
-		if (mainColumn.charAt(0) != '\'' && mainColumn.charAt(0) != '(' && castDataType != null) {
-			mainColumn = sqladapter.sqlCast(mainColumn, jdbcTypeMapper.getSQLType(castDataType));
+		String column = getSQLString(ht, index, false);
+		if (column.charAt(0) != '\'' && column.charAt(0) != '(' && castDataType != null) {
+			// a column that still needs a CAST to VARCHAR
+			return sqladapter.sqlCast(column, jdbcTypeMapper.getSQLType(castDataType));
 		}
-
-		return mainColumn;
+		return column;
 	}
 
 	private String getLangColumnForSELECT(Term ht, AliasIndex index, Optional<TermType> optionalTermType) {
@@ -1087,10 +1095,6 @@ public class OneShotSQLGeneratorEngine {
 			}
 		}
 		return false;
-	}
-
-	private boolean hasIRIDictionary() {
-		return uriRefIds != null;
 	}
 
 	/**
@@ -1381,8 +1385,14 @@ public class OneShotSQLGeneratorEngine {
 		}
 	}
 
-	/***
-	 * We look for the ID in the list of IDs, if its not there, we return -2,
+
+
+	private boolean hasIRIDictionary() {
+		return uriRefIds != null;
+	}
+
+	/**
+	 * We look for the ID in the list of IDs, if it's not there, then we return -2,
 	 * which we know will never appear on the DB. This is correct because if a
 	 * constant appears in a query, and that constant was never inserted in the
 	 * DB, the query must be empty (that atom), by putting -2 as id, we will
