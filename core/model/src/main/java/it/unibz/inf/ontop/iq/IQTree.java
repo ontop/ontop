@@ -31,4 +31,9 @@ public interface IQTree {
                                    Optional<ImmutableExpression> constraint);
 
     ImmutableSet<Variable> getKnownVariables();
+
+    /**
+     * Returns true if corresponds to a EmptyNode
+     */
+    boolean isDeclaredAsEmpty();
 }

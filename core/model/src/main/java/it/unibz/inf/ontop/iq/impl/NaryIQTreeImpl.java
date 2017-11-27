@@ -45,6 +45,17 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint) {
-        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChildren());
+        ImmutableSet<Variable> projectedVariables = getVariables();
+        if (descendingSubstitution.getDomain().stream()
+                .anyMatch(projectedVariables::contains)) {
+            return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChildren());
+        }
+        else
+            return this;
+    }
+
+    @Override
+    public boolean isDeclaredAsEmpty() {
+        return false;
     }
 }

@@ -59,4 +59,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                               Optional<ImmutableExpression> constraint) {
         throw new RuntimeException("TODO: implement it");
     }
+
+    @Override
+    public boolean isDeclaredAsEmpty() {
+        return false;
+    }
 }

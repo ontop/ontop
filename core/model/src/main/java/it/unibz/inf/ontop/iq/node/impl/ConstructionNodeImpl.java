@@ -513,7 +513,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         QueryNode liftedChildRoot = liftedChildIQTree.getRootNode();
         if (liftedChildRoot instanceof ConstructionNode)
             return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQTree) liftedChildIQTree);
-        else if (liftedChildRoot instanceof EmptyNode) {
+        else if (liftedChildIQTree.isDeclaredAsEmpty()) {
             return iqFactory.createEmptyNode(projectedVariables);
         }
         else

@@ -132,6 +132,11 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
+    public boolean isDeclaredAsEmpty() {
+        return true;
+    }
+
+    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of();
     }

@@ -122,4 +122,9 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     public ImmutableSet<Variable> getKnownVariables() {
         return ImmutableSet.of();
     }
+
+    @Override
+    public boolean isDeclaredAsEmpty() {
+        return false;
+    }
 }

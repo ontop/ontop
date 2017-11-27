@@ -311,7 +311,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toList());
 
         if (updatedChildren.stream()
-                .anyMatch(c -> c instanceof EmptyNode)) {
+                .anyMatch(IQTree::isDeclaredAsEmpty)) {
             return iqFactory.createEmptyNode(computeNewlyProjectedVariables(descendingSubstitution, children));
         }
 
@@ -348,7 +348,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toList());
 
         if (liftedChildren.stream()
-                .anyMatch(iq -> iq.getRootNode() instanceof EmptyNode))
+                .anyMatch(IQTree::isDeclaredAsEmpty))
             throw new EmptyIQException();
 
         Optional<IQTree> optionalSelectedLiftedChild = liftedChildren.stream()

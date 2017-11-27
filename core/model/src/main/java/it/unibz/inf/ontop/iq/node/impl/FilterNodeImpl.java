@@ -151,7 +151,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         QueryNode childRoot = liftedChildIQTree.getRootNode();
         if (childRoot instanceof ConstructionNode)
             return liftBinding((ConstructionNode) childRoot, (UnaryIQTree) liftedChildIQTree);
-        else if (childRoot instanceof EmptyNode) {
+        else if (liftedChildIQTree.isDeclaredAsEmpty()) {
             return liftedChildIQTree;
         }
         else

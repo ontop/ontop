@@ -95,4 +95,9 @@ public abstract class DataNodeImpl extends LeafIQTreeImpl implements DataNode {
     public ImmutableSet<Variable> getKnownVariables() {
         return getLocalVariables();
     }
+
+    @Override
+    public boolean isDeclaredAsEmpty() {
+        return false;
+    }
 }

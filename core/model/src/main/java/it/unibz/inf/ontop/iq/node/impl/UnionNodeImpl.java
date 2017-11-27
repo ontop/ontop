@@ -199,7 +199,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
         ImmutableList<IQTree> liftedChildren = children.stream()
                 .map(c -> c.liftBinding(variableGenerator))
-                .filter(c -> !(c instanceof EmptyNode))
+                .filter(c -> !c.isDeclaredAsEmpty())
                 .collect(ImmutableCollectors.toList());
 
         switch (liftedChildren.size()) {
@@ -215,7 +215,23 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children) {
-        throw new RuntimeException("TODO: implement it");
+        ImmutableSet<Variable> updatedProjectedVariables = constructionTools.computeNewProjectedVariables(
+                    descendingSubstitution, projectedVariables);
+
+        ImmutableList<IQTree> updatedChildren = children.stream()
+                .map(c -> c.applyDescendingSubstitution(descendingSubstitution, constraint))
+                .filter(c -> !c.isDeclaredAsEmpty())
+                .collect(ImmutableCollectors.toList());
+
+        switch (updatedChildren.size()) {
+            case 0:
+                return iqFactory.createEmptyNode(updatedProjectedVariables);
+            case 1:
+                return updatedChildren.get(0);
+            default:
+                UnionNode newRootNode = iqFactory.createUnionNode(updatedProjectedVariables);
+                return iqFactory.createNaryIQTree(newRootNode, updatedChildren);
+        }
     }
 
 

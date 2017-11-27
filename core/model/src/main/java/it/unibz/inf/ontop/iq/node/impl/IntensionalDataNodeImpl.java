@@ -88,4 +88,5 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
     public IntensionalDataNode newAtom(DataAtom newAtom) {
         return new IntensionalDataNodeImpl(newAtom);
     }
+
 }
