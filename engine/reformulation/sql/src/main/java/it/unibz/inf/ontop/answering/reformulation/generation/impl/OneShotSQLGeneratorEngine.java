@@ -99,7 +99,7 @@ public class OneShotSQLGeneratorEngine {
 	private final IntermediateQuery2DatalogTranslator iq2DatalogTranslator;
 
 	private final boolean distinctResultSet;
-	private final String replace1, replace2;
+	private final boolean isIRISafeEncodingEnabled;
 
 	@Nullable
 	private final IRIDictionary uriRefIds;
@@ -142,21 +142,7 @@ public class OneShotSQLGeneratorEngine {
 		this.operations = buildOperations(sqladapter);
 		this.distinctResultSet = settings.isDistinctPostProcessingEnabled();
 		this.iq2DatalogTranslator = iq2DatalogTranslator;
-
-		if (settings.isIRISafeEncodingEnabled()) {
-			StringBuilder sb1 = new StringBuilder();
-			StringBuilder sb2 = new StringBuilder();
-			for (Entry<String, String> e : EncodeForURI.TABLE.entrySet()) {
-				sb1.append("REPLACE(");
-				sb2.append(", '").append(e.getValue()).append("', '").append(e.getKey()).append("')");
-			}
-			replace1 = sb1.toString();
-			replace2 = sb2.toString();
-		}
-		else {
-			replace1 = replace2 = "";
-		}
-
+		this.isIRISafeEncodingEnabled = settings.isIRISafeEncodingEnabled();
 		this.uriRefIds = iriDictionary;
 		this.jdbcTypeMapper = jdbcTypeMapper;
  	}
@@ -165,7 +151,7 @@ public class OneShotSQLGeneratorEngine {
 	 * For clone purposes only
 	 */
 	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter,
-                                      String replace1, String replace2, boolean distinctResultSet,
+                                      boolean isIRISafeEncodingEnabled, boolean distinctResultSet,
                                       IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
                                       ImmutableMap<ExpressionOperation, String> operations,
 									  IntermediateQuery2DatalogTranslator iq2DatalogTranslator) {
@@ -173,8 +159,7 @@ public class OneShotSQLGeneratorEngine {
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
 		this.operations = operations;
-		this.replace1 = replace1;
-		this.replace2 = replace2;
+		this.isIRISafeEncodingEnabled = isIRISafeEncodingEnabled;
 		this.distinctResultSet = distinctResultSet;
 		this.uriRefIds = uriRefIds;
 		this.jdbcTypeMapper = jdbcTypeMapper;
@@ -234,7 +219,7 @@ public class OneShotSQLGeneratorEngine {
 	@Override
 	public OneShotSQLGeneratorEngine clone() {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
-				replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator);
+				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator);
 	}
 
 	/**
@@ -1098,25 +1083,24 @@ public class OneShotSQLGeneratorEngine {
 				vex.add(sqladapter.getSQLLexicalFormString(split[0]));
 			}
 
-			/*
-			 * New we concat the rest of the function, note that if there is
-			 * only 1 element there is nothing to concatenate
-			 */
 			int size = terms.size();
-			for (int termIndex = 1; termIndex < size; termIndex++) {
-				Term currentTerm = terms.get(termIndex);
-				String repl0 = getSQLString(currentTerm, index, false);
-				String repl1 = isStringColType(currentTerm, index)
+			for (int i = 1; i < size; i++) {
+				Term term = terms.get(i);
+				String repl0 = getSQLString(term, index, false);
+				String repl1 = isStringColType(term, index)
 						? repl0
 						: sqladapter.sqlCast(repl0, Types.VARCHAR);
-				//empty place holders: the correct uri is in the column of DB no need to replace
-				String repl = (split.length == 0) ? repl1 : replace1 + repl1 + replace2;
+				// empty place holders: the correct uri is in the column of DB no need to replace
+				String repl = (split.length > 0 && isIRISafeEncodingEnabled)
+						? sqladapter.strEncodeForUri(repl1)
+						: repl1;
 				vex.add(repl);
-				if (termIndex < split.length) {
-					vex.add(sqladapter.getSQLLexicalFormString(split[termIndex]));
+				if (i < split.length) {
+					vex.add(sqladapter.getSQLLexicalFormString(split[i]));
 				}
 			}
 
+			// if there is only one element there is nothing to concatenate
 			return (vex.size() == 1) ? vex.get(0) : getStringConcatenation(vex.toArray(new String[0]));
 		}
 		else if (t instanceof Variable) {
@@ -1245,7 +1229,8 @@ public class OneShotSQLGeneratorEngine {
 			if (hasIRIDictionary() && ((ct.getType() == OBJECT || ct.getType() == STRING))) {
 				int id = getUriid(ct.getValue());
 				if (id >= 0)
-					sqladapter.getSQLLexicalFormString(String.valueOf(id));
+					return String.valueOf(id); // return the INTEGER, not a string
+					//sqladapter.getSQLLexicalFormString(String.valueOf(id));
 			}
 			return getSQLLexicalForm(ct);
 		}
