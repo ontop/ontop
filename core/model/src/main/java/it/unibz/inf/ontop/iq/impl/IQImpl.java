@@ -60,4 +60,9 @@ public class IQImpl implements IQ {
                 ? this
                 : new IQImpl(projectionAtom, newTree, termFactory);
     }
+
+    @Override
+    public String toString() {
+        return projectionAtom + "\n" + tree.toString();
+    }
 }

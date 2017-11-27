@@ -16,6 +16,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     private final N rootNode;
     private final ImmutableList<IQTree> children;
+    private static final String TAB_STR = "   ";
 
     /**
      * LAZY
@@ -62,4 +63,22 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                     .collect(ImmutableCollectors.toSet());
         return knownVariables;
     }
+
+    @Override
+    public String toString() {
+        return printSubtree(this, "");
+    }
+
+    /**
+     * Recursive
+     */
+    private static String printSubtree(IQTree subTree, String offset) {
+        String childOffset = offset + TAB_STR;
+
+        return offset + subTree.getRootNode() + "\n"
+                + subTree.getChildren().stream()
+                    .map(c -> printSubtree(c, childOffset))
+                    .reduce("", (c, a) -> c + a);
+    }
+
 }
