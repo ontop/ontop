@@ -958,23 +958,7 @@ public class OneShotSQLGeneratorEngine {
 			 * Adding the column(s) with the actual value(s)
 			 */
 			if (ov.isDataTypeFunction()) {
-				/*
-				 * Case where we have a typing function in the head (this is the
-				 * case for all literal columns
-				 */
-				int size = ov.getTerms().size();
-				if ((functionSymbol instanceof Literal) || size > 2) {
-					mainColumn = getSQLStringForTemplateFunction(ov, index);
-				}
-				else {
-					Term term = ov.getTerms().get(0);
-					if (term instanceof ValueConstant) {
-						mainColumn = getSQLLexicalForm((ValueConstant) term);
-					}
-					else {
-						mainColumn = getSQLString(term, index, false);
-					}
-				}
+				mainColumn = getSQLString(ov, index, false);
 			}
 			else if (functionSymbol instanceof URITemplatePredicate
 					|| functionSymbol instanceof BNodePredicate) {
@@ -1055,47 +1039,42 @@ public class OneShotSQLGeneratorEngine {
 	private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 
 	private String getSQLStringForTemplateFunction(Function ov, AliasIndex index) {
-		/*
-		 * The first inner term determines the form of the result
-		 */
-		List<Term> terms = ov.getTerms();
-		Term t = terms.get(0);
 
-		if (t instanceof ValueConstant || t instanceof BNode) {
-			/*
-			 * The function is actually a template. The first parameter is a
-			 * string of the form http://.../.../ or empty "{}" with place holders of the form
-			 * {}. The rest are variables or constants that should be put in
-			 * place of the place holders. We need to tokenize and form the
-			 * CONCAT
-			 */
-			String template = (t instanceof BNode)
-					? ((BNode) t).getName()   // getValue should be removed from Constant
-					: ((ValueConstant) t).getValue();
-			// trim template
+		List<Term> terms = ov.getTerms();
+
+		// The first argument determines the form of the result
+		Term term0 = terms.get(0);
+		if (term0 instanceof ValueConstant || term0 instanceof BNode) {
+			// An actual template: the first term is a string of the form
+			// http://.../.../ or empty "{}" with placeholders of the form {}
+			// The other terms are variables or constants that should replace
+			// the placeholders. We need to tokenize and form the CONCAT
+			String template = (term0 instanceof BNode)
+					? ((BNode) term0).getName()   // getValue should be removed from Constant
+					: ((ValueConstant) term0).getValue();
+			// strip the template of all quotation marks (dubious step)
 			while (pQuotes.matcher(template).matches()) {
 				template = template.substring(1, template.length() - 1);
 			}
 			String[] split = template.split("[{][}]");
 
 			List<String> vex = new ArrayList<>();
-			if (split.length > 0 && !split[0].isEmpty()) {
+			if (split.length > 0 && !split[0].isEmpty()) { // fragment before the first {}
 				vex.add(sqladapter.getSQLLexicalFormString(split[0]));
 			}
 
 			int size = terms.size();
 			for (int i = 1; i < size; i++) {
 				Term term = terms.get(i);
-				String repl0 = getSQLString(term, index, false);
-				String repl1 = isStringColType(term, index)
-						? repl0
-						: sqladapter.sqlCast(repl0, Types.VARCHAR);
-				// empty place holders: the correct uri is in the column of DB no need to replace
-				String repl = (split.length > 0 && isIRISafeEncodingEnabled)
-						? sqladapter.strEncodeForUri(repl1)
-						: repl1;
-				vex.add(repl);
-				if (i < split.length) {
+				String arg = getSQLString(term, index, false);
+				String cast = isStringColType(term, index)
+						? arg
+						: sqladapter.sqlCast(arg, Types.VARCHAR);
+				// empty placeholder: the correct uri is in the column of DB no need to replace
+				vex.add((split.length > 0 && isIRISafeEncodingEnabled)
+						? sqladapter.strEncodeForUri(cast)
+						: cast);
+				if (i < split.length) { // fragment after the current {} (if it exists)
 					vex.add(sqladapter.getSQLLexicalFormString(split[i]));
 				}
 			}
@@ -1103,29 +1082,16 @@ public class OneShotSQLGeneratorEngine {
 			// if there is only one element there is nothing to concatenate
 			return (vex.size() == 1) ? vex.get(0) : getStringConcatenation(vex.toArray(new String[0]));
 		}
-		else if (t instanceof Variable) {
-			/*
-			 * The function is of the form uri(x), we need to simply return the
-			 * value of X
-			 */
-			return getSQLString(t, index, false);
-		}
-		else if (t instanceof URIConstant) {
-			/*
-			 * The function is of the form uri("http://some.uri/"), i.e., a
-			 * concrete URI, we return the string representing that URI.
-			 */
-			URIConstant uc = (URIConstant) t;
+		else if (term0 instanceof URIConstant) {
+			// The function is of the form uri("http://some.uri/"),
+			// i.e., a concrete URI: return the string representing that URI
+			URIConstant uc = (URIConstant) term0;
 			return sqladapter.getSQLLexicalFormString(uc.getURI());
 		}
-		/**
-		 * Complex first argument: treats it as a string and ignore other arguments
-		 */
 		else {
-			/*
-			 * The function is for example of the form uri(CONCAT("string",x)),we simply return the value from the database.
-			 */
-			return getSQLString(t, index, false);
+			// complex term or a variable: e.g., uri(CONCAT(x, "a"))
+			// use the first term as the result string and ignore other terms
+			return getSQLString(term0, index, false);
 		}
 	}
 
@@ -1230,7 +1196,6 @@ public class OneShotSQLGeneratorEngine {
 				int id = getUriid(ct.getValue());
 				if (id >= 0)
 					return String.valueOf(id); // return the INTEGER, not a string
-					//sqladapter.getSQLLexicalFormString(String.valueOf(id));
 			}
 			return getSQLLexicalForm(ct);
 		}
