@@ -53,6 +53,7 @@ public class BindingLiftTest {
     private final Variable Z = TERM_FACTORY.getVariable("z");
     private final Variable A = TERM_FACTORY.getVariable("a");
     private final Variable AF0 = TERM_FACTORY.getVariable("af0");
+    private final Variable AF1 = TERM_FACTORY.getVariable("af1");
     private final Variable B = TERM_FACTORY.getVariable("b");
     private final Variable C = TERM_FACTORY.getVariable("c");
     private final Variable D = TERM_FACTORY.getVariable("d");
@@ -465,19 +466,19 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(AF0)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(AF1)));
 
         expectedQueryBuilder.init(projectionAtom, newRootNode);
 
-        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(AF0));
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(AF1));
         expectedQueryBuilder.addChild(newRootNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, AF0, B)));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, AF1, B)));
         expectedQueryBuilder.addChild(newUnionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, AF0, D)));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, AF1, D)));
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, AF0, F)));
+                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, AF1, F)));
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected  query: \n" +  expectedQuery);
@@ -534,19 +535,19 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(AF0)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(AF1)));
 
         expectedQueryBuilder.init(projectionAtom, newRootNode);
 
-        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(AF0));
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(AF1));
         expectedQueryBuilder.addChild(newRootNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, AF0, B)));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, AF1, B)));
         expectedQueryBuilder.addChild(newUnionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, AF0, D)));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, AF1, D)));
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, AF0, F)));
+                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, AF1, F)));
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected  query: \n" +  expectedQuery);
@@ -598,19 +599,19 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(AF0)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(AF1)));
 
         expectedQueryBuilder.init(projectionAtom, newRootNode);
 
-        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(AF0));
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(AF1));
         expectedQueryBuilder.addChild(newRootNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, AF0, B)));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, AF1, B)));
         expectedQueryBuilder.addChild(newUnionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, AF0, D)));
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, AF1, D)));
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, AF0, F)));
+                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, AF1, F)));
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected  query: \n" +  expectedQuery);
