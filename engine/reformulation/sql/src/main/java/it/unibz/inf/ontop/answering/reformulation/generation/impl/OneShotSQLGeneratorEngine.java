@@ -203,7 +203,7 @@ public class OneShotSQLGeneratorEngine {
 				.put(ExpressionOperation.NOT, "NOT %s")
 				.put(ExpressionOperation.IS_NULL, "%s IS NULL")
 				.put(ExpressionOperation.IS_NOT_NULL, "%s IS NOT NULL")
-				.put(ExpressionOperation.IS_TRUE, "%s IS TRUE")
+				//.put(ExpressionOperation.IS_TRUE, "%s IS TRUE")
 				.put(ExpressionOperation.SQL_LIKE, "%s LIKE %s")
 				.put(ExpressionOperation.STR_STARTS, sqladapter.strStartsOperator())
 				.put(ExpressionOperation.STR_ENDS, sqladapter.strEndsOperator())
@@ -298,7 +298,7 @@ public class OneShotSQLGeneratorEngine {
 			}
 
 			resultingQuery = "SELECT *\n" +
-					"FROM " + bracket("\n" + queryString + "\n") + " " + OUTER_VIEW_NAME + "\n" +
+					"FROM " + inBrackets("\n" + queryString + "\n") + " " + OUTER_VIEW_NAME + "\n" +
 					modifier;
 		}
 		else {
@@ -398,7 +398,7 @@ public class OneShotSQLGeneratorEngine {
 								metadata.getQuotedIDFactory().createAttributeID(alias)));
 					}
 				}
-				FromItem item = new FromItem(subQueryAlias, bracket(subQuery), columnsBuilder.build());
+				FromItem item = new FromItem(subQueryAlias, inBrackets(subQuery), columnsBuilder.build());
 				subQueryDefinitionsBuilder.put(pred, item);
 			}
 		}
@@ -432,7 +432,7 @@ public class OneShotSQLGeneratorEngine {
 		List<String> sqls = Lists.newArrayListWithExpectedSize(cqs.size());
 		for (CQIE cq : cqs) {
 		    /* Main loop, constructing the SPJ query for each CQ */
-			QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions);
+			AliasIndex index = new AliasIndex(cq, subQueryDefinitions);
 
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT ");
@@ -458,7 +458,7 @@ public class OneShotSQLGeneratorEngine {
 			sb.append("\n FROM \n");
 			List<String> from = getTableDefs(body, index, "");
 			if (from.isEmpty()) {
-				from = ImmutableList.of(bracket(sqladapter.getDummyTable()) + " tdummy");
+				from = ImmutableList.of(inBrackets(sqladapter.getDummyTable()) + " tdummy");
 			}
 			Joiner.on(",\n").appendTo(sb, from);
 
@@ -487,7 +487,7 @@ public class OneShotSQLGeneratorEngine {
 		}
 		return sqls.size() == 1
 				? sqls.get(0)
-				: bracket(Joiner.on(")\n " + (unionNoDuplicates ? "UNION" : "UNION ALL") + "\n (").join(sqls));
+				: inBrackets(Joiner.on(")\n " + (unionNoDuplicates ? "UNION" : "UNION ALL") + "\n (").join(sqls));
 	}
 
 
@@ -504,7 +504,7 @@ public class OneShotSQLGeneratorEngine {
 		return ImmutableList.of();
 	}
 
-	private ImmutableList<QualifiedAttributeID> getGroupBy(List<Function> body, QueryAliasIndex index) {
+	private ImmutableList<QualifiedAttributeID> getGroupBy(List<Function> body, AliasIndex index) {
 		return body.stream()
 				.filter(a -> a.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_GROUP)
 				.map(a -> a.getVariables())
@@ -529,7 +529,7 @@ public class OneShotSQLGeneratorEngine {
 	 * Returns a string with boolean conditions formed with the boolean atoms
 	 * found in the atoms list.
 	 */
-	private Set<String> getBooleanConditions(List<Function> atoms, QueryAliasIndex index) {
+	private Set<String> getBooleanConditions(List<Function> atoms, AliasIndex index) {
 		Set<String> conditions = new LinkedHashSet<>();
 		for (Function atom : atoms) {
 			if (atom.isOperation()) {  // Boolean expression
@@ -547,59 +547,51 @@ public class OneShotSQLGeneratorEngine {
 	/**
 	 * Returns the SQL for an atom representing an SQL condition (booleans).
 	 */
-	private String getSQLCondition(Function atom, QueryAliasIndex index) {
+	private String getSQLCondition(Function atom, AliasIndex index) {
 		Predicate functionSymbol = atom.getFunctionSymbol();
-		if (functionSymbol.getArity() == 1) {
-			// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
-			Term term = atom.getTerm(0);
-			if (functionSymbol == ExpressionOperation.NOT) {
-				String expressionFormat = operations.get(functionSymbol);
-				if (term instanceof Function) {
-					Function f = (Function) term;
-					if (!f.isDataTypeFunction()) {
-						String column = getSQLString(term, index, false);
-						return String.format(expressionFormat, column);
-					}
-				}
-				// find data type of term and evaluate accordingly
-				String column = effectiveBooleanValue(term, index);
-				return String.format(expressionFormat, column);
-			}
-			else if (functionSymbol == ExpressionOperation.IS_TRUE) {
-				return effectiveBooleanValue(term, index);
-			}
-			else {
-				String expressionFormat = operations.get(functionSymbol);
-				String column = getSQLString(term, index, false);
-				return String.format(expressionFormat, column);
-			}
-		}
-		else if (functionSymbol.getArity() == 2) {
-			// For binary boolean operators, e.g., AND, OR, EQ, GT, LT, etc.
+		if (operations.containsKey(functionSymbol)) {
 			String expressionFormat = operations.get(functionSymbol);
-			String left = getSQLString(atom.getTerm(0), index, true);
-			String right = getSQLString(atom.getTerm(1), index, true);
-			return String.format(bracket(expressionFormat), left, right);
-		}
-		else {
-			if (functionSymbol == ExpressionOperation.REGEX) {
-				boolean caseinSensitive = false, multiLine = false, dotAllMode = false;
-				if (atom.getArity() == 3) {
-					String options = atom.getTerm(2).toString();
-					caseinSensitive = options.contains("i");
-					multiLine = options.contains("m");
-					dotAllMode = options.contains("s");
+			if (functionSymbol.getArity() == 1) {
+				// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
+				Term term = atom.getTerm(0);
+				final String arg;
+				if (functionSymbol == ExpressionOperation.NOT) {
+					arg = (term instanceof Function && ((Function) term).isDataTypeFunction())
+							? effectiveBooleanValue(term, index)
+							: getSQLString(term, index, false);
 				}
-				String column = getSQLString(atom.getTerm(0), index, false);
-				String pattern = getSQLString(atom.getTerm(1), index, false);
-				return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
+				else {
+					arg = getSQLString(term, index, false);
+				}
+				return String.format(expressionFormat, arg);
 			}
-			else
-				throw new RuntimeException("The builtin function " + functionSymbol + " is not supported yet!");
+			else if (functionSymbol.getArity() == 2) {
+				// For binary boolean operators, e.g., AND, OR, EQ, GT, LT, etc.
+				String left = getSQLString(atom.getTerm(0), index, true);
+				String right = getSQLString(atom.getTerm(1), index, true);
+				return String.format(inBrackets(expressionFormat), left, right);
+			}
 		}
+		else if (functionSymbol == ExpressionOperation.IS_TRUE) {
+			return effectiveBooleanValue(atom.getTerm(0), index);
+		}
+		else if (functionSymbol == ExpressionOperation.REGEX) {
+			boolean caseinSensitive = false, multiLine = false, dotAllMode = false;
+			if (atom.getArity() == 3) {
+				String options = atom.getTerm(2).toString();
+				caseinSensitive = options.contains("i");
+				multiLine = options.contains("m");
+				dotAllMode = options.contains("s");
+			}
+			String column = getSQLString(atom.getTerm(0), index, false);
+			String pattern = getSQLString(atom.getTerm(1), index, false);
+			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
+		}
+
+		throw new RuntimeException("The builtin function " + functionSymbol + " is not supported yet!");
 	}
 
-	private ImmutableList<String> getTableDefs(List<Function> atoms, QueryAliasIndex index, String indent) {
+	private ImmutableList<String> getTableDefs(List<Function> atoms, AliasIndex index, String indent) {
 		return atoms.stream()
 				.map(a -> getTableDefinition(a, index, indent + INDENT))
 				.filter(d -> !d.isEmpty())
@@ -628,7 +620,7 @@ public class OneShotSQLGeneratorEngine {
 	 * @return
 	 */
 	private String getTableDefinitions(List<Function> atoms,
-									   QueryAliasIndex index,
+									   AliasIndex index,
 									   String JOIN_KEYWORD,
 									   boolean parenthesis,
 									   String indent) {
@@ -642,9 +634,7 @@ public class OneShotSQLGeneratorEngine {
 				return tableDefinitions.get(0);
 
 			default:
-				String JOIN_WITH_PARENTHESIS = indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n"
-						+ indent + "(%s)" + indent;
-				String JOIN_NO_PARENTHESIS = indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n"
+				String JOIN = indent + indent + "%s\n" + indent + JOIN_KEYWORD + "\n"
 						+ indent + "%s" + indent;
 				/*
 		 		 * Now we generate the table definition: Join/LeftJoin
@@ -656,11 +646,13 @@ public class OneShotSQLGeneratorEngine {
 				 * go on the TOP level only.
 				 */
 				int size = tableDefinitions.size();
-				String currentJoin = String.format(parenthesis ? JOIN_WITH_PARENTHESIS : JOIN_NO_PARENTHESIS,
-						tableDefinitions.get(size - 2), tableDefinitions.get(size - 1));
+				String currentJoin = tableDefinitions.get(size - 1);
+
+				currentJoin = String.format(JOIN, tableDefinitions.get(size - 2),
+						parenthesis ? inBrackets(currentJoin) : currentJoin);
 
 				for (int i = size - 3; i >= 0; i--) {
-					currentJoin = String.format(JOIN_WITH_PARENTHESIS, tableDefinitions.get(i), currentJoin);
+					currentJoin = String.format(JOIN, tableDefinitions.get(i), inBrackets(currentJoin));
 				}
 
 				Set<String> on = getConditionsSet(atoms, index, true);
@@ -676,10 +668,10 @@ public class OneShotSQLGeneratorEngine {
 	/**
 	 * Returns the table definition for the given atom. If the atom is a simple
 	 * table or view, then it returns the value as defined by the
-	 * QueryAliasIndex. If the atom is a Join or Left Join, it will call
+	 * AliasIndex. If the atom is a Join or Left Join, it will call
 	 * getTableDefinitions on the nested term list.
 	 */
-	private String getTableDefinition(Function atom, QueryAliasIndex index, String indent) {
+	private String getTableDefinition(Function atom, AliasIndex index, String indent) {
 
 		if (atom.isAlgebraFunction()) {
 			Predicate functionSymbol = atom.getFunctionSymbol();
@@ -728,7 +720,7 @@ public class OneShotSQLGeneratorEngine {
 	 * The method assumes that no variable in this list (or nested ones) referes
 	 * to an upper level one.
 	 */
-	private Set<String> getConditionsSet(List<Function> atoms, QueryAliasIndex index, boolean processShared) {
+	private Set<String> getConditionsSet(List<Function> atoms, AliasIndex index, boolean processShared) {
 
 		Set<String> conditions = new LinkedHashSet<>();
 		if (processShared) {
@@ -796,7 +788,7 @@ public class OneShotSQLGeneratorEngine {
 	 * x),B(x))
 	 *
 	 */
-	private Set<String> getConditionsSharedVariables(Set<Variable> vars, QueryAliasIndex index) {
+	private Set<String> getConditionsSharedVariables(Set<Variable> vars, AliasIndex index) {
 		/*
 		 * For each variable we collect all the columns that should be equated
 		 * (due to repeated positions of the variable)
@@ -822,7 +814,7 @@ public class OneShotSQLGeneratorEngine {
 		return equalities;
 	}
 
-	private Set<String> getEqConditionsForConstants(List<Function> atoms, QueryAliasIndex index) {
+	private Set<String> getEqConditionsForConstants(List<Function> atoms, AliasIndex index) {
 		Set<String> equalities = new LinkedHashSet<>();
 		for (Function atom : atoms) {
 			if (atom.isDataFunction())  {
@@ -839,7 +831,7 @@ public class OneShotSQLGeneratorEngine {
 		return equalities;
 	}
 
-	private String effectiveBooleanValue(Term term, QueryAliasIndex index) {
+	private String effectiveBooleanValue(Term term, AliasIndex index) {
 
 		String column = getSQLString(term, index, false);
 		// find data type of term and evaluate accordingly
@@ -900,7 +892,7 @@ public class OneShotSQLGeneratorEngine {
 	private String getSelectClauseFragment(SignatureVariable var,
 										   Term term,
 										   Optional<TermType> termType,
-										   QueryAliasIndex index) {
+										   AliasIndex index) {
 		/*
 		 * Datatype for the main column (to which it is cast).
 		 * Beware, it may defer the RDF datatype (the one of the type column).
@@ -948,7 +940,7 @@ public class OneShotSQLGeneratorEngine {
 		return builder.build();
 	}
 
-	private String getMainColumnForSELECT(Term ht, QueryAliasIndex index, COL_TYPE castDataType) {
+	private String getMainColumnForSELECT(Term ht, AliasIndex index, COL_TYPE castDataType) {
 
 		String mainColumn;
 		if (ht instanceof URIConstant) {
@@ -1024,7 +1016,7 @@ public class OneShotSQLGeneratorEngine {
 		return mainColumn;
 	}
 
-	private String getLangColumnForSELECT(Term ht, QueryAliasIndex index, Optional<TermType> optionalTermType) {
+	private String getLangColumnForSELECT(Term ht, AliasIndex index, Optional<TermType> optionalTermType) {
 
 		if (ht instanceof Variable) {
 			return index.getLangColumn((Variable) ht)
@@ -1054,7 +1046,7 @@ public class OneShotSQLGeneratorEngine {
 	 * @param index Used when the term correspond to a column name
 	 * @param optionalTermType
 	 */
-	private String getTypeColumnForSELECT(Term ht, QueryAliasIndex index, Optional<TermType> optionalTermType) {
+	private String getTypeColumnForSELECT(Term ht, AliasIndex index, Optional<TermType> optionalTermType) {
 
 		if (ht instanceof Variable) {
 	        // Such variable does not hold this information, so we have to look
@@ -1077,7 +1069,7 @@ public class OneShotSQLGeneratorEngine {
 
 	private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 
-	private String getSQLStringForTemplateFunction(Function ov, QueryAliasIndex index) {
+	private String getSQLStringForTemplateFunction(Function ov, AliasIndex index) {
 		/*
 		 * The first inner term determines the form of the result
 		 */
@@ -1171,7 +1163,7 @@ public class OneShotSQLGeneratorEngine {
 		return toReturn;
 	}
 
-	private boolean isStringColType(Term term, QueryAliasIndex index) {
+	private boolean isStringColType(Term term, AliasIndex index) {
 		if (term instanceof Function) {
 			Function function = (Function) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
@@ -1200,7 +1192,7 @@ public class OneShotSQLGeneratorEngine {
 			Set<QualifiedAttributeID> columns = index.getColumns((Variable) term);
 			QualifiedAttributeID column0 = columns.iterator().next();
 
-			RelationDefinition relation = index.invertedAlias.get(column0.getRelation());
+			RelationDefinition relation = index.relationsForAliases.get(column0.getRelation());
 			if (relation != null) {
 				QuotedID columnId = column0.getAttribute();
 				for (Attribute a : relation.getAttributes()) {
@@ -1243,30 +1235,26 @@ public class OneShotSQLGeneratorEngine {
 	 * <p>
 	 * If its a boolean comparison, it returns the corresponding SQL comparison.
 	 */
-	private String getSQLString(Term term, QueryAliasIndex index, boolean useBrackets) {
+	private String getSQLString(Term term, AliasIndex index, boolean useBrackets) {
 
 		if (term == null) {
 			return "";
 		}
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
-			if (hasIRIDictionary()) {
-				if (ct.getType() == OBJECT || ct.getType() == STRING) {
-					int id = getUriid(ct.getValue());
-					if (id >= 0)
-						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
-						return String.valueOf(id);
-				}
+			if (hasIRIDictionary() && ((ct.getType() == OBJECT || ct.getType() == STRING))) {
+				int id = getUriid(ct.getValue());
+				if (id >= 0)
+					sqladapter.getSQLLexicalFormString(String.valueOf(id));
 			}
 			return getSQLLexicalForm(ct);
 		}
 		else if (term instanceof URIConstant) {
+			URIConstant uc = (URIConstant) term;
 			if (hasIRIDictionary()) {
-				String uri = term.toString();
-				int id = getUriid(uri);
+				int id = getUriid(uc.getValue());
 				return sqladapter.getSQLLexicalFormString(String.valueOf(id));
 			}
-			URIConstant uc = (URIConstant) term;
 			return sqladapter.getSQLLexicalFormString(uc.toString());
 		}
 		else if (term instanceof Variable) {
@@ -1286,16 +1274,11 @@ public class OneShotSQLGeneratorEngine {
 			}
 			if (size == 1) {
 				// atoms of the form integer(x)
-				Term term1 = function.getTerm(0);
-				return getSQLString(term1, index, false);
+				return getSQLString(function.getTerm(0), index, false);
 			}
 			else {
 				return getSQLStringForTemplateFunction(function, index);
 			}
-		}
-		else if (functionSymbol == ExpressionOperation.IS_TRUE) {
-			// ABOVE operations.containsKey
-			return effectiveBooleanValue(function.getTerm(0), index);
 		}
 		else if (operations.containsKey(functionSymbol)) {
 			String expressionFormat = operations.get(functionSymbol);
@@ -1311,10 +1294,13 @@ public class OneShotSQLGeneratorEngine {
 					String left = getSQLString(function.getTerm(0), index, true);
 					String right = getSQLString(function.getTerm(1), index, true);
 					String result = String.format(expressionFormat, left, right);
-					return useBrackets ? bracket(result) : result;
+					return useBrackets ? inBrackets(result) : result;
 				default:
 					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
 			}
+		}
+		else if (functionSymbol == ExpressionOperation.IS_TRUE) {
+			return effectiveBooleanValue(function.getTerm(0), index);
 		}
 		else if (functionSymbol == ExpressionOperation.REGEX) {
 			boolean caseinSensitive = false, multiLine = false, dotAllMode = false;
@@ -1558,14 +1544,14 @@ public class OneShotSQLGeneratorEngine {
 	 * used in a FROM clause, and variables, to column references defined over
 	 * the existing view definitions of a query.
 	 */
-	public final class QueryAliasIndex {
+	public final class AliasIndex {
 
-		final Map<Function, FromItem> dataDefinitions = new HashMap<>();
-		final Map<RelationID, FromItem> subQueries = new HashMap<>();
-		final Map<Variable, Set<QualifiedAttributeID>> columnReferences = new HashMap<>();
-		final Map<RelationID, RelationDefinition> invertedAlias = new HashMap<>();
+		final Map<Function, FromItem> fromItemsForAtoms = new HashMap<>();
+		final Map<RelationID, FromItem> subQueryFromItems = new HashMap<>();
+		final Map<Variable, Set<QualifiedAttributeID>> columnsForVariables = new HashMap<>();
+		final Map<RelationID, RelationDefinition> relationsForAliases = new HashMap<>();
 
-		public QueryAliasIndex(CQIE query, ImmutableMap<Predicate, FromItem> subQueryDefinitions) {
+		public AliasIndex(CQIE query, ImmutableMap<Predicate, FromItem> subQueryDefinitions) {
 			for (Function atom : query.getBody()) {
 				// This will be called recursively if necessary
 				generateViewsIndexVariables(atom, subQueryDefinitions);
@@ -1601,10 +1587,10 @@ public class OneShotSQLGeneratorEngine {
 
 			Predicate predicate = atom.getFunctionSymbol();
 			boolean isSubquery = subQueryDefinitions.containsKey(predicate);
-			final FromItem definition;
+			final FromItem fromItem;
 			if (isSubquery) {
-				definition = subQueryDefinitions.get(predicate);
-				subQueries.put(definition.alias, definition);
+				fromItem = subQueryDefinitions.get(predicate);
+				subQueryFromItems.put(fromItem.alias, fromItem);
 			}
 			else {
 				RelationDefinition relation = metadata.getRelation(Relation2Predicate.createRelationFromPredicateName(
@@ -1613,35 +1599,35 @@ public class OneShotSQLGeneratorEngine {
 					return;   // because of dummyN - what exactly is that?
 
 				RelationID relationAlias = createAlias(predicate.getName(),
-						VIEW_SUFFIX + dataDefinitions.size(),
-						dataDefinitions.entrySet().stream()
+						VIEW_SUFFIX + fromItemsForAtoms.size(),
+						fromItemsForAtoms.entrySet().stream()
 								.map(e -> e.getValue().alias).collect(Collectors.toList()));
 
-				definition = new FromItem(
+				fromItem = new FromItem(
 						relationAlias,
 						relation instanceof DatabaseRelationDefinition
 								? relation.getID().getSQLRendering()
-								: bracket(((ParserViewDefinition)relation).getStatement()),
+								: inBrackets(((ParserViewDefinition)relation).getStatement()),
 						relation.getAttributes().stream()
 								.map(a -> new QualifiedAttributeID(relationAlias, a.getID()))
 								.collect(ImmutableCollectors.toList()));
 
-				invertedAlias.put(definition.alias, relation);
+				relationsForAliases.put(fromItem.alias, relation);
 			}
-			dataDefinitions.put(atom, definition);
+			fromItemsForAtoms.put(atom, fromItem);
 
 			for (int i = 0; i < atom.getTerms().size(); i++) {
 				Term term = atom.getTerms().get(i);
 				if (term instanceof Variable) {
-					Set<QualifiedAttributeID> columns = columnReferences.get(term);
+					Set<QualifiedAttributeID> columns = columnsForVariables.get(term);
 					if (columns == null) {
 						columns = new LinkedHashSet<>();
-						columnReferences.put((Variable) term, columns);
+						columnsForVariables.put((Variable) term, columns);
 					}
 					int idx = isSubquery
 							? 3 * i + 2 // a view from an Ans predicate
 							: i;        // a database relation
-					columns.add(definition.attributes.get(idx));
+					columns.add(fromItem.attributes.get(idx));
 				}
 			}
 		}
@@ -1655,7 +1641,7 @@ public class OneShotSQLGeneratorEngine {
 		 *            The variable we want the referenced columns.
 		 */
 		public Set<QualifiedAttributeID> getColumns(Variable var) {
-			Set<QualifiedAttributeID> columns = columnReferences.get(var);
+			Set<QualifiedAttributeID> columns = columnsForVariables.get(var);
 			if (columns == null || columns.isEmpty())
 				throw new RuntimeException("Unbound variable found in WHERE clause: " + var);
 			return columns;
@@ -1666,20 +1652,20 @@ public class OneShotSQLGeneratorEngine {
 		 */
 		public String getViewDefinition(Function atom) {
 
-			FromItem dd = dataDefinitions.get(atom);
+			FromItem dd = fromItemsForAtoms.get(atom);
 			if (dd != null) {
 				return sqladapter.sqlTableName(dd.definition, dd.alias.getSQLRendering());
 			}
 			else if (atom.getArity() == 0) {
 				 // Special case of nullary atoms
-				return bracket(sqladapter.getDummyTable()) + " tdummy";
+				return inBrackets(sqladapter.getDummyTable()) + " tdummy";
 			}
 			throw new RuntimeException(
 						"Impossible to get data definition for: " + atom + ", type: " + dd);
 		}
 
 		public QualifiedAttributeID getColumn(Function atom, int column) {
-			FromItem dd = dataDefinitions.get(atom);
+			FromItem dd = fromItemsForAtoms.get(atom);
 			return dd.attributes.get(column);
 		}
 
@@ -1701,7 +1687,7 @@ public class OneShotSQLGeneratorEngine {
 				//
 				// For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
 
-				FromItem subQuery = subQueries.get(mainColumn.getRelation());
+				FromItem subQuery = subQueryFromItems.get(mainColumn.getRelation());
 				if (subQuery != null) {
 					int mainColumnIndex = subQuery.attributes.indexOf(mainColumn);
 					return Optional.of(subQuery.attributes.get(
@@ -1712,7 +1698,7 @@ public class OneShotSQLGeneratorEngine {
 		}
 	}
 
-	private static String bracket(String s) {
+	private static String inBrackets(String s) {
 		return "(" + s + ")";
 	}
 }
