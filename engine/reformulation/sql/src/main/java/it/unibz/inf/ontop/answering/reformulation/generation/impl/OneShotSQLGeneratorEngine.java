@@ -927,54 +927,7 @@ public class OneShotSQLGeneratorEngine {
 
 	private String getMainColumnForSELECT(Term ht, AliasIndex index, COL_TYPE castDataType) {
 
-		String mainColumn;
-		if (ht instanceof URIConstant) {
-			URIConstant uc = (URIConstant) ht;
-			mainColumn = sqladapter.getSQLLexicalFormString(uc.getURI());
-		}
-		else if (ht == TermConstants.NULL) {
-			/**
-			 * TODO: we should not have to treat NULL as a special case!
-			 * It is because this constant is currently
-			 * a STRING!
-			 */
-			mainColumn = "NULL";
-		}
-		else if (ht instanceof ValueConstant) {
-			mainColumn = getSQLLexicalForm((ValueConstant) ht);
-		}
-		else if (ht instanceof Variable) {
-			mainColumn = getSQLString(ht, index, false);
-		}
-		else if (ht instanceof Function) {
-			/*
-			 * if it's a function we need to get the nested value if its a
-			 * datatype function or we need to do the CONCAT if its URI(....).
-			 */
-			Function ov = (Function) ht;
-			Predicate functionSymbol = ov.getFunctionSymbol();
-
-			/*
-			 * Adding the column(s) with the actual value(s)
-			 */
-			if (ov.isDataTypeFunction()) {
-				mainColumn = getSQLString(ov, index, false);
-			}
-			else if (functionSymbol instanceof URITemplatePredicate
-					|| functionSymbol instanceof BNodePredicate) {
-				// New template based URI/BNODE building functions
-				mainColumn = getSQLStringForTemplateFunction(ov, index);
-			}
-			else if (ov.isOperation()) {
-				mainColumn = getSQLString(ov, index, false);
-			}
-			else
-				throw new IllegalArgumentException(
-						"Error generating SQL query. Found an invalid function during translation: " + ov);
-		}
-		else
-			throw new RuntimeException("Cannot generate SELECT for term: " + ht);
-
+		String mainColumn =  getSQLString(ht, index, false);
 		/*
 		 * If the we have a column we need to still CAST to VARCHAR
 		 */
@@ -1023,7 +976,7 @@ public class OneShotSQLGeneratorEngine {
 			return index.getTypeColumn((Variable) ht)
 					.map(QualifiedAttributeID::getSQLRendering)
 					// By default, we assume that the variable is an IRI.
-					.orElseGet(() -> String.format("%d", OBJECT.getQuestCode()));
+					.orElseGet(() -> String.valueOf(OBJECT.getQuestCode()));
 		}
 		else {
 			COL_TYPE colType = optionalTermType
@@ -1031,16 +984,14 @@ public class OneShotSQLGeneratorEngine {
 					// By default, we apply the "most" general COL_TYPE
 					.orElse(STRING);
 
-			return String.format("%d", colType.getQuestCode());
+			return String.valueOf(colType.getQuestCode());
 		}
 	}
 
 
 	private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 
-	private String getSQLStringForTemplateFunction(Function ov, AliasIndex index) {
-
-		List<Term> terms = ov.getTerms();
+	private String getSQLStringForTemplateFunction(List<Term> terms, AliasIndex index) {
 
 		// The first argument determines the form of the result
 		Term term0 = terms.get(0);
@@ -1082,14 +1033,8 @@ public class OneShotSQLGeneratorEngine {
 			// if there is only one element there is nothing to concatenate
 			return (vex.size() == 1) ? vex.get(0) : getStringConcatenation(vex.toArray(new String[0]));
 		}
-		else if (term0 instanceof URIConstant) {
-			// The function is of the form uri("http://some.uri/"),
-			// i.e., a concrete URI: return the string representing that URI
-			URIConstant uc = (URIConstant) term0;
-			return sqladapter.getSQLLexicalFormString(uc.getURI());
-		}
 		else {
-			// complex term or a variable: e.g., uri(CONCAT(x, "a"))
+			// a concrete uri, a variable or a complex expression like in uri(CONCAT(x, "a"))
 			// use the first term as the result string and ignore other terms
 			return getSQLString(term0, index, false);
 		}
@@ -1212,8 +1157,7 @@ public class OneShotSQLGeneratorEngine {
 			return columns.iterator().next().getSQLRendering();
 		}
 
-		/* If its not constant, or variable its a function */
-
+		// If it's not constant, or variable it's a function
 		Function function = (Function) term;
 		Predicate functionSymbol = function.getFunctionSymbol();
 		int size = function.getTerms().size();
@@ -1227,8 +1171,14 @@ public class OneShotSQLGeneratorEngine {
 				return getSQLString(function.getTerm(0), index, false);
 			}
 			else {
-				return getSQLStringForTemplateFunction(function, index);
+				return getSQLStringForTemplateFunction(function.getTerms(), index);
 			}
+		}
+		else if (functionSymbol instanceof URITemplatePredicate
+				|| functionSymbol instanceof BNodePredicate) {
+
+		 	// The atom must be of the form uri("...", x, y)
+			return getSQLStringForTemplateFunction(function.getTerms(), index);
 		}
 		else if (operations.containsKey(functionSymbol)) {
 			String expressionFormat = operations.get(functionSymbol);
@@ -1399,14 +1349,6 @@ public class OneShotSQLGeneratorEngine {
 			return "SUM(" + columnName + ")";
 		}
 
-		/*
-		 * The atom must be of the form uri("...", x, y)
-		 */
-		if (functionSymbol instanceof URITemplatePredicate
-				|| functionSymbol instanceof BNodePredicate) {
-			return getSQLStringForTemplateFunction(function, index);
-		}
-
 		throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
 	}
 
@@ -1423,6 +1365,12 @@ public class OneShotSQLGeneratorEngine {
 	 * @return
 	 */
 	private String getSQLLexicalForm(ValueConstant constant) {
+
+		if (constant == TermConstants.NULL) {
+			// TODO: we should not have to treat NULL as a special case!
+			// It is because this constant is currently of type COL_TYPE.STRING!
+			return "NULL";
+		}
 		switch (constant.getType()) {
 			case BNODE:
 			case OBJECT:
