@@ -1178,8 +1178,11 @@ public class BindingLiftTest {
         ExtensionalDataNode dataNode9 = buildExtensionalDataNode(TABLE9_ARITY_1_PREDICATE, D);
         queryBuilder.addChild(constructionNode3, dataNode9);
 
+        ConstructionNode lastConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(E))));
+        queryBuilder.addChild(joinNode, lastConstructionNode);
         ExtensionalDataNode dataNode10 = buildExtensionalDataNode(TABLE7_ARITY_1_PREDICATE, E);
-        queryBuilder.addChild(joinNode, dataNode10);
+        queryBuilder.addChild(lastConstructionNode, dataNode10);
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
@@ -1208,10 +1211,14 @@ public class BindingLiftTest {
         expectedQueryBuilder.addChild(newConstructionNode2, dataNode8);
 
 
-        expectedQueryBuilder.addChild(topUnionNode, constructionNode3);
-        expectedQueryBuilder.addChild(constructionNode3, joinNode);
+        ConstructionNode newConstructionNode3 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
+                        X, generateURI1(E),
+                        B, three)));
+        expectedQueryBuilder.addChild(topUnionNode, newConstructionNode3);
+        expectedQueryBuilder.addChild(newConstructionNode3, joinNode);
+        expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE9_ARITY_1_PREDICATE, E));
         expectedQueryBuilder.addChild(joinNode, dataNode10);
-        expectedQueryBuilder.addChild(joinNode, dataNode9);
 
         //build expected query
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
