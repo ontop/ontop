@@ -1048,6 +1048,9 @@ public class ExpressionEvaluator {
 	}
 
 	private Term evalUriFunctionsWithMultipleTerms(Function uriFunction1, Function uriFunction2, boolean isEqual) {
+		if (uriFunction1.equals(uriFunction2))
+			return termFactory.getBooleanConstant(isEqual);
+
 		Substitution theta = unifierUtilities.getMGU(uriFunction1, uriFunction2);
 		if (theta == null) {
 			return termFactory.getBooleanConstant(!isEqual);
