@@ -96,7 +96,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                                              ImmutableList<IQTree> otherChildren,
                                              Optional<ImmutableExpression> initialJoiningCondition,
                                              VariableGenerator variableGenerator,
-                                             LiftConverter<R> liftConverter) throws EmptyIQException {
+                                             LiftConverter<R> liftConverter) throws UnsatisfiableJoiningConditionException {
 
         if (selectedChildConstructionNode.getOptionalModifiers().isPresent())
             throw new UnsupportedOperationException("Construction with query modifiers are" +
@@ -167,7 +167,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
     private ExpressionAndSubstitution computeNewCondition(Optional<ImmutableExpression> initialJoiningCondition,
                                                           ImmutableSubstitution<ImmutableTerm> childSubstitution,
                                                           InjectiveVar2VarSubstitution freshRenaming)
-            throws EmptyIQException {
+            throws UnsatisfiableJoiningConditionException {
 
         Stream<ImmutableExpression> expressions = Stream.concat(
                 initialJoiningCondition
@@ -188,7 +188,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
             ExpressionEvaluator.EvaluationResult results = optionalEvaluationResults.get();
 
             if (results.isEffectiveFalse())
-                throw new EmptyIQException();
+                throw new UnsatisfiableJoiningConditionException();
 
             return results.getOptionalExpression()
                     .map(this::convertIntoExpressionAndSubstitution)
@@ -224,7 +224,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         }
     }
 
-    protected static class EmptyIQException extends Exception {
+    protected static class UnsatisfiableJoiningConditionException extends Exception {
     }
 
 
