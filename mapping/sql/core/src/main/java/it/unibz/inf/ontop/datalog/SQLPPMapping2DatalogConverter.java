@@ -78,13 +78,9 @@ public class SQLPPMapping2DatalogConverter {
                     body.addAll(re.getFilterAtoms());
                 }
                 catch (UnsupportedSelectQueryException e) {
-                    ParserViewDefinition view = metadata.createParserView(sourceQuery.toString());
-                    if (view.getAttributes().isEmpty()) {
-                        // need to create attributes
-                        new SelectQueryAttributeExtractor(metadata)
-                                .extract(sourceQuery.toString())
-                                .forEach(att -> view.addAttribute(new QualifiedAttributeID(null, att)));
-                    }
+                    ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata)
+                            .extract(sourceQuery.toString());
+                    ParserViewDefinition view = metadata.createParserView(sourceQuery.toString(), attributes);
 
                     // this is required to preserve the order of the variables
                     ImmutableList<Map.Entry<QualifiedAttributeID,Variable>> list = view.getAttributes().stream()
