@@ -83,7 +83,7 @@ public class IQConverterImpl implements IQConverter {
         QueryNode parentNode = parentTree.getRootNode();
 
         if (parentTree instanceof BinaryNonCommutativeIQTree) {
-            BinaryNonCommutativeIQTree binaryParentTree = (BinaryNonCommutativeIQTree) parentNode;
+            BinaryNonCommutativeIQTree binaryParentTree = (BinaryNonCommutativeIQTree) parentTree;
             queryBuilder.addChild(parentNode, binaryParentTree.getLeftChild().getRootNode(), LEFT);
             queryBuilder.addChild(parentNode, binaryParentTree.getRightChild().getRootNode(), RIGHT);
         }

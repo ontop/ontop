@@ -17,8 +17,8 @@ import java.util.Optional;
 public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<BinaryNonCommutativeOperatorNode>
         implements BinaryNonCommutativeIQTree {
 
-    private final IQTree leftIQTree;
-    private final IQTree rightIQTree;
+    private final IQTree leftChild;
+    private final IQTree rightChild;
     private final boolean isLifted;
 
     @AssistedInject
@@ -26,8 +26,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
                                            @Assisted boolean isLifted) {
         super(rootNode, ImmutableList.of(leftChild, rightChild));
-        this.leftIQTree = leftChild;
-        this.rightIQTree = rightChild;
+        this.leftChild = leftChild;
+        this.rightChild = rightChild;
         this.isLifted = isLifted;
     }
 
@@ -39,19 +39,19 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     public IQTree getLeftChild() {
-        return leftIQTree;
+        return leftChild;
     }
 
     @Override
     public IQTree getRightChild() {
-        return rightIQTree;
+        return rightChild;
     }
 
     @Override
     public IQTree liftBinding(VariableGenerator variableGenerator) {
         if (isLifted)
             return this;
-        throw new RuntimeException("TODO: implement it");
+        return getRootNode().liftBinding(leftChild, rightChild, variableGenerator);
     }
 
     @Override

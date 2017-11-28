@@ -1,11 +1,14 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
@@ -21,6 +24,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
@@ -35,6 +39,7 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 
 public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
+
     private enum Provenance {
         FROM_ABOVE,
         FROM_LEFT,
@@ -46,39 +51,48 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     private static final String LEFT_JOIN_NODE_STR = "LJ";
     private final SubstitutionFactory substitutionFactory;
     private final ImmutabilityTools immutabilityTools;
+    private final IntermediateQueryFactory iqFactory;
     private final ValueConstant valueNull;
 
     @AssistedInject
     private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                             ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools) {
-        super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator, immutabilityTools, substitutionFactory);
+                             ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
+                             IntermediateQueryFactory iqFactory) {
+        super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
+                immutabilityTools, substitutionFactory);
         this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
         this.immutabilityTools = immutabilityTools;
+        this.iqFactory = iqFactory;
     }
 
     @AssistedInject
     private LeftJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                             ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools) {
+                             ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
+                             IntermediateQueryFactory iqFactory) {
         super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator, immutabilityTools, substitutionFactory);
         this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
         this.immutabilityTools = immutabilityTools;
+        this.iqFactory = iqFactory;
     }
 
     @AssistedInject
     private LeftJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                             ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools) {
-        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator, immutabilityTools, substitutionFactory);
+                             ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
+                             IntermediateQueryFactory iqFactory) {
+        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
+                immutabilityTools, substitutionFactory);
         this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
         this.immutabilityTools = immutabilityTools;
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -89,7 +103,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public LeftJoinNode clone() {
         return new LeftJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(), substitutionFactory,
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), immutabilityTools);
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), immutabilityTools, iqFactory);
     }
 
     @Override
@@ -100,7 +114,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new LeftJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator(), substitutionFactory,
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), immutabilityTools);
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), immutabilityTools, iqFactory);
     }
 
     @Override
@@ -390,6 +404,106 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         }
         else {
             throw new RuntimeException("Inconsistent tree: no argument position after " + this);
+        }
+    }
+
+
+    /**
+     * Only the substitution of the left child is lifted.
+     *
+     * Lifting the right one is considered as way too tricky to be implemented.
+     * Basically these bindings should provide a non-null value only if a right-specific variable is not null.
+     * However, if is generally not guaranteed that a variable that is right-specific at some point in time
+     * will remain as such after structural/semantic optimization.
+     *
+     */
+    @Override
+    public IQTree liftBinding(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator) {
+
+        ImmutableSet<Variable> projectedVariables = Stream.of(initialLeftChild, initialRightChild)
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+
+        IQTree liftedLeftChild = initialLeftChild.liftBinding(variableGenerator);
+        if (liftedLeftChild.isDeclaredAsEmpty())
+            return iqFactory.createEmptyNode(projectedVariables);
+
+        IQTree liftedRightChild = initialRightChild.liftBinding(variableGenerator);
+        if (liftedRightChild.isDeclaredAsEmpty())
+            return liftedLeftChild;
+
+        ChildLiftingResults results = liftLeftChild(liftedLeftChild, liftedRightChild, variableGenerator);
+
+        Optional<ConstructionNode> topConstructionNode = Optional.of(results.ascendingSubstitution)
+                .filter(s -> !s.isEmpty())
+                .map(s -> iqFactory.createConstructionNode(projectedVariables, s));
+
+        IQTree subTree = Optional.of(results.rightChild)
+                .filter(rightChild -> !rightChild.isDeclaredAsEmpty())
+                // LJ
+                .map(rightChild -> (IQTree) iqFactory.createBinaryNonCommutativeIQTree(
+                        iqFactory.createLeftJoinNode(results.ljCondition),
+                        results.leftChild, results.rightChild, true))
+                // Left child
+                .orElse(results.leftChild);
+
+        return topConstructionNode
+                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, subTree, true))
+                .orElse(subTree);
+    }
+
+    private ChildLiftingResults liftLeftChild(IQTree liftedLeftChild, IQTree liftedRightChild,
+                                              VariableGenerator variableGenerator) {
+        if (liftedLeftChild.getRootNode() instanceof ConstructionNode) {
+            ConstructionNode leftConstructionNode = (ConstructionNode) liftedLeftChild.getRootNode();
+            IQTree leftGrandChild = ((UnaryIQTree) liftedLeftChild).getChild();
+
+            try {
+                return liftSelectedChildBinding(leftConstructionNode, leftGrandChild, ImmutableList.of(liftedRightChild),
+                        getOptionalFilterCondition(), variableGenerator, this::convertIntoChildLiftingResults);
+            }
+            /*
+             * Replaces the LJ by the left child
+             */
+            catch (UnsatisfiableJoiningConditionException e) {
+                EmptyNode newRightChild = iqFactory.createEmptyNode(liftedRightChild.getVariables());
+
+                return new ChildLiftingResults(liftedLeftChild, newRightChild, Optional.empty(),
+                        substitutionFactory.getSubstitution());
+            }
+        }
+        else
+            return new ChildLiftingResults(liftedLeftChild, liftedRightChild, getOptionalFilterCondition(),
+                    substitutionFactory.getSubstitution());
+    }
+
+    private ChildLiftingResults convertIntoChildLiftingResults(ImmutableList<IQTree> otherChildren, IQTree leftGrandChild,
+                                                               Optional<ImmutableExpression> ljCondition,
+                                                               ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
+                                                               ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution) {
+        if (otherChildren.size() != 1)
+            throw new MinorOntopInternalBugException("One other child was expected, not " + otherChildren);
+
+        IQTree newRightChild = otherChildren.get(0)
+                .applyDescendingSubstitution(descendingSubstitution, ljCondition);
+
+        return new ChildLiftingResults(leftGrandChild, newRightChild, ljCondition, ascendingSubstitution);
+    }
+
+
+    private class ChildLiftingResults {
+
+        private final IQTree leftChild;
+        private final IQTree rightChild;
+        private final Optional<ImmutableExpression> ljCondition;
+        private final ImmutableSubstitution<ImmutableTerm> ascendingSubstitution;
+
+        private ChildLiftingResults(IQTree leftChild, IQTree rightChild, Optional<ImmutableExpression> ljCondition,
+                                   ImmutableSubstitution<ImmutableTerm> ascendingSubstitution) {
+            this.leftChild = leftChild;
+            this.rightChild = rightChild;
+            this.ljCondition = ljCondition;
+            this.ascendingSubstitution = ascendingSubstitution;
         }
     }
 }

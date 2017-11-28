@@ -164,7 +164,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         return new ExpressionAndSubstitution(newExpression, newSubstitution);
     }
 
-    private ExpressionAndSubstitution computeNewCondition(Optional<ImmutableExpression> initialJoiningCondition,
+    protected ExpressionAndSubstitution computeNewCondition(Optional<ImmutableExpression> initialJoiningCondition,
                                                           ImmutableSubstitution<ImmutableTerm> childSubstitution,
                                                           InjectiveVar2VarSubstitution freshRenaming)
             throws UnsatisfiableJoiningConditionException {
@@ -212,7 +212,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
 
 
 
-    private static class ExpressionAndSubstitution {
+    protected static class ExpressionAndSubstitution {
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         public final Optional<ImmutableExpression> optionalExpression;
         public final ImmutableSubstitution<VariableOrGroundTerm> substitution;
