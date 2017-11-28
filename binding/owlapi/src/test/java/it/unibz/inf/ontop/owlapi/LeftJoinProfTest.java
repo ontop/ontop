@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -38,7 +36,7 @@ public class LeftJoinProfTest {
     private static final String PROPERTY_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.properties";
     private static final String NO_SELF_LJ_OPTIMIZATION_MSG = "The table professors should be used only once";
 
-    private Connection conn;;
+    private Connection conn;
 
 
     @Before
@@ -188,10 +186,9 @@ public class LeftJoinProfTest {
 
         System.out.println("SQL Query: \n" + sql);
 
-        assertTrue(containsMoreThanOneOccurrence(sql, "\"PROFESSORS\""));
+        assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
-    @Ignore("TODO: lift the conditions up and  then try to support it")
     @Test
     public void testSimpleNickname() throws Exception {
 
@@ -212,8 +209,32 @@ public class LeftJoinProfTest {
 
         System.out.println("SQL Query: \n" + sql);
 
-        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"professors\""));
-        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"PROFESSORS\""));
+        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql.toLowerCase(), "\"professors\""));
+    }
+
+    @Test
+    public void testNicknameAndCourse() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?v ?f\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor ;\n" +
+                "      :firstName ?f ;\n" +
+                "      :teaches ?c .\n" +
+                "   OPTIONAL {\n" +
+                "     ?p :nickname ?v\n" +
+                "  }\n" +
+                "}";
+
+        List<String> expectedValues = ImmutableList.of(
+                "Rog", "Rog", "Johnny"
+        );
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+
+        assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql.toLowerCase(), "\"professors\""));
     }
 
     @Test
@@ -239,7 +260,6 @@ public class LeftJoinProfTest {
         assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
-    @Ignore
     @Test
     public void testCourseJoinOnLeft1() throws Exception {
 
@@ -267,29 +287,6 @@ public class LeftJoinProfTest {
 
     @Test
     public void testCourseJoinOnLeft2() throws Exception {
-
-        String query = "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
-                "\n" +
-                "SELECT DISTINCT ?v\n" +
-                "WHERE {\n" +
-                "   ?p :firstName ?v ; \n" +
-                "      :teaches ?c .\n" +
-                "   OPTIONAL {\n" +
-                "     ?p :lastName ?v\n" +
-                "  }\n" +
-                "}";
-
-        List<String> expectedValues = ImmutableList.of(
-                "John", "Mary", "Roger"
-        );
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
-
-        System.out.println("SQL Query: \n" + sql);
-    }
-
-    @Ignore("TODO: should replace testCourseJoinOnLeft2 (checks that the left join is removed)")
-    @Test
-    public void testCourseJoinOnLeft2Improve() throws Exception {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
@@ -339,34 +336,6 @@ public class LeftJoinProfTest {
         assertTrue(sql.toUpperCase().contains("LEFT"));
     }
 
-    @Test
-    public void testUselessRightPart2Kept() throws Exception {
-
-        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
-                "\n" +
-                "SELECT DISTINCT ?v\n" +
-                "WHERE {\n" +
-                "   ?p a :Professor . \n" +
-                "   OPTIONAL { \n" +
-                "     ?p :lastName ?v .\n" +
-                "   }\n" +
-                "   OPTIONAL {\n" +
-                "     ?p :firstName ?v\n" +
-                "  }\n" +
-                "}\n" +
-                "ORDER BY ?v";
-
-        List<String> expectedValues = ImmutableList.of(
-                "Depp", "Dodero", "Gamper", "Helmer", "Jackson", "Pitt", "Poppins", "Smith");
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
-
-        System.out.println("SQL Query: \n" + sql);
-
-        // TODO: enable this assertion
-        //assertFalse(sql.toUpperCase().contains("LEFT"));
-    }
-
-    @Ignore("TODO: enable it and make it replace testUselessRightPart2Kept")
     @Test
     public void testUselessRightPart2() throws Exception {
 

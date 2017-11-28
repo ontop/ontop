@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.transform.impl;
 
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
@@ -46,8 +45,8 @@ public abstract class NodeBasedQueryTransformer
         IntermediateQueryBuilder queryBuilder = originalQuery.newBuilder();
 
         // Clone the original root node and apply the transformer if available.
-        ConstructionNode originalRootNode = originalQuery.getRootConstructionNode();
-        ConstructionNode newRootNode;
+        QueryNode originalRootNode = originalQuery.getRootNode();
+        QueryNode newRootNode;
         newRootNode = originalRootNode.acceptNodeTransformer(nodeTransformer);
         queryBuilder.init(transformedProjectionAtom, newRootNode);
         return copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalRootNode, newRootNode, nodeTransformer);

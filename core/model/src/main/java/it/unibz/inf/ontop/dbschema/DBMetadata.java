@@ -76,10 +76,11 @@ public interface DBMetadata extends Serializable {
 
     Optional<Predicate.COL_TYPE> getColType(Attribute attribute);
 
+    Optional<DatabaseRelationDefinition> getDatabaseRelationByPredicate(AtomPredicate predicate);
+
     /**
      * After calling this method, the DBMetadata cannot be modified
      */
     void freeze();
-
 
 }

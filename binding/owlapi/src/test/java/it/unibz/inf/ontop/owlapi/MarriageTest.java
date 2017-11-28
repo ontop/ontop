@@ -45,7 +45,7 @@ import static org.junit.Assert.assertTrue;
 
 public class MarriageTest {
 
-	private Connection conn;;
+	private Connection conn;
 
 	private static final String ONTOLOGY_FILE = "src/test/resources/marriage/marriage.ttl";
 	private static final String OBDA_FILE = "src/test/resources/marriage/marriage.obda";
@@ -128,6 +128,33 @@ public class MarriageTest {
         );
         checkReturnedValues(queryBind, expectedValues);
     }
+
+	/**
+	 * Complex Optional interaction
+	 */
+	@Test
+	public void testComplexOptionalInteraction() throws Exception {
+		String queryBind = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT ?x ?f2 \n" +
+				"WHERE {\n" +
+				"  ?x :firstName ?f1 .\n" +
+				"  OPTIONAL {\n" +
+				"     ?x :hasSpouse ?p2 .\n" +
+				"  }\n" +
+				"  OPTIONAL {\n" +
+				"     ?p2 :firstName ?f2 .\n" +
+				"  }\n" +
+				"}";
+
+		// All distinct values of x
+		ImmutableSet<String> expectedValues = ImmutableSet.of(
+				"http://example.com/person/1",
+				"http://example.com/person/2",
+				"http://example.com/person/3"
+		);
+		checkReturnedValues(queryBind, expectedValues);
+	}
 
     private void checkReturnedValues(String query, Set<String> expectedValues) throws Exception {
 

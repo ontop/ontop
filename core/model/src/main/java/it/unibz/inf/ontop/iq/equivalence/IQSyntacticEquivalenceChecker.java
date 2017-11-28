@@ -28,7 +28,7 @@ public class IQSyntacticEquivalenceChecker {
             return false;
 
         Queue<NodePair> pairsToVisit = new LinkedList<>();
-        pairsToVisit.add(new NodePair(query1.getRootConstructionNode(), query2.getRootConstructionNode()));
+        pairsToVisit.add(new NodePair(query1.getRootNode(), query2.getRootNode()));
 
         while(!pairsToVisit.isEmpty()) {
             NodePair pair = pairsToVisit.poll();

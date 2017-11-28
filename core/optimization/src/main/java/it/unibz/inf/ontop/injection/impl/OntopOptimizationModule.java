@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.executor.expression.PushUpBooleanExpressionExecutor
 import it.unibz.inf.ontop.iq.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.iq.executor.join.InnerJoinExecutor;
 import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinExecutor;
+import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinRightChildNormalizationAnalyzer;
 import it.unibz.inf.ontop.iq.executor.merging.QueryMergingExecutor;
 import it.unibz.inf.ontop.iq.executor.projection.ProjectionShrinkingExecutor;
 import it.unibz.inf.ontop.iq.executor.pullout.PullVariableOutOfDataNodeExecutor;
@@ -66,6 +67,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(LeftJoinOptimizer.class);
         bindFromSettings(BindingLiftOptimizer.class);
         bindFromSettings(IntermediateQuery2DatalogTranslator.class);
+        bindFromSettings(LeftJoinRightChildNormalizationAnalyzer.class);
 
         // Releases the configuration (enables some GC)
         this.configuration = null;

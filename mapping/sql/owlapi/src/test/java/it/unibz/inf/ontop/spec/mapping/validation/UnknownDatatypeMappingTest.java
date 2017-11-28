@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.validation;
 import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
@@ -14,6 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static junit.framework.TestCase.assertTrue;
@@ -85,7 +87,11 @@ public class UnknownDatatypeMappingTest {
                 .map(mapping::getDefinition)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .flatMap(query -> query.getRootConstructionNode().getSubstitution().getImmutableMap().values().stream())
+                .flatMap(query -> Optional.of(query.getRootNode())
+                        .filter(r -> r instanceof ConstructionNode)
+                        .map(r -> (ConstructionNode)r)
+                        .map(r -> r.getSubstitution().getImmutableMap().values().stream())
+                        .orElseGet(Stream::empty))
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
                 .map(Function::getFunctionSymbol)

@@ -35,9 +35,9 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
 
         @Override
         public void visit(ConstructionNode constructionNode) {
-            if (query.getChildren(constructionNode).size() > 1) {
+            if (query.getChildren(constructionNode).size() != 1) {
                 throw new InvalidIntermediateQueryException("CONSTRUCTION node " + constructionNode
-                        + " has more than one child.\n" + query);
+                        + " must have ONE and ONLY ONE child.\n" + query);
             }
 
             ImmutableSet<Variable> requiredChildVariables = constructionNode.getChildVariables();
@@ -158,12 +158,23 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
 
     @Override
     public void validate(IntermediateQuery query) throws InvalidIntermediateQueryException {
+        validateProjectedVariables(query);
+
+
         QueryNodeVisitor visitor = createVisitor(query);
 
-        /**
+        /*
          * May throw an InvalidIntermediateQueryException
          */
-        query.getNodesInTopDownOrder().stream()
+        query.getNodesInTopDownOrder()
                 .forEach(n -> n.acceptVisitor(visitor));
+    }
+
+    private void validateProjectedVariables(IntermediateQuery query) throws InvalidIntermediateQueryException {
+        ImmutableSet<Variable> projectedVariables = query.getVariables(query.getRootNode());
+        if (!projectedVariables.equals(query.getProjectionAtom().getVariables())) {
+            throw new InvalidIntermediateQueryException("The variables projected by the root node"
+                    +  projectedVariables + " do not match the projection atom " + query.getProjectionAtom());
+        }
     }
 }
