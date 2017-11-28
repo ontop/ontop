@@ -84,7 +84,9 @@ public class SQLPPMapping2DatalogConverter {
 
                     // this is required to preserve the order of the variables
                     ImmutableList<Map.Entry<QualifiedAttributeID,Variable>> list = view.getAttributes().stream()
-                            .map(att -> new AbstractMap.SimpleEntry<>(att.getQualifiedID(), TERM_FACTORY.getVariable(att.getID().getName())))
+                            .map(att -> new AbstractMap.SimpleEntry<>(
+                                    new QualifiedAttributeID(null, att.getID()), // strip off the ParserViewDefinitionName
+                                    TERM_FACTORY.getVariable(att.getID().getName())))
                             .collect(ImmutableCollectors.toList());
 
                     lookupTable = list.stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

@@ -195,10 +195,11 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 				"select student_id as sid, course_id as cid from Enrollment",
 				":S_{sid} :hasCourse :C_{cid} .");
 	}
-	
+
+	// ROMAN (28.11.17): StudentNumber cannot be used in the WHERE clause
 	public void testAnalysis_16() throws Exception {
 		runAnalysis(
-				"select id as StudentNumber, first_name as Name, last_name as FamilyName from Student as t1, Enrollment as t2 where StudentNumber=student_id and t2.course_id='BA002'",
+				"select id as StudentNumber, first_name as Name, last_name as FamilyName from Student as t1, Enrollment as t2 where id=student_id and t2.course_id='BA002'",
 				":S_{StudentNumber} a :Student ; :fname {Name} ; :lname {FamilyName} .");
 	}
 
@@ -213,28 +214,36 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 //				"select Student.student_id as StudentId from Student JOIN Enrollment USING (student_id) ",
 //				":S_{StudentId} a :Student .");
 //	}
-	
+
+	// ROMAN (28.11.17): StudentId cannot be used in the WHERE clause
+	// ROMAN (28.11.17): year was not visible outside the subsquery
 	public void testAnalysis_18() throws Exception {
 		runAnalysis(
-				"select id as StudentId from (select id from Student) as Sub JOIN Enrollment ON student_id = StudentId where year> 2010 ",
+				"select id as StudentId from (select id, year from Student) as Sub JOIN Enrollment ON student_id = id where year> 2010 ",
 				":S_{StudentId} a :Student .");
 	}
-	
+
+	// ROMAN (28.11.17): StudentId cannot be used in the WHERE clause
+	// ROMAN (28.11.17): first_name was not visible outside the subsquery
 	public void testAnalysis_19() throws Exception {
 		runAnalysis(
-				"select id as StudentId from (select id from Student) as Sub JOIN Enrollment ON student_id = StudentId where first_name !~ 'foo' ",
+				"select id as StudentId from (select id, first_name from Student) as Sub JOIN Enrollment ON student_id = id where first_name !~ 'foo' ",
 				":S_{StudentId} a :Student .");
 	}
-	
+
+	// ROMAN (28.11.17): StudentId cannot be used in the WHERE clause
+	// ROMAN (28.11.17): first_name was not visible outside the subsquery
 	public void testAnalysis_20() throws Exception {
 		runAnalysis(
-				"select id as StudentId from (select id from Student) as Sub JOIN Enrollment ON student_id = StudentId where regexp_like(first_name,'foo') ",
+				"select id as StudentId from (select id, first_name from Student) as Sub JOIN Enrollment ON student_id = id where regexp_like(first_name,'foo') ",
 				":S_{StudentId} a :Student .");
 	}
-	
+
+	// ROMAN (28.11.17): StudentId cannot be used in the WHERE clause
+	// ROMAN (28.11.17): first_name was not visible outside the subsquery
 	public void testAnalysis_21() throws Exception {
 		runAnalysis(
-				"select id as StudentId from (select id from Student) as Sub JOIN Enrollment ON student_id = StudentId where first_name regexp 'foo' ",
+				"select id as StudentId from (select id, first_name from Student) as Sub JOIN Enrollment ON student_id = id where first_name regexp 'foo' ",
 				":S_{StudentId} a :Student .");
 	}
 
@@ -248,9 +257,10 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
                 ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
     }
 
+	// ROMAN (28.11.17): first_name was not visible outside the subsquery
     public void testAnalysis_24() throws Exception {
         runAnalysis(
-                "select id from (select id from Student) as Sub JOIN Enrollment ON student_id = id where regexp_like(first_name,'foo') ",
+                "select id from (select id, first_name from Student) as Sub JOIN Enrollment ON student_id = id where regexp_like(first_name,'foo') ",
                 ":S_{id} a :Student .");
     }
 
