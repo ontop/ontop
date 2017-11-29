@@ -21,6 +21,9 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import fj.P;
 import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
@@ -31,15 +34,13 @@ import java.util.*;
 /**
  * Represents a complex sub-query created by the SQL parser (not a database view!)
  *
- * TODO: rename it because also used for sub-queries at runtime
- * 
  * @author Roman Kontchakov
 */
 
 public class ParserViewDefinition extends RelationDefinition {
 
-	private final List<Attribute> attributes = new ArrayList<>();
-	private final Map<QualifiedAttributeID, Attribute> attributeMap = new HashMap<>();
+	private final ImmutableList<Attribute> attributes;
+	private final ImmutableMap<QuotedID, Attribute> attributeMap;
 	
 	private final String statement;
 	
@@ -49,28 +50,24 @@ public class ParserViewDefinition extends RelationDefinition {
 	 * @param statement
 	 */
 	
-	public ParserViewDefinition(RelationID name, String statement) {
+	public ParserViewDefinition(RelationID name, ImmutableList<QuotedID> attrs, String statement) {
 		super(name);
 		this.statement = statement;
+
+		ImmutableList.Builder<Attribute> attributeBuilder = ImmutableList.builder();
+		ImmutableMap.Builder<QuotedID, Attribute> attributeMapBuilder = ImmutableMap.builder();
+		int c = 1;
+		for (QuotedID id : attrs) {
+			Attribute att = new Attribute(this,
+					new QualifiedAttributeID(name, id), c, 0, null, true);
+			c++;
+			attributeMapBuilder.put(id, att);
+			attributeBuilder.add(att);
+		}
+		this.attributes = attributeBuilder.build();
+		this.attributeMap = attributeMapBuilder.build();
 	}
 
-	/**
-	 * adds a new attribute
-	 * <p>
-	 * (note that attributes may have fully qualified names because 
-	 * attributes in the sub-query do not necessarily have aliases)
-	 * 
-	 * @param name
-	 */
-	public void addAttribute(QualifiedAttributeID name) {
-		Attribute att = new Attribute(this, name, attributes.size() + 1, 0, null, true);
-		Attribute prev = attributeMap.put(name, att);
-		if (prev != null) 
-			throw new IllegalArgumentException("Duplicate attribute names");
-		
-		attributes.add(att);
-	}
-	
 	/**
 	 * returns the SQL definition of the sub-query
 	 *  
@@ -84,24 +81,19 @@ public class ParserViewDefinition extends RelationDefinition {
 	@Override
 	public Attribute getAttribute(int index) {
 		// positions start at 1
-		Attribute attribute = attributes.get(index - 1);
-		return attribute;
+		return attributes.get(index - 1);
 	}
 
 	@Override
-	public List<Attribute> getAttributes() {
-		return Collections.unmodifiableList(attributes);
-	}
+	public List<Attribute> getAttributes() { return attributes; }
 	
 	
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
-		bf.append(getID());
-		bf.append(" [");
+		bf.append(getID()).append(" [");
 		Joiner.on(", ").appendTo(bf, attributes);
-		bf.append("]");
-		bf.append(" (").append(statement).append(")");
+		bf.append("]").append(" (").append(statement).append(")");
 		return bf.toString();
 	}
 

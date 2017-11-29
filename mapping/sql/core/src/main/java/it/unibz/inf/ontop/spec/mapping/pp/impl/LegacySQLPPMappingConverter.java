@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -53,7 +52,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     /**
      * Assumption: one CQIE per mapping axiom (no nested union)
      */
-    private ImmutableMap<CQIE, PPMappingAssertionProvenance> convertIntoDatalog(SQLPPMapping ppMapping, DBMetadata dbMetadata)
+    private ImmutableMap<CQIE, PPMappingAssertionProvenance> convertIntoDatalog(SQLPPMapping ppMapping, RDBMetadata dbMetadata)
             throws InvalidMappingSourceQueriesException {
 
         /*
