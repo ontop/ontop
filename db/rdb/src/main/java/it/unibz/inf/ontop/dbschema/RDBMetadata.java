@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -69,17 +70,20 @@ public class RDBMetadata extends BasicDBMetadata {
 	 * creates a view for SQLQueryParser
 	 * (NOTE: these views are simply names for complex non-parsable subqueries, not database views)
 	 *
+	 * TODO: make the second argument a callback (which is called only when needed)
+     * TODO: make it re-use parser views for the same SQL
+	 *
 	 * @param sql
 	 * @return
 	 */
 	
-	public ParserViewDefinition createParserView(String sql) {
+	public ParserViewDefinition createParserView(String sql, ImmutableList<QuotedID> attributes) {
 		if (!isStillMutable()) {
 			throw new IllegalStateException("Too late! Parser views must be created before freezing the DBMetadata");
 		}
 		RelationID id = getQuotedIDFactory().createRelationID(null, String.format("view_%s", parserViewCounter++));
 		
-		ParserViewDefinition view = new ParserViewDefinition(id, sql);
+		ParserViewDefinition view = new ParserViewDefinition(id, attributes, sql);
 		// UGLY!!
 		add(view, relations);
 		return view;

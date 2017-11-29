@@ -23,40 +23,30 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.Indicator;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
-import it.unibz.inf.ontop.exception.MappingIOException;
+import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
+import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.LineNumberReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -298,18 +288,21 @@ public class OntopNativeMappingParser implements SQLMappingParser {
             }
             
             String[] tokens = line.split("[\t| ]+", 2);
-            String label = tokens[0].trim();
-            String value = tokens[1].trim();
+
+            String label;
+            String value;
+            if(tokens.length > 1 ) {
+                label = tokens[0].trim();
+                value = tokens[1].trim();
+            }
+            else{
+                value = tokens[0];
+                label = "";
+            }
             if (!label.isEmpty()) {
             	currentLabel = tokens[0];
-            	wsCount = getSeparatorLength(line, currentLabel.length());
-            } else {
-            	if (currentLabel.equals(Label.source.name())) {
-            		int beginIndex = wsCount + 1; // add one tab to replace the "source" label
-            		value = line.substring(beginIndex, line.length());
-            	}       	
             }
-            
+
             if (currentLabel.equals(Label.mappingId.name())) {
                 mappingId = value;
                 if (mappingId.isEmpty()) { // empty or not
