@@ -20,20 +20,11 @@ package it.unibz.inf.ontop.test.sparql;
  * #L%
  */
 
-import org.eclipse.rdf4j.common.io.FileUtil;
-import org.eclipse.rdf4j.common.io.ZipUtil;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.util.jar.JarFile;
-
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
-
 import org.eclipse.rdf4j.OpenRDFUtil;
+import org.eclipse.rdf4j.common.io.FileUtil;
+import org.eclipse.rdf4j.common.io.ZipUtil;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -44,27 +35,29 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.repository.util.RDFInserter;
-import org.eclipse.rdf4j.rio.ParserConfig;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.RDFParseException;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.util.jar.JarFile;
+
 public class QuestManifestTestUtils {
 
 	static final Logger logger = LoggerFactory.getLogger(QuestManifestTestUtils.class);
 
-	public static TestSuite suite(SPARQLQueryParent.Factory factory) throws Exception
+	public static TestSuite suite(SPARQLQueryParent.Factory factory, String manifestAllFile) throws Exception
 	{
 		final String manifestFile;
 		final File tmpDir;
 				
-		URL url = QuestManifestTestUtils.class.getResource("/testcases-dawg-quest/data-r2/manifest-evaluation.ttl");
+		URL url = QuestManifestTestUtils.class.getResource(manifestAllFile);
 		
 		if ("jar".equals(url.getProtocol())) {
 			// Extract manifest files to a temporary directory

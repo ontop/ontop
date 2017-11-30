@@ -12,15 +12,15 @@
     mf:entries
     (
       :type-promotion-01
-    #  :type-promotion-02 all removed because of unsupported types
+      :type-promotion-02 #all removed because of unsupported types
       :type-promotion-03
-    #  :type-promotion-04
-    #  :type-promotion-05
+      :type-promotion-04
+      :type-promotion-05
       :type-promotion-06
-    #  :type-promotion-07  :type-promotion-08  :type-promotion-09  :type-promotion-10 :type-promotion-11
-    #  :type-promotion-12  :type-promotion-13 :type-promotion-14 :type-promotion-15 :type-promotion-16
-    #  :type-promotion-17 :type-promotion-18  :type-promotion-19 :type-promotion-20 :type-promotion-21
-    #  :type-promotion-22
+      :type-promotion-07  :type-promotion-08  :type-promotion-09  :type-promotion-10 :type-promotion-11
+      :type-promotion-12  :type-promotion-13 :type-promotion-14 :type-promotion-15 :type-promotion-16
+      :type-promotion-17 :type-promotion-18  :type-promotion-19 :type-promotion-20 :type-promotion-21
+      :type-promotion-22
       :type-promotion-23
       :type-promotion-24
       :type-promotion-25
