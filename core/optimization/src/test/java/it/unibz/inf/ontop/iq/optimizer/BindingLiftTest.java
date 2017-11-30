@@ -1549,7 +1549,8 @@ public class BindingLiftTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-        BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
+        System.out.println("\nUnexpected optimized query: \n" +  optimizedQuery);
     }
 
     @Test

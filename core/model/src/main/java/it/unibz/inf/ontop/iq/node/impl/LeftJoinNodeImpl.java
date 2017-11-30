@@ -36,6 +36,7 @@ import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.REPLACE
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.REPLACE_BY_UNIQUE_NON_EMPTY_CHILD;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 
 public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
@@ -450,6 +451,110 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return topConstructionNode
                 .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, subTree, true))
                 .orElse(subTree);
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint, IQTree leftChild,
+                                              IQTree rightChild) {
+        IQTree updatedLeftChild = leftChild.applyDescendingSubstitution(descendingSubstitution, constraint);
+
+        Optional<ImmutableExpression> initialExpression = getOptionalFilterCondition();
+        if (initialExpression.isPresent()) {
+            try {
+                ExpressionAndSubstitution expressionAndCondition = applyDescendingSubstitutionToExpression(
+                        initialExpression.get(), descendingSubstitution, leftChild.getVariables(), rightChild.getVariables());
+
+                Optional<ImmutableExpression> newConstraint = constraint
+                        .map(c1 -> expressionAndCondition.optionalExpression
+                                .flatMap(immutabilityTools::foldBooleanExpressions)
+                                .orElse(c1));
+
+                ImmutableSubstitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
+                        (ImmutableSubstitution<? extends VariableOrGroundTerm>)(ImmutableSubstitution<?>)
+                                expressionAndCondition.substitution.composeWith(descendingSubstitution);
+
+                IQTree updatedRightChild = rightChild.applyDescendingSubstitution(rightDescendingSubstitution, newConstraint);
+
+                return updatedRightChild.isDeclaredAsEmpty()
+                        ? updatedLeftChild
+                        : iqFactory.createBinaryNonCommutativeIQTree(
+                                iqFactory.createLeftJoinNode(expressionAndCondition.optionalExpression),
+                                updatedLeftChild, updatedRightChild);
+            } catch (UnsatisfiableJoiningConditionException e) {
+                return updatedLeftChild;
+            }
+        }
+        else {
+            IQTree updatedRightChild = rightChild.applyDescendingSubstitution(descendingSubstitution, constraint);
+            if (updatedRightChild.isDeclaredAsEmpty())
+                return updatedLeftChild;
+            // TODO: lift it again!
+            return iqFactory.createBinaryNonCommutativeIQTree(this, leftChild, rightChild);
+        }
+    }
+
+    private ExpressionAndSubstitution applyDescendingSubstitutionToExpression(
+            ImmutableExpression initialExpression,
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            ImmutableSet<Variable> leftChildVariables, ImmutableSet<Variable> rightChildVariables)
+            throws UnsatisfiableJoiningConditionException {
+
+        ExpressionEvaluator.EvaluationResult results =
+                createExpressionEvaluator().evaluateExpression(
+                        descendingSubstitution.applyToBooleanExpression(initialExpression));
+
+        if (results.isEffectiveFalse())
+            throw new UnsatisfiableJoiningConditionException();
+
+        return results.getOptionalExpression()
+                .map(e -> convertIntoExpressionAndSubstitution(e, leftChildVariables, rightChildVariables))
+                .orElseGet(() ->
+                        new ExpressionAndSubstitution(Optional.empty(), descendingSubstitution));
+    }
+
+    /**
+     * TODO: explain
+     *
+     * TODO: refactor !!!!!!!!!!
+     */
+    private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
+                                                                           ImmutableSet<Variable> leftVariables,
+                                                                           ImmutableSet<Variable> rightVariables) {
+
+        ImmutableSet<Variable> rightSpecificVariables = rightVariables.stream()
+                .filter(v -> !leftVariables.contains(v))
+                .collect(ImmutableCollectors.toSet());
+
+
+        ImmutableSet<ImmutableExpression> expressions = expression.flattenAND();
+        ImmutableSet<ImmutableExpression> downSubstitutionExpressions = expressions.stream()
+                .filter(e -> e.getFunctionSymbol().equals(EQ))
+                .filter(e -> {
+                    ImmutableList<? extends ImmutableTerm> arguments = e.getArguments();
+                    return arguments.stream().allMatch(t -> t instanceof VariableOrGroundTerm)
+                            && arguments.stream().anyMatch(t -> t instanceof Variable);
+                })
+                .collect(ImmutableCollectors.toSet());
+
+        ImmutableSubstitution<VariableOrGroundTerm> downSubstitution = substitutionFactory.getSubstitution(
+                downSubstitutionExpressions.stream()
+                        .map(ImmutableFunctionalTerm::getArguments)
+                        .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
+                        // Rename right-specific variables if possible
+                        .map(args -> rightSpecificVariables.contains(args.get(1)) ? args : args.reverse())
+                        .collect(ImmutableCollectors.toMap(
+                                args -> (Variable) args.get(0),
+                                args -> (VariableOrGroundTerm) args.get(1))));
+
+        Optional<ImmutableExpression> newExpression = getImmutabilityTools().foldBooleanExpressions(
+                expressions.stream()
+                        .filter(e -> (!downSubstitutionExpressions.contains(e))
+                                || e.getArguments().stream().anyMatch(rightSpecificVariables::contains)))
+                // TODO: do not apply this substitution!!!
+                .map(downSubstitution::applyToBooleanExpression);
+
+        return new ExpressionAndSubstitution(newExpression, downSubstitution);
     }
 
     private ChildLiftingResults liftLeftChild(IQTree liftedLeftChild, IQTree liftedRightChild,

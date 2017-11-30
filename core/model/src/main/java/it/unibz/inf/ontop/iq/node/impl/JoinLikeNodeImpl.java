@@ -165,19 +165,19 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
     }
 
     protected ExpressionAndSubstitution computeNewCondition(Optional<ImmutableExpression> initialJoiningCondition,
-                                                          ImmutableSubstitution<ImmutableTerm> childSubstitution,
+                                                          ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                                           InjectiveVar2VarSubstitution freshRenaming)
             throws UnsatisfiableJoiningConditionException {
 
         Stream<ImmutableExpression> expressions = Stream.concat(
                 initialJoiningCondition
-                        .map(childSubstitution::applyToBooleanExpression)
+                        .map(substitution::applyToBooleanExpression)
                         .map(ImmutableExpression::flattenAND)
                         .orElseGet(ImmutableSet::of)
                         .stream(),
                 freshRenaming.getImmutableMap().entrySet().stream()
                         .map(r -> termFactory.getImmutableExpression(EQ,
-                                childSubstitution.applyToVariable(r.getKey()),
+                                substitution.applyToVariable(r.getKey()),
                                 r.getValue())));
 
         Optional<ExpressionEvaluator.EvaluationResult> optionalEvaluationResults =
@@ -215,10 +215,10 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
     protected static class ExpressionAndSubstitution {
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         public final Optional<ImmutableExpression> optionalExpression;
-        public final ImmutableSubstitution<VariableOrGroundTerm> substitution;
+        public final ImmutableSubstitution<? extends VariableOrGroundTerm> substitution;
 
-        private ExpressionAndSubstitution(Optional<ImmutableExpression> optionalExpression,
-                                          ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+        protected ExpressionAndSubstitution(Optional<ImmutableExpression> optionalExpression,
+                                          ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
             this.optionalExpression = optionalExpression;
             this.substitution = substitution;
         }

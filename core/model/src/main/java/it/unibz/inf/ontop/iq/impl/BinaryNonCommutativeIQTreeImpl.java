@@ -57,7 +57,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint) {
-        throw new RuntimeException("TODO: implement it");
+        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, leftChild, rightChild);
     }
 
     @Override
