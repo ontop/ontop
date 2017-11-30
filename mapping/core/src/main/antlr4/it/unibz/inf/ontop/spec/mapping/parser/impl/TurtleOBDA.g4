@@ -68,7 +68,7 @@ prefixID
   ;
 
 prefix
-  : (UNDERSCORE? NAME_SBS+)? COLON
+  : (UNDERSCORE? NAME_SBS)? COLON
   ;
 
 triples
@@ -117,7 +117,7 @@ ncNameExt
   ;
 
 blank
-  : BLANK_PREFIX (NAME_CHAR)+ | BLANK
+  : BLANK_PREFIX NAME_SBS | BLANK
   ;
 
 variable
@@ -134,7 +134,7 @@ typedLiteral
   ;
 
 language
-  : LANGUAGE_STRING
+  : LANGUAGE_TAG
   ;
 
 terms
@@ -196,6 +196,33 @@ numericNegative
  - If there are several, the first of them is applied
  *------------------------------------------------------------------*/
 
+fragment ALPHA
+  : 'a'..'z'
+  | 'A'..'Z'
+  | '\u00C0'..'\u00D6'
+  | '\u00D8'..'\u00F6'
+  | '\u00F8'..'\u02FF'
+  | '\u0370'..'\u037D'
+  | '\u037F'..'\u1FFF'
+  | '\u200C'..'\u200D'
+  | '\u2070'..'\u218F'
+  | '\u2C00'..'\u2FEF'
+  | '\u3001'..'\uD7FF'
+  | '\uF900'..'\uFDCF'
+  | '\uFDF0'..'\uFFFD'
+  ;
+
+fragment DIGIT
+  : '0'..'9'
+  ;
+
+fragment ALPHANUM
+  : ALPHA
+  | DIGIT
+  ;
+
+fragment NAME_CHAR: (ALPHANUM|DIGIT|UNDERSCORE|MINUS|PERIOD|HASH|QUESTION|SLASH|PERCENT|EQUALS);
+
 BASE_KW: ('B'|'b')('A'|'a')('S'|'s')('E'|'e');
 
 PREFIX_KW: ('P'|'p')('R'|'r')('E'|'e')('F'|'f')('I'|'i')('X'|'x');
@@ -204,18 +231,18 @@ FALSE: ('F'|'f')('A'|'a')('L'|'l')('S'|'s')('E'|'e');
 
 TRUE: ('T'|'t')('R'|'r')('U'|'u')('E'|'e');
 
-//REFERENCE:     '^^';
+REFERENCE:     '^^';
 //LTSIGN:        '<"';
 //RTSIGN:        '">';
-//SEMI:          ';';
+SEMI:          ';';
 PERIOD:        '.';
-//COMMA:         ',';
+COMMA:         ',';
 LSQ_BRACKET:   '[';
 RSQ_BRACKET:   ']';
 LCR_BRACKET:   '{';
 RCR_BRACKET:   '}';
-//LPAREN:        '(';
-//RPAREN:        ')';
+LPAREN:        '(';
+RPAREN:        ')';
 QUESTION:      '?';
 //DOLLAR:        '$';
 QUOTE_DOUBLE:  '"';
@@ -225,7 +252,7 @@ UNDERSCORE:    '_';
 MINUS:         '-';
 //ASTERISK:      '*';
 //AMPERSAND:     '&';
-//AT:            '@';
+AT:            '@';
 //EXCLAMATION:   '!';
 HASH:          '#';
 PERCENT:       '%';
@@ -289,12 +316,12 @@ DECIMAL_NEGATIVE
   : MINUS DECIMAL
   ;
 
-LANGUAGE_STRING
+LANGUAGE_TAG
     : [a-zA-Z] + (MINUS [a-zA-Z0-9] +)*
     ;
 
 NAME_SBS
-    : NAME_CHAR+ | LANGUAGE_STRING
+    : (NAME_CHAR)+ | LANGUAGE_TAG
     ;
 //NAME_START_CHAR: (ALPHA|UNDERSCORE);
 
@@ -321,33 +348,6 @@ STRING_WITH_CURLY_BRACKET // No lexer ref allowed in complement
 URI_REF // No lexer ref allowed in complement
   : LESS  ( ~(' '|'\t'|'\n'|'\r'|'\b'|'\f' | '\'' | '"' | '\\') )+? GREATER
   ;
-
-fragment ALPHA
-  : 'a'..'z'
-  | 'A'..'Z'
-  | '\u00C0'..'\u00D6'
-  | '\u00D8'..'\u00F6'
-  | '\u00F8'..'\u02FF'
-  | '\u0370'..'\u037D'
-  | '\u037F'..'\u1FFF'
-  | '\u200C'..'\u200D'
-  | '\u2070'..'\u218F'
-  | '\u2C00'..'\u2FEF'
-  | '\u3001'..'\uD7FF'
-  | '\uF900'..'\uFDCF'
-  | '\uFDF0'..'\uFFFD'
-  ;
-
-fragment DIGIT
-  : '0'..'9'
-  ;
-
-fragment ALPHANUM
-  : ALPHA
-  | DIGIT
-  ;
-
-NAME_CHAR: (ALPHANUM|DIGIT|UNDERSCORE|MINUS|PERIOD|HASH|QUESTION|SLASH|PERCENT|EQUALS);
 
 WS: (' '|'\t'|'\n'|'\r\n'|'\b'|'\f')+ -> channel(HIDDEN);
 

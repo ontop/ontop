@@ -385,12 +385,19 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     }
 
     public String visitPrefixedName(PrefixedNameContext ctx) {
-        String[] tokens = ctx.PREFIXED_NAME().getText().split(":", 2);
-        String uri = directives.get(tokens[0]);  // the first token is the prefix
-        return uri + tokens[1];  // the second token is the local name
-//        String[] tokens = ctx.PREFIXED_NAME().getText().split(":", 2);
-//        String uri = directives.get(tokens[0]);  // the first token is the prefix
-//        return uri + tokens[1];  // the second token is the local name
+        String uri = directives.get(visitPrefix(ctx.prefix()));
+        return uri + ctx.ncNameExt().getText();
+    }
+
+    @Override
+    public String visitPrefix(PrefixContext ctx) {
+        if(ctx.NAME_SBS() == null){
+            return "";
+        }
+        String returnString = (ctx.UNDERSCORE() != null)?
+                "_":
+                "";
+        return returnString+ctx.NAME_SBS().getText();
     }
 
     @Override
@@ -430,11 +437,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Term visitLanguage(LanguageContext ctx) {
-        LanguageTagContext ltc = ctx.languageTag();
-        if (ltc != null) {
-            return TERM_FACTORY.getConstantLiteral(ltc.getText().toLowerCase(), COL_TYPE.STRING);
-        }
-        return visitVariable(ctx.variable());
+        return TERM_FACTORY.getConstantLiteral(ctx.LANGUAGE_TAG().getText().toLowerCase(), COL_TYPE.STRING);
     }
 
     @Override
