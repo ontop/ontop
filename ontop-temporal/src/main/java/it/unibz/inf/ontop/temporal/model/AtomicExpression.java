@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import java.util.List;
 
 public interface AtomicExpression extends DatalogMTLExpression {
-    public Predicate getPredicate();
+    Predicate getPredicate();
 
-    public List<? extends Term> getTerms();
+    List<? extends Term> getTerms();
 }

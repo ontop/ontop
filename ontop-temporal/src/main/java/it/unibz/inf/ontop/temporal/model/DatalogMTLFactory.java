@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 public interface DatalogMTLFactory {
 
@@ -30,11 +31,11 @@ public interface DatalogMTLFactory {
 
     UntilExpression createUntilExpression(TemporalRange range, DatalogMTLExpression left, DatalogMTLExpression right);
 
-    DatalogMTLRule createRule(DatalogMTLExpression head, DatalogMTLExpression body);
+    DatalogMTLRule createRule(AtomicExpression head, DatalogMTLExpression body);
 
-    DatalogMTLProgram createProgram(List<DatalogMTLRule> rules);
+    DatalogMTLProgram createProgram(Map<String, String> prefixes, List<DatalogMTLRule> rules);
 
-    DatalogMTLProgram createProgram(DatalogMTLRule... rules);
+    DatalogMTLProgram createProgram(Map<String, String> prefixes, DatalogMTLRule... rules);
 
     TemporalRange createTemporalRange(boolean beginInclusive, boolean endInclusive, Duration begin, Duration end);
 

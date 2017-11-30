@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
 
@@ -67,19 +68,19 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     }
 
     @Override
-    public DatalogMTLRule createRule(DatalogMTLExpression head, DatalogMTLExpression body) {
+    public DatalogMTLRule createRule(AtomicExpression head, DatalogMTLExpression body) {
         return new DatalogMTLRuleImpl(head, body);
     }
 
     @Override
-    public DatalogMTLProgram createProgram(List<DatalogMTLRule> rules) {
-        return new DatalogMTLProgramImpl(rules);
+    public DatalogMTLProgram createProgram(Map<String, String> prefixes, List<DatalogMTLRule> rules) {
+        return new DatalogMTLProgramImpl(prefixes, rules);
     }
 
 
     @Override
-    public DatalogMTLProgram createProgram(DatalogMTLRule... rules) {
-        return new DatalogMTLProgramImpl(Arrays.asList(rules));
+    public DatalogMTLProgram createProgram(Map<String, String> prefixes, DatalogMTLRule... rules) {
+        return new DatalogMTLProgramImpl(prefixes, Arrays.asList(rules));
     }
 
     @Override

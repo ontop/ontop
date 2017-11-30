@@ -3,14 +3,14 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.injection.OntopMappingSQLTemporalSettings;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllSettings;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import it.unibz.inf.ontop.spec.TOBDASpecInput;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.injection.OntopMappingSQLTemporalConfiguration;
+import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import org.apache.commons.rdf.api.Graph;
 
@@ -24,12 +24,14 @@ import java.util.Properties;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLConfigurationImpl implements OntopMappingSQLTemporalConfiguration {
+public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQLAllConfigurationImpl
+        implements OntopTemporalMappingSQLAllConfiguration {
 
-    private final OntopMappingSQLTemporalSettings settings;
-    private final OntopMappingSQLTemporalConfigurationImpl.OntopMappingSQLTemporalOptions options;
+    private final OntopMappingSQLAllSettings settings;
+    private final OntopTemporalMappingSQLAllOptions options;
 
-    OntopMappingSQLTemporalConfigurationImpl(OntopMappingSQLTemporalSettings settings, OntopMappingSQLTemporalConfigurationImpl.OntopMappingSQLTemporalOptions options) {
+    OntopTemporalMappingSQLAllConfigurationImpl(OntopMappingSQLAllSettings settings,
+                                                OntopTemporalMappingSQLAllOptions options) {
         super(settings, options.mappingSQLOptions);
         this.settings = settings;
         this.options = options;
@@ -46,7 +48,7 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
     }
 
     @Override
-    public OntopMappingSQLTemporalSettings getSettings() {
+    public OntopMappingSQLAllSettings getSettings() {
         return settings;
     }
 
@@ -75,7 +77,7 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
             throws OBDASpecificationException {
         return loadSpecification(
                 ontologySupplier,
-                () -> options.mappingSQLOptions.ppMapping.map(m -> (PreProcessedMapping) m),
+                () -> options.mappingSQLOptions.mappingSQLOptions.ppMapping.map(m -> (PreProcessedMapping) m),
                 temporalMappingFileSupplier,
                 mappingFileSupplier,
                 mappingReaderSupplier,
@@ -95,7 +97,7 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
         Optional<Ontology> optionalOntology = ontologySupplier.get();
-        Optional<DBMetadata> optionalMetadata = options.mappingSQLOptions.mappingOptions.dbMetadata;
+        Optional<DBMetadata> optionalMetadata = options.mappingSQLOptions.mappingSQLOptions.mappingOptions.dbMetadata;
 
         /*
          * Pre-processed mapping
@@ -180,18 +182,18 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
     }
 
 
-    static class OntopMappingSQLTemporalOptions {
+    static class OntopTemporalMappingSQLAllOptions {
         private final Optional<File> temporalMappingFile;
         private final Optional<File> mappingFile;
         private final Optional<Reader> mappingReader;
         private final Optional<Graph> mappingGraph;
         private final Optional<File> constraintFile;
-        final OntopMappingSQLOptions mappingSQLOptions;
+        final OntopMappingSQLAllOptions mappingSQLOptions;
 
-        OntopMappingSQLTemporalOptions(Optional<File> temporalMappingFile,
-                                       Optional<File> mappingFile, Optional<Reader> mappingReader,
-                                       Optional<Graph> mappingGraph, Optional<File> constraintFile,
-                                       OntopMappingSQLOptions mappingSQLOptions) {
+        OntopTemporalMappingSQLAllOptions(Optional<File> temporalMappingFile,
+                                          Optional<File> mappingFile, Optional<Reader> mappingReader,
+                                          Optional<Graph> mappingGraph, Optional<File> constraintFile,
+                                          OntopMappingSQLAllOptions mappingSQLOptions) {
             this.temporalMappingFile = temporalMappingFile;
             this.mappingFile = mappingFile;
             this.mappingReader = mappingReader;
@@ -201,29 +203,29 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
         }
     }
 
-    static class StandardMappingSQLTemporalBuilderFragment<B extends OntopMappingSQLTemporalConfiguration.Builder<B>>
-            implements OntopMappingSQLTemporalBuilderFragment<B>  {
+    static class StandardTemporalMappingSQLBuilderFragment<B extends OntopTemporalMappingSQLAllConfiguration.Builder<B>>
+            implements OntopTemporalMappingSQLAllBuilderFragment<B> {
 
         private final B builder;
         private final Runnable declareMappingDefinedCB;
         private final Runnable declareImplicitConstraintSetDefinedCB;
 
-        private Optional<File> mappingFile = Optional.empty();
-        private Optional<Reader> mappingReader = Optional.empty();
-        private Optional<Graph> mappingGraph = Optional.empty();
-        private Optional<File> constraintFile = Optional.empty();
+        Optional<File> mappingFile = Optional.empty();
+        Optional<Reader> mappingReader = Optional.empty();
+        Optional<Graph> mappingGraph = Optional.empty();
+        Optional<File> constraintFile = Optional.empty();
 
-        private Optional<File> temporalMappingFile = Optional.empty();
-        private Optional<Reader> temporalMappingReader = Optional.empty();
+        Optional<File> temporalMappingFile = Optional.empty();
+        Optional<Reader> temporalMappingReader = Optional.empty();
 
-        private boolean useTemporal = false;
-        private boolean useR2rml = false;
+        boolean useTemporal = false;
+        boolean useR2rml = false;
 
         /**
          * Default constructor
          */
-        protected StandardMappingSQLTemporalBuilderFragment(B builder, Runnable declareMappingDefinedCB,
-                                                       Runnable declareImplicitConstraintSetDefinedCB) {
+        protected StandardTemporalMappingSQLBuilderFragment(B builder, Runnable declareMappingDefinedCB,
+                                                            Runnable declareImplicitConstraintSetDefinedCB) {
             this.builder = builder;
             this.declareMappingDefinedCB = declareMappingDefinedCB;
             this.declareImplicitConstraintSetDefinedCB = declareImplicitConstraintSetDefinedCB;
@@ -402,21 +404,22 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
             }
         }
 
-        final OntopMappingSQLTemporalOptions generateMappingSQLTemporalOptions(OntopMappingSQLOptions mappingOptions) {
-            return new OntopMappingSQLTemporalOptions(temporalMappingFile, mappingFile, mappingReader, mappingGraph, constraintFile, mappingOptions);
+        final OntopTemporalMappingSQLAllOptions generateMappingSQLTemporalOptions(OntopMappingSQLOptions mappingSQLOptions) {
+            return new OntopTemporalMappingSQLAllOptions(temporalMappingFile, mappingFile, mappingReader, mappingGraph, constraintFile,
+                    new OntopMappingSQLAllOptions(mappingFile, mappingReader, mappingGraph, constraintFile, mappingSQLOptions));
         }
     }
 
-    protected abstract static class OntopMappingSQLTemporalBuilderMixin<B extends OntopMappingSQLTemporalConfiguration.Builder<B>>
+    protected abstract static class OntopMappingSQLTemporalBuilderMixin<B extends OntopTemporalMappingSQLAllConfiguration.Builder<B>>
             extends OntopMappingSQLBuilderMixin<B>
-            implements OntopMappingSQLTemporalConfiguration.Builder<B> {
+            implements OntopTemporalMappingSQLAllConfiguration.Builder<B> {
 
-        private final OntopMappingSQLTemporalConfigurationImpl.StandardMappingSQLTemporalBuilderFragment<B> localFragmentBuilder;
+        private final StandardTemporalMappingSQLBuilderFragment<B> localFragmentBuilder;
         private boolean isImplicitConstraintSetDefined = false;
 
         OntopMappingSQLTemporalBuilderMixin() {
             B builder = (B) this;
-            this.localFragmentBuilder = new OntopMappingSQLTemporalConfigurationImpl.StandardMappingSQLTemporalBuilderFragment<>(builder,
+            this.localFragmentBuilder = new StandardTemporalMappingSQLBuilderFragment<>(builder,
                     this::declareMappingDefined, this::declareImplicitConstraintSetDefined);
         }
 
@@ -480,7 +483,7 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
             return localFragmentBuilder.basicImplicitConstraintFile(constraintFilename);
         }
 
-        final OntopMappingSQLTemporalConfigurationImpl.OntopMappingSQLTemporalOptions generateMappingSQLTemporalOptions() {
+        final OntopTemporalMappingSQLAllOptions generateTemporalMappingSQLAllOptions() {
             return localFragmentBuilder.generateMappingSQLTemporalOptions(generateMappingSQLOptions());
         }
 
@@ -505,15 +508,15 @@ public class OntopMappingSQLTemporalConfigurationImpl extends OntopMappingSQLCon
 
     }
 
-    public static class BuilderImpl<B extends OntopMappingSQLTemporalConfiguration.Builder<B>>
-            extends OntopMappingSQLTemporalConfigurationImpl.OntopMappingSQLTemporalBuilderMixin<B> {
+    public static class BuilderImpl<B extends OntopTemporalMappingSQLAllConfiguration.Builder<B>>
+            extends OntopTemporalMappingSQLAllConfigurationImpl.OntopMappingSQLTemporalBuilderMixin<B> {
 
         @Override
-        public OntopMappingSQLTemporalConfiguration build() {
-            OntopMappingSQLTemporalSettings settings = new OntopMappingSQLTemporalSettingsImpl(generateProperties(), isR2rml(), isTemporal());
-            OntopMappingSQLTemporalConfigurationImpl.OntopMappingSQLTemporalOptions options = generateMappingSQLTemporalOptions();
+        public OntopTemporalMappingSQLAllConfiguration build() {
+            OntopMappingSQLAllSettings settings = new OntopTemporalMappingSQLAllSettingsImpl(generateProperties(), isR2rml(), isTemporal());
+            OntopTemporalMappingSQLAllOptions options = generateTemporalMappingSQLAllOptions();
 
-            return new OntopMappingSQLTemporalConfigurationImpl(settings, options);
+            return new OntopTemporalMappingSQLAllConfigurationImpl(settings, options);
         }
     }
 }

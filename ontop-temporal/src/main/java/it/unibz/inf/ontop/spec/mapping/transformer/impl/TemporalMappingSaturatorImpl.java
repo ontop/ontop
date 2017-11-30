@@ -8,13 +8,17 @@ import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.impl.MappingImpl;
+import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.temporal.datalog.impl.DatalogMTLConversionTools;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
+import it.unibz.inf.ontop.temporal.mapping.OntopNativeTemporalMappingParser;
 import it.unibz.inf.ontop.temporal.model.*;
 
 import java.util.List;
@@ -39,6 +43,9 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
 
         TreeTraverser treeTraverser = getTreeTraverser();
 
+        List<TargetQueryParser> parsers = OntopNativeTemporalMappingParser.createParsers(datalogMTLProgram.getPrefixes());
+
+
 
 
         for (DatalogMTLRule rule : datalogMTLProgram.getRules()) {
@@ -47,7 +54,9 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
            Stack<IntermediateQuery> mappingStack = new Stack<IntermediateQuery>();
 
             //TODO: merge dbMetadata and temporalDBMetadata
-            TemporalIntermediateQueryBuilder TIQBuilder = (TemporalIntermediateQueryBuilder) TIQFactory.createIQBuilder(temporalDBMetadata, temporalMapping.getExecutorRegistry());
+            //TemporalIntermediateQueryBuilder TIQBuilder = (TemporalIntermediateQueryBuilder) TIQFactory.createIQBuilder(temporalDBMetadata, temporalMapping.getExecutorRegistry());
+            
+            TargetAtom ta = DatalogMTLConversionTools.convertFromDatalogDataAtom(rule.getHead());
             //TIQBuilder.init(((TemporalAtomicExpression)rule.getHead()).getPredicate(), TIQFactory.createConstructionNode());
            it.forEach(te-> teStack.push(te));
 

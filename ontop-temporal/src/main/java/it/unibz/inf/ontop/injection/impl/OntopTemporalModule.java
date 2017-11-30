@@ -5,6 +5,7 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
@@ -18,23 +19,27 @@ import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingTransformer;
 import it.unibz.inf.ontop.temporal.datalog.TemporalDatalog2QueryMappingConverter;
 import it.unibz.inf.ontop.temporal.datalog.TemporalDatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.temporal.iq.node.*;
-import it.unibz.inf.ontop.temporal.model.TemporalRange;
 
 /**
  * Created by elem on 08/08/2017.
  */
 public class OntopTemporalModule extends OntopAbstractModule{
 
-    private final OntopMappingSQLTemporalSettings settings;
+    private final OntopMappingSQLAllSettings settings;
 
-    protected OntopTemporalModule(OntopMappingSQLTemporalConfiguration configuration) {
+    protected OntopTemporalModule(OntopTemporalSQLOWLAPIConfiguration configuration) {
+        super(configuration.getSettings());
+        settings = configuration.getSettings();
+    }
+
+    protected OntopTemporalModule(OntopTemporalMappingSQLAllConfigurationImpl configuration) {
         super(configuration.getSettings());
         settings = configuration.getSettings();
     }
 
     @Override
     protected void configure() {
-        bind(OntopMappingSQLTemporalSettings.class).toInstance(settings);
+        bind(OntopMappingSQLAllSettings.class).toInstance(settings);
 
         bindFromPreferences(SQLPPMappingFactory.class);
         bindFromPreferences(SQLMappingParser.class);

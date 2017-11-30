@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.temporal.model;
 
 public interface DatalogMTLRule {
 
-    DatalogMTLExpression getHead();
+    AtomicExpression getHead();
 
     DatalogMTLExpression getBody();
 

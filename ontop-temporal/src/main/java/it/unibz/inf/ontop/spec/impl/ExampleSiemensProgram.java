@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.temporal.model.impl;
+package it.unibz.inf.ontop.spec.impl;
 
 import it.unibz.inf.ontop.model.OntopModelSingletons;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -6,8 +6,11 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.temporal.model.*;
+import it.unibz.inf.ontop.temporal.model.impl.DatalogMTLFactoryImpl;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExampleSiemensProgram {
 
@@ -49,30 +52,39 @@ public class ExampleSiemensProgram {
         TemporalAtomicExpression mfon = f.createTemporalAtomicExpression(conceptMFON, varTs);
         TemporalAtomicExpression pio = f.createTemporalAtomicExpression(conceptPIO, varTb);
 
-        TemporalAtomicExpression tb = f.createTemporalAtomicExpression(conceptTurbine, varTb);
-        TemporalAtomicExpression ts = f.createTemporalAtomicExpression(conceptTempSensor, varTs);
-        TemporalAtomicExpression rss = f.createTemporalAtomicExpression(conceptRotSpeedSensor, varRs);
-        TemporalAtomicExpression isMonitoredByTs = f.createTemporalAtomicExpression(objectPropertyIMB, varBurner, varTs);
-        TemporalAtomicExpression isMonitoredByRS = f.createTemporalAtomicExpression(objectPropertyIMB, varPt, varRs);
-        TemporalAtomicExpression isPartOfPt = f.createTemporalAtomicExpression(objectPropertyIPO, varPt, varTb);
-        TemporalAtomicExpression isPartOfB = f.createTemporalAtomicExpression(objectPropertyIPO, varBurner, varTb);
-        TemporalAtomicExpression CLTRS = f.createTemporalAtomicExpression(conceptCLTRS, varTb, varTs, varRs);
+        StaticAtomicExpression tb = f.createStaticAtomicExpression(conceptTurbine, varTb);
+        StaticAtomicExpression ts = f.createStaticAtomicExpression(conceptTempSensor, varTs);
+        StaticAtomicExpression rss = f.createStaticAtomicExpression(conceptRotSpeedSensor, varRs);
+        StaticAtomicExpression isMonitoredByTs = f.createStaticAtomicExpression(objectPropertyIMB, varBurner, varTs);
+        StaticAtomicExpression isMonitoredByRS = f.createStaticAtomicExpression(objectPropertyIMB, varPt, varRs);
+        StaticAtomicExpression isPartOfPt = f.createStaticAtomicExpression(objectPropertyIPO, varPt, varTb);
+        StaticAtomicExpression isPartOfB = f.createStaticAtomicExpression(objectPropertyIPO, varBurner, varTb);
+        StaticAtomicExpression CLTRS = f.createStaticAtomicExpression(conceptCLTRS, varTb, varTs, varRs);
 
-        TemporalExpression boxMinusLRS = f.createBoxMinusExpression(rangeLRS,lrs);
-        TemporalExpression diamondMinusLRS = f.createDiamondMinusExpression(rangeDiamondInner, boxMinusLRS);
-        TemporalExpression boxMinusHRS = f.createBoxMinusExpression(rangeHRS, hrs);
-        TemporalExpression innerExp = f.createTemporalJoinExpression(boxMinusHRS, diamondMinusLRS);
-        TemporalExpression diamondInnerExp = f.createDiamondMinusExpression(rangeDiamondOuter, innerExp);
-        TemporalExpression boxMinusMFON = f.createBoxMinusExpression(rangeMFON, mfon);
-        TemporalExpression temporalPIO = f.createTemporalJoinExpression(boxMinusMFON, diamondInnerExp);
-        TemporalExpression bodyCLTRS = f.createTemporalJoinExpression(tb, ts, rss, isMonitoredByRS, isMonitoredByTs, isPartOfPt, isPartOfB);
-        TemporalExpression bodyPIO = f.createTemporalJoinExpression(temporalPIO, CLTRS);
+        DatalogMTLExpression boxMinusLRS = f.createBoxMinusExpression(rangeLRS,lrs);
+        DatalogMTLExpression diamondMinusLRS = f.createDiamondMinusExpression(rangeDiamondInner, boxMinusLRS);
+        DatalogMTLExpression boxMinusHRS = f.createBoxMinusExpression(rangeHRS, hrs);
+        DatalogMTLExpression innerExp = f.createTemporalJoinExpression(boxMinusHRS, diamondMinusLRS);
+        DatalogMTLExpression diamondInnerExp = f.createDiamondMinusExpression(rangeDiamondOuter, innerExp);
+        DatalogMTLExpression boxMinusMFON = f.createBoxMinusExpression(rangeMFON, mfon);
+        DatalogMTLExpression temporalPIO = f.createTemporalJoinExpression(boxMinusMFON, diamondInnerExp);
+        StaticJoinExpression bodyCLTRS = f.createStaticJoinExpression(tb, ts, rss, isMonitoredByRS, isMonitoredByTs, isPartOfPt, isPartOfB);
+        DatalogMTLExpression bodyPIO = f.createTemporalJoinExpression(temporalPIO, CLTRS);
 
         DatalogMTLRule CLTRSrule = f.createRule(CLTRS, bodyCLTRS);
         DatalogMTLRule LRSrule = f.createRule(lrs, f.createTemporalJoinExpression(rs, comparisonLs));
         DatalogMTLRule HRSrule = f.createRule(hrs, f.createTemporalJoinExpression(rs, comparisonHs));
         DatalogMTLRule PIOrule = f.createRule(pio, bodyPIO);
 
-        return f.createProgram(LRSrule, HRSrule, CLTRSrule, PIOrule);
+        Map<String, String> prefixes = new HashMap<>();
+
+//        PREFIX ss: <http://siemens.com/ns#>
+//        PREFIX st: <http://siemens.com/temporal/ns#>
+//        PREFIX obda:   <https://w3id.org/obda/vocabulary#>
+        prefixes.put("ss:", "http://siemens.com/ns#");
+        prefixes.put("st", "http://siemens.com/temporal/ns#");
+        prefixes.put("obda:", "https://w3id.org/obda/vocabulary#");
+
+        return f.createProgram(prefixes, LRSrule, HRSrule, CLTRSrule, PIOrule);
     }
 }

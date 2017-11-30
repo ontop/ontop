@@ -201,7 +201,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
         return line.contains(COMMENT_SYMBOL) && line.trim().indexOf(COMMENT_SYMBOL) == 0;
     }
 
-    private static List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
+    public static List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
         parsers.add(new TurtleOBDASyntaxParser(prefixes));
@@ -485,7 +485,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
         return currentSourceMappings;
     }
 
-    private static ImmutableList<ImmutableFunctionalTerm> loadTargetQuery(String targetString,
+    public static ImmutableList<ImmutableFunctionalTerm> loadTargetQuery(String targetString,
                                                                           List<TargetQueryParser> parsers) throws it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException {
         Map<TargetQueryParser, TargetQueryParserException> exceptions = new HashMap<>();
         for (TargetQueryParser parser : parsers) {
