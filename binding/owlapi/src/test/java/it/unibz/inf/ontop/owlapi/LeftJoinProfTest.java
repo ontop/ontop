@@ -362,6 +362,56 @@ public class LeftJoinProfTest {
         assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
+    @Test
+    public void testOptionalTeachesAt() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?v\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor ; \n" +
+                "        :lastName ?v .\n" +
+                "   OPTIONAL { \n" +
+                "     ?p :teachesAt ?u .\n" +
+                "   }\n" +
+                "   FILTER (bound(?u))\n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of(
+                "Smith", "Depp", "Poppins");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+
+        assertTrue(sql.toUpperCase().contains("LEFT"));
+    }
+
+    @Test
+    public void testOptionalTeacherID() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?v\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor ; \n" +
+                "        :lastName ?v .\n" +
+                "   OPTIONAL { \n" +
+                "     ?p :teacherID ?id .\n" +
+                "   }\n" +
+                "   FILTER (bound(?id))\n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of(
+                "Smith", "Depp", "Poppins");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+
+        assertTrue(sql.toUpperCase().contains("LEFT"));
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {
