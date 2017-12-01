@@ -311,8 +311,8 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Void visitPrefixID(PrefixIDContext ctx) {
-        String uriref = visitUriref(ctx.uriref());
-        String ns = ctx.prefix().getText();
+        String uriref = visitIriref(ctx.iriref ());
+        String ns = ctx.PNAME_NS().getText();
         directives.put(ns.substring(0, ns.length() - 1), uriref); // remove the end colon
         return null;
     }
@@ -373,36 +373,30 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Term visitResource(ResourceContext ctx) {
-        if (ctx.uriref() != null) {
-            return construct(visitUriref(ctx.uriref()));
+        if (ctx.iriref() != null) {
+            return construct(this.visitIriref(ctx.iriref()));
         }
         return construct(this.visitPrefixedName(ctx.prefixedName()));
     }
 
-    @Override
-    public String visitUriref(UrirefContext ctx) {
-        return removeBrackets(ctx.URI_REF().getText());
+    public String visitIriref(IrirefContext ctx) {
+        return removeBrackets(ctx.IRIREF().getText());
     }
 
     public String visitPrefixedName(PrefixedNameContext ctx) {
-        String uri = directives.get(visitPrefix(ctx.prefix()));
-        return uri + ctx.ncNameExt().getText();
+        String[] tokens = ctx.PREFIXEDNAME().getText().split(":", 2);
+        String uri = directives.get(tokens[0]);  // the first token is the prefix
+        return uri + tokens[1];  // the second token is the local name
     }
 
     @Override
     public String visitPrefix(PrefixContext ctx) {
-        if(ctx.NAME_SBS() == null){
-            return "";
-        }
-        String returnString = (ctx.UNDERSCORE() != null)?
-                "_":
-                "";
-        return returnString+ctx.NAME_SBS().getText();
+        return ctx.PNAME_NS().getText().split(":")[0];
     }
 
     @Override
     public Function visitTypedLiteral_1(TypedLiteral_1Context ctx) {
-        return TERM_FACTORY.getTypedTerm(visitVariable(ctx.variable()), visitLanguage(ctx.language()));
+        return TERM_FACTORY.getTypedTerm(visitVariable(ctx.variable()), visitLanguageTag(ctx.languageTag()));
     }
 
     @Override
@@ -436,8 +430,8 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     }
 
     @Override
-    public Term visitLanguage(LanguageContext ctx) {
-        return TERM_FACTORY.getConstantLiteral(ctx.LANGUAGE_TAG().getText().toLowerCase(), COL_TYPE.STRING);
+    public Term visitLanguageTag(LanguageTagContext ctx) {
+        return TERM_FACTORY.getConstantLiteral(ctx.LANGTAG().getText().substring(1).toLowerCase(), COL_TYPE.STRING);
     }
 
     @Override
@@ -457,13 +451,13 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
         StringLiteralContext slc = ctx.stringLiteral();
         if (slc != null) {
             Term literal = visitStringLiteral(slc);
-            LanguageContext lc = ctx.language();
+            LanguageTagContext lc = ctx.languageTag();
             //if variable we cannot assign a datatype yet
             if (literal instanceof Variable) {
                 return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
             }
             if (lc != null) {
-                return TERM_FACTORY.getTypedTerm(literal, visitLanguage(lc));
+                return TERM_FACTORY.getTypedTerm(literal, visitLanguageTag(lc));
             }
             return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
         }
@@ -472,7 +466,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Term visitStringLiteral(StringLiteralContext ctx) {
-        String str = ctx.STRING_WITH_QUOTE_DOUBLE().getText();
+        String str = ctx.STRING_LITERAL_QUOTE().getText();
         if (str.contains("{")) {
             return getNestedConcat(str);
         }
@@ -502,11 +496,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Term visitBooleanLiteral(BooleanLiteralContext ctx) {
-        TerminalNode token = ctx.TRUE();
-        if (token != null) {
-            return typeTerm(token.getText(), COL_TYPE.BOOLEAN);
-        }
-        return typeTerm(ctx.FALSE().getText(), COL_TYPE.BOOLEAN);
+            return typeTerm(ctx.BOOLEAN_LITERAL().getText(), COL_TYPE.BOOLEAN);
     }
 
     @Override
