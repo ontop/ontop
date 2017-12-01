@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
-import it.unibz.inf.ontop.test.sparql.QuestManifestTestUtils;
+import it.unibz.inf.ontop.test.sparql.ManifestTestUtils;
 import it.unibz.inf.ontop.test.sparql.SPARQLQueryParent;
 import junit.framework.Test;
 import org.eclipse.rdf4j.query.Dataset;
@@ -37,7 +37,7 @@ import java.util.Set;
 
 //Test of SPARQL 1.1 compliance
 @Ignore("unsupported files still need to be added and checked")
-public class OntopMemorySPARQL11QueryTest extends SPARQLQueryParent {
+public class MemorySPARQL11QueryTest extends SPARQLQueryParent {
 
 	/* List of UNSUPPORTED QUERIES */
 
@@ -48,10 +48,12 @@ public class OntopMemorySPARQL11QueryTest extends SPARQLQueryParent {
 	private static final String constructManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/construct/manifest#";
 	private static final String csvTscResManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/csv-tsv-res/manifest#";
 	private static final String groupingManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/grouping/manifest#";
+	private static final String negationManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/negation/manifest#";
 	private static final String existsManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/exists/manifest#";
 	private static final String projectExpressionManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/project-expression/manifest#";
 	private static final String propertyPathManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/property-path/manifest#";
 	private static final String subqueryManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/subquery/manifest#";
+	private static final String serviceManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/service/manifest#";
 
 
 	private static Set<String> IGNORE = ImmutableSet.of(
@@ -94,56 +96,168 @@ public class OntopMemorySPARQL11QueryTest extends SPARQLQueryParent {
 			aggregatesManifest + "agg-err-01",
 			aggregatesManifest + "agg-err-02",
 			aggregatesManifest + "agg-sum-order-01",
+			aggregatesManifest + "agg-empty-group",
 
 			/* BIND
 			not supported yet */
 			bindManifest + "bind03",
 			bindManifest + "bind04",
 			bindManifest + "bind07",
+
 			/* BINDINGS
 			not supported yet */
-			bindingsManifest + "",
+			bindingsManifest + "values7",
+			bindingsManifest + "values6",
+			bindingsManifest + "values8",
+			bindingsManifest + "values5",
+
 			/* FUNCTIONS
 			not supported yet */
-			functionsManifest + "",
+			functionsManifest + "bnode01",
+			functionsManifest + "bnode02",
+			functionsManifest + "ceil01",
+			functionsManifest + "coalesce01",
+			functionsManifest + "concat02",
+			functionsManifest + "encode01",
+			functionsManifest + "floor01",
+			functionsManifest + "hours",
+			functionsManifest + "if01",
+			functionsManifest + "if02",
+			functionsManifest + "in01",
+			functionsManifest + "in02",
+			functionsManifest + "iri01",
+			functionsManifest + "lcase01",
+			functionsManifest + "md5-01",
+			functionsManifest + "md5-02",
+			functionsManifest + "minutes",
+			functionsManifest + "notin01",
+			functionsManifest + "notin02",
+			functionsManifest + "now01",
+			functionsManifest + "plus-1",
+			functionsManifest + "plus-2",
+			functionsManifest + "rand01",
+			functionsManifest + "replace01",
+			functionsManifest + "round01",
+			functionsManifest + "seconds",
+			functionsManifest + "sha1-01",
+			functionsManifest + "sha1-02",
+			functionsManifest + "sha512-01",
+			functionsManifest + "sha512-02",
+			functionsManifest + "strafter01a",
+			functionsManifest + "strafter02",
+			functionsManifest + "strbefore01a",
+			functionsManifest + "strbefore02",
+			functionsManifest + "strdt01",
+			functionsManifest + "strdt02",
+			functionsManifest + "strdt03",
+			functionsManifest + "strlang01",
+			functionsManifest + "strlang02",
+			functionsManifest + "strlang03",
+			functionsManifest + "struuid01",
+			functionsManifest + "substring01",
+			functionsManifest + "substring02",
+			functionsManifest + "timezone",
+			functionsManifest + "tz",
+			functionsManifest + "ucase01",
+			functionsManifest + "uuid01",
+
 			/* CONSTRUCT
 			not supported yet */
-			constructManifest + "",
+			constructManifest + "constructwhere01",
+			constructManifest + "constructwhere02",
+			constructManifest + "constructwhere03",
+			constructManifest + "constructwhere04",
+
 			/* CSV
 			not supported yet */
-			csvTscResManifest + "",
+			csvTscResManifest + "tsv03",
+
 			/* GROUPING
 			not supported yet */
-			groupingManifest + "",
+			groupingManifest + "group01",
+			groupingManifest + "group03",
+			groupingManifest + "group04",
+			groupingManifest + "group05",
+
+			/* NEGATION
+			not supported yet */
+            negationManifest + "subset-by-exclusion-nex-1",
+			negationManifest + "subset-by-exclusion-minus-1",
+			negationManifest + "temporal-proximity-by-exclusion-nex-1",
+			negationManifest + "subset-01",
+			negationManifest + "subset-02",
+			negationManifest + "set-equals-1",
+			negationManifest + "subset-03",
+			negationManifest + "exists-01",
+			negationManifest + "exists-02",
+			negationManifest + "full-minuend",
+			negationManifest + "partial-minuend",
+
 			/* EXISTS
 			not supported yet */
-			existsManifest + "",
+			existsManifest + "exists01",
+			existsManifest + "exists02",
+			existsManifest + "exists03",
+			existsManifest + "exists04",
+			existsManifest + "exists05",
+
 			/* PROJECT
 			not supported yet */
-			projectExpressionManifest + "",
+			projectExpressionManifest + "projexp07",
+			projectExpressionManifest + "projexp05",
+			projectExpressionManifest + "projexp02",
+
 			/* PROPERTY PATH
 			not supported yet */
-			propertyPathManifest + "",
+			propertyPathManifest + "pp02",
+			propertyPathManifest + "pp06",
+			propertyPathManifest + "pp12",
+			propertyPathManifest + "pp14",
+			propertyPathManifest + "pp16",
+			propertyPathManifest + "pp21",
+			propertyPathManifest + "pp23",
+			propertyPathManifest + "pp25",
+			propertyPathManifest + "pp28a",
+			propertyPathManifest + "pp34",
+			propertyPathManifest + "pp35",
+			propertyPathManifest + "pp36",
+			propertyPathManifest + "pp37",
+
+			/* SERVICE
+			not supported yet */
+			serviceManifest + "service1",
+			serviceManifest + "service2",
+			serviceManifest + "service3",
+			serviceManifest + "service4a",
+			serviceManifest + "service5",
+			serviceManifest + "service6",
+			serviceManifest + "service7",
+
+
 			/* SUBQUERY
 			not supported yet */
-			subqueryManifest + ""
-
-
-
-
+			subqueryManifest + "subquery02",
+			subqueryManifest + "subquery04",
+			subqueryManifest + "subquery07",
+			subqueryManifest + "subquery08",
+			subqueryManifest + "subquery10",
+			subqueryManifest + "subquery11",
+			subqueryManifest + "subquery12",
+			subqueryManifest + "subquery13",
+			subqueryManifest + "subquery14"
 
 
 	);
 
 	public static Test suite() throws Exception {
-		return QuestManifestTestUtils.suite(new Factory() {
+		return ManifestTestUtils.suite(new Factory() {
 
-			public OntopMemorySPARQL11QueryTest createSPARQLQueryTest(
+			public MemorySPARQL11QueryTest createSPARQLQueryTest(
 					String testURI, String name, String queryFileURL,
 					String resultFileURL, Dataset dataSet,
 					boolean laxCardinality, boolean checkOrder) {
 				if(!IGNORE.contains(testURI)) {
-				return new OntopMemorySPARQL11QueryTest(testURI, name,
+				return new MemorySPARQL11QueryTest(testURI, name,
 						queryFileURL, resultFileURL, dataSet, laxCardinality,
 						checkOrder);
 				}
@@ -152,9 +266,9 @@ public class OntopMemorySPARQL11QueryTest extends SPARQLQueryParent {
 		}, "/testcases-dawg-sparql-1.1/manifest-all.ttl");
 	}
 
-	protected OntopMemorySPARQL11QueryTest(String testURI, String name,
-			String queryFileURL, String resultFileURL, Dataset dataSet,
-			boolean laxCardinality, boolean checkOrder) {
+	protected MemorySPARQL11QueryTest(String testURI, String name,
+									  String queryFileURL, String resultFileURL, Dataset dataSet,
+									  boolean laxCardinality, boolean checkOrder) {
 		super(testURI, name, queryFileURL, resultFileURL, dataSet,
 				laxCardinality, checkOrder);
 	}

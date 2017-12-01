@@ -170,7 +170,7 @@ public class OntopMemorySPARQL10QueryTest extends SPARQLQueryParent {
 	);
 
 	public static Test suite() throws Exception {
-		return QuestManifestTestUtils.suite(new Factory() {
+		return ManifestTestUtils.suite(new Factory() {
 
 			public OntopMemorySPARQL10QueryTest createSPARQLQueryTest(
 					String testURI, String name, String queryFileURL,

@@ -48,16 +48,16 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.jar.JarFile;
 
-public class QuestManifestTestUtils {
+public class ManifestTestUtils {
 
-	static final Logger logger = LoggerFactory.getLogger(QuestManifestTestUtils.class);
+	static final Logger logger = LoggerFactory.getLogger(ManifestTestUtils.class);
 
 	public static TestSuite suite(SPARQLQueryParent.Factory factory, String manifestAllFile) throws Exception
 	{
 		final String manifestFile;
 		final File tmpDir;
 				
-		URL url = QuestManifestTestUtils.class.getResource(manifestAllFile);
+		URL url = ManifestTestUtils.class.getResource(manifestAllFile);
 		
 		if ("jar".equals(url.getProtocol())) {
 			// Extract manifest files to a temporary directory

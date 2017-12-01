@@ -670,7 +670,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 		manifestRep.initialize();
 		RepositoryConnection con = manifestRep.getConnection();
 
-		QuestManifestTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
+		ManifestTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
 
 		suite.setName(getManifestName(manifestRep, con, manifestFileURL));
 

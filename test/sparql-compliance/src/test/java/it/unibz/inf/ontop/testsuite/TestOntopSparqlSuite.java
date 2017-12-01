@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.testsuite;
  */
 
 import it.unibz.inf.ontop.test.sparql.OntopMemorySPARQL10QueryTest;
-import it.unibz.inf.ontop.test.sparql11.OntopMemorySPARQL11QueryTest;
+import it.unibz.inf.ontop.test.sparql11.MemorySPARQL11QueryTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -30,7 +30,7 @@ public class TestOntopSparqlSuite extends TestSuite {
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite("SPARQL Compliance Tests for Ontop");
 		suite.addTest(OntopMemorySPARQL10QueryTest.suite());
-		suite.addTest(OntopMemorySPARQL11QueryTest.suite());
+		suite.addTest(MemorySPARQL11QueryTest.suite());
 		return suite;
 	}
 }
