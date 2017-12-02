@@ -411,6 +411,10 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Term visitLanguageTag(LanguageTagContext ctx) {
+        VariableContext vc = ctx.variable();
+        if (vc != null) {
+            return visitVariable(vc);
+        }
         return TERM_FACTORY.getConstantLiteral(ctx.LANGTAG().getText().substring(1).toLowerCase(), COL_TYPE.STRING);
     }
 

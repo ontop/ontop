@@ -173,7 +173,7 @@ typedLiteral
   ;
 
 languageTag
-  : LANGTAG
+  : LANGTAG | '@' variable
   ;
 
 terms
