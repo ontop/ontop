@@ -15,7 +15,7 @@ public class StaticAtomicExpressionImpl implements StaticAtomicExpression {
 
     private final Predicate predicate;
 
-    private final List<? extends Term> terms;
+    private final List<Term> terms;
 
     StaticAtomicExpressionImpl(Predicate predicate, List<Term> terms) {
         this.predicate = predicate;

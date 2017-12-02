@@ -1,8 +1,11 @@
 package it.unibz.inf.ontop.injection;
 
 import com.google.inject.assistedinject.Assisted;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 import it.unibz.inf.ontop.temporal.iq.node.*;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
 
@@ -15,8 +18,9 @@ import java.util.Optional;
  * See https://github.com/google/guice/wiki/AssistedInject.
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public interface TemporalIntermediateQueryFactory extends IntermediateQueryFactory{
+public interface TemporalIntermediateQueryFactory extends IntermediateQueryFactory {
 
+    TemporalIntermediateQueryBuilder createTemporalIQBuilder(DBMetadata metadata, ExecutorRegistry executorRegistry);
     TemporalJoinNode createTemporalJoinNode();
     TemporalJoinNode createTemporalJoinNode(ImmutableExpression joiningCondition);
     TemporalJoinNode createTemporalJoinNode(Optional<ImmutableExpression> joiningCondition);

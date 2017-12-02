@@ -14,7 +14,9 @@ public class TemporalMappingParserTest extends TestCase {
         String username = "postgres";
         String password = "postgres";
 
-        OntopMappingSQLTemporalConfiguration configuration = OntopMappingSQLTemporalConfiguration.defaultBuilder()
+        //OntopTemporalMappingSQLAllConfiguration configuration = OntopTemporalMappingSQLAllConfiguration.defaultBuilder()
+        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
+                .ontologyFile("src/test/resources/siemens.owl")
                 .nativeOntopTemporalMappingFile("src/test/resources/siemens.tobda")
                 .nativeOntopMappingFile("src/test/resources/siemens.obda")
                 .jdbcUrl(url)

@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -41,13 +42,13 @@ public class TemporalDatalog2QueryMappingConverterImpl implements TemporalDatalo
 
     private final TemporalDatalogProgram2QueryConverter converter;
     private final SpecificationFactory specificationFactory;
-    private final IntermediateQueryFactory iqFactory;
+    private final TemporalIntermediateQueryFactory iqFactory;
     private final ProvenanceMappingFactory provMappingFactory;
 
     @Inject
     private TemporalDatalog2QueryMappingConverterImpl(TemporalDatalogProgram2QueryConverter converter,
                                               SpecificationFactory specificationFactory,
-                                              IntermediateQueryFactory iqFactory,
+                                                      TemporalIntermediateQueryFactory iqFactory,
                                               ProvenanceMappingFactory provMappingFactory){
         this.converter = converter;
         this.specificationFactory = specificationFactory;

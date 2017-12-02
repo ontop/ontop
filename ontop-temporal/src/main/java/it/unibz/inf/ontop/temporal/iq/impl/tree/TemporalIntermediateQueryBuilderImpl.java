@@ -31,6 +31,7 @@ public class TemporalIntermediateQueryBuilderImpl extends DefaultIntermediateQue
     private DistinctVariableOnlyDataAtom projectionAtom;
     private QueryTree tree;
     private boolean canEdit;
+    private TemporalIntermediateQueryFactory tiqFactory;
 
     @AssistedInject
     protected TemporalIntermediateQueryBuilderImpl(@Assisted DBMetadata dbMetadata,
@@ -39,5 +40,12 @@ public class TemporalIntermediateQueryBuilderImpl extends DefaultIntermediateQue
                                                    IntermediateQueryValidator validator,
                                                    OntopModelSettings settings) {
         super(dbMetadata, executorRegistry, iqFactory, validator, settings);
+        tiqFactory = iqFactory;
     }
+
+    @Override
+    public TemporalIntermediateQueryFactory getFactory(){
+        return tiqFactory;
+    }
+
 }

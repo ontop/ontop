@@ -6,7 +6,7 @@ public interface DatalogMTLRule {
 
     AtomicExpression getHead();
 
-    DatalogMTLExpression getBody();
+    <T extends DatalogMTLExpression> T getBody();
 
     String render();
 }

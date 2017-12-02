@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.temporal.model.*;
 import org.junit.Test;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class WeatherUseCaseTest {
@@ -26,12 +28,12 @@ public class WeatherUseCaseTest {
 
         final Variable v1 = odf.getVariable("SID");
 
-        TemporalExpression hurricane = f.createTemporalAtomicExpression(p1, v1);
-        TemporalExpression hfw = f.createTemporalAtomicExpression(p2, v1);
+        DatalogMTLExpression hurricane = f.createTemporalAtomicExpression(p1, v1);
+        DatalogMTLExpression hfw = f.createTemporalAtomicExpression(p2, v1);
 
-        TemporalExpression head = f.createBoxMinusExpression(range, hurricane);
+        TemporalAtomicExpression head = (TemporalAtomicExpression) f.createBoxMinusExpression(range, hurricane);
 
-        TemporalExpression body = f.createBoxMinusExpression(range, hfw);
+        DatalogMTLExpression body = f.createBoxMinusExpression(range, hfw);
 
         DatalogMTLRule rule1 = f.createRule(head, body);
 
@@ -42,13 +44,17 @@ public class WeatherUseCaseTest {
 
         head = f.createTemporalAtomicExpression(p4, v2);
 
-        TemporalExpression locatedInState = f.createTemporalAtomicExpression(p3,v1,v2);
+        DatalogMTLExpression locatedInState = f.createTemporalAtomicExpression(p3,v1,v2);
 
         body = f.createTemporalJoinExpression(locatedInState, f.createTemporalAtomicExpression(p1,v1));
 
         DatalogMTLRule rule2 = f.createRule(head, body);
 
-        final DatalogMTLProgram program = f.createProgram(rule1, rule2);
+        Map<String, String> prefixes = new HashMap<>();
+        prefixes.put("mt", "http://mesowest.com/temporal/ns#");
+        prefixes.put("obda:", "https://w3id.org/obda/vocabulary#");
+
+        final DatalogMTLProgram program = f.createProgram(prefixes, rule1, rule2);
 
         System.out.println(program.render());
 
@@ -72,11 +78,11 @@ public class WeatherUseCaseTest {
         final Variable v1 = odf.getVariable("SID");
         final Variable v2 = odf.getVariable("county");
 
-        TemporalExpression excessiveHeat = f.createTemporalAtomicExpression(p3, v1);
+        DatalogMTLExpression excessiveHeat = f.createTemporalAtomicExpression(p3, v1);
 
-        TemporalExpression head = f.createBoxMinusExpression(range, excessiveHeat);
+        TemporalAtomicExpression head = (TemporalAtomicExpression) f.createBoxMinusExpression(range, excessiveHeat);
 
-        TemporalExpression body = f.createTemporalJoinExpression(
+        DatalogMTLExpression body = f.createTemporalJoinExpression(
                 f.createBoxMinusExpression(range, f.createTemporalAtomicExpression(p1,v1)),
                 f.createDiamondMinusExpression(range, f.createTemporalAtomicExpression(p2,v1)));
 
@@ -88,7 +94,11 @@ public class WeatherUseCaseTest {
 
         DatalogMTLRule rule2 = f.createRule(head, body);
 
-        final DatalogMTLProgram program = f.createProgram(rule1, rule2);
+        Map<String, String> prefixes = new HashMap<>();
+        prefixes.put("mt", "http://mesowest.com/temporal/ns#");
+        prefixes.put("obda:", "https://w3id.org/obda/vocabulary#");
+
+        final DatalogMTLProgram program = f.createProgram(prefixes, rule1, rule2);
 
         System.out.println(program.render());
 
@@ -112,9 +122,9 @@ public class WeatherUseCaseTest {
         final Variable v2 = odf.getVariable("SID2");
         final Variable v3 = odf.getVariable("county");
 
-        TemporalExpression head = f.createTemporalAtomicExpression(p4, v3);
+        TemporalAtomicExpression head = f.createTemporalAtomicExpression(p4, v3);
 
-        TemporalExpression body = f.createTemporalJoinExpression(f.createTemporalAtomicExpression(p3, v1, v3),
+        DatalogMTLExpression body = f.createTemporalJoinExpression(f.createTemporalAtomicExpression(p3, v1, v3),
                 f.createTemporalAtomicExpression(p3, v2, v3),
                 f.createTemporalAtomicExpression(p1,v1),
                 f.createTemporalAtomicExpression(p2, v2),
@@ -122,7 +132,11 @@ public class WeatherUseCaseTest {
 
         DatalogMTLRule rule = f.createRule(head, body);
 
-        final DatalogMTLProgram program = f.createProgram(rule);
+        Map<String, String> prefixes = new HashMap<>();
+        prefixes.put("mt", "http://mesowest.com/temporal/ns#");
+        prefixes.put("obda:", "https://w3id.org/obda/vocabulary#");
+
+        final DatalogMTLProgram program = f.createProgram(prefixes, rule);
 
         System.out.println(program.render());
 
@@ -148,14 +162,18 @@ public class WeatherUseCaseTest {
         final Variable v4 = odf.getVariable("SID4");
         final Variable v5 = odf.getVariable("state");
 
-        TemporalExpression head = f.createTemporalAtomicExpression(p1, v5);
+        TemporalAtomicExpression head = f.createTemporalAtomicExpression(p1, v5);
 
-        TemporalExpression body = f.createTemporalJoinExpression(f.createTemporalAtomicExpression(p2,v1,v5), f.createTemporalAtomicExpression(p2,v2,v5), f.createTemporalAtomicExpression(p2,v3,v5),f.createTemporalAtomicExpression(p2,v4,v5),
+        DatalogMTLExpression body = f.createTemporalJoinExpression(f.createTemporalAtomicExpression(p2,v1,v5), f.createTemporalAtomicExpression(p2,v2,v5), f.createTemporalAtomicExpression(p2,v3,v5),f.createTemporalAtomicExpression(p2,v4,v5),
                 f.createTemporalAtomicExpression(p3,v1),f.createTemporalAtomicExpression(p4,v2),f.createTemporalAtomicExpression(p5,v3),f.createTemporalAtomicExpression(p6,v4));
 
         DatalogMTLRule rule = f.createRule(head, body);
 
-        final DatalogMTLProgram program = f.createProgram(rule);
+        Map<String, String> prefixes = new HashMap<>();
+        prefixes.put("mt", "http://mesowest.com/temporal/ns#");
+        prefixes.put("obda:", "https://w3id.org/obda/vocabulary#");
+
+        final DatalogMTLProgram program = f.createProgram(prefixes, rule);
 
         System.out.println(program.render());
 

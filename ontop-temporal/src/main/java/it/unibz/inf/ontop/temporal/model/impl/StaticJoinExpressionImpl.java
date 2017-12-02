@@ -10,7 +10,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.joining;
 
-public class StaticJoinExpressionImpl implements StaticJoinExpression{
+public class StaticJoinExpressionImpl implements StaticJoinExpression {
 
     private final List<StaticExpression> operands;
 
@@ -28,12 +28,12 @@ public class StaticJoinExpressionImpl implements StaticJoinExpression{
     }
 
     @Override
-    public Iterable<? extends  DatalogMTLExpression> getChildNodes() {
+    public Iterable<StaticExpression> getChildNodes() {
         return operands;
     }
 
     @Override
-    public List<? extends DatalogMTLExpression> getOperands() {
+    public List<StaticExpression> getOperands() {
         return operands;
     }
 }

@@ -26,9 +26,5 @@ source		SELECT sensor_id FROM tb_sensors WHERE sensor_type = 0
 mappingId	urn:Map-PowerTurbine
 target		:PowerTurbine/{turbine_id}/{component_id} a :PowerTurbine . 
 source		SELECT turbine_id, component_id FROM tb_components WHERE component_type = 0
-
-mappingId	urn:Map-isPartOf
-target		:TurbinePart/{turbine_id}/{component_id} :isPartOf :Turbine/{turbine_id} . 
-source		SELECT turbine_id, component_id FROM tb_components 
 ]]
 

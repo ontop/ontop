@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.mapping.TargetAtom;
 import it.unibz.inf.ontop.iq.mapping.impl.TargetAtomImpl;
@@ -67,7 +68,7 @@ public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverte
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TemporalPPMappingConverter.class);
     private final SpecificationFactory specificationFactory;
-    private final IntermediateQueryFactory iqFactory;
+    private final TemporalIntermediateQueryFactory iqFactory;
     private final ProvenanceMappingFactory provMappingFactory;
     private final TemporalDatalog2QueryMappingConverter mappingConverter;
 
@@ -75,7 +76,7 @@ public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverte
 
     @Inject
     private TemporalPPMappingConverterImpl(SpecificationFactory specificationFactory,
-                                           IntermediateQueryFactory iqFactory,
+                                           TemporalIntermediateQueryFactory iqFactory,
                                            ProvenanceMappingFactory provMappingFactory, TemporalDatalog2QueryMappingConverter mappingConverter) {
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;

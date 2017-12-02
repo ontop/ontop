@@ -6,6 +6,4 @@ public interface NAryDatalogMTLExpression extends DatalogMTLExpression {
 
     List<? extends DatalogMTLExpression> getOperands();
 
-    Iterable<? extends DatalogMTLExpression> getChildNodes();
-
 }

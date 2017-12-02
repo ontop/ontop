@@ -118,7 +118,8 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
 
         MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
 
-        validateMapping(optionalOntology, optionalSaturatedTBox, filledProvMapping);
+        //TODO: write a mapping validator for temporal mappings
+        //validateMapping(optionalOntology, optionalSaturatedTBox, filledProvMapping);
 
         return new TemporalMappingAndDBMetadataImpl(filledProvMapping.toRegularMapping(), dbMetadata);
     }

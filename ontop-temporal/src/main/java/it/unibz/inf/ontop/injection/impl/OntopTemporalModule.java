@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingTransformer;
 import it.unibz.inf.ontop.temporal.datalog.TemporalDatalog2QueryMappingConverter;
 import it.unibz.inf.ontop.temporal.datalog.TemporalDatalogProgram2QueryConverter;
+import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 import it.unibz.inf.ontop.temporal.iq.node.*;
 
 /**
@@ -56,6 +57,7 @@ public class OntopTemporalModule extends OntopAbstractModule{
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
                 IntermediateQueryBuilder.class,
+                TemporalIntermediateQueryBuilder.class,
                 ConstructionNode.class,
                 UnionNode.class,
                 InnerJoinNode.class,

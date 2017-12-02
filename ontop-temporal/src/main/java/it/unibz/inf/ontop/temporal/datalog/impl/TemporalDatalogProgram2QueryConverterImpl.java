@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.datalog.impl.DatalogProgram2QueryConverterImpl;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
@@ -35,11 +36,11 @@ import static it.unibz.inf.ontop.temporal.datalog.impl.TemporalDatalogRule2Query
 
 
 public class TemporalDatalogProgram2QueryConverterImpl implements TemporalDatalogProgram2QueryConverter {
-    private final IntermediateQueryFactory iqFactory;
+    private final TemporalIntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
 
     @Inject
-    private TemporalDatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory,
+    private TemporalDatalogProgram2QueryConverterImpl(TemporalIntermediateQueryFactory iqFactory,
                                               UnionBasedQueryMerger queryMerger) {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;

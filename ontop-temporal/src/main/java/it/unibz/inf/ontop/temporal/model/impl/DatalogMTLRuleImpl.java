@@ -28,4 +28,9 @@ public class DatalogMTLRuleImpl implements DatalogMTLRule {
     public String render() {
         return String.format("%s :- %s .", head.render(), body.render());
     }
+
+    @Override
+    public String toString(){
+        return render();
+    }
 }

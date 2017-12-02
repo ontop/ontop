@@ -1,5 +1,5 @@
 package it.unibz.inf.ontop.temporal.model;
 
-public interface TemporalJoinExpression extends DatalogMTLExpression, NAryDatalogMTLExpression {
+public interface TemporalJoinExpression extends NAryDatalogMTLExpression {
 
 }
