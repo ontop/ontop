@@ -80,8 +80,6 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 			return new TurtleOBDAVisitorImpl().visitParse(parser.parse()).stream()
 					.map(TERM_FACTORY::getImmutableFunctionalTerm)
 					.collect(ImmutableCollectors.toList());
-//		} catch (RecognitionException e) {
-//			throw new TargetQueryParserException(input, e);
 		} catch (RuntimeException e) {
 			throw new TargetQueryParserException(input, e);
 		}

@@ -154,9 +154,6 @@ prefixedName // unnecessary in the grammar, but used for code generation
   : PREFIXEDNAME
   ;
 
-prefix // unnecessary in the grammar, but used for code generation
-  : PNAME_NS
-  ;
 //blank
 //  : BLANK_PREFIX NAME_SBS
 //  | BLANK
@@ -344,18 +341,20 @@ BOOLEAN_LITERAL
   : 'true' | 'TRUE' | 'True' | 'false'| 'FALSE'| 'False'
   ;
 
-PN_PREFIX
-  : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
-  ;
 
 //IRIREF	        :	'<' (~(['\u0000'..'\u0020']|'<'|'>'|'"'|'{'|'}'|'|'|'^'|'`'|'\\') | UCHAR)* '>'; /* \u00=NULL #01-\u1F=control codes \u20=space */
 
+//
 IRIREF
-  : '<' (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR)* '>'
+  : '<' (STRING_WITH_CURLY_BRACKET | (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR)*) '>'
   ;
 
 PNAME_NS
   : PN_PREFIX? ':'
+  ;
+
+PN_PREFIX
+  : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
   ;
 
 PREFIXEDNAME
@@ -414,18 +413,26 @@ DECIMAL_NEGATIVE
   : '-' DECIMAL
   ;
 
+// not used
 STRING_LITERAL_LONG_SINGLE_QUOTE
   : '\'\'\'' (('\'' | '\'\'')? ([^'\\] | ECHAR | UCHAR | '"'))* '\'\'\''
   ;
 
+// not used
 STRING_LITERAL_LONG_QUOTE
   : '"""' (('"' | '""')? (~ ["\\] | ECHAR | UCHAR | '\''))* '"""'
   ;
 
+// Extended with curly brackets, space and escaped characters
 STRING_LITERAL_QUOTE
-  : '"' (~ ["\\\r\n] | '\'' | '\\"')* '"'
+  : '"' (~ ["\\\r\n] | '\'' | '\\"' | '{' | '}' | ' ' | ECHAR)* '"'
   ;
 
+//STRING_LITERAL_QUOTE
+//  : '"' (~ ["\\\r\n] | '\'' | '\\"')* '"'
+//  ;
+
+// not used
 STRING_LITERAL_SINGLE_QUOTE
   : '\'' (~ [\u0027\u005C\u000A\u000D] | ECHAR | UCHAR | '"')* '\''
   ;
@@ -459,9 +466,9 @@ PN_CHARS
   : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '{' | '}'
   ;
 
-//Extended to allow slash
+//Extended to allow slash and initial curly bracket
 PN_LOCAL
-  : (PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | '/' | PLX )* (PN_CHARS | ':' | '/' | PLX ))?
+  : (PN_CHARS_U | ':' | '{' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | '/' | PLX )* (PN_CHARS | ':' | '/' | PLX ))?
   ;
 
 PLX

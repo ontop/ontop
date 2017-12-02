@@ -22,20 +22,14 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     /**
      * Map of directives
      */
-    protected HashMap<String, String> directives = new HashMap<>();
+    private HashMap<String, String> directives = new HashMap<>();
 
     /**
      * The current subject term
      */
-    protected Term currentSubject;
-
-    /**
-     * All variables
-     */
-    protected Set<Term> variableSet = new HashSet<>();
+    private Term currentSubject;
 
     protected String error = "";
-
 
     public String getError() {
         return error;
@@ -89,7 +83,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     private static Pattern chPattern = Pattern.compile(formatSpecifier);
 
     private List<FormatString> parse(String text) {
-        List<FormatString> toReturn = new ArrayList<FormatString>();
+        List<FormatString> toReturn = new ArrayList<>();
         Matcher m = chPattern.matcher(text);
         int i = 0;
         while (i < text.length()) {
@@ -113,7 +107,6 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     private interface FormatString {
         int index();
-
         String toString();
     }
 
@@ -170,7 +163,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     //in case of concat this function parses the literal
     //and adds parsed constant literals and template literal to terms list
     private ArrayList<Term> addToTermsList(String str) {
-        ArrayList<Term> terms = new ArrayList<Term>();
+        ArrayList<Term> terms = new ArrayList<>();
         int i, j;
         String st;
         str = str.substring(1, str.length() - 1);
@@ -198,13 +191,11 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     //this function returns nested concats
     //in case of more than two terms need to be concatted
-    protected Term getNestedConcat(String str) {
-        ArrayList<Term> terms = new ArrayList<Term>();
+    private Term getNestedConcat(String str) {
+        ArrayList<Term> terms;
         terms = addToTermsList(str);
         if (terms.size() == 1) {
-            Variable v = (Variable) terms.get(0);
-            variableSet.add(v);
-            return v;
+            return terms.get(0);
         }
 
         Function f = TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
@@ -224,8 +215,8 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
      * <li> triple(subject, pred, object), otherwise (it is a higher order atom). </li>
      * </ul>
      */
-    protected Function makeAtom(Term subject, Term pred, Term object) {
-        Function atom = null;
+    private Function makeAtom(Term subject, Term pred, Term object) {
+        Function atom;
 
         if (isRDFType(pred)) {
             if (object instanceof Function) {
@@ -246,7 +237,6 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
         } else if (!QueryUtils.isGrounded(pred)) {
             atom = ATOM_FACTORY.getTripleAtom(subject, pred, object);
         } else {
-            //Predicate predicate = TERM_FACTORY.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
             Predicate predicate;
             if (pred instanceof Function) {
                 ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
@@ -274,9 +264,6 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
 
     private static boolean isRDFType(Term pred) {
-//		if (pred instanceof Constant && ((Constant) pred).getValue().equals(RDF_TYPE)) {
-//			return true;
-//		}
         if (pred instanceof Function && ((Function) pred).getTerm(0) instanceof Constant) {
             String c = ((Constant) ((Function) pred).getTerm(0)).getValue();
             return c.equals(RDF_TYPE);
@@ -286,7 +273,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public List<Function> visitParse(ParseContext ctx) {
-        ctx.directiveStatement().forEach(c -> visit(c));
+        ctx.directiveStatement().forEach(this::visit);
         return ctx.triplesStatement().stream()
                 .flatMap(c -> visitTriplesStatement(c).stream())
                 .collect(ImmutableCollectors.toList());
@@ -311,7 +298,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Void visitPrefixID(PrefixIDContext ctx) {
-        String uriref = visitIriref(ctx.iriref ());
+        String uriref = visitIriref(ctx.iriref());
         String ns = ctx.PNAME_NS().getText();
         directives.put(ns.substring(0, ns.length() - 1), uriref); // remove the end colon
         return null;
@@ -349,7 +336,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     @Override
     public List<Term> visitObjectList(ObjectListContext ctx) {
         return ctx.object().stream()
-                .map(c -> visitObject(c))
+                .map(this::visitObject)
                 .collect(ImmutableCollectors.toList());
     }
 
@@ -390,11 +377,6 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     }
 
     @Override
-    public String visitPrefix(PrefixContext ctx) {
-        return ctx.PNAME_NS().getText().split(":")[0];
-    }
-
-    @Override
     public Function visitTypedLiteral_1(TypedLiteral_1Context ctx) {
         return TERM_FACTORY.getTypedTerm(visitVariable(ctx.variable()), visitLanguageTag(ctx.languageTag()));
     }
@@ -416,9 +398,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Variable visitVariable(VariableContext ctx) {
-        Variable variable = TERM_FACTORY.getVariable(removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText()));
-        variableSet.add(variable);
-        return variable;
+        return TERM_FACTORY.getVariable(removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText()));
     }
 
     @Override
@@ -437,7 +417,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     @Override
     public ImmutableList<Term> visitTerms(TermsContext ctx) {
         return ctx.term().stream()
-                .map(c -> visitTerm(c))
+                .map(this::visitTerm)
                 .collect(ImmutableCollectors.toList());
     }
 
@@ -496,7 +476,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Term visitBooleanLiteral(BooleanLiteralContext ctx) {
-            return typeTerm(ctx.BOOLEAN_LITERAL().getText(), COL_TYPE.BOOLEAN);
+        return typeTerm(ctx.BOOLEAN_LITERAL().getText(), COL_TYPE.BOOLEAN);
     }
 
     @Override
