@@ -64,6 +64,10 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-rdf-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+        </dependency>
     </dependencies>
 
 
@@ -74,5 +78,28 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <plugins>
+        <plugin>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-maven-plugin</artifactId>
+            <version>4.7</version>
+            <configuration>
+                    <listener>false</listener>
+                    <visitor>true</visitor>
+                    <!--<arguments>-->
+                        <!--<argument>-package</argument>-->
+                    <!--</arguments>-->
+            </configuration>
+            <executions>
+                <execution>
+                    <id>antlr</id>
+                    <!--<phase>generate-sources</phase>-->
+                    <goals>
+                        <goal>antlr4</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        </plugins>
     </build>
 </project>

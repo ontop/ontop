@@ -285,8 +285,11 @@ public class BindingLiftTest {
 
 
         //construct right side left join (union)
-
-        expectedQueryBuilder.addChild(expectedleftJoinNode, EXPECTED_DATA_NODE_6, RIGHT);
+        ConstructionNode newRightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, Y),
+                SUBSTITUTION_FACTORY.getSubstitution(Y, generateInt(F)));
+        expectedQueryBuilder.addChild(expectedleftJoinNode, newRightConstructionNode, RIGHT);
+        expectedQueryBuilder.addChild(newRightConstructionNode,
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, A, F)));
 
 
         //build expected query
@@ -1076,7 +1079,7 @@ public class BindingLiftTest {
         //Construct unoptimized query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(W, generateInt(H), Y, generateInt(G), Z, generateInt(F))));
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(W, generateInt(H), Y, generateInt(G))));
 
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
 
@@ -1087,7 +1090,7 @@ public class BindingLiftTest {
 
 
         //construct union
-        UnionNode expectedUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(G, X, F));
+        UnionNode expectedUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(G, X, Z));
         expectedQueryBuilder.addChild(expectedJoinNode, expectedUnionNode);
 
         //construct right side join
@@ -1108,10 +1111,14 @@ public class BindingLiftTest {
         //construct left side left join
         expectedQueryBuilder.addChild(expectedLeftJoinNode, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, G)), LEFT);
         //construct right side left join
-        expectedQueryBuilder.addChild(expectedLeftJoinNode, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, A, F)), RIGHT);
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(
+                ImmutableSet.of(A, Z),
+                SUBSTITUTION_FACTORY.getSubstitution(Z, generateInt(F)));
+        expectedQueryBuilder.addChild(expectedLeftJoinNode, rightConstructionNode, RIGHT);
+        expectedQueryBuilder.addChild(rightConstructionNode, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, A, F)));
 
-        ConstructionNode expectedNodeOnRight =IQ_FACTORY.createConstructionNode(ImmutableSet.of(G, X, F),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(F, NULL, X, generateURI2(C))));
+        ConstructionNode expectedNodeOnRight =IQ_FACTORY.createConstructionNode(ImmutableSet.of(G, X, Z),
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Z, NULL, X, generateURI2(C))));
 
         expectedQueryBuilder.addChild(expectedUnionNode, expectedNodeOnRight);
 

@@ -82,7 +82,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
         while (optionalCurrentNode.isPresent()) {
             final QueryNode currentNode = optionalCurrentNode.get();
 
-            /**
+            /*
              * Targets: join-like nodes and data nodes
              */
             if (currentNode instanceof JoinLikeNode) {
@@ -137,7 +137,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
         // Non-final
         Optional<QueryNode> optionalNextChild = query.getNextSibling(focusChild);
 
-        /**
+        /*
          * Less than 2 children: nothing to be done here
          */
         if (!optionalNextChild.isPresent()) {
@@ -151,7 +151,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
         JoinLikeNode currentJoinLikeNode = initialJoinLikeNode;
 
 
-        /**
+        /*
          * Loops over the following children
          */
         while (optionalNextChild.isPresent()){
@@ -178,7 +178,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
 
                 PullVariableOutOfSubTreeResults<JoinLikeNode> results = query.applyProposal(proposal);
 
-                /**
+                /*
                  * Updates the "iterated" variables
                  */
                 currentJoinLikeNode = results.getOptionalNewNode()
@@ -209,7 +209,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
             if (argument instanceof Variable) {
                 Variable variable = (Variable) argument;
 
-                /**
+                /*
                  * Tracks the indexes of variables to "pull out"
                  */
                 if (!alreadySeenVariables.add(variable)) {
