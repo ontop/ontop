@@ -64,7 +64,7 @@ public class EmptyNodeRemovalTest {
          * Expected query
          */
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
-        ConstructionNode rootNode = query.getRootConstructionNode();
+        QueryNode rootNode = query.getRootNode();
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         ConstructionNode secondConstructionNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 leftBindings);
@@ -93,7 +93,7 @@ public class EmptyNodeRemovalTest {
         //ImmutableSubstitution<ImmutableTerm> expectedTopBindings = topBindings.union(leftBindings)
         //        .orElseThrow(() -> new IllegalStateException("Wrong bindings (union cannot be computed)"));
 
-        ConstructionNode rootNode = query.getRootConstructionNode();
+        QueryNode rootNode = query.getRootNode();
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         ConstructionNode secondConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y, A), leftBindings,
                 Optional.empty());
@@ -119,7 +119,7 @@ public class EmptyNodeRemovalTest {
          */
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode rootNode = query.getRootConstructionNode();
+        QueryNode rootNode = query.getRootNode();
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
 

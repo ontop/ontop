@@ -103,7 +103,12 @@ public enum ExpressionOperation implements OperationPredicate {
 	SUM("SUM", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null),
 	MAX("MAX", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null),
 	MIN("MIN", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, null),
-	COUNT("COUNT", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, null);
+	COUNT("COUNT", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, null),
+
+	/*
+ 	 * Conditional
+ 	 */
+	IF_ELSE_NULL("IF_ELSE_NULL", TermTypeInferenceRules.SECOND_ARG_RULE, COL_TYPE.BOOLEAN, null);
 
 
 	// 0-ary operations

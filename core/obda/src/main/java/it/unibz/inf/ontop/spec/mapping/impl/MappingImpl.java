@@ -7,7 +7,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -44,8 +44,8 @@ public class MappingImpl implements Mapping {
     }
 
     private static boolean projectNullableVariable(IntermediateQuery query) {
-        ConstructionNode rootNode = query.getRootConstructionNode();
-        return rootNode.getVariables().stream()
+        QueryNode rootNode = query.getRootNode();
+        return query.getProjectionAtom().getVariableStream()
                 .anyMatch(v -> rootNode.isVariableNullable(query, v));
     }
 

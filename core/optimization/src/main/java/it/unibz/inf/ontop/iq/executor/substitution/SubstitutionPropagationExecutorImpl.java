@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.iq.executor.substitution;
 
-import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.executor.substitution.LocalPropagationTools.SubstitutionApplicationResults;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -17,6 +19,7 @@ import it.unibz.inf.ontop.iq.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 
+import javax.inject.Inject;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.executor.substitution.AscendingPropagationTools.propagateSubstitutionUp;
@@ -28,6 +31,13 @@ import static it.unibz.inf.ontop.iq.executor.substitution.LocalPropagationTools.
  */
 public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
         implements SubstitutionPropagationExecutor<N> {
+
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private SubstitutionPropagationExecutorImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
 
     @Override
     public NodeCentricOptimizationResults<N> apply(SubstitutionPropagationProposal<N> proposal,
@@ -75,7 +85,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
          */
         NodeCentricOptimizationResults<QueryNode> ascendingPropagationResults = propagateSubstitutionUp(
                 newFocusOrReplacingChildNode,
-                substitutionToPropagate, query, treeComponent, Optional.empty());
+                substitutionToPropagate, query, treeComponent, iqFactory, Optional.empty());
 
         /*
          * If some ancestors are removed, does not go further
@@ -122,17 +132,17 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
      */
     private ImmutableSubstitution<? extends ImmutableTerm> normalizeInputSubstitution(
             N originalFocusNode, IntermediateQuery query, ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-        if (query.getRootConstructionNode() == originalFocusNode)
+        if (query.getRootNode() == originalFocusNode)
             return substitution;
 
-        ExplicitVariableProjectionNode closestProjectionAncestor = query.getAncestors(originalFocusNode).stream()
+        ImmutableSet<Variable> priorityVariables = query.getAncestors(originalFocusNode).stream()
                 .filter(a -> a instanceof ExplicitVariableProjectionNode)
                 .map(a -> (ExplicitVariableProjectionNode) a)
                 .findFirst()
-                .orElseThrow(() -> new InvalidIntermediateQueryException(
-                        "All the non-root nodes must be an ExplicitVariableProjectionNode ancestor"));
+                .map(ExplicitVariableProjectionNode::getVariables)
+                .orElseGet(() -> query.getProjectionAtom().getVariables());
 
-        return ImmutableSubstitutionTools.prioritizeRenaming(substitution, closestProjectionAncestor.getVariables());
+        return ImmutableSubstitutionTools.prioritizeRenaming(substitution, priorityVariables);
     }
 
     /**
