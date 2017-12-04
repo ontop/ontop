@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -305,8 +306,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of(
-                "Depp", "Poppins", "Smith");
+        List<String> expectedValues = Arrays.asList("Depp", "Poppins", "Smith");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
@@ -319,7 +319,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
-                "SELECT DISTINCT ?v\n" +
+                "SELECT DISTINCT ?v ?id\n" +
                 "WHERE {\n" +
                 "   ?p a :Professor ; \n" +
                 "        :lastName ?v .\n" +
@@ -330,8 +330,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of(
-                "Depp", "Poppins", "Smith");
+        List<String> expectedValues = Arrays.asList("Depp", "Poppins", "Smith");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
