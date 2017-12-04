@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -50,9 +49,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
+    private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final ImmutabilityTools immutabilityTools;
-    private final IntermediateQueryFactory iqFactory;
     private final ValueConstant valueNull;
 
     @AssistedInject
@@ -65,8 +64,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 immutabilityTools, substitutionFactory);
         this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
-        this.immutabilityTools = immutabilityTools;
         this.iqFactory = iqFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     @AssistedInject
@@ -123,44 +122,34 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode childNode, IntermediateQuery query) {
         return  isFromRightBranch(childNode, query)
-                ? applyAscendingSubstitutionFromRight(substitution, query)
+                ? applyAscendingSubstitutionFromRight(substitution, query, childNode)
                 : applyAscendingSubstitutionFromLeft(substitution, query);
     }
 
+    /**
+     * Currently blocks the substitution coming from the right
+     *
+     * TODO: propagate NULLs
+     */
     private SubstitutionResults<LeftJoinNode> applyAscendingSubstitutionFromRight(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        QueryNode leftChild = query.getChild(this, LEFT)
-                .orElseThrow(() -> new IllegalStateException("No left child for the LJ"));
-        ImmutableSet<Variable> leftVariables = query.getVariables(leftChild);
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query,
+            QueryNode rightChild) {
 
-        ImmutableSet<? extends Map.Entry<Variable, ? extends ImmutableTerm>> substitutionEntries =
-                substitution.getImmutableMap().entrySet();
+        if (substitution.isEmpty()) {
+            return DefaultSubstitutionResults.noChange();
+        }
+        else {
+            ImmutableSet<Variable> rightProjectedVariables =
+                    Stream.concat(
+                            query.getVariables(rightChild).stream(),
+                            substitution.getDomain().stream())
+                    .collect(ImmutableCollectors.toSet());
 
-        /**
-         * New substitution: only concerns variables specific to the right
-         */
-        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = substitutionEntries.stream()
-                .filter(e -> !leftVariables.contains(e.getKey()))
-                .map(e -> (Map.Entry<Variable, ImmutableTerm>)e)
-                .collect(ImmutableCollectors.toMap());
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(newSubstitutionMap);
+            ConstructionNode newConstructionNode = iqFactory.createConstructionNode(rightProjectedVariables,
+                    (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>) substitution);
 
-        /**
-         * New equalities (which could not be propagated)
-         */
-        Optional<ImmutableExpression> optionalNewEqualities = immutabilityTools.foldBooleanExpressions(substitutionEntries.stream()
-                .filter(e -> leftVariables.contains(e.getKey()))
-                .map(e -> termFactory.getImmutableExpression(
-                        ExpressionOperation.EQ, e.getKey(), e.getValue())));
-
-        /**
-         * Updates the joining conditions (may add new equalities)
-         * and propagates the new substitution if the conditions still holds.
-         *
-         */
-        return computeAndEvaluateNewCondition(substitution, optionalNewEqualities)
-                .map(ev -> applyEvaluation(query, ev, newSubstitution, Optional.of(leftVariables), Provenance.FROM_RIGHT))
-                .orElseGet(() -> DefaultSubstitutionResults.newNode(this, newSubstitution));
+            return DefaultSubstitutionResults.insertConstructionNode(newConstructionNode, rightChild);
+        }
     }
 
     private SubstitutionResults<LeftJoinNode> applyAscendingSubstitutionFromLeft(

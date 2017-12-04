@@ -170,30 +170,36 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
 
 
     private NextNodeAndQuery liftBindingsFromConstructionNode(IntermediateQuery currentQuery,
-                                                              ConstructionNode initialConstrNode)
+                                                              ConstructionNode currentConstructionNode)
             throws EmptyQueryException {
 
-        QueryNode currentNode = initialConstrNode;
-
-        Optional<QueryNode> parentNode = currentQuery.getParent(currentNode);
+        Optional<QueryNode> parentNode = currentQuery.getParent(currentConstructionNode);
         if(parentNode.isPresent()){
-            if (parentNode.get() instanceof UnionNode){
-                return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
+            QueryNode parent = parentNode.get();
+            /*
+             * Union and LJ (on the right) block substitutions
+             */
+            if ((parent instanceof UnionNode)
+                    || ((parent instanceof LeftJoinNode)
+                        && currentQuery.getOptionalPosition(currentConstructionNode)
+                            .filter(p -> p == RIGHT)
+                            .isPresent())) {
+                return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentConstructionNode), currentQuery);
             }
         }
         // Does not lift the root when it is a construction node
         else {
-            return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
+            return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentConstructionNode), currentQuery);
         }
 
         //extract substitution from the construction node
         Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
-                currentQuery, currentNode).getOptionalSubstitution();
+                currentQuery, currentConstructionNode).getOptionalSubstitution();
 
         //propagate substitution up and down
         if (optionalSubstitution.isPresent()) {
             SubstitutionPropagationProposal<QueryNode> proposal =
-                    new SubstitutionPropagationProposalImpl<>(currentNode, optionalSubstitution.get());
+                    new SubstitutionPropagationProposalImpl<>(currentConstructionNode, optionalSubstitution.get());
 
             NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
             return getNextNodeAndQuery(currentQuery, results);
@@ -201,7 +207,7 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
 
         }
 
-        return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
+        return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentConstructionNode), currentQuery);
     }
 
 
@@ -266,8 +272,10 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
     }
 
 
-    /** Lift bindings from left node extracting first bindings coming from the left side of its subtree,
-     * lift from the right only the bindings with variables that are not common with the left
+    /** Lift bindings from left node extracting first bindings coming from the left side of its subtree.
+     *
+     * Does not lift the right part (TODO: improve this)
+     *
      * @param currentQuery
      * @param initialLeftJoinNode
      * @return
@@ -276,7 +284,6 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
     private NextNodeAndQuery liftBindingsFromLeftJoinNode(IntermediateQuery currentQuery, LeftJoinNode initialLeftJoinNode) throws EmptyQueryException {
 
         QueryNode currentNode = initialLeftJoinNode;
-        Optional<LeftJoinNode> currentJoinNode = Optional.of(initialLeftJoinNode);
 
         Optional<QueryNode> optionalLeftChild = currentQuery.getChild(currentNode, LEFT);
 
@@ -288,7 +295,7 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
             Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
                     currentQuery, optionalLeftChild.get()).getOptionalSubstitution();
 
-            /**
+            /*
              * Applies the substitution to the join
              */
             if (optionalSubstitution.isPresent()) {
@@ -296,7 +303,7 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
                         new SubstitutionPropagationProposalImpl<>(initialLeftJoinNode, optionalSubstitution.get());
 
                 NodeCentricOptimizationResults<LeftJoinNode> results = currentQuery.applyProposal(proposal);
-                currentJoinNode = results.getOptionalNewNode();
+                Optional<LeftJoinNode> currentJoinNode = results.getOptionalNewNode();
 
                 if(currentJoinNode.isPresent()){
                     currentNode = currentJoinNode.get();
@@ -313,84 +320,9 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
             throw new IllegalStateException("Left Join needs to have a left child");
         }
 
-        /* Current join node has not been removed lifting left side bindings.
-          Extract the bindings also from the right child */
-
-        if (currentJoinNode.isPresent()){
-
-            Optional<QueryNode> optionalRightChild = currentQuery.getChild(currentNode, RIGHT);
-
-            if (optionalRightChild.isPresent()) {
-                QueryNode rightChild = optionalRightChild.get();
-
-                Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
-                        currentQuery, rightChild).getOptionalSubstitution();
-
-                if(optionalSubstitution.isPresent()){
-
-                //extract variables present only in the right child
-                Optional<ImmutableSubstitution<ImmutableTerm>> substitutionRightMap =
-                        getRightChildSubstitutionMap(currentQuery, currentNode, rightChild, optionalSubstitution);
-
-                /**
-                 * Propagate the bindings to the join
-                 */
-                if (substitutionRightMap.isPresent()) {
-                    SubstitutionPropagationProposal<QueryNode> proposal =
-                            new SubstitutionPropagationProposalImpl<>(currentNode, substitutionRightMap.get());
-
-                    NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
-
-                    return getNextNodeAndQuery(currentQuery, results);
-
-                }
-                }
-
-            }
-            else
-            {
-                throw new IllegalStateException("Left Join needs to have a right child");
-            }
-
-
-        }
-
-
         return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
 
 
-    }
-
-    /**
-     * From the given substitutionMap returns only the bindings with variables that are contained in the right child of the left join
-     * and do not appear in the left child
-     */
-
-    private Optional<ImmutableSubstitution<ImmutableTerm>> getRightChildSubstitutionMap(
-            IntermediateQuery currentQuery, QueryNode currentNode, QueryNode rightChild,
-            Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution) {
-
-        Optional<QueryNode> optionalLeftChild;
-        Set<Variable> onlyRightVariables = new HashSet<>();
-
-        onlyRightVariables.addAll(currentQuery.getVariables(rightChild));
-        optionalLeftChild = currentQuery.getChild(currentNode, LEFT);
-
-        if(optionalLeftChild.isPresent()){
-            onlyRightVariables.removeAll(currentQuery.getVariables(optionalLeftChild.get()));
-        }
-        else
-        {
-            throw new IllegalStateException("Left Join needs to have a left child");
-        }
-
-        //Get only the bindings referring to the right variables
-        return Optional.of(optionalSubstitution.get()
-                    .getImmutableMap().entrySet().stream()
-                    .filter(binding -> onlyRightVariables.contains(binding.getKey()))
-                    .collect(ImmutableCollectors.toMap()))
-                .filter(m -> !m.isEmpty())
-                .map(substitutionFactory::getSubstitution);
     }
 
 }
