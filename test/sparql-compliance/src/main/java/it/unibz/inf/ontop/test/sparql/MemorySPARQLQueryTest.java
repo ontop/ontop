@@ -32,7 +32,7 @@ import java.util.Properties;
 import java.util.Set;
 
 // Test of SPARQL 1.0 compliance
-public class OntopMemorySPARQL10QueryTest extends SPARQLQueryParent {
+public class MemorySPARQLQueryTest extends SPARQLQueryParent {
 
 	/* List of UNSUPPORTED QUERIES */
 
@@ -79,7 +79,7 @@ public class OntopMemorySPARQL10QueryTest extends SPARQLQueryParent {
 			//missing result "." is not considered as part of the decimal (error is already in the sparql algebra)
 			basicManifest + "term-6",
 
-			//MalformedQueryException SPARQL Prser Encountered "."  "." is not considered as part of the decimal (error is already in the sparql algebra)
+			//MalformedQueryException SPARQL Parser Encountered "."  "." is not considered as part of the decimal (error is already in the sparql algebra)
 			basicManifest + "term-7",
 
 			/* DATA-R2: CAST
@@ -172,12 +172,12 @@ public class OntopMemorySPARQL10QueryTest extends SPARQLQueryParent {
 	public static Test suite() throws Exception {
 		return ManifestTestUtils.suite(new Factory() {
 
-			public OntopMemorySPARQL10QueryTest createSPARQLQueryTest(
+			public MemorySPARQLQueryTest createSPARQLQueryTest(
 					String testURI, String name, String queryFileURL,
 					String resultFileURL, Dataset dataSet,
 					boolean laxCardinality, boolean checkOrder) {
 				if(!IGNORE.contains(testURI)) {
-					return new OntopMemorySPARQL10QueryTest(testURI, name,
+					return new MemorySPARQLQueryTest(testURI, name,
 							queryFileURL, resultFileURL, dataSet, laxCardinality,
 							checkOrder);
 				}
@@ -188,9 +188,9 @@ public class OntopMemorySPARQL10QueryTest extends SPARQLQueryParent {
 	}
 
 
-	protected OntopMemorySPARQL10QueryTest(String testURI, String name,
-										   String queryFileURL, String resultFileURL, Dataset dataSet,
-										   boolean laxCardinality, boolean checkOrder) {
+	protected MemorySPARQLQueryTest(String testURI, String name,
+									String queryFileURL, String resultFileURL, Dataset dataSet,
+									boolean laxCardinality, boolean checkOrder) {
 		super(testURI, name, queryFileURL, resultFileURL, dataSet,
 				laxCardinality, checkOrder);
 	}
