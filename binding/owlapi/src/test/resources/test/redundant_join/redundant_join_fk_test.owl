@@ -26,6 +26,14 @@
     <owl:ObjectProperty rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teaches">
         <rdfs:domain rdf:resource="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#Teacher"/>
     </owl:ObjectProperty>
+
+
+
+    <!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teachesAt -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teachesAt">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#Teacher"/>
+    </owl:ObjectProperty>
     
 
 
@@ -60,6 +68,14 @@
 
     <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nickname">
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+
+
+
+    <!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#hasTeacherID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teacherID">
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
     </owl:DatatypeProperty>
     
 
