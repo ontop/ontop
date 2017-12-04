@@ -35,6 +35,7 @@ public class LeftJoinProfTest {
     private static final String ODBA_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.obda";
     private static final String PROPERTY_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.properties";
     private static final String NO_SELF_LJ_OPTIMIZATION_MSG = "The table professors should be used only once";
+    private static final String LEFT_JOIN_NOT_OPTIMIZED_MSG = "The left join is still present in the output query";
 
     private Connection conn;
 
@@ -186,7 +187,7 @@ public class LeftJoinProfTest {
 
         System.out.println("SQL Query: \n" + sql);
 
-        assertFalse(sql.toUpperCase().contains("LEFT"));
+        assertFalse(LEFT_JOIN_NOT_OPTIMIZED_MSG, sql.toUpperCase().contains("LEFT"));
     }
 
     @Test
@@ -360,6 +361,56 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
 
         assertFalse(sql.toUpperCase().contains("LEFT"));
+    }
+
+    @Test
+    public void testOptionalTeachesAt() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?v\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor ; \n" +
+                "        :lastName ?v .\n" +
+                "   OPTIONAL { \n" +
+                "     ?p :teachesAt ?u .\n" +
+                "   }\n" +
+                "   FILTER (bound(?u))\n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of(
+                "Depp", "Poppins", "Smith");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+
+        assertTrue(sql.toUpperCase().contains("LEFT"));
+    }
+
+    @Test
+    public void testOptionalTeacherID() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?v\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor ; \n" +
+                "        :lastName ?v .\n" +
+                "   OPTIONAL { \n" +
+                "     ?p :teacherID ?id .\n" +
+                "   }\n" +
+                "   FILTER (bound(?id))\n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of(
+                "Depp", "Poppins", "Smith");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+
+        assertTrue(sql.toUpperCase().contains("LEFT"));
     }
 
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
