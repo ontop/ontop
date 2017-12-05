@@ -8,10 +8,8 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -58,6 +56,17 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution() {
         return new ImmutableSubstitutionImpl<>(ImmutableMap.of(), atomFactory, termFactory);
+    }
+
+    @Override
+    public <T extends VariableOrGroundTerm> VariableOrGroundTermSubstitution<T> getVariableOrGroundTermSubstitution() {
+        return new VariableOrGroundTermSubstitutionImpl<>(ImmutableMap.of(), atomFactory, termFactory);
+    }
+
+    @Override
+    public <T extends VariableOrGroundTerm> VariableOrGroundTermSubstitution<T> getVariableOrGroundTermSubstitution(
+            ImmutableMap<Variable, T> substitutionMap) {
+        return new VariableOrGroundTermSubstitutionImpl<>(substitutionMap, atomFactory, termFactory);
     }
 
     @Override

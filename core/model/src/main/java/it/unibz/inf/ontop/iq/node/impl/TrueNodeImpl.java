@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 
 import java.util.Optional;
 
@@ -113,8 +114,10 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint) {
+    public IQTree applyDescendingSubstitution(
+            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Optional<ImmutableExpression> constraint) {
+
         return this;
     }
 

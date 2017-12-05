@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -112,8 +113,10 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint) {
+    public IQTree applyDescendingSubstitution(
+            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Optional<ImmutableExpression> constraint) {
+
         ImmutableSet<Variable> substitutionDomain = descendingSubstitution.getDomain();
 
         ImmutableSet<Variable> newProjectedVariables = Stream.concat(

@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -46,8 +46,10 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint) {
+    public IQTree applyDescendingSubstitution(
+            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Optional<ImmutableExpression> constraint) {
+
         return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChild());
     }
 

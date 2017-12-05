@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
+import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -157,5 +158,15 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
 
         return Stream.concat(gEntryStream, localEntryStream)
                 .filter(e -> !e.getKey().equals(e.getValue()));
+    }
+
+    @Override
+    public VariableOrGroundTermSubstitution<VariableOrGroundTerm> composeWith2(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> g) {
+        ImmutableSubstitution<? extends VariableOrGroundTerm> composedSubstitution =
+                (ImmutableSubstitution<? extends VariableOrGroundTerm>) (ImmutableSubstitution<?>) composeWith(g);
+
+        return new VariableOrGroundTermSubstitutionImpl<>(composedSubstitution.getImmutableMap(),
+                getAtomFactory(), getTermFactory());
     }
 }

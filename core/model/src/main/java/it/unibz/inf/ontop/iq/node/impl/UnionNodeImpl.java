@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -213,7 +214,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    public IQTree applyDescendingSubstitution(VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children) {
         ImmutableSet<Variable> updatedProjectedVariables = constructionTools.computeNewProjectedVariables(
                     descendingSubstitution, projectedVariables);
@@ -378,8 +379,10 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
         // NB: this is expected to be ok given that the expected compatibility of the merged substitution with
         // this construction node
-        ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution =
-                (ImmutableSubstitution<? extends VariableOrGroundTerm>) substitutionPair.propagatedSubstitution;
+        VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution =
+                substitutionFactory.getVariableOrGroundTermSubstitution(
+                        (ImmutableMap<Variable, ? extends VariableOrGroundTerm>)(ImmutableMap<Variable, ?>)
+                                substitutionPair.propagatedSubstitution.getImmutableMap());
 
         IQTree newChild = liftedChildTree.getChild()
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty());

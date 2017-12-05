@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -104,7 +105,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
 
         ImmutableSubstitution<ImmutableTerm> selectedChildSubstitution = selectedChildConstructionNode.getSubstitution();
 
-        ImmutableSubstitution<VariableOrGroundTerm> downPropagableFragment = selectedChildSubstitution
+        VariableOrGroundTermSubstitution<VariableOrGroundTerm> downPropagableFragment = selectedChildSubstitution
                 .getVariableOrGroundTermFragment();
 
         ImmutableSubstitution<NonGroundFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution
@@ -124,10 +125,9 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
 
         ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = expressionResults.substitution.composeWith(
                 selectedChildSubstitution);
-        ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution =
-                (ImmutableSubstitution<VariableOrGroundTerm>)(ImmutableSubstitution<?>)
-                        expressionResults.substitution.composeWith(freshRenaming)
-                                .composeWith(downPropagableFragment);
+        VariableOrGroundTermSubstitution<VariableOrGroundTerm> descendingSubstitution =
+                        expressionResults.substitution.composeWith2(freshRenaming)
+                                .composeWith2(downPropagableFragment);
 
         return liftConverter.convert(otherChildren, selectedGrandChild, newCondition, ascendingSubstitution,
                 descendingSubstitution);
@@ -154,7 +154,8 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                         args -> (Variable) args.get(0),
                         args -> (VariableOrGroundTerm) args.get(1)));
 
-        ImmutableSubstitution<VariableOrGroundTerm> newSubstitution = substitutionFactory.getSubstitution(substitutionMap);
+        VariableOrGroundTermSubstitution<VariableOrGroundTerm> newSubstitution =
+                substitutionFactory.getVariableOrGroundTermSubstitution(substitutionMap);
 
         Optional<ImmutableExpression> newExpression = getImmutabilityTools().foldBooleanExpressions(
                 expressions.stream()
@@ -193,10 +194,12 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
             return results.getOptionalExpression()
                     .map(this::convertIntoExpressionAndSubstitution)
                     .orElseGet(() ->
-                            new ExpressionAndSubstitution(Optional.empty(), substitutionFactory.getSubstitution()));
+                            new ExpressionAndSubstitution(Optional.empty(),
+                                    substitutionFactory.getVariableOrGroundTermSubstitution()));
         }
         else
-            return new ExpressionAndSubstitution(Optional.empty(), substitutionFactory.getSubstitution());
+            return new ExpressionAndSubstitution(Optional.empty(),
+                    substitutionFactory.getVariableOrGroundTermSubstitution());
     }
 
     private InjectiveVar2VarSubstitution computeOtherChildrenRenaming(ImmutableSubstitution<NonGroundFunctionalTerm> nonDownPropagableFragment,
@@ -215,10 +218,10 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
     protected static class ExpressionAndSubstitution {
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         public final Optional<ImmutableExpression> optionalExpression;
-        public final ImmutableSubstitution<? extends VariableOrGroundTerm> substitution;
+        public final VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> substitution;
 
         protected ExpressionAndSubstitution(Optional<ImmutableExpression> optionalExpression,
-                                          ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+                                            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> substitution) {
             this.optionalExpression = optionalExpression;
             this.substitution = substitution;
         }
@@ -234,6 +237,6 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         R convert(ImmutableList<IQTree> otherLiftedChildren, IQTree selectedGrandChild,
                   Optional<ImmutableExpression> newCondition,
                   ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
-                  ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution);
+                  VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution);
     }
 }

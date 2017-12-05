@@ -93,7 +93,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     Optional<ImmutableExpression> convertIntoBooleanExpression();
 
     Var2VarSubstitution getVar2VarFragment();
-    ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment();
+    VariableOrGroundTermSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment();
     ImmutableSubstitution<NonGroundFunctionalTerm> getNonGroundFunctionalTermFragment();
 
     ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment();

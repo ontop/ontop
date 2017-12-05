@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
+import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
@@ -416,14 +417,14 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment() {
+    public VariableOrGroundTermSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment() {
         ImmutableMap<Variable, VariableOrGroundTerm> newMap = getImmutableMap().entrySet().stream()
                 .filter(e -> e.getValue() instanceof VariableOrGroundTerm)
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> (VariableOrGroundTerm) e.getValue()));
 
-        return new ImmutableSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory());
+        return new VariableOrGroundTermSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory());
     }
 
     @Override

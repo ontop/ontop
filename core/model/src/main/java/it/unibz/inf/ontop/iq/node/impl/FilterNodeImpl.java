@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 
 import java.util.Optional;
 
@@ -162,8 +163,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
      * TODO: consider the constraint
      */
     @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child) {
+    public IQTree applyDescendingSubstitution(
+            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Optional<ImmutableExpression> constraint, IQTree child) {
+
         SubstitutionResults<FilterNode> results = applySubstitution(descendingSubstitution);
 
         switch (results.getLocalAction()) {
