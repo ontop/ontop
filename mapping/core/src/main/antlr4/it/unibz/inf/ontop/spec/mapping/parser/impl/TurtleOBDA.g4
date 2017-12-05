@@ -231,17 +231,13 @@ PN_PREFIX
    ;
 
 PREFIXED_NAME
-  : PNAME_LN | PNAME_NS
+   : PNAME_NS PN_LOCAL
   ;
 
-// extends PREFIXED_NAME to allow right-hand side curly brackets and slash, and force one right-hand side opening curly bracket
+// extends PREFIXED_NAME to allow right-hand side curly brackets, and force one right-hand side opening curly bracket
 PREFIXED_NAME_EXT
   : PNAME_NS PN_LOCAL_EXT
   ;
-
-PNAME_LN
-   : PNAME_NS PN_LOCAL
-   ;
 
 BLANK_NODE_LABEL
   : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS )?
@@ -349,7 +345,7 @@ PN_LOCAL_EXT
   : '{' RIGHT_PART_TAIL_EXT ? | RIGHT_PART_FIRST_CHAR RIGHT_PART_TAIL_EXT_MAND
   ;
 
-// extends PN_LOCAL in the original grammar to allow slash
+// extends PN_LOCAL in the original grammar to allow '/' and '#'
 PN_LOCAL
   : RIGHT_PART_FIRST_CHAR RIGHT_PART_TAIL?
   ;
@@ -371,15 +367,15 @@ PN_LOCAL_ESC
   ;
 
 fragment RIGHT_PART_FIRST_CHAR
-  : (PN_CHARS_U | ':' | [0-9] | PLX)
+  : (PN_CHARS_U | ':' | '#' | [0-9] | PLX)
   ;
 
 fragment RIGHT_PART_FIRST_CHAR_EXT
-  : (PN_CHARS_U | ':' | [0-9] | '{' | PLX)
+  : (RIGHT_PART_FIRST_CHAR | '{')
   ;
 
 fragment RIGHT_PART_CHAR
-  : (PN_CHARS | '.' | ':' | '/' | PLX)
+  : (PN_CHARS | '.' | ':' | '/' | '#' | PLX)
   ;
 
 fragment RIGHT_PART_CHAR_EXT
@@ -391,7 +387,7 @@ fragment RIGHT_PART_END_CHAR
   ;
 
 fragment RIGHT_PART_END_CHAR_EXT
-  : (PN_CHARS | ':' | PLX | '}')
+  : (RIGHT_PART_END_CHAR | '}')
   ;
 
 fragment RIGHT_PART_TAIL
@@ -411,7 +407,7 @@ fragment IRIREF_INNER_CHAR
   ;
 
 fragment IRIREF_INNER_CHAR_EXT
-  :  (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | '{' | '}' | UCHAR)
+  :  (IRIREF_INNER_CHAR | '{' | '}')
   ;
 
 fragment VARIABLE_CHAR
