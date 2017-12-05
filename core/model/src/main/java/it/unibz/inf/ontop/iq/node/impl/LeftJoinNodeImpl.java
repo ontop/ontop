@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
@@ -37,6 +38,8 @@ import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.REPLACE
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
 
 public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
@@ -159,7 +162,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .orElseThrow(() -> new IllegalStateException("No right child for the LJ"));
         ImmutableSet<Variable> rightVariables = query.getVariables(rightChild);
 
-        /**
+        /*
          * If the substitution will set some right variables to be null
          *  -> remove the right part
          */
@@ -169,7 +172,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             return proposeToRemoveTheRightPart(query, substitution, Optional.of(rightVariables), Provenance.FROM_LEFT);
         }
 
-        /**
+        /*
          * Updates the joining conditions (may add new equalities)
          * and propagates the same substitution if the conditions still holds.
          *
@@ -211,7 +214,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                                               ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                                               Optional<ImmutableSet<Variable>> optionalVariablesFromOppositeSide,
                                                               Provenance provenance) {
-        /**
+        /*
          * Joining condition does not hold: replace the LJ by its left child.
          */
         if (evaluationResult.isEffectiveFalse()) {
@@ -398,16 +401,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         }
     }
 
-
-    /**
-     * Only the substitution of the left child is lifted.
-     *
-     * Lifting the right one is considered as way too tricky to be implemented.
-     * Basically these bindings should provide a non-null value only if a right-specific variable is not null.
-     * However, if is generally not guaranteed that a variable that is right-specific at some point in time
-     * will remain as such after structural/semantic optimization.
-     *
-     */
     @Override
     public IQTree liftBinding(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator) {
 
@@ -423,7 +416,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         if (liftedRightChild.isDeclaredAsEmpty())
             return liftedLeftChild;
 
-        ChildLiftingResults results = liftLeftChild(liftedLeftChild, liftedRightChild, variableGenerator);
+        ChildLiftingResults results = liftRightChild(liftLeftChild(liftedLeftChild, liftedRightChild, variableGenerator),
+                variableGenerator);
 
         Optional<ConstructionNode> topConstructionNode = Optional.of(results.ascendingSubstitution)
                 .filter(s -> !s.isEmpty())
@@ -585,6 +579,189 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .applyDescendingSubstitution(descendingSubstitution, ljCondition);
 
         return new ChildLiftingResults(leftGrandChild, newRightChild, ljCondition, ascendingSubstitution);
+    }
+
+
+    private ChildLiftingResults liftRightChild(ChildLiftingResults childLiftingResults, VariableGenerator variableGenerator) {
+        IQTree rightChild = childLiftingResults.rightChild;
+        if (rightChild.isDeclaredAsEmpty()
+                || (!(rightChild.getRootNode() instanceof ConstructionNode)))
+            return childLiftingResults;
+
+        ConstructionNode rightConstructionNode = (ConstructionNode) rightChild.getRootNode();
+
+        // Not supported
+        if (rightConstructionNode.getOptionalModifiers().isPresent())
+            return childLiftingResults;
+
+        IQTree rightGrandChild = ((UnaryIQTree) rightChild).getChild();
+
+        ImmutableSubstitution<ImmutableTerm> rightSubstitution = rightConstructionNode.getSubstitution();
+
+        // Empty substitution -> replace the construction node by its child
+        if (rightSubstitution.isEmpty())
+            return new ChildLiftingResults(childLiftingResults.leftChild, rightGrandChild,
+                    childLiftingResults.ljCondition, childLiftingResults.ascendingSubstitution);
+
+        ImmutableSet<Variable> leftVariables = childLiftingResults.leftChild.getVariables();
+
+        Optional<Map.Entry<Variable, Constant>> excludedEntry = extractExcludedEntry(rightSubstitution);
+
+        ImmutableSubstitution<ImmutableTerm> selectedSubstitution = excludedEntry
+                .map(excluded -> rightSubstitution.getImmutableMap().entrySet().stream()
+                        .filter(e -> !e.equals(excluded))
+                        .collect(ImmutableCollectors.toMap()))
+                .map(substitutionFactory::getSubstitution)
+                .orElse(rightSubstitution);
+
+        try {
+            /*
+             * TODO: do not evaluate it now (later)
+             */
+            Optional<ImmutableExpression> nonShrinkedLJCondition = applyRightSubstitutionToLJCondition(
+                    childLiftingResults.ljCondition, selectedSubstitution, leftVariables);
+
+            // TODO: explain
+            Optional<Variable> rightProvenanceVariable;
+            Optional<ConstructionNode> remainingRightConstructionNode;
+            if (excludedEntry.isPresent()) {
+                rightProvenanceVariable = excludedEntry.map(Map.Entry::getKey);
+
+                ImmutableSet<Variable> newRightProjectedVariables =
+                        Stream.concat(Stream.of(rightProvenanceVariable.get()),
+                                rightConstructionNode.getChildVariables().stream())
+                                .collect(ImmutableCollectors.toSet());
+
+                remainingRightConstructionNode = Optional.of(iqFactory.createConstructionNode(
+                        newRightProjectedVariables,
+                        substitutionFactory.getSubstitution(excludedEntry
+                                .map(e -> ImmutableMap.of(e.getKey(), (ImmutableTerm) e.getValue()))
+                                .get())));
+            }
+            else if (selectedSubstitution.getImmutableMap().entrySet().stream()
+                    .filter(e -> !leftVariables.contains(e.getKey()))
+                    .map(Map.Entry::getValue)
+                    .anyMatch(value -> value.getVariableStream()
+                            .noneMatch(v -> !leftVariables.contains(v)))) {
+
+                Variable provenanceVariable = variableGenerator.generateNewVariable();
+                rightProvenanceVariable = Optional.of(provenanceVariable);
+
+                ImmutableSet<Variable> newRightProjectedVariables =
+                        Stream.concat(Stream.of(provenanceVariable),
+                                rightConstructionNode.getChildVariables().stream())
+                                .collect(ImmutableCollectors.toSet());
+
+                remainingRightConstructionNode = Optional.of(iqFactory.createConstructionNode(
+                        newRightProjectedVariables,
+                        substitutionFactory.getSubstitution(provenanceVariable,
+                                termFactory.getBooleanConstant(true))));
+            }
+            else {
+                rightProvenanceVariable = Optional.empty();
+                remainingRightConstructionNode = Optional.empty();
+            }
+
+            ImmutableSubstitution<ImmutableTerm> liftableSubstitution =
+                    computeLiftableSubstitution(selectedSubstitution, rightProvenanceVariable, leftVariables);
+
+
+            IQTree newRightChild = remainingRightConstructionNode
+                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, rightGrandChild))
+                    .orElse(rightGrandChild);
+
+            ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = liftableSubstitution.composeWith(
+                    childLiftingResults.ascendingSubstitution);
+
+            return new ChildLiftingResults(childLiftingResults.leftChild, newRightChild, nonShrinkedLJCondition,
+                    newAscendingSubstitution);
+
+            /*
+             * TODO: get rid of this
+             */
+        } catch (UnsatisfiableLJConditionException e) {
+            return new ChildLiftingResults(childLiftingResults.leftChild,
+                    iqFactory.createEmptyNode(rightChild.getVariables()), Optional.empty(),
+                    childLiftingResults.ascendingSubstitution);
+        }
+
+    }
+
+    private ImmutableSubstitution<ImmutableTerm> computeLiftableSubstitution(
+            ImmutableSubstitution<ImmutableTerm> selectedSubstitution,
+            Optional<Variable> rightProvenanceVariable, ImmutableSet<Variable> leftVariables) {
+
+        ImmutableMap<Variable, ImmutableTerm> newMap;
+        if (rightProvenanceVariable.isPresent()) {
+            newMap = selectedSubstitution.getImmutableMap().entrySet().stream()
+                    .filter(e -> !leftVariables.contains(e.getKey()))
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> transformRightSubstitutionValue(e.getValue(), leftVariables,
+                                    rightProvenanceVariable.get())));
+        }
+        else {
+            newMap = selectedSubstitution.getImmutableMap().entrySet().stream()
+                    .filter(e -> !leftVariables.contains(e.getKey()))
+                    .collect(ImmutableCollectors.toMap());
+        }
+
+        return substitutionFactory.getSubstitution(newMap);
+    }
+
+    private ImmutableTerm transformRightSubstitutionValue(ImmutableTerm value,
+                                                          ImmutableSet<Variable> leftVariables,
+                                                          Variable rightProvenanceVariable) {
+        if (value.getVariableStream()
+                .anyMatch(v -> !leftVariables.contains(v)))
+            return value;
+
+        return termFactory.getImmutableExpression(
+                IF_ELSE_NULL,
+                termFactory.getImmutableExpression(IS_NOT_NULL, rightProvenanceVariable),
+                value);
+    }
+
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private Optional<ImmutableExpression> applyRightSubstitutionToLJCondition(
+            Optional<ImmutableExpression> ljCondition,
+            ImmutableSubstitution<ImmutableTerm> selectedSubstitution,
+            ImmutableSet<Variable> leftVariables) throws UnsatisfiableLJConditionException {
+
+        Stream<ImmutableExpression> equalitiesToInsert = selectedSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> leftVariables.contains(e.getKey()))
+                .map(e -> termFactory.getImmutableExpression(EQ, e.getKey(), e.getValue()));
+
+        Optional<ImmutableExpression> nonOptimizedLJCondition = immutabilityTools.foldBooleanExpressions(
+                Stream.concat(
+                        ljCondition
+                                .map(selectedSubstitution::applyToBooleanExpression)
+                                .map(Stream::of)
+                                .orElseGet(Stream::empty),
+                        equalitiesToInsert));
+
+        if (nonOptimizedLJCondition.isPresent()) {
+            ExpressionEvaluator.EvaluationResult evaluationResults = createExpressionEvaluator()
+                    .evaluateExpression(nonOptimizedLJCondition.get());
+            if (evaluationResults.isEffectiveFalse())
+                throw new UnsatisfiableLJConditionException();
+
+            return evaluationResults.getOptionalExpression();
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<Map.Entry<Variable, Constant>> extractExcludedEntry(ImmutableSubstitution<ImmutableTerm> rightSubstitution) {
+        return rightSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> (e.getValue() instanceof Constant))
+                .map(e -> Maps.immutableEntry(e.getKey(), (Constant)e.getValue()))
+                .findFirst();
+    }
+
+
+    private static class UnsatisfiableLJConditionException extends Exception {
     }
 
 
