@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -138,6 +139,7 @@ public class ConstructionNodeCleanerTest {
     }
 
 
+    @Ignore("TODO: refactor after moving the query modifiers away from the construction node ")
     @Test
     public void removeConstructionNodeTest3() throws EmptyQueryException {
 

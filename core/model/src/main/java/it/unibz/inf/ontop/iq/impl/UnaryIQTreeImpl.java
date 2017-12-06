@@ -36,13 +36,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     public IQTree liftBinding(VariableGenerator variableGenerator) {
         if (isLifted)
             return this;
-        else {
-            IQTree initialChild = getChild();
-            IQTree liftedChild = initialChild.liftBinding(variableGenerator);
-            return initialChild.equals(liftedChild)
-                    ? this
-                    : getRootNode().liftBinding(liftedChild);
-        }
+        else
+            return getRootNode().liftBinding(getChild(), variableGenerator);
     }
 
     @Override

@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
@@ -148,7 +149,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public IQTree liftBinding(IQTree liftedChildIQTree) {
+    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator) {
+        IQTree liftedChildIQTree = childIQTree.liftBinding(variableGenerator);
         QueryNode childRoot = liftedChildIQTree.getRootNode();
         if (childRoot instanceof ConstructionNode)
             return liftBinding((ConstructionNode) childRoot, (UnaryIQTree) liftedChildIQTree);

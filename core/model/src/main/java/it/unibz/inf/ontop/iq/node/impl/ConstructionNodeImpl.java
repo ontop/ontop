@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -506,7 +507,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public IQTree liftBinding(IQTree liftedChildIQTree) {
+    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator) {
+        IQTree liftedChildIQTree = childIQTree.liftBinding(variableGenerator);
         QueryNode liftedChildRoot = liftedChildIQTree.getRootNode();
         if (liftedChildRoot instanceof ConstructionNode)
             return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQTree) liftedChildIQTree);
