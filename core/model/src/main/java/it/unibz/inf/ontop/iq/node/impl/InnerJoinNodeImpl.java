@@ -389,7 +389,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         ImmutableList<IQTree> newChildren = Stream.concat(
                 otherLiftedChildren.stream()
                         .map(c -> c.applyDescendingSubstitution(descendingSubstitution, newCondition)),
-                Stream.of(selectedGrandChild))
+                Stream.of(selectedGrandChild.applyDescendingSubstitution(descendingSubstitution, newCondition)))
                 .collect(ImmutableCollectors.toList());
 
         return new LiftingStepResults(ascendingSubstitution, newChildren, newCondition, false);
