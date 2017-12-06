@@ -367,13 +367,11 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     @Override
     public SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, IntermediateQuery query) {
-        return applyDescendingSubstitution(descendingSubstitution,
-                !query.getChildren(this).isEmpty());
+        return applyDescendingSubstitution(descendingSubstitution);
     }
 
     private SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution,
-            boolean hasChildren) {
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution) {
 
         ImmutableSubstitution<ImmutableTerm> relevantSubstitution = constructionNodeTools.extractRelevantDescendingSubstitution(
                 descendingSubstitution, projectedVariables);
@@ -403,9 +401,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          * Currently, the root construction node is still required.
          */
         if (newSubstitutions.bindings.isEmpty() && !newOptionalModifiers.isPresent()) {
-            return hasChildren
-                    ? DefaultSubstitutionResults.declareAsTrue()
-                    : DefaultSubstitutionResults.replaceByUniqueChild(substitutionToPropagate);
+            return DefaultSubstitutionResults.replaceByUniqueChild(substitutionToPropagate);
         }
 
         /*
@@ -531,7 +527,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     public IQTree applyDescendingSubstitution(
             VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree child) {
-        SubstitutionResults<ConstructionNode> results = applyDescendingSubstitution(descendingSubstitution, true);
+        SubstitutionResults<ConstructionNode> results = applyDescendingSubstitution(descendingSubstitution);
 
         IQTree updatedChild = results.getSubstitutionToPropagate()
                 .map(s -> (ImmutableSubstitution<? extends VariableOrGroundTerm>) (ImmutableSubstitution<?>) s)
