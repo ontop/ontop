@@ -421,6 +421,11 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         Optional<ConstructionNode> topConstructionNode = Optional.of(results.ascendingSubstitution)
                 .filter(s -> !s.isEmpty())
+                // Filters out the non-projected variables
+                .map(s -> substitutionFactory.getSubstitution(
+                        s.getImmutableMap().entrySet().stream()
+                                .filter(e -> projectedVariables.contains(e.getKey()))
+                                .collect(ImmutableCollectors.toMap())))
                 .map(s -> iqFactory.createConstructionNode(projectedVariables, s));
 
         IQTree subTree = Optional.of(results.rightChild)
