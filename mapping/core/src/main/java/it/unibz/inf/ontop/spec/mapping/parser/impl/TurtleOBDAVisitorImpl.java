@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -107,6 +106,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     private interface FormatString {
         int index();
+
         String toString();
     }
 
@@ -271,6 +271,12 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
         return false;
     }
 
+    private String concatPrefix(String prefixedName) {
+        String[] tokens = prefixedName.split(":", 2);
+        String uri = directives.get(tokens[0]);  // the first token is the prefix
+        return uri + tokens[1];  // the second token is the local name
+    }
+
     @Override
     public List<Function> visitParse(ParseContext ctx) {
         ctx.directiveStatement().forEach(this::visit);
@@ -298,9 +304,16 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Void visitPrefixID(PrefixIDContext ctx) {
-        String uriref = visitIriref(ctx.iriref());
+        String iriref = removeBrackets(ctx.IRIREF().getText());
         String ns = ctx.PNAME_NS().getText();
-        directives.put(ns.substring(0, ns.length() - 1), uriref); // remove the end colon
+        directives.put(ns.substring(0, ns.length() - 1), iriref); // remove the end colon
+        return null;
+    }
+
+    @Override
+    public Object visitBase(BaseContext ctx) {
+        String iriRef = removeBrackets(ctx.IRIREF().getText());
+        directives.put("", iriRef);
         return null;
     }
 
@@ -360,53 +373,47 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Term visitResource(ResourceContext ctx) {
-        if (ctx.iriref() != null) {
-            return construct(this.visitIriref(ctx.iriref()));
+        if (ctx.iriExt() != null) {
+            return visitIriExt(ctx.iriExt());
         }
-        return construct(this.visitPrefixedName(ctx.prefixedName()));
+        return construct(this.visitIri(ctx.iri()));
     }
 
-    public String visitIriref(IrirefContext ctx) {
-        return removeBrackets(ctx.IRIREF().getText());
-    }
-
-    public String visitPrefixedName(PrefixedNameContext ctx) {
-        String[] tokens = ctx.PREFIXEDNAME().getText().split(":", 2);
-        String uri = directives.get(tokens[0]);  // the first token is the prefix
-        return uri + tokens[1];  // the second token is the local name
+    public Term visitIriExt(IriExtContext ctx) {
+        if (ctx.IRIREF_EXT() != null) {
+            return construct(removeBrackets(ctx.IRIREF_EXT().getText()));
+        }
+        return construct(concatPrefix(ctx.PREFIXED_NAME_EXT().getText()));
     }
 
     @Override
-    public Function visitTypedLiteral_1(TypedLiteral_1Context ctx) {
+    public Function visitVariableLiteral_1(VariableLiteral_1Context ctx) {
         return TERM_FACTORY.getTypedTerm(visitVariable(ctx.variable()), visitLanguageTag(ctx.languageTag()));
     }
 
     @Override
-    public Function visitTypedLiteral_2(TypedLiteral_2Context ctx) {
+    public Function visitVariableLiteral_2(VariableLiteral_2Context ctx) {
         Variable var = visitVariable(ctx.variable());
-        Term term = visitResource(ctx.resource());
-        if (term instanceof Function) {
-            String functionName = ((ValueConstant) ((Function) term).getTerm(0)).getValue();
-            Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(functionName);
-            if (type.isPresent()) {
-                return TERM_FACTORY.getTypedTerm(var, type.get());
-            }
-            throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
+        String iri = visitIri(ctx.iri());
+        Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(iri);
+        if (type.isPresent()) {
+            return TERM_FACTORY.getTypedTerm(var, type.get());
         }
-        throw new IllegalArgumentException("$resource.value should be an URI");
+        throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + iri);
+    }
+
+    @Override
+    public String visitIri(IriContext ctx) {
+        TerminalNode token = ctx.PREFIXED_NAME();
+        if (token != null) {
+            return concatPrefix(token.getText());
+        }
+        return removeBrackets(ctx.IRIREF().getText());
     }
 
     @Override
     public Variable visitVariable(VariableContext ctx) {
         return TERM_FACTORY.getVariable(removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText()));
-    }
-
-    @Override
-    public Function visitFunction(FunctionContext ctx) {
-        String functionName = visitResource(ctx.resource()).toString();
-        ImmutableList<Term> terms = visitTerms(ctx.terms());
-        Predicate functionSymbol = TERM_FACTORY.getPredicate(functionName, terms.size());
-        return TERM_FACTORY.getFunction(functionSymbol, terms);
     }
 
     @Override
@@ -416,18 +423,6 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
             return visitVariable(vc);
         }
         return TERM_FACTORY.getConstantLiteral(ctx.LANGTAG().getText().substring(1).toLowerCase(), COL_TYPE.STRING);
-    }
-
-    @Override
-    public ImmutableList<Term> visitTerms(TermsContext ctx) {
-        return ctx.term().stream()
-                .map(this::visitTerm)
-                .collect(ImmutableCollectors.toList());
-    }
-
-    @Override
-    public Term visitTerm(TermContext ctx) {
-        return (Term) visitChildren(ctx);
     }
 
     @Override
@@ -458,19 +453,14 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     }
 
     @Override
-    public Term visitDataTypeString(DataTypeStringContext ctx) {
+    public Term visitTypedLiteral(TypedLiteralContext ctx) {
         Term stringValue = visitStringLiteral(ctx.stringLiteral());
-        Term resource = visitResource(ctx.resource());
-        if (resource instanceof Function) {
-            String functionName = ((ValueConstant) ((Function) resource).getTerm(0)).getValue();
-
-            Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(functionName);
-            if (!type.isPresent()) {
-                throw new RuntimeException("Unsupported datatype: " + functionName);
-            }
+        String iriRef = visitIri(ctx.iri());
+        Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(iriRef);
+        if (type.isPresent()) {
             return TERM_FACTORY.getTypedTerm(stringValue, type.get());
         }
-        return TERM_FACTORY.getTypedTerm(stringValue, COL_TYPE.STRING);
+        throw new RuntimeException("Unsupported datatype: " + iriRef);
     }
 
     @Override
