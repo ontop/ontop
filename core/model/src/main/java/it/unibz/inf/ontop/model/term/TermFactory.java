@@ -177,6 +177,11 @@ public interface TermFactory {
 	public ValueConstant getBooleanConstant(boolean value);
 
 	ValueConstant getNullConstant();
+
+	/**
+	 * TODO: explain
+	 */
+	ValueConstant getProvenanceSpecialConstant();
 	
 	/**
 	 * Construct a {@link ValueConstant} object.

@@ -47,6 +47,7 @@ public class TermFactoryImpl implements TermFactory {
 	private final ValueConstant valueTrue;
 	private final ValueConstant valueFalse;
 	private final ValueConstant valueNull;
+	private final ValueConstant provenanceConstant;
 	private final ImmutabilityTools immutabilityTools;
 	private final Map<RDFDatatype, DatatypePredicate> type2FunctionSymbolMap;
 
@@ -58,6 +59,7 @@ public class TermFactoryImpl implements TermFactory {
 		this.valueTrue = new ValueConstantImpl("true", xsdBoolean);
 		this.valueFalse = new ValueConstantImpl("false", xsdBoolean);
 		this.valueNull = new ValueConstantImpl("null", typeFactory.getXsdStringDatatype());
+		this.provenanceConstant = new ValueConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
 		this.rootTermType = typeFactory.getAbstractAtomicTermType();
 		this.immutabilityTools = new ImmutabilityTools(this);
 		this.type2FunctionSymbolMap = new HashMap<>();
@@ -392,6 +394,11 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ValueConstant getNullConstant() {
 		return valueNull;
+	}
+
+	@Override
+	public ValueConstant getProvenanceSpecialConstant() {
+		return provenanceConstant;
 	}
 
 	private ImmutableList<ImmutableTerm> convertTerms(Function functionalTermToClone) {

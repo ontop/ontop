@@ -619,6 +619,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .map(substitutionFactory::getSubstitution)
                 .orElse(rightSubstitution);
 
+        // Empty selected substitution -> nothing to do
+        if (selectedSubstitution.isEmpty())
+            return childLiftingResults;
+
         try {
             /*
              * TODO: do not evaluate it now (later)
@@ -647,20 +651,24 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                     .filter(e -> !leftVariables.contains(e.getKey()))
                     .map(Map.Entry::getValue)
                     .anyMatch(value -> value.getVariableStream()
-                            .noneMatch(v -> !leftVariables.contains(v)))) {
+                            .allMatch(leftVariables::contains))) {
+
+                /*
+                 * TODO: Use a non-nullable right-specific variable instead (when possible)
+                 */
 
                 Variable provenanceVariable = variableGenerator.generateNewVariable();
                 rightProvenanceVariable = Optional.of(provenanceVariable);
 
                 ImmutableSet<Variable> newRightProjectedVariables =
-                        Stream.concat(Stream.of(provenanceVariable),
-                                rightConstructionNode.getChildVariables().stream())
+                            Stream.concat(Stream.of(provenanceVariable),
+                                    rightConstructionNode.getChildVariables().stream())
                                 .collect(ImmutableCollectors.toSet());
 
                 remainingRightConstructionNode = Optional.of(iqFactory.createConstructionNode(
                         newRightProjectedVariables,
-                        substitutionFactory.getSubstitution(provenanceVariable,
-                                termFactory.getBooleanConstant(true))));
+                            substitutionFactory.getSubstitution(provenanceVariable,
+                                    termFactory.getProvenanceSpecialConstant())));
             }
             else {
                 rightProvenanceVariable = Optional.empty();
@@ -759,9 +767,11 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     private Optional<Map.Entry<Variable, Constant>> extractExcludedEntry(ImmutableSubstitution<ImmutableTerm> rightSubstitution) {
+        Constant specialProvenanceConstant = termFactory.getProvenanceSpecialConstant();
+
         return rightSubstitution.getImmutableMap().entrySet().stream()
-                .filter(e -> (e.getValue() instanceof Constant))
-                .map(e -> Maps.immutableEntry(e.getKey(), (Constant)e.getValue()))
+                .filter(e -> (e.getValue().equals(specialProvenanceConstant)))
+                .map(e -> Maps.immutableEntry(e.getKey(), specialProvenanceConstant))
                 .findFirst();
     }
 
