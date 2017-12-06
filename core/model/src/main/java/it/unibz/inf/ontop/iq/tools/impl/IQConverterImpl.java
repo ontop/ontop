@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
@@ -65,7 +66,10 @@ public class IQConverterImpl implements IQConverter {
 
 
     @Override
-    public IntermediateQuery convert(IQ query, DBMetadata dbMetadata, ExecutorRegistry executorRegistry) {
+    public IntermediateQuery convert(IQ query, DBMetadata dbMetadata, ExecutorRegistry executorRegistry) throws EmptyQueryException {
+        if (query.getTree().isDeclaredAsEmpty())
+            throw new EmptyQueryException();
+
         IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(dbMetadata, executorRegistry);
         IQTree topTree = query.getTree();
         QueryNode rootNode = topTree.getRootNode();
