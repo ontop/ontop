@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.type.TermType;
+
 import java.sql.Types;
 
 /**
@@ -39,14 +41,17 @@ public class Attribute {
 	private final int type;
 	private final String typeName;
 	private final boolean canNull;
-	
-	Attribute(RelationDefinition relation, QualifiedAttributeID id, int index, int type, String typeName, boolean canNull) {
+	private final TermType termType;
+
+	Attribute(RelationDefinition relation, QualifiedAttributeID id, int index, int type, String typeName, boolean canNull,
+			  TermType termType) {
 		this.table = relation;
 		this.index = index;
 		this.id = id;
 		this.type = type;
 		this.typeName = typeName;
 		this.canNull = canNull;
+		this.termType = termType;
 	}
 	
 	public QuotedID getID() {
@@ -108,5 +113,9 @@ public class Attribute {
 	@Override 
 	public int hashCode() {
 		return id.hashCode();
+	}
+
+	public TermType getTermType() {
+		return termType;
 	}
 }

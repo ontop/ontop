@@ -3,15 +3,14 @@ package it.unibz.inf.ontop.iq.executor.leftjoin;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
-import it.unibz.inf.ontop.dbschema.UniqueConstraint;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.DataNode;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -20,6 +19,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import javax.annotation.Nullable;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -43,33 +43,27 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
     }
 
     @Override
-    public LeftJoinRightChildNormalizationAnalysis analyze(ImmutableList<DataNode> leftDataNodes, DataNode rightDataNode,
-                                                           DBMetadata dbMetadata,
+    public LeftJoinRightChildNormalizationAnalysis analyze(ImmutableSet<Variable> leftVariables,
+                                                           ImmutableList<ExtensionalDataNode> leftDataNodes,
+                                                           ExtensionalDataNode rightDataNode,
                                                            VariableGenerator variableGenerator) {
-        ImmutableSet<Variable> leftVariables = leftDataNodes.stream()
-                .flatMap(n -> n.getVariables().stream())
-                .collect(ImmutableCollectors.toSet());
 
-        ImmutableMultimap<DatabaseRelationDefinition, ImmutableList<? extends VariableOrGroundTerm>>
-                leftRelationArgumentMultimap = leftDataNodes.stream()
-                .map(DataNode::getProjectionAtom)
-                .flatMap(a -> dbMetadata.getDatabaseRelationByPredicate(a.getPredicate())
-                        .map(r -> Stream.of(new SimpleEntry<DatabaseRelationDefinition,
-                                ImmutableList<? extends VariableOrGroundTerm>>(r, a.getArguments())))
-                        .orElseGet(Stream::empty))
-                .collect(ImmutableCollectors.toMultimap());
+        ImmutableMultimap<RelationDefinition, ImmutableList<? extends VariableOrGroundTerm>> leftRelationArgumentMultimap
+                = leftDataNodes.stream()
+                .map(ExtensionalDataNode::getProjectionAtom)
+                .map(a -> Maps.immutableEntry(
+                        a.getPredicate().getRelationDefinition(), a.getArguments()))
+                .collect(ImmutableCollectors.toMultimap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue));
 
-        DataAtom rightProjectionAtom = rightDataNode.getProjectionAtom();
+        DataAtom<RelationPredicate> rightProjectionAtom = rightDataNode.getProjectionAtom();
         ImmutableList<? extends VariableOrGroundTerm> rightArguments = rightProjectionAtom.getArguments();
-
-        Optional<DatabaseRelationDefinition> optionalRightRelation = dbMetadata.getDatabaseRelationByPredicate(
-                rightProjectionAtom.getPredicate());
-
-        if (leftRelationArgumentMultimap.isEmpty() || (!optionalRightRelation.isPresent())) {
+        if (leftRelationArgumentMultimap.isEmpty()) {
             // TODO: print a warning
             return new LeftJoinRightChildNormalizationAnalysisImpl(false);
         }
-        DatabaseRelationDefinition rightRelation = optionalRightRelation.get();
+        RelationDefinition rightRelation = rightDataNode.getProjectionAtom().getPredicate().getRelationDefinition();
 
         /*
          * Matched UCs and FKs
@@ -90,7 +84,7 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
                 .collect(ImmutableCollectors.toList());
 
         if (!conflictingRightArgumentIndexes.isEmpty()) {
-            DataNode newRightDataNode = rightDataNode.newAtom(computeNewRightAtom(rightProjectionAtom.getPredicate(),
+            ExtensionalDataNode newRightDataNode = rightDataNode.newAtom(computeNewRightAtom(rightProjectionAtom.getPredicate(),
                     rightArguments, conflictingRightArgumentIndexes, variableGenerator));
             ImmutableExpression newExpression = computeExpression(rightArguments,
                     newRightDataNode.getProjectionAtom().getArguments());
@@ -103,9 +97,9 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
     }
 
     private ImmutableSet<UniqueConstraint> extractMatchedUCs(
-            ImmutableMultimap<DatabaseRelationDefinition, ImmutableList<? extends VariableOrGroundTerm>> leftRelationArgumentMultimap,
+            ImmutableMultimap<RelationDefinition, ImmutableList<? extends VariableOrGroundTerm>> leftRelationArgumentMultimap,
             ImmutableList<? extends VariableOrGroundTerm> rightArguments,
-            DatabaseRelationDefinition rightRelation) {
+            RelationDefinition rightRelation) {
         /*
          * When the left and right relations are the same
          */
@@ -126,9 +120,9 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
     }
 
     private ImmutableSet<ForeignKeyConstraint> extractMatchedFKs(
-            ImmutableMultimap<DatabaseRelationDefinition, ImmutableList<? extends VariableOrGroundTerm>> leftRelationArgumentMultimap,
+            ImmutableMultimap<RelationDefinition, ImmutableList<? extends VariableOrGroundTerm>> leftRelationArgumentMultimap,
             ImmutableList<? extends VariableOrGroundTerm> rightArguments,
-            DatabaseRelationDefinition rightRelation) {
+            RelationDefinition rightRelation) {
 
         return leftRelationArgumentMultimap.asMap().entrySet().stream()
                 .flatMap(e -> extractMatchedFKsForARelation(e.getKey(), e.getValue(), rightArguments, rightRelation))
@@ -136,10 +130,10 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
     }
 
     private Stream<ForeignKeyConstraint> extractMatchedFKsForARelation(
-            DatabaseRelationDefinition leftRelation,
+            RelationDefinition leftRelation,
             Collection<ImmutableList<? extends VariableOrGroundTerm>> leftArgumentLists,
             ImmutableList<? extends VariableOrGroundTerm> rightArguments,
-            DatabaseRelationDefinition rightRelation) {
+            RelationDefinition rightRelation) {
 
         return leftRelation.getForeignKeys().stream()
              .filter(fk -> fk.getReferencedRelation().equals(rightRelation))
@@ -197,7 +191,7 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
                 .anyMatch(i -> rightArguments.get(i).equals(rightVariable));
     }
 
-    private DataAtom computeNewRightAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> rightArguments,
+    private DataAtom<RelationPredicate> computeNewRightAtom(RelationPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> rightArguments,
                                          ImmutableList<Integer> conflictingRightArgumentIndexes, VariableGenerator variableGenerator) {
         ImmutableList<VariableOrGroundTerm> newArguments = IntStream.range(0, rightArguments.size())
                 .boxed()

@@ -4,20 +4,18 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.MissingRelationForExtensionalDataNodeException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 /**
@@ -25,16 +23,13 @@ import java.util.stream.IntStream;
  *
  * Most likely (but not necessarily) will be overwritten by native query language specific implementations.
  */
-public class ExtensionalDataNodeImpl extends DataNodeImpl implements ExtensionalDataNode {
+public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> implements ExtensionalDataNode {
 
     private static final String EXTENSIONAL_NODE_STR = "EXTENSIONAL";
-    private final Relation2Predicate relation2Predicate;
 
     @AssistedInject
-    private ExtensionalDataNodeImpl(@Assisted DataAtom atom,
-                                    Relation2Predicate relation2Predicate) {
+    private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom) {
         super(atom);
-        this.relation2Predicate = relation2Predicate;
     }
 
     @Override
@@ -44,7 +39,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
 
     @Override
     public ExtensionalDataNode clone() {
-        return new ExtensionalDataNodeImpl(getProjectionAtom(), relation2Predicate);
+        return new ExtensionalDataNodeImpl(getProjectionAtom());
     }
 
     @Override
@@ -61,30 +56,35 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
     public SubstitutionResults<ExtensionalDataNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode childNode, IntermediateQuery query) {
-        return applySubstitution((ExtensionalDataNode) this, substitution);
+        return applySubstitution(this, substitution);
     }
 
     @Override
     public SubstitutionResults<ExtensionalDataNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        return applySubstitution((ExtensionalDataNode)this, substitution);
+        return applySubstitution(this, substitution);
+    }
+
+    @Override
+    public ExtensionalDataNode newAtom(DataAtom<RelationPredicate> newAtom) {
+        return new ExtensionalDataNodeImpl(newAtom);
     }
 
     @Override
     public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
+        return isVariableNullable(variable);
+    }
+
+    /**
+     * TODO: add it to the IQ interface
+     */
+    public boolean isVariableNullable(Variable variable) {
         if (!getVariables().contains(variable))
             throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
 
-        DBMetadata metadata = query.getDBMetadata();
-        DataAtom atom = getProjectionAtom();
+        DataAtom<RelationPredicate> atom = getProjectionAtom();
 
-        RelationID relationId = relation2Predicate.createRelationFromPredicateName(
-                metadata.getQuotedIDFactory(),
-                atom.getPredicate());
-        DatabaseRelationDefinition relation = metadata.getDatabaseRelation(relationId);
-
-        if (relation == null)
-            throw new MissingRelationForExtensionalDataNodeException("Bug: required relation for " + this + " not found");
+        RelationDefinition relation = atom.getPredicate().getRelationDefinition();
 
         ImmutableList<? extends VariableOrGroundTerm> arguments = atom.getArguments();
 
@@ -93,8 +93,6 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
                 .filter(i -> arguments.get(i - 1).equals(variable))
                 .mapToObj(relation::getAttribute)
                 .allMatch(Attribute::canNull);
-
-
     }
 
     @Override
@@ -107,10 +105,5 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
     @Override
     public String toString() {
         return EXTENSIONAL_NODE_STR + " " + getProjectionAtom();
-    }
-
-    @Override
-    public ExtensionalDataNode newAtom(DataAtom newAtom) {
-        return new ExtensionalDataNodeImpl(newAtom, relation2Predicate);
     }
 }

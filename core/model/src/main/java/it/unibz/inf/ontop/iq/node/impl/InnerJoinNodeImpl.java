@@ -33,6 +33,7 @@ import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
     private static final String JOIN_NODE_STR = "JOIN" ;
+    private static final int MAX_ITERATIONS = 100000;
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final ConstructionNodeTools constructionNodeTools;
@@ -248,13 +249,18 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
         try {
 
-            while (!hasConverged) {
+            int i = 0;
+            while ((!hasConverged) && (i++ < MAX_ITERATIONS)) {
                 LiftingStepResults results = liftChildBinding(currentChildren, currentJoiningCondition, variableGenerator);
                 hasConverged = results.hasConverged;
                 currentChildren = results.children;
                 currentSubstitution = results.substitution.composeWith(currentSubstitution);
                 currentJoiningCondition = results.joiningCondition;
             }
+
+            if (i >= MAX_ITERATIONS)
+                throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
+
             IQTree joinIQ = createJoinOrFilterOrTrue(currentChildren, currentJoiningCondition);
 
             ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = substitutionFactory

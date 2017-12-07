@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -34,11 +35,11 @@ import static org.junit.Assert.fail;
 
 public class MappingTest {
 
-    private static final AtomPredicate P1_PREDICATE;
-    private static final AtomPredicate P3_PREDICATE;
-    private static final AtomPredicate P4_PREDICATE;
-    private static final AtomPredicate P5_PREDICATE;
-    private static final AtomPredicate BROKER_PREDICATE;
+    private static final RelationPredicate P1_PREDICATE;
+    private static final RelationPredicate P3_PREDICATE;
+    private static final RelationPredicate P4_PREDICATE;
+    private static final RelationPredicate P5_PREDICATE;
+    private static final RelationPredicate BROKER_PREDICATE;
 
     private static final DBMetadata DB_METADATA;
 
@@ -68,19 +69,19 @@ public class MappingTest {
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p1"));
         table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         table1Def.addAttribute(idFactory.createAttributeID("col12"), Types.INTEGER, null, false);
-        P1_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table1Def);
+        P1_PREDICATE = table1Def.getAtomPredicate();
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p3"));
         table3Def.addAttribute(idFactory.createAttributeID("col31"), Types.INTEGER, null, false);
-        P3_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table3Def);
+        P3_PREDICATE = table3Def.getAtomPredicate();
 
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p4"));
         table4Def.addAttribute(idFactory.createAttributeID("col41"), Types.INTEGER, null, false);
-        P4_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table4Def);
+        P4_PREDICATE = table4Def.getAtomPredicate();
 
         DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p5"));
         table5Def.addAttribute(idFactory.createAttributeID("col51"), Types.INTEGER, null, false);
-        P5_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table5Def);
+        P5_PREDICATE = table5Def.getAtomPredicate();
 
         P1_ST_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P1_PREDICATE, ImmutableList.of(S, T));
         P2_ST_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P1_PREDICATE, ImmutableList.of(S, T));
@@ -93,7 +94,7 @@ public class MappingTest {
         tableBrokerDef.addAttribute(idFactory.createAttributeID("broker"), Types.INTEGER, null, false);
         tableBrokerDef.addAttribute(idFactory.createAttributeID("company"), Types.INTEGER, null, true);
         tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), Types.INTEGER, null, true);
-        BROKER_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(tableBrokerDef);
+        BROKER_PREDICATE = tableBrokerDef.getAtomPredicate();
 
         URI_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
         ANS1_VAR1_PREDICATE = ATOM_FACTORY.getAtomPredicate("http://example.org/Dealer", 1);

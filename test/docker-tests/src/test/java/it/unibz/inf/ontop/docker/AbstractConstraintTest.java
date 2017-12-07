@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,14 +74,14 @@ public abstract class AbstractConstraintTest extends TestCase {
 			OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 			AtomFactory atomFactory = defaultConfiguration.getAtomFactory();
 			TermFactory termFactory = defaultConfiguration.getTermFactory();
+			TypeFactory typeFactory = defaultConfiguration.getTypeFactory();
 			Injector injector = defaultConfiguration.getInjector();
 			DatalogFactory datalogFactory = injector.getInstance(DatalogFactory.class);
-			Relation2Predicate relation2Predicate = injector.getInstance(Relation2Predicate.class);
 			JdbcTypeMapper jdbcTypeMapper = injector.getInstance(JdbcTypeMapper.class);
 
 
-			metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, datalogFactory,
-					atomFactory, relation2Predicate, jdbcTypeMapper);
+			metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, typeFactory, datalogFactory,
+					atomFactory, jdbcTypeMapper);
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		}
 		catch (IOException e) {

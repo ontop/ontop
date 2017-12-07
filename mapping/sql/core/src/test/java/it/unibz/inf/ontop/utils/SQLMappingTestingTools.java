@@ -23,7 +23,6 @@ public class SQLMappingTestingTools {
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
-    public static final Relation2Predicate RELATION_2_PREDICATE;
     public static final SpecificationFactory MAPPING_FACTORY;
     public static final MappingNormalizer MAPPING_NORMALIZER;
     private static final DummyRDBMetadata DEFAULT_DUMMY_DB_METADATA;
@@ -42,7 +41,6 @@ public class SQLMappingTestingTools {
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
-        RELATION_2_PREDICATE = injector.getInstance(Relation2Predicate.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyRDBMetadata.class);
 

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import org.junit.Ignore;
@@ -32,13 +33,13 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class LeftJoinOptimizationTest {
 
-    private final static AtomPredicate TABLE1_PREDICATE;
-    private final static AtomPredicate TABLE1a_PREDICATE;
-    private final static AtomPredicate TABLE2_PREDICATE;
-    private final static AtomPredicate TABLE2a_PREDICATE;
-    private final static AtomPredicate TABLE3_PREDICATE;
-    private final static AtomPredicate TABLE4_PREDICATE;
-    private final static AtomPredicate TABLE5_PREDICATE;
+    private final static RelationPredicate TABLE1_PREDICATE;
+    private final static RelationPredicate TABLE1a_PREDICATE;
+    private final static RelationPredicate TABLE2_PREDICATE;
+    private final static RelationPredicate TABLE2a_PREDICATE;
+    private final static RelationPredicate TABLE3_PREDICATE;
+    private final static RelationPredicate TABLE4_PREDICATE;
+    private final static RelationPredicate TABLE5_PREDICATE;
     private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
     private final static AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 4);
@@ -88,7 +89,7 @@ public class LeftJoinOptimizationTest {
         table1Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table1Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, true);
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Col1));
-        TABLE1_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table1Def);
+        TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         /*
          * Table 2: non-composite unique constraint and regular field
@@ -99,7 +100,7 @@ public class LeftJoinOptimizationTest {
         table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Col1));
         table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Col2, table1Col1));
-        TABLE2_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table2Def);
+        TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         /*
          * Table 3: composite unique constraint over the first TWO columns
@@ -109,7 +110,7 @@ public class LeftJoinOptimizationTest {
         Attribute table3Col2 = table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Col1, table3Col2));
-        TABLE3_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table3Def);
+        TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         /*
          * Table 1a: non-composite unique constraint and regular field
@@ -120,7 +121,7 @@ public class LeftJoinOptimizationTest {
         table1aDef.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table1aDef.addAttribute(idFactory.createAttributeID("col4"), Types.INTEGER, null, false);
         table1aDef.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1aCol1));
-        TABLE1a_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table1aDef);
+        TABLE1a_PREDICATE = table1aDef.getAtomPredicate();
 
         /*
          * Table 2a: non-composite unique constraint and regular field
@@ -134,7 +135,7 @@ public class LeftJoinOptimizationTest {
         fkBuilder.add(table2aCol2, table1aCol1);
         fkBuilder.add(table2aCol3, table1aCol2);
         table2aDef.addForeignKeyConstraint(fkBuilder.build("composite-fk"));
-        TABLE2a_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table2aDef);
+        TABLE2a_PREDICATE = table2aDef.getAtomPredicate();
 
         /*
          * Table 4: non-composite unique constraint and nullable fk
@@ -145,7 +146,7 @@ public class LeftJoinOptimizationTest {
         Attribute table4Col3 = table4Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, true);
         table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table4Col1));
         table4Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk4-1", table4Col3, table1Col1));
-        TABLE4_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table4Def);
+        TABLE4_PREDICATE = table4Def.getAtomPredicate();
 
         /*
          * Table 5: nullable unique constraint
@@ -157,7 +158,7 @@ public class LeftJoinOptimizationTest {
                 UniqueConstraint.builder(table5Def)
                     .add(table5Col1)
                     .build("uc5", false));
-        TABLE5_PREDICATE = RELATION_2_PREDICATE.createAtomPredicateFromRelation(table5Def);
+        TABLE5_PREDICATE = table5Def.getAtomPredicate();
 
         dbMetadata.freeze();
         DB_METADATA = dbMetadata;

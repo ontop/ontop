@@ -20,6 +20,10 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
+
+import javax.annotation.Nullable;
 import java.util.List;
 
 
@@ -36,6 +40,12 @@ import java.util.List;
 public abstract class RelationDefinition {
 
 	private final RelationID id;
+
+	/**
+	 * Lazy
+	 */
+	@Nullable
+	private RelationPredicate predicate;
 	
 	protected RelationDefinition(RelationID id) {
 		this.id = id;
@@ -48,4 +58,21 @@ public abstract class RelationDefinition {
 	public abstract Attribute getAttribute(int index);
 
 	public abstract List<Attribute> getAttributes();
+
+	/**
+	 * Call it only after having completely assigned the attributes!
+	 */
+	public RelationPredicate getAtomPredicate() {
+		if (predicate == null)
+			predicate = new RelationPredicateImpl(this);
+		return predicate;
+	}
+
+	public abstract ImmutableList<UniqueConstraint> getUniqueConstraints();
+
+	public abstract ImmutableList<FunctionalDependency> getOtherFunctionalDependencies();
+
+	public abstract UniqueConstraint getPrimaryKey();
+
+	public abstract ImmutableList<ForeignKeyConstraint> getForeignKeys();
 }

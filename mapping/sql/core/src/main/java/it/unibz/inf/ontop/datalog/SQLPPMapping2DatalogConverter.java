@@ -48,15 +48,12 @@ import org.slf4j.LoggerFactory;
 public class SQLPPMapping2DatalogConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SQLPPMapping2DatalogConverter.class);
-    private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
 
     @Inject
-    private SQLPPMapping2DatalogConverter(Relation2Predicate relation2Predicate, TermFactory termFactory,
-                                          TypeFactory typeFactory, DatalogFactory datalogFactory) {
-        this.relation2Predicate = relation2Predicate;
+    private SQLPPMapping2DatalogConverter(TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.datalogFactory = datalogFactory;
@@ -106,7 +103,7 @@ public class SQLPPMapping2DatalogConverter {
                     List<Term> arguments = list.stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
 
                     body = new ArrayList<>(1);
-                    body.add(termFactory.getFunction(relation2Predicate.createPredicateFromRelation(view), arguments));
+                    body.add(termFactory.getFunction(view.getAtomPredicate(), arguments));
                 }
 
                 for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {

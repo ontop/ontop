@@ -4,11 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  * Common abstraction for all sorts of Database (relational, etc.)
@@ -38,7 +37,7 @@ public interface DBMetadata extends Serializable {
      *
      *
      */
-    ImmutableMultimap<AtomPredicate,ImmutableList<Integer>> getUniqueConstraints();
+    ImmutableMultimap<RelationPredicate,ImmutableList<Integer>> getUniqueConstraints();
 
     /**
      * generate CQIE rules from foreign key info of db metadata
@@ -73,12 +72,6 @@ public interface DBMetadata extends Serializable {
      * Retrieves the tables list form the metadata.
      */
     Collection<DatabaseRelationDefinition> getDatabaseRelations();
-
-    Optional<TermType> getTermType(Attribute attribute);
-
-    Optional<DatabaseRelationDefinition> getDatabaseRelationByPredicate(AtomPredicate predicate);
-
-    Relation2Predicate getRelation2Predicate();
 
     /**
      * After calling this method, the DBMetadata cannot be modified

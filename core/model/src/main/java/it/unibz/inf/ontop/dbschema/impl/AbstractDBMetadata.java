@@ -14,13 +14,10 @@ import java.util.*;
 
 public abstract class AbstractDBMetadata implements DBMetadata {
 
-    private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
 
-    protected AbstractDBMetadata(Relation2Predicate relation2Predicate,
-                                 TermFactory termFactory, DatalogFactory datalogFactory) {
-        this.relation2Predicate = relation2Predicate;
+    protected AbstractDBMetadata(TermFactory termFactory, DatalogFactory datalogFactory) {
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
     }
@@ -72,11 +69,11 @@ public abstract class AbstractDBMetadata implements DBMetadata {
                 for (Map.Entry<Integer,Integer> swap : positionMatch.entrySet())
                     terms1.set(swap.getKey(), terms2.get(swap.getValue()));
 
-                Function head = relation2Predicate.getAtom(def2, terms2);
-                Function body = relation2Predicate.getAtom(def, terms1);
+                Function head = termFactory.getFunction(def2.getAtomPredicate(), terms2);
+                Function body = termFactory.getFunction(def.getAtomPredicate(), terms1);
 
                 CQIE rule = datalogFactory.getCQIE(head, body);
-                multimapBuilder.put(convertToAtomPredicate(body.getFunctionSymbol(), knownPredicateMap), rule);
+                multimapBuilder.put(def.getAtomPredicate(), rule);
                 if (printouts)
                     System.out.println("   FK_" + ++count + " " +  head + " :- " + body);
             }
@@ -84,29 +81,6 @@ public abstract class AbstractDBMetadata implements DBMetadata {
         if (printouts)
             System.out.println("===END OF FOREIGN KEY RULES");
         return multimapBuilder.build();
-    }
-
-    protected abstract AtomPredicate convertToAtomPredicate(Predicate functionSymbol,
-                                                            Map<Predicate, AtomPredicate> knownPredicateMap);
-
-    @Override
-    public Optional<DatabaseRelationDefinition> getDatabaseRelationByPredicate(AtomPredicate predicate) {
-
-        RelationID relationId = relation2Predicate.createRelationFromPredicateName(getQuotedIDFactory(),
-                predicate);
-
-        return Optional.ofNullable(getRelation(relationId))
-                /*
-                 * Here we only consider DB relations
-                 */
-                .filter(r -> r instanceof DatabaseRelationDefinition)
-                .map(r -> (DatabaseRelationDefinition) r);
-    }
-
-
-    @Override
-    public Relation2Predicate getRelation2Predicate() {
-        return relation2Predicate;
     }
 
     protected TermFactory getTermFactory() {

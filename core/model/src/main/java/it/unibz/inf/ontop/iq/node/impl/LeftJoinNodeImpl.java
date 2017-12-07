@@ -9,6 +9,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
@@ -43,6 +44,8 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.I
 
 public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
+
+    private static final int MAX_ITERATIONS = 10000;
 
     private enum Provenance {
         FROM_ABOVE,
@@ -417,12 +420,16 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 variableGenerator);
         boolean hasConverged = false;
 
-        while (!hasConverged) {
+        int i = 0;
+        while ((!hasConverged) && (i++ < MAX_ITERATIONS)) {
             ChildLiftingState newLiftingState = liftRightChild(
                     optimizeLeftJoinCondition(liftingState, variableGenerator), variableGenerator);
 
             hasConverged = liftingState.equals(newLiftingState);
         }
+
+        if (i >= MAX_ITERATIONS)
+            throw new MinorOntopInternalBugException("LJ.liftBinding() did not converge after " + MAX_ITERATIONS);
 
         Optional<ConstructionNode> topConstructionNode = Optional.of(liftingState.getComposedAscendingSubstitution())
                 .filter(s -> !s.isEmpty())

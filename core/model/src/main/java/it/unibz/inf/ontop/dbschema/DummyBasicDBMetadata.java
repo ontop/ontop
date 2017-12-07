@@ -4,6 +4,9 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 /**
  * A dummy DBMetadata
@@ -11,10 +14,26 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 public class DummyBasicDBMetadata extends BasicDBMetadata {
 
     @Inject
-    private DummyBasicDBMetadata(AtomFactory atomFactory, Relation2Predicate relation2Predicate,
-                                 TermFactory termFactory, DatalogFactory datalogFactory) {
+    private DummyBasicDBMetadata(AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
+                                 DatalogFactory datalogFactory) {
         super("dummy", null, null, "",
-                new QuotedIDFactoryStandardSQL("\""),
-                atomFactory, relation2Predicate, termFactory, datalogFactory);
+                new DummyTypeMapper(typeFactory), atomFactory, termFactory, datalogFactory,
+                new QuotedIDFactoryStandardSQL("\"")
+        );
+    }
+
+
+    private static class DummyTypeMapper implements TypeMapper {
+
+        private final RDFDatatype defaultType;
+
+        private DummyTypeMapper(TypeFactory typeFactory) {
+            this.defaultType = typeFactory.getXsdStringDatatype();
+        }
+
+        @Override
+        public TermType getTermType(int typeCode, String typeName) {
+            return defaultType;
+        }
     }
 }

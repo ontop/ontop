@@ -35,14 +35,12 @@ public class SelectQueryParser {
     private final QuotedIDFactory idfac;
 
     private int relationIndex = 0;
-    private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
 
     public SelectQueryParser(DBMetadata metadata, TermFactory termFactory, TypeFactory typeFactory) {
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
-        this.relation2Predicate = metadata.getRelation2Predicate();
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
     }
@@ -244,7 +242,7 @@ public class SelectQueryParser {
                 attributes.put(attributeId, var);
             });
             // create an atom for a particular table
-            Function atom = relation2Predicate.getAtom(relation, terms);
+            Function atom = termFactory.getFunction(relation.getAtomPredicate(), terms);
 
             // DEFAULT SCHEMA
             // TODO: to be improved

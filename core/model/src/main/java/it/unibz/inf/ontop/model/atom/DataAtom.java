@@ -9,9 +9,9 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
  *
  * In the future, this class could be disassociated from the Function class.
  */
-public interface DataAtom extends ImmutableFunctionalTerm {
+public interface DataAtom<P extends AtomPredicate> extends ImmutableFunctionalTerm {
 
-    AtomPredicate getPredicate();
+    P getPredicate();
 
     /**
      * Effective arity (number of sub-terms).

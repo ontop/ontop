@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -60,10 +61,10 @@ public class DirectMappingEngine {
 
 	private final MappingVocabularyExtractor vocabularyExtractor;
 	private final AtomFactory atomFactory;
-	private final Relation2Predicate relation2Predicate;
 	private final TermFactory termFactory;
 	private final DatalogFactory datalogFactory;
 	private final JdbcTypeMapper jdbcTypeMapper;
+	private final TypeFactory typeFactory;
 
 	public static class DefaultBootstrappingResults implements BootstrappingResults {
 		private final SQLPPMapping ppMapping;
@@ -106,15 +107,14 @@ public class DirectMappingEngine {
 
 	@Inject
 	private DirectMappingEngine(OntopSQLCredentialSettings settings, MappingVocabularyExtractor vocabularyExtractor,
-								AtomFactory atomFactory, Relation2Predicate relation2Predicate,
-								TermFactory termFactory, DatalogFactory datalogFactory, JdbcTypeMapper jdbcTypeMapper,
-								SpecificationFactory specificationFactory,
-								SQLPPMappingFactory ppMappingFactory) {
+								AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
+								JdbcTypeMapper jdbcTypeMapper, TypeFactory typeFactory,
+								SpecificationFactory specificationFactory, SQLPPMappingFactory ppMappingFactory) {
 		this.atomFactory = atomFactory;
-		this.relation2Predicate = relation2Predicate;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
 		this.jdbcTypeMapper = jdbcTypeMapper;
+		this.typeFactory = typeFactory;
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
@@ -236,8 +236,8 @@ public class DirectMappingEngine {
 			throw new IllegalArgumentException("Model should not be null");
 		}
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
-			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, datalogFactory,
-					atomFactory, relation2Predicate, jdbcTypeMapper);
+			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, typeFactory, datalogFactory,
+					atomFactory, jdbcTypeMapper);
 			// this operation is EXPENSIVE
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 			return bootstrapMappings(metadata, ppMapping);

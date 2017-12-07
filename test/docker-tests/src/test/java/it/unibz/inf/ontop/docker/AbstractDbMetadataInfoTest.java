@@ -25,8 +25,8 @@ import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,9 +64,9 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 
 			metadata = RDBMetadataExtractionTools.createMetadata(conn,
 					defaultConfiguration.getTermFactory(),
+					injector.getInstance(TypeFactory.class),
 					injector.getInstance(DatalogFactory.class),
 					defaultConfiguration.getAtomFactory(),
-					injector.getInstance(Relation2Predicate.class),
 					injector.getInstance(JdbcTypeMapper.class));
 
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);

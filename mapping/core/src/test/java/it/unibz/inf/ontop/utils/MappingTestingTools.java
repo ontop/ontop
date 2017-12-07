@@ -26,7 +26,6 @@ public class MappingTestingTools {
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
-    public static final Relation2Predicate RELATION_2_PREDICATE;
     public static final SpecificationFactory MAPPING_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
     public static final MappingNormalizer MAPPING_NORMALIZER;
@@ -50,7 +49,6 @@ public class MappingTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
-        RELATION_2_PREDICATE = injector.getInstance(Relation2Predicate.class);
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
 
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);

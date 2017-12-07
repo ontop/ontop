@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -47,8 +48,8 @@ public class BootstrapGenerator {
     private final MappingVocabularyExtractor vocabularyExtractor;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
-    private final Relation2Predicate relation2Predicate;
     private final JdbcTypeMapper jdbcTypeMapper;
     private int currentMappingIndex = 1;
 
@@ -63,8 +64,8 @@ public class BootstrapGenerator {
         vocabularyExtractor = configuration.getInjector().getInstance(MappingVocabularyExtractor.class);
         atomFactory = obdaModelManager.getAtomFactory();
         termFactory = obdaModelManager.getTermFactory();
+        typeFactory = obdaModelManager.getTypeFactory();
         datalogFactory = obdaModelManager.getDatalogFactory();
-        relation2Predicate = obdaModelManager.getRelation2Predicate();
 
         bootstrapMappingAndOntologyProtege(baseUri);
     }
@@ -100,8 +101,8 @@ public class BootstrapGenerator {
             throw new RuntimeException("JDBC connection are missing, have you setup Ontop Mapping properties?" +
                     " Message: " + e.getMessage());
         }
-        RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, datalogFactory,
-                atomFactory, relation2Predicate, jdbcTypeMapper);
+        RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, typeFactory, datalogFactory,
+                atomFactory, jdbcTypeMapper);
 
         // this operation is EXPENSIVE
         RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);

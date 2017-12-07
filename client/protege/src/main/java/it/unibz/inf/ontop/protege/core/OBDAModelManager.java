@@ -195,7 +195,11 @@ public class OBDAModelManager implements Disposable {
 		return jdbcTypeMapper;
 	}
 
-	/***
+	public TypeFactory getTypeFactory() {
+		return typeFactory;
+	}
+
+    /***
 	 * This ontology change listener has some euristics that determine if the
 	 * user is refactoring his ontology. In particular, this listener will try
 	 * to determine if some add/remove axioms are in fact a "renaming"

@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,8 +116,8 @@ public class RDBMetadataExtractionTools {
 	 */
 
 	public static RDBMetadata createMetadata(Connection conn,
-											 TermFactory termFactory, DatalogFactory datalogFactory,
-											 AtomFactory atomFactory, Relation2Predicate relation2Predicate,
+											 TermFactory termFactory, TypeFactory typeFactory,
+											 DatalogFactory datalogFactory, AtomFactory atomFactory,
 											 JdbcTypeMapper jdbcTypeMapper) throws SQLException  {
 		
 		final DatabaseMetaData md = conn.getMetaData();
@@ -170,7 +171,7 @@ public class RDBMetadataExtractionTools {
 		
 		RDBMetadata metadata = new RDBMetadata(md.getDriverName(), md.getDriverVersion(),
 							productName, md.getDatabaseProductVersion(), idfac, jdbcTypeMapper,
-				atomFactory, relation2Predicate, termFactory, datalogFactory);
+				atomFactory, termFactory, typeFactory, datalogFactory);
 		
 		return metadata;	
 	}

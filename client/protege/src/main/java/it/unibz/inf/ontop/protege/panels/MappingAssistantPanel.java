@@ -802,8 +802,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		try {
 			Connection conn = ConnectionTools.getConnection(selectedSource);
 			RDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn, obdaModel.getTermFactory(),
-					obdaModel.getDatalogFactory(), obdaModel.getAtomFactory(),
-					obdaModel.getRelation2Predicate(), jdbcTypeMapper);
+					obdaModel.getTypeFactory(), obdaModel.getDatalogFactory(), obdaModel.getAtomFactory(),
+					jdbcTypeMapper);
 			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
 			RDBMetadataExtractionTools.loadMetadata(md, conn, null);
 			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {
