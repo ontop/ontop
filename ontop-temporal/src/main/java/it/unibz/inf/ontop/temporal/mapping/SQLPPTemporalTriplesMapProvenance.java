@@ -31,5 +31,9 @@ public class SQLPPTemporalTriplesMapProvenance implements PPTriplesMapProvenance
     public String toString() {
         return getProvenanceInfo();
     }
+
+    public SQLPPTemporalTriplesMap getTriplesMap(){
+        return triplesMap;
+    }
 }
 

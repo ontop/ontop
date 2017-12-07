@@ -27,4 +27,8 @@ public class SQLTemporalMappingAssertionProvenance implements PPMappingAssertion
     public String toString() {
         return getProvenanceInfo();
     }
+
+    public SQLPPTemporalTriplesMap getTriplesMap(){
+        return  triplesMap;
+    }
 }

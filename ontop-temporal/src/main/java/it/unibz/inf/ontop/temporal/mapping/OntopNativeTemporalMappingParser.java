@@ -310,7 +310,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
 
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(endInXSDDateTime, endInstantURITemplate, temporalTriplesMap.getTemporalMappingInterval().getEnd()));
 
-        return new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList()));
+        return new SQLPPTemporalTriplesMapImpl(temporalTriplesMap, ngComponentsList.stream().collect(ImmutableCollectors.toList()), targetAtom.getFunctionSymbol());
     }
 
     private static ImmutableTerm getGraphURITemplate(TemporalMappingInterval intervalQuery){

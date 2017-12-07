@@ -11,4 +11,9 @@ mappingId	urn:Map-rotorSpeed
 target		:RotationSpeedSensor/{sensor_id} :rotorSpeed {value}.
 interval    [{ts_begin}^^xsd:datetime, {ts_end}^^xsd:datetime)
 source		SELECT sensor_id, value, timestamp AS ts_begin, LEAD(timestamp, 1) OVER (PARTITION BY sensor_id ORDER BY timestamp) AS ts_end FROM tb_measurement
+
+mappingId	urn:Map-rotorSpeed-1
+target		:RotationSpeedSensor/{sensor_id} :rotorSpeed {value}.
+interval    [{ts_begin}^^xsd:datetime, {ts_end}^^xsd:datetime)
+source		SELECT sensor_id, value, timestamp AS ts_begin, LEAD(timestamp, 1) OVER (PARTITION BY sensor_id ORDER BY timestamp) AS ts_end FROM tb_measurement
 ]]

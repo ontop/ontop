@@ -1,22 +1,23 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
+import it.unibz.inf.ontop.injection.TemporalSpecificationFactory;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.TOBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
-import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
-import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.spec.mapping.TemporalMappingExtractor;
-import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
+import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.*;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
@@ -24,15 +25,16 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import org.apache.commons.rdf.api.Graph;
+import it.unibz.inf.ontop.temporal.mapping.impl.SQLTemporalMappingAssertionProvenance;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Optional;
+import java.util.*;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 
 
 public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
@@ -45,11 +47,13 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final OntopMappingSQLSettings settings;
     private final MappingDatatypeFiller mappingDatatypeFiller;
+    private final TemporalSpecificationFactory temporalSpecificationFactory;
+    private final UnionBasedQueryMerger queryMerger;
 
     @Inject
     private TemporalMappingExtractorImpl(TemporalMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                          TemporalPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
-                                NativeQueryLanguageComponentFactory nativeQLFactory, OntopMappingSQLSettings settings) {
+                                NativeQueryLanguageComponentFactory nativeQLFactory, OntopMappingSQLSettings settings, TemporalSpecificationFactory specificationFactory, UnionBasedQueryMerger queryMerger) {
 
         this.mappingParser = mappingParser;
         this.ontologyComplianceValidator = ontologyComplianceValidator;
@@ -57,6 +61,8 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
         this.dbMetadataExtractor = nativeQLFactory.create();
         this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.settings = settings;
+        this.temporalSpecificationFactory = specificationFactory;
+        this.queryMerger = queryMerger;
     }
     @Override
     public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology, @Nonnull Optional<TBoxReasoner> saturatedTBox, @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
@@ -121,7 +127,127 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
         //TODO: write a mapping validator for temporal mappings
         //validateMapping(optionalOntology, optionalSaturatedTBox, filledProvMapping);
 
-        return new TemporalMappingAndDBMetadataImpl(filledProvMapping.toRegularMapping(), dbMetadata);
+        return new TemporalMappingAndDBMetadataImpl(toRegularMapping(filledProvMapping), dbMetadata);
+    }
+
+    //TODO: move it to a proper place
+    public TemporalMapping toRegularMapping( MappingWithProvenance mappingWithProvenance) {
+        class MapItem{
+            Predicate pred;
+            Predicate projPred;
+            IntermediateQuery iq;
+
+            public MapItem(Predicate pred,
+                    Predicate projPred,
+                    IntermediateQuery iq){
+                this.pred = pred;
+                this.projPred = projPred;
+                this.iq = iq;
+            }
+
+            public Predicate getPred() {
+                return pred;
+            }
+
+            public Predicate getProjPred() {
+                return projPred;
+            }
+
+            public IntermediateQuery getIq() {
+                return iq;
+            }
+
+            @Override
+            public String toString(){
+                return String.format("pred: %s \nprojPred: %s \niq:%s", pred.getName(), projPred.getName(), iq.toString());
+            }
+        }
+        List<MapItem> mapItems = new ArrayList<>();
+         mappingWithProvenance.getProvenanceMap().forEach((iq, tmap )-> {
+            mapItems.add(new MapItem(((SQLTemporalMappingAssertionProvenance)tmap).getTriplesMap()
+                    .getProvenanceTemporalPredicate(), iq.getProjectionAtom().getFunctionSymbol(), iq));
+        });
+
+        mapItems.sort(Comparator.comparing(a -> a.getProjPred().getName()));
+
+        Map<Predicate, Multimap<String, IntermediateQuery>> map = new HashMap<>();
+
+        //TODO: inXSDTimes are duplicated. fix it!
+        for(MapItem mapItem : mapItems){
+            map.putIfAbsent(mapItem.getPred(), ArrayListMultimap.create());
+            if (mapItem.getProjPred().getName().equals("http://www.w3.org/2006/time#inXSDDateTime")){
+                mapItem.getIq().getRootConstructionNode().getSubstitution().getImmutableMap().values().forEach(immutableTerm -> {
+                    mapItems.forEach(mapItem1 -> {
+                        if (mapItem1.getProjPred().getName().equals("http://www.w3.org/2006/time#hasBeginning")){
+                           if(mapItem1.getIq().getRootConstructionNode().getSubstitution().getImmutableMap().containsValue(immutableTerm)){
+                               map.get(mapItem.getPred()).put(mapItem.getProjPred().getName()+"$begin", mapItem.getIq());
+                           }
+                        }else if(mapItem1.getProjPred().getName().equals("http://www.w3.org/2006/time#hasEnd")){
+                            if(mapItem1.getIq().getRootConstructionNode().getSubstitution().getImmutableMap().containsValue(immutableTerm)){
+                                map.get(mapItem.getPred()).put(mapItem.getProjPred().getName()+"$end", mapItem.getIq());
+                            }
+                        }
+
+                    });
+                });
+            }else {
+                map.get(mapItem.getPred()).put(mapItem.getProjPred().getName(), mapItem.getIq());
+            }
+        }
+
+        Map<AtomPredicate, QuadrupleDefinition> quadrupleDefinitionMap = Maps.newHashMap();
+
+        map.forEach(
+                (keyPred, item) -> {
+                    List<IntermediateQuery> definitions = Lists.newLinkedList();
+                    List<String> keys = Lists.newLinkedList();
+                    Map<String, IntermediateQuery> defMap = new HashMap<>();
+                    item.asMap().forEach(
+                            (mmk, mmi) -> {
+                                queryMerger.mergeDefinitions(mmi).ifPresent(definitions::add);
+                                keys.add(mmk);
+                            }
+                    );
+                    quadrupleDefinitionMap.put(ATOM_FACTORY.getAtomPredicate(keyPred), toQuadrupleDefinition(keys, definitions));
+                });
+
+        return temporalSpecificationFactory.createTemporalMapping(mappingWithProvenance.getMetadata(), ImmutableMap.copyOf(quadrupleDefinitionMap), mappingWithProvenance.getExecutorRegistry());
+    }
+
+    private QuadrupleDefinition toQuadrupleDefinition(List <String> keyList, List<IntermediateQuery> iqList){
+        QuadrupleDefinition qd = new QuadrupleDefinition();
+        int idx = 0;
+        for(IntermediateQuery iq : iqList) {
+            String predName = keyList.get(idx);
+
+            if (predName.equals(QuadrupleElements.quadruple.toString())) {
+                qd.setQuadruple(new QuadrupleItem(iq.getProjectionAtom().getPredicate(), iq));
+
+            } else if (predName.equals(QuadrupleElements.hasTime.toString())) {
+                qd.setHasTime(new QuadrupleItem(iq.getProjectionAtom().getPredicate(), iq));
+
+            } else if(predName.equals(QuadrupleElements.isBeginInclusive.toString())){
+                qd.setIsBeginInclusive(new QuadrupleItem(iq.getProjectionAtom().getPredicate(), iq));
+
+            } else if (predName.equals(QuadrupleElements.hasBeginning.toString())){
+                qd.setHasBeginning(new QuadrupleItem(iq.getProjectionAtom().getPredicate(), iq));
+
+            } else if (predName.equals(QuadrupleElements.inXSDTimeBegin.toString()+"$begin")){
+                qd.setInXSDTimeBegin(new QuadrupleItem(iq.getProjectionAtom().getPredicate(), iq));
+
+            } else if (predName.equals(QuadrupleElements.isEndInclusive.toString())){
+                qd.setIsEndInclusive(new QuadrupleItem(iq.getProjectionAtom().getPredicate(), iq));
+
+            } else if (predName.equals(QuadrupleElements.hasEnd.toString())){
+                qd.setHasEnd(new QuadrupleItem(iq.getProjectionAtom().getPredicate(), iq));
+
+            } else if (predName.equals(QuadrupleElements.inXSDTimeEnd.toString()+"$end")){
+                qd.setInXSDTimeEnd(new QuadrupleItem(iq.getProjectionAtom().getPredicate(), iq));
+
+            }
+            idx ++;
+        }
+        return qd;
     }
 
     private SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)

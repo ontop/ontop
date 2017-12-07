@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
@@ -69,7 +70,7 @@ public class TemporalMappingTransformerImpl implements TemporalMappingTransforme
 
     @Override
     public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata, Ontology ontology,
-                                       TBoxReasoner tBox, Mapping temporalMapping, DBMetadata temporalDBMetadata,
+                                       TBoxReasoner tBox, TemporalMapping temporalMapping, DBMetadata temporalDBMetadata,
                                        DatalogMTLProgram datalogMTLProgram) throws MappingException, OntologyException, DBMetadataExtractionException {
         Mapping factsAsMapping = factConverter.convert(ontology, mapping.getExecutorRegistry(),
                 settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());

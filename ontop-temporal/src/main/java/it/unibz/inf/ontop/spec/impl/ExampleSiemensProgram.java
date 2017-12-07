@@ -18,24 +18,29 @@ public class ExampleSiemensProgram {
         DatalogMTLFactory f = DatalogMTLFactoryImpl.getInstance();
         TermFactory odf = OntopModelSingletons.TERM_FACTORY;
 
+        Map<String, String> prefixes = new HashMap<>();
+        prefixes.put("ss:", "http://siemens.com/ns#");
+        prefixes.put("st:", "http://siemens.com/temporal/ns#");
+        prefixes.put("obda:", "https://w3id.org/obda/vocabulary#");
+
         TemporalRange rangeLRS = f.createTemporalRange(false, true, Duration.parse("PT0M"), Duration.parse("PT1M"));
         TemporalRange rangeHRS = f.createTemporalRange(false, true, Duration.parse("PT0S"), Duration.parse("PT30S"));
         TemporalRange rangeMFON = f.createTemporalRange(false, true, Duration.parse("PT0S"), Duration.parse("PT10S"));
         TemporalRange rangeDiamondInner = f.createTemporalRange(false, true, Duration.parse("PT0M"), Duration.parse("PT2M"));
         TemporalRange rangeDiamondOuter = f.createTemporalRange(false, true, Duration.parse("PT0M"), Duration.parse("PT10M"));
 
-        final Predicate conceptLRS = odf.getClassPredicate("LowRotorSpeed");
-        final Predicate conceptHRS = odf.getClassPredicate("HighRotorSpeed");
-        final Predicate conceptMFON = odf.getClassPredicate("MainFlameOn");
-        final Predicate dataPropertyRs = odf.getObjectPropertyPredicate("rotorSpeed");
-        final Predicate conceptPIO = odf.getClassPredicate("PurgingIsOver");
+        final Predicate conceptLRS = odf.getClassPredicate(prefixes.get("st:") + "LowRotorSpeed");
+        final Predicate conceptHRS = odf.getClassPredicate(prefixes.get("st:") + "HighRotorSpeed");
+        final Predicate conceptMFON = odf.getClassPredicate(prefixes.get("st:") + "MainFlameOn");
+        final Predicate dataPropertyRs = odf.getObjectPropertyPredicate(prefixes.get("st:") + "rotorSpeed");
+        final Predicate conceptPIO = odf.getClassPredicate(prefixes.get("st:") + "PurgingIsOver");
 
-        final Predicate conceptTurbine = odf.getClassPredicate("Turbine");
-        final Predicate conceptTempSensor = odf.getClassPredicate("TemperatureSensor");
-        final Predicate conceptRotSpeedSensor = odf.getClassPredicate("RotationSpeedSensor");
-        final Predicate objectPropertyIMB = odf.getObjectPropertyPredicate("isMonitoredBy");
-        final Predicate objectPropertyIPO = odf.getObjectPropertyPredicate("isPartOf");
-        final Predicate conceptCLTRS = odf.getClassPredicate("ColocTempRotSensors");
+        final Predicate conceptTurbine = odf.getClassPredicate(prefixes.get("ss:") + "Turbine");
+        final Predicate conceptTempSensor = odf.getClassPredicate(prefixes.get("ss:") + "TemperatureSensor");
+        final Predicate conceptRotSpeedSensor = odf.getClassPredicate(prefixes.get("ss:") + "RotationSpeedSensor");
+        final Predicate objectPropertyIMB = odf.getObjectPropertyPredicate(prefixes.get("ss:") + "isMonitoredBy");
+        final Predicate objectPropertyIPO = odf.getObjectPropertyPredicate(prefixes.get("ss:") + "isPartOf");
+        final Predicate conceptCLTRS = odf.getClassPredicate(prefixes.get("ss:") + "ColocTempRotSensors");
 
         final Variable varRs = odf.getVariable("rs");
         final Variable varTs = odf.getVariable("ts");
@@ -76,14 +81,6 @@ public class ExampleSiemensProgram {
         DatalogMTLRule HRSrule = f.createRule(hrs, f.createTemporalJoinExpression(rs, comparisonHs));
         DatalogMTLRule PIOrule = f.createRule(pio, bodyPIO);
 
-        Map<String, String> prefixes = new HashMap<>();
-
-//        PREFIX ss: <http://siemens.com/ns#>
-//        PREFIX st: <http://siemens.com/temporal/ns#>
-//        PREFIX obda:   <https://w3id.org/obda/vocabulary#>
-        prefixes.put("ss:", "http://siemens.com/ns#");
-        prefixes.put("st", "http://siemens.com/temporal/ns#");
-        prefixes.put("obda:", "https://w3id.org/obda/vocabulary#");
 
         return f.createProgram(prefixes, LRSrule, HRSrule, CLTRSrule, PIOrule);
     }

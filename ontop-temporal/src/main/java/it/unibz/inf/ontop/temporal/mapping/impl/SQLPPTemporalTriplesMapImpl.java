@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.temporal.mapping.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPTriplesMapProvenance;
@@ -16,11 +17,13 @@ public class SQLPPTemporalTriplesMapImpl extends AbstractSQLPPTriplesMap impleme
 
     private final SQLPPTemporalTriplesMapProvenance triplesMapProvenance;
     private TemporalMappingInterval temporalMappingInterval;
+    private Predicate provenanceTemporalPredicate;
 
     public SQLPPTemporalTriplesMapImpl(String id, OBDASQLQuery sqlQuery, ImmutableList<ImmutableFunctionalTerm> targetAtoms, TemporalMappingInterval temporalMappingInterval) {
         super(targetAtoms, sqlQuery, id);
         this.triplesMapProvenance = createProvenance(this);
         setTemporalMappingInterval(temporalMappingInterval);
+        provenanceTemporalPredicate = null;
     }
 
     public SQLPPTemporalTriplesMapImpl(OBDASQLQuery sqlQuery, ImmutableList<ImmutableFunctionalTerm> targetAtoms) {
@@ -29,10 +32,11 @@ public class SQLPPTemporalTriplesMapImpl extends AbstractSQLPPTriplesMap impleme
         setTemporalMappingInterval(temporalMappingInterval);
     }
 
-    public SQLPPTemporalTriplesMapImpl(SQLPPTemporalTriplesMap oldTriplesMap, ImmutableList<ImmutableFunctionalTerm> targetAtoms) {
+    public SQLPPTemporalTriplesMapImpl(SQLPPTemporalTriplesMap oldTriplesMap, ImmutableList<ImmutableFunctionalTerm> targetAtoms, Predicate provenanceTemporalPredicate) {
         super(targetAtoms, oldTriplesMap.getSourceQuery());
         this.triplesMapProvenance = (SQLPPTemporalTriplesMapProvenance) oldTriplesMap.getTriplesMapProvenance();
         setTemporalMappingInterval(oldTriplesMap.getTemporalMappingInterval());
+        this.provenanceTemporalPredicate = provenanceTemporalPredicate;
     }
 
     private static SQLPPTemporalTriplesMapProvenance createProvenance(SQLPPTemporalTriplesMapImpl triplesMap) {
@@ -48,6 +52,11 @@ public class SQLPPTemporalTriplesMapImpl extends AbstractSQLPPTriplesMap impleme
     @Override
     public TemporalMappingInterval getTemporalMappingInterval() {
         return temporalMappingInterval;
+    }
+
+    @Override
+    public Predicate getProvenanceTemporalPredicate() {
+        return provenanceTemporalPredicate;
     }
 
     @Override

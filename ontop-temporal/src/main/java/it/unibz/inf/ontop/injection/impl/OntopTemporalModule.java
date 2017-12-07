@@ -8,8 +8,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
-import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
-import it.unibz.inf.ontop.spec.mapping.TemporalMappingExtractor;
+import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
@@ -54,6 +53,16 @@ public class OntopTemporalModule extends OntopAbstractModule{
         bindFromPreferences(TemporalDatalogProgram2QueryConverter.class);
         bindFromPreferences(TemporalMappingTransformer.class);
         bindFromPreferences(TemporalMappingSaturator.class);
+        //bindFromPreferences(TemporalMapping.class);
+
+        Module specFactoryModule = buildFactory(ImmutableList.of(
+                PrefixManager.class,
+                MappingMetadata.class,
+                Mapping.class,
+                OBDASpecification.class,
+                TemporalMapping.class
+        ), TemporalSpecificationFactory.class);
+        install(specFactoryModule);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
                 IntermediateQueryBuilder.class,

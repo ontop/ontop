@@ -16,7 +16,7 @@ import java.util.Optional;
 //@ImplementedBy(it.unibz.inf.ontop.spec.mapping.impl.TemporalMappingExtractorImpl.class)
 public interface TemporalMappingExtractor extends MappingExtractor {
     interface MappingAndDBMetadata extends MappingExtractor.MappingAndDBMetadata {
-        Mapping getTemporalMapping();
+        TemporalMapping getTemporalMapping();
     }
 
     MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,

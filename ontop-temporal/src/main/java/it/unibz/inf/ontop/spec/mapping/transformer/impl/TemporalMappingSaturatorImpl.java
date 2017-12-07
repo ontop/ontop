@@ -13,9 +13,11 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
+import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
 import it.unibz.inf.ontop.spec.mapping.impl.MappingImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
@@ -43,7 +45,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         return null;
     }
 
-    public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, Mapping temporalMapping, DBMetadata temporalDBMetadata, DatalogMTLProgram datalogMTLProgram){
+    public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, TemporalMapping temporalMapping, DBMetadata temporalDBMetadata, DatalogMTLProgram datalogMTLProgram){
 
 
         //List<TargetQueryParser> parsers = OntopNativeTemporalMappingParser.createParsers(datalogMTLProgram.getPrefixes());
@@ -61,9 +63,15 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         while(!queue.isEmpty()){
             DatalogMTLRule rule = queue.poll();
             ImmutableList<AtomicExpression> atomicExpressionsList = getAtomicExpressions(rule);
-            if (atomicExpressionsList.stream().allMatch(ae -> /*ae instanceof AtomicExpression ||*/ saturatedMappingMap.containsKey(ae.getPredicate().getName())))
-                saturateRule(rule, mapping, dbMetadata, temporalMapping, temporalDBMetadata, TIQBuilder);
-            else queue.add(rule);
+            atomicExpressionsList.stream()
+                    .filter(ae-> !(ae.getPredicate().getName().equals(ExpressionOperation.LT.getName())) && !(ae.getPredicate().getName().equals(ExpressionOperation.GT.getName())))
+                    .forEach(ae-> System.out.println(ae.getPredicate().getName() + " "+ saturatedMappingMap.get(ae.getPredicate().getName())));
+//            if (atomicExpressionsList.stream()
+//                    //TODO: replace this filter condition with a reasonable one
+//                    .filter(ae-> !(ae.getPredicate().getName().equals(ExpressionOperation.LT.getName())) && !(ae.getPredicate().getName().equals(ExpressionOperation.GT.getName())))
+//                    .allMatch(ae -> saturatedMappingMap.containsKey(ae.getPredicate().getName())))
+//                saturateRule(rule, mapping, dbMetadata, temporalMapping, temporalDBMetadata, TIQBuilder);
+//            else queue.add(rule);
         }
 
 
