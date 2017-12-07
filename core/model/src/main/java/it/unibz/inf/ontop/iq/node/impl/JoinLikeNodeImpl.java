@@ -136,7 +136,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
     /**
      * TODO: Fixed point instead?
      */
-    private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression) {
+    protected ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression) {
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND();
         ImmutableSet<ImmutableExpression> substitutionExpressions = expressions.stream()
                 .filter(e -> e.getFunctionSymbol().equals(EQ))
