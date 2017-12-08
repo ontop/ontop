@@ -126,6 +126,14 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
         return false;
     }
 
+
+    @Override
+    public ImmutableSet<Variable> getNullableVariables(ImmutableList<IQTree> children) {
+        return children.stream()
+                .flatMap(c -> c.getNullableVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+    }
+
     @Override
     public ImmutableSet<Variable> getVariables() {
         return projectedVariables;

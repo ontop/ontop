@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
@@ -15,7 +16,9 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.annotation.Nullable;
 import java.util.stream.IntStream;
 
 /**
@@ -26,6 +29,10 @@ import java.util.stream.IntStream;
 public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> implements ExtensionalDataNode {
 
     private static final String EXTENSIONAL_NODE_STR = "EXTENSIONAL";
+
+    // LAZY
+    @Nullable
+    private ImmutableSet<Variable> nullableVariables;
 
     @AssistedInject
     private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom) {
@@ -72,13 +79,6 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
 
     @Override
     public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        return isVariableNullable(variable);
-    }
-
-    /**
-     * TODO: add it to the IQ interface
-     */
-    public boolean isVariableNullable(Variable variable) {
         if (!getVariables().contains(variable))
             throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
 
@@ -93,6 +93,25 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
                 .filter(i -> arguments.get(i - 1).equals(variable))
                 .mapToObj(relation::getAttribute)
                 .allMatch(Attribute::canNull);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getNullableVariables() {
+        if (nullableVariables == null) {
+            DataAtom<RelationPredicate> atom = getProjectionAtom();
+            RelationDefinition relation = atom.getPredicate().getRelationDefinition();
+
+            ImmutableList<? extends VariableOrGroundTerm> arguments = atom.getArguments();
+
+            // NB: DB column indexes start at 1.
+            nullableVariables = IntStream.range(0, arguments.size())
+                    .filter(i -> arguments.get(i) instanceof Variable)
+                    .filter(i -> relation.getAttribute(i + 1).canNull())
+                    .mapToObj(arguments::get)
+                    .map(a -> (Variable) a)
+                    .collect(ImmutableCollectors.toSet());
+        }
+        return nullableVariables;
     }
 
     @Override

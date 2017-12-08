@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
@@ -24,6 +23,7 @@ import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -327,6 +327,22 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             default:
                 return iqFactory.createNaryIQTree(joinNode, updatedChildren);
         }
+    }
+
+    @Override
+    public ImmutableSet<Variable> getNullableVariables(ImmutableList<IQTree> children) {
+        ImmutableMap<Variable, Collection<IQTree>> variableProvenanceMap = children.stream()
+                .flatMap(c -> c.getVariables().stream()
+                        .map(v -> Maps.immutableEntry(v, c)))
+                .collect(ImmutableCollectors.toMultimap())
+                .asMap();
+
+        return variableProvenanceMap.entrySet().stream()
+                .filter(e -> e.getValue().size() == 1)
+                .filter(e -> e.getValue().iterator().next().containsNullableVariable(e.getKey()))
+                .map(Map.Entry::getKey)
+                .filter(this::isFilteringNullValue)
+                .collect(ImmutableCollectors.toSet());
     }
 
     private ImmutableSet<Variable> computeNewlyProjectedVariables(

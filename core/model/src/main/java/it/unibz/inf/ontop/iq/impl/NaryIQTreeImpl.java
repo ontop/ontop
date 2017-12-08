@@ -15,12 +15,17 @@ import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> implements NaryIQTree {
 
     private final boolean isLifted;
+
+    // Lazy
+    @Nullable
+    private ImmutableSet<Variable> nullableVariables;
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
@@ -60,5 +65,17 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @Override
     public boolean isDeclaredAsEmpty() {
         return false;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getNullableVariables() {
+        if (nullableVariables == null)
+            nullableVariables = getRootNode().getNullableVariables(getChildren());
+        return nullableVariables;
+    }
+
+    @Override
+    public boolean containsNullableVariable(Variable variable) {
+        return getNullableVariables().contains(variable);
     }
 }

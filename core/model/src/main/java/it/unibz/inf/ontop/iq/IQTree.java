@@ -37,4 +37,10 @@ public interface IQTree {
      * Returns true if corresponds to a EmptyNode
      */
     boolean isDeclaredAsEmpty();
+
+    default boolean containsNullableVariable(Variable variable) {
+        return getNullableVariables().contains(variable);
+    }
+
+    ImmutableSet<Variable> getNullableVariables();
 }

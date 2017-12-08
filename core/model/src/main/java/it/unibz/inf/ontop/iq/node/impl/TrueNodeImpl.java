@@ -130,4 +130,9 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     public boolean isDeclaredAsEmpty() {
         return false;
     }
+
+    @Override
+    public ImmutableSet<Variable> getNullableVariables() {
+        return EMPTY_VARIABLE_SET;
+    }
 }

@@ -14,10 +14,4 @@ import java.util.Optional;
  * For instance: Left Join.
  */
 public interface BinaryNonCommutativeOperatorNode extends BinaryOrderedOperatorNode {
-
-    IQTree liftBinding(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
-
-    IQTree applyDescendingSubstitution(
-            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild);
 }

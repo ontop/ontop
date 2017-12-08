@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -123,6 +124,13 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public ImmutableSet<Variable> getNullableVariables(IQTree child) {
+        return child.getNullableVariables().stream()
+                .filter(v -> !isFilteringNullValue(v))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof FilterNode)
                 && ((FilterNode) node).getFilterCondition().equals(this.getFilterCondition());
@@ -186,6 +194,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                 throw new MinorOntopInternalBugException("Unexpected local action: " + results.getLocalAction());
         }
     }
+
 
     /**
      * TODO: simplify after getting rid of the former mechanism

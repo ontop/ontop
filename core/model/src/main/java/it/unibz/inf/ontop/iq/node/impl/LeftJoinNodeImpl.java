@@ -405,6 +405,18 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
+    public ImmutableSet<Variable> getNullableVariables(IQTree leftChild, IQTree rightChild) {
+        ImmutableSet<Variable> leftVariables = leftChild.getVariables();
+
+        return Stream.concat(
+                leftChild.getNullableVariables().stream(),
+                // Right-specific variables
+                rightChild.getVariables().stream()
+                    .filter(v -> !leftVariables.contains(v)))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
     public IQTree liftBinding(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator) {
 
         ImmutableSet<Variable> projectedVariables = Stream.of(initialLeftChild, initialRightChild)

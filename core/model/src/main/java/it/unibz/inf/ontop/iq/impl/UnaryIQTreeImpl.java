@@ -54,6 +54,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
+    public ImmutableSet<Variable> getNullableVariables() {
+        return getRootNode().getNullableVariables(getChild());
+    }
+
+    @Override
     public ImmutableSet<Variable> getVariables() {
         UnaryOperatorNode rootNode = getRootNode();
         if (rootNode instanceof ExplicitVariableProjectionNode)

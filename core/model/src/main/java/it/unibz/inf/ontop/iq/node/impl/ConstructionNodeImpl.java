@@ -427,6 +427,33 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .orElseThrow(() -> new IllegalArgumentException("The variable " + variable + " is not projected by " + this));
     }
 
+    @Override
+    public ImmutableSet<Variable> getNullableVariables(IQTree child) {
+        ImmutableSet<Variable> nullableChildVariables = child.getNullableVariables();
+
+
+        return Stream.concat(
+                getSubstitution().getImmutableMap().entrySet().stream()
+                    .filter(e -> isNullable(e.getValue(), nullableChildVariables))
+                    .map(Map.Entry::getKey),
+                nullableChildVariables.stream()
+        ).collect(ImmutableCollectors.toSet());
+    }
+
+    /**
+     * TODO: involve the function to reduce the number of false positive
+     */
+    private boolean isNullable(ImmutableTerm term, ImmutableSet<Variable> nullableChildVariables) {
+        if (term instanceof Constant)
+            return term.equals(termFactory.getNullConstant());
+        // TODO: improve this
+        else if (term.isGround())
+            return true;
+        // TODO: improve this
+        return term.getVariableStream()
+                .anyMatch(nullableChildVariables::contains);
+    }
+
     private boolean isChildVariableNullable(IntermediateQuery query, Variable variable) {
         return query.getFirstChild(this)
                 .map(c -> c.isVariableNullable(query, variable))

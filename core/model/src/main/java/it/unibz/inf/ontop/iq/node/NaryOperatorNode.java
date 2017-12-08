@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
@@ -19,4 +21,6 @@ public interface NaryOperatorNode extends QueryNode {
 
     IQTree applyDescendingSubstitution(VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                        Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children);
+
+    ImmutableSet<Variable> getNullableVariables(ImmutableList<IQTree> children);
 }
