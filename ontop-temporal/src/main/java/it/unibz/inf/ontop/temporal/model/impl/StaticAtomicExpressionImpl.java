@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
@@ -13,22 +14,22 @@ import static java.util.stream.Collectors.joining;
 
 public class StaticAtomicExpressionImpl implements StaticAtomicExpression {
 
-    private final Predicate predicate;
+    private final AtomPredicate predicate;
 
     private final List<Term> terms;
 
-    StaticAtomicExpressionImpl(Predicate predicate, List<Term> terms) {
+    StaticAtomicExpressionImpl(AtomPredicate predicate, List<Term> terms) {
         this.predicate = predicate;
         this.terms = terms;
     }
 
-    StaticAtomicExpressionImpl(Predicate predicate, Term... terms) {
+    StaticAtomicExpressionImpl(AtomPredicate predicate, Term... terms) {
         this.predicate = predicate;
         this.terms = Arrays.asList(terms);;
     }
 
     @Override
-    public Predicate getPredicate() {
+    public AtomPredicate getPredicate() {
         return predicate;
     }
 

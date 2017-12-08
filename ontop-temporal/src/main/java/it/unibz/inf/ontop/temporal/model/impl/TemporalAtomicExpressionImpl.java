@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
 
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
@@ -14,17 +15,17 @@ import static java.util.stream.Collectors.joining;
 
 public class TemporalAtomicExpressionImpl implements TemporalAtomicExpression {
 
-    TemporalAtomicExpressionImpl(Predicate predicate, List<Term> terms) {
+    TemporalAtomicExpressionImpl(AtomPredicate predicate, List<Term> terms) {
         this.predicate = predicate;
         this.terms = terms;
     }
 
-    TemporalAtomicExpressionImpl(Predicate predicate, Term... terms) {
+    TemporalAtomicExpressionImpl(AtomPredicate predicate, Term... terms) {
         this.predicate = predicate;
         this.terms = Arrays.asList(terms);
     }
 
-    private final Predicate predicate;
+    private final AtomPredicate predicate;
 
     private final List<? extends Term> terms;
 
@@ -39,7 +40,7 @@ public class TemporalAtomicExpressionImpl implements TemporalAtomicExpression {
     }
 
     @Override
-    public Predicate getPredicate() {
+    public AtomPredicate getPredicate() {
         return predicate;
     }
 

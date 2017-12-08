@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.temporal.model;
 
 
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
 import java.time.Duration;
@@ -11,9 +13,9 @@ import java.util.Map;
 
 public interface DatalogMTLFactory {
 
-    TemporalAtomicExpression createTemporalAtomicExpression(Predicate predicate, List<Term> terms);
+    TemporalAtomicExpression createTemporalAtomicExpression(AtomPredicate predicate, List<Term> terms);
 
-    TemporalAtomicExpression createTemporalAtomicExpression(Predicate predicate, Term... terms);
+    TemporalAtomicExpression createTemporalAtomicExpression(AtomPredicate predicate, Term... terms);
 
     TemporalJoinExpression createTemporalJoinExpression(DatalogMTLExpression... expressions);
 
@@ -41,11 +43,13 @@ public interface DatalogMTLFactory {
 
     TemporalInterval createTemporalInterval(boolean beginInclusive, boolean endInclusive, Instant begin, Instant end);
 
-    StaticAtomicExpression createStaticAtomicExpression(Predicate predicate, List<Term> terms);
+    StaticAtomicExpression createStaticAtomicExpression(AtomPredicate predicate, List<Term> terms);
 
-    StaticAtomicExpression createStaticAtomicExpression(Predicate predicate, Term... terms);
+    StaticAtomicExpression createStaticAtomicExpression(AtomPredicate predicate, Term... terms);
 
     StaticJoinExpression createStaticJoinExpression(StaticExpression... expressions);
 
     StaticJoinExpression createStaticJoinExpression(List<StaticExpression> expressions);
+
+    ComparisonExpression createComparisonExpression(AtomPredicate predicate, VariableOrGroundTerm term1, VariableOrGroundTerm term2);
 }

@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
@@ -18,12 +20,12 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     }
 
     @Override
-    public TemporalAtomicExpression createTemporalAtomicExpression(Predicate predicate, List<Term> terms) {
+    public TemporalAtomicExpression createTemporalAtomicExpression(AtomPredicate predicate, List<Term> terms) {
         return new TemporalAtomicExpressionImpl(predicate, terms);
     }
 
     @Override
-    public TemporalAtomicExpression createTemporalAtomicExpression(Predicate predicate, Term... terms) {
+    public TemporalAtomicExpression createTemporalAtomicExpression(AtomPredicate predicate, Term... terms) {
         return new TemporalAtomicExpressionImpl(predicate, terms);
     }
 
@@ -94,12 +96,12 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     }
 
     @Override
-    public StaticAtomicExpression createStaticAtomicExpression(Predicate predicate, List<Term> terms) {
+    public StaticAtomicExpression createStaticAtomicExpression(AtomPredicate predicate, List<Term> terms) {
         return new StaticAtomicExpressionImpl(predicate, terms);
     }
 
     @Override
-    public StaticAtomicExpression createStaticAtomicExpression(Predicate predicate, Term... terms) {
+    public StaticAtomicExpression createStaticAtomicExpression(AtomPredicate predicate, Term... terms) {
         return new StaticAtomicExpressionImpl(predicate, terms);
     }
 
@@ -111,5 +113,10 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     @Override
     public StaticJoinExpression createStaticJoinExpression(List<StaticExpression> expressions) {
         return new StaticJoinExpressionImpl(expressions);
+    }
+
+    @Override
+    public ComparisonExpression createComparisonExpression(AtomPredicate predicate, VariableOrGroundTerm term1, VariableOrGroundTerm term2) {
+        return new ComparisonExpressionImpl(predicate, term1, term2);
     }
 }

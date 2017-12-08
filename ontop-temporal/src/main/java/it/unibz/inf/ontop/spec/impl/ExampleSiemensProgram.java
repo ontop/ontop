@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.spec.impl;
 
 import it.unibz.inf.ontop.model.OntopModelSingletons;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
@@ -16,7 +18,8 @@ public class ExampleSiemensProgram {
 
     public static DatalogMTLProgram getSampleProgram(){
         DatalogMTLFactory f = DatalogMTLFactoryImpl.getInstance();
-        TermFactory odf = OntopModelSingletons.TERM_FACTORY;
+        AtomFactory af = OntopModelSingletons.ATOM_FACTORY;
+        TermFactory tf = OntopModelSingletons.TERM_FACTORY;
 
         Map<String, String> prefixes = new HashMap<>();
         prefixes.put("ss:", "http://siemens.com/ns#");
@@ -29,31 +32,31 @@ public class ExampleSiemensProgram {
         TemporalRange rangeDiamondInner = f.createTemporalRange(false, true, Duration.parse("PT0M"), Duration.parse("PT2M"));
         TemporalRange rangeDiamondOuter = f.createTemporalRange(false, true, Duration.parse("PT0M"), Duration.parse("PT10M"));
 
-        final Predicate conceptLRS = odf.getClassPredicate(prefixes.get("st:") + "LowRotorSpeed");
-        final Predicate conceptHRS = odf.getClassPredicate(prefixes.get("st:") + "HighRotorSpeed");
-        final Predicate conceptMFON = odf.getClassPredicate(prefixes.get("st:") + "MainFlameOn");
-        final Predicate dataPropertyRs = odf.getObjectPropertyPredicate(prefixes.get("st:") + "rotorSpeed");
-        final Predicate conceptPIO = odf.getClassPredicate(prefixes.get("st:") + "PurgingIsOver");
+        final AtomPredicate conceptLRS = af.getAtomPredicate(prefixes.get("st:") + "LowRotorSpeed", 1);
+        final AtomPredicate conceptHRS = af.getAtomPredicate(prefixes.get("st:") + "HighRotorSpeed",1);
+        final AtomPredicate conceptMFON = af.getAtomPredicate(prefixes.get("st:") + "MainFlameOn",1);
+        final AtomPredicate dataPropertyRs = af.getAtomPredicate(prefixes.get("st:") + "rotorSpeed",2);
+        final AtomPredicate conceptPIO = af.getAtomPredicate(prefixes.get("st:") + "PurgingIsOver",1);
 
-        final Predicate conceptTurbine = odf.getClassPredicate(prefixes.get("ss:") + "Turbine");
-        final Predicate conceptTempSensor = odf.getClassPredicate(prefixes.get("ss:") + "TemperatureSensor");
-        final Predicate conceptRotSpeedSensor = odf.getClassPredicate(prefixes.get("ss:") + "RotationSpeedSensor");
-        final Predicate objectPropertyIMB = odf.getObjectPropertyPredicate(prefixes.get("ss:") + "isMonitoredBy");
-        final Predicate objectPropertyIPO = odf.getObjectPropertyPredicate(prefixes.get("ss:") + "isPartOf");
-        final Predicate conceptCLTRS = odf.getClassPredicate(prefixes.get("ss:") + "ColocTempRotSensors");
+        final AtomPredicate conceptTurbine = af.getAtomPredicate(prefixes.get("ss:") + "Turbine",1);
+        final AtomPredicate conceptTempSensor = af.getAtomPredicate(prefixes.get("ss:") + "TemperatureSensor",1);
+        final AtomPredicate conceptRotSpeedSensor = af.getAtomPredicate(prefixes.get("ss:") + "RotationSpeedSensor",1);
+        final AtomPredicate objectPropertyIMB = af.getAtomPredicate(prefixes.get("ss:") + "isMonitoredBy",2);
+        final AtomPredicate objectPropertyIPO = af.getAtomPredicate(prefixes.get("ss:") + "isPartOf",2);
+        final AtomPredicate conceptCLTRS = af.getAtomPredicate(prefixes.get("ss:") + "ColocTempRotSensors",2);
 
-        final Variable varRs = odf.getVariable("rs");
-        final Variable varTs = odf.getVariable("ts");
-        final Variable varTb = odf.getVariable("tb");
-        final Variable varV = odf.getVariable("v");
-        final Variable varPt = odf.getVariable("pt");
-        final Variable varBurner = odf.getVariable("b");
+        final Variable varRs = tf.getVariable("rs");
+        final Variable varTs = tf.getVariable("ts");
+        final Variable varTb = tf.getVariable("tb");
+        final Variable varV = tf.getVariable("v");
+        final Variable varPt = tf.getVariable("pt");
+        final Variable varBurner = tf.getVariable("b");
 
         TemporalAtomicExpression lrs = f.createTemporalAtomicExpression(conceptLRS, varRs);
         TemporalAtomicExpression rs = f.createTemporalAtomicExpression(dataPropertyRs, varTb, varV);
-        TemporalAtomicExpression comparisonLs = f.createTemporalAtomicExpression(ExpressionOperation.LT, varV, odf.getConstantLiteral("1000", Predicate.COL_TYPE.DECIMAL));
+        ComparisonExpression comparisonLs = f.createComparisonExpression(af.getAtomPredicate("LT", 2), varV, tf.getConstantLiteral("1000", Predicate.COL_TYPE.DECIMAL));
         TemporalAtomicExpression hrs = f.createTemporalAtomicExpression(conceptHRS, varRs);
-        TemporalAtomicExpression comparisonHs = f.createTemporalAtomicExpression(ExpressionOperation.GT, varV, odf.getConstantLiteral("1260", Predicate.COL_TYPE.DECIMAL));
+        ComparisonExpression comparisonHs = f.createComparisonExpression(af.getAtomPredicate("GT",2), varV, tf.getConstantLiteral("1260", Predicate.COL_TYPE.DECIMAL));
         TemporalAtomicExpression mfon = f.createTemporalAtomicExpression(conceptMFON, varTs);
         TemporalAtomicExpression pio = f.createTemporalAtomicExpression(conceptPIO, varTb);
 

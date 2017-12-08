@@ -68,9 +68,9 @@ public class TemporalMappingImpl implements TemporalMapping{
         return definitions.keySet();
     }
 
-    public ImmutableCollection<IntermediateQuery> getQueries() {
-        //return definitions.values();
-        return null;
+    public ImmutableMap<AtomPredicate, QuadrupleDefinition> getDefinitions() {
+        return definitions;
+
     }
 
     public ExecutorRegistry getExecutorRegistry() {

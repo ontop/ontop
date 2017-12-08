@@ -110,4 +110,11 @@ public class QuadrupleDefinition {
 
         return list.stream().collect(ImmutableCollectors.toList());
     }
+
+    @Override
+    public String toString(){
+        StringBuilder builder = new StringBuilder();
+        getAll().forEach(iq -> builder.append(String.format("%s\n", iq.toString())));
+        return builder.toString();
+    }
 }

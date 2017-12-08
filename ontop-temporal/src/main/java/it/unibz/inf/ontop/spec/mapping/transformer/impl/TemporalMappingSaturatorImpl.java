@@ -1,30 +1,21 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
-import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
-import it.unibz.inf.ontop.spec.mapping.impl.MappingImpl;
-import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.temporal.datalog.impl.DatalogMTLConversionTools;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
-import it.unibz.inf.ontop.temporal.mapping.OntopNativeTemporalMappingParser;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -52,10 +43,6 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
 
         TemporalIntermediateQueryBuilder TIQBuilder = TIQFactory.createTemporalIQBuilder(temporalDBMetadata, temporalMapping.getExecutorRegistry());
 
-        Map<String, IntermediateQuery> saturatedMappingMap = new HashMap<>();
-        temporalMapping.getQueries().forEach(q-> saturatedMappingMap.put( q.getProjectionAtom().getFunctionSymbol().getName(),q));
-        mapping.getQueries().forEach(q-> saturatedMappingMap.put( q.getProjectionAtom().getFunctionSymbol().getName(),q));
-
         Queue<DatalogMTLRule> queue = new LinkedList<>();
 
         queue.addAll(datalogMTLProgram.getRules());
@@ -63,24 +50,10 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         while(!queue.isEmpty()){
             DatalogMTLRule rule = queue.poll();
             ImmutableList<AtomicExpression> atomicExpressionsList = getAtomicExpressions(rule);
-            atomicExpressionsList.stream()
-                    .filter(ae-> !(ae.getPredicate().getName().equals(ExpressionOperation.LT.getName())) && !(ae.getPredicate().getName().equals(ExpressionOperation.GT.getName())))
-                    .forEach(ae-> System.out.println(ae.getPredicate().getName() + " "+ saturatedMappingMap.get(ae.getPredicate().getName())));
-//            if (atomicExpressionsList.stream()
-//                    //TODO: replace this filter condition with a reasonable one
-//                    .filter(ae-> !(ae.getPredicate().getName().equals(ExpressionOperation.LT.getName())) && !(ae.getPredicate().getName().equals(ExpressionOperation.GT.getName())))
-//                    .allMatch(ae -> saturatedMappingMap.containsKey(ae.getPredicate().getName())))
-//                saturateRule(rule, mapping, dbMetadata, temporalMapping, temporalDBMetadata, TIQBuilder);
-//            else queue.add(rule);
+            if (areAllMappingsExist(mapping,temporalMapping,atomicExpressionsList)){
+                saturateRule(rule, mapping, dbMetadata, temporalMapping, temporalDBMetadata, TIQBuilder);
+            }
         }
-
-
-
-
-
-
-
-
 
 
 //        for (DatalogMTLRule rule : datalogMTLProgram.getRules()) {
@@ -106,7 +79,17 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         return null;
     }
 
-    private void saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata, Mapping temporalMapping, DBMetadata temporalDBMetadata, TemporalIntermediateQueryBuilder TIQBuilder){
+    private boolean areAllMappingsExist(Mapping mapping, TemporalMapping temporalMapping,
+                                        ImmutableList<AtomicExpression> atomicExpressionsList){
+
+        if (atomicExpressionsList.stream().filter(ae-> !(ae instanceof ComparisonExpression))
+                .allMatch(ae -> mapping.getDefinition(ae.getPredicate()).isPresent() || temporalMapping.getDefinitions().containsKey(ae.getPredicate())))
+            return true;
+
+        return false;
+    }
+
+    private void saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata, TemporalMapping temporalMapping, DBMetadata temporalDBMetadata, TemporalIntermediateQueryBuilder TIQBuilder){
         TreeTraverser treeTraverser = TreeTraverser.using(DatalogMTLExpression::getChildNodes);
         Iterable<DatalogMTLExpression> it = treeTraverser.preOrderTraversal(rule.getBody());
         Stack<DatalogMTLExpression> teStack = new Stack<>();
