@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -24,6 +23,8 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 
+
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements JoinLikeNode {
 
     private final ImmutabilityTools immutabilityTools;
@@ -92,12 +93,13 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
     /**
      * For children of a commutative join or for the left child of a LJ
      */
-    protected <R> R liftSelectedChildBinding(ConstructionNode selectedChildConstructionNode,
-                                             IQTree selectedGrandChild,
-                                             ImmutableList<IQTree> otherChildren,
-                                             Optional<ImmutableExpression> initialJoiningCondition,
-                                             VariableGenerator variableGenerator,
-                                             LiftConverter<R> liftConverter) throws UnsatisfiableJoiningConditionException {
+    protected <R> R liftRegularChildBinding(ConstructionNode selectedChildConstructionNode,
+                                            IQTree selectedGrandChild,
+                                            ImmutableList<IQTree> otherChildren,
+                                            ImmutableSet<Variable> nonLiftableVariables,
+                                            Optional<ImmutableExpression> initialJoiningCondition,
+                                            VariableGenerator variableGenerator,
+                                            LiftConverter<R> liftConverter) throws UnsatisfiableJoiningConditionException {
 
         if (selectedChildConstructionNode.getOptionalModifiers().isPresent())
             throw new UnsupportedOperationException("Construction with query modifiers are" +
@@ -119,8 +121,9 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         InjectiveVar2VarSubstitution freshRenaming = computeOtherChildrenRenaming(nonDownPropagableFragment,
                 otherChildrenVariables, variableGenerator);
 
-        ExpressionAndSubstitution expressionResults = computeNewCondition(initialJoiningCondition,
-                selectedChildSubstitution, freshRenaming);
+        ExpressionAndSubstitution expressionResults = simplifyCondition(
+                computeNonOptimizedCondition(initialJoiningCondition, selectedChildSubstitution, freshRenaming),
+                nonLiftableVariables);
         Optional<ImmutableExpression> newCondition = expressionResults.optionalExpression;
 
         ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = expressionResults.substitution.composeWith(
@@ -133,10 +136,53 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                 descendingSubstitution);
     }
 
+    private Optional<ImmutableExpression> computeNonOptimizedCondition(Optional<ImmutableExpression> initialJoiningCondition,
+                                                                       ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                                                                       InjectiveVar2VarSubstitution freshRenaming) {
+        Stream<ImmutableExpression> expressions = Stream.concat(
+                initialJoiningCondition
+                        .map(substitution::applyToBooleanExpression)
+                        .map(ImmutableExpression::flattenAND)
+                        .orElseGet(ImmutableSet::of)
+                        .stream(),
+                freshRenaming.getImmutableMap().entrySet().stream()
+                        .map(r -> termFactory.getImmutableExpression(EQ,
+                                substitution.applyToVariable(r.getKey()),
+                                r.getValue())));
+
+        return getImmutabilityTools().foldBooleanExpressions(expressions);
+    }
+
+    protected ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> nonOptimizedExpression,
+                                                          ImmutableSet<Variable> nonLiftableVariables)
+            throws UnsatisfiableJoiningConditionException {
+
+        Optional<ExpressionEvaluator.EvaluationResult> optionalEvaluationResults =
+                        nonOptimizedExpression
+                        .map(e -> createExpressionEvaluator().evaluateExpression(e));
+
+        if (optionalEvaluationResults.isPresent()) {
+            ExpressionEvaluator.EvaluationResult results = optionalEvaluationResults.get();
+
+            if (results.isEffectiveFalse())
+                throw new UnsatisfiableJoiningConditionException();
+
+            return results.getOptionalExpression()
+                    .map(e -> convertIntoExpressionAndSubstitution(e, nonLiftableVariables))
+                    .orElseGet(() ->
+                            new ExpressionAndSubstitution(Optional.empty(),
+                                    substitutionFactory.getVariableOrGroundTermSubstitution()));
+        }
+        else
+            return new ExpressionAndSubstitution(Optional.empty(),
+                    substitutionFactory.getVariableOrGroundTermSubstitution());
+    }
+
     /**
      * TODO: Fixed point instead?
      */
-    protected ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression) {
+    protected ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
+                                                                             ImmutableSet<Variable> nonLiftableVariables) {
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND();
         ImmutableSet<ImmutableExpression> substitutionExpressions = expressions.stream()
                 .filter(e -> e.getFunctionSymbol().equals(EQ))
@@ -163,43 +209,6 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                 .map(newSubstitution::applyToBooleanExpression);
 
         return new ExpressionAndSubstitution(newExpression, newSubstitution);
-    }
-
-    private ExpressionAndSubstitution computeNewCondition(Optional<ImmutableExpression> initialJoiningCondition,
-                                                          ImmutableSubstitution<? extends ImmutableTerm> substitution,
-                                                          InjectiveVar2VarSubstitution freshRenaming)
-            throws UnsatisfiableJoiningConditionException {
-
-        Stream<ImmutableExpression> expressions = Stream.concat(
-                initialJoiningCondition
-                        .map(substitution::applyToBooleanExpression)
-                        .map(ImmutableExpression::flattenAND)
-                        .orElseGet(ImmutableSet::of)
-                        .stream(),
-                freshRenaming.getImmutableMap().entrySet().stream()
-                        .map(r -> termFactory.getImmutableExpression(EQ,
-                                substitution.applyToVariable(r.getKey()),
-                                r.getValue())));
-
-        Optional<ExpressionEvaluator.EvaluationResult> optionalEvaluationResults =
-                getImmutabilityTools().foldBooleanExpressions(expressions)
-                        .map(e -> createExpressionEvaluator().evaluateExpression(e));
-
-        if (optionalEvaluationResults.isPresent()) {
-            ExpressionEvaluator.EvaluationResult results = optionalEvaluationResults.get();
-
-            if (results.isEffectiveFalse())
-                throw new UnsatisfiableJoiningConditionException();
-
-            return results.getOptionalExpression()
-                    .map(this::convertIntoExpressionAndSubstitution)
-                    .orElseGet(() ->
-                            new ExpressionAndSubstitution(Optional.empty(),
-                                    substitutionFactory.getVariableOrGroundTermSubstitution()));
-        }
-        else
-            return new ExpressionAndSubstitution(Optional.empty(),
-                    substitutionFactory.getVariableOrGroundTermSubstitution());
     }
 
     private InjectiveVar2VarSubstitution computeOtherChildrenRenaming(ImmutableSubstitution<NonGroundFunctionalTerm> nonDownPropagableFragment,

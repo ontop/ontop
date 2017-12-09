@@ -392,9 +392,9 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         IQTree selectedGrandChild = selectedLiftedChild.getChild();
 
         try {
-            return liftSelectedChildBinding(selectedChildConstructionNode,
+            return liftRegularChildBinding(selectedChildConstructionNode,
                     selectedGrandChild,
-                    otherLiftedChildren, initialJoiningCondition, variableGenerator,
+                    otherLiftedChildren, ImmutableSet.of(), initialJoiningCondition, variableGenerator,
                     this::convertIntoLiftingStepResults);
         } catch (UnsatisfiableJoiningConditionException e) {
             throw new EmptyIQException();
