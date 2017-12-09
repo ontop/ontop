@@ -23,7 +23,6 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -448,7 +447,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public IQTree applyDescendingSubstitution(
-            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild) {
 
         IQTree updatedLeftChild = leftChild.applyDescendingSubstitution(descendingSubstitution, constraint);
@@ -464,8 +463,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                 .flatMap(immutabilityTools::foldBooleanExpressions)
                                 .orElse(c1));
 
-                VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
-                        expressionAndCondition.substitution.composeWith2(descendingSubstitution);
+                // TODO: remove the casts
+                ImmutableSubstitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
+                        ((ImmutableSubstitution<VariableOrGroundTerm>)(ImmutableSubstitution<?>)expressionAndCondition.substitution)
+                                .composeWith2(descendingSubstitution);
 
                 IQTree updatedRightChild = rightChild.applyDescendingSubstitution(rightDescendingSubstitution, newConstraint);
 
@@ -489,7 +490,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private ExpressionAndSubstitution applyDescendingSubstitutionToExpression(
             ImmutableExpression initialExpression,
-            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableSet<Variable> leftChildVariables, ImmutableSet<Variable> rightChildVariables)
             throws UnsatisfiableJoiningConditionException {
 
@@ -530,8 +531,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 })
                 .collect(ImmutableCollectors.toSet());
 
-        VariableOrGroundTermSubstitution<NonFunctionalTerm> downSubstitution =
-                substitutionFactory.getVariableOrGroundTermSubstitution(
+        ImmutableSubstitution<NonFunctionalTerm> downSubstitution =
+                substitutionFactory.getSubstitution(
                         downSubstitutionExpressions.stream()
                             .map(ImmutableFunctionalTerm::getArguments)
                             .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
@@ -601,7 +602,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     private ChildLiftingState convertIntoChildLiftingResults(
             ImmutableList<IQTree> otherChildren, IQTree leftGrandChild,
             Optional<ImmutableExpression> ljCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
-            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
 
         if (otherChildren.size() != 1)
             throw new MinorOntopInternalBugException("One other child was expected, not " + otherChildren);

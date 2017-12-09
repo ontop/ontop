@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
-import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -35,7 +34,7 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     /**
      * Regular constructor
      */
-    protected Var2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap, AtomFactory atomFactory,
+    protected Var2VarSubstitutionImpl(Map<Variable, ? extends Variable> substitutionMap, AtomFactory atomFactory,
                                       TermFactory termFactory) {
         super(atomFactory, termFactory);
         this.map = ImmutableMap.copyOf(substitutionMap);
@@ -161,12 +160,11 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
-    public VariableOrGroundTermSubstitution<VariableOrGroundTerm> composeWith2(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> g) {
-        ImmutableSubstitution<? extends VariableOrGroundTerm> composedSubstitution =
-                (ImmutableSubstitution<? extends VariableOrGroundTerm>) (ImmutableSubstitution<?>) composeWith(g);
+    public Var2VarSubstitution composeWith2(
+            ImmutableSubstitution<? extends Variable> g) {
+        ImmutableSubstitution<? extends Variable> composedSubstitution =
+                (ImmutableSubstitution<? extends Variable>) (ImmutableSubstitution<?>) composeWith(g);
 
-        return new VariableOrGroundTermSubstitutionImpl<>(composedSubstitution.getImmutableMap(),
-                getAtomFactory(), getTermFactory());
+        return new Var2VarSubstitutionImpl(composedSubstitution.getImmutableMap(), getAtomFactory(), getTermFactory());
     }
 }

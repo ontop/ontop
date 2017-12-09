@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -290,7 +289,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
      * TODO: consider the constraint
      */
     @Override
-    public IQTree applyDescendingSubstitution(VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children) {
         SubstitutionResults<InnerJoinNode> results = applyDescendingSubstitution(descendingSubstitution);
 
@@ -407,7 +406,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     private LiftingStepResults convertIntoLiftingStepResults(
             ImmutableList<IQTree> otherLiftedChildren, IQTree selectedGrandChild,
             Optional<ImmutableExpression> newCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
-            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         ImmutableList<IQTree> newChildren = Stream.concat(
                 otherLiftedChildren.stream()
                         .map(c -> c.applyDescendingSubstitution(descendingSubstitution, newCondition)),

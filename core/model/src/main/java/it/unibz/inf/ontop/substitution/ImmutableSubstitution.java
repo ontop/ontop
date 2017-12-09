@@ -62,7 +62,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      * Returns "(g o f)" where g is this substitution.
      * NB: (g o f)(x) = g(f(x))
      */
-    ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g);
+    ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> f);
+
+    ImmutableSubstitution<T> composeWith2(ImmutableSubstitution<? extends T> f);
 
     /**
      * Because of the optional cannot be overloaded.
@@ -94,9 +96,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     Optional<ImmutableExpression> convertIntoBooleanExpression();
 
     Var2VarSubstitution getVar2VarFragment();
-    VariableOrGroundTermSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment();
+    ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment();
     ImmutableSubstitution<NonGroundFunctionalTerm> getNonGroundFunctionalTermFragment();
-    VariableOrGroundTermSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment();
+    ImmutableSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment();
 
     ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment();
 

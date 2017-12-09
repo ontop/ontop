@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.NodeTransformationProposal;
 import it.unibz.inf.ontop.iq.node.SubstitutionResults;
 import it.unibz.inf.ontop.iq.node.TrueNode;
-import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -63,7 +62,7 @@ public abstract class DataNodeImpl<P extends AtomPredicate> extends LeafIQTreeIm
 
     @Override
     public IQTree applyDescendingSubstitution(
-            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint) {
         DataAtom newAtom = descendingSubstitution.applyToDataAtom(getProjectionAtom());
         return newAtom(newAtom);

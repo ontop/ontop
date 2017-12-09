@@ -22,7 +22,6 @@ import it.unibz.inf.ontop.iq.node.impl.ConstructionNodeTools.NewSubstitutionPair
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
@@ -554,13 +553,12 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     @Override
     public IQTree applyDescendingSubstitution(
-            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree child) {
         SubstitutionResults<ConstructionNode> results = applyDescendingSubstitution(descendingSubstitution);
 
         IQTree updatedChild = results.getSubstitutionToPropagate()
                 .map(s -> (ImmutableSubstitution<? extends VariableOrGroundTerm>) (ImmutableSubstitution<?>) s)
-                .map(this::convertVariableOrGroundTermSubstitution)
                 .map(s -> child.applyDescendingSubstitution(s, constraint))
                 .orElse(child);
 
@@ -581,15 +579,6 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             default:
                 throw new MinorOntopInternalBugException("Unexpected local action: " + results.getLocalAction());
         }
-    }
-
-    private <T extends VariableOrGroundTerm>
-    VariableOrGroundTermSubstitution<T> convertVariableOrGroundTermSubstitution(
-            ImmutableSubstitution<T> substitution) {
-        if (substitution instanceof VariableOrGroundTermSubstitution)
-            return (VariableOrGroundTermSubstitution<T>) substitution;
-
-        return substitutionFactory.getVariableOrGroundTermSubstitution(substitution.getImmutableMap());
     }
 
     private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree childIQ) {

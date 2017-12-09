@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 /**
  * Substitution where variables are only mapped to variables
  */
-public interface Var2VarSubstitution extends VariableOrGroundTermSubstitution<Variable> {
+public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
 
     @Override
     Variable applyToVariable(Variable variable);

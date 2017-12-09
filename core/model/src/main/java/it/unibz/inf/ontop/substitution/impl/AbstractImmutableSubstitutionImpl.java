@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
-import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
@@ -197,6 +196,11 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                         // Clean out entries like t/t
                         .filter(entry -> !entry.getKey().equals(entry.getValue()))
                         .collect(ImmutableCollectors.toMap()), atomFactory, termFactory);
+    }
+
+    @Override
+    public ImmutableSubstitution<T> composeWith2(ImmutableSubstitution<? extends T> g) {
+        return (ImmutableSubstitution<T>) composeWith(g);
     }
 
     /**
@@ -417,14 +421,14 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public VariableOrGroundTermSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment() {
+    public ImmutableSubstitutionImpl<VariableOrGroundTerm> getVariableOrGroundTermFragment() {
         ImmutableMap<Variable, VariableOrGroundTerm> newMap = getImmutableMap().entrySet().stream()
                 .filter(e -> e.getValue() instanceof VariableOrGroundTerm)
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> (VariableOrGroundTerm) e.getValue()));
 
-        return new VariableOrGroundTermSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory());
+        return new ImmutableSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory());
     }
 
     @Override
@@ -439,14 +443,14 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public VariableOrGroundTermSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment() {
+    public ImmutableSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment() {
         ImmutableMap<Variable, NonFunctionalTerm> newMap = getImmutableMap().entrySet().stream()
                 .filter(e -> e.getValue() instanceof NonFunctionalTerm)
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> (NonFunctionalTerm) e.getValue()));
 
-        return new VariableOrGroundTermSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory());
+        return new ImmutableSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory());
     }
 
 
