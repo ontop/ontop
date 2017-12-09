@@ -59,7 +59,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
             throws ConversionException;
 
     /**
-     * Returns "f o g" where f is this substitution
+     * Returns "(g o f)" where g is this substitution.
+     * NB: (g o f)(x) = g(f(x))
      */
     ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g);
 

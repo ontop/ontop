@@ -154,34 +154,34 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
 
     /**
-     *" "this o g"
+     *" "this o f"
      *
-     * Equivalent to the function x -> this.apply(g.apply(x))
+     * Equivalent to the function x -> this.apply(f.apply(x))
      *
      * Follows the formal definition of a the composition of two substitutions.
      *
      */
     @Override
-    public ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g) {
+    public ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> f) {
         if (isEmpty()) {
-            return (ImmutableSubstitution<ImmutableTerm>)g;
+            return (ImmutableSubstitution<ImmutableTerm>)f;
         }
-        if (g.isEmpty()) {
+        if (f.isEmpty()) {
             return (ImmutableSubstitution<ImmutableTerm>)this;
         }
 
         Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
 
         /**
-         * For all variables in the domain of g
+         * For all variables in the domain of f
          */
 
-        for (Map.Entry<Variable, ? extends ImmutableTerm> gEntry :  g.getImmutableMap().entrySet()) {
+        for (Map.Entry<Variable, ? extends ImmutableTerm> gEntry :  f.getImmutableMap().entrySet()) {
             substitutionMap.put(gEntry.getKey(), apply(gEntry.getValue()));
         }
 
         /**
-         * For the other variables (in the local domain but not in g)
+         * For the other variables (in the local domain but not in f)
          */
         for (Map.Entry<Variable, ? extends ImmutableTerm> localEntry :  getImmutableMap().entrySet()) {
             Variable localVariable = localEntry.getKey();
