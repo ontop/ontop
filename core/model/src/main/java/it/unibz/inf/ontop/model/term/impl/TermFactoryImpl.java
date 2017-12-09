@@ -204,7 +204,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms) {
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<? extends ImmutableTerm> terms) {
 		if (functor instanceof OperationPredicate) {
 			return getImmutableExpression((OperationPredicate)functor, terms);
 		}

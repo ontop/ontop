@@ -151,6 +151,19 @@ public class ImmutableUnificationTools {
         return Optional.of(substitutionTools.convertMutableSubstitution(mutableSubstitution));
     }
 
+    public <T extends ImmutableTerm, S extends ImmutableSubstitution<T>> Optional<S> computeMGU(ImmutableList<T> args1,
+                                                                                                ImmutableList<T> args2) {
+        if (args1.size() != args2.size())
+            throw new IllegalArgumentException("The two argument lists must have the same size");
+
+        Predicate functionSymbol = atomFactory.getAtomPredicate(PREDICATE_STR, args1.size());
+
+        return computeMGU(termFactory.getImmutableFunctionalTerm(functionSymbol, args1),
+                termFactory.getImmutableFunctionalTerm(functionSymbol, args2))
+                .map(u -> (S) u);
+
+    }
+
     public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
         Substitution mutableSubstitution = unifierUtilities.getMGU(
                 immutabilityTools.convertToMutableFunction(atom1),

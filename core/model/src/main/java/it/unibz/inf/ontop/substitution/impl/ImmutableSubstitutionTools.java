@@ -189,8 +189,9 @@ public class ImmutableSubstitutionTools {
      * When applied to a MGU, it is expected to return another "equivalent" MGU.
      *
      */
-    public ImmutableSubstitution<? extends ImmutableTerm> prioritizeRenaming(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, ImmutableSet<Variable> priorityVariables) {
+    public <T extends ImmutableTerm, S extends ImmutableSubstitution<T>> S prioritizeRenaming(
+            S substitution, ImmutableSet<Variable> priorityVariables) {
+
         ImmutableMultimap<Variable, Variable> renamingMultimap = substitution.getImmutableMap().entrySet().stream()
                 .filter(e -> priorityVariables.contains(e.getKey())
                         && (e.getValue() instanceof Variable)
@@ -208,6 +209,7 @@ public class ImmutableSubstitutionTools {
                         e -> e.getValue().iterator().next()));
         InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(renamingMap);
 
-        return renamingSubstitution.composeWith(substitution);
+        // TODO: refactor
+        return (S) renamingSubstitution.composeWith(substitution);
     }
 }

@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -179,36 +180,46 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
     }
 
     /**
-     * TODO: Fixed point instead?
+     * TODO: explain
+     *
+     * Functional terms remain in the expression (never going into the substitution)
+     *
      */
-    protected ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
-                                                                             ImmutableSet<Variable> nonLiftableVariables) {
+    private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
+                                                                           ImmutableSet<Variable> nonLiftableVariables) {
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND();
-        ImmutableSet<ImmutableExpression> substitutionExpressions = expressions.stream()
+        ImmutableSet<ImmutableExpression> functionFreeEqualities = expressions.stream()
                 .filter(e -> e.getFunctionSymbol().equals(EQ))
                 .filter(e -> {
                     ImmutableList<? extends ImmutableTerm> arguments = e.getArguments();
-                    return arguments.stream().allMatch(t -> t instanceof VariableOrGroundTerm)
-                            && arguments.stream().anyMatch(t -> t instanceof Variable);
+                    return arguments.stream().allMatch(t -> t instanceof NonFunctionalTerm);
                 })
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableMap<Variable, VariableOrGroundTerm> substitutionMap = substitutionExpressions.stream()
+        VariableOrGroundTermSubstitution<NonFunctionalTerm> normalizedUnifier = unify(functionFreeEqualities.stream()
                 .map(ImmutableFunctionalTerm::getArguments)
-                .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
-                .collect(ImmutableCollectors.toMap(
-                        args -> (Variable) args.get(0),
-                        args -> (VariableOrGroundTerm) args.get(1)));
+                .map(args -> Maps.immutableEntry(
+                        (NonFunctionalTerm) args.get(0),
+                        (NonFunctionalTerm)args.get(1))),
+                nonLiftableVariables);
 
-        VariableOrGroundTermSubstitution<VariableOrGroundTerm> newSubstitution =
-                substitutionFactory.getVariableOrGroundTermSubstitution(substitutionMap);
+        throw new RuntimeException("TODO: continue");
 
-        Optional<ImmutableExpression> newExpression = getImmutabilityTools().foldBooleanExpressions(
-                expressions.stream()
-                        .filter(e -> !substitutionExpressions.contains(e)))
-                .map(newSubstitution::applyToBooleanExpression);
 
-        return new ExpressionAndSubstitution(newExpression, newSubstitution);
+//        Optional<ImmutableExpression> newExpression = getImmutabilityTools().foldBooleanExpressions(
+//                expressions.stream()
+//                        .filter(e -> !functionFreeEqualities.contains(e)))
+//                .map(newSubstitution::applyToBooleanExpression);
+//
+//        return new ExpressionAndSubstitution(newExpression, newSubstitution);
+    }
+
+    private VariableOrGroundTermSubstitution<NonFunctionalTerm> unify(
+            Stream<Map.Entry<NonFunctionalTerm, NonFunctionalTerm>> equalityStream,
+            ImmutableSet<Variable> nonLiftableVariables) {
+
+        throw new RuntimeException("TODO: implement");
+
     }
 
     private InjectiveVar2VarSubstitution computeOtherChildrenRenaming(ImmutableSubstitution<NonGroundFunctionalTerm> nonDownPropagableFragment,
@@ -227,10 +238,10 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
     protected static class ExpressionAndSubstitution {
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         public final Optional<ImmutableExpression> optionalExpression;
-        public final VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> substitution;
+        public final VariableOrGroundTermSubstitution<? extends NonFunctionalTerm> substitution;
 
         protected ExpressionAndSubstitution(Optional<ImmutableExpression> optionalExpression,
-                                            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> substitution) {
+                                            VariableOrGroundTermSubstitution<? extends NonFunctionalTerm> substitution) {
             this.optionalExpression = optionalExpression;
             this.substitution = substitution;
         }
