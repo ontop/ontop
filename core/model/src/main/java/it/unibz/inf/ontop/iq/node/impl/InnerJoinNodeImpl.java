@@ -19,6 +19,8 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -43,9 +45,10 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
                                 ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                                ConstructionNodeTools constructionNodeTools) {
+                                ConstructionNodeTools constructionNodeTools,
+                                ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator, immutabilityTools, substitutionFactory);
+                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.constructionNodeTools = constructionNodeTools;
@@ -57,9 +60,10 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
                               ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                              ConstructionNodeTools constructionNodeTools) {
+                              ConstructionNodeTools constructionNodeTools,
+                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
         super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator, immutabilityTools, substitutionFactory);
+                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.constructionNodeTools = constructionNodeTools;
@@ -70,9 +74,10 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               TypeFactory typeFactory, DatalogTools datalogTools,
                               ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                              ConstructionNodeTools constructionNodeTools) {
+                              ConstructionNodeTools constructionNodeTools,
+                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
         super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
-                immutabilityTools, substitutionFactory);
+                immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.constructionNodeTools = constructionNodeTools;
@@ -86,7 +91,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public InnerJoinNode clone() {
         return new InnerJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(),
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory, substitutionFactory, constructionNodeTools);
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory,
+                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools);
     }
 
     @Override
@@ -98,7 +104,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new InnerJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator(),
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory, substitutionFactory, constructionNodeTools);
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory,
+                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools);
     }
 
     @Override

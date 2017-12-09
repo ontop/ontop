@@ -14,6 +14,8 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -29,17 +31,22 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
 
     private final ImmutabilityTools immutabilityTools;
     private final SubstitutionFactory substitutionFactory;
+    protected final ImmutableUnificationTools unificationTools;
+    protected final ImmutableSubstitutionTools substitutionTools;
 
     protected JoinLikeNodeImpl(Optional<ImmutableExpression> optionalJoinCondition,
                                TermNullabilityEvaluator nullabilityEvaluator,
                                TermFactory termFactory,
                                TypeFactory typeFactory, DatalogTools datalogTools,
                                ExpressionEvaluator defaultExpressionEvaluator,
-                               ImmutabilityTools immutabilityTools, SubstitutionFactory substitutionFactory) {
+                               ImmutabilityTools immutabilityTools, SubstitutionFactory substitutionFactory,
+                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator);
         this.immutabilityTools = immutabilityTools;
         this.substitutionFactory = substitutionFactory;
+        this.unificationTools = unificationTools;
+        this.substitutionTools = substitutionTools;
     }
 
     /**
@@ -167,11 +174,12 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
             if (results.isEffectiveFalse())
                 throw new UnsatisfiableJoiningConditionException();
 
-            return results.getOptionalExpression()
-                    .map(e -> convertIntoExpressionAndSubstitution(e, nonLiftableVariables))
-                    .orElseGet(() ->
-                            new ExpressionAndSubstitution(Optional.empty(),
-                                    substitutionFactory.getSubstitution()));
+            Optional<ImmutableExpression> optionalExpression = results.getOptionalExpression();
+            if (optionalExpression.isPresent())
+                // May throw an exception if unification is rejected
+                return convertIntoExpressionAndSubstitution(optionalExpression.get(), nonLiftableVariables);
+            else
+                return new ExpressionAndSubstitution(Optional.empty(), substitutionFactory.getSubstitution());
         }
         else
             return new ExpressionAndSubstitution(Optional.empty(),
@@ -185,7 +193,9 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
      *
      */
     private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
-                                                                           ImmutableSet<Variable> nonLiftableVariables) {
+                                                                           ImmutableSet<Variable> nonLiftableVariables)
+            throws UnsatisfiableJoiningConditionException {
+
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND();
         ImmutableSet<ImmutableExpression> functionFreeEqualities = expressions.stream()
                 .filter(e -> e.getFunctionSymbol().equals(EQ))
@@ -202,23 +212,39 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                         (NonFunctionalTerm)args.get(1))),
                 nonLiftableVariables);
 
-        throw new RuntimeException("TODO: continue");
+        Optional<ImmutableExpression> newExpression = getImmutabilityTools().foldBooleanExpressions(
+                Stream.concat(
+                    // Expressions that are not function-free equalities
+                    expressions.stream()
+                            .filter(e -> !functionFreeEqualities.contains(e))
+                            .map(normalizedUnifier::applyToBooleanExpression),
 
+                    // Equalities that must remain
+                    normalizedUnifier.getImmutableMap().entrySet().stream()
+                        .filter(e -> nonLiftableVariables.contains(e.getValue()))
+                        .map(e -> termFactory.getImmutableExpression(EQ, e.getKey(), e.getValue()))
+                ));
 
-//        Optional<ImmutableExpression> newExpression = getImmutabilityTools().foldBooleanExpressions(
-//                expressions.stream()
-//                        .filter(e -> !functionFreeEqualities.contains(e)))
-//                .map(newSubstitution::applyToBooleanExpression);
-//
-//        return new ExpressionAndSubstitution(newExpression, newSubstitution);
+        return new ExpressionAndSubstitution(newExpression, normalizedUnifier);
     }
 
     private ImmutableSubstitution<NonFunctionalTerm> unify(
             Stream<Map.Entry<NonFunctionalTerm, NonFunctionalTerm>> equalityStream,
-            ImmutableSet<Variable> nonLiftableVariables) {
+            ImmutableSet<Variable> nonLiftableVariables) throws UnsatisfiableJoiningConditionException {
+        ImmutableList<Map.Entry<NonFunctionalTerm, NonFunctionalTerm>> equalities = equalityStream.collect(ImmutableCollectors.toList());
 
-        throw new RuntimeException("TODO: implement");
+        ImmutableList<NonFunctionalTerm> args1 = equalities.stream()
+                .map(Map.Entry::getKey)
+                .collect(ImmutableCollectors.toList());
 
+        ImmutableList<NonFunctionalTerm> args2 = equalities.stream()
+                .map(Map.Entry::getValue)
+                .collect(ImmutableCollectors.toList());
+
+        return unificationTools.computeMGU(args1, args2)
+                // TODO: merge priorityRenaming with the orientate() method
+                .map(u -> substitutionTools.prioritizeRenaming(u, nonLiftableVariables))
+                .orElseThrow(UnsatisfiableJoiningConditionException::new);
     }
 
     private InjectiveVar2VarSubstitution computeOtherChildrenRenaming(ImmutableSubstitution<NonGroundFunctionalTerm> nonDownPropagableFragment,

@@ -23,6 +23,8 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -65,9 +67,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
                              ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
-                             IntermediateQueryFactory iqFactory) {
+                             IntermediateQueryFactory iqFactory,
+                             ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
-                immutabilityTools, substitutionFactory);
+                immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
         this.iqFactory = iqFactory;
@@ -79,9 +82,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
                              ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
-                             IntermediateQueryFactory iqFactory) {
+                             IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
+                             ImmutableSubstitutionTools substitutionTools) {
         super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator, immutabilityTools, substitutionFactory);
+                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
         this.immutabilityTools = immutabilityTools;
@@ -92,9 +96,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     private LeftJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
                              ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
-                             IntermediateQueryFactory iqFactory) {
+                             IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
+                             ImmutableSubstitutionTools substitutionTools) {
         super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
-                immutabilityTools, substitutionFactory);
+                immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
         this.immutabilityTools = immutabilityTools;
@@ -109,7 +114,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public LeftJoinNode clone() {
         return new LeftJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(), substitutionFactory,
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), immutabilityTools, iqFactory);
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), immutabilityTools, iqFactory,
+                unificationTools, substitutionTools);
     }
 
     @Override
@@ -120,7 +126,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new LeftJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator(), substitutionFactory,
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), immutabilityTools, iqFactory);
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), immutabilityTools, iqFactory,
+                unificationTools, substitutionTools);
     }
 
     @Override
