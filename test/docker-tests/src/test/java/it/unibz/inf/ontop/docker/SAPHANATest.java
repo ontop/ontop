@@ -1,15 +1,14 @@
-package it.unibz.inf.ontop.docker.failing.local;
+package it.unibz.inf.ontop.docker;
 
-import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore("Local test")
+@Ignore("Stopped database test")
 public class SAPHANATest extends AbstractVirtualModeTest {
 
-    private static final String owlfile = "/local/sap/SAPbooktutorial.owl";
-    private static final String obdafile = "/local/sap/SAPbooktutorial.obda";
-    private static final String propertyfile = "/local/sap/SAPbooktutorial.properties";
+    private static final String owlfile = "/sap/SAPbooktutorial.owl";
+    private static final String obdafile = "/sap/SAPbooktutorial.obda";
+    private static final String propertyfile = "/sap/SAPbooktutorial.properties";
 
     public SAPHANATest() {
         super(owlfile, obdafile, propertyfile);
@@ -25,7 +24,7 @@ public class SAPHANATest extends AbstractVirtualModeTest {
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                         "select ?x ?y where {?x rdf:type :Author. ?x :name ?y.} limit 5 offset 2";
 
-        runQuery(sparqlQuery);
+        checkThereIsAtLeastOneResult(sparqlQuery);
     }
 
 }
