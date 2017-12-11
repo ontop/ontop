@@ -139,7 +139,7 @@ public class MetaMappingExpander {
 				: target.getTerm(1)); // template is in the position of predicate
 
 		ImmutableList<SelectExpressionItem> templateColumns =
-				getTemplateColumns(metadata.getQuotedIDFactory(), templateAtom, queryColumns);
+				getTemplateColumns(metadata.getQuotedIDFactory(), templateAtom.getTerms(), queryColumns);
 
 		ImmutableList<SelectItem> newColumns = queryColumns.stream()
 				.filter(c -> !templateColumns.contains(c))
@@ -306,41 +306,32 @@ public class MetaMappingExpander {
 	/**
 	 * This method get the columns which will be used for the predicate template
 	 *
-	 * @param templateAtom
+	 * @param templateTerms
 	 * @param queryColumns
 	 * @return
 	 */
-	private static ImmutableList<SelectExpressionItem> getTemplateColumns(QuotedIDFactory idfac, Function templateAtom,
+	private static ImmutableList<SelectExpressionItem> getTemplateColumns(QuotedIDFactory idfac, List<Term> templateTerms,
 																		  List<SelectExpressionItem> queryColumns) {
 
 		ImmutableMap<String, SelectExpressionItem> lookup = queryColumns.stream()
 				.collect(ImmutableCollectors.toMap(
 						si -> {
-							if (si.getAlias() != null && si.getAlias().getName() != null)
-								return si.getAlias().getName();
-
-							if (!(si.getExpression() instanceof Column))
+							final String name;
+							if (si.getAlias() != null && si.getAlias().getName() != null) {
+								name = si.getAlias().getName();
+							}
+							else if (si.getExpression() instanceof Column) {
+								name = ((Column)si.getExpression()).getColumnName();
+							}
+							else
 								throw new RuntimeException("Complex expressions in SELECT require an alias");
 
-							Column c = (Column)si.getExpression();
-
-							QuotedID attribute = idfac.createAttributeID(c.getColumnName());
-							RelationID relation = null;
-							if (c.getTable().getName() != null)
-								relation = idfac.createRelationID(c.getTable().getSchemaName(), c.getTable().getName());
-
-							QualifiedAttributeID qa = new QualifiedAttributeID(relation, attribute);
-							return qa.getAttribute().getName(); // TODO: IGNORES TABLE NAME! (TO BE FIXED)
+							QuotedID alias = idfac.createAttributeID(name);
+							return alias.getName();
 						},
 						si -> si));
 
-		List<Variable> templateVariables = getTemplateVariables(templateAtom);
-		if (templateVariables.isEmpty())
-			throw new IllegalArgumentException("No variables could be found for this metamapping." +
-					"Check that the variable in the metamapping is enclosed in a URI, for instance, " +
-					"http://.../{var}");
-
-
+		List<Variable> templateVariables = getTemplateVariables(templateTerms);
 		return templateVariables.stream()
 				.map(var -> {
 					SelectExpressionItem si = lookup.get(var.getName());
@@ -364,26 +355,26 @@ public class MetaMappingExpander {
 	 * Output: [X, Y]
 	 * <p>
 	 *
-	 * @param templateAtom
+	 * @param templateTerms
 	 * @return list of variables
 	 */
-	private static ImmutableList<Variable> getTemplateVariables(Function templateAtom) {
+	private static ImmutableList<Variable> getTemplateVariables(List<Term> templateTerms) {
 
-		int len = templateAtom.getTerms().size();
-
+		int len = templateTerms.size();
 		if (len == 1) { // the case of <{varUri}>
-			Term uri = templateAtom.getTerm(0);
+			Term uri = templateTerms.get(0);
 			if (uri instanceof Variable)
 				return ImmutableList.of((Variable) uri);
-			else
-				return ImmutableList.of();
+
+			throw new IllegalArgumentException("No variables could be found for this metamapping." +
+					"Check that the variable in the metamapping is enclosed in a URI, for instance, " +
+					"http://.../{var}");
 		}
 		else {
 			ImmutableList.Builder<Variable> vars = ImmutableList.builder();
-			// TODO: check when getTerms().size() != getArity()
 			// index 0 is for the URI template term
 			for (int i = 1; i < len; i++)
-				vars.add((Variable) templateAtom.getTerm(i));
+				vars.add((Variable) templateTerms.get(i));
 			return vars.build();
 		}
 	}
