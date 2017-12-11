@@ -91,7 +91,7 @@ public class SQLMappingParserUsingOwlTest {
 
         // Setting up the CQ parser
         prefixes = prefixManager.getPrefixMap();
-        parser = new TurtleOBDASyntaxParser(prefixes, ATOM_FACTORY, TERM_FACTORY, TYPE_FACTORY);
+        parser = new TurtleOBDASyntaxParser(prefixes, ATOM_FACTORY, TERM_FACTORY);
     }
 
     @Test

@@ -76,11 +76,11 @@ directive
   ;
 
 prefixID
-  : ('@prefix' | '@PREFIX') PNAME_NS iriref
+  : ('@prefix' | '@PREFIX') PNAME_NS IRIREF
   ;
 
 base
-  : ('@base' | '@BASE') iriref
+  : ('@base' | '@BASE') IRIREF
   ;
 
 triples
@@ -114,17 +114,18 @@ object
   : resource
 //  | BlankNode
   | literal
-  | typedLiteral
+  | variableLiteral
   | variable
   ;
 
 resource
-  : iriref
-  | prefixedName
+  : iri
+  | iriExt
   ;
 
-iriref // unnecessary in the grammar, but used for code generation
-  : IRIREF
+iriExt
+  : IRIREF_EXT
+  | PREFIXED_NAME_EXT
   ;
 
 blank
@@ -132,48 +133,40 @@ blank
   | ANON
   ;
 
-prefixedName // unnecessary in the grammar, but used for code generation
-  : PREFIXEDNAME
-  ;
-
 variable
   : STRING_WITH_CURLY_BRACKET
   ;
 
-function
-  : resource '(' terms ')'
+variableLiteral
+  : variable languageTag   # variableLiteral_1
+  | variable '^^' iri      # variableLiteral_2
   ;
 
-typedLiteral
-  : variable LANGTAG        # typedLiteral_1
-  | variable '^^' resource      # typedLiteral_2
+languageTag
+  : LANGTAG | '@' variable
   ;
 
-terms
-  : term (',' term)*
-  ;
-
-term
-  : function
-  | variable
-  | literal
-  ;
+iri
+   : IRIREF
+   | PREFIXED_NAME
+   ;
 
 literal
-  : stringLiteral (LANGTAG)?
-  | dataTypeString
+  : stringLiteral (languageTag)?
+  | typedLiteral
   | numericLiteral
   | booleanLiteral
   ;
 
-dataTypeString
-  :  stringLiteral '^^' resource
+typedLiteral
+  :  stringLiteral '^^' iri
   ;
 
 stringLiteral
   : STRING_LITERAL_QUOTE
 //  : STRING_WITH_QUOTE_DOUBLE
   ;
+
 numericLiteral
   : numericUnsigned
   | numericPositive
@@ -208,35 +201,41 @@ WS
  *------------------------------------------------------------------*/
 
 STRING_WITH_CURLY_BRACKET
-  : '{' (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '%' | '&' | UCHAR)*? '}'
+  : '{' VARIABLE_CHAR*? '}'
   ;
 
 BOOLEAN_LITERAL
   : 'true' | 'TRUE' | 'True' | 'false'| 'FALSE'| 'False'
   ;
 
-IRIREF
-  : '<' (STRING_WITH_CURLY_BRACKET | (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR)*) '>'
+// extends IRIREF to allow curly brackets, and force one curly bracket
+IRIREF_EXT
+  : '<' IRIREF_INNER_CHAR_EXT* '{' IRIREF_INNER_CHAR_EXT+ '>'
   ;
+
+IRIREF
+   : '<' IRIREF_INNER_CHAR* '>'
+   ;
 
 PNAME_NS
   : PN_PREFIX? ':'
   ;
 
 PN_PREFIX
-  : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
+   : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
+   ;
+
+PREFIXED_NAME
+   : PNAME_NS PN_LOCAL
   ;
 
-PREFIXEDNAME
-  : PNAME_LN | PNAME_NS
-  ;
-
-PNAME_LN
-  : PNAME_NS PN_LOCAL
+// extends PREFIXED_NAME to allow right-hand side curly brackets, and force one right-hand side opening curly bracket
+PREFIXED_NAME_EXT
+  : PNAME_NS PN_LOCAL_EXT
   ;
 
 BLANK_NODE_LABEL
-  : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS)?
+  : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS )?
   ;
 
 LANGTAG
@@ -293,7 +292,7 @@ STRING_LITERAL_LONG_QUOTE
   : '"""' (('"' | '""')? (~ ["\\] | ECHAR | UCHAR | '\''))* '"""'
   ;
 
-// extended with curly brackets, space and escaped characters
+// extends STRING_LITERAL_QUOTE in the original grammar to allow curly brackets, space and escaped characters
 STRING_LITERAL_QUOTE
   : '"' (~ ["\\\r\n] | '\'' | '\\"' | '{' | '}' | ' ' | ECHAR)* '"'
   ;
@@ -332,14 +331,18 @@ PN_CHARS_U
   : PN_CHARS_BASE | '_'
   ;
 
-// extended to allow curly brackets
 PN_CHARS
-  : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '{' | '}'
+  : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040]
   ;
 
-// extended to allow slash and initial curly bracket
+// extends PN_LOCAL to allow curly brackets, and force at least one (opening) curly bracket
+PN_LOCAL_EXT
+  : '{' RIGHT_PART_TAIL_EXT ? | RIGHT_PART_FIRST_CHAR RIGHT_PART_TAIL_EXT_MAND
+  ;
+
+// extends PN_LOCAL in the original grammar to allow '/' and '#'
 PN_LOCAL
-  : (PN_CHARS_U | ':' | '{' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | '/' | PLX )* (PN_CHARS | ':' | '/' | PLX ))?
+  : RIGHT_PART_FIRST_CHAR RIGHT_PART_TAIL?
   ;
 
 PLX
@@ -356,4 +359,52 @@ HEX
 
 PN_LOCAL_ESC
   : '\\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' | '?' | '#' | '@' | '%')
+  ;
+
+fragment RIGHT_PART_FIRST_CHAR
+  : (PN_CHARS_U | ':' | '#' | [0-9] | PLX)
+  ;
+
+fragment RIGHT_PART_FIRST_CHAR_EXT
+  : (RIGHT_PART_FIRST_CHAR | '{')
+  ;
+
+fragment RIGHT_PART_CHAR
+  : (PN_CHARS | '.' | ':' | '/' | '#' | PLX)
+  ;
+
+fragment RIGHT_PART_CHAR_EXT
+  : (RIGHT_PART_CHAR | '{' | '}')
+  ;
+
+fragment RIGHT_PART_END_CHAR
+  : (PN_CHARS | ':' | '/'| PLX)
+  ;
+
+fragment RIGHT_PART_END_CHAR_EXT
+  : (RIGHT_PART_END_CHAR | '}')
+  ;
+
+fragment RIGHT_PART_TAIL
+  : RIGHT_PART_CHAR* RIGHT_PART_END_CHAR
+  ;
+
+fragment RIGHT_PART_TAIL_EXT
+  : RIGHT_PART_CHAR_EXT* RIGHT_PART_END_CHAR_EXT
+  ;
+
+fragment RIGHT_PART_TAIL_EXT_MAND
+  : RIGHT_PART_CHAR_EXT* '{' RIGHT_PART_CHAR_EXT* RIGHT_PART_END_CHAR_EXT
+  ;
+
+fragment IRIREF_INNER_CHAR
+  :  (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR)
+  ;
+
+fragment IRIREF_INNER_CHAR_EXT
+  :  (IRIREF_INNER_CHAR | '{' | '}')
+  ;
+
+fragment VARIABLE_CHAR
+  : (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '%' | '&' | UCHAR)
   ;
