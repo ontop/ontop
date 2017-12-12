@@ -19,6 +19,7 @@ import net.sf.jsqlparser.statement.select.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
@@ -79,7 +80,8 @@ public class SelectQueryAttributeExtractor2 {
                 for (Join join : plainSelect.getJoins())
                     try {
                         current = join(current, join);
-                    } catch (IllegalJoinException e) {
+                    }
+                    catch (IllegalJoinException e) {
                         throw new InvalidSelectQueryException(e.toString(), join);
                     }
             return current.getAttributes();
@@ -90,7 +92,21 @@ public class SelectQueryAttributeExtractor2 {
     }
 
 
+    public ImmutableMap<QualifiedAttributeID, Variable> expandStar(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
+        return attributes.entrySet().stream()
+                .filter(e -> e.getKey().getRelation() == null)
+                .collect(ImmutableCollectors.toMap());
+    }
 
+    public ImmutableMap<QualifiedAttributeID, Variable> expandStar(ImmutableMap<QualifiedAttributeID, Variable> attributes, Table table) {
+        RelationID id = idfac.createRelationID(table.getSchemaName(), table.getName());
+
+        return attributes.entrySet().stream()
+                .filter(e -> e.getKey().getRelation() != null && e.getKey().getRelation().equals(id))
+                .collect(ImmutableCollectors.toMap(
+                        e -> new QualifiedAttributeID(null, e.getKey().getAttribute()),
+                        Map.Entry::getValue));
+    }
 
 
 
@@ -288,21 +304,12 @@ public class SelectQueryAttributeExtractor2 {
 
         @Override
         public void visit(AllColumns allColumns) {
-            map = attributes.entrySet().stream()
-                    .filter(e -> e.getKey().getRelation() == null)
-                    .collect(ImmutableCollectors.toMap());
+            map = expandStar(attributes);
         }
 
         @Override
         public void visit(AllTableColumns allTableColumns) {
-            Table table = allTableColumns.getTable();
-            RelationID id = idfac.createRelationID(table.getSchemaName(), table.getName());
-
-            map = attributes.entrySet().stream()
-                    .filter(e -> e.getKey().getRelation() != null && e.getKey().getRelation().equals(id))
-                    .collect(ImmutableCollectors.toMap(
-                            e -> new QualifiedAttributeID(null, e.getKey().getAttribute()),
-                            Map.Entry::getValue));
+            map = expandStar(attributes, allTableColumns.getTable());
         }
 
         @Override

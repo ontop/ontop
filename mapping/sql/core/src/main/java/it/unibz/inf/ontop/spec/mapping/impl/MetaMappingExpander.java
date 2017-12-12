@@ -200,42 +200,35 @@ public class MetaMappingExpander {
 			throws InvalidSelectQueryException, UnsupportedSelectQueryException {
 
 		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata);
-
 		PlainSelect plainSelect = sqae.getParsedSql(sql);
+		ImmutableMap<QualifiedAttributeID, Variable> attributes = sqae.getQueryBodyAttributes(plainSelect);
 
-		Set<QualifiedAttributeID> attributes = sqae.getQueryBodyAttributes(plainSelect).keySet();
-
-		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
-
-		List<SelectExpressionItem> list = new ArrayList<>();
+		ImmutableList.Builder<SelectExpressionItem> builder = ImmutableList.builder();
 		for (SelectItem si : plainSelect.getSelectItems()) {
 			si.accept(new SelectItemVisitor() {
 				@Override
 				public void visit(AllColumns allColumns) {
-					list.addAll(attributes.stream()
-							.filter(id -> id.getRelation() == null)
+					builder.addAll(sqae.expandStar(attributes).keySet().stream()
 							.map(id -> new SelectExpressionItem(new Column(id.getSQLRendering())))
-							.collect(ImmutableCollectors.toList()));
+							.iterator());
 				}
 
 				@Override
 				public void visit(AllTableColumns allTableColumns) {
 					Table table = allTableColumns.getTable();
-					RelationID tableId = idfac.createRelationID(table.getSchemaName(), table.getName());
-					list.addAll(attributes.stream()
-							.filter(id -> id.getRelation() != null && id.getRelation().equals(tableId))
+					builder.addAll(sqae.expandStar(attributes, table).keySet().stream()
 							.map(id -> new SelectExpressionItem(new Column(table, id.getAttribute().getSQLRendering())))
-							.collect(ImmutableCollectors.toList()));
+							.iterator());
 				}
 
 				@Override
 				public void visit(SelectExpressionItem selectExpressionItem) {
-					list.add(selectExpressionItem);
+					builder.add(selectExpressionItem);
 				}
 			});
 		}
 
-		return ImmutableList.copyOf(list);
+		return builder.build();
 	}
 
 	private static List<List<String>> getTemplateValues(Connection connection, String sql,

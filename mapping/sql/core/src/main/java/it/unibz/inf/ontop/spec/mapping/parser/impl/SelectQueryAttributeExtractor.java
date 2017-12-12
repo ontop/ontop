@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 /**
  * Created by Roman Kontchakov on 09/01/2017.
  */
+
 public class SelectQueryAttributeExtractor {
 
     private final QuotedIDFactory idfac;
@@ -65,7 +66,6 @@ public class SelectQueryAttributeExtractor {
                     .collect(ImmutableCollectors.toList());
         }
         catch (Exception e) {
-            final ImmutableList.Builder<QuotedID> attributes = ImmutableList.builder();
 
             // COULD NOT PARSE - do a rough approximation
 
@@ -85,6 +85,7 @@ public class SelectQueryAttributeExtractor {
             for (Matcher matcher = BRACKETS.matcher(projection); matcher.find(); matcher = BRACKETS.matcher(projection))
                 projection = matcher.replaceAll("");
 
+            final ImmutableList.Builder<QuotedID> attributes = ImmutableList.builder();
             for (String column : COL_SEP.split(projection)) {
                 String[] components = AS.split(column);
                 // components = { column } if there is no AS
