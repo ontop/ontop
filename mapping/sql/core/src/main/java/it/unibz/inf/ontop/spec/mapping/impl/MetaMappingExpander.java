@@ -23,9 +23,9 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
-import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -38,7 +38,6 @@ import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryExcept
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import it.unibz.inf.ontop.utils.URITemplates;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -61,7 +60,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * 
- * @author xiao
+ * @author xiao, roman
  *
  */
 public class MetaMappingExpander {
@@ -70,140 +69,151 @@ public class MetaMappingExpander {
 	
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
+	private static final class MappingToBeExpanded {
+		private final String id;
+		private final OBDASQLQuery source;
+		private final ImmutableList<ImmutableFunctionalTerm> targets;
+
+		MappingToBeExpanded(String id, OBDASQLQuery source, ImmutableList<ImmutableFunctionalTerm> targets) {
+			this.id = id;
+			this.source = source;
+			this.targets = targets;
+		}
+	}
+
+	private final ImmutableList<SQLPPTriplesMap> nonExpandableMappings;
+	private final ImmutableList<MappingToBeExpanded> mappingsToBeExpanded;
+
+	public MetaMappingExpander(Collection<SQLPPTriplesMap> mappings) {
+
+		ImmutableList.Builder<SQLPPTriplesMap> builder1 = ImmutableList.builder();
+		ImmutableList.Builder<MappingToBeExpanded> builder2 = ImmutableList.builder();
+
+		for (SQLPPTriplesMap mapping : mappings) {
+			ImmutableList<ImmutableFunctionalTerm> toBeExpanded = mapping.getTargetAtoms().stream()
+					.filter(atom -> atom.getFunctionSymbol().isTriplePredicate())
+					.collect(ImmutableCollectors.toList());
+
+			if (toBeExpanded.isEmpty()) {
+				builder1.add(mapping);
+			}
+			else {
+				builder2.add(new MappingToBeExpanded(mapping.getId(), mapping.getSourceQuery(), toBeExpanded));
+
+				ImmutableList<ImmutableFunctionalTerm> toBeLeft = mapping.getTargetAtoms().stream()
+						.filter(atom -> !atom.getFunctionSymbol().isTriplePredicate())
+						.collect(ImmutableCollectors.toList());
+
+				if (!toBeLeft.isEmpty()) {
+					// TODO: see how to keep the provenance
+					SQLPPTriplesMap newMapping = new OntopNativeSQLPPTriplesMap(
+							IDGenerator.getNextUniqueID(mapping.getId() + "#"),
+							mapping.getSourceQuery(),
+							toBeLeft);
+					builder1.add(newMapping);
+				}
+			}
+		}
+		nonExpandableMappings = builder1.build();
+		mappingsToBeExpanded = builder2.build();
+	}
+
+	public boolean hasMappingsToBeExpanded() { return !mappingsToBeExpanded.isEmpty(); }
+
+	public ImmutableList<SQLPPTriplesMap> getNonExpandableMappings() { return nonExpandableMappings; }
 
 	/**
 	 * this method expand the input mappings, which may include meta mappings, to the concrete mappings
 	 *
-	 * @param mappings
-	 * 		a list of mappings, which may include meta mappings
 	 * @return
 	 * 		expanded normal mappings
 	 */
-	public static ImmutableList<SQLPPTriplesMap> expand(Collection<SQLPPTriplesMap> mappings,
-														OntopMappingSQLSettings settings, DBMetadata metadata)
+	public ImmutableList<SQLPPTriplesMap> getExpandedMappings(Connection connection, DBMetadata metadata)
 			throws MetaMappingExpansionException {
 
 		List<String> errorMessages = new LinkedList<>();
 
-		List<SQLPPTriplesMap> expandedMappings = new LinkedList<>();
+		ImmutableList.Builder<SQLPPTriplesMap> builder = ImmutableList.builder();
+		builder.addAll(nonExpandableMappings);
 
-		for (SQLPPTriplesMap mapping : mappings) {
+		for (MappingToBeExpanded m : mappingsToBeExpanded) {
+			for (ImmutableFunctionalTerm target : m.targets) {
+				try {
+					int arity = isURIRDFType(target.getTerm(1)) ? 1 : 2;
+					Function templateAtom = (Function)((arity == 1)
+							? target.getTerm(2)   // template is in the position of object
+							: target.getTerm(1)); // template is in the position of predicate
 
-			boolean split = mapping.getTargetAtoms().stream()
-					.anyMatch(atom -> atom.getFunctionSymbol().isTriplePredicate());
+					List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getQuotedIDFactory(), templateAtom.getTerms());
 
-			if (split) {
-				String id = mapping.getId();
-				OBDASQLQuery sourceQuery = mapping.getSourceQuery();
+					String sql = m.source.getSQLQuery();
+					ImmutableMap<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, sql);
 
-				try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
+					ImmutableList<SelectExpressionItem> templateColumns;
+					try {
+						templateColumns = templateColumnIds.stream()
+								.map(id -> queryColumns.get(id))
+								.collect(ImmutableCollectors.toList());
+					}
+					catch (NullPointerException e) {
+						throw new IllegalArgumentException("The placeholder(s) " +
+								Joiner.on(", ").join(templateColumnIds.stream()
+										.filter(id -> !queryColumns.containsKey(id)).iterator()) +
+								" in the target do(es) not occur in the body of the mapping");
+					}
 
-					for (ImmutableFunctionalTerm atom : mapping.getTargetAtoms()) {
-						if (!atom.getFunctionSymbol().isTriplePredicate()) {
-							// for normal mappings, we do not need to expand it.
-							SQLPPTriplesMap newMapping = mapping.extractPPMappingAssertion(atom);
+					ImmutableList<SelectItem> newColumns = queryColumns.values().stream()
+							.filter(c -> !templateColumns.contains(c))
+							.collect(ImmutableCollectors.toList());
+					if (newColumns.isEmpty())   // avoid empty SELECT clause
+						newColumns = ImmutableList.of(new AllColumns());
 
-							expandedMappings.add(newMapping);
-						} else {
-							try {
-								expandedMappings.addAll(instantiateMapping(connection, metadata, id, atom, sourceQuery.toString()));
-							} catch (Exception e) {
-								log.warn("Parse exception, check no SQL reserved keywords have been used " + e.getMessage());
-								errorMessages.add(e.getMessage());
-							}
+					String query = getTemplateValuesQuery(sql, templateColumns);
+					int size = templateColumns.size();
+					try (Statement st = connection.createStatement();
+							ResultSet rs = st.executeQuery(query)) {
+						while (rs.next()) {
+							List<String> values = Lists.newArrayListWithCapacity(size);
+							for (int i = 1; i <= size; i++)
+								values.add(rs.getString(i));
+
+							String newSourceQuery = getInstantiatedSourceQuery(sql, newColumns, templateColumns, values);
+							// construct new Target Query by expanding higher order atoms of the form
+							// <pre>triple(t1, 'rdf:type', URI("http://example.org/{}", X))</pre>
+							// to
+							// <pre>http://example.org/cls(t1)</pre>, if X is t1
+							// (similarly for properties)
+
+							String predicateName = getPredicateName(templateAtom.getTerm(0), values);
+							ImmutableFunctionalTerm newTarget = (arity == 1)
+									? TERM_FACTORY.getImmutableFunctionalTerm(TERM_FACTORY.getClassPredicate(predicateName),
+									target.getTerm(0))
+									: TERM_FACTORY.getImmutableFunctionalTerm(TERM_FACTORY.getObjectPropertyPredicate(predicateName),
+									target.getTerm(0), target.getTerm(2));
+
+							// TODO: see how to keep the provenance
+							SQLPPTriplesMap newMapping = new OntopNativeSQLPPTriplesMap(
+									IDGenerator.getNextUniqueID(m.id + "#"),
+									MAPPING_FACTORY.getSQLQuery(newSourceQuery),
+									ImmutableList.of(newTarget));
+
+							builder.add(newMapping);
+
+							log.debug("Expanded Mapping: {}", newMapping);
 						}
 					}
-				} catch (SQLException e) {
-					throw new MetaMappingExpansionException(e);
+				}
+				catch (Exception e) {
+					log.warn("Expanding meta-mappings exception: " + e.getMessage());
+					errorMessages.add(e.getMessage());
 				}
 			}
-			else
-				expandedMappings.add(mapping);
 		}
 
 		if (!errorMessages.isEmpty())
 			throw new MetaMappingExpansionException(Joiner.on("\n").join(errorMessages));
 
-		return ImmutableList.copyOf(expandedMappings);
-	}
-
-	private static List<SQLPPTriplesMap> instantiateMapping(Connection connection, DBMetadata metadata, String mappingId,
-															ImmutableFunctionalTerm target, String sql)
-			throws SQLException, JSQLParserException, InvalidSelectQueryException, UnsupportedSelectQueryException {
-
-		ImmutableMap<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, sql);
-
-		int arity = isURIRDFType(target.getTerm(1)) ? 1 : 2;
-		Function templateAtom = (Function)((arity == 1)
-				? target.getTerm(2)   // template is in the position of object
-				: target.getTerm(1)); // template is in the position of predicate
-
-		ImmutableList<SelectExpressionItem> templateColumns;
-		List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getQuotedIDFactory(), templateAtom.getTerms());
-		try {
-			templateColumns = templateColumnIds.stream()
-					.map(id -> queryColumns.get(id))
-					.collect(ImmutableCollectors.toList());
-		}
-		catch (NullPointerException e) {
-			ImmutableList<QuotedID> missingIds = templateColumnIds.stream()
-					.filter(id -> !queryColumns.containsKey(id))
-					.collect(ImmutableCollectors.toList());
-			throw new IllegalArgumentException("The placeholder(s) " + Joiner.on(", ").join(missingIds) +
-					" in the target do(es) not occur in the body of the mapping");
-		}
-
-		ImmutableList<SelectItem> newColumns = queryColumns.values().stream()
-				.filter(c -> !templateColumns.contains(c))
-				.collect(ImmutableCollectors.toList());
-		if (newColumns.isEmpty())   // avoid empty SELECT clause
-			newColumns = ImmutableList.of(new AllColumns());
-
-		List<List<String>> templateValues = getTemplateValues(connection, sql, templateColumns);
-
-		List<SQLPPTriplesMap> expandedMappings = new ArrayList<>(templateValues.size());
-
-		for(List<String> values : templateValues) {
-			// create a new  query with the changed projection and selection
-			Expression whereClauseExtension = getWhereClauseExtension(templateColumns, values);
-
-			Select select = (Select) CCJSqlParserUtil.parse(sql);
-			PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
-
-			plainSelect.setSelectItems(newColumns);
-
-			// whereClauseExtension is never null
-			plainSelect.setWhere((plainSelect.getWhere() == null)
-					? whereClauseExtension
-					: new AndExpression(plainSelect.getWhere(), whereClauseExtension));
-
-			OBDASQLQuery newSourceQuery =  MAPPING_FACTORY.getSQLQuery(select.toString());
-
-			// construct new Target Query by expanding higher order atoms of the form
-			// <pre>triple(t1, 'rdf:type', URI("http://example.org/{}", X))</pre>
-			// to
-			// <pre>http://example.org/cls(t1)</pre>, if X is t1
-			// (similarly for properties)
-
-			String predicateName = getPredicateName(templateAtom.getTerm(0), values);
-			ImmutableFunctionalTerm newTarget = (arity == 1)
-					? TERM_FACTORY.getImmutableFunctionalTerm(TERM_FACTORY.getClassPredicate(predicateName),
-					target.getTerm(0))
-					: TERM_FACTORY.getImmutableFunctionalTerm(TERM_FACTORY.getObjectPropertyPredicate(predicateName),
-					target.getTerm(0), target.getTerm(2));
-
-			String newId = IDGenerator.getNextUniqueID(mappingId + "#");
-
-			// TODO: see how to keep the provenance
-			SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap(newId, newSourceQuery,
-					ImmutableList.of(newTarget));
-
-			expandedMappings.add(mapping);
-
-			log.debug("Expanded Mapping: {}", mapping);
-		}
-
-		return expandedMappings;
+		return builder.build();
 	}
 
 
@@ -245,11 +255,7 @@ public class MetaMappingExpander {
 		return builder.build();
 	}
 
-	private static List<List<String>> getTemplateValues(Connection connection, String sql,
-														ImmutableList<SelectExpressionItem> templateColumns)
-			throws SQLException, JSQLParserException {
-
-
+	private static String getTemplateValuesQuery(String sql, List<SelectExpressionItem> templateColumns) throws JSQLParserException {
 		// The query for params is almost the same with the original source query, except that
 		// we only need to distinct project the columns needed for the template expansion
 
@@ -259,22 +265,7 @@ public class MetaMappingExpander {
 		plainSelect.setDistinct(new Distinct());
 		plainSelect.setSelectItems(ImmutableList.copyOf(templateColumns)); // SelectExpressionItem -> SelectItem
 
-		String distinctParamsSQL = select.toString();
-
-		List<List<String>> templateValues = new ArrayList<>();
-		try (Statement st = connection.createStatement()) {
-			try (ResultSet rs = st.executeQuery(distinctParamsSQL)) {
-				int size = templateColumns.size();
-				while (rs.next()) {
-					List<String> params = new ArrayList<>(size);
-					for (int i = 1; i <= size; i++)
-						params.add(rs.getString(i));
-
-					templateValues.add(params);
-				}
-			}
-		}
-		return templateValues;
+		return select.toString();
 	}
 
 	/**
@@ -294,19 +285,38 @@ public class MetaMappingExpander {
 		return false;
 	}
 
+	/**
+	 * Create a new query with the changed projection and selection
+	 *
+	 * @param sql
+	 * @param newColumns
+	 * @param templateColumns
+	 * @param values
+	 * @return
+	 * @throws JSQLParserException
+	 */
+	private static String getInstantiatedSourceQuery(String sql,
+													 List<SelectItem> newColumns,
+													 List<SelectExpressionItem> templateColumns,
+													 List<String> values) throws JSQLParserException {
 
-	private static Expression getWhereClauseExtension(List<SelectExpressionItem> templateColumns,
-													  List<String> values) {
-		Expression selection = null;
-		int size = templateColumns.size(); // both lists are ArrayLists of the same size
-		for (int j = 0; j < size; j++) {
+		Select select = (Select) CCJSqlParserUtil.parse(sql);
+		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
+
+		Expression where = plainSelect.getWhere();
+		int size = templateColumns.size(); // both lists have the same size
+		for (int i = 0; i < size; i++) {
 			BinaryExpression condition = new EqualsTo();
-			condition.setLeftExpression(templateColumns.get(j).getExpression());
-			condition.setRightExpression(new StringValue("'" + values.get(j) + "'"));
+			condition.setLeftExpression(templateColumns.get(i).getExpression());
+			condition.setRightExpression(new StringValue("'" + values.get(i) + "'"));
 
-			selection = (selection != null) ? new AndExpression(selection, condition) : condition;
+			where = (where == null) ? condition : new AndExpression(where, condition);
 		}
-		return selection;
+
+		plainSelect.setWhere(where); // where cannot be null
+		plainSelect.setSelectItems(newColumns);
+
+		return select.toString();
 	}
 
 	/**
