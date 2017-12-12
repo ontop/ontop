@@ -209,7 +209,7 @@ public class MetaMappingExpander {
 				@Override
 				public void visit(AllColumns allColumns) {
 					builder.addAll(sqae.expandStar(attributes).keySet().stream()
-							.map(id -> new SelectExpressionItem(new Column(id.getSQLRendering())))
+							.map(id -> new SelectExpressionItem(new Column(id.getAttribute().getSQLRendering())))
 							.iterator());
 				}
 
