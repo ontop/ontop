@@ -221,7 +221,7 @@
                     ] ;
 
       # Removed entry: Mismatch in data representation
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:double ;
+       rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:double ;
                                        rs:variable   "v1"
                                      ] ;
                        rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
@@ -297,7 +297,7 @@
                      ] ;
       
       # Removed entry: Mismatch in data representation      
-      # rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
+       rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
                                        rs:variable   "v1"
                                      ] ;
                        rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
@@ -358,12 +358,12 @@
                     ] ;
                     
       # Removed entry: Quest doesn't recognize the equality between different 
-          numerical datatypes.                    
+      #    numerical datatypes.
        rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
                                        rs:variable   "v1"
                                      ] ;
                        rs:binding    [ rs:value      "1"^^xsd:double ;
                                        rs:variable   "v2"
                                      ]
-                     ] .
+                     ] ;
 	  .

@@ -68,7 +68,7 @@ public class MemorySPARQLQueryTest extends SPARQLQueryParent {
 			algebraManifest + "join-combo-1",
 
 			//Unexpected exception: Unbounded variable: v2 Problem already appears in the filter datalog translation (missing variable v) # ?v is not in scope so ?v2 never set
-			//expected empty result
+			//expected empty ripTesult
 			algebraManifest + "opt-filter-3",
 
 			/* DATA-R2: BASIC*/
@@ -106,48 +106,96 @@ public class MemorySPARQLQueryTest extends SPARQLQueryParent {
 
 			//unknown datatype are not supported, so missing type
 			exprBuiltInManifest + "dawg-isLiteral-1",
+
 			//Illegal subject value: ""^^<http://www.w3.org/2001/XMLSchema#integer>
 			exprBuiltInManifest + "dawg-langMatches-2",
+
+			//missing and unexpected bindings:
 			exprBuiltInManifest + "sameTerm-eq",
+
+			//Missing bindings:
 			exprBuiltInManifest + "sameTerm-not-eq",
+
+			//missing and unexpected bindings:
+			// The reason is because DBMS may modify the string representation
+			// of the original data no support for custom datatype
 			exprBuiltInManifest + "sameTerm-simple",
+
+			//Missing bindings The reason is because DBMS may modify the string representation
+			//  of the original data, i.e., "1"^^xsd:double --> 1.0
 			exprBuiltInManifest + "dawg-str-1",
+
+			//Illegal subject value: ""^^<http://www.w3.org/2001/XMLSchema#integer>
 			exprBuiltInManifest + "dawg-str-2",
+
+			//java.lang.NumberFormatException: For input string: "zzz" no support for custom datatype.
 			exprBuiltInManifest + "dawg-str-3",
+
+			//NumberFormatException: For input string: "" (it should not be considered as a number)
 			exprBuiltInManifest + "dawg-str-4",
 
 			/* DATA-R2: EXPR-EQUALS   */
+			//never ends don't manage to get the result from the sql query
 			exprEqualsManifest + "eq-2-1",
+
+			//missing and unexpected bindings, no custom datatypes supported
 			exprEqualsManifest + "eq-2-2",
+
+			//missing bindings  equality between different
+			//      #    numerical datatypes is not recognized.
 			exprEqualsManifest + "eq-1",
 			exprEqualsManifest + "eq-2",
+
+			//Data conversion error converting "zzz" Bad datatype handling by the classic mode.
 			exprEqualsManifest + "eq-4",
 
 			/* DATA-R2: OPEN_WORLD   */
+			//missing and unexpected bindings, different time in the unexpected datetime result
 			openWorldManifest +"date-2",
 			openWorldManifest +"date-3",
+
+			//Missing bindings no result while searching for xsd:date datatype
 			openWorldManifest +"date-4",
+
+			//Data conversion error converting "v2" data conversion error in sql
 			openWorldManifest +"open-cmp-01",
 			openWorldManifest +"open-cmp-02",
+
+			//Unexpected bindings: we return values that do not strictly match 001
 			openWorldManifest +"open-eq-01",
+
+			//Missing bindings: unsupported user-defined datatype
 			openWorldManifest +"open-eq-02",
+
+			//Unexpected bindings: should return empty result, we cannot know what is different from an unknown datatype
 			openWorldManifest +"open-eq-06",
+
+			//Missing bindings eaulity between variables
 			openWorldManifest +"open-eq-07",
+
+			//Missing bindings: problem handling language tags
 			openWorldManifest +"open-eq-08",
 			openWorldManifest +"open-eq-10",
 			openWorldManifest +"open-eq-11",
+
+			//Data conversion error converting "xyz"
 			openWorldManifest +"open-eq-12",
 
-			/* DATA-R2: REGEX   */
+			/* DATA-R2: REGEX
+			Missing bindings #string operation over URI is not supported in SI mode*/
 			regexManifest + "dawg-regex-004",
 
-			/* DATA-R2: SORT   */
+			/* DATA-R2: SORT
+			 * Problem with SPARQL translation
+			  * Error translating ORDER BY.
+			   * The current implementation can only sort by variables. This query has a more complex expression*/
 			sortManifest + "dawg-sort-numbers",
 			sortManifest + "dawg-sort-builtin",
 			sortManifest + "dawg-sort-function",
 
 
-			/* DATA-R2: TYPE-PROMOTION   */
+			/* DATA-R2: TYPE-PROMOTION
+			 * all removed because of unsupported types */
 			typePromotionManifest + "type-promotion-13",
 			typePromotionManifest + "type-promotion-11",
 			typePromotionManifest + "type-promotion-07",
