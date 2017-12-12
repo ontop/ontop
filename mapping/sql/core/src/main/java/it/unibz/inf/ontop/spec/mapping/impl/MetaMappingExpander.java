@@ -139,15 +139,14 @@ public class MetaMappingExpander {
 		for (MappingToBeExpanded m : mappingsToBeExpanded) {
 			for (ImmutableFunctionalTerm target : m.targets) {
 				try {
-					int arity = isURIRDFType(target.getTerm(1)) ? 1 : 2;
-					Function templateAtom = (Function)((arity == 1)
-							? target.getTerm(2)   // template is in the position of object
-							: target.getTerm(1)); // template is in the position of predicate
+					boolean isClass = isURIRDFType(target.getTerm(1));
+					// if isClass, then the template is the object;
+					// otheriwse, it's a property and the template is the predicate
+					Function templateAtom = (Function) target.getTerm(isClass ? 2 : 1);
 
 					List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getQuotedIDFactory(), templateAtom.getTerms());
 
-					String sql = m.source.getSQLQuery();
-					ImmutableMap<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, sql);
+					ImmutableMap<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQLQuery());
 
 					ImmutableList<SelectExpressionItem> templateColumns;
 					try {
@@ -168,8 +167,8 @@ public class MetaMappingExpander {
 					if (newColumns.isEmpty())   // avoid empty SELECT clause
 						newColumns = ImmutableList.of(new AllColumns());
 
-					String query = getTemplateValuesQuery(sql, templateColumns);
-					int size = templateColumns.size();
+					String query = getTemplateValuesQuery(m.source.getSQLQuery(), templateColumns);
+					final int size = templateColumns.size();
 					try (Statement st = connection.createStatement();
 							ResultSet rs = st.executeQuery(query)) {
 						while (rs.next()) {
@@ -177,15 +176,14 @@ public class MetaMappingExpander {
 							for (int i = 1; i <= size; i++)
 								values.add(rs.getString(i));
 
-							String newSourceQuery = getInstantiatedSourceQuery(sql, newColumns, templateColumns, values);
-							// construct new Target Query by expanding higher order atoms of the form
+							String newSourceQuery = getInstantiatedSQL(m.source.getSQLQuery(), newColumns, templateColumns, values);
+
+							// construct new target by expanding the higher-order atom of the form
 							// <pre>triple(t1, 'rdf:type', URI("http://example.org/{}", X))</pre>
 							// to
 							// <pre>http://example.org/cls(t1)</pre>, if X is t1
-							// (similarly for properties)
-
 							String predicateName = getPredicateName(templateAtom.getTerm(0), values);
-							ImmutableFunctionalTerm newTarget = (arity == 1)
+							ImmutableFunctionalTerm newTarget = isClass
 									? TERM_FACTORY.getImmutableFunctionalTerm(TERM_FACTORY.getClassPredicate(predicateName),
 									target.getTerm(0))
 									: TERM_FACTORY.getImmutableFunctionalTerm(TERM_FACTORY.getObjectPropertyPredicate(predicateName),
@@ -198,7 +196,6 @@ public class MetaMappingExpander {
 									ImmutableList.of(newTarget));
 
 							builder.add(newMapping);
-
 							log.debug("Expanded Mapping: {}", newMapping);
 						}
 					}
@@ -295,10 +292,10 @@ public class MetaMappingExpander {
 	 * @return
 	 * @throws JSQLParserException
 	 */
-	private static String getInstantiatedSourceQuery(String sql,
-													 List<SelectItem> newColumns,
-													 List<SelectExpressionItem> templateColumns,
-													 List<String> values) throws JSQLParserException {
+	private static String getInstantiatedSQL(String sql,
+											 List<SelectItem> newColumns,
+											 List<SelectExpressionItem> templateColumns,
+											 List<String> values) throws JSQLParserException {
 
 		Select select = (Select) CCJSqlParserUtil.parse(sql);
 		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
@@ -336,23 +333,26 @@ public class MetaMappingExpander {
 	 */
 	private static ImmutableList<QuotedID> getTemplateColumnNames(QuotedIDFactory idfac, List<Term> templateTerms) {
 
+		final ImmutableList<Variable> vars;
 		int len = templateTerms.size();
 		if (len == 1) { // the case of <{varUri}>
 			Term uri = templateTerms.get(0);
 			if (uri instanceof Variable)
-				return ImmutableList.of(QuotedID.createIdFromDatabaseRecord(idfac, ((Variable) uri).getName()));
-
-			throw new IllegalArgumentException("No variables could be found for this metamapping." +
+				 vars = ImmutableList.of((Variable) uri);
+			else
+				throw new IllegalArgumentException("No variables could be found for this metamapping." +
 					"Check that the variable in the metamapping is enclosed in a URI, for instance, " +
 					"http://.../{var}");
 		}
 		else {
-			ImmutableList.Builder<QuotedID> vars = ImmutableList.builder();
-			// index 0 is for the URI template term
-			for (int i = 1; i < len; i++)
-				vars.add(QuotedID.createIdFromDatabaseRecord(idfac, ((Variable) templateTerms.get(i)).getName()));
-			return vars.build();
+			ImmutableList.Builder<Variable> builder = ImmutableList.builder();
+			for (int i = 1; i < len; i++) // index 0 is for the URI template term
+				builder.add((Variable) templateTerms.get(i));
+			vars = builder.build();
 		}
+		return vars.stream()
+				.map(v -> QuotedID.createIdFromDatabaseRecord(idfac, v.getName()))
+				.collect(ImmutableCollectors.toList());
 	}
 
 	private static String getPredicateName(Term templateTerm, List<String> values) {
