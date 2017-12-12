@@ -127,21 +127,33 @@ public class MetaMappingExpander {
 		return ImmutableList.copyOf(expandedMappings);
 	}
 
-	private static List<SQLPPTriplesMap> instantiateMapping(Connection connection, DBMetadata metadata, String id,
+	private static List<SQLPPTriplesMap> instantiateMapping(Connection connection, DBMetadata metadata, String mappingId,
 															ImmutableFunctionalTerm target, String sql)
 			throws SQLException, JSQLParserException, InvalidSelectQueryException, UnsupportedSelectQueryException {
 
-		ImmutableList<SelectExpressionItem> queryColumns = getQueryColumns(metadata, sql);
+		ImmutableMap<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, sql);
 
 		int arity = isURIRDFType(target.getTerm(1)) ? 1 : 2;
 		Function templateAtom = (Function)((arity == 1)
 				? target.getTerm(2)   // template is in the position of object
 				: target.getTerm(1)); // template is in the position of predicate
 
-		ImmutableList<SelectExpressionItem> templateColumns =
-				getTemplateColumns(metadata.getQuotedIDFactory(), templateAtom.getTerms(), queryColumns);
+		ImmutableList<SelectExpressionItem> templateColumns;
+		List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getQuotedIDFactory(), templateAtom.getTerms());
+		try {
+			templateColumns = templateColumnIds.stream()
+					.map(id -> queryColumns.get(id))
+					.collect(ImmutableCollectors.toList());
+		}
+		catch (NullPointerException e) {
+			ImmutableList<QuotedID> missingIds = templateColumnIds.stream()
+					.filter(id -> !queryColumns.containsKey(id))
+					.collect(ImmutableCollectors.toList());
+			throw new IllegalArgumentException("The placeholder(s) " + Joiner.on(", ").join(missingIds) +
+					" in the target do(es) not occur in the body of the mapping");
+		}
 
-		ImmutableList<SelectItem> newColumns = queryColumns.stream()
+		ImmutableList<SelectItem> newColumns = queryColumns.values().stream()
 				.filter(c -> !templateColumns.contains(c))
 				.collect(ImmutableCollectors.toList());
 		if (newColumns.isEmpty())   // avoid empty SELECT clause
@@ -180,7 +192,7 @@ public class MetaMappingExpander {
 					: TERM_FACTORY.getImmutableFunctionalTerm(TERM_FACTORY.getObjectPropertyPredicate(predicateName),
 					target.getTerm(0), target.getTerm(2));
 
-			String newId = IDGenerator.getNextUniqueID(id + "#");
+			String newId = IDGenerator.getNextUniqueID(mappingId + "#");
 
 			// TODO: see how to keep the provenance
 			SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap(newId, newSourceQuery,
@@ -196,34 +208,36 @@ public class MetaMappingExpander {
 
 
 
-	private static ImmutableList<SelectExpressionItem> getQueryColumns(DBMetadata metadata, String sql)
+	private static ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(DBMetadata metadata, String sql)
 			throws InvalidSelectQueryException, UnsupportedSelectQueryException {
 
 		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata);
 		PlainSelect plainSelect = sqae.getParsedSql(sql);
 		ImmutableMap<QualifiedAttributeID, Variable> attributes = sqae.getQueryBodyAttributes(plainSelect);
 
-		ImmutableList.Builder<SelectExpressionItem> builder = ImmutableList.builder();
+		ImmutableMap.Builder<QuotedID, SelectExpressionItem> builder = ImmutableMap.builder();
 		for (SelectItem si : plainSelect.getSelectItems()) {
 			si.accept(new SelectItemVisitor() {
 				@Override
 				public void visit(AllColumns allColumns) {
-					builder.addAll(sqae.expandStar(attributes).keySet().stream()
-							.map(id -> new SelectExpressionItem(new Column(id.getAttribute().getSQLRendering())))
-							.iterator());
+					builder.putAll(sqae.expandStar(attributes).keySet().stream()
+							.collect(ImmutableCollectors.toMap(
+									id -> id.getAttribute(),
+									id -> new SelectExpressionItem(new Column(id.getAttribute().getSQLRendering())))));
 				}
 
 				@Override
 				public void visit(AllTableColumns allTableColumns) {
 					Table table = allTableColumns.getTable();
-					builder.addAll(sqae.expandStar(attributes, table).keySet().stream()
-							.map(id -> new SelectExpressionItem(new Column(table, id.getAttribute().getSQLRendering())))
-							.iterator());
+					builder.putAll(sqae.expandStar(attributes, table).keySet().stream()
+							.collect(ImmutableCollectors.toMap(
+									id -> id.getAttribute(),
+									id -> new SelectExpressionItem(new Column(table, id.getAttribute().getSQLRendering())))));
 				}
 
 				@Override
 				public void visit(SelectExpressionItem selectExpressionItem) {
-					builder.add(selectExpressionItem);
+					builder.put(sqae.getSelectItemAliasedId(selectExpressionItem), selectExpressionItem);
 				}
 			});
 		}
@@ -295,34 +309,6 @@ public class MetaMappingExpander {
 		return selection;
 	}
 
-
-	/**
-	 * This method get the columns which will be used for the predicate template
-	 *
-	 * @param templateTerms
-	 * @param queryColumns
-	 * @return
-	 */
-	private static ImmutableList<SelectExpressionItem> getTemplateColumns(QuotedIDFactory idfac, List<Term> templateTerms,
-																		  List<SelectExpressionItem> queryColumns) {
-
-		ImmutableMap<QuotedID, SelectExpressionItem> lookup = queryColumns.stream()
-				.collect(ImmutableCollectors.toMap(
-						si -> SelectQueryAttributeExtractor2.getSelectItemAliasedId(idfac, si),
-						si -> si));
-
-		List<QuotedID> templateColumns = getTemplateColumnNames(idfac, templateTerms);
-		return templateColumns.stream()
-				.map(id -> {
-					SelectExpressionItem si = lookup.get(id);
-					if (si == null)
-						throw new IllegalArgumentException("The placeholder " + id +
-								" in the target does not occur in the body of the mapping");
-					return si;
-				})
-				.collect(ImmutableCollectors.toList());
-	}
-
 	/**
 	 *
 	 * This method extracts the variables in the template from the atom
@@ -344,7 +330,7 @@ public class MetaMappingExpander {
 		if (len == 1) { // the case of <{varUri}>
 			Term uri = templateTerms.get(0);
 			if (uri instanceof Variable)
-				return ImmutableList.of(idfac.createAttributeID(((Variable) uri).getName()));
+				return ImmutableList.of(QuotedID.createIdFromDatabaseRecord(idfac, ((Variable) uri).getName()));
 
 			throw new IllegalArgumentException("No variables could be found for this metamapping." +
 					"Check that the variable in the metamapping is enclosed in a URI, for instance, " +
@@ -354,7 +340,7 @@ public class MetaMappingExpander {
 			ImmutableList.Builder<QuotedID> vars = ImmutableList.builder();
 			// index 0 is for the URI template term
 			for (int i = 1; i < len; i++)
-				vars.add(idfac.createAttributeID(((Variable) templateTerms.get(i)).getName()));
+				vars.add(QuotedID.createIdFromDatabaseRecord(idfac, ((Variable) templateTerms.get(i)).getName()));
 			return vars.build();
 		}
 	}

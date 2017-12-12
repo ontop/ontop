@@ -108,7 +108,7 @@ public class SelectQueryAttributeExtractor2 {
                         Map.Entry::getValue));
     }
 
-    public static QuotedID getSelectItemAliasedId(QuotedIDFactory idfac, SelectExpressionItem si) {
+    public QuotedID getSelectItemAliasedId(SelectExpressionItem si) {
 
         if (si.getAlias() != null && si.getAlias().getName() != null) {
             return idfac.createAttributeID(si.getAlias().getName());
@@ -327,7 +327,7 @@ public class SelectQueryAttributeExtractor2 {
         @Override
         public void visit(SelectExpressionItem selectExpressionItem) {
             Expression expr = selectExpressionItem.getExpression();
-            QuotedID name = getSelectItemAliasedId(idfac, selectExpressionItem);
+            QuotedID name = getSelectItemAliasedId(selectExpressionItem);
             final Variable var;
             if (expr instanceof Column) {
                 Column column = (Column) expr;
