@@ -306,31 +306,18 @@ public class MetaMappingExpander {
 	private static ImmutableList<SelectExpressionItem> getTemplateColumns(QuotedIDFactory idfac, List<Term> templateTerms,
 																		  List<SelectExpressionItem> queryColumns) {
 
-		ImmutableMap<String, SelectExpressionItem> lookup = queryColumns.stream()
+		ImmutableMap<QuotedID, SelectExpressionItem> lookup = queryColumns.stream()
 				.collect(ImmutableCollectors.toMap(
-						si -> {
-							final String name;
-							if (si.getAlias() != null && si.getAlias().getName() != null) {
-								name = si.getAlias().getName();
-							}
-							else if (si.getExpression() instanceof Column) {
-								name = ((Column)si.getExpression()).getColumnName();
-							}
-							else
-								throw new RuntimeException("Complex expressions in SELECT require an alias");
-
-							QuotedID alias = idfac.createAttributeID(name);
-							return alias.getName();
-						},
+						si -> SelectQueryAttributeExtractor2.getSelectItemAliasedId(idfac, si),
 						si -> si));
 
-		List<Variable> templateVariables = getTemplateVariables(templateTerms);
-		return templateVariables.stream()
-				.map(var -> {
-					SelectExpressionItem si = lookup.get(var.getName());
+		List<QuotedID> templateColumns = getTemplateColumnNames(idfac, templateTerms);
+		return templateColumns.stream()
+				.map(id -> {
+					SelectExpressionItem si = lookup.get(id);
 					if (si == null)
-						throw new IllegalArgumentException("The placeholder '" + var.getName() +
-								"' in the target does not occur in the body of the mapping");
+						throw new IllegalArgumentException("The placeholder " + id +
+								" in the target does not occur in the body of the mapping");
 					return si;
 				})
 				.collect(ImmutableCollectors.toList());
@@ -351,23 +338,23 @@ public class MetaMappingExpander {
 	 * @param templateTerms
 	 * @return list of variables
 	 */
-	private static ImmutableList<Variable> getTemplateVariables(List<Term> templateTerms) {
+	private static ImmutableList<QuotedID> getTemplateColumnNames(QuotedIDFactory idfac, List<Term> templateTerms) {
 
 		int len = templateTerms.size();
 		if (len == 1) { // the case of <{varUri}>
 			Term uri = templateTerms.get(0);
 			if (uri instanceof Variable)
-				return ImmutableList.of((Variable) uri);
+				return ImmutableList.of(idfac.createAttributeID(((Variable) uri).getName()));
 
 			throw new IllegalArgumentException("No variables could be found for this metamapping." +
 					"Check that the variable in the metamapping is enclosed in a URI, for instance, " +
 					"http://.../{var}");
 		}
 		else {
-			ImmutableList.Builder<Variable> vars = ImmutableList.builder();
+			ImmutableList.Builder<QuotedID> vars = ImmutableList.builder();
 			// index 0 is for the URI template term
 			for (int i = 1; i < len; i++)
-				vars.add((Variable) templateTerms.get(i));
+				vars.add(idfac.createAttributeID(((Variable) templateTerms.get(i)).getName()));
 			return vars.build();
 		}
 	}
