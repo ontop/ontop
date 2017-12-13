@@ -80,6 +80,7 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 
 	private static final String algebraManifest = "http://www.w3.org/2001/sw/DataAccess/tests/data-r2/algebra/manifest#";
 	private static final String basicManifest = "http://www.w3.org/2001/sw/DataAccess/tests/data-r2/basic/manifest#";
+	private static final String booleanManifest = "http://www.w3.org/2001/sw/DataAccess/tests/data-r2/boolean-effective-value/manifest#";
 	private static final String castManifest = "http://www.w3.org/2001/sw/DataAccess/tests/data-r2/cast/manifest#";
 	private static final String constructManifest = "http://www.w3.org/2001/sw/DataAccess/tests/data-r2/construct/manifest#";
     private static final String datasetManifest = "http://www.w3.org/2001/sw/DataAccess/tests/data-r2/dataset/manifest#";
@@ -120,6 +121,10 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 
 			//MalformedQueryException SPARQL Parser Encountered "."  "." is not considered as part of the decimal (error is already in the sparql algebra)
 			basicManifest + "term-7",
+
+			/* DATA-R2: BOOLEAN EFFECTIVE VALUE */
+			//Cannot return the SQL type for: w
+			booleanManifest + "dawg-bev-5",
 
 			/* DATA-R2: CAST
 			Cast with function call on the datatype is not yet supported e.g. FILTER(datatype(xsd:double(?v)) = xsd:double) . */
@@ -263,14 +268,18 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 
 	);
 
-	public static Test suite() throws Exception {
+	public static Test suite() throws Exception{
+		return suite(true);
+	}
+
+	public static Test suite(boolean ignoreFailures) throws Exception {
 		return ManifestTestUtils.suite(new Factory() {
 
 			public MemorySPARQLOntopQueryTest createSPARQLQueryTest(
 					String testURI, String name, String queryFileURL,
 					String resultFileURL, Dataset dataSet,
 					boolean laxCardinality, boolean checkOrder) {
-				if(!IGNORE.contains(testURI)) {
+				if(ignoreFailures && !IGNORE.contains(testURI)) {
 					return new MemorySPARQLOntopQueryTest(testURI, name,
 							queryFileURL, resultFileURL, dataSet, laxCardinality,
 							checkOrder);

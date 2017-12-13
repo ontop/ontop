@@ -335,14 +335,17 @@ public class MemorySPARQL11QueryTest extends SPARQLQueryParent {
 
 	);
 
-	public static Test suite() throws Exception {
+    public static Test suite() throws Exception{
+        return suite(true);
+    }
+	public static Test suite(boolean ignoreFailures) throws Exception {
 		return ManifestTestUtils.suite(new Factory() {
 
 			public MemorySPARQL11QueryTest createSPARQLQueryTest(
 					String testURI, String name, String queryFileURL,
 					String resultFileURL, Dataset dataSet,
 					boolean laxCardinality, boolean checkOrder) {
-				if(!IGNORE.contains(testURI)) {
+				if(ignoreFailures && !IGNORE.contains(testURI)) {
 				return new MemorySPARQL11QueryTest(testURI, name,
 						queryFileURL, resultFileURL, dataSet, laxCardinality,
 						checkOrder);
