@@ -914,6 +914,18 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                     .map(s -> s.composeWith(ascendingSubstitution))
                     .orElse(ascendingSubstitution);
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof ChildLiftingState))
+                return false;
+
+            ChildLiftingState other = (ChildLiftingState) o;
+            return leftChild.isEquivalentTo(other.leftChild)
+                    && rightChild.isEquivalentTo(other.rightChild)
+                    && ljCondition.equals(other.ljCondition)
+                    && ascendingSubstitution.equals(other.ascendingSubstitution);
+        }
     }
 
     /**
