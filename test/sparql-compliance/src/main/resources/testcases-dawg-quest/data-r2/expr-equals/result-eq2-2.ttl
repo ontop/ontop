@@ -7,7 +7,7 @@
       rs:resultVariable  "v1" ;
       rs:resultVariable  "v2" ;
       
-      # Removed entry: Quest doesn't support custom datatype    
+      # Removed entry: Quest doesn't support custom datatype
       # rs:solution
       #             [ rs:binding  [ rs:value    :z ;
       #                             rs:variable  "v2"
@@ -33,7 +33,7 @@
                                 ]
                   ] ;
 
-      # Removed entry: Quest doesn't support custom datatype  
+      # Removed entry: Quest doesn't support custom datatype
       # rs:solution
       #             [ rs:binding  [ rs:value    "1" ;
       #                             rs:variable  "v2"
@@ -70,7 +70,7 @@
       #                           ]
       #             ] ;
  
-      # Removed entry: Quest doesn't support custom datatype  
+      # Removed entry: Quest doesn't support custom datatype
       # rs:solution
       #             [ rs:binding  [ rs:value    "1" ;
       #                             rs:variable  "v1"
@@ -80,7 +80,7 @@
       #                           ]
       #             ] ;
       
-      # Removed entry: Quest doesn't support custom datatype  
+      # Removed entry: Quest doesn't support custom datatype
       # rs:solution
       #             [ rs:binding  [ rs:value    "zzz" ;
       #                             rs:variable  "v2"
@@ -90,7 +90,7 @@
       #                           ]
       #             ] ;
       
-      # Removed entry: Quest doesn't support custom datatype  
+      # Removed entry: Quest doesn't support custom datatype
       # rs:solution
       #             [ rs:binding  [ rs:value    :z ;
       #                             rs:variable  "v1"

@@ -9,22 +9,12 @@
   <results>
     <result>
       <binding name="x">
-        <uri>http://www.w3.org/1999/02/22-rdf-syntax-ns#Alt</uri>
+        <uri>http://example.org/ns#b</uri>
       </binding>
     </result>
     <result>
       <binding name="x">
-        <uri>http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag</uri>
-      </binding>
-    </result>
-    <result>
-      <binding name="x">
-        <uri>http://www.w3.org/1999/02/22-rdf-syntax-ns#Seq</uri>
-      </binding>
-    </result>
-    <result>
-      <binding name="x">
-        <uri>http://www.w3.org/2000/01/rdf-schema#Container</uri>
+        <uri>http://example.org/ns#p</uri>
       </binding>
     </result>
   </results>

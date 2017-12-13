@@ -12,8 +12,8 @@
     :pp01
     :pp02
     :pp03
-    :pp04
-    :pp05
+#     :pp04 # removed by 3LC
+#     :pp05 # removed by 3LC
     :pp06
     :pp07
     :pp08
@@ -21,22 +21,23 @@
     :pp10
     :pp11
     :pp12
-    :pp13
+#     :pp13 # removed by 3LC
     :pp14
-    :pp15
+#     :pp15 # removed by 3LC
     :pp16
 
-    :pp20
+#     :pp20 # removed by 3LC
     :pp21
-    :pp22
+#     :pp22 # removed by 3LC
     :pp23
-    :pp24
+#     :pp24 # removed by 3LC
     :pp25
     
-    :pp26
-    :pp27
-    :pp28
-    :pp29
+#     :pp26 # removed by 3LC
+#     :pp27 # removed by 3LC
+#     :pp28 # removed 2012-07-31
+    :pp28a
+#     :pp29 # removed by 3LC
 
     :pp30
     :pp31
@@ -45,6 +46,8 @@
 
     :pp34
     :pp35
+    :pp36
+    :pp37
  ) .
 
 
@@ -162,7 +165,7 @@
 :pp12 rdf:type mf:QueryEvaluationTest ;
     mf:name    "(pp12) Variable length path and two paths to same target node" ;
     dawgt:approval dawgt:Approved ;
-    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2011-03-29#resolution_3> ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-15#resolution_2> ;
     mf:action
          [ qt:query  <pp12.rq> ;
            qt:data   <pp11.ttl>] ;
@@ -202,7 +205,7 @@
 :pp16 rdf:type mf:QueryEvaluationTest ;
     mf:name    "(pp16) Duplicate paths and cycles through foaf:knows*" ;
     dawgt:approval dawgt:Approved ;
-    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2011-03-29#resolution_3> ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-15#resolution_2> ;
     mf:action
          [ qt:query  <pp14.rq> ;
            qt:data   <pp16.ttl>] ;
@@ -223,7 +226,7 @@
 
 :pp21 rdf:type mf:QueryEvaluationTest ;
     dawgt:approval dawgt:Approved ;
-    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2011-03-29#resolution_3> ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-15#resolution_2> ;
     mf:name    "(pp21) Diamond -- :p+" ;
     mf:action
         [ qt:query  <path-2-2.rq> ;
@@ -244,7 +247,7 @@
 
 :pp23  rdf:type mf:QueryEvaluationTest ;
     dawgt:approval dawgt:Approved ;
-    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2011-03-29#resolution_3> ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-15#resolution_2> ;
     mf:name    "(pp23) Diamond, with tail -- :p+" ;
     mf:action
         [ qt:query  <path-2-2.rq> ;
@@ -264,7 +267,7 @@
 
 :pp25  rdf:type mf:QueryEvaluationTest ;
     dawgt:approval dawgt:Approved ;
-    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2011-03-29#resolution_3> ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-15#resolution_2> ;
     mf:name    "(pp25) Diamond, with loop -- :p+" ;
     mf:action
         [ qt:query  <path-2-2.rq> ;
@@ -292,15 +295,27 @@
     mf:result  <diamond-loop-4.srx>
     .
 
-:pp28  rdf:type mf:QueryEvaluationTest ;
+## :pp28  rdf:type mf:QueryEvaluationTest ;
+##     dawgt:approval dawgt:Approved ;
+##     dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2011-03-29#resolution_3> ;
+## Now invalid.
+##     mf:name    "(pp28) Diamond, with loop -- (:p/:p)?" ;
+##     mf:action
+##         [ qt:query  <path-3-3.rq> ;
+##           qt:data   <data-diamond-loop.ttl> ] ;
+##     mf:result  <diamond-loop-5.srx>
+##     .
+
+:pp28a  rdf:type mf:QueryEvaluationTest ;
+    mf:name    "(pp28a) Diamond, with loop -- (:p/:p)?" ;
     dawgt:approval dawgt:Approved ;
-    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2011-03-29#resolution_3> ;
-    mf:name    "(pp28) Diamond, with loop -- (:p/:p)?" ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-08-07#resolution_2> ;
     mf:action
         [ qt:query  <path-3-3.rq> ;
           qt:data   <data-diamond-loop.ttl> ] ;
-    mf:result  <diamond-loop-5.srx>
-    .
+    mf:result  <diamond-loop-5a.srx>
+     .
+
 
 :pp29  rdf:type mf:QueryEvaluationTest ;
     dawgt:approval dawgt:Approved ;
@@ -376,3 +391,23 @@
     mf:result  <path-ng-01.srx>
     .
 
+:pp36  rdf:type mf:QueryEvaluationTest ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-15#resolution_2> ;
+    mf:name    "(pp36) Arbitrary path with bound endpoints" ;
+    mf:action
+        [ qt:query  <pp36.rq> ;
+          qt:data   <clique3.ttl> ] ;
+    mf:result  <pp36.srx>
+    .
+
+:pp37 rdf:type mf:QueryEvaluationTest ;
+    rdfs:comment "Test case as per http://lists.w3.org/Archives/Public/public-rdf-dawg-comments/2012Feb/0006.html" ;
+    mf:name    "(pp37) Nested (*)*" ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-15#resolution_2> ;
+    mf:action 
+        [ qt:query <pp37.rq> ; 
+          qt:data  <pp37.ttl> ] ;
+    mf:result <pp37.srx> 
+   .
