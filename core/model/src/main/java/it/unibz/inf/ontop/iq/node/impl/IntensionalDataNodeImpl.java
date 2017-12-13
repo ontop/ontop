@@ -81,6 +81,12 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        return (queryNode instanceof IntensionalDataNode)
+                && getProjectionAtom().equals(((IntensionalDataNode) queryNode).getProjectionAtom());
+    }
+
+    @Override
     public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }

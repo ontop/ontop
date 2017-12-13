@@ -108,6 +108,11 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        return (queryNode instanceof TrueNode);
+    }
+
+    @Override
     public ImmutableSet<Variable> getVariables() {
         return EMPTY_VARIABLE_SET;
     }

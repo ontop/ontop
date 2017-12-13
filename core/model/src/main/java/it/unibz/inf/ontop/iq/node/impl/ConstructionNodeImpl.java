@@ -522,6 +522,17 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        if (!(queryNode instanceof ConstructionNode))
+            return false;
+        ConstructionNode node = (ConstructionNode) queryNode;
+
+        return projectedVariables.equals(node.getVariables())
+                && substitution.equals(node.getSubstitution())
+                && optionalModifiers.equals(node.getOptionalModifiers());
+    }
+
+    @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
         visitor.visit(this);
     }

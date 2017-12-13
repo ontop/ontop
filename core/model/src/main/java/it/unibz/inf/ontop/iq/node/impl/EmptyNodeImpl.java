@@ -157,4 +157,11 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
     }
+
+    @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        if (!(queryNode instanceof EmptyNode))
+            return false;
+        return projectedVariables.equals(((EmptyNode) queryNode).getVariables());
+    }
 }

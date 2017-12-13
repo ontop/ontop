@@ -203,6 +203,13 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        if (!(queryNode instanceof UnionNode))
+            return false;
+        return projectedVariables.equals(((UnionNode) queryNode).getVariables());
+    }
+
+    @Override
     public IQTree liftBinding(ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
 
         ImmutableList<IQTree> liftedChildren = children.stream()

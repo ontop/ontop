@@ -120,6 +120,12 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
                 && ((ExtensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
     }
 
+    @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        return (queryNode instanceof ExtensionalDataNode)
+                && getProjectionAtom().equals(((ExtensionalDataNode) queryNode).getProjectionAtom());
+    }
+
 
     @Override
     public String toString() {

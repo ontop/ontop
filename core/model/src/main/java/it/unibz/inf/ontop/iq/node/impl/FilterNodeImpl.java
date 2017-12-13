@@ -151,6 +151,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        return (queryNode instanceof FilterNode)
+                && getFilterCondition().equals(((FilterNode) queryNode).getFilterCondition());
+    }
+
+    @Override
     public String toString() {
         return FILTER_NODE_STR + getOptionalFilterString();
     }
