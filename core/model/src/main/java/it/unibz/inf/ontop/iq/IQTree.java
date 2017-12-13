@@ -43,4 +43,6 @@ public interface IQTree {
     }
 
     ImmutableSet<Variable> getNullableVariables();
+
+    boolean isEquivalentTo(IQTree tree);
 }

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class AbstractCompositeIQTree<N extends QueryNode> implements CompositeIQTree<N> {
@@ -79,6 +80,28 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                 + subTree.getChildren().stream()
                     .map(c -> printSubtree(c, childOffset))
                     .reduce("", (c, a) -> c + a);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof CompositeIQTree)
+                && isEquivalentTo((CompositeIQTree) o);
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
+    public boolean isEquivalentTo(IQTree tree) {
+        if (!getRootNode().isEquivalentTo(tree.getRootNode()))
+            return false;
+
+        ImmutableList<IQTree> otherChildren = tree.getChildren();
+        return (children.size() == otherChildren.size())
+                && IntStream.range(0, children.size())
+                    .allMatch(i -> children.get(i).isEquivalentTo(otherChildren.get(i)));
     }
 
 }

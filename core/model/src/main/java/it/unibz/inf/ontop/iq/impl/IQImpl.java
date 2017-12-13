@@ -65,4 +65,15 @@ public class IQImpl implements IQ {
     public String toString() {
         return projectionAtom + "\n" + tree.toString();
     }
+
+    @Override
+    public boolean equals(Object otherObject) {
+        return (otherObject instanceof IQ)
+                && tree.isEquivalentTo(((IQ) otherObject).getTree());
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
 }
