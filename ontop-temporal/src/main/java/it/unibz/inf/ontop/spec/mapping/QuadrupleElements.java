@@ -8,7 +8,11 @@ public enum QuadrupleElements {
     inXSDTimeBegin("http://www.w3.org/2006/time#inXSDDateTime"),
     isEndInclusive("https://w3id.org/tobda/vocabulary#isEndInclusive"),
     hasEnd("http://www.w3.org/2006/time#hasEnd"),
-    inXSDTimeEnd("http://www.w3.org/2006/time#inXSDDateTime");
+    inXSDTimeEnd("http://www.w3.org/2006/time#inXSDDateTime"),
+    inXSDTime("http://www.w3.org/2006/time#inXSDDateTime"),
+    interval("http://www.w3.org/2006/time#Interval"),
+    instant("http://www.w3.org/2006/time#Instant"),
+    namedGraph("https://w3id.org/tobda/vocabulary#namedGraph/");
 
     private final String uri;
 

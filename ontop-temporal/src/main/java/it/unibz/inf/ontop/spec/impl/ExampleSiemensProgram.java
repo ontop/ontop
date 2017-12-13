@@ -53,7 +53,7 @@ public class ExampleSiemensProgram {
         final Variable varBurner = tf.getVariable("b");
 
         TemporalAtomicExpression lrs = f.createTemporalAtomicExpression(conceptLRS, varRs);
-        TemporalAtomicExpression rs = f.createTemporalAtomicExpression(dataPropertyRs, varTb, varV);
+        TemporalAtomicExpression rs = f.createTemporalAtomicExpression(dataPropertyRs, varRs, varV);
         ComparisonExpression comparisonLs = f.createComparisonExpression(af.getAtomPredicate("LT", 2), varV, tf.getConstantLiteral("1000", Predicate.COL_TYPE.DECIMAL));
         TemporalAtomicExpression hrs = f.createTemporalAtomicExpression(conceptHRS, varRs);
         ComparisonExpression comparisonHs = f.createComparisonExpression(af.getAtomPredicate("GT",2), varV, tf.getConstantLiteral("1260", Predicate.COL_TYPE.DECIMAL));

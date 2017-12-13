@@ -19,4 +19,9 @@ public class QuadrupleItem {
     public IntermediateQuery getIntermediateQuery() {
         return intermediateQuery;
     }
+
+    @Override
+    public String toString(){
+        return predicate.toString()+"\n"+intermediateQuery.toString();
+    }
 }

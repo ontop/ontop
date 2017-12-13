@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -19,6 +20,11 @@ public class StaticAtomicExpressionImpl implements StaticAtomicExpression {
     private final List<Term> terms;
 
     StaticAtomicExpressionImpl(AtomPredicate predicate, List<Term> terms) {
+        this.predicate = predicate;
+        this.terms = terms;
+    }
+
+    public StaticAtomicExpressionImpl(AtomPredicate predicate, ImmutableList<Term> terms) {
         this.predicate = predicate;
         this.terms = terms;
     }

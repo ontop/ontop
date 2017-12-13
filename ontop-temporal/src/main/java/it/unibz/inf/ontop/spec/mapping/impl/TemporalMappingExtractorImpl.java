@@ -175,14 +175,14 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
         //TODO: inXSDTimes are duplicated. fix it!
         for(MapItem mapItem : mapItems){
             map.putIfAbsent(mapItem.getPred(), ArrayListMultimap.create());
-            if (mapItem.getProjPred().getName().equals("http://www.w3.org/2006/time#inXSDDateTime")){
+            if (mapItem.getProjPred().getName().equals(QuadrupleElements.inXSDTime.toString())){
                 mapItem.getIq().getRootConstructionNode().getSubstitution().getImmutableMap().values().forEach(immutableTerm -> {
                     mapItems.forEach(mapItem1 -> {
-                        if (mapItem1.getProjPred().getName().equals("http://www.w3.org/2006/time#hasBeginning")){
+                        if (mapItem1.getProjPred().getName().equals(QuadrupleElements.hasBeginning.toString())){
                            if(mapItem1.getIq().getRootConstructionNode().getSubstitution().getImmutableMap().containsValue(immutableTerm)){
                                map.get(mapItem.getPred()).put(mapItem.getProjPred().getName()+"$begin", mapItem.getIq());
                            }
-                        }else if(mapItem1.getProjPred().getName().equals("http://www.w3.org/2006/time#hasEnd")){
+                        }else if(mapItem1.getProjPred().getName().equals(QuadrupleElements.hasEnd.toString())){
                             if(mapItem1.getIq().getRootConstructionNode().getSubstitution().getImmutableMap().containsValue(immutableTerm)){
                                 map.get(mapItem.getPred()).put(mapItem.getProjPred().getName()+"$end", mapItem.getIq());
                             }

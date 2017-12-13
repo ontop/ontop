@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.spec.mapping.QuadrupleElements;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
@@ -260,8 +261,8 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
 
         //hasTime
         ImmutableTerm graphURITemplate = quadAtom.getArguments().get(3);
-        Predicate hasTime = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#hasTime",2);
-        Predicate interval = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#Interval",1);
+        Predicate hasTime = ATOM_FACTORY.getAtomPredicate(QuadrupleElements.hasTime.toString(),2);
+        Predicate interval = ATOM_FACTORY.getAtomPredicate(QuadrupleElements.interval.toString(),1);
 
         ImmutableFunctionalTerm intervalURITemplate  =
                 TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral(interval.getName()),
@@ -271,13 +272,13 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(hasTime, graphURITemplate, intervalURITemplate));
 
         //isBeginInclusive
-        Predicate beginInclusive = ATOM_FACTORY.getAtomPredicate("https://w3id.org/tobda/vocabulary#isBeginInclusive",2);
+        Predicate beginInclusive = ATOM_FACTORY.getAtomPredicate(QuadrupleElements.isBeginInclusive.toString(),2);
 
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(beginInclusive, intervalURITemplate, TERM_FACTORY.getBooleanConstant(temporalTriplesMap.getTemporalMappingInterval().isBeginInclusive())));
 
         //hasBeginning
-        Predicate hasBeginning = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#hasBeginning",2);
-        Predicate beginInstant = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#Instant",1);
+        Predicate hasBeginning = ATOM_FACTORY.getAtomPredicate(QuadrupleElements.hasBeginning.toString(),2);
+        Predicate beginInstant = ATOM_FACTORY.getAtomPredicate(QuadrupleElements.instant.toString(),1);
         ImmutableFunctionalTerm beginInstantURITemplate =
                 TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral(beginInstant.getName()),
                         temporalTriplesMap.getTemporalMappingInterval().getBegin());
@@ -286,18 +287,18 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
 
         //TODO:support other types too
         //begin inXSDDateTime
-        Predicate beginInXSDDateTime = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#inXSDDateTime",2);
+        Predicate beginInXSDDateTime = ATOM_FACTORY.getAtomPredicate(QuadrupleElements.inXSDTimeBegin.toString(),2);
 
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(beginInXSDDateTime, beginInstantURITemplate, temporalTriplesMap.getTemporalMappingInterval().getBegin()));
 
         //isEndInclusive
-        Predicate endInclusive = ATOM_FACTORY.getAtomPredicate("https://w3id.org/tobda/vocabulary#isEndInclusive",2);
+        Predicate endInclusive = ATOM_FACTORY.getAtomPredicate(QuadrupleElements.isEndInclusive.toString(),2);
 
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(endInclusive, intervalURITemplate, TERM_FACTORY.getBooleanConstant(temporalTriplesMap.getTemporalMappingInterval().isEndInclusive())));
 
         //hasEnd
-        Predicate hasEnd = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#hasEnd",2);
-        Predicate endInstant = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#Instant",1);
+        Predicate hasEnd = ATOM_FACTORY.getAtomPredicate(QuadrupleElements.hasEnd.toString(),2);
+        Predicate endInstant = ATOM_FACTORY.getAtomPredicate(QuadrupleElements.instant.toString(),1);
         ImmutableFunctionalTerm endInstantURITemplate =
                 TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral(endInstant.getName()),
                         temporalTriplesMap.getTemporalMappingInterval().getEnd());
@@ -306,7 +307,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
 
         //TODO:support other types too
         //end inXSDDateTime
-        Predicate endInXSDDateTime = ATOM_FACTORY.getAtomPredicate("http://www.w3.org/2006/time#inXSDDateTime",2);
+        Predicate endInXSDDateTime = ATOM_FACTORY.getAtomPredicate(QuadrupleElements.inXSDTimeEnd.toString(),2);
 
         ngComponentsList.add(TERM_FACTORY.getImmutableFunctionalTerm(endInXSDDateTime, endInstantURITemplate, temporalTriplesMap.getTemporalMappingInterval().getEnd()));
 
@@ -315,7 +316,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
 
     private static ImmutableTerm getGraphURITemplate(TemporalMappingInterval intervalQuery){
 
-        ImmutableTerm graphConstrantLiteral = TERM_FACTORY.getConstantLiteral("https://w3id.org/tobda/vocabulary#namedGraph/");
+        ImmutableTerm graphConstrantLiteral = TERM_FACTORY.getConstantLiteral(QuadrupleElements.namedGraph.toString());
         ImmutableTerm beginInc = TERM_FACTORY.getConstantLiteral(intervalQuery.isBeginInclusiveToString(), Predicate.COL_TYPE.BOOLEAN);
         ImmutableTerm endInc = TERM_FACTORY.getConstantLiteral(intervalQuery.isEndInclusiveToString(), Predicate.COL_TYPE.BOOLEAN);
 
