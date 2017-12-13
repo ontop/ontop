@@ -35,8 +35,8 @@ public class LegacyMappingEquivalenceFreeRewriter implements MappingEquivalenceF
             ImmutableList<CQIE> rules = mapping2DatalogConverter.convert(mapping).collect(ImmutableCollectors.toList());
 //            Stream<CQIE> rules = mapping2DatalogConverter.convert(mapping);
 
-            ImmutableList<CQIE> updatedRules = new LegacyMappingVocabularyValidator(tBox, vocabulary)
-                    .replaceEquivalences(rules);
+            ImmutableList<CQIE> updatedRules = rules;
+            //new LegacyMappingVocabularyValidator(tBox, vocabulary).replaceEquivalences(rules);
             return datalog2MappingConverter.convertMappingRules(updatedRules, dbMetadata, mapping.getExecutorRegistry(),
                     mapping.getMetadata());
         }

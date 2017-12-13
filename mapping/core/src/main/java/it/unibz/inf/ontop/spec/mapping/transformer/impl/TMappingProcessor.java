@@ -56,9 +56,20 @@ public class TMappingProcessor {
 
 	private static final boolean noCQC = false;		
 
+	// TODO: the implementation of EXCLUDE ignores equivalent classes / properties
+
 	private static class TMappingIndexEntry implements Iterable<TMappingRule> {
 		private final List<TMappingRule> rules = new LinkedList<>();
-	
+
+		public TMappingIndexEntry copyOf(Predicate newPredicate) {
+			TMappingIndexEntry copy = new TMappingIndexEntry();
+			for (TMappingRule rule : rules) {
+				Function newHead = TERM_FACTORY.getFunction(newPredicate, rule.getHeadTerms());
+				TMappingRule newRule = new TMappingRule(newHead, rule);
+				copy.rules.add(newRule);
+			}
+			return copy;
+		}
 
 		@Override
 		public Iterator<TMappingRule> iterator() {
@@ -248,17 +259,17 @@ public class TMappingProcessor {
 
 		for (Equivalences<ObjectPropertyExpression> propertySet : dag) {
 
-			ObjectPropertyExpression current = propertySet.getRepresentative();
-			if (current.isInverse())
+			ObjectPropertyExpression representative = propertySet.getRepresentative();
+			if (representative.isInverse())
 				continue;
 
-			if (excludeFromTMappings.contains(current)) {
+			if (excludeFromTMappings.contains(representative)) {
 				continue;
 			}
 
 			/* Getting the current node mappings */
-			Predicate currentPredicate = current.getPredicate();
-			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
+			Predicate currentPredicate = representative.getPredicate();
+			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
 			for (Equivalences<ObjectPropertyExpression> descendants : dag.getSub(propertySet)) {
 				for(ObjectPropertyExpression childproperty : descendants) {
@@ -276,16 +287,11 @@ public class TMappingProcessor {
 						continue;
 					
 					for (TMappingRule childmapping : childmappings) {
-						
 						List<Term> terms = childmapping.getHeadTerms();
+						Function newMappingHead = (!requiresInverse)
+							? TERM_FACTORY.getFunction(currentPredicate, terms)
+							: TERM_FACTORY.getFunction(currentPredicate, terms.get(1), terms.get(0));
 
-						Function newMappingHead;
-						if (!requiresInverse) {
-							newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms);
-						} 
-						else {
-							newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms.get(1), terms.get(0));
-						}
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
@@ -294,27 +300,8 @@ public class TMappingProcessor {
 
 			/* Setting up mappings for the equivalent classes */
 			for (ObjectPropertyExpression equivProperty : propertySet) {
-					 
-				Predicate p = equivProperty.getPredicate();
-
-				// skip the property and its inverse (if it is symmetric)
-				if (p.equals(current.getPredicate()))
-					continue;
-				
-				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
-					
-				for (TMappingRule currentNodeMapping : currentNodeMappings) {
-					List<Term> terms = currentNodeMapping.getHeadTerms();
-					
-					Function newhead;
-					if (!equivProperty.isInverse()) 
-						newhead = TERM_FACTORY.getFunction(p, terms);
-					else 
-						newhead = TERM_FACTORY.getFunction(p, terms.get(1), terms.get(0));
-					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
-					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
-				}
+				if (!equivProperty.isInverse())
+					setMappings(mappingIndex, equivProperty.getPredicate(), currentNodeMappings);
 			}
 		} // Properties loop ended
 		
@@ -332,13 +319,13 @@ public class TMappingProcessor {
 			TMappingExclusionConfig excludeFromTMappings) {
 		
 		for (Equivalences<DataPropertyExpression> propertySet : dag) {
-			DataPropertyExpression current = propertySet.getRepresentative();
+			DataPropertyExpression representative = propertySet.getRepresentative();
 
-			if (excludeFromTMappings.contains(current)) {
+			if (excludeFromTMappings.contains(representative)) {
 				continue;
 			}
 			/* Getting the current node mappings */
-			Predicate currentPredicate = current.getPredicate();
+			Predicate currentPredicate = representative.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
 			for (Equivalences<DataPropertyExpression> descendants : dag.getSub(propertySet)) {
@@ -366,20 +353,7 @@ public class TMappingProcessor {
 
 			/* Setting up mappings for the equivalent classes */
 			for (DataPropertyExpression equivProperty : propertySet) {
-				Predicate p = equivProperty.getPredicate();
-
-				// skip the property and its inverse (if it is symmetric)
-				if (p.equals(current.getPredicate()))
-					continue;
-				
-				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
-					
-				for (TMappingRule currentNodeMapping : currentNodeMappings) {
-					Function newhead = TERM_FACTORY.getFunction(p, currentNodeMapping.getHeadTerms());
-					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
-					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
-				}
+				setMappings(mappingIndex, equivProperty.getPredicate(), currentNodeMappings);
 			}
 		} // Properties loop ended
 		
@@ -463,59 +437,47 @@ public class TMappingProcessor {
 
 		/*
 		 * Property t-mappings are done, we now continue with class t-mappings.
-		 * Starting with the leafs.
 		 */
 
 		for (Equivalences<ClassExpression> classSet : reasoner.getClassDAG()) {
 
-			if (!(classSet.getRepresentative() instanceof OClass)) 
+			if (!(classSet.getRepresentative() instanceof OClass))
 				continue;
 
-			OClass current = (OClass)classSet.getRepresentative();
+			OClass representative = (OClass)classSet.getRepresentative();
 
-			// FIXME: consider equivalences
-            // USE OF excludeFromTMappings
-			if(excludeFromTMappings.contains(current)){
+			if (excludeFromTMappings.contains(representative)) {
 				continue;
 			}
 
 			/* Getting the current node mappings */
-			Predicate currentPredicate = current.getPredicate();
+			Predicate currentPredicate = representative.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
 			for (Equivalences<ClassExpression> descendants : reasoner.getClassDAG().getSub(classSet)) {
 				for (ClassExpression childDescription : descendants) {
-
 
                     /* adding the mappings of the children as own mappings, the new
 					 * mappings. There are three cases, when the child is a named
 					 * class, or when it is an \exists P or \exists \inv P. 
 					 */
 					
-					boolean isClass, isInverse;
-
-					Predicate childPredicate;					
+					final int arg;
+					final Predicate childPredicate;
 					if (childDescription instanceof OClass) {
 						childPredicate = ((OClass) childDescription).getPredicate();
-						isClass = true;
-						isInverse = false;
-
-                        if (excludeFromTMappings.contains((OClass) childDescription)) {
-                            continue;
-                        }
-					} 
+						arg = 0;
+					}
 					else if (childDescription instanceof ObjectSomeValuesFrom) {
 						ObjectPropertyExpression some = ((ObjectSomeValuesFrom) childDescription).getProperty();
 						childPredicate = some.getPredicate();
-						isClass = false;
-						isInverse = some.isInverse();
+						arg = some.isInverse() ? 1 : 0;
 					} 
 					else {
 						assert (childDescription instanceof DataSomeValuesFrom);
 						DataPropertyExpression some = ((DataSomeValuesFrom) childDescription).getProperty();
 						childPredicate = some.getPredicate();
-						isClass = false;
-						isInverse = false;  // can never be an inverse
+						arg = 0; // can never be an inverse
 					} 
 					
 					List<TMappingRule> childmappings = originalMappingIndex.get(childPredicate);
@@ -523,45 +485,22 @@ public class TMappingProcessor {
 						continue;
 					
 					for (TMappingRule childmapping : childmappings) {
-						
 						List<Term> terms = childmapping.getHeadTerms();
-
-						Function newMappingHead;
-						if (isClass) {
-							newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms);
-						} 
-						else {
-							if (!isInverse) 
-								newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms.get(0));
-							else 
-								newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms.get(1));
-						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
+						Function newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms.get(arg));
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
 			}
 
-			
 			/* Setting up mappings for the equivalent classes */
 			for (ClassExpression equiv : classSet) {
-				if (!(equiv instanceof OClass) || equiv.equals(current))
-					continue;
-				
-				Predicate p = ((OClass) equiv).getPredicate();
-				TMappingIndexEntry equivalentClassMappings = getMappings(mappingIndex, p);	
-				
-				for (TMappingRule currentNodeMapping : currentNodeMappings) {
-					Function newhead = TERM_FACTORY.getFunction(p, currentNodeMapping.getHeadTerms());
-
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
-					equivalentClassMappings.mergeMappingsWithCQC(newrule);
-				}
+				if (equiv instanceof OClass)
+					setMappings(mappingIndex, ((OClass) equiv).getPredicate(), currentNodeMappings);
 			}
 		}
 		
 		Map<Integer, Set<Predicate>> frequences = new HashMap<>();
-		
 		
 		List<CQIE> tmappingsProgram = new LinkedList<>();
 		for (Entry<Predicate, TMappingIndexEntry> entry : mappingIndex.entrySet()) {
@@ -611,6 +550,10 @@ public class TMappingProcessor {
 			mappingIndex.put(current, currentMappings);
 		}
 		return currentMappings;
+	}
+
+	private static void setMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, Predicate predicate, TMappingIndexEntry mapping) {
+		mappingIndex.put(predicate, mapping.copyOf(predicate));
 	}
 
 }
