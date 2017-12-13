@@ -29,14 +29,13 @@ import it.unibz.inf.ontop.test.sparql.SPARQLQueryParent;
 import junit.framework.Test;
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.repository.Repository;
-import org.junit.Ignore;
 
 import java.util.Properties;
 import java.util.Set;
 
 
 //Test of SPARQL 1.1 compliance
-@Ignore("unsupported files still need to be added and checked")
+
 public class MemorySPARQL11QueryTest extends SPARQLQueryParent {
 
 	/* List of UNSUPPORTED QUERIES */
@@ -98,78 +97,137 @@ public class MemorySPARQL11QueryTest extends SPARQLQueryParent {
 			aggregatesManifest + "agg-sum-order-01",
 			aggregatesManifest + "agg-empty-group",
 
-			/* BIND
-			not supported yet */
+			/* BIND */
+			//The sub-term: ADD(o,http://www.w3.org/2001/XMLSchema#integer(+1)) is not a VariableOrGroundTerm
 			bindManifest + "bind03",
+            //converision in SPARQL failed: Projection source of ProjectionElem "nova"
+            // not found in Extension
 			bindManifest + "bind04",
+            //typing exception In ADD("null",http://www.w3.org/2001/XMLSchema#integer(+2)): Incompatible type inferred : expected: numeric term, actual: NULL
 			bindManifest + "bind07",
 
 			/* BINDINGS
-			not supported yet */
+			 */
+			//Unexpected bindings
 			bindingsManifest + "values7",
+            //Missing bindings:
 			bindingsManifest + "values6",
 			bindingsManifest + "values8",
 			bindingsManifest + "values5",
 
-			/* FUNCTIONS
-			not supported yet */
+			/* FUNCTIONS*/
+
+			//bnode not supported in SPARQL transformation
 			functionsManifest + "bnode01",
 			functionsManifest + "bnode02",
+
+			//problem with the numbers format e.g. 1.0 instead of 1
 			functionsManifest + "ceil01",
+
+			//coalesce not supported in SPARQL transformation
 			functionsManifest + "coalesce01",
+
+			//wrong equality with lang
 			functionsManifest + "concat02",
+
+			//encoding is simply removed
 			functionsManifest + "encode01",
+
+			//problem with the numbers format
 			functionsManifest + "floor01",
+
+			//extract hours return 0
 			functionsManifest + "hours",
+
+			//not supported in SPARQL transformation
 			functionsManifest + "if01",
 			functionsManifest + "if02",
 			functionsManifest + "in01",
 			functionsManifest + "in02",
 			functionsManifest + "iri01",
+
+			//missing info about lang
 			functionsManifest + "lcase01",
+
+			//not supported in H2 transformation
 			functionsManifest + "md5-01",
 			functionsManifest + "md5-02",
+
+			//extract minutes return 0
 			functionsManifest + "minutes",
+
+			// No data or composite atom in List
 			functionsManifest + "notin01",
 			functionsManifest + "notin02",
 			functionsManifest + "now01",
+
+			//Incompatible type inferred : expected: numeric term, actual: LITERAL
 			functionsManifest + "plus-1",
 			functionsManifest + "plus-2",
+
+			// No data or composite atom in List
 			functionsManifest + "rand01",
+
+			//missing info about lang
 			functionsManifest + "replace01",
+
+			//problem with the numbers format
 			functionsManifest + "round01",
+
+			//extract seconds return 0
 			functionsManifest + "seconds",
+
+			//SHA1 is not supported in H2
 			functionsManifest + "sha1-01",
 			functionsManifest + "sha1-02",
+
+			//SHA512 is not supported in H2
 			functionsManifest + "sha512-01",
 			functionsManifest + "sha512-02",
+
+			//The type should already be for a non-variable - non-expression term e.g "e"^^xsd:string
 			functionsManifest + "strafter01a",
 			functionsManifest + "strafter02",
 			functionsManifest + "strbefore01a",
 			functionsManifest + "strbefore02",
+
+			//not supported in SPARQL transformation
 			functionsManifest + "strdt01",
 			functionsManifest + "strdt02",
 			functionsManifest + "strdt03",
 			functionsManifest + "strlang01",
 			functionsManifest + "strlang02",
 			functionsManifest + "strlang03",
+
+			//No data or composite atom in List
 			functionsManifest + "struuid01",
+
+			//The type should already be for a non-variable - non-expression term e.g "e"^^xsd:string
 			functionsManifest + "substring01",
 			functionsManifest + "substring02",
+
+			//not supported in SPARQL transformation
 			functionsManifest + "timezone",
+
+			//TZ is not supported in H2
 			functionsManifest + "tz",
+
+			// missing language tag
 			functionsManifest + "ucase01",
+
+			//No data or composite atom in List
 			functionsManifest + "uuid01",
 
-			/* CONSTRUCT
-			not supported yet */
+			/* CONSTRUCT not supported yet*/
+			//Projection cannot be cast to Reduced in rdf4j
 			constructManifest + "constructwhere01",
 			constructManifest + "constructwhere02",
 			constructManifest + "constructwhere03",
+			//problem importing dataset
 			constructManifest + "constructwhere04",
 
-			/* CSV
-			not supported yet */
+			/* CSV */
+			//different format for number and not supported custom datatype
 			csvTscResManifest + "tsv03",
 
 			/* GROUPING
@@ -201,23 +259,33 @@ public class MemorySPARQL11QueryTest extends SPARQLQueryParent {
 			existsManifest + "exists04",
 			existsManifest + "exists05",
 
-			/* PROJECT
-			not supported yet */
+			/* PROJECT */
+			//Unexpected function in the query: SPARQL_DATATYPE
 			projectExpressionManifest + "projexp07",
 			projectExpressionManifest + "projexp05",
+
+			//Data conversion error converting "foobar"
 			projectExpressionManifest + "projexp02",
 
-			/* PROPERTY PATH
-			not supported yet */
+			/* PROPERTY PATH*/
+			// Not supported: ArbitraryLengthPath
 			propertyPathManifest + "pp02",
+
+			//wrong result, unexpected binding
 			propertyPathManifest + "pp06",
+
+			// Not supported: ArbitraryLengthPath
 			propertyPathManifest + "pp12",
 			propertyPathManifest + "pp14",
 			propertyPathManifest + "pp16",
 			propertyPathManifest + "pp21",
 			propertyPathManifest + "pp23",
 			propertyPathManifest + "pp25",
+
+			//Not supported: ZeroLengthPath
 			propertyPathManifest + "pp28a",
+
+			// Not supported: ArbitraryLengthPath
 			propertyPathManifest + "pp34",
 			propertyPathManifest + "pp35",
 			propertyPathManifest + "pp36",
@@ -226,24 +294,42 @@ public class MemorySPARQL11QueryTest extends SPARQLQueryParent {
 			/* SERVICE
 			not supported yet */
 			serviceManifest + "service1",
+
+			//no loading of the dataset
 			serviceManifest + "service2",
 			serviceManifest + "service3",
+
 			serviceManifest + "service4a",
 			serviceManifest + "service5",
+			//no loading of the dataset
 			serviceManifest + "service6",
 			serviceManifest + "service7",
 
 
 			/* SUBQUERY
-			not supported yet */
+			*/
+			//Unexpected bindings
 			subqueryManifest + "subquery02",
 			subqueryManifest + "subquery04",
+
+			//Problem SPARQL translation: Projection source of ProjectionElem "g"
+			// not found in StatementPattern FROM NAMED CONTEXT
 			subqueryManifest + "subquery07",
+
+			//fucntion is not supported
 			subqueryManifest + "subquery08",
 			subqueryManifest + "subquery10",
+
+			//wrong SQL translation Column "SUB_QVIEW.O" missing
 			subqueryManifest + "subquery11",
+
+			//unbound variable: Var
 			subqueryManifest + "subquery12",
+
+			//wrong SQL translation Column "SUB_QVIEW.O" missing
 			subqueryManifest + "subquery13",
+
+			//missing results
 			subqueryManifest + "subquery14"
 
 

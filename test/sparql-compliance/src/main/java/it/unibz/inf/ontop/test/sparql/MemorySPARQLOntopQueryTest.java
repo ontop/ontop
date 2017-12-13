@@ -27,14 +27,54 @@ import it.unibz.inf.ontop.si.SemanticIndexException;
 import junit.framework.Test;
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.repository.Repository;
-import org.junit.Ignore;
 
 import java.util.Properties;
 import java.util.Set;
 
-// Test of SPARQL 1.0 compliance
-@Ignore("We are testing the modified version MemorySARQLOntopQueryTest")
-public class MemorySPARQLQueryTest extends SPARQLQueryParent {
+/*Test of SPARQL 1.0 compliance
+Some test have been modified  or are missing, respect to the original test case
+- DATA-R2: ALGEBRA not well designed queries actually return correct results :
+			:nested-opt-1
+			:nested-opt-2
+			:opt-filter-1
+			:opt-filter-2
+
+- DATA-R2: GRAPH folder is missing-
+- DATA-R2: DATASET folder is missing
+
+- DATA-R2: EXPR-BUILTIN modification in the result files
+removed unknown datatype from
+expr-builtin/result-isliteral-1
+
+removed hierarchical language tag form
+expr-builtin/result-langMatches-2.ttl
+
+modified string representation and datatype
+expr-builtin/result-sameTerm.ttl
+
+modified string representation
+expr-builtin/result-str-1.ttl
+expr-builtin/result-str-2.ttl
+
+removed custom datatype
+expr-builtin/result-str-3.ttl
+
+- DATA-R2: EXPR-EQUALS
+
+removed equality between different numerical datatypes
+expr-equals/data-eq.ttl
+expr-equals/result-eq-1.ttl
+expr-equals/result-eq-2.ttl
+
+removed mismatch in data representation, equality and custom datatype
+expr-equals/result-eq-2-1.ttl
+
+removed custom datatype
+expr-equals/result-eq2-2.ttl
+
+*/
+
+public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 
 	/* List of UNSUPPORTED QUERIES */
 
@@ -54,12 +94,7 @@ public class MemorySPARQLQueryTest extends SPARQLQueryParent {
 
 	private static Set<String> IGNORE = ImmutableSet.of(
 
-			/* DATA-R2: ALGEBRA
-			not well designed queries actually return correct results :
-			:nested-opt-1
-			:nested-opt-2
-			:opt-filter-1
-			:opt-filter-2 */
+
 
 			//Unexpected exception: Unbounded variable: v2 Problem already appears in the filter datalog translation (missing variable v)
 			//LeftJoin(http://example/q(URI1(0),w),http://example/p(URI1(0),v2),EQ("null",http://www.w3.org/2001/XMLSchema#integer(1)))
@@ -102,25 +137,6 @@ public class MemorySPARQLQueryTest extends SPARQLQueryParent {
 			constructManifest + "construct-3",
 			constructManifest + "construct-4",
 
-            /* DATA-R2: DATASET NullPointerException
-            loading unsupported  */
-
-            datasetManifest + "dawg-dataset-01",
-            datasetManifest + "dawg-dataset-02",
-            datasetManifest + "dawg-dataset-03",
-            datasetManifest + "dawg-dataset-04",
-            datasetManifest + "dawg-dataset-05",
-            datasetManifest + "dawg-dataset-06",
-            datasetManifest + "dawg-dataset-07",
-            datasetManifest + "dawg-dataset-08",
-            datasetManifest + "dawg-dataset-09",
-            datasetManifest + "dawg-dataset-10",
-            datasetManifest + "dawg-dataset-11",
-            datasetManifest + "dawg-dataset-12",
-            datasetManifest + "dawg-dataset-09b",
-            datasetManifest + "dawg-dataset-10b",
-            datasetManifest + "dawg-dataset-12b",
-
 			/* DATA-R2: DISTINCT Missing and unexpected bindings  */
 			distinctManifest + "no-distinct-9",
 			distinctManifest + "distinct-9",
@@ -128,10 +144,10 @@ public class MemorySPARQLQueryTest extends SPARQLQueryParent {
 			/* DATA-R2: EXPR-BUILTIN   */
 
 			//unknown datatype are not supported, so missing type
-			exprBuiltInManifest + "dawg-isLiteral-1",
+//			exprBuiltInManifest + "dawg-isLiteral-1",
 
 			//Illegal subject value: ""^^<http://www.w3.org/2001/XMLSchema#integer>
-			exprBuiltInManifest + "dawg-langMatches-2",
+//			exprBuiltInManifest + "dawg-langMatches-2",
 
 			//missing and unexpected bindings:
 			exprBuiltInManifest + "sameTerm-eq",
@@ -146,56 +162,37 @@ public class MemorySPARQLQueryTest extends SPARQLQueryParent {
 
 			//Missing bindings The reason is because DBMS may modify the string representation
 			//  of the original data, i.e., "1"^^xsd:double --> 1.0
-			exprBuiltInManifest + "dawg-str-1",
+//			exprBuiltInManifest + "dawg-str-1",
 
 			//Illegal subject value: ""^^<http://www.w3.org/2001/XMLSchema#integer>
-			exprBuiltInManifest + "dawg-str-2",
+//			exprBuiltInManifest + "dawg-str-2",
 
-			//java.lang.NumberFormatException: For input string: "zzz" no support for custom datatype.
+//			//java.lang.NumberFormatException: For input string: "zzz" no support for custom datatype.
 			exprBuiltInManifest + "dawg-str-3",
 
-			//NumberFormatException: For input string: "" (it should not be considered as a number)
+//			//NumberFormatException: For input string: "" (it should not be considered as a number)
 			exprBuiltInManifest + "dawg-str-4",
 
             //unknownType not supported, custom datatype
-            exprBuiltInManifest + "dawg-datatype-2",
-            exprBuiltInManifest + "dawg-lang-1",
-            exprBuiltInManifest + "dawg-lang-2",
+//            exprBuiltInManifest + "dawg-datatype-2",
+//            exprBuiltInManifest + "dawg-lang-1",
+//            exprBuiltInManifest + "dawg-lang-2",
 
 			/* DATA-R2: EXPR-EQUALS   */
 			//never ends don't manage to get the result from the sql query
-			exprEqualsManifest + "eq-2-1",
+//			exprEqualsManifest + "eq-2-1",
 
 			//missing and unexpected bindings, no custom datatypes supported
 			exprEqualsManifest + "eq-2-2",
 
 			//missing bindings  equality between different
 			//      #    numerical datatypes is not recognized.
-			exprEqualsManifest + "eq-1",
-			exprEqualsManifest + "eq-2",
+//			exprEqualsManifest + "eq-1",
+//			exprEqualsManifest + "eq-2",
 
 			//Data conversion error converting "zzz" Bad datatype handling by the classic mode.
 			exprEqualsManifest + "eq-4",
 
-            /* DATA-R2: GRAPH   */
-            //Unexpected bindings: it should not return results
-            graphManifest + "dawg-graph-02",
-
-            //Problem with graph transaltion in SPARQL Projection source of ProjectionElem "g"  not found in Join
-            graphManifest + "dawg-graph-03",
-            graphManifest + "dawg-graph-04",
-
-            //Unexpected bindings: one result more from dataset2
-            graphManifest + "dawg-graph-05",
-
-            //Problem with graph transaltion in SPARQL Projection source of ProjectionElem "g"  not found in Join
-            graphManifest + "dawg-graph-06",
-            graphManifest + "dawg-graph-07",
-            graphManifest + "dawg-graph-08",
-            graphManifest + "dawg-graph-09",
-            graphManifest + "dawg-graph-10",
-            graphManifest + "dawg-graph-10b",
-            graphManifest + "dawg-graph-11",
 
 			/* DATA-R2: OPEN_WORLD   */
 			//missing and unexpected bindings, different time in the unexpected datetime result
@@ -214,7 +211,7 @@ public class MemorySPARQLQueryTest extends SPARQLQueryParent {
 
 			//Missing bindings: unsupported user-defined datatype
 			openWorldManifest +"open-eq-02",
-            openWorldManifest +"open-eq-05",
+//            openWorldManifest +"open-eq-05",
 
 			//Unexpected bindings: should return empty result, we cannot know what is different from an unknown datatype
 			openWorldManifest +"open-eq-06",
@@ -269,25 +266,25 @@ public class MemorySPARQLQueryTest extends SPARQLQueryParent {
 	public static Test suite() throws Exception {
 		return ManifestTestUtils.suite(new Factory() {
 
-			public MemorySPARQLQueryTest createSPARQLQueryTest(
+			public MemorySPARQLOntopQueryTest createSPARQLQueryTest(
 					String testURI, String name, String queryFileURL,
 					String resultFileURL, Dataset dataSet,
 					boolean laxCardinality, boolean checkOrder) {
 				if(!IGNORE.contains(testURI)) {
-					return new MemorySPARQLQueryTest(testURI, name,
+					return new MemorySPARQLOntopQueryTest(testURI, name,
 							queryFileURL, resultFileURL, dataSet, laxCardinality,
 							checkOrder);
 				}
 				return null;
 
 			}
-		}, "/testcases-dawg/data-r2/manifest-evaluation.ttl");
+		}, "/testcases-dawg-quest/data-r2/manifest-evaluation.ttl");
 	}
 
 
-	protected MemorySPARQLQueryTest(String testURI, String name,
-									String queryFileURL, String resultFileURL, Dataset dataSet,
-									boolean laxCardinality, boolean checkOrder) {
+	protected MemorySPARQLOntopQueryTest(String testURI, String name,
+                                         String queryFileURL, String resultFileURL, Dataset dataSet,
+                                         boolean laxCardinality, boolean checkOrder) {
 		super(testURI, name, queryFileURL, resultFileURL, dataSet,
 				laxCardinality, checkOrder);
 	}

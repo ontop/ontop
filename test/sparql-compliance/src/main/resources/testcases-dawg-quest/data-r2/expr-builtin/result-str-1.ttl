@@ -8,14 +8,14 @@
       rs:resultVariable  "v" ;
       # Removed entry: The reason is because DBMS may modify the string representation
       #     of the original data, i.e., "1"^^xsd:double --> 1.0
-       rs:solution
-                   [ rs:binding  [ rs:value    "1"^^xsd:double ;
-                                   rs:variable  "v"
-                                 ] ;
-                     rs:binding  [ rs:value    :xd3 ;
-                                   rs:variable  "x"
-                                 ]
-                   ] ;
+      # rs:solution
+      #             [ rs:binding  [ rs:value    "1"^^xsd:double ;
+      #                             rs:variable  "v"
+      #                           ] ;
+      #               rs:binding  [ rs:value    :xd3 ;
+      #                             rs:variable  "x"
+      #                           ]
+      #             ] ;
       rs:solution
                   [ rs:binding  [ rs:value    :xp2 ;
                                   rs:variable  "x"
