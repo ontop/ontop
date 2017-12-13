@@ -221,7 +221,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
 
                     // Equalities that must remain
                     normalizedUnifier.getImmutableMap().entrySet().stream()
-                        .filter(e -> nonLiftableVariables.contains(e.getValue()))
+                        .filter(e -> nonLiftableVariables.contains(e.getKey()))
                         .map(e -> termFactory.getImmutableExpression(EQ, e.getKey(), e.getValue()))
                 ));
 

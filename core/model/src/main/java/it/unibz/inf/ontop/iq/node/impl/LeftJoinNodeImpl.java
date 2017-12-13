@@ -602,19 +602,28 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             return state;
 
         ImmutableSet<Variable> leftVariables = state.leftChild.getVariables();
+        IQTree rightChild = state.rightChild;
 
         try {
             ExpressionAndSubstitution simplificationResults = simplifyCondition(state.ljCondition, leftVariables);
 
-            ImmutableSubstitution<NonFunctionalTerm> downSubstitution = simplificationResults.substitution;
+            ImmutableSubstitution<NonFunctionalTerm> downSubstitution = selectDownSubstitution(
+                    simplificationResults.substitution, rightChild.getVariables());
 
-            Optional<RightProvenance> rightProvenance = createProvenanceElements(state.rightChild, downSubstitution,
+            if (downSubstitution.isEmpty())
+                return new ChildLiftingState(state.leftChild, state.rightChild, simplificationResults.optionalExpression,
+                        state.ascendingSubstitution);
+
+            IQTree updatedRightChild = rightChild.applyDescendingSubstitution(downSubstitution,
+                    simplificationResults.optionalExpression);
+
+            Optional<RightProvenance> rightProvenance = createProvenanceElements(updatedRightChild, downSubstitution,
                     leftVariables, variableGenerator);
 
             IQTree newRightChild = rightProvenance
                     .flatMap(p -> p.constructionNode)
-                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, state.rightChild))
-                    .orElse(state.rightChild);
+                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, updatedRightChild))
+                    .orElse(updatedRightChild);
 
             ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = computeLiftableSubstitution(
                         downSubstitution, rightProvenance.map(p -> p.variable), leftVariables)
@@ -625,10 +634,23 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         } catch (UnsatisfiableJoiningConditionException e) {
             return new ChildLiftingState(state.leftChild,
-                    iqFactory.createEmptyNode(state.rightChild.getVariables()),
+                    iqFactory.createEmptyNode(rightChild.getVariables()),
                     Optional.empty(),
                     state.ascendingSubstitution);
         }
+    }
+
+    /**
+     * Selects the entries that can be applied to the right child.
+     *
+     * Useful when there is an equality between two variables defined on the right (otherwise would not converge)
+     */
+    private ImmutableSubstitution<NonFunctionalTerm> selectDownSubstitution(
+            ImmutableSubstitution<NonFunctionalTerm> simplificationSubstitution, ImmutableSet<Variable> rightVariables) {
+        ImmutableMap<Variable, NonFunctionalTerm> newMap = simplificationSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> rightVariables.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap());
+        return substitutionFactory.getSubstitution(newMap);
     }
 
     private ChildLiftingState convertIntoChildLiftingResults(
@@ -751,6 +773,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         || value.isGround())) {
 
             Optional<Variable> nonNullableRightVariable = rightTree.getVariables().stream()
+                    .filter(v -> !leftVariables.contains(v))
                     .filter(v -> !rightTree.getNullableVariables().contains(v))
                     .findFirst();
 
