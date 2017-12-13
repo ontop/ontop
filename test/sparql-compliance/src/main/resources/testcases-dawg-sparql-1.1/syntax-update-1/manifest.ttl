@@ -63,6 +63,8 @@
 :test_50
 :test_51
 :test_52
+:test_53
+:test_54
 ) .
 
 :test_1 rdf:type   mf:PositiveUpdateSyntaxTest11 ;
@@ -377,4 +379,14 @@
    mf:name    "syntax-update-bad-12.ru" ;
    mf:action  <syntax-update-bad-12.ru> ;.
 
+:test_53 rdf:type   mf:PositiveUpdateSyntaxTest11 ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-08-07#resolution_3> ;
+   mf:name    "syntax-update-53.ru" ;
+   mf:action  <syntax-update-53.ru> ;.
 
+:test_54 rdf:type   mf:NegativeUpdateSyntaxTest11 ;
+    dawgt:approval  dawgt:NotClassified ;
+    # Reuse of bNode label across operations.  
+    mf:name    "syntax-update-54.ru" ;
+    mf:action  <syntax-update-54.ru> ;.

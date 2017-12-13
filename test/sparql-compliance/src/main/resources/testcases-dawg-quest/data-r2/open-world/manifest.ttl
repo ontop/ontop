@@ -11,17 +11,17 @@
     rdfs:label "open world value testing tests" ;
     mf:entries
     (
-      # :open-eq-01 :open-eq-02 unsupported user-defined datatype
+      :open-eq-01 :open-eq-02 #unsupported user-defined datatype
      :open-eq-03 :open-eq-04 
        :open-eq-05 
-      # :open-eq-06 user-defined datatype
-      # :open-eq-07  variable equality
+      :open-eq-06 #user-defined datatype
+       :open-eq-07  #variable equality
       :open-eq-09 
-      # :open-eq-08 :open-eq-10 :open-eq-11 :open-eq-12 handling language tags
+       :open-eq-08 :open-eq-10 :open-eq-11 :open-eq-12 #handling language tags
       :date-1 
-     # :date-2 :date-3 unknown datatype
-     # :date-4  missing type date
-     # :open-cmp-01 :open-cmp-02 data conversion error in sql
+      :date-2 :date-3 #unknown datatype
+      :date-4  #missing type date
+      :open-cmp-01 :open-cmp-02 #data conversion error in sql
     ) .
 
 :open-eq-01 a mf:QueryEvaluationTest ;

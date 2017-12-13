@@ -19,11 +19,10 @@
  */
 
 /*
-    This grammar is adapted from https://github.com/antlr/grammars-v4/tree/master/turtle,
-    derived in turn from http://www.w3.org/TR/turtle/#sec-grammar-grammar,
-    with the following copywright:
-*/
-/*
+ This grammar is adapted from https://github.com/antlr/grammars-v4/tree/master/turtle,
+ derived in turn from http://www.w3.org/TR/turtle/#sec-grammar-grammar,
+ with the following copywright:
+
  [The "BSD licence"]
  Copyright (c) 2014, Alejandro Medrano (@ Universidad Politecnica de Madrid, http://www.upm.es/)
  All rights reserved.
@@ -53,15 +52,11 @@ grammar TurtleOBDA;
  If src/main/<subPath>/TurtleOBDA.g4 is the path to this file,
  then the source files are generated in target/generated-sources/antlr4/<subPath>
  */
-//options {
-//  superClass = AbstractTurtleOBDAParser ;
+
+//@header {
+//import it.unibz.inf.ontop.model.term.*;
+//import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 //}
-
-@header {
-import it.unibz.inf.ontop.model.term.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-}
-
 
 
 /*------------------------------------------------------------------
@@ -85,21 +80,13 @@ directive
   | prefixID
   ;
 
-//base
-//  : AT BASE_KW uriref
-//  ;
-
 prefixID
-  : ('@prefix' | '@PREFIX') PNAME_NS iriref
+  : ('@prefix' | '@PREFIX') PNAME_NS IRIREF
   ;
 
 base
-  : ('@base' | '@BASE') iriref
+  : ('@base' | '@BASE') IRIREF
   ;
-
-//prefix
-//  : ('_'? NAME_SBS)? ':'
-//  ;
 
 triples
   : subject  predicateObjectList
@@ -132,17 +119,18 @@ object
   : resource
 //  | BlankNode
   | literal
-  | typedLiteral
+  | variableLiteral
   | variable
   ;
 
 resource
-  : iriref
-  | prefixedName
+  : iri
+  | iriExt
   ;
 
-iriref // unnecessary in the grammar, but used for code generation
-  : IRIREF
+iriExt
+  : IRIREF_EXT
+  | PREFIXED_NAME_EXT
   ;
 
 blank
@@ -150,57 +138,40 @@ blank
   | ANON
   ;
 
-prefixedName // unnecessary in the grammar, but used for code generation
-  : PREFIXEDNAME
-  ;
-
-//blank
-//  : BLANK_PREFIX NAME_SBS
-//  | BLANK
-//  ;
-
 variable
   : STRING_WITH_CURLY_BRACKET
   ;
 
-function
-  : resource '(' terms ')'
-  ;
-
-typedLiteral
-  : variable languageTag        # typedLiteral_1
-  | variable '^^' resource      # typedLiteral_2
+variableLiteral
+  : variable languageTag   # variableLiteral_1
+  | variable '^^' iri      # variableLiteral_2
   ;
 
 languageTag
   : LANGTAG | '@' variable
   ;
 
-terms
-  : term (',' term)*
-  ;
-
-term
-  : function
-  | variable
-  | literal
-  ;
+iri
+   : IRIREF
+   | PREFIXED_NAME
+   ;
 
 literal
   : stringLiteral (languageTag)?
-  | dataTypeString
+  | typedLiteral
   | numericLiteral
   | booleanLiteral
   ;
 
-dataTypeString
-  :  stringLiteral '^^' resource
+typedLiteral
+  :  stringLiteral '^^' iri
   ;
 
 stringLiteral
   : STRING_LITERAL_QUOTE
 //  : STRING_WITH_QUOTE_DOUBLE
   ;
+
 numericLiteral
   : numericUnsigned
   | numericPositive
@@ -226,147 +197,50 @@ numericNegative
 WS
   : ([\t\r\n\u000C] | ' ') + -> skip
   ;
+
 /*------------------------------------------------------------------
  * LEXER RULES
  Applied for tokenization (before parsing), regardless of parser rules, as follows:
  - The rule matching the longest substring is applied
- - If there are several, the first of them is applied
+ - If there are several of them, the first one is applied
  *------------------------------------------------------------------*/
 
-//fragment ALPHA
-//  : 'a'..'z'
-//  | 'A'..'Z'
-//  | '\u00C0'..'\u00D6'
-//  | '\u00D8'..'\u00F6'
-//  | '\u00F8'..'\u02FF'
-//  | '\u0370'..'\u037D'
-//  | '\u037F'..'\u1FFF'
-//  | '\u200C'..'\u200D'
-//  | '\u2070'..'\u218F'
-//  | '\u2C00'..'\u2FEF'
-//  | '\u3001'..'\uD7FF'
-//  | '\uF900'..'\uFDCF'
-//  | '\uFDF0'..'\uFFFD'
-//  ;
-
-//fragment DIGIT
-//  : [0-9]
-//  ;
-
-//fragment ALPHANUM
-//  : ALPHA
-//  | DIGIT
-//  ;
-
-//fragment NAME_CHAR: (ALPHANUM|'_'|'-'|'.'|'#'|'?'|'/'|'%'|'=');
-
-//WS: (' '|'\t'|'\n'|'\r\n'|'\b'|'\f')+ -> channel(HIDDEN);
-
-//STRING_WITH_CURLY_BRACKET // No lexer ref allowed in complement
-//  : '{'  ( ~(' '|'\t'|'\n'|'\r'|'\b'|'\f' | '\'' | '"' | '\\') )+? '}'
-//  ;
-
-//BASE_KW: ('B'|'b')('A'|'a')('S'|'s')('E'|'e');
-//
-//PREFIX_KW: ('P'|'p')('R'|'r')('E'|'e')('F'|'f')('I'|'i')('X'|'x');
-
-//FALSE: ('F'|'f')('A'|'a')('L'|'l')('S'|'s')('E'|'e');
-
-//TRUE: ('T'|'t')('R'|'r')('U'|'u')('E'|'e');
-
-//NAME_SBS
-//  : (NAME_CHAR | '{' | '}')+;
-
-//INTEGER
-//  : DIGIT+
-//  ;
-//
-//DOUBLE
-//  : DIGIT+ '.' DIGIT* ('e'|'E') ('-'|'+')? DIGIT*
-//  | '.' DIGIT+ ('e'|'E') ('-'|'+')? DIGIT*
-//  | DIGIT+ ('e'|'E') ('-'|'+')? DIGIT*
-//  ;
-//
-//DECIMAL
-//  : DIGIT+ '.' DIGIT+
-//  | '.' DIGIT+
-//  ;
-
-
-//LANGUAGE_TAG
-//    : '@' [a-zA-Z] + ('-' [a-zA-Z0-9] +)*
-//    ;
-
-//STRING_WITH_QUOTE_DOUBLE // No lexer ref allowed in complement
-//  : QUOTE_DOUBLE  ( ~(' '|'\t'|'\n'|'\r'|'\b'|'\f' | '\'' | '"' | '\\') )+ QUOTE_DOUBLE
-//  ;
-
-
-//URI_REF // No lexer ref allowed in complement
-//  : '<'  ( ~(' '|'\t'|'\n'|'\r'|'\b'|'\f' | '\'' | '"' | '\\') )+? '>'
-//  ;
-
-//REFERENCE:     '^^';
-////SEMI:          ';';
-//PERIOD:        '.';
-////COMMA:         ',';
-//LSQ_BRACKET:   '[';
-//RSQ_BRACKET:   ']';
-//LCR_BRACKET:   '{';
-//RCR_BRACKET:   '}';
-//LPAREN:        '(';
-//RPAREN:        ')';
-////QUESTION:      '?';
-//QUOTE_DOUBLE:  '"';
-//QUOTE_SINGLE:  '\'';
-//UNDERSCORE:    '_';
-//MINUS:         '-';
-//AT:            '@';
-////HASH:          '#';
-////PERCENT:       '%';
-//PLUS:          '+';
-////EQUALS:        '=';
-//COLON:         ':';
-//LESS:          '<';
-//GREATER:       '>';
-//BLANK:	       '[]';
-//BLANK_PREFIX:  '_:';
-////SLASH:         '/';
-
 STRING_WITH_CURLY_BRACKET
-  : '{' (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '%' | '&' | UCHAR)*? '}'
+  : '{' VARIABLE_CHAR*? '}'
   ;
 
 BOOLEAN_LITERAL
   : 'true' | 'TRUE' | 'True' | 'false'| 'FALSE'| 'False'
   ;
 
-
-//IRIREF	        :	'<' (~(['\u0000'..'\u0020']|'<'|'>'|'"'|'{'|'}'|'|'|'^'|'`'|'\\') | UCHAR)* '>'; /* \u00=NULL #01-\u1F=control codes \u20=space */
-
-//
-IRIREF
-  : '<' (STRING_WITH_CURLY_BRACKET | (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR)*) '>'
+// extends IRIREF to allow curly brackets, and force one curly bracket
+IRIREF_EXT
+  : '<' IRIREF_INNER_CHAR_EXT* '{' IRIREF_INNER_CHAR_EXT+ '>'
   ;
+
+IRIREF
+   : '<' IRIREF_INNER_CHAR* '>'
+   ;
 
 PNAME_NS
   : PN_PREFIX? ':'
   ;
 
 PN_PREFIX
-  : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
+   : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
+   ;
+
+PREFIXED_NAME
+   : PNAME_NS PN_LOCAL
   ;
 
-PREFIXEDNAME
-   : PNAME_LN | PNAME_NS
-   ;
-
-PNAME_LN
-   : PNAME_NS PN_LOCAL
-   ;
+// extends PREFIXED_NAME to allow right-hand side curly brackets, and force one right-hand side opening curly bracket
+PREFIXED_NAME_EXT
+  : PNAME_NS PN_LOCAL_EXT
+  ;
 
 BLANK_NODE_LABEL
-  : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS)?
+  : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS )?
   ;
 
 LANGTAG
@@ -423,14 +297,15 @@ STRING_LITERAL_LONG_QUOTE
   : '"""' (('"' | '""')? (~ ["\\] | ECHAR | UCHAR | '\''))* '"""'
   ;
 
-// Extended with curly brackets, space and escaped characters
+// extends STRING_LITERAL_QUOTE in the original grammar to allow curly brackets, space and escaped characters
 STRING_LITERAL_QUOTE
   : '"' (~ ["\\\r\n] | '\'' | '\\"' | '{' | '}' | ' ' | ECHAR)* '"'
   ;
-
-//STRING_LITERAL_QUOTE
-//  : '"' (~ ["\\\r\n] | '\'' | '\\"')* '"'
-//  ;
+/* orginal version:
+  STRING_LITERAL_QUOTE
+  : '"' (~ ["\\\r\n] | '\'' | '\\"')* '"'
+  ;
+*/
 
 // not used
 STRING_LITERAL_SINGLE_QUOTE
@@ -461,14 +336,18 @@ PN_CHARS_U
   : PN_CHARS_BASE | '_'
   ;
 
-// Extended to allow curly brackets
 PN_CHARS
-  : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '{' | '}'
+  : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040]
   ;
 
-//Extended to allow slash and initial curly bracket
+// extends PN_LOCAL to allow curly brackets, and force at least one (opening) curly bracket
+PN_LOCAL_EXT
+  : '{' RIGHT_PART_TAIL_EXT ? | RIGHT_PART_FIRST_CHAR RIGHT_PART_TAIL_EXT_MAND
+  ;
+
+// extends PN_LOCAL in the original grammar to allow '/' and '#'
 PN_LOCAL
-  : (PN_CHARS_U | ':' | '{' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | '/' | PLX )* (PN_CHARS | ':' | '/' | PLX ))?
+  : RIGHT_PART_FIRST_CHAR RIGHT_PART_TAIL?
   ;
 
 PLX
@@ -485,4 +364,52 @@ HEX
 
 PN_LOCAL_ESC
   : '\\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' | '?' | '#' | '@' | '%')
+  ;
+
+fragment RIGHT_PART_FIRST_CHAR
+  : (PN_CHARS_U | ':' | '#' | [0-9] | PLX)
+  ;
+
+fragment RIGHT_PART_FIRST_CHAR_EXT
+  : (RIGHT_PART_FIRST_CHAR | '{')
+  ;
+
+fragment RIGHT_PART_CHAR
+  : (PN_CHARS | '.' | ':' | '/' | '#' | PLX)
+  ;
+
+fragment RIGHT_PART_CHAR_EXT
+  : (RIGHT_PART_CHAR | '{' | '}')
+  ;
+
+fragment RIGHT_PART_END_CHAR
+  : (PN_CHARS | ':' | '/'| PLX)
+  ;
+
+fragment RIGHT_PART_END_CHAR_EXT
+  : (RIGHT_PART_END_CHAR | '}')
+  ;
+
+fragment RIGHT_PART_TAIL
+  : RIGHT_PART_CHAR* RIGHT_PART_END_CHAR
+  ;
+
+fragment RIGHT_PART_TAIL_EXT
+  : RIGHT_PART_CHAR_EXT* RIGHT_PART_END_CHAR_EXT
+  ;
+
+fragment RIGHT_PART_TAIL_EXT_MAND
+  : RIGHT_PART_CHAR_EXT* '{' RIGHT_PART_CHAR_EXT* RIGHT_PART_END_CHAR_EXT
+  ;
+
+fragment IRIREF_INNER_CHAR
+  :  (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR)
+  ;
+
+fragment IRIREF_INNER_CHAR_EXT
+  :  (IRIREF_INNER_CHAR | '{' | '}')
+  ;
+
+fragment VARIABLE_CHAR
+  : (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '%' | '&' | UCHAR)
   ;
