@@ -58,7 +58,6 @@ public class LegacyMappingSaturator implements MappingSaturator {
                 .collect(ImmutableCollectors.toList());
 
         ImmutableSet<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(initialMappingRules, saturatedTBox,
-                true,
                 foreignKeyCQC, tMappingExclusionConfig).stream()
                 .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
                 .collect(ImmutableCollectors.toSet());

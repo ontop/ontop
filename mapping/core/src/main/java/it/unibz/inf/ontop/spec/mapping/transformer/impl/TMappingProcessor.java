@@ -71,18 +71,18 @@ public class TMappingProcessor {
 		 * smaller number of mappings, and hence, the unfolding will be able to
 		 * produce fewer queries.
 		 * 
-		 * Given a set of mappings for a class/property A in {@link currentMappings}
+		 * Given a set of mappings for a class/property A in currentMappings
 		 * , this method tries to add a the data coming from a new mapping for A in
 		 * an optimal way, that is, this method will attempt to include the content
-		 * of coming from {@link newmapping} by modifying an existing mapping
+		 * of coming from newmapping by modifying an existing mapping
 		 * instead of adding a new mapping.
 		 * 
 		 * <p/>
 		 * 
-		 * To do this, this method will strip {@link newmapping} from any
+		 * To do this, this method will strip newmapping from any
 		 * (in)equality conditions that hold over the variables of the query,
 		 * leaving only the raw body. Then it will look for another "stripped"
-		 * mapping <bold>m</bold> in {@link currentMappings} such that m is
+		 * mapping <bold>m</bold> in currentMappings such that m is
 		 * equivalent to stripped(newmapping). If such a m is found, this method
 		 * will add the extra semantics of newmapping to "m" by appending
 		 * newmapping's conditions into an OR atom, together with the existing
@@ -111,8 +111,6 @@ public class TMappingProcessor {
 		 * 
 		 * <p/>
 		 * 
-		 * @param newmapping
-		 *            The new mapping for A/P
 		 */
 		public void mergeMappingsWithCQC(TMappingRule newRule) {
 			
@@ -242,12 +240,11 @@ public class TMappingProcessor {
 	 * @param mappingIndex
 	 * @param originalMappings
 	 * @param dag
-	 * @param full
 	 */
 	private static void getObjectTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex,
 			Map<Predicate, List<TMappingRule>> originalMappings,
 			EquivalencesDAG<ObjectPropertyExpression> dag, 
-			boolean full, TMappingExclusionConfig excludeFromTMappings) {
+			TMappingExclusionConfig excludeFromTMappings) {
 
 		for (Equivalences<ObjectPropertyExpression> propertySet : dag) {
 
@@ -255,8 +252,7 @@ public class TMappingProcessor {
 			if (current.isInverse())
 				continue;
 
-			// for optimization
-			if(excludeFromTMappings.contains(current)){
+			if (excludeFromTMappings.contains(current)) {
 				continue;
 			}
 
@@ -285,8 +281,6 @@ public class TMappingProcessor {
 
 						Function newMappingHead;
 						if (!requiresInverse) {
-							if (!full)
-								continue;
 							newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms);
 						} 
 						else {
@@ -331,55 +325,47 @@ public class TMappingProcessor {
 	 * @param mappingIndex
 	 * @param originalMappings
 	 * @param dag
-	 * @param full
 	 */
 	private static void getDataTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
 			Map<Predicate, List<TMappingRule>> originalMappings,
 			EquivalencesDAG<DataPropertyExpression> dag, 
-			boolean full, TMappingExclusionConfig excludeFromTMappings) {
+			TMappingExclusionConfig excludeFromTMappings) {
 		
 		for (Equivalences<DataPropertyExpression> propertySet : dag) {
-
 			DataPropertyExpression current = propertySet.getRepresentative();
 
-			// for optimization
-			if(excludeFromTMappings.contains(current)){
+			if (excludeFromTMappings.contains(current)) {
 				continue;
 			}
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
-			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
+			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
-			if (full) {
-				for (Equivalences<DataPropertyExpression> descendants : dag.getSub(propertySet)) {
-					for(DataPropertyExpression childproperty : descendants) {
+			for (Equivalences<DataPropertyExpression> descendants : dag.getSub(propertySet)) {
+				for(DataPropertyExpression childproperty : descendants) {
 
-						/*
-						 * adding the mappings of the children as own mappings, the new
-						 * mappings use the current predicate instead of the child's
-						 * predicate and, if the child is inverse and the current is
-						 * positive, it will also invert the terms in the head
-						 */
-						List<TMappingRule> childmappings = originalMappings.get(childproperty.getPredicate());
-						if (childmappings == null)
-							continue;
-						
-						for (TMappingRule childmapping : childmappings) {
-							
-							List<Term> terms = childmapping.getHeadTerms();
+					/*
+					 * adding the mappings of the children as own mappings, the new
+					 * mappings use the current predicate instead of the child's
+					 * predicate and, if the child is inverse and the current is
+					 * positive, it will also invert the terms in the head
+					 */
+					List<TMappingRule> childmappings = originalMappings.get(childproperty.getPredicate());
+					if (childmappings == null)
+						continue;
 
-							Function newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms);
-							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
-							currentNodeMappings.mergeMappingsWithCQC(newmapping);
-						}
+					for (TMappingRule childmapping : childmappings) {
+						List<Term> terms = childmapping.getHeadTerms();
+
+						Function newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms);
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);
+						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
 			}
 
 			/* Setting up mappings for the equivalent classes */
 			for (DataPropertyExpression equivProperty : propertySet) {
-			
-				 
 				Predicate p = equivProperty.getPredicate();
 
 				// skip the property and its inverse (if it is symmetric)
@@ -403,12 +389,11 @@ public class TMappingProcessor {
 	 * constructs the TMappings using DAG
 	 * @param originalMappings
 	 * @param reasoner
-	 * @param full (false for the Semantic Index)
 	 * @return
 	 */
 
-	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
-		
+	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
+
 		final boolean printouts = false;
 		
 		if (printouts)
@@ -473,8 +458,8 @@ public class TMappingProcessor {
 		 * the TMappings specification.
 		 */
 
-		getObjectTMappings(mappingIndex, originalMappingIndex, reasoner.getObjectPropertyDAG(), full, excludeFromTMappings);
-		getDataTMappings(mappingIndex, originalMappingIndex, reasoner.getDataPropertyDAG(), full, excludeFromTMappings);
+		getObjectTMappings(mappingIndex, originalMappingIndex, reasoner.getObjectPropertyDAG(), excludeFromTMappings);
+		getDataTMappings(mappingIndex, originalMappingIndex, reasoner.getDataPropertyDAG(), excludeFromTMappings);
 
 		/*
 		 * Property t-mappings are done, we now continue with class t-mappings.
@@ -511,19 +496,13 @@ public class TMappingProcessor {
 
 					Predicate childPredicate;					
 					if (childDescription instanceof OClass) {
-						if (!full)
-							continue;
 						childPredicate = ((OClass) childDescription).getPredicate();
 						isClass = true;
 						isInverse = false;
 
-                        /*
-                         * USE OF excludeFromTMappings
-                         */
-                        if(excludeFromTMappings.contains((OClass) childDescription)){
+                        if (excludeFromTMappings.contains((OClass) childDescription)) {
                             continue;
                         }
-
 					} 
 					else if (childDescription instanceof ObjectSomeValuesFrom) {
 						ObjectPropertyExpression some = ((ObjectSomeValuesFrom) childDescription).getProperty();
@@ -633,8 +612,5 @@ public class TMappingProcessor {
 		}
 		return currentMappings;
 	}
-
-
-	
 
 }
