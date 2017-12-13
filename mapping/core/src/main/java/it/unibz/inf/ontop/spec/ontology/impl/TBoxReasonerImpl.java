@@ -93,9 +93,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		chooseDataRangeRepresentatives(dataRangeDAG, dataPropertyDAG);
 
 		TBoxReasonerImpl r = new TBoxReasonerImpl(classDAG, dataRangeDAG, objectPropertyDAG, dataPropertyDAG);
-		if (equivalenceReduced) {
-			r = getEquivalenceSimplifiedReasoner(r);
-		}
+//		if (equivalenceReduced) {
+//			r = getEquivalenceSimplifiedReasoner(r);
+//		}
 		return r;
 	}
 

@@ -32,13 +32,12 @@ public class LegacyMappingEquivalenceFreeRewriter implements MappingEquivalenceF
     public Mapping rewrite(Mapping mapping, TBoxReasoner tBox, ImmutableOntologyVocabulary vocabulary, DBMetadata dbMetadata) {
         if (enabled) {
 
-            ImmutableList<CQIE> rules = mapping2DatalogConverter.convert(mapping).collect(ImmutableCollectors.toList());
-//            Stream<CQIE> rules = mapping2DatalogConverter.convert(mapping);
+//            ImmutableList<CQIE> rules = mapping2DatalogConverter.convert(mapping).collect(ImmutableCollectors.toList());
 
-            ImmutableList<CQIE> updatedRules = //rules;
-                    new LegacyMappingVocabularyValidator(tBox, vocabulary).replaceEquivalences(rules);
-            return datalog2MappingConverter.convertMappingRules(updatedRules, dbMetadata, mapping.getExecutorRegistry(),
-                    mapping.getMetadata());
+//            ImmutableList<CQIE> updatedRules = rules;
+            //        new LegacyMappingVocabularyValidator(tBox, vocabulary).replaceEquivalences(rules);
+//            return datalog2MappingConverter.convertMappingRules(updatedRules, dbMetadata, mapping.getExecutorRegistry(),
+//                    mapping.getMetadata());
         }
         return mapping;
     }

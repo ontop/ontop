@@ -38,6 +38,7 @@ import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
@@ -273,22 +275,19 @@ public class TMappingProcessor {
 
 			for (Equivalences<ObjectPropertyExpression> descendants : dag.getSub(propertySet)) {
 				for(ObjectPropertyExpression childproperty : descendants) {
-
 					/*
 					 * adding the mappings of the children as own mappings, the new
 					 * mappings use the current predicate instead of the child's
 					 * predicate and, if the child is inverse and the current is
 					 * positive, it will also invert the terms in the head
 					 */
-					boolean requiresInverse = childproperty.isInverse();
-
 					List<TMappingRule> childmappings = originalMappings.get(childproperty.getPredicate());
 					if (childmappings == null)
 						continue;
 					
 					for (TMappingRule childmapping : childmappings) {
 						List<Term> terms = childmapping.getHeadTerms();
-						Function newMappingHead = (!requiresInverse)
+						Function newMappingHead = !childproperty.isInverse()
 							? TERM_FACTORY.getFunction(currentPredicate, terms)
 							: TERM_FACTORY.getFunction(currentPredicate, terms.get(1), terms.get(0));
 
@@ -500,25 +499,35 @@ public class TMappingProcessor {
 			}
 		}
 		
-		Map<Integer, Set<Predicate>> frequences = new HashMap<>();
-		
+
 		List<CQIE> tmappingsProgram = new LinkedList<>();
 		for (Entry<Predicate, TMappingIndexEntry> entry : mappingIndex.entrySet()) {
-			if (printouts && !entry.getValue().rules.isEmpty()) {
-				Set<Predicate> freq = frequences.get(entry.getValue().rules.size());
-				if (freq == null) {
-					freq = new HashSet<>();
-					frequences.put(entry.getValue().rules.size(), freq);
-				}
-				freq.add(entry.getKey());
-			}
 			for (TMappingRule mapping : entry.getValue()) {
 				CQIE cq = mapping.asCQIE();
 				tmappingsProgram.add(cq);
 			}
 		}
+
+		List<CQIE> nonOntologyRules = originalMappingIndex.entrySet().stream()
+				.filter(e -> !mappingIndex.containsKey(e.getKey()))
+				.flatMap(e -> e.getValue().stream())
+				.map(m -> m.asCQIE())
+				.collect(ImmutableCollectors.toList());
+
+		tmappingsProgram.addAll(nonOntologyRules);
 		
 		if (printouts) {
+			Map<Integer, Set<Predicate>> frequences = new HashMap<>();
+			for (Entry<Predicate, TMappingIndexEntry> entry : mappingIndex.entrySet()) {
+				if (!entry.getValue().rules.isEmpty()) {
+					Set<Predicate> freq = frequences.get(entry.getValue().rules.size());
+					if (freq == null) {
+						freq = new HashSet<>();
+						frequences.put(entry.getValue().rules.size(), freq);
+					}
+					freq.add(entry.getKey());
+				}
+			}
 			System.out.println("T-MAPPING SIZE: " + tmappingsProgram.size());
 			List<Integer> sorted = new ArrayList<>(frequences.keySet());
 			Collections.sort(sorted);
