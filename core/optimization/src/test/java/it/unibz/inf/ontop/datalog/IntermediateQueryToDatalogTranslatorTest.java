@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.impl.IntermediateQuery2DatalogTranslatorImpl;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -40,13 +38,13 @@ public class IntermediateQueryToDatalogTranslatorTest {
             P2_IQ_PREDICATE, ImmutableList.of(X));
 
     private static Predicate ANS1_DATALOG_PREDICATE;
-    private static Predicate ANSSQ1_DATALOG_PREDICATE;
+    private static Predicate SUBQUERY1_DATALOG_PREDICATE;
     private static Predicate P1_DATALOG_PREDICATE;
     private static Predicate P2_DATALOG_PREDICATE;
 
     static {
         ANS1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("ans1");
-        ANSSQ1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("ansSQ1");
+        SUBQUERY1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate(DATALOG_FACTORY.getSubqueryPredicatePrefix()+"1");
         P1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("p1");
         P2_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("p2");
     }
@@ -97,7 +95,7 @@ public class IntermediateQueryToDatalogTranslatorTest {
          Expected Datalog program
          */
         Function ans1Atom = DATA_FACTORY.getFunction(ANS1_DATALOG_PREDICATE, X);
-        Function ansSQ1Atom = DATA_FACTORY.getFunction(ANSSQ1_DATALOG_PREDICATE, X);
+        Function ansSQ1Atom = DATA_FACTORY.getFunction(SUBQUERY1_DATALOG_PREDICATE, X);
         Function p1Atom = DATA_FACTORY.getFunction(P1_DATALOG_PREDICATE, X);
         Function p2Atom = DATA_FACTORY.getFunction(P2_DATALOG_PREDICATE, X);
 
