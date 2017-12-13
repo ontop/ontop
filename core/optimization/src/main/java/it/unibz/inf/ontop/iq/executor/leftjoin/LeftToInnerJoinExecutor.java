@@ -20,10 +20,7 @@ import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.SubstitutionPropagationProposalImpl;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -32,9 +29,12 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
 
@@ -82,8 +82,15 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
             ImmutableList<DataNode> leftDataNodes = optionalLeftDataNodes.get();
 
             if (rightChild instanceof DataNode) {
-                return optimizeRightDataNode(leftJoinNode, query, treeComponent, leftChild, leftDataNodes, (DataNode) rightChild);
-            } else if (rightChild instanceof UnionNode) {
+                return optimizeRightDataNode(leftJoinNode, query, treeComponent, leftChild, leftDataNodes,
+                        DataNodeAndSubstitution.extract((DataNode) rightChild));
+            } else if (rightChild instanceof ConstructionNode) {
+
+                return DataNodeAndSubstitution.extract((ConstructionNode) rightChild, query)
+                        .map(n -> optimizeRightDataNode(leftJoinNode, query, treeComponent, leftChild, leftDataNodes, n))
+                        .orElseGet(() -> new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode));
+            }
+            else if (rightChild instanceof UnionNode) {
                 return optimizeRightUnion(leftJoinNode, query, treeComponent, leftChild, leftDataNodes, (UnionNode) rightChild);
             }
         }
@@ -120,38 +127,63 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                                                                                 QueryTreeComponent treeComponent,
                                                                                 QueryNode leftChild,
                                                                                 ImmutableList<DataNode> leftChildren,
-                                                                                DataNode rightChild) {
+                                                                                DataNodeAndSubstitution rightComponent) {
 
         VariableGenerator variableGenerator = new VariableGenerator(query.getKnownVariables());
 
-        LeftJoinRightChildNormalizationAnalysis analysis = normalizer.analyze(leftChildren, rightChild,
+        LeftJoinRightChildNormalizationAnalysis analysis = normalizer.analyze(leftChildren, rightComponent.dataNode,
                 query.getDBMetadata(), variableGenerator);
 
         if (!analysis.isMatchingAConstraint())
             // No normalization
             return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
 
-        Optional<ImmutableExpression> newLJCondition = leftJoinNode.getOptionalFilterCondition()
-                .map(c1 -> analysis.getAdditionalExpression()
-                        .map(c2 -> ImmutabilityTools.foldBooleanExpressions(c1, c2))
-                        .orElseGet(() -> Optional.of(c1)))
-                .orElseGet(analysis::getAdditionalExpression);
+        ImmutableSet<Variable> requiredVariablesAboveLJ = query.getVariablesRequiredByAncestors(leftJoinNode);
 
-        LeftJoinNode normalizedLeftJoin = analysis.getProposedRightDataNode()
-                .map(proposedRightDataNode -> normalize(leftJoinNode, rightChild,
-                        newLJCondition.orElseThrow(() -> new MinorOntopInternalBugException(
-                                "A condition was expected for a modified data node")),
-                        proposedRightDataNode, treeComponent))
-                .orElse(leftJoinNode);
+        ImmutableSet<Variable> leftVariables = query.getVariables(leftChild);
+
+        /*
+         * All the conditions that could be assigned to the LJ put together
+         */
+        Optional<ImmutableExpression> newLJCondition = ImmutabilityTools.foldBooleanExpressions(Stream.concat(
+                    // Former condition
+                    Stream.of(leftJoinNode.getOptionalFilterCondition(),
+                            // New condition proposed by the analyser
+                            analysis.getAdditionalExpression(),
+                            // Former additional filter condition on the right
+                            rightComponent.filterNode.map(FilterNode::getFilterCondition))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get),
+                    // Equalities extracted from the right substitution
+                    rightComponent.constructionNode
+                            .map(n -> extractEqualities(n.getSubstitution(), leftVariables))
+                            .orElseGet(Stream::empty)));
+
+        Optional<ImmutableSubstitution<ImmutableTerm>> remainingRightSubstitution = rightComponent.constructionNode
+                .map(ConstructionNode::getSubstitution)
+                .filter(s -> !s.isEmpty())
+                .map(s -> SUBSTITUTION_FACTORY.getSubstitution(s.getImmutableMap().entrySet().stream()
+                        .filter(e -> !leftVariables.contains(e.getKey()))
+                        .collect(ImmutableCollectors.toMap())))
+                .filter(s -> !s.isEmpty());
+
+
+        /*
+         * NB: removes the construction node if present, without inserting its substitution (will be propagated later)
+         */
+        LeftJoinNode normalizedLeftJoin = updateRightNodesAndLJ(leftJoinNode, rightComponent, newLJCondition,
+                analysis.getProposedRightDataNode(), treeComponent);
 
         DataNode newRightChild = analysis.getProposedRightDataNode()
-                .orElse(rightChild);
+                .orElse(rightComponent.dataNode);
 
         LeftJoinNode leftJoinNodeToUpgrade = newLJCondition
-                .map(ljCondition -> liftCondition(normalizedLeftJoin, leftChild, newRightChild, query, treeComponent,
-                        variableGenerator))
+                .map(ljCondition -> liftCondition(normalizedLeftJoin, leftChild, newRightChild, requiredVariablesAboveLJ,
+                        treeComponent, remainingRightSubstitution, variableGenerator, query))
                 // NB: here the normalized LJ is expected to be the initial left join
-                .orElse(normalizedLeftJoin);
+                .orElseGet(() -> remainingRightSubstitution
+                        .map(s -> liftSubstitution(normalizedLeftJoin, s, query))
+                        .orElse(normalizedLeftJoin));
 
         if (leftJoinNodeToUpgrade.getOptionalFilterCondition().isPresent())
             throw new MinorOntopInternalBugException("Bug: at this point the lj must not have a joining condition");
@@ -165,22 +197,43 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
 
     }
 
-    private LeftJoinNode normalize(LeftJoinNode leftJoinNode, DataNode formerRightChild, ImmutableExpression newLJCondition,
-                                   DataNode proposedRightDataNode, QueryTreeComponent treeComponent) {
-        treeComponent.replaceNode(formerRightChild, proposedRightDataNode);
-        LeftJoinNode newLeftJoinNode = leftJoinNode.changeOptionalFilterCondition(Optional.of(newLJCondition));
+    /**
+     * Extracts equalities involving a left variable from the substitution
+     */
+    private Stream<ImmutableExpression> extractEqualities(ImmutableSubstitution<ImmutableTerm> substitution,
+                                                          ImmutableSet<Variable> leftVariables) {
+        return substitution.getImmutableMap().entrySet().stream()
+                .filter(e -> leftVariables.contains(e.getKey()) || leftVariables.contains(e.getValue()))
+                .map(e -> TERM_FACTORY.getImmutableExpression(EQ, e.getKey(), e.getValue()));
+    }
+
+    /**
+     * NB: removes the construction node if present, without inserting its substitution (will be propagated later)
+     */
+    private LeftJoinNode updateRightNodesAndLJ(LeftJoinNode leftJoinNode,
+                                               DataNodeAndSubstitution rightComponent,
+                                               Optional<ImmutableExpression> newLJCondition,
+                                               Optional<DataNode> proposedRightDataNode,
+                                               QueryTreeComponent treeComponent) {
+        rightComponent.constructionNode
+                .ifPresent(n -> treeComponent.replaceNodeByChild(n, Optional.empty()));
+        rightComponent.filterNode
+                .ifPresent(n -> treeComponent.replaceNodeByChild(n, Optional.empty()));
+        proposedRightDataNode
+                .ifPresent(n -> treeComponent.replaceNode(rightComponent.dataNode, n));
+        LeftJoinNode newLeftJoinNode = leftJoinNode.changeOptionalFilterCondition(newLJCondition);
         treeComponent.replaceNode(leftJoinNode, newLeftJoinNode);
 
         return newLeftJoinNode;
     }
 
     private LeftJoinNode liftCondition(LeftJoinNode leftJoinNode, QueryNode leftChild, DataNode rightChild,
-                                       IntermediateQuery query, QueryTreeComponent treeComponent,
-                                       VariableGenerator variableGenerator) {
+                                       ImmutableSet<Variable> requiredVariablesAboveLJ, QueryTreeComponent treeComponent,
+                                       Optional<ImmutableSubstitution<ImmutableTerm>> remainingRightSubstitution,
+                                       VariableGenerator variableGenerator, IntermediateQuery query) {
         ImmutableExpression ljCondition = leftJoinNode.getOptionalFilterCondition()
                 .orElseThrow(() -> new IllegalArgumentException("The LJ is expected to have a joining condition"));
 
-        ImmutableSet<Variable> requiredVariablesAboveLJ = query.getVariablesRequiredByAncestors(leftJoinNode);
         ImmutableSet<Variable> leftVariables = query.getVariables(leftChild);
         ImmutableSet<Variable> requiredRightVariables = requiredVariablesAboveLJ.stream()
                 .filter(v -> !leftVariables.contains(v))
@@ -201,15 +254,16 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         LeftJoinNode newLeftJoinNode = leftJoinNode.changeOptionalFilterCondition(Optional.empty());
         treeComponent.replaceNode(leftJoinNode, newLeftJoinNode);
 
-        return rightVariablesToUpdate.isEmpty()
+        return (rightVariablesToUpdate.isEmpty() && (!remainingRightSubstitution.isPresent()))
                 ? newLeftJoinNode
                 : updateConditionalVariables(rightVariablesToUpdate, rightChild, newLeftJoinNode, ljCondition,
-                                             query, treeComponent, variableGenerator);
+                                             query, treeComponent, remainingRightSubstitution, variableGenerator);
     }
 
     private LeftJoinNode updateConditionalVariables(ImmutableSet<Variable> rightVariablesToUpdate, DataNode rightChild,
                                                     LeftJoinNode newLeftJoinNode, ImmutableExpression ljCondition,
                                                     IntermediateQuery query, QueryTreeComponent treeComponent,
+                                                    Optional<ImmutableSubstitution<ImmutableTerm>> remainingRightSubstitution,
                                                     VariableGenerator variableGenerator) {
         ImmutableMap<Variable, Variable> newVariableMap = rightVariablesToUpdate.stream()
                 .collect(ImmutableCollectors.toMap(
@@ -224,15 +278,39 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
 
         ImmutableExpression newCondition = localSubstitution.applyToBooleanExpression(ljCondition);
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> substitutionToPropagate = SUBSTITUTION_FACTORY.getSubstitution(
+        ImmutableSubstitution<ImmutableTerm> conditionalVarSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
                 newVariableMap.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getKey,
                                 e -> termFactory.getImmutableFunctionalTerm(IF_ELSE_NULL, newCondition, e.getValue())
                     )));
 
+        ImmutableSubstitution<ImmutableTerm> substitutionToPropagate = remainingRightSubstitution
+                .map(localSubstitution::applyRenaming)
+                .map(s -> s.composeWith(conditionalVarSubstitution))
+                .orElse(conditionalVarSubstitution);
+
         SubstitutionPropagationProposal<LeftJoinNode> proposal = new SubstitutionPropagationProposalImpl<>(
                 newLeftJoinNode, substitutionToPropagate);
+
+        try {
+            return query.applyProposal(proposal, true)
+                    .getOptionalNewNode()
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Was not expected to modify the LJ node"));
+        } catch (EmptyQueryException e) {
+            throw new MinorOntopInternalBugException("This substitution propagation was not expected " +
+                    "to make the query be empty");
+        }
+    }
+
+    /**
+     * Lifts the substitution in the absence of a LJ condition
+     */
+    private LeftJoinNode liftSubstitution(LeftJoinNode normalizedLeftJoin,
+                                          ImmutableSubstitution<ImmutableTerm> remainingRightSubstitution,
+                                          IntermediateQuery query) {
+        SubstitutionPropagationProposal<LeftJoinNode> proposal = new SubstitutionPropagationProposalImpl<>(
+                normalizedLeftJoin, remainingRightSubstitution);
 
         try {
             return query.applyProposal(proposal, true)
@@ -253,4 +331,59 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         // NOT YET IMPLEMENTED --> no optimization YET
         return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
     }
+
+    /**
+     * May represent the right part of a LJ
+     */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static class DataNodeAndSubstitution {
+
+        public final DataNode dataNode;
+        public final Optional<FilterNode> filterNode;
+        public final Optional<ConstructionNode> constructionNode;
+
+        private DataNodeAndSubstitution(DataNode dataNode, Optional<FilterNode> filterNode,
+                                        Optional<ConstructionNode> constructionNode) {
+            this.dataNode = dataNode;
+            this.filterNode = filterNode;
+            this.constructionNode = constructionNode;
+        }
+
+        private DataNodeAndSubstitution(DataNode dataNode) {
+            this.dataNode = dataNode;
+            this.filterNode = Optional.empty();
+            this.constructionNode = Optional.empty();
+        }
+
+
+        static Optional<DataNodeAndSubstitution> extract(ConstructionNode rightChild, IntermediateQuery query) {
+            /*
+             * Not supported
+             */
+            if (rightChild.getOptionalModifiers().isPresent())
+                return Optional.empty();
+
+            QueryNode grandChild = query.getFirstChild(rightChild).get();
+
+            if (grandChild instanceof DataNode)
+                return Optional.of(new DataNodeAndSubstitution((DataNode) grandChild, Optional.empty(),
+                        Optional.of(rightChild)));
+            else if (grandChild instanceof FilterNode) {
+                FilterNode filterNode = (FilterNode) grandChild;
+
+                return query.getFirstChild(grandChild)
+                        .filter(n -> n instanceof DataNode)
+                        .map(n -> (DataNode)n)
+                        .map(n -> new DataNodeAndSubstitution(n, Optional.of(filterNode), Optional.of(rightChild)));
+            }
+            else
+                return Optional.empty();
+        }
+
+        static DataNodeAndSubstitution extract(DataNode rightChild) {
+            return new DataNodeAndSubstitution(rightChild);
+        }
+
+    }
+
 }

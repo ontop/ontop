@@ -22,17 +22,14 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.antlr.v4.runtime.*;
 
 import java.util.Map;
-
-import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
@@ -76,15 +73,13 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 			appendDirectives(bf);
 		}		
 		try {
-			ANTLRStringStream inputStream = new ANTLRStringStream(bf.toString());
+			CharStream inputStream = CharStreams.fromString(bf.toString());
 			TurtleOBDALexer lexer = new TurtleOBDALexer(inputStream);
 			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 			TurtleOBDAParser parser = new TurtleOBDAParser(tokenStream);
-			return parser.parse().stream()
+			return new TurtleOBDAVisitorImpl().visitParse(parser.parse()).stream()
 					.map(TERM_FACTORY::getImmutableFunctionalTerm)
 					.collect(ImmutableCollectors.toList());
-		} catch (RecognitionException e) {
-			throw new TargetQueryParserException(input, e);
 		} catch (RuntimeException e) {
 			throw new TargetQueryParserException(input, e);
 		}

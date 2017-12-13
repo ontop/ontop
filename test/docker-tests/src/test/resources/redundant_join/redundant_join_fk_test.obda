@@ -27,5 +27,13 @@ source		SELECT prof_id, nickname FROM professors;
 mappingId	MAPID-e601171745c0418c936b64d4abc06923
 target		:professor/{prof_id} :teaches :course/{course_id} . 
 source		SELECT prof_id, course_id FROM teaching;
+
+mappingId	MAPID-teachesAt
+target		:professor/{prof_id} :teachesAt :university/Bolzano .
+source		SELECT prof_id FROM teaching;
+
+mappingId	MAPID-teacherID
+target		:professor/{prof_id} :teacherID {prof_id} .
+source		SELECT prof_id FROM teaching;
 ]]
 
