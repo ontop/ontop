@@ -58,7 +58,6 @@ import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertToMuta
  */
 public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuery2DatalogTranslator {
 
-	private static final String SUBQUERY_PRED_PREFIX = "ansSQ";
 	private final IntermediateQueryFactory iqFactory;
 
 	private static class RuleHead {
@@ -347,7 +346,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	}
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
-		AtomPredicate newPredicate = ATOM_FACTORY.getAtomPredicate(SUBQUERY_PRED_PREFIX+ ++subQueryCounter,
+		AtomPredicate newPredicate = ATOM_FACTORY.getAtomPredicate(DATALOG_FACTORY.getSubqueryPredicatePrefix()+ ++subQueryCounter,
 				projectedVariables.size());
 		return ATOM_FACTORY.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}
