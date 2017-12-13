@@ -453,6 +453,17 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return new ImmutableSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory());
     }
 
+    @Override
+    public ImmutableSubstitution<ImmutableFunctionalTerm> getFunctionalTermFragment() {
+        ImmutableMap<Variable, ImmutableFunctionalTerm> newMap = getImmutableMap().entrySet().stream()
+                .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (ImmutableFunctionalTerm) e.getValue()));
+
+        return new ImmutableSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory());
+    }
+
 
     protected AtomFactory getAtomFactory() {
         return atomFactory;

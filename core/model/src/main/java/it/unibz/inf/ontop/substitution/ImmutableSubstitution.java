@@ -99,6 +99,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment();
     ImmutableSubstitution<NonGroundFunctionalTerm> getNonGroundFunctionalTermFragment();
     ImmutableSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment();
+    ImmutableSubstitution<ImmutableFunctionalTerm> getFunctionalTermFragment();
 
     ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment();
 

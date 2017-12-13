@@ -117,8 +117,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         ImmutableSubstitution<NonFunctionalTerm> downPropagableFragment = selectedChildSubstitution
                 .getNonFunctionalTermFragment();
 
-        ImmutableSubstitution<NonGroundFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution
-                .getNonGroundFunctionalTermFragment();
+        ImmutableSubstitution<ImmutableFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution.getFunctionalTermFragment();
 
 
         ImmutableSet<Variable> otherChildrenVariables = otherChildren.stream()
@@ -247,10 +246,10 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                 .orElseThrow(UnsatisfiableJoiningConditionException::new);
     }
 
-    private InjectiveVar2VarSubstitution computeOtherChildrenRenaming(ImmutableSubstitution<NonGroundFunctionalTerm> nonDownPropagableFragment,
+    private InjectiveVar2VarSubstitution computeOtherChildrenRenaming(ImmutableSubstitution<ImmutableFunctionalTerm> nonDownPropagatedFragment,
                                                                       ImmutableSet<Variable> otherChildrenVariables,
                                                                       VariableGenerator variableGenerator) {
-        ImmutableMap<Variable, Variable> substitutionMap = nonDownPropagableFragment.getImmutableMap().keySet().stream()
+        ImmutableMap<Variable, Variable> substitutionMap = nonDownPropagatedFragment.getImmutableMap().keySet().stream()
                 .filter(otherChildrenVariables::contains)
                 .collect(ImmutableCollectors.toMap(
                         v -> v,
