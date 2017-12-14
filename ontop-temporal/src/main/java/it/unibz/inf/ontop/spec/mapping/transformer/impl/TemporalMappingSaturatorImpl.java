@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.mapping.TargetAtom;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.OntopModelSingletons;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -68,6 +69,13 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
             ImmutableList<AtomicExpression> atomicExpressionsList = getAtomicExpressions(rule);
             if (areAllMappingsExist(mapping,temporalMapping,atomicExpressionsList)){
                 saturateRule(rule, mapping, dbMetadata, temporalMapping, temporalDBMetadata, TIQBuilder);
+            }else if(!queue.isEmpty()){
+                //TODO:Override compareTo for rule.getHead()
+                if (queue.stream().anyMatch(qe-> qe.getHead().equals(rule.getHead()))){
+                    queue.add(rule);
+                }
+            }else{
+                //TODO: ignore "rule"
             }
         }
         return null;
@@ -90,31 +98,33 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         it.iterator().forEachRemaining(dMTLexp -> teStack.push(dMTLexp));
         Stack<IntermediateQuery> mappingStack = new Stack<>();
 
-
         if(!teStack.empty()) {
             ImmutableMap<Variable, Term> varMap = retrieveMapForVariablesOccuringInTheHead(rule, mapping, temporalMapping);
-
             AtomicExpression atomicExpression;
-            if(rule.getHead() instanceof TemporalAtomicExpression){
+
+            if (rule.getHead() instanceof TemporalAtomicExpression) {
                 atomicExpression = new TemporalAtomicExpressionImpl(rule.getHead().getPredicate(), varMap.values().asList());
-            }else{
+            } else {
                 atomicExpression = new StaticAtomicExpressionImpl(rule.getHead().getPredicate(), varMap.values().asList());
             }
+
             TargetAtom targetAtom = DatalogMTLConversionTools.convertFromDatalogDataAtom(atomicExpression);
             DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
-            ConstructionNode rootNode = TIQFactory.createConstructionNode(projectionAtom.getVariables(),
+            ConstructionNode constructionNode = TIQFactory.createConstructionNode(projectionAtom.getVariables(),
                     targetAtom.getSubstitution(), Optional.empty());
-            TIQBuilder.init( projectionAtom, rootNode);
-        }
+            TIQBuilder.init(projectionAtom, constructionNode);
 
-        while(!teStack.isEmpty()){
-            DatalogMTLExpression currentExpression = teStack.pop();
+            QueryNode currParentNode = constructionNode;
 
-            if(currentExpression instanceof StaticAtomicExpression){
-                TargetAtom ta = DatalogMTLConversionTools.convertFromDatalogDataAtom(rule.getHead());
+            while (!teStack.isEmpty()) {
+                DatalogMTLExpression currentExpression = teStack.pop();
+                if (currentExpression instanceof StaticAtomicExpression) {
+
+                }
 
             }
-
+        }else{
+            //TODO:????
         }
 
     }
@@ -128,6 +138,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                     int varIdxInBody = 0;
                     for(Term t : ae.getTerms()){
                         if (t instanceof Variable) {
+                            //TODO:Override compareTo for Variable
                             if(((Variable) t).equals(term)){
                                 if(mapping.getPredicates().contains(ae.getPredicate())){
                                     int varIdxInSub = 0;
