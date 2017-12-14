@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.mapping;
 
-import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
 import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;

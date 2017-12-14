@@ -6,12 +6,10 @@ import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
 import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 
 import java.util.stream.Stream;
 
@@ -28,7 +26,7 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
 
 
     @Override
-    public ImmutableOntologyVocabulary extractVocabulary(Stream<? extends Function> targetAtoms) {
+    public Ontology extractVocabulary(Stream<? extends Function> targetAtoms) {
         OntologyVocabulary ontologyVocabulary = ONTOLOGY_FACTORY.createVocabulary();
         targetAtoms
                 .forEach(f -> {
@@ -42,18 +40,14 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
                             ontologyVocabulary.createDataProperty(f.getFunctionSymbol().getName());
                     }
                 });
-        return ontologyVocabulary;
+        return ONTOLOGY_FACTORY.createOntology(ontologyVocabulary);
     }
 
     @Override
-    public Ontology extractOntology(Mapping mapping) {
-
-        return extractOntology(mapping2DatalogConverter.convert(mapping)
+    public Ontology extractVocabulary(Mapping mapping) {
+        return extractVocabulary(mapping2DatalogConverter.convert(mapping)
                 .map(CQIE::getHead)
         );
     }
 
-    private Ontology extractOntology(Stream<? extends Function> mappingAxioms) {
-        return ONTOLOGY_FACTORY.createOntology(extractVocabulary(mappingAxioms));
-    }
 }

@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 

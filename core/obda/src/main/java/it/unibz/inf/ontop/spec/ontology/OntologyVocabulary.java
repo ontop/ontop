@@ -1,7 +1,124 @@
 package it.unibz.inf.ontop.spec.ontology;
 
 
-public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
+import java.util.Collection;
+
+public interface OntologyVocabulary {
+
+	/**
+	 * check whether the class has been declared and return the class object
+	 *
+	 * @param uri
+	 * @return
+	 * @throws RuntimeException if the class has not been declared
+	 */
+
+	OClass getClass(String uri);
+
+
+	/**
+	 * check whether the object property has been declared and return the class object
+	 *
+	 * @param uri
+	 * @return
+	 * @throws RuntimeException if the object property has not been declared
+	 */
+
+	ObjectPropertyExpression getObjectProperty(String uri);
+
+
+	/**
+	 * check whether the data property has been declared and return the class object
+	 *
+	 * @param uri
+	 * @return
+	 * @throws RuntimeException if the data property has not been declared
+	 */
+
+	DataPropertyExpression getDataProperty(String uri);
+
+	/**
+	 * check whether the annotation property has been declared and return the class object
+	 *
+	 * @param uri
+	 * @return
+	 * @throws RuntimeException if the data property has not been declared
+	 */
+
+	AnnotationProperty getAnnotationProperty(String uri);
+
+
+	Datatype getDatatype(String uri);
+
+
+	/**
+	 * check whether the class has been declared
+	 *
+	 * @param uri
+	 * @return
+	 */
+
+	boolean containsClass(String uri);
+
+	/**
+	 * check whether the object property has been declared
+	 *
+	 * @param uri
+	 * @return
+	 */
+
+	boolean containsObjectProperty(String uri);
+
+	/**
+	 * check whether the data property has been declared
+	 *
+	 * @param uri
+	 * @return
+	 */
+
+	boolean containsDataProperty(String uri);
+
+	/**
+	 * check whether the data property has been declared
+	 *
+	 * @param uri
+	 * @return
+	 */
+
+	boolean containsAnnotationProperty(String uri);
+
+	/**
+	 * return all declared classes
+	 *
+	 * @return
+	 */
+
+	Collection<OClass> getClasses();
+
+	/**
+	 * return all declared object properties
+	 *
+	 * @return
+	 */
+
+	Collection<ObjectPropertyExpression> getObjectProperties();
+
+	/**
+	 * return all declared data properties
+	 *
+	 * @return
+	 */
+
+	Collection<DataPropertyExpression> getDataProperties();
+
+	/**
+	 * return all declared annotation properties
+	 *
+	 * @return
+	 */
+
+	Collection<AnnotationProperty> getAnnotationProperties();
+
 
 	/**
 	 * declare class
@@ -10,7 +127,7 @@ public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
 	 * @return class object
 	 */
 	
-	public OClass createClass(String uri);
+	OClass createClass(String uri);
 
 	/**
 	 * declare object property
@@ -19,7 +136,7 @@ public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
 	 * @return property object
 	 */
 	
-	public ObjectPropertyExpression createObjectProperty(String uri);
+	ObjectPropertyExpression createObjectProperty(String uri);
 
 	/**
 	 * declare data property
@@ -28,7 +145,7 @@ public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
 	 * @return property object
 	 */
 	
-	public DataPropertyExpression createDataProperty(String uri);
+	DataPropertyExpression createDataProperty(String uri);
 
 	/**
 	 * declare annotation property
@@ -37,7 +154,7 @@ public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
 	 * @return property object
 	 */
 
-	public AnnotationProperty createAnnotationProperty(String uri);
+	AnnotationProperty createAnnotationProperty(String uri);
 
 
 	/**
@@ -46,7 +163,7 @@ public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
 	 * @param classname uri name
 	 */
 	
-	public void removeClass(String classname);
+	void removeClass(String classname);
 
 	/**
 	 * remove object property from the vocabulary
@@ -54,7 +171,7 @@ public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
 	 * @param property uri name
 	 */
 	
-	public void removeObjectProperty(String property);
+	void removeObjectProperty(String property);
 
 	/**
 	 * remove data property from the vocabulary
@@ -62,7 +179,7 @@ public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
 	 * @param property uri name
 	 */
 	
-	public void removeDataProperty(String property);
+	void removeDataProperty(String property);
 
 	/**
 	 * remove annotation property from the vocabulary
@@ -70,14 +187,8 @@ public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
 	 * @param property uri name
 	 */
 
-	public void removeAnnotationProperty(String property);
-	
-	
-	/**
-	 * copy all classes and properties from a given vocabulary 
-	 * 
-	 * @param v vocabulary to be copied from
-	 */
-	
-	public void merge(ImmutableOntologyVocabulary v);
+	void removeAnnotationProperty(String property);
+
+
+	void merge(Ontology ontology);
 }

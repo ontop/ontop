@@ -51,7 +51,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 	
 	@Override
-	public Ontology createOntology(ImmutableOntologyVocabulary vb) {
+	public Ontology createOntology(OntologyVocabulary vb) {
 		return new OntologyImpl((OntologyVocabularyImpl)vb);
 	}
 	

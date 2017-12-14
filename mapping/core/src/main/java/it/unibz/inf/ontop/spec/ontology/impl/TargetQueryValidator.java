@@ -24,8 +24,7 @@ import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,7 @@ import java.util.List;
 public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	
 	// the ontology vocabulary of the OBDA model
-	private final OntologyVocabulary voc;
+	private final Ontology voc;
 
 	/** List of invalid predicates */
 	private List<String> invalidPredicates = new ArrayList<>();
@@ -45,7 +44,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
     @SuppressWarnings("unused")
     Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public TargetQueryValidator(OntologyVocabulary voc) {
+	public TargetQueryValidator(Ontology voc) {
 		this.voc = voc;
 	}
 	
@@ -74,25 +73,17 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 				invalidPredicates.add(p.getName());
 			}
 		}
-		boolean isValid = true;
-		if (!invalidPredicates.isEmpty()) {
-			isValid = false; // if the list is not empty means the string is invalid!
-		}
-		return isValid;
+		return invalidPredicates.isEmpty();
 	}
-
-
 
 	@Override
-	public List<String> getInvalidPredicates() {
-		return invalidPredicates;
-	}
+	public List<String> getInvalidPredicates() { return invalidPredicates; }
 
 	@Override
 	public boolean isClass(Predicate predicate) {
 		return voc.containsClass(predicate.getName());
 	}
-	
+
 	@Override
 	public boolean isObjectProperty(Predicate predicate) {
 		return voc.containsObjectProperty(predicate.getName());
@@ -104,18 +95,13 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	}
 
 	@Override
-	public boolean isAnnotationProperty(Predicate predicate) {
-		return voc.containsAnnotationProperty(predicate.getName());
-	}
+	public boolean isAnnotationProperty(Predicate predicate) {  return voc.containsAnnotationProperty(predicate.getName()); }
 	
-	@Override
-	public boolean isTriple(Predicate predicate){
+	private boolean isTriple(Predicate predicate){
 		return predicate.isTriplePredicate();
 	}
 
-	@Override
-	public boolean isSameAs(Predicate p) { return p.getName().equals(IriConstants.SAME_AS); }
+	private boolean isSameAs(Predicate p) { return p.getName().equals(IriConstants.SAME_AS); }
 
-    //@Override
-    public boolean isCanonicalIRI(Predicate p) { return p.getName().equals(IriConstants.CANONICAL_IRI); }
+    private boolean isCanonicalIRI(Predicate p) { return p.getName().equals(IriConstants.CANONICAL_IRI); }
 }

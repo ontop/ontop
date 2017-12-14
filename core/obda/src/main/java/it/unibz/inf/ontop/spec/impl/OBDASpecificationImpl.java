@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.impl;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.dbschema.DBMetadata;

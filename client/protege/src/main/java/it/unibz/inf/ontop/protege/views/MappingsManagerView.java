@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.protege.views;
 
 import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.TargetQueryValidator;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
@@ -63,7 +64,8 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 		obdaModel = controller.getActiveOBDAModel();
 		
-		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getCurrentVocabulary());
+		TargetQueryVocabularyValidator validator = new TargetQueryValidator(
+				OntologyFactoryImpl.getInstance().createOntology(obdaModel.getCurrentVocabulary()));
 		
 		// Init the Mapping Manager panel.
 		mappingPanel = new MappingManagerPanel(obdaModel, validator);
@@ -101,12 +103,12 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 	@Override
 	public void activeOntologyChanged() {
 		obdaModel = controller.getActiveOBDAModel();
-		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getCurrentVocabulary());
+		TargetQueryVocabularyValidator validator = new TargetQueryValidator(
+				OntologyFactoryImpl.getInstance().createOntology(obdaModel.getCurrentVocabulary()));
 
 		mappingPanel.setTargetQueryValidator(validator);
 
 		mappingPanel.datasourceChanged(mappingPanel.getSelectedSource(), obdaModel.getSources().get(0));
-
 	}
 
 	@Override
@@ -119,6 +121,4 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 	public void show(OWLEntity owlEntity) {
 	//	System.out.println(owlEntity);
 	}
-
-
 }

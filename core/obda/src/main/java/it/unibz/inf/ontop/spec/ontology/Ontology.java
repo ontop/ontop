@@ -85,9 +85,13 @@ public interface Ontology extends Serializable {
 
 	Datatype getDatatype(String uri);
 
+	boolean containsClass(String uri);
+
 	boolean containsObjectProperty(String uri);
 
 	boolean containsDataProperty(String uri);
+
+	boolean containsAnnotationProperty(String uri);
 
 	// SUBCLASS/PROPERTY
 

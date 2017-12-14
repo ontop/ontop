@@ -48,7 +48,7 @@ public interface OntologyFactory {
 	 * @return
 	 */
 	
-	public Ontology createOntology(ImmutableOntologyVocabulary voc);
+	public Ontology createOntology(OntologyVocabulary voc);
 	
 	/**
 	 * Creates a class assertion 

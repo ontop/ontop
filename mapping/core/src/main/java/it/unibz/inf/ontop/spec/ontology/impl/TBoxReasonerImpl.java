@@ -48,7 +48,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private final EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG;
 	private final EquivalencesDAGImpl<ClassExpression> classDAG;
 	private final EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG;
-	private final ImmutableOntologyVocabulary voc;
+	private final OntologyImpl.ImmutableOntologyVocabularyImpl voc;
 
 	/**
 	 * constructs a TBox reasoner from an ontology
@@ -96,7 +96,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 							 EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG,
 							 EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG,
 							 EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG,
-							 ImmutableOntologyVocabulary voc) {
+							 OntologyImpl.ImmutableOntologyVocabularyImpl voc) {
 		this.objectPropertyDAG = objectPropertyDAG;
 		this.dataPropertyDAG = dataPropertyDAG;
 		this.classDAG = classDAG;

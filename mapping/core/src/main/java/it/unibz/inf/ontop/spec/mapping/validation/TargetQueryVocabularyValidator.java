@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.spec.mapping.validation;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
 import java.util.List;
 
@@ -31,60 +31,11 @@ public interface TargetQueryVocabularyValidator {
 
 	List<String> getInvalidPredicates();
 
-	/**
-	 * Checks whether the predicate is a class assertion.
-	 * 
-	 * @param predicate
-	 *            The target predicate.
-	 * @return Returns true if the predicate is a class assertion from the input
-	 *         ontology, or false otherwise.
-	 */
-    boolean isClass(Predicate predicate);
+	boolean isClass(Predicate predicate);
 
-	/**
-	 * Checks whether the predicate is a object property assertion.
-	 * 
-	 * @param predicate
-	 *            The target predicate.
-	 * @return Returns true if the predicate is a object property assertion from
-	 *         the input ontology, or false otherwise.
-	 */
-    boolean isObjectProperty(Predicate predicate);
+	boolean isObjectProperty(Predicate predicate);
 
-	/**
-	 * Checks whether the predicate is a data property assertion.
-	 * 
-	 * @param predicate
-	 *            The target predicate.
-	 * @return Returns true if the predicate is a data property assertion from
-	 *         the input ontology, or false otherwise.
-	 */
-    boolean isDataProperty(Predicate predicate);
+	boolean isDataProperty(Predicate predicate);
 
-
-	/**
-	 * Checks whether the predicate is an annotation property assertion.
-	 *
-	 * @param predicate
-	 *            The target predicate.
-	 * @return Returns true if the predicate is an annotation property assertion from
-	 *         the input ontology, or false otherwise.
-	 */
-    boolean isAnnotationProperty(Predicate predicate);
-
-
-	/**
-	 * Checks whether the predicate is a "triple", which is used for meta mapping
-	 * 
-	 * @param predicate a Predicate
-     *
-	 * @return
-	 * 	True if the predicate is "triple", or false otherwise
-	 */
-	boolean isTriple(Predicate predicate);
-
-	/**
-	 * Checks whether the predicate is owl:sameAs
-     */
-	boolean isSameAs(Predicate p);
+	boolean isAnnotationProperty(Predicate predicate);
 }

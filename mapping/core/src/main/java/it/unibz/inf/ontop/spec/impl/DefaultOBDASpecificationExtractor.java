@@ -44,7 +44,8 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
     public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
                                      @Nonnull Optional<Ontology> optionalOntology, ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
-        Optional<TBoxReasoner> optionalSaturatedTBox = saturateTBox(optionalOntology);
+        Optional<TBoxReasoner> optionalSaturatedTBox = optionalOntology
+                .map(o -> TBoxReasonerImpl.create(o));
 
         MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata, optionalOntology,
                 optionalSaturatedTBox, executorRegistry);
@@ -56,7 +57,8 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
     public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull PreProcessedMapping ppMapping,
                                      @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> optionalOntology,
                                      ExecutorRegistry executorRegistry) throws OBDASpecificationException {
-        Optional<TBoxReasoner> optionalSaturatedTBox = saturateTBox(optionalOntology);
+        Optional<TBoxReasoner> optionalSaturatedTBox = optionalOntology
+                .map(o -> TBoxReasonerImpl.create(o));
 
         MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
                 optionalOntology, optionalSaturatedTBox, executorRegistry);
@@ -69,7 +71,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
             throws MappingException, OntologyException, DBMetadataExtractionException {
         //Bootstrap the ontology from the mapping if it does not already exist
         Ontology ontology = optionalOntology
-                .orElseGet(() -> vocabularyExtractor.extractOntology(mappingAndDBMetadata.getMapping()));
+                .orElseGet(() -> vocabularyExtractor.extractVocabulary(mappingAndDBMetadata.getMapping()));
         TBoxReasoner tBox = optionalInputTBox
                 .orElseGet(() -> TBoxReasonerImpl.create(ontology));
 
@@ -80,11 +82,4 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                 ontology,
                 tBox);
     }
-
-    private Optional<TBoxReasoner> saturateTBox(Optional<Ontology> ontology) {
-        return ontology
-                .map(o -> TBoxReasonerImpl.create(o));
-    }
-
-
 }

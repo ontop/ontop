@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 
 
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,7 +39,6 @@ import java.util.Map;
  *       HOWEVER, they are recognized as valid class and property names
  * 
  * @author Roman Kontchakov
- *
  */
 
 public class OntologyVocabularyImpl implements OntologyVocabulary {
@@ -48,7 +48,6 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	final Map<String, DataPropertyExpression> dataProperties = new HashMap<>();
 	final Map<String, AnnotationProperty> annotationProperties = new HashMap<>();
 
-	
 	private static final String CLASS_NOT_FOUND = "Class not found: ";	
 	private static final String OBJECT_PROPERTY_NOT_FOUND = "ObjectProperty not found: ";
 	private static final String DATA_PROPERTY_NOT_FOUND = "DataProperty not found: ";
@@ -136,9 +135,6 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		return annotationProperties.values();
 	}
 
-
-
-	
 	
 	@Override
 	public OClass createClass(String uri) {
@@ -172,29 +168,21 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	@Override
-	public void merge(ImmutableOntologyVocabulary v) {
-		if (v instanceof OntologyVocabularyImpl) {
-			OntologyVocabularyImpl vi = (OntologyVocabularyImpl)v;
-			
-			concepts.putAll(vi.concepts);
-			objectProperties.putAll(vi.objectProperties);
-			dataProperties.putAll(vi.dataProperties);
-			annotationProperties.putAll(vi.annotationProperties);
-		}
-		else {
-			for (OClass oc : v.getClasses())
-				if (!oc.isTop() && !oc.isBottom())
-					concepts.put(oc.getName(), oc);
-			for (ObjectPropertyExpression ope : v.getObjectProperties())
-				if (!ope.isTop() && !ope.isBottom())
-					objectProperties.put(ope.getName(), ope);
-			for (DataPropertyExpression dpe : v.getDataProperties())
-				if (!dpe.isTop() && !dpe.isBottom())
-					dataProperties.put(dpe.getName(), dpe);
-			for (AnnotationProperty ap : v.getAnnotationProperties())
-					annotationProperties.put(ap.getName(), ap);
-		}
+	public void merge(Ontology ontology) {
+		OntologyImpl imp = (OntologyImpl)ontology;
+
+		concepts.putAll(imp.vocabulary.concepts.entrySet().stream()
+				.filter(e -> !e.getValue().isBottom() && !e.getValue().isTop())
+				.collect(ImmutableCollectors.toMap()));
+		objectProperties.putAll(imp.vocabulary.objectProperties.entrySet().stream()
+				.filter(e -> !e.getValue().isBottom() && !e.getValue().isTop())
+				.collect(ImmutableCollectors.toMap()));
+		dataProperties.putAll(imp.vocabulary.dataProperties.entrySet().stream()
+				.filter(e -> !e.getValue().isBottom() && !e.getValue().isTop())
+				.collect(ImmutableCollectors.toMap()));
+		annotationProperties.putAll(imp.vocabulary.annotationProperties);
 	}
+
 	
 	@Override
 	public void removeClass(String classname) {

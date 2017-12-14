@@ -124,7 +124,7 @@ public class DirectMappingEngine {
 					? extractPPMapping(inputPPMapping.get())
 					: extractPPMapping();
 
-			ImmutableOntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
+			Ontology newVocabulary = vocabularyExtractor.extractVocabulary(
 					newPPMapping.getTripleMaps().stream()
 							.flatMap(ax -> ax.getTargetAtoms().stream()));
 
@@ -162,7 +162,7 @@ public class DirectMappingEngine {
 	 * @return a new ontology storing all classes and properties used in the mappings
 	 *
 	 */
-	private OWLOntology updateOntology(OWLOntology ontology, ImmutableOntologyVocabulary vocabulary)
+	private OWLOntology updateOntology(OWLOntology ontology, Ontology vocabulary)
 			throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException {
 		OWLOntologyManager manager = ontology.getOWLOntologyManager();
 
@@ -176,19 +176,18 @@ public class DirectMappingEngine {
 		}
 		
 		//Add all the object properties
-		for (ObjectPropertyExpression p : vocabulary.getObjectProperties()){
+		for (ObjectPropertyExpression p : vocabulary.getObjectProperties()) {
 			OWLObjectProperty property = dataFactory.getOWLObjectProperty(IRI.create(p.getName()));
 			declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(property));
 		}
 		
 		//Add all the data properties
-		for (DataPropertyExpression p : vocabulary.getDataProperties()){
+		for (DataPropertyExpression p : vocabulary.getDataProperties()) {
 			OWLDataProperty property = dataFactory.getOWLDataProperty(IRI.create(p.getName()));
 			declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(property));
 		}
 
 		manager.addAxioms(ontology, declarationAxioms);
-
 		return ontology;		
 	}
 

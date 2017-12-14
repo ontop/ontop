@@ -15,11 +15,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingAxiomProducer;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -65,14 +61,11 @@ public class BootstrapGenerator {
 
         List<SQLPPTriplesMap> sqlppTriplesMaps = bootstrapMapping(activeOBDAModel.generatePPMapping(), baseUri);
 
-
-        ImmutableOntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
+        Ontology newVocabulary = vocabularyExtractor.extractVocabulary(
                 sqlppTriplesMaps.stream()
                         .flatMap(ax -> ax.getTargetAtoms().stream()));
 
-        updateProtegeOntology (owlManager.getActiveOntology(), newVocabulary);
-
-
+        updateProtegeOntology(owlManager.getActiveOntology(), newVocabulary);
     }
 
     private List<SQLPPTriplesMap> bootstrapMapping(SQLPPMapping ppMapping, String baseURI)
@@ -81,7 +74,6 @@ public class BootstrapGenerator {
         List<SQLPPTriplesMap> newTriplesMap = new ArrayList<>();
 
         currentMappingIndex = ppMapping.getTripleMaps().size() + 1;
-
 
         Connection conn = null;
         try {
@@ -124,21 +116,16 @@ public class BootstrapGenerator {
         }
     }
 
-    private void updateProtegeOntology(OWLOntology ontology, ImmutableOntologyVocabulary vocabulary)
+    private void updateProtegeOntology(OWLOntology ontology, Ontology vocabulary)
             throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException {
-
 
         OWLDataFactory dataFactory = owlManager.getOWLDataFactory();
 
-        owlManager.applyChanges( extractDeclarationAxioms(ontology, vocabulary, dataFactory));
-
-
+        owlManager.applyChanges(extractDeclarationAxioms(ontology, vocabulary, dataFactory));
     }
 
-    private List<AddAxiom> extractDeclarationAxioms(OWLOntology ontology, ImmutableOntologyVocabulary vocabulary, OWLDataFactory dataFactory) {
+    private List<AddAxiom> extractDeclarationAxioms(OWLOntology ontology, Ontology vocabulary, OWLDataFactory dataFactory) {
         List<AddAxiom> declarationAxioms = new ArrayList<>();
-
-
 
         //Add all the classes
         for (OClass c :  vocabulary.getClasses()) {
@@ -159,7 +146,6 @@ public class BootstrapGenerator {
         }
 
         return declarationAxioms;
-
     }
 
     private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {

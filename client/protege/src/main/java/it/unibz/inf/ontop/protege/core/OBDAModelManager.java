@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.spec.mapping.converter.OldSyntaxMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.spec.mapping.validation.SQLPPMappingValidator;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.utils.querymanager.*;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
@@ -168,7 +169,6 @@ public class OBDAModelManager implements Disposable {
 	 */
 	public class OntologyRefactoringListener implements OWLOntologyChangeListener {
 
-
 		@Override
 		public void ontologiesChanged(@Nonnull List<? extends OWLOntologyChange> changes) throws OWLException {
 			Map<OWLEntity, OWLEntity> renamings = new HashMap<OWLEntity, OWLEntity>();
@@ -181,8 +181,8 @@ public class OBDAModelManager implements Disposable {
 					updateOntologyID((SetOntologyID) change);
 
 					continue;
-
-				} else if (change instanceof AddImport) {
+				}
+				else if (change instanceof AddImport) {
 
 					AddImportData addedImport = ((AddImport) change).getChangeData();
 					IRI addedOntoIRI = addedImport.getDeclaration().getIRI();
@@ -203,10 +203,9 @@ public class OBDAModelManager implements Disposable {
 					for (OWLAnnotationProperty p : addedOnto.getAnnotationPropertiesInSignature())
 						activeOBDAModel.getCurrentVocabulary().createAnnotationProperty(p.getIRI().toString());
 
-
 					continue;
-
-				} else if (change instanceof RemoveImport) {
+				}
+				else if (change instanceof RemoveImport) {
 
 					RemoveImportData removedImport = ((RemoveImport) change).getChangeData();
 					IRI removedOntoIRI = removedImport.getDeclaration().getIRI();
@@ -227,8 +226,8 @@ public class OBDAModelManager implements Disposable {
 						activeOBDAModel.getCurrentVocabulary().removeAnnotationProperty(p.getIRI().toString());
 
 					continue;
-
-				} else if (change instanceof AddAxiom) {
+				}
+				else if (change instanceof AddAxiom) {
 					OWLAxiom axiom = change.getAxiom();
 					if (axiom instanceof OWLDeclarationAxiom) {
 
@@ -251,8 +250,8 @@ public class OBDAModelManager implements Disposable {
 							activeOBDAModel.getCurrentVocabulary().createAnnotationProperty(ap.getIRI().toString());
 						}
 					}
-
-				} else if (change instanceof RemoveAxiom) {
+				}
+				else if (change instanceof RemoveAxiom) {
 					OWLAxiom axiom = change.getAxiom();
 					if (axiom instanceof OWLDeclarationAxiom) {
 						OWLEntity entity = ((OWLDeclarationAxiom) axiom).getEntity();
@@ -293,7 +292,8 @@ public class OBDAModelManager implements Disposable {
 					OWLEntity newe = ((OWLDeclarationAxiom) add.getAxiom()).getEntity();
 					renamings.put(olde, newe);
 
-				} else if (change instanceof RemoveAxiom && change.getAxiom() instanceof OWLDeclarationAxiom) {
+				}
+				else if (change instanceof RemoveAxiom && change.getAxiom() instanceof OWLDeclarationAxiom) {
 					// Found the pattern of a deletion
 					OWLDeclarationAxiom declaration = (OWLDeclarationAxiom) change.getAxiom();
 					OWLEntity removedEntity = declaration.getEntity();
@@ -514,14 +514,13 @@ public class OBDAModelManager implements Disposable {
 			try {
 				IRI documentIRI = owlModelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
 
-				if(!UIUtil.isLocalFile(documentIRI.toURI())){
+				if (!UIUtil.isLocalFile(documentIRI.toURI())) {
 					return;
 				}
 
 				String owlDocumentIriString = documentIRI.toString();
 				int i = owlDocumentIriString.lastIndexOf(".");
 				String owlName = owlDocumentIriString.substring(0,i);
-
 
 				String obdaDocumentIri = owlName + OBDA_EXT;
 				String queryDocumentIri = owlName + QUERY_EXT;
@@ -544,7 +543,6 @@ public class OBDAModelManager implements Disposable {
 				}
 
 				if (obdaFile.exists()) {
-
 					try {
 						//convert old syntax OBDA file
 						Reader mappingReader = new FileReader(obdaFile);
@@ -558,7 +556,8 @@ public class OBDAModelManager implements Disposable {
 						// Load the OBDA model
 						obdaModel.parseMapping(mappingReader, configurationManager.snapshotProperties());
 
-					} catch (Exception ex) {
+					}
+					catch (Exception ex) {
 						throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
 					}
 
@@ -566,21 +565,25 @@ public class OBDAModelManager implements Disposable {
 						// Load the saved queries
 						QueryIOManager queryIO = new QueryIOManager(queryController);
 						queryIO.load(queryFile);
-					} catch (Exception ex) {
+					}
+					catch (Exception ex) {
 						queryController.reset();
 						throw new Exception("Exception occurred while loading Query document: " + queryFile + "\n\n" + ex.getMessage());
 					}
-				} else {
+				}
+				else {
 					log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
 				}
 				// adding type information to the mapping predicates
-				SQLPPMappingValidator.validate(obdaModel.generatePPMapping(), obdaModel.getCurrentVocabulary());
+				SQLPPMappingValidator.validate(obdaModel.generatePPMapping(),
+						OntologyFactoryImpl.getInstance().createOntology(obdaModel.getCurrentVocabulary()));
 			}
 			catch (Exception e) {
 				InvalidOntopConfigurationException ex = new InvalidOntopConfigurationException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
 				DialogUtils.showQuickErrorDialog(null, ex, "Open file error");
 				log.error(e.getMessage());
-			} finally {
+			}
+			finally {
 				loadingData = false; // flag off
 				fireActiveOBDAModelChange();
 
@@ -791,10 +794,7 @@ public class OBDAModelManager implements Disposable {
 		}
 
 		@Override
-		public void mappingUpdated() {
-			triggerOntologyChanged();
-
-		}
+		public void mappingUpdated() {  triggerOntologyChanged(); }
 	}
 
 	private class ProtegeQueryControllerListener implements QueryControllerListener {
@@ -839,8 +839,7 @@ public class OBDAModelManager implements Disposable {
 		if (!prefixUri.endsWith("#")) {
 			if (!prefixUri.endsWith("/")) {
 				String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();
-				if (!prefixUri.endsWith(defaultSeparator))
-				{
+				if (!prefixUri.endsWith(defaultSeparator))  {
 					prefixUri += defaultSeparator;
 				}
 			}

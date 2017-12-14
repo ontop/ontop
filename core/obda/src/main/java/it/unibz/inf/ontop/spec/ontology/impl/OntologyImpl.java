@@ -215,7 +215,7 @@ public class OntologyImpl implements Ontology {
 	
 	
 	
-	private final class ImmutableOntologyVocabularyImpl implements ImmutableOntologyVocabulary {
+	public final class ImmutableOntologyVocabularyImpl  {
 
 		final ImmutableMap<String, OClass> concepts;
 		final ImmutableMap<String, ObjectPropertyExpression> objectProperties;
@@ -239,7 +239,6 @@ public class OntologyImpl implements Ontology {
 					.putAll(voc.annotationProperties).build();
 		}
 		
-		@Override
 		public OClass getClass(String uri) {
 			OClass oc = concepts.get(uri);
 			if (oc == null)
@@ -247,7 +246,6 @@ public class OntologyImpl implements Ontology {
 			return oc;
 		}
 
-		@Override
 		public ObjectPropertyExpression getObjectProperty(String uri) {
 			ObjectPropertyExpression ope = objectProperties.get(uri);
 			if (ope == null)
@@ -255,7 +253,6 @@ public class OntologyImpl implements Ontology {
 			return ope;
 		}
 
-		@Override
 		public DataPropertyExpression getDataProperty(String uri) {
 			DataPropertyExpression dpe = dataProperties.get(uri);
 			if (dpe == null)
@@ -263,7 +260,6 @@ public class OntologyImpl implements Ontology {
 			return dpe;
 		}
 
-		@Override
 		public AnnotationProperty getAnnotationProperty(String uri) {
 			AnnotationProperty ap = annotationProperties.get(uri);
 			if (ap == null)
@@ -272,47 +268,38 @@ public class OntologyImpl implements Ontology {
 		}
 
 
-		@Override
 		public boolean containsClass(String uri) {
 			return concepts.containsKey(uri);
 		}
 
-		@Override
 		public boolean containsObjectProperty(String uri) {
 			return objectProperties.containsKey(uri);
 		}
 
-		@Override
 		public boolean containsDataProperty(String uri) {
 			return dataProperties.containsKey(uri);
 		}
 
-		@Override
 		public boolean containsAnnotationProperty(String uri) {
 			return annotationProperties.containsKey(uri);
 		}
 
-		@Override
 		public Collection<OClass> getClasses() {
 			return concepts.values();
 		}
 
-		@Override
 		public Collection<ObjectPropertyExpression> getObjectProperties() {
 			return objectProperties.values();
 		}
 
-		@Override
 		public Collection<DataPropertyExpression> getDataProperties() {
 			return dataProperties.values();
 		}
 
-		@Override
 		public Collection<AnnotationProperty> getAnnotationProperties() {
 			return annotationProperties.values();
 		}
 
-		@Override
 		public Datatype getDatatype(String uri) {
 			Datatype dt = OWL2QLDatatypes.get(uri);
 			if (dt == null)
@@ -362,6 +349,9 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
+	public boolean containsClass(String uri) { return vocabulary.containsClass(uri); }
+
+	@Override
 	public boolean containsObjectProperty(String uri) {
 		return vocabulary.containsObjectProperty(uri);
 	}
@@ -370,6 +360,9 @@ public class OntologyImpl implements Ontology {
 	public boolean containsDataProperty(String uri) {
 		return vocabulary.containsDataProperty(uri);
 	}
+
+	@Override
+	public boolean containsAnnotationProperty(String uri) { return vocabulary.containsAnnotationProperty(uri); }
 
 
 	/**

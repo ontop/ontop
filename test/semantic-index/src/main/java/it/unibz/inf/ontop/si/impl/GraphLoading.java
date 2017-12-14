@@ -107,10 +107,9 @@ public class GraphLoading {
         graphURIs.addAll(dataset.getNamedGraphs());
 
         OntologyVocabulary vb = ONTOLOGY_FACTORY.createVocabulary();
-
         for (IRI graphURI : graphURIs) {
             Ontology o = getOntology(graphURI);
-            vb.merge(((OntologyImpl)o).vocabulary);
+            vb.merge(o);
 
             // TODO: restore copying ontology axioms (it was copying from result into result, at least since July 2013)
 
@@ -180,6 +179,5 @@ public class GraphLoading {
 			ontology.addAssertionWithCheck(axiom);
 		*/
         }
-
     }
 }

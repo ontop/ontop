@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.validation;
 
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.validation.SQLPPMappingValidator;
@@ -66,17 +67,14 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 		 * TODO: do we want to consider a non-empty vocabulary?
 		 */
 		OntologyVocabulary vocabulary = OntologyFactoryImpl.getInstance().createVocabulary();
+		Ontology onto = OntologyFactoryImpl.getInstance().createOntology(vocabulary);
 
 		// run validator
 		try {
-			SQLPPMappingValidator.validate(ppMapping, vocabulary);
+			SQLPPMappingValidator.validate(ppMapping, onto);
 		}
 		catch (Exception e) {
 			fail("The target query has problem:" + e.getMessage());
 		}
-		
 	}
-
-
-
 }
