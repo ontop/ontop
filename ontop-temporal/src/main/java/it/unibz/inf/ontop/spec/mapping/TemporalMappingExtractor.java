@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.mapping;
 
-import com.google.inject.ImplementedBy;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.MappingException;

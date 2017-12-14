@@ -4,13 +4,12 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllSettings;
-import it.unibz.inf.ontop.spec.OBDASpecInput;
+import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import it.unibz.inf.ontop.spec.TOBDASpecInput;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import org.apache.commons.rdf.api.Graph;
 
@@ -53,14 +52,14 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
     }
 
     @Override
-    public OBDASpecification loadSpecification() throws OBDASpecificationException {
+    public OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
         return loadSpecification(Optional::empty);
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier)
             throws OBDASpecificationException {
 
-        return loadSpecification(ontologySupplier,
+        return loadTemporalSpecification(ontologySupplier,
                 () -> options.temporalMappingFile,
                 () -> options.mappingFile,
                 () -> options.mappingReader,
@@ -68,7 +67,7 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
                 () -> options.constraintFile);
     }
 
-    OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
+    OBDASpecification loadTemporalSpecification(OntologySupplier ontologySupplier,
                                         Supplier<Optional<File>> temporalMappingFileSupplier,
                                         Supplier<Optional<File>> mappingFileSupplier,
                                         Supplier<Optional<Reader>> mappingReaderSupplier,
@@ -166,7 +165,7 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
 
     Optional<SQLPPMapping> loadPPMapping(OntologySupplier ontologySupplier)
             throws MappingIOException, InvalidMappingException, DuplicateMappingException {
-        return loadPPMapping(ontologySupplier,
+        return loadPPMapping(
                 () -> options.temporalMappingFile,
                 () -> null,
                 () -> null);

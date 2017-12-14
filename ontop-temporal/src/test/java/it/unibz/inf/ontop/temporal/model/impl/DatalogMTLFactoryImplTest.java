@@ -5,13 +5,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.temporal.model.DatalogMTLFactory;
-import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
-import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
-import it.unibz.inf.ontop.temporal.model.TemporalAtomicExpression;
-import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
-import it.unibz.inf.ontop.temporal.model.TemporalRange;
+import it.unibz.inf.ontop.temporal.model.*;
 import org.junit.Test;
 
 import java.time.Duration;

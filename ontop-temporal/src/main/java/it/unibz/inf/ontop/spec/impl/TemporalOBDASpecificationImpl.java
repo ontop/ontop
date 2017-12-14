@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.impl;
 
-import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.spec.TemporalOBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;

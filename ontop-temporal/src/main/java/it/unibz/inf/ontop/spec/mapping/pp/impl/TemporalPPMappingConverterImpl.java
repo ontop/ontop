@@ -1,68 +1,35 @@
 package it.unibz.inf.ontop.spec.mapping.pp.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import fj.data.*;
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.EQNormalizer;
-import it.unibz.inf.ontop.datalog.SQLPPMapping2DatalogConverter;
-import it.unibz.inf.ontop.datalog.impl.DatalogConversionTools;
-import it.unibz.inf.ontop.datalog.impl.DatalogProgram2QueryConverterImpl;
-import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
-import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.mapping.TargetAtom;
-import it.unibz.inf.ontop.iq.mapping.impl.TargetAtomImpl;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.IriConstants;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.spec.impl.LegacyIsNotNullDatalogMappingFiller;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.TemporalPPMappingConverter;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.temporal.datalog.TemporalDatalog2QueryMappingConverter;
-import it.unibz.inf.ontop.temporal.mapping.SQLPPTemporalTriplesMap;
-import it.unibz.inf.ontop.temporal.mapping.TemporalMappingInterval;
 import it.unibz.inf.ontop.temporal.mapping.TemporalSQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.apache.jena.base.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.temporal.Temporal;
-import java.util.*;
-import java.util.List;
+import java.util.Map;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
-import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.castIntoGroundTerm;
-import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
-import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertIntoImmutableTerm;
-import static it.unibz.inf.ontop.model.term.impl.PredicateImpl.QUEST_QUADRUPLE_PRED;
 
 public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverter {
 
@@ -85,7 +52,7 @@ public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverte
 
     }
     @Override
-    public MappingWithProvenance convert(SQLPPMapping ppMapping, DBMetadata dbMetadata, ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
+    public MappingWithProvenance convert(SQLPPMapping ppMapping, RDBMetadata dbMetadata, ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
 
         ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap = convertIntoDatalog(ppMapping, dbMetadata);
 
@@ -102,7 +69,7 @@ public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverte
     /**
      * Assumption: one CQIE per mapping axiom (no nested union)
      */
-    private ImmutableMap<CQIE, PPMappingAssertionProvenance> convertIntoDatalog(SQLPPMapping ppMapping, DBMetadata dbMetadata)
+    private ImmutableMap<CQIE, PPMappingAssertionProvenance> convertIntoDatalog(SQLPPMapping ppMapping, RDBMetadata dbMetadata)
             throws InvalidMappingSourceQueriesException {
 
         /*
@@ -155,8 +122,6 @@ public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverte
         for (CQIE cq: unfoldingProgram)
             EQNormalizer.enforceEqualities(cq);
     }
-
-
 
 
 

@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
 
 import java.time.Duration;

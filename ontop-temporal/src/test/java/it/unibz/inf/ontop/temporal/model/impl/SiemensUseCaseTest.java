@@ -1,20 +1,10 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
-import it.unibz.inf.ontop.model.OntopModelSingletons;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.temporal.model.*;
 import junit.framework.TestCase;
-import org.junit.Test;
 
 import java.sql.Connection;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class SiemensUseCaseTest extends TestCase {

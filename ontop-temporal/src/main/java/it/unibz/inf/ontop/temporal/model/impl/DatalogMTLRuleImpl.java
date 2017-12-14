@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
 import it.unibz.inf.ontop.temporal.model.AtomicExpression;
-import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
-import org.mapdb.Atomic;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
 
 public class DatalogMTLRuleImpl implements DatalogMTLRule {
     DatalogMTLRuleImpl(AtomicExpression head, DatalogMTLExpression body) {

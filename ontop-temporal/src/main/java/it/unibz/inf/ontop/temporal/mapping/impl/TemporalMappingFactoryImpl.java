@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.temporal.mapping.TemporalMappingAxiom;
 import it.unibz.inf.ontop.temporal.mapping.TemporalMappingFactory;
 import it.unibz.inf.ontop.temporal.mapping.TemporalMappingTarget;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class TemporalMappingFactoryImpl implements TemporalMappingFactory {

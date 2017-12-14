@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.temporal.mapping;
 
 
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.injection.OntopTemporalSQLOWLAPIConfiguration;
 import junit.framework.TestCase;
 
 

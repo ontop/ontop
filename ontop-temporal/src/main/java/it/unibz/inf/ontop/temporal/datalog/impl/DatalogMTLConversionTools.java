@@ -3,15 +3,11 @@ package it.unibz.inf.ontop.temporal.datalog.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.datalog.TargetAtom;
 import it.unibz.inf.ontop.datalog.impl.DatalogProgram2QueryConverterImpl;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.mapping.TargetAtom;
-import it.unibz.inf.ontop.iq.mapping.impl.TargetAtomImpl;
-import it.unibz.inf.ontop.iq.node.DataNode;
+import it.unibz.inf.ontop.datalog.impl.TargetAtomImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -20,8 +16,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.temporal.model.AtomicExpression;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Collection;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
@@ -42,7 +36,7 @@ public class DatalogMTLConversionTools {
 //        }
 //
 //        return iqFactory.createIntensionalDataNode(dataAtom);
-//    }
+//    }i
 
 
     /**

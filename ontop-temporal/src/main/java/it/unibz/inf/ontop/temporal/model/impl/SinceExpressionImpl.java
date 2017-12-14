@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
-import it.unibz.inf.ontop.temporal.model.SinceExpression;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
+import it.unibz.inf.ontop.temporal.model.SinceExpression;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
 
 public class SinceExpressionImpl extends AbstractBinaryTemporalExpressionWithRange implements SinceExpression{

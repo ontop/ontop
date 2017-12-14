@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.TemporalSpecificationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -111,7 +112,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
                                                   OBDASpecInput specInput, Optional<Ontology> optionalOntology,
                                                   Optional<TBoxReasoner> optionalSaturatedTBox,
                                                   ExecutorRegistry executorRegistry)
-            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException {
+            throws MetaMappingExpansionException, DBMetadataExtractionException, InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
 
         RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
@@ -122,12 +123,13 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
         MappingWithProvenance provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
         dbMetadata.freeze();
 
-        MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
+        //TODO:find out what is wrong
+        //MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
 
         //TODO: write a mapping validator for temporal mappings
         //validateMapping(optionalOntology, optionalSaturatedTBox, filledProvMapping);
 
-        return new TemporalMappingAndDBMetadataImpl(toRegularMapping(filledProvMapping), dbMetadata);
+        return new TemporalMappingAndDBMetadataImpl(toRegularMapping(provMapping), dbMetadata);
     }
 
     //TODO: move it to a proper place
@@ -176,14 +178,14 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
         for(MapItem mapItem : mapItems){
             map.putIfAbsent(mapItem.getPred(), ArrayListMultimap.create());
             if (mapItem.getProjPred().getName().equals(QuadrupleElements.inXSDTime.toString())){
-                mapItem.getIq().getRootConstructionNode().getSubstitution().getImmutableMap().values().forEach(immutableTerm -> {
+                ((ConstructionNode)mapItem.getIq().getRootNode()).getSubstitution().getImmutableMap().values().forEach(immutableTerm -> {
                     mapItems.forEach(mapItem1 -> {
                         if (mapItem1.getProjPred().getName().equals(QuadrupleElements.hasBeginning.toString())){
-                           if(mapItem1.getIq().getRootConstructionNode().getSubstitution().getImmutableMap().containsValue(immutableTerm)){
+                           if(((ConstructionNode)mapItem1.getIq().getRootNode()).getSubstitution().getImmutableMap().containsValue(immutableTerm)){
                                map.get(mapItem.getPred()).put(mapItem.getProjPred().getName()+"$begin", mapItem.getIq());
                            }
                         }else if(mapItem1.getProjPred().getName().equals(QuadrupleElements.hasEnd.toString())){
-                            if(mapItem1.getIq().getRootConstructionNode().getSubstitution().getImmutableMap().containsValue(immutableTerm)){
+                            if(((ConstructionNode)mapItem1.getIq().getRootNode()).getSubstitution().getImmutableMap().containsValue(immutableTerm)){
                                 map.get(mapItem.getPred()).put(mapItem.getProjPred().getName()+"$end", mapItem.getIq());
                             }
                         }
