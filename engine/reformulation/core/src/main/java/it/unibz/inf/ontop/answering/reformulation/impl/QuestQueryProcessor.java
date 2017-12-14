@@ -49,7 +49,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 	private final QueryRewriter rewriter;
 	private final LinearInclusionDependencies sigma;
-	private final VocabularyValidator vocabularyValidator;
 	private final NativeQueryGenerator datasourceQueryGenerator;
 	private final QueryCache queryCache;
 
@@ -94,8 +93,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		this.queryUnfolder = translationFactory.create(saturatedMapping);
 
-		this.vocabularyValidator = new VocabularyValidator(obdaSpecification.getSaturatedTBox(),
-				obdaSpecification.getVocabulary());
 		this.dbMetadata = obdaSpecification.getDBMetadata();
 		this.datasourceQueryGenerator = translationFactory.create(dbMetadata);
 		this.inputQueryTranslator = translationFactory.createInputQueryTranslator(saturatedMapping.getMetadata()
@@ -132,10 +129,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 			// TODO: get rid of EQNormalizer
 			EQNormalizer.enforceEqualities(rule);
 
-			CQIE newquery = vocabularyValidator.replaceEquivalences(rule);
-			if (newquery.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
-				topLevelPredicate = newquery.getHead().getFunctionSymbol();
-			newprogramEq.appendRule(newquery);
+			if (rule.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
+				topLevelPredicate = rule.getHead().getFunctionSymbol();
+			newprogramEq.appendRule(rule);
 		}
 
 		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
