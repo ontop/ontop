@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.rdf4j.rio.helpers.SemanticIndexRDFHandler;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyImpl;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 import org.eclipse.rdf4j.query.Dataset;
@@ -109,7 +110,7 @@ public class GraphLoading {
 
         for (IRI graphURI : graphURIs) {
             Ontology o = getOntology(graphURI);
-            vb.merge(o.getVocabulary());
+            vb.merge(((OntologyImpl)o).vocabulary);
 
             // TODO: restore copying ontology axioms (it was copying from result into result, at least since July 2013)
 

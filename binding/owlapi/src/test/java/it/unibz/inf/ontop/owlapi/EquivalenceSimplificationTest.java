@@ -54,16 +54,15 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(2, classDAG.edgeSetSize());  // A1 <- B1 <- C1
 		assertEquals(0, propDAG.edgeSetSize());  // no properties
 
-		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
-		ClassExpression A1 = voc.getClass(testURI + "A1");
-		ClassExpression B1 = voc.getClass(testURI + "B1");
-		ClassExpression C1 = voc.getClass(testURI + "C1");
-		ClassExpression A2 = voc.getClass(testURI + "A2");
-		ClassExpression A3 = voc.getClass(testURI + "A3");
-		ClassExpression B2 = voc.getClass(testURI + "B2");
-		ClassExpression B3 = voc.getClass(testURI + "B3");
-		ClassExpression C2 = voc.getClass(testURI + "C2");
-		ClassExpression C3 = voc.getClass(testURI + "C3");
+		ClassExpression A1 = ontology.getClass(testURI + "A1");
+		ClassExpression B1 = ontology.getClass(testURI + "B1");
+		ClassExpression C1 = ontology.getClass(testURI + "C1");
+		ClassExpression A2 = ontology.getClass(testURI + "A2");
+		ClassExpression A3 = ontology.getClass(testURI + "A3");
+		ClassExpression B2 = ontology.getClass(testURI + "B2");
+		ClassExpression B3 = ontology.getClass(testURI + "B3");
+		ClassExpression C2 = ontology.getClass(testURI + "C2");
+		ClassExpression C3 = ontology.getClass(testURI + "C3");
 
 		EquivalencesDAG<ClassExpression> classes = simple.getClassDAG();
 		assertEquals(classes.getCanonicalForm(A1), A1);
@@ -98,16 +97,15 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(4, classDAG.edgeSetSize()); // A1 <- B1 <- C1, A1^- <- B1^- <- C1^-
 
 		
-		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
-		ObjectPropertyExpression A1 = voc.getObjectProperty(testURI + "A1");
-		ObjectPropertyExpression B1 = voc.getObjectProperty(testURI + "B1");
-		ObjectPropertyExpression C1 = voc.getObjectProperty(testURI + "C1");
-		ObjectPropertyExpression A2 = voc.getObjectProperty(testURI + "A2");
-		ObjectPropertyExpression A3 = voc.getObjectProperty(testURI + "A3");
-		ObjectPropertyExpression B2 = voc.getObjectProperty(testURI + "B2");
-		ObjectPropertyExpression B3 = voc.getObjectProperty(testURI + "B3");
-		ObjectPropertyExpression C2 = voc.getObjectProperty(testURI + "C2");
-		ObjectPropertyExpression C3 = voc.getObjectProperty(testURI + "C3");
+		ObjectPropertyExpression A1 = ontology.getObjectProperty(testURI + "A1");
+		ObjectPropertyExpression B1 = ontology.getObjectProperty(testURI + "B1");
+		ObjectPropertyExpression C1 = ontology.getObjectProperty(testURI + "C1");
+		ObjectPropertyExpression A2 = ontology.getObjectProperty(testURI + "A2");
+		ObjectPropertyExpression A3 = ontology.getObjectProperty(testURI + "A3");
+		ObjectPropertyExpression B2 = ontology.getObjectProperty(testURI + "B2");
+		ObjectPropertyExpression B3 = ontology.getObjectProperty(testURI + "B3");
+		ObjectPropertyExpression C2 = ontology.getObjectProperty(testURI + "C2");
+		ObjectPropertyExpression C3 = ontology.getObjectProperty(testURI + "C3");
 
 		EquivalencesDAG<ObjectPropertyExpression> ops = simple.getObjectPropertyDAG();
 		assertEquals(ops.getCanonicalForm(A1), A1);
@@ -140,14 +138,12 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(0, propDAG.edgeSetSize()); // 
 		assertEquals(2, classDAG.edgeSetSize()); // A1 <- B1 <- C1
 
-		
-		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
-		ClassExpression A1 = voc.getClass(testURI + "A1");
-		ClassExpression B1 = voc.getClass(testURI + "B1");
-		ClassExpression C1 = voc.getClass(testURI + "C1");
-		ClassExpression A3 = voc.getClass(testURI + "A3");
-		ClassExpression B3 = voc.getClass(testURI + "B3");
-		ClassExpression C3 = voc.getClass(testURI + "C3");
+		ClassExpression A1 = ontology.getClass(testURI + "A1");
+		ClassExpression B1 = ontology.getClass(testURI + "B1");
+		ClassExpression C1 = ontology.getClass(testURI + "C1");
+		ClassExpression A3 = ontology.getClass(testURI + "A3");
+		ClassExpression B3 = ontology.getClass(testURI + "B3");
+		ClassExpression C3 = ontology.getClass(testURI + "C3");
 
 		EquivalencesDAG<ClassExpression> classes = simple.getClassDAG();
 		assertEquals(classes.getCanonicalForm(A1), A1);
@@ -175,16 +171,15 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(4, classDAG.edgeSetSize()); // A1 >= B1 >= C1, A1^- >= B1^- >= C1^-
 		assertEquals(4, propDAG.edgeSetSize()); //
 
-		ImmutableOntologyVocabulary voc = ontology.getVocabulary();
-		ObjectPropertyExpression A1 = voc.getObjectProperty(testURI + "A1");
-		ObjectPropertyExpression B1 = voc.getObjectProperty(testURI + "B1");
-		ObjectPropertyExpression C1 = voc.getObjectProperty(testURI + "C1");
-		ObjectPropertyExpression A2 = voc.getObjectProperty(testURI + "A2");
-		ObjectPropertyExpression A3 = voc.getObjectProperty(testURI + "A3");
-		ObjectPropertyExpression B2 = voc.getObjectProperty(testURI + "B2");
-		ObjectPropertyExpression B3 = voc.getObjectProperty(testURI + "B3");
-		ObjectPropertyExpression C2 = voc.getObjectProperty(testURI + "C2");
-		ObjectPropertyExpression C3 = voc.getObjectProperty(testURI + "C3");
+		ObjectPropertyExpression A1 = ontology.getObjectProperty(testURI + "A1");
+		ObjectPropertyExpression B1 = ontology.getObjectProperty(testURI + "B1");
+		ObjectPropertyExpression C1 = ontology.getObjectProperty(testURI + "C1");
+		ObjectPropertyExpression A2 = ontology.getObjectProperty(testURI + "A2");
+		ObjectPropertyExpression A3 = ontology.getObjectProperty(testURI + "A3");
+		ObjectPropertyExpression B2 = ontology.getObjectProperty(testURI + "B2");
+		ObjectPropertyExpression B3 = ontology.getObjectProperty(testURI + "B3");
+		ObjectPropertyExpression C2 = ontology.getObjectProperty(testURI + "C2");
+		ObjectPropertyExpression C3 = ontology.getObjectProperty(testURI + "C3");
 
 		EquivalencesDAG<ObjectPropertyExpression> ops = simple.getObjectPropertyDAG();
 		assertEquals(ops.getCanonicalForm(A1), A1);

@@ -550,7 +550,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 				dl_onto.addSubPropertyOfAxiom(dpe, DataPropertyExpressionImpl.owlBottomDataProperty);
 			}
 			else {
-				Datatype datatype = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
+				Datatype datatype = dl_onto.getDatatype(owlDatatype.getIRI().toString());
 				dl_onto.addDataPropertyRangeAxiom(dpe.getRange(), datatype);		
 			}		
 		} 
@@ -948,7 +948,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			return ClassImpl.owlNothing;
 		}
 		else {
-			Datatype datatype = dl_onto.getVocabulary().getDatatype(owlDatatype.getIRI().toString());
+			Datatype datatype = dl_onto.getDatatype(owlDatatype.getIRI().toString());
 			//if (!datatype.equals(DatatypeImpl.rdfsLiteral))
 			//	System.err.println("QDD: " + owlDPE + "." + owlDR);
 			

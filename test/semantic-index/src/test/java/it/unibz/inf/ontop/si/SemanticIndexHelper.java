@@ -160,30 +160,30 @@ public class SemanticIndexHelper {
 
                 if (type.equals("classes")) {
                     if (exists) {
-                    	if (onto.getVocabulary().containsObjectProperty(uri)) {
-                        	ObjectPropertyExpression prop = onto.getVocabulary().getObjectProperty(uri);
+                    	if (onto.containsObjectProperty(uri)) {
+                        	ObjectPropertyExpression prop = onto.getObjectProperty(uri);
                         	if (inverse)
                         		prop = prop.getInverse();
                             description = prop.getDomain();
                     	}
                     	else {
-                    		DataPropertyExpression prop = onto.getVocabulary().getDataProperty(uri);
+                    		DataPropertyExpression prop = onto.getDataProperty(uri);
                     		description = prop.getDomainRestriction(DatatypeImpl.rdfsLiteral);
                     	}
                     }
                     else
-                        description = onto.getVocabulary().getClass(uri);
+                        description = onto.getClass(uri);
                 } 
                 else {
-                	if (onto.getVocabulary().containsObjectProperty(uri)) {	
-                    	ObjectPropertyExpression prop = onto.getVocabulary().getObjectProperty(uri);
+                	if (onto.containsObjectProperty(uri)) {
+                    	ObjectPropertyExpression prop = onto.getObjectProperty(uri);
                         if (inverse)
                         	description = prop.getInverse();
                         else
                         	description = prop;
                 	}
                 	else {
-                		description = onto.getVocabulary().getDataProperty(uri);
+                		description = onto.getDataProperty(uri);
                 	}
                 }
 

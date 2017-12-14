@@ -42,7 +42,7 @@ public class DAGConstructor {
 		return new DAG(ontology);
 	}
 
-	public static DAG filterPureISA(DAG dag, ImmutableOntologyVocabulary voc) {
+	public static DAG filterPureISA(DAG dag, Ontology voc) {
 
 		Map<Description, DAGNode> classes = new LinkedHashMap<>();
 		Map<Description, DAGNode> roles = new LinkedHashMap<>();
@@ -59,7 +59,7 @@ public class DAGConstructor {
 				newNode = new DAGNode(node.getDescription());
 				newNode.setIndex(node.getIndex());
 				newNode.getRange().addRange(node.getRange().getIntervals());
-				newNode.equivalents = new LinkedHashSet<DAGNode>(node.equivalents);
+				newNode.equivalents = new LinkedHashSet<>(node.equivalents);
 				classes.put(node.getDescription(), newNode);
 				allnodes.put(node.getDescription(), newNode);
 			}
@@ -71,7 +71,7 @@ public class DAGConstructor {
 				DAGNode newChild = classes.get(child.getDescription());
 				if (newChild == null) {
 					newChild = new DAGNode(child.getDescription());
-					newChild.equivalents = new LinkedHashSet<DAGNode>(child.equivalents);
+					newChild.equivalents = new LinkedHashSet<>(child.equivalents);
 					classes.put(child.getDescription(), newChild);
 					allnodes.put(child.getDescription(), newChild);
 				}

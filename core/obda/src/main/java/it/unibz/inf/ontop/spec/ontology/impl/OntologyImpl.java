@@ -35,8 +35,9 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 public class OntologyImpl implements Ontology {
 
 	private static final long serialVersionUID = 758424053258299151L;
-	
-	private final ImmutableOntologyVocabularyImpl vocabulary;
+
+	// TEMPORARY
+	public final ImmutableOntologyVocabularyImpl vocabulary;
 	
 	// axioms 
 
@@ -323,12 +324,53 @@ public class OntologyImpl implements Ontology {
 	OntologyImpl(OntologyVocabularyImpl voc) {
 		this.vocabulary = new ImmutableOntologyVocabularyImpl(voc);
 	}
-	
+
+
 	@Override
-	public ImmutableOntologyVocabulary getVocabulary() {
-		return vocabulary;
+	public Collection<OClass> getClasses() {
+		return vocabulary.getClasses();
 	}
-	
+
+	@Override
+	public Collection<ObjectPropertyExpression> getObjectProperties() {
+		return vocabulary.getObjectProperties();
+	}
+
+	@Override
+	public Collection<DataPropertyExpression> getDataProperties() {
+		return vocabulary.getDataProperties();
+	}
+
+	@Override
+	public OClass getClass(String uri) {
+		return vocabulary.getClass(uri);
+	}
+
+	@Override
+	public ObjectPropertyExpression getObjectProperty(String uri) {
+		return vocabulary.getObjectProperty(uri);
+	}
+
+	@Override
+	public DataPropertyExpression getDataProperty(String uri) {
+		return vocabulary.getDataProperty(uri);
+	}
+
+	@Override
+	public Datatype getDatatype(String uri) {
+		return vocabulary.getDatatype(uri);
+	}
+
+	@Override
+	public boolean containsObjectProperty(String uri) {
+		return vocabulary.containsObjectProperty(uri);
+	}
+
+	@Override
+	public boolean containsDataProperty(String uri) {
+		return vocabulary.containsDataProperty(uri);
+	}
+
 
 	/**
 	 * Normalizes and adds subclass axiom

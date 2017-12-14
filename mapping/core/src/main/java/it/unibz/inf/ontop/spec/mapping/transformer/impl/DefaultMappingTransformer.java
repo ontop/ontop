@@ -56,6 +56,6 @@ public class DefaultMappingTransformer implements MappingTransformer{
         Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tBox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
-        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox, ontology.getVocabulary());
+        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox);
     }
 }

@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
 /**
- * To be build by Guice (Assisted inject pattern)
+ * To be built by Guice (Assisted inject pattern)
  */
 public interface SpecificationFactory {
 
@@ -24,6 +24,5 @@ public interface SpecificationFactory {
 
     Mapping createMapping(MappingMetadata metadata, ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap, ExecutorRegistry executorRegistry);
 
-    OBDASpecification createSpecification(Mapping saturatedMapping, DBMetadata dbMetadata, TBoxReasoner tBox,
-                                          ImmutableOntologyVocabulary vocabulary);
+    OBDASpecification createSpecification(Mapping saturatedMapping, DBMetadata dbMetadata, TBoxReasoner tBox);
 }

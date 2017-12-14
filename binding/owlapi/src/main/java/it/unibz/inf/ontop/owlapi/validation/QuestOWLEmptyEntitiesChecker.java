@@ -62,12 +62,12 @@ public class QuestOWLEmptyEntitiesChecker {
 	}
 
 	public Iterator<Predicate> iEmptyConcepts() {
-		return new EmptyEntitiesIterator( onto.getVocabulary().getClasses().iterator(), conn);
+		return new EmptyEntitiesIterator(onto.getClasses().iterator(), conn);
 	}
 
 
 	public Iterator<Predicate> iEmptyRoles() {
-		return new EmptyEntitiesIterator(onto.getVocabulary().getObjectProperties().iterator(), onto.getVocabulary().getDataProperties().iterator(), conn);
+		return new EmptyEntitiesIterator(onto.getObjectProperties().iterator(), onto.getDataProperties().iterator(), conn);
 	}
 
 	public int getEConceptsSize() {
@@ -228,7 +228,7 @@ public class QuestOWLEmptyEntitiesChecker {
 
 		private boolean nextEmptyEntity(Predicate entity) {
 
-			String query =getQuery(entity);
+			String query = getQuery(entity);
 
 			//execute next query
 			try (OWLStatement stm = questConn.createStatement()){
@@ -263,10 +263,7 @@ public class QuestOWLEmptyEntitiesChecker {
 			}
 
 			return null;
-
-
 		}
-
 
 		@Override
 		public void remove() {
