@@ -62,14 +62,13 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      *
      */
     @Override
-    public void validate(MappingWithProvenance mapping, ImmutableOntologyVocabulary declaredVocabulary,
-                         TBoxReasoner saturatedTBox)
+    public void validate(MappingWithProvenance mapping, TBoxReasoner saturatedTBox)
             throws MappingOntologyMismatchException {
 
         ImmutableMultimap<String, Datatype> datatypeMap = computeDataTypeMap(saturatedTBox);
 
         for (Map.Entry<IntermediateQuery, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
-            validateAssertion(entry.getKey(), entry.getValue(), declaredVocabulary, datatypeMap);
+            validateAssertion(entry.getKey(), entry.getValue(), saturatedTBox.getVocabulary(), datatypeMap);
         }
     }
 

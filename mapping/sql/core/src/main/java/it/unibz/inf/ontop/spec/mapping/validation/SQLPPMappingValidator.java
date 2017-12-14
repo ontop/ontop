@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.impl.TargetQueryValidator;
 
 import java.util.List;
@@ -43,7 +44,7 @@ import java.util.List;
  */
 public class SQLPPMappingValidator {
 
-	public static void validate(SQLPPMapping ppMapping, ImmutableOntologyVocabulary vocabulary) throws Exception {
+	public static void validate(SQLPPMapping ppMapping, OntologyVocabulary vocabulary) throws Exception {
 
 		 TargetQueryVocabularyValidator validator = new TargetQueryValidator(vocabulary);
 

@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
-import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.parser.MappingParser;
@@ -84,14 +83,11 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
      * Validation:
      * - Mismatch between the ontology and the mapping
      */
-    protected void validateMapping(Optional<Ontology> optionalOntology, Optional<TBoxReasoner> optionalSaturatedTBox,
+    protected void validateMapping(Optional<TBoxReasoner> optionalSaturatedTBox,
                                  MappingWithProvenance filledProvMapping) throws MappingOntologyMismatchException {
-        if (optionalOntology.isPresent()) {
-            Ontology ontology = optionalOntology.get();
-            TBoxReasoner saturatedTBox = optionalSaturatedTBox
-                    .orElseThrow(() -> new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG));
-
-            ontologyComplianceValidator.validate(filledProvMapping, ontology.getVocabulary(), saturatedTBox);
+        if (optionalSaturatedTBox.isPresent()) {
+            TBoxReasoner saturatedTBox = optionalSaturatedTBox.get();
+            ontologyComplianceValidator.validate(filledProvMapping, saturatedTBox);
         }
     }
 

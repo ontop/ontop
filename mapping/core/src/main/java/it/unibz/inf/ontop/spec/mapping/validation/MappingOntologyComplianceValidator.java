@@ -7,6 +7,6 @@ import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 
 public interface MappingOntologyComplianceValidator {
 
-    void validate(MappingWithProvenance preProcessedMapping, ImmutableOntologyVocabulary signature, TBoxReasoner tBox)
+    void validate(MappingWithProvenance preProcessedMapping, TBoxReasoner tBox)
             throws MappingOntologyMismatchException;
 }

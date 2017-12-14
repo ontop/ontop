@@ -81,7 +81,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
         MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
 
-        validateMapping(optionalOntology, optionalSaturatedTBox, filledProvMapping);
+        validateMapping(optionalSaturatedTBox, filledProvMapping);
 
         return new MappingAndDBMetadataImpl(filledProvMapping.toRegularMapping(), dbMetadata);
     }
