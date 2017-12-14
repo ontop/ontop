@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 
 import it.unibz.inf.ontop.spec.ontology.*;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -109,8 +110,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 
 
-	@Override
-	public ImmutableOntologyVocabulary getVocabulary() { return voc; }
 
 
 	/**
@@ -135,6 +134,71 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	@Override
 	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
 		return dataRangeDAG;
+	}
+
+	@Override
+	public Collection<OClass> getClasses() {
+		return voc.getClasses();
+	}
+
+	@Override
+	public Collection<ObjectPropertyExpression> getObjectProperties() {
+		return voc.getObjectProperties();
+	}
+
+	@Override
+	public Collection<DataPropertyExpression> getDataProperties() {
+		return voc.getDataProperties();
+	}
+
+	@Override
+	public Collection<AnnotationProperty> getAnnotationProperties() {
+		return voc.getAnnotationProperties();
+	}
+
+	@Override
+	public OClass getClass(String uri) {
+		return voc.getClass(uri);
+	}
+
+	@Override
+	public ObjectPropertyExpression getObjectProperty(String uri) {
+		return voc.getObjectProperty(uri);
+	}
+
+	@Override
+	public DataPropertyExpression getDataProperty(String uri) {
+		return voc.getDataProperty(uri);
+	}
+
+	@Override
+	public AnnotationProperty getAnnotationProperty(String uri) {
+		return voc.getAnnotationProperty(uri);
+	}
+
+	@Override
+	public Datatype getDatatype(String uri) {
+		return voc.getDatatype(uri);
+	}
+
+	@Override
+	public boolean containsClass(String uri) {
+		return voc.containsClass(uri);
+	}
+
+	@Override
+	public boolean containsObjectProperty(String uri) {
+		return voc.containsObjectProperty(uri);
+	}
+
+	@Override
+	public boolean containsDataProperty(String uri) {
+		return voc.containsDataProperty(uri);
+	}
+
+	@Override
+	public boolean containsAnnotationProperty(String uri) {
+		return voc.containsAnnotationProperty(uri);
 	}
 
 	/**
@@ -476,7 +540,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		// TODO: a proper implementation is in order here
 
 		return new TBoxReasonerImpl(classDAG, (EquivalencesDAGImpl<DataRangeExpression>)reasoner.getDataRangeDAG(),
-				objectPropertyDAG, dataPropertyDAG, reasoner.getVocabulary());
+				objectPropertyDAG, dataPropertyDAG, ((TBoxReasonerImpl)reasoner).voc);
 	}
 
 

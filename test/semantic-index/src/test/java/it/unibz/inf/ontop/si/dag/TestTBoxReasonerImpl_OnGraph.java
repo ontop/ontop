@@ -23,11 +23,7 @@ package it.unibz.inf.ontop.si.dag;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.jgrapht.alg.StrongConnectivityInspector;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -49,14 +45,14 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	private final EquivalencesDAGImplOnGraph<DataPropertyExpression> dataPropertyDAG;
 	private final EquivalencesDAGImplOnGraph<ClassExpression> classDAG;
 	private final EquivalencesDAGImplOnGraph<DataRangeExpression> dataRangeDAG;
-	private final ImmutableOntologyVocabulary voc;
+	private final TBoxReasonerImpl reasoner;
 
 	public TestTBoxReasonerImpl_OnGraph(TBoxReasonerImpl reasoner) {	
-		this.objectPropertyDAG = new EquivalencesDAGImplOnGraph<ObjectPropertyExpression>(reasoner.getObjectPropertyGraph());
-		this.dataPropertyDAG = new EquivalencesDAGImplOnGraph<DataPropertyExpression>(reasoner.getDataPropertyGraph());
-		this.classDAG = new EquivalencesDAGImplOnGraph<ClassExpression>(reasoner.getClassGraph());
-		this.dataRangeDAG = new EquivalencesDAGImplOnGraph<DataRangeExpression>(reasoner.getDataRangeGraph());
-		this.voc = reasoner.getVocabulary();
+		this.objectPropertyDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getObjectPropertyGraph());
+		this.dataPropertyDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getDataPropertyGraph());
+		this.classDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getClassGraph());
+		this.dataRangeDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getDataRangeGraph());
+		this.reasoner = reasoner;
 	}
 	
 	/**
@@ -91,8 +87,73 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 		return dataRangeDAG;
 	}
 
+
+	// DUMMY
+
 	@Override
-	public ImmutableOntologyVocabulary getVocabulary() { return voc; }
+	public Collection<OClass> getClasses() {
+		return null;
+	}
+
+	@Override
+	public Collection<ObjectPropertyExpression> getObjectProperties() {
+		return null;
+	}
+
+	@Override
+	public Collection<DataPropertyExpression> getDataProperties() {
+		return null;
+	}
+
+	@Override
+	public Collection<AnnotationProperty> getAnnotationProperties() {
+		return null;
+	}
+
+	@Override
+	public OClass getClass(String uri) {
+		return null;
+	}
+
+	@Override
+	public ObjectPropertyExpression getObjectProperty(String uri) {
+		return null;
+	}
+
+	@Override
+	public DataPropertyExpression getDataProperty(String uri) {
+		return null;
+	}
+
+	@Override
+	public AnnotationProperty getAnnotationProperty(String uri) {
+		return null;
+	}
+
+	@Override
+	public Datatype getDatatype(String uri) {
+		return null;
+	}
+
+	@Override
+	public boolean containsClass(String uri) {
+		return false;
+	}
+
+	@Override
+	public boolean containsObjectProperty(String uri) {
+		return false;
+	}
+
+	@Override
+	public boolean containsDataProperty(String uri) {
+		return false;
+	}
+
+	@Override
+	public boolean containsAnnotationProperty(String uri) {
+		return false;
+	}
 
 	/**
 	 * Reconstruction of the DAG from the ontology graph
@@ -110,7 +171,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 
 		@Override
 		public Iterator<Equivalences<T>> iterator() {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			Set<Equivalences<T>> result = new LinkedHashSet<>();
 
 			for (T vertex : graph.vertexSet()) {
 					result.add(getVertex(vertex));

@@ -390,8 +390,8 @@ public class TreeWitnessSet {
 				 }
 				 
 				 Predicate pred = a.getFunctionSymbol();
-				 if (reasoner.getVocabulary().containsClass(pred.getName()))
-					 subc.intersectWith(reasoner.getVocabulary().getClass(pred.getName()));
+				 if (reasoner.containsClass(pred.getName()))
+					 subc.intersectWith(reasoner.getClass(pred.getName()));
 				 else
 					 subc.setToBottom();
 				 if (subc.isBottom())
@@ -425,8 +425,8 @@ public class TreeWitnessSet {
 					}
 					else {
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-						if (reasoner.getVocabulary().containsObjectProperty(a.getFunctionSymbol().getName())) {
-							ObjectPropertyExpression prop = reasoner.getVocabulary().getObjectProperty(a.getFunctionSymbol().getName());
+						if (reasoner.containsObjectProperty(a.getFunctionSymbol().getName())) {
+							ObjectPropertyExpression prop = reasoner.getObjectProperty(a.getFunctionSymbol().getName());
 							if (!root.equals(a.getTerm(0)))
 									prop = prop.getInverse();
 							properties.intersectWith(prop);

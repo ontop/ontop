@@ -687,7 +687,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	
 	private void setIndex(String iri, int type, int idx) {
 		if (type == CLASS_TYPE) {
-			OClass c = reasonerDag.getVocabulary().getClass(iri);
+			OClass c = reasonerDag.getClass(iri);
 			if (reasonerDag.getClassDAG().getVertex(c) == null) 
 				throw new RuntimeException("UNKNOWN CLASS: " + iri);
 			
@@ -697,7 +697,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			cacheSI.setIndex(c, idx);
 		}
 		else {
-			if (reasonerDag.getVocabulary().containsObjectProperty(iri)) { // reasonerDag.getObjectPropertyDAG().getVertex(ope) != null
+			if (reasonerDag.containsObjectProperty(iri)) {
 				//
 				// a bit elaborate logic is a consequence of using the same type for
 				// both object and data properties (which can have the same name)
@@ -707,9 +707,9 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 				// and the second occurrence is a datatype property
 				// (here we use the fact that the query result is sorted by idx)
 				//
-				ObjectPropertyExpression ope = reasonerDag.getVocabulary().getObjectProperty(iri);
+				ObjectPropertyExpression ope = reasonerDag.getObjectProperty(iri);
 				if (cacheSI.getEntry(ope) != null)  {
-					DataPropertyExpression dpe = reasonerDag.getVocabulary().getDataProperty(iri);
+					DataPropertyExpression dpe = reasonerDag.getDataProperty(iri);
 					if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
 						if (cacheSI.getEntry(dpe) != null)
 							throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
@@ -723,7 +723,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 					cacheSI.setIndex(ope, idx);
 			}
 			else {
-				DataPropertyExpression dpe = reasonerDag.getVocabulary().getDataProperty(iri);
+				DataPropertyExpression dpe = reasonerDag.getDataProperty(iri);
 				if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
 					if (cacheSI.getEntry(dpe) != null)
 						throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
@@ -740,18 +740,18 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		
 		SemanticIndexRange range;
 		if (type == CLASS_TYPE) {
-			OClass c = reasonerDag.getVocabulary().getClass(iri);
+			OClass c = reasonerDag.getClass(iri);
 			range = cacheSI.getEntry(c);
 		}
 		else {
 			Interval interval = intervals.get(0);
 			// if the first interval is within object property indexes
 			if (interval.getEnd() <= maxObjectPropertyIndex) {
-				ObjectPropertyExpression ope = reasonerDag.getVocabulary().getObjectProperty(iri);
+				ObjectPropertyExpression ope = reasonerDag.getObjectProperty(iri);
 				range = cacheSI.getEntry(ope);
 			}
 			else {
-				DataPropertyExpression dpe = reasonerDag.getVocabulary().getDataProperty(iri);
+				DataPropertyExpression dpe = reasonerDag.getDataProperty(iri);
 				range = cacheSI.getEntry(dpe);
 			}
 		}
@@ -868,7 +868,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 				continue;
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!reasonerDag.getVocabulary().containsObjectProperty(ope.getName()))
+			if (!reasonerDag.containsObjectProperty(ope.getName()))
 				continue;
 
 			SemanticIndexRange range = cacheSI.getEntry(ope);
@@ -907,7 +907,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			DataPropertyExpression dpe = set.getRepresentative();
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!reasonerDag.getVocabulary().containsDataProperty(dpe.getName()))
+			if (!reasonerDag.containsDataProperty(dpe.getName()))
 				continue;
 			
 			SemanticIndexRange range = cacheSI.getEntry(dpe);

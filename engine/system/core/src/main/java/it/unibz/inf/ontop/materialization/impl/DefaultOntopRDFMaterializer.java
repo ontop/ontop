@@ -70,7 +70,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 												  @Nonnull MaterializationParams params)
 			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
-		ImmutableSet<Predicate> vocabulary = extractVocabulary(obdaSpecification.getVocabulary());
+		ImmutableSet<Predicate> vocabulary = extractVocabulary(obdaSpecification.getSaturatedTBox());
 		return apply(obdaSpecification, vocabulary, params, configuration);
 	}
 
@@ -81,7 +81,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
 
-		ImmutableMap<URI, Predicate> vocabularyMap = extractVocabulary(obdaSpecification.getVocabulary()).stream()
+		ImmutableMap<URI, Predicate> vocabularyMap = extractVocabulary(obdaSpecification.getSaturatedTBox()).stream()
 				.collect(ImmutableCollectors.toMap(
 						DefaultOntopRDFMaterializer::convertIntoURI,
 						p -> p));
@@ -105,7 +105,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		return new DefaultMaterializedGraphResultSet(selectedVocabulary, params, queryEngine, inputQueryFactory);
 	}
 
-	private static ImmutableSet<Predicate> extractVocabulary(@Nonnull ImmutableOntologyVocabulary vocabulary) {
+	private static ImmutableSet<Predicate> extractVocabulary(@Nonnull TBoxReasoner vocabulary) {
         Set<Predicate> predicates = new HashSet<>();
 
         //add all class/data/object predicates to selectedVocabulary

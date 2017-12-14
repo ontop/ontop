@@ -16,6 +16,4 @@ public interface OBDASpecification {
     DBMetadata getDBMetadata();
 
     TBoxReasoner getSaturatedTBox();
-
-    ImmutableOntologyVocabulary getVocabulary();
 }

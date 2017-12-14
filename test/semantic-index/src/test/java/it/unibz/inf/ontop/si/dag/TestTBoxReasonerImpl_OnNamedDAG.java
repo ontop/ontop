@@ -30,6 +30,7 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -48,7 +49,7 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	private final EquivalencesDAG<DataPropertyExpression> dataPropertyDAG;
 	private final EquivalencesDAG<ClassExpression> classDAG;
 	private final EquivalencesDAG<DataRangeExpression> dataRangeDAG;
-	private final ImmutableOntologyVocabulary voc;
+	private final TBoxReasoner reasoner;
 
 	/**
 	 * Constructor using a DAG or a named DAG
@@ -63,7 +64,7 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 				SemanticIndexBuilder.getNamedDAG(reasoner.getClassDAG()), reasoner.getClassDAG());
 		this.dataRangeDAG = new EquivalencesDAGImpl<>(
 					SemanticIndexBuilder.getNamedDAG(reasoner.getDataRangeDAG()), reasoner.getDataRangeDAG());
-		this.voc = reasoner.getVocabulary();
+		this.reasoner = reasoner;
 	}
 
 	
@@ -100,6 +101,74 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 
 	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
 		return dataRangeDAG;
+	}
+
+
+	// DUMMY
+
+	@Override
+	public Collection<OClass> getClasses() {
+		return null;
+	}
+
+	@Override
+	public Collection<ObjectPropertyExpression> getObjectProperties() {
+		return null;
+	}
+
+	@Override
+	public Collection<DataPropertyExpression> getDataProperties() {
+		return null;
+	}
+
+	@Override
+	public Collection<AnnotationProperty> getAnnotationProperties() {
+		return null;
+	}
+
+	@Override
+	public OClass getClass(String uri) {
+		return null;
+	}
+
+	@Override
+	public ObjectPropertyExpression getObjectProperty(String uri) {
+		return null;
+	}
+
+	@Override
+	public DataPropertyExpression getDataProperty(String uri) {
+		return null;
+	}
+
+	@Override
+	public AnnotationProperty getAnnotationProperty(String uri) {
+		return null;
+	}
+
+	@Override
+	public Datatype getDatatype(String uri) {
+		return null;
+	}
+
+	@Override
+	public boolean containsClass(String uri) {
+		return false;
+	}
+
+	@Override
+	public boolean containsObjectProperty(String uri) {
+		return false;
+	}
+
+	@Override
+	public boolean containsDataProperty(String uri) {
+		return false;
+	}
+
+	@Override
+	public boolean containsAnnotationProperty(String uri) {
+		return false;
 	}
 
 	/**
@@ -233,6 +302,4 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 			return null;
 		}
 	}
-	@Override
-	public ImmutableOntologyVocabulary getVocabulary() { return voc; }
 }

@@ -38,7 +38,4 @@ public class OBDASpecificationImpl implements OBDASpecification {
     public TBoxReasoner getSaturatedTBox() {
         return saturatedTBox;
     }
-
-    @Override
-    public ImmutableOntologyVocabulary getVocabulary() { return saturatedTBox.getVocabulary(); }
 }
