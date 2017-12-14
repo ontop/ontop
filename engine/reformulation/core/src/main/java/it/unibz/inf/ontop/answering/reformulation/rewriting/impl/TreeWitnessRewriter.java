@@ -64,18 +64,16 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TBoxReasoner reasoner;
-	private ImmutableOntologyVocabulary voc;
 	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
 	private LinearInclusionDependencies sigma;
 	
 	private Collection<TreeWitnessGenerator> generators;
 	
 	@Override
-	public void setTBox(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, LinearInclusionDependencies sigma) {
+	public void setTBox(TBoxReasoner reasoner, LinearInclusionDependencies sigma) {
 		double startime = System.currentTimeMillis();
 
 		this.reasoner = reasoner;
-		this.voc = voc;
 		this.sigma = sigma;
 		
 		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma);
@@ -152,7 +150,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		List<CQIE> outputRules = new LinkedList<>();	
 		String headURI = headAtom.getFunctionSymbol().getName();
 		
-		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, voc, generators);
+		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators);
 
 		if (cc.hasNoFreeTerms()) {  
 			if (!cc.isDegenerate() || cc.getLoop() != null) 
@@ -291,7 +289,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		DatalogProgram edgeDP = DATALOG_FACTORY.getDatalogProgram();
 
 		for (CQIE cqie : dp.getRules()) {
-			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, voc, cqie);
+			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, cqie);
 			Function cqieAtom = cqie.getHead();
 		
 			if (ccs.size() == 1) {

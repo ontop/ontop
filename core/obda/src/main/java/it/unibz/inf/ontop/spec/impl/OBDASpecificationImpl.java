@@ -14,16 +14,14 @@ public class OBDASpecificationImpl implements OBDASpecification {
     private final Mapping mapping;
     private final DBMetadata dbMetadata;
     private final TBoxReasoner saturatedTBox;
-    private final ImmutableOntologyVocabulary vocabulary;
 
     @Inject
-    private OBDASpecificationImpl(@Assisted Mapping saturatedMapping, @Assisted DBMetadata dbMetadata,
-                                  @Assisted TBoxReasoner saturatedTBox,
-                                  @Assisted ImmutableOntologyVocabulary vocabulary) {
+    private OBDASpecificationImpl(@Assisted Mapping saturatedMapping,
+                                  @Assisted DBMetadata dbMetadata,
+                                  @Assisted TBoxReasoner saturatedTBox) {
         this.mapping = saturatedMapping;
         this.dbMetadata = dbMetadata;
         this.saturatedTBox = saturatedTBox;
-        this.vocabulary = vocabulary;
     }
 
     @Override
@@ -42,7 +40,5 @@ public class OBDASpecificationImpl implements OBDASpecification {
     }
 
     @Override
-    public ImmutableOntologyVocabulary getVocabulary() {
-        return vocabulary;
-    }
+    public ImmutableOntologyVocabulary getVocabulary() { return saturatedTBox.getVocabulary(); }
 }

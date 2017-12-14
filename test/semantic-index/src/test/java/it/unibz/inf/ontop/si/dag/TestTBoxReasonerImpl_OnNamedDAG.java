@@ -21,14 +21,8 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
@@ -54,10 +48,11 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	private final EquivalencesDAG<DataPropertyExpression> dataPropertyDAG;
 	private final EquivalencesDAG<ClassExpression> classDAG;
 	private final EquivalencesDAG<DataRangeExpression> dataRangeDAG;
+	private final ImmutableOntologyVocabulary voc;
 
 	/**
 	 * Constructor using a DAG or a named DAG
-	 * @param dag DAG to be used for reasoning
+	 * @param reasoner DAG to be used for reasoning
 	 */
 	public TestTBoxReasonerImpl_OnNamedDAG(TBoxReasoner reasoner) {
 		this.objectPropertyDAG = new EquivalencesDAGImpl<>(
@@ -68,6 +63,7 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 				SemanticIndexBuilder.getNamedDAG(reasoner.getClassDAG()), reasoner.getClassDAG());
 		this.dataRangeDAG = new EquivalencesDAGImpl<>(
 					SemanticIndexBuilder.getNamedDAG(reasoner.getDataRangeDAG()), reasoner.getDataRangeDAG());
+		this.voc = reasoner.getVocabulary();
 	}
 
 	
@@ -237,4 +233,6 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 			return null;
 		}
 	}
+	@Override
+	public ImmutableOntologyVocabulary getVocabulary() { return voc; }
 }

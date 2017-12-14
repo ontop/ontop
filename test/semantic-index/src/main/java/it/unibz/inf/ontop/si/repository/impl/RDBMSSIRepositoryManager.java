@@ -231,7 +231,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
 	
 	private final TBoxReasoner reasonerDag;
-	private final ImmutableOntologyVocabulary voc;
 
 	private SemanticIndexCache cacheSI;
 	
@@ -241,9 +240,8 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	
 	private final List<RepositoryChangedListener> changeList = new LinkedList<>();
 
-	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag, ImmutableOntologyVocabulary voc) {
+	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag) {
 		this.reasonerDag = reasonerDag;
-		this.voc = voc;
 	}
 
 	@Override
@@ -689,7 +687,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	
 	private void setIndex(String iri, int type, int idx) {
 		if (type == CLASS_TYPE) {
-			OClass c = voc.getClass(iri);
+			OClass c = reasonerDag.getVocabulary().getClass(iri);
 			if (reasonerDag.getClassDAG().getVertex(c) == null) 
 				throw new RuntimeException("UNKNOWN CLASS: " + iri);
 			
@@ -699,7 +697,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			cacheSI.setIndex(c, idx);
 		}
 		else {
-			if (voc.containsObjectProperty(iri)) { // reasonerDag.getObjectPropertyDAG().getVertex(ope) != null
+			if (reasonerDag.getVocabulary().containsObjectProperty(iri)) { // reasonerDag.getObjectPropertyDAG().getVertex(ope) != null
 				//
 				// a bit elaborate logic is a consequence of using the same type for
 				// both object and data properties (which can have the same name)
@@ -709,9 +707,9 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 				// and the second occurrence is a datatype property
 				// (here we use the fact that the query result is sorted by idx)
 				//
-				ObjectPropertyExpression ope = voc.getObjectProperty(iri);
+				ObjectPropertyExpression ope = reasonerDag.getVocabulary().getObjectProperty(iri);
 				if (cacheSI.getEntry(ope) != null)  {
-					DataPropertyExpression dpe = voc.getDataProperty(iri);
+					DataPropertyExpression dpe = reasonerDag.getVocabulary().getDataProperty(iri);
 					if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
 						if (cacheSI.getEntry(dpe) != null)
 							throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
@@ -725,7 +723,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 					cacheSI.setIndex(ope, idx);
 			}
 			else {
-				DataPropertyExpression dpe = voc.getDataProperty(iri);
+				DataPropertyExpression dpe = reasonerDag.getVocabulary().getDataProperty(iri);
 				if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
 					if (cacheSI.getEntry(dpe) != null)
 						throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
@@ -742,18 +740,18 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		
 		SemanticIndexRange range;
 		if (type == CLASS_TYPE) {
-			OClass c = voc.getClass(iri);
+			OClass c = reasonerDag.getVocabulary().getClass(iri);
 			range = cacheSI.getEntry(c);
 		}
 		else {
 			Interval interval = intervals.get(0);
 			// if the first interval is within object property indexes
 			if (interval.getEnd() <= maxObjectPropertyIndex) {
-				ObjectPropertyExpression ope = voc.getObjectProperty(iri);
+				ObjectPropertyExpression ope = reasonerDag.getVocabulary().getObjectProperty(iri);
 				range = cacheSI.getEntry(ope);
 			}
 			else {
-				DataPropertyExpression dpe = voc.getDataProperty(iri);
+				DataPropertyExpression dpe = reasonerDag.getVocabulary().getDataProperty(iri);
 				range = cacheSI.getEntry(dpe);
 			}
 		}
@@ -870,7 +868,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 				continue;
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!voc.containsObjectProperty(ope.getName()))
+			if (!reasonerDag.getVocabulary().containsObjectProperty(ope.getName()))
 				continue;
 
 			SemanticIndexRange range = cacheSI.getEntry(ope);
@@ -909,7 +907,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			DataPropertyExpression dpe = set.getRepresentative();
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!voc.containsDataProperty(dpe.getName()))
+			if (!reasonerDag.getVocabulary().containsDataProperty(dpe.getName()))
 				continue;
 			
 			SemanticIndexRange range = cacheSI.getEntry(dpe);

@@ -75,11 +75,10 @@ class SILoadingTools {
 
     private static RepositoryInit createRepository(Ontology ontology, Optional<Set<OWLOntology>> ontologyClosure)
             throws SemanticIndexException {
-        ImmutableOntologyVocabulary vocabulary = ontology.getVocabulary();
 
-        final TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(ontology);
+        TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(ontology);
 
-        SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, vocabulary);
+        SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner);
 
         LOG.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
         // we work in memory (with H2), the database is clean and
@@ -93,7 +92,7 @@ class SILoadingTools {
 
             // Creating the ABox repository
             dataRepository.createDBSchemaAndInsertMetadata(localConnection);
-            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, vocabulary, localConnection);
+            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner.getVocabulary(), localConnection);
 
         } catch (SQLException e) {
             throw new SemanticIndexException(e.getMessage());

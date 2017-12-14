@@ -205,7 +205,7 @@ public class QueryConnectedComponent {
 	 * @return list of connected components
 	 */
 	
-	public static List<QueryConnectedComponent> getConnectedComponents(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, CQIE cqie) {
+	public static List<QueryConnectedComponent> getConnectedComponents(TBoxReasoner reasoner, CQIE cqie) {
 
 		Set<Term> headTerms = new HashSet<Term>(cqie.getHead().getTerms());
 
@@ -220,7 +220,7 @@ public class QueryConnectedComponent {
 		for (Function atom : cqie.getBody()) {
 			Predicate p = atom.getFunctionSymbol();
 			if (atom.isDataFunction() && !p.isTriplePredicate()) { // if DL predicates
-				Function a = getCanonicalForm(reasoner, voc, atom);
+				Function a = getCanonicalForm(reasoner, atom);
 				Term t0 = a.getTerm(0);
 				if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {
 					// proper DL edge between two distinct terms
@@ -485,20 +485,20 @@ public class QueryConnectedComponent {
 		}
 	}
 
-	private static Function getCanonicalForm(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, Function atom) {
+	private static Function getCanonicalForm(TBoxReasoner reasoner, Function atom) {
 		Predicate p = atom.getFunctionSymbol();
 
 		// the contains tests are inefficient, but tests fails without them
 		// p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
-		if (/*p.isClass()*/ (p.getArity() == 1) && voc.containsClass(p.getName())) {
-			OClass c = voc.getClass(p.getName());
+		if (/*p.isClass()*/ (p.getArity() == 1) && reasoner.getVocabulary().containsClass(p.getName())) {
+			OClass c = reasoner.getVocabulary().getClass(p.getName());
 			OClass equivalent = (OClass)reasoner.getClassDAG().getCanonicalForm(c);
 			if (equivalent != null && !equivalent.equals(c)) {
 				return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
 			}
 		}
-		else if (/*p.isObjectProperty()*/ (p.getArity() == 2) && voc.containsObjectProperty(p.getName())) {
-			ObjectPropertyExpression ope = voc.getObjectProperty(p.getName());
+		else if (/*p.isObjectProperty()*/ (p.getArity() == 2) && reasoner.getVocabulary().containsObjectProperty(p.getName())) {
+			ObjectPropertyExpression ope = reasoner.getVocabulary().getObjectProperty(p.getName());
 			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyDAG().getCanonicalForm(ope);
 			if (equivalent != null && !equivalent.equals(ope)) {
 				if (!equivalent.isInverse())
@@ -507,8 +507,8 @@ public class QueryConnectedComponent {
 					return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
 			}
 		}
-		else if (/*p.isDataProperty()*/ (p.getArity() == 2)  && voc.containsDataProperty(p.getName())) {
-			DataPropertyExpression dpe = voc.getDataProperty(p.getName());
+		else if (/*p.isDataProperty()*/ (p.getArity() == 2)  && reasoner.getVocabulary().containsDataProperty(p.getName())) {
+			DataPropertyExpression dpe = reasoner.getVocabulary().getDataProperty(p.getName());
 			DataPropertyExpression equivalent = reasoner.getDataPropertyDAG().getCanonicalForm(dpe);
 			if (equivalent != null && !equivalent.equals(dpe)) {
 				return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());

@@ -41,7 +41,7 @@ public class DummyRewriter implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(TBoxReasoner ontology, ImmutableOntologyVocabulary voc, LinearInclusionDependencies sigma) {
+	public void setTBox(TBoxReasoner ontology, LinearInclusionDependencies sigma) {
 		// NO-OP		
 	}
 }

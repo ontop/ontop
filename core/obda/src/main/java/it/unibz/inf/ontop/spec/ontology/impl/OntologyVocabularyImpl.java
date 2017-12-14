@@ -137,12 +137,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 
-	@Override
-	public boolean isEmpty() {
-		return concepts.isEmpty() && objectProperties.isEmpty() && dataProperties.isEmpty();
-	}
-		
-	
+
 	
 	
 	@Override

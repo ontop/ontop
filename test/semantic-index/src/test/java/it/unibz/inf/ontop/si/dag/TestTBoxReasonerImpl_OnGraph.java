@@ -20,13 +20,7 @@ package it.unibz.inf.ontop.si.dag;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 
 import java.util.Collections;
@@ -55,12 +49,14 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	private final EquivalencesDAGImplOnGraph<DataPropertyExpression> dataPropertyDAG;
 	private final EquivalencesDAGImplOnGraph<ClassExpression> classDAG;
 	private final EquivalencesDAGImplOnGraph<DataRangeExpression> dataRangeDAG;
+	private final ImmutableOntologyVocabulary voc;
 
 	public TestTBoxReasonerImpl_OnGraph(TBoxReasonerImpl reasoner) {	
 		this.objectPropertyDAG = new EquivalencesDAGImplOnGraph<ObjectPropertyExpression>(reasoner.getObjectPropertyGraph());
 		this.dataPropertyDAG = new EquivalencesDAGImplOnGraph<DataPropertyExpression>(reasoner.getDataPropertyGraph());
 		this.classDAG = new EquivalencesDAGImplOnGraph<ClassExpression>(reasoner.getClassGraph());
 		this.dataRangeDAG = new EquivalencesDAGImplOnGraph<DataRangeExpression>(reasoner.getDataRangeGraph());
+		this.voc = reasoner.getVocabulary();
 	}
 	
 	/**
@@ -94,6 +90,9 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
 		return dataRangeDAG;
 	}
+
+	@Override
+	public ImmutableOntologyVocabulary getVocabulary() { return voc; }
 
 	/**
 	 * Reconstruction of the DAG from the ontology graph

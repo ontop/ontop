@@ -32,7 +32,7 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG();
+	EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG();
 	
 	/**
 	 * Return the DAG of properties
@@ -40,7 +40,7 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG();
+	EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG();
 
 	/**
 	 * Return the DAG of classes
@@ -48,7 +48,7 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<ClassExpression> getClassDAG();
+	EquivalencesDAG<ClassExpression> getClassDAG();
 	
 	/**
 	 * Return the DAG of datatypes and data property ranges
@@ -56,5 +56,10 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG();
+	EquivalencesDAG<DataRangeExpression> getDataRangeDAG();
+
+
+	ImmutableOntologyVocabulary getVocabulary();
+
+
 }

@@ -21,24 +21,11 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  */
 
 
-import it.unibz.inf.ontop.spec.ontology.BinaryAxiom;
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyRangeExpression;
-import it.unibz.inf.ontop.spec.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.spec.ontology.DataSomeValuesFrom;
-import it.unibz.inf.ontop.spec.ontology.Datatype;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.*;
 
 import java.util.Collections;
 import java.util.Comparator;
 
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -60,6 +47,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private final EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG;
 	private final EquivalencesDAGImpl<ClassExpression> classDAG;
 	private final EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG;
+	private final ImmutableOntologyVocabulary voc;
 
 	/**
 	 * constructs a TBox reasoner from an ontology
@@ -67,6 +55,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 
 	public static TBoxReasoner create(Ontology onto) {
+
 		final DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> objectPropertyGraph =
 				getObjectPropertyGraph(onto);
 		final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG =
@@ -88,7 +77,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		chooseClassRepresentatives(classDAG, objectPropertyDAG, dataPropertyDAG);
 		chooseDataRangeRepresentatives(dataRangeDAG, dataPropertyDAG);
 
-		TBoxReasonerImpl r = new TBoxReasonerImpl(classDAG, dataRangeDAG, objectPropertyDAG, dataPropertyDAG);
+		TBoxReasonerImpl r = new TBoxReasonerImpl(classDAG, dataRangeDAG, objectPropertyDAG, dataPropertyDAG, onto.getVocabulary());
 //		if (equivalenceReduced) {
 //			r = getEquivalenceSimplifiedReasoner(r);
 //		}
@@ -105,11 +94,13 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private TBoxReasonerImpl(EquivalencesDAGImpl<ClassExpression> classDAG,
 							 EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG,
 							 EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG,
-							 EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG) {
+							 EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG,
+							 ImmutableOntologyVocabulary voc) {
 		this.objectPropertyDAG = objectPropertyDAG;
 		this.dataPropertyDAG = dataPropertyDAG;
 		this.classDAG = classDAG;
 		this.dataRangeDAG = dataRangeDAG;
+		this.voc = voc;
 	}
 
 	@Override
@@ -118,6 +109,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 
 
+	@Override
+	public ImmutableOntologyVocabulary getVocabulary() { return voc; }
 
 
 	/**
@@ -483,7 +476,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		// TODO: a proper implementation is in order here
 
 		return new TBoxReasonerImpl(classDAG, (EquivalencesDAGImpl<DataRangeExpression>)reasoner.getDataRangeDAG(),
-				objectPropertyDAG, dataPropertyDAG);
+				objectPropertyDAG, dataPropertyDAG, reasoner.getVocabulary());
 	}
 
 

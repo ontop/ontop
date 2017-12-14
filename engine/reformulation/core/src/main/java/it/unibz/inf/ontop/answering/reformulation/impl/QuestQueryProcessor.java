@@ -83,7 +83,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.sigma = LinearInclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
 		this.rewriter = queryRewriter;
-		this.rewriter.setTBox(saturatedTBox, obdaSpecification.getVocabulary(), sigma);
+		this.rewriter.setTBox(saturatedTBox, sigma);
 
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 

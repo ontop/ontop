@@ -37,5 +37,5 @@ public interface QueryRewriter {
 	 * @param ontology
 	 * @param sigma
 	 */
-	void setTBox(TBoxReasoner ontology, ImmutableOntologyVocabulary voc, LinearInclusionDependencies sigma);
+	void setTBox(TBoxReasoner ontology, LinearInclusionDependencies sigma);
 }

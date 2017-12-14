@@ -21,13 +21,7 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.*;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -46,12 +40,14 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	private final EquivalencesDAG<DataPropertyExpression> dataPropertyDAG;
 	private final EquivalencesDAG<ClassExpression> classDAG;
 	private final EquivalencesDAG<DataRangeExpression> dataRangeDAG;
+	private final ImmutableOntologyVocabulary voc;
 
 	public TestTBoxReasonerImpl_Named(TBoxReasoner reasoner) {
 		this.objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
 		this.dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(reasoner.getDataPropertyDAG());
 		this.classDAG = new EquivalencesDAGImpl<ClassExpression>(reasoner.getClassDAG());
 		this.dataRangeDAG = new EquivalencesDAGImpl<DataRangeExpression>(reasoner.getDataRangeDAG());
+		this.voc = reasoner.getVocabulary();
 	}
 
 
@@ -92,8 +88,11 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 		return dataRangeDAG;
 	}
 
+	@Override
+	public ImmutableOntologyVocabulary getVocabulary() { return voc; }
+
 	/**
-	 * Reconstruction of the Named DAG (as EquivalncesDAG) from a DAG
+	 * Reconstruction of the Named DAG (as EquivalencesDAG) from a DAG
 	 *
 	 * @param <T> Property or BasicClassDescription
 	 */
@@ -208,4 +207,6 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 			return null;
 		}
 	}
+
+
 }

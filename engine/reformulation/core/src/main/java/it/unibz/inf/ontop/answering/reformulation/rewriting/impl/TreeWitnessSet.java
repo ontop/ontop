@@ -62,9 +62,9 @@ public class TreeWitnessSet {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
 	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
 	
-	private TreeWitnessSet(QueryConnectedComponent cc, TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, Collection<TreeWitnessGenerator> allTWgenerators) {
+	private TreeWitnessSet(QueryConnectedComponent cc, TBoxReasoner reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
 		this.cc = cc;
-		this.cache = new QueryConnectedComponentCache(reasoner, voc);
+		this.cache = new QueryConnectedComponentCache(reasoner);
 		this.allTWgenerators = allTWgenerators;
 	}
 	
@@ -76,8 +76,8 @@ public class TreeWitnessSet {
 		return hasConflicts;
 	}
 	
-	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, Collection<TreeWitnessGenerator> generators) {		
-		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, voc, generators);
+	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TBoxReasoner reasoner, Collection<TreeWitnessGenerator> generators) {
+		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, generators);
 		
 		if (!cc.isDegenerate())
 			treewitnesses.computeTreeWitnesses();
@@ -368,11 +368,9 @@ public class TreeWitnessSet {
 		private final Map<Term, Intersection<ClassExpression>> conceptsCache = new HashMap<>();
 
 		private final TBoxReasoner reasoner;
-		private final ImmutableOntologyVocabulary voc;
-		
-		private QueryConnectedComponentCache(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
+
+		private QueryConnectedComponentCache(TBoxReasoner reasoner) {
 			this.reasoner = reasoner;
-			this.voc = voc;
 		}
 		
 		public Intersection<ClassExpression> getTopClass() {
@@ -392,8 +390,8 @@ public class TreeWitnessSet {
 				 }
 				 
 				 Predicate pred = a.getFunctionSymbol();
-				 if (voc.containsClass(pred.getName())) 
-					 subc.intersectWith(voc.getClass(pred.getName()));
+				 if (reasoner.getVocabulary().containsClass(pred.getName()))
+					 subc.intersectWith(reasoner.getVocabulary().getClass(pred.getName()));
 				 else
 					 subc.setToBottom();
 				 if (subc.isBottom())
@@ -427,8 +425,8 @@ public class TreeWitnessSet {
 					}
 					else {
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-						if (voc.containsObjectProperty(a.getFunctionSymbol().getName())) {
-							ObjectPropertyExpression prop = voc.getObjectProperty(a.getFunctionSymbol().getName());
+						if (reasoner.getVocabulary().containsObjectProperty(a.getFunctionSymbol().getName())) {
+							ObjectPropertyExpression prop = reasoner.getVocabulary().getObjectProperty(a.getFunctionSymbol().getName());
 							if (!root.equals(a.getTerm(0)))
 									prop = prop.getInverse();
 							properties.intersectWith(prop);

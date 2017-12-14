@@ -312,12 +312,6 @@ public class OntologyImpl implements Ontology {
 		}
 
 		@Override
-		public boolean isEmpty() {
-			// the minimum size is 2 because of \top / \bopttom
-			return concepts.size() == 2 && objectProperties.size() == 2 && dataProperties.size() == 2;
-		}
-
-		@Override
 		public Datatype getDatatype(String uri) {
 			Datatype dt = OWL2QLDatatypes.get(uri);
 			if (dt == null)

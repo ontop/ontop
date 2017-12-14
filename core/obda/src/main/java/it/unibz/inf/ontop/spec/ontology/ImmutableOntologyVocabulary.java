@@ -12,7 +12,7 @@ public interface ImmutableOntologyVocabulary {
 	 * @throws RuntimeException if the class has not been declared
 	 */
 	
-	public OClass getClass(String uri);
+	OClass getClass(String uri);
 	
 
 	/**
@@ -23,7 +23,7 @@ public interface ImmutableOntologyVocabulary {
 	 * @throws RuntimeException if the object property has not been declared
 	 */
 	
-	public ObjectPropertyExpression getObjectProperty(String uri);
+	ObjectPropertyExpression getObjectProperty(String uri);
 	
 
 	/**
@@ -34,7 +34,7 @@ public interface ImmutableOntologyVocabulary {
 	 * @throws RuntimeException if the data property has not been declared
 	 */
 	
-	public DataPropertyExpression getDataProperty(String uri);
+	DataPropertyExpression getDataProperty(String uri);
 
 	/**
 	 * check whether the annotation property has been declared and return the class object
@@ -44,10 +44,10 @@ public interface ImmutableOntologyVocabulary {
 	 * @throws RuntimeException if the data property has not been declared
 	 */
 
-	public AnnotationProperty getAnnotationProperty(String uri);
+	AnnotationProperty getAnnotationProperty(String uri);
 	
 	
-	public Datatype getDatatype(String uri);
+	Datatype getDatatype(String uri);
 	
 	
 	/**
@@ -57,7 +57,7 @@ public interface ImmutableOntologyVocabulary {
 	 * @return
 	 */
 
-	public boolean containsClass(String uri);
+	boolean containsClass(String uri);
 
 	/**
 	 * check whether the object property has been declared 
@@ -66,7 +66,7 @@ public interface ImmutableOntologyVocabulary {
 	 * @return
 	 */
 	
-	public boolean containsObjectProperty(String uri);
+	boolean containsObjectProperty(String uri);
 	
 	/**
 	 * check whether the data property has been declared 
@@ -75,7 +75,7 @@ public interface ImmutableOntologyVocabulary {
 	 * @return
 	 */
 	
-	public boolean containsDataProperty(String uri);
+	boolean containsDataProperty(String uri);
 
 	/**
 	 * check whether the data property has been declared
@@ -84,7 +84,7 @@ public interface ImmutableOntologyVocabulary {
 	 * @return
 	 */
 
-	public boolean containsAnnotationProperty(String uri);
+	boolean containsAnnotationProperty(String uri);
 
 	/**
 	 * return all declared classes
@@ -92,7 +92,7 @@ public interface ImmutableOntologyVocabulary {
 	 * @return
 	 */	
 	
-	public Collection<OClass> getClasses();
+	Collection<OClass> getClasses();
 	
 	/**
 	 * return all declared object properties
@@ -100,7 +100,7 @@ public interface ImmutableOntologyVocabulary {
 	 * @return
 	 */
 	
-	public Collection<ObjectPropertyExpression> getObjectProperties();
+	Collection<ObjectPropertyExpression> getObjectProperties();
 	
 	/**
 	 * return all declared data properties
@@ -108,7 +108,7 @@ public interface ImmutableOntologyVocabulary {
 	 * @return
 	 */
 	
-	public Collection<DataPropertyExpression> getDataProperties();
+	Collection<DataPropertyExpression> getDataProperties();
 
 	/**
 	 * return all declared annotation properties
@@ -116,14 +116,6 @@ public interface ImmutableOntologyVocabulary {
 	 * @return
 	 */
 
-	public Collection<AnnotationProperty> getAnnotationProperties();
+	Collection<AnnotationProperty> getAnnotationProperties();
 
-
-	/**
-	 * check whether the vocabulary is empty (no declared classes, object or data properties)
-	 * 
-	 * @return
-	 */
-
-	public boolean isEmpty();
 }
