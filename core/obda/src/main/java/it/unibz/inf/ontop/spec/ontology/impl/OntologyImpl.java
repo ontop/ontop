@@ -650,11 +650,6 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public Collection<BinaryAxiom<AnnotationProperty>> getSubAnnotationAxioms() {
-		return Collections.unmodifiableList(annotationAxioms);
-	}
-
-	@Override 
 	public Set<ObjectPropertyExpression> getFunctionalObjectProperties() {
 		return Collections.unmodifiableSet(functionalObjectPropertyAxioms);
 	}
