@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
+import it.unibz.inf.ontop.spec.ontology.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,6 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * QueryConnectedComponent represents a connected component of a CQ
@@ -82,7 +85,6 @@ public class QueryConnectedComponent {
 	 * constructor is private as instances created only by the static method getConnectedComponents
 	 * 
 	 * @param edges: a list of edges in the connected component
-	 * @param loop: a loop if the component is degenerate
 	 * @param nonDLAtoms: a list of non-DL atoms in the connected component
 	 * @param terms: terms that are covered by the edges
 	 */
@@ -203,7 +205,7 @@ public class QueryConnectedComponent {
 	 * @return list of connected components
 	 */
 	
-	public static List<QueryConnectedComponent> getConnectedComponents(CQIE cqie) {
+	public static List<QueryConnectedComponent> getConnectedComponents(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, CQIE cqie) {
 
 		Set<Term> headTerms = new HashSet<Term>(cqie.getHead().getTerms());
 
@@ -215,11 +217,11 @@ public class QueryConnectedComponent {
 		Map<Term, Loop> allLoops = new HashMap<Term, Loop>();
 		List<Function> nonDLAtoms = new LinkedList<Function>();
 		
-		for (Function a: cqie.getBody()) {
-			Predicate p = a.getFunctionSymbol();
-			if (a.isDataFunction() && !p.isTriplePredicate()) { // if DL predicates 
-			//if (p.isClass() || p.isObjectProperty() || p.isDataProperty()) { // if DL predicate (throws NullPointerException)
-				Term t0 = a.getTerm(0);				
+		for (Function atom : cqie.getBody()) {
+			Predicate p = atom.getFunctionSymbol();
+			if (atom.isDataFunction() && !p.isTriplePredicate()) { // if DL predicates
+				Function a = getCanonicalForm(reasoner, voc, atom);
+				Term t0 = a.getTerm(0);
 				if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {
 					// proper DL edge between two distinct terms
 					Term t1 = a.getTerm(1);
@@ -240,7 +242,7 @@ public class QueryConnectedComponent {
 			}
 			else { // non-DL precicate
 				//log.debug("NON-DL ATOM {}",  a);
-				nonDLAtoms.add(a);
+				nonDLAtoms.add(atom);
 			}
 		}	
 
@@ -481,5 +483,38 @@ public class QueryConnectedComponent {
 		public int hashCode() {
 			return t0.hashCode() ^ t1.hashCode();
 		}
-	}	
+	}
+
+	private static Function getCanonicalForm(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, Function atom) {
+		Predicate p = atom.getFunctionSymbol();
+
+		// the contains tests are inefficient, but tests fails without them
+		// p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
+		if (/*p.isClass()*/ (p.getArity() == 1) && voc.containsClass(p.getName())) {
+			OClass c = voc.getClass(p.getName());
+			OClass equivalent = (OClass)reasoner.getClassDAG().getCanonicalForm(c);
+			if (equivalent != null && !equivalent.equals(c)) {
+				return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
+			}
+		}
+		else if (/*p.isObjectProperty()*/ (p.getArity() == 2) && voc.containsObjectProperty(p.getName())) {
+			ObjectPropertyExpression ope = voc.getObjectProperty(p.getName());
+			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyDAG().getCanonicalForm(ope);
+			if (equivalent != null && !equivalent.equals(ope)) {
+				if (!equivalent.isInverse())
+					return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
+				else
+					return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+			}
+		}
+		else if (/*p.isDataProperty()*/ (p.getArity() == 2)  && voc.containsDataProperty(p.getName())) {
+			DataPropertyExpression dpe = voc.getDataProperty(p.getName());
+			DataPropertyExpression equivalent = reasoner.getDataPropertyDAG().getCanonicalForm(dpe);
+			if (equivalent != null && !equivalent.equals(dpe)) {
+				return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
+			}
+		}
+		return atom;
+	}
+
 }

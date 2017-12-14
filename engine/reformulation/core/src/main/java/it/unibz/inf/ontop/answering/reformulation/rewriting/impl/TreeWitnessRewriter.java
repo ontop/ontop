@@ -285,13 +285,13 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	public DatalogProgram rewrite(DatalogProgram dp) {
 		
 		double startime = System.currentTimeMillis();
-		
+
 		List<CQIE> outputRules = new LinkedList<>();
 		DatalogProgram ccDP = null;
 		DatalogProgram edgeDP = DATALOG_FACTORY.getDatalogProgram();
 
 		for (CQIE cqie : dp.getRules()) {
-			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(cqie);	
+			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, voc, cqie);
 			Function cqieAtom = cqie.getHead();
 		
 			if (ccs.size() == 1) {
