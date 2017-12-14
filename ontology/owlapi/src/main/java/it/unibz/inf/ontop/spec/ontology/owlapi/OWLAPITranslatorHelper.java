@@ -15,13 +15,13 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class OWLAPITranslatorHelper {
 
-	private final ImmutableOntologyVocabulary voc;
+	private final TBoxReasoner reasoner;
 	
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
 	
-	public OWLAPITranslatorHelper(ImmutableOntologyVocabulary voc) {
-		this.voc = voc;
+	public OWLAPITranslatorHelper(TBoxReasoner reasoner) {
+		this.reasoner = reasoner;
 	}
 
 	
@@ -31,7 +31,7 @@ public class OWLAPITranslatorHelper {
 			throw new OWLAPITranslatorOWL2QL.TranslationException("complex class expressions are not supported");
 		
 		OWLClass namedclass = (OWLClass) classExpression;
-		OClass concept = voc.getClass(namedclass.getIRI().toString());
+		OClass concept = reasoner.getVocabulary().getClass(namedclass.getIRI().toString());
 		
 		URIConstant c = getIndividual(ax.getIndividual());
 
@@ -89,7 +89,7 @@ public class OWLAPITranslatorHelper {
 	
 	public OClass getOClass(OWLClass clExpression) {
 		String uri = clExpression.getIRI().toString();
-		return voc.getClass(uri);		
+		return reasoner.getVocabulary().getClass(uri);
 	}
 	
 	
@@ -104,13 +104,13 @@ public class OWLAPITranslatorHelper {
 	public ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression opeExpression) {
 
 		if (opeExpression instanceof OWLObjectProperty) 
-			return voc.getObjectProperty(opeExpression.asOWLObjectProperty().getIRI().toString());
+			return reasoner.getVocabulary().getObjectProperty(opeExpression.asOWLObjectProperty().getIRI().toString());
 	
 		else {
 			assert(opeExpression instanceof OWLObjectInverseOf);
 			
 			OWLObjectInverseOf aux = (OWLObjectInverseOf) opeExpression;
-			return voc.getObjectProperty(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
+			return reasoner.getVocabulary().getObjectProperty(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
 		} 			
 	}
 
@@ -125,7 +125,7 @@ public class OWLAPITranslatorHelper {
 	
 	public DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression dpeExpression)  {
 		assert (dpeExpression instanceof OWLDataProperty); 
-		return voc.getDataProperty(dpeExpression.asOWLDataProperty().getIRI().toString());
+		return reasoner.getVocabulary().getDataProperty(dpeExpression.asOWLDataProperty().getIRI().toString());
 	}
 
 
@@ -137,7 +137,7 @@ public class OWLAPITranslatorHelper {
 	 */
 
 	public AnnotationProperty getPropertyExpression(OWLAnnotationProperty ap)  {
-		return voc.getAnnotationProperty(ap.getIRI().toString());
+		return reasoner.getVocabulary().getAnnotationProperty(ap.getIRI().toString());
 	}
 
 

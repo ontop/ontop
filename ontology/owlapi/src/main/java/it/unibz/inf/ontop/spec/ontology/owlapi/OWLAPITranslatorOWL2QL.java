@@ -2,10 +2,7 @@ package it.unibz.inf.ontop.spec.ontology.owlapi;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.*;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
@@ -45,7 +42,8 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	public OWLAPITranslatorOWL2QL(Collection<OWLOntology> owls) {
 		dl_onto = createOntology(owls);
-		helper = new OWLAPITranslatorHelper(dl_onto.getVocabulary());
+		// creates dummy reasoner - may be slow
+		helper = new OWLAPITranslatorHelper(TBoxReasonerImpl.create(dl_onto));
 	}
 	
 	public Ontology getOntology() {

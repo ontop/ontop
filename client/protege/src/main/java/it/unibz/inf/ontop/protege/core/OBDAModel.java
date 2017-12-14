@@ -297,30 +297,12 @@ public class OBDAModel {
         mappingListeners.add(mlistener);
     }
 
-    private void fireSourceAdded(OBDADataSource source) {
-        for (OBDAModelListener listener : sourceListeners) {
-            listener.datasourceAdded(source);
-        }
-    }
-
-    private void fireSourceRemoved(OBDADataSource source) {
-        for (OBDAModelListener listener : sourceListeners) {
-            listener.datasourceDeleted(source);
-        }
-    }
-
     /**
      * TODO: make it private
      */
     public void fireSourceParametersUpdated() {
         for (OBDAModelListener listener : sourceListeners) {
             listener.datasourceParametersUpdated();
-        }
-    }
-
-    private void fireSourceNameUpdated(URI old, OBDADataSource newDataSource) {
-        for (OBDAModelListener listener : sourceListeners) {
-            listener.datasourceUpdated(old.toString(), newDataSource);
         }
     }
 
@@ -433,10 +415,7 @@ public class OBDAModel {
         return source;
     }
 
-    public OntologyVocabulary getCurrentVocabulary() {
-        return currentMutableVocabulary;
-
-    }
+    public OntologyVocabulary getCurrentVocabulary() { return currentMutableVocabulary; }
 
     private static <I> Collector<I, ?, LinkedHashMap<String, SQLPPTriplesMap>> collectTriplesMaps(
             java.util.function.Function<I, String> keyFunction,

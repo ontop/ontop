@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ import java.util.List;
 public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	
 	// the ontology vocabulary of the OBDA model
-	private final ImmutableOntologyVocabulary voc;
+	private final OntologyVocabulary voc;
 
 	/** List of invalid predicates */
 	private List<String> invalidPredicates = new ArrayList<>();
@@ -44,7 +45,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
     @SuppressWarnings("unused")
     Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public TargetQueryValidator(ImmutableOntologyVocabulary voc) {
+	public TargetQueryValidator(OntologyVocabulary voc) {
 		this.voc = voc;
 	}
 	
