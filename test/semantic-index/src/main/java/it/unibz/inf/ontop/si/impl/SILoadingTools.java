@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.si.repository.impl.RDBMSSIRepositoryManager;
@@ -43,21 +42,20 @@ class SILoadingTools {
     private static final Logger LOG = LoggerFactory.getLogger(OntopSemanticIndexLoaderImpl.class);
     private static final String DEFAULT_USER = "sa";
     private static final String DEFAULT_PASSWORD = "";
-    private static final boolean OPTIMIZE_EQUIVALENCES = true;;
 
     static class RepositoryInit {
         final SIRepositoryManager dataRepository;
         final Optional<Set<OWLOntology>> ontologyClosure;
         final String jdbcUrl;
-        final ImmutableOntologyVocabulary vocabulary;
+        final TBoxReasoner reasoner;
         final Connection localConnection;
 
         private RepositoryInit(SIRepositoryManager dataRepository, Optional<Set<OWLOntology>> ontologyClosure, String jdbcUrl,
-                               ImmutableOntologyVocabulary vocabulary, Connection localConnection) {
+                               TBoxReasoner reasoner, Connection localConnection) {
             this.dataRepository = dataRepository;
             this.ontologyClosure = ontologyClosure;
             this.jdbcUrl = jdbcUrl;
-            this.vocabulary = vocabulary;
+            this.reasoner = reasoner;
             this.localConnection = localConnection;
         }
     }
@@ -92,7 +90,7 @@ class SILoadingTools {
 
             // Creating the ABox repository
             dataRepository.createDBSchemaAndInsertMetadata(localConnection);
-            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner.getVocabulary(), localConnection);
+            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner, localConnection);
 
         } catch (SQLException e) {
             throw new SemanticIndexException(e.getMessage());

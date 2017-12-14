@@ -32,88 +32,85 @@ public interface Ontology extends Serializable {
 	 * @return ontology vocabulary 
 	 */
 	
-	public ImmutableOntologyVocabulary getVocabulary();
+	ImmutableOntologyVocabulary getVocabulary();
 	
 	// SUBCLASS/PROPERTY
 
-	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) throws InconsistentOntologyException;
+	void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) throws InconsistentOntologyException;
 
-	public void addDataPropertyRangeAxiom(DataPropertyRangeExpression range, Datatype datatype) throws InconsistentOntologyException;
+	void addDataPropertyRangeAxiom(DataPropertyRangeExpression range, Datatype datatype) throws InconsistentOntologyException;
 	
-	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) throws InconsistentOntologyException;
+	void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) throws InconsistentOntologyException;
 
-	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including) throws InconsistentOntologyException;
+	void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including) throws InconsistentOntologyException;
 
-	public void addSubPropertyOfAxiom(AnnotationProperty included, AnnotationProperty including);
+	void addSubPropertyOfAxiom(AnnotationProperty included, AnnotationProperty including);
 
-	public Collection<BinaryAxiom<ClassExpression>> getSubClassAxioms();
+	Collection<BinaryAxiom<ClassExpression>> getSubClassAxioms();
 
-	public Collection<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms();
+	Collection<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms();
 	
-	public Collection<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
+	Collection<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
 
-	public Collection<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
-
-	public Collection<BinaryAxiom<AnnotationProperty>> getSubAnnotationAxioms();
-
+	Collection<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
 
 
 	// DISJOINTNESS
 	
-	public void addDisjointClassesAxiom(ClassExpression... classes) throws InconsistentOntologyException;
+	void addDisjointClassesAxiom(ClassExpression... classes) throws InconsistentOntologyException;
 
-	public void addDisjointObjectPropertiesAxiom(ObjectPropertyExpression... properties) throws InconsistentOntologyException;
+	void addDisjointObjectPropertiesAxiom(ObjectPropertyExpression... properties) throws InconsistentOntologyException;
 	
-	public void addDisjointDataPropertiesAxiom(DataPropertyExpression... properties) throws InconsistentOntologyException;
+	void addDisjointDataPropertiesAxiom(DataPropertyExpression... properties) throws InconsistentOntologyException;
 	
 	
-	public Collection<NaryAxiom<ClassExpression>> getDisjointClassesAxioms();
+	Collection<NaryAxiom<ClassExpression>> getDisjointClassesAxioms();
 	
-	public Collection<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms();
+	Collection<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms();
 
-	public Collection<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
+	Collection<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
 	
 	
 	// REFLEXIVITY / IRREFLEXIVITY
 	
-	public void addReflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException;
+	void addReflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException;
 
-	public void addIrreflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException;
+	void addIrreflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException;
 	
-	public Collection<ObjectPropertyExpression> getReflexiveObjectPropertyAxioms();
+	Collection<ObjectPropertyExpression> getReflexiveObjectPropertyAxioms();
 	
-	public Collection<ObjectPropertyExpression> getIrreflexiveObjectPropertyAxioms();
+	Collection<ObjectPropertyExpression> getIrreflexiveObjectPropertyAxioms();
 	
 	// FUNCTIONALITY 
 	
 	
-	public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop);
+	void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop);
 
-	public void addFunctionalDataPropertyAxiom(DataPropertyExpression prop);
+	void addFunctionalDataPropertyAxiom(DataPropertyExpression prop);
 	
-	public Set<ObjectPropertyExpression> getFunctionalObjectProperties();
+	Set<ObjectPropertyExpression> getFunctionalObjectProperties();
 
-	public Set<DataPropertyExpression> getFunctionalDataProperties();
+	Set<DataPropertyExpression> getFunctionalDataProperties();
 	
 	
 	// ASSERTIONS
 	
-	public void addClassAssertion(ClassAssertion assertion);
+	void addClassAssertion(ClassAssertion assertion);
 
-	public void addObjectPropertyAssertion(ObjectPropertyAssertion assertion);
+	void addObjectPropertyAssertion(ObjectPropertyAssertion assertion);
 
-	public void addDataPropertyAssertion(DataPropertyAssertion assertion);
+	void addDataPropertyAssertion(DataPropertyAssertion assertion);
 
-	public void addAnnotationAssertion(AnnotationAssertion assertion);
+	void addAnnotationAssertion(AnnotationAssertion assertion);
 
 	
-	public List<ClassAssertion> getClassAssertions();
+	List<ClassAssertion> getClassAssertions();
 
-	public List<ObjectPropertyAssertion> getObjectPropertyAssertions();
+	List<ObjectPropertyAssertion> getObjectPropertyAssertions();
 	
-	public List<DataPropertyAssertion> getDataPropertyAssertions();
+	List<DataPropertyAssertion> getDataPropertyAssertions();
 
-	public List<AnnotationAssertion> getAnnotationAssertions();
+	List<AnnotationAssertion> getAnnotationAssertions();
 
 
 
@@ -126,7 +123,7 @@ public interface Ontology extends Serializable {
 	 *
 	 */
 
-	public ObjectPropertyExpression createAuxiliaryObjectProperty();
+	ObjectPropertyExpression createAuxiliaryObjectProperty();
 	
 	
 	/**
@@ -136,6 +133,6 @@ public interface Ontology extends Serializable {
 	 * @return
 	 */
 	
-	public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties();
+	Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties();
 
 }

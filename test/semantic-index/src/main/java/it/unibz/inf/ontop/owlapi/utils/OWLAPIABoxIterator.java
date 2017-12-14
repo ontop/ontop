@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.owlapi.utils;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
+import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorHelper;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL.TranslationException;
 import org.semanticweb.owlapi.model.*;
@@ -49,8 +50,8 @@ public class OWLAPIABoxIterator implements Iterator<Assertion> {
 	
 	private final OWLAPITranslatorHelper helper;
 
-	public OWLAPIABoxIterator(Collection<OWLOntology> ontologies, ImmutableOntologyVocabulary voc) {
-		helper = new OWLAPITranslatorHelper(voc);
+	public OWLAPIABoxIterator(Collection<OWLOntology> ontologies, TBoxReasoner reasoner) {
+		helper = new OWLAPITranslatorHelper(reasoner.getVocabulary());
 		ontologiesIterator = ontologies.iterator();
 		if (ontologiesIterator.hasNext()) 
 			owlaxiomIterator = ontologiesIterator.next().getAxioms().iterator();

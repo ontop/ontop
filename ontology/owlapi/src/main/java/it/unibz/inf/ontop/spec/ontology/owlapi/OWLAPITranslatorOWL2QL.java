@@ -48,10 +48,6 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		helper = new OWLAPITranslatorHelper(dl_onto.getVocabulary());
 	}
 	
-	public ImmutableOntologyVocabulary getVocabulary() {
-		return dl_onto.getVocabulary();
-	}
-	
 	public Ontology getOntology() {
 		return dl_onto;
 	}
@@ -1136,6 +1132,4 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		}
 		return ofac.createOntology(vb);		
 	}
-	
-	
 }
