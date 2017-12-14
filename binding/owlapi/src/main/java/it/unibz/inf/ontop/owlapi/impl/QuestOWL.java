@@ -20,25 +20,21 @@ package it.unibz.inf.ontop.owlapi.impl;
  * #L%
  */
 
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
+import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.reformulation.input.AskQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
+import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
-import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.answering.connection.OntopConnection;
-import it.unibz.inf.ontop.answering.connection.OntopStatement;
-import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -69,6 +65,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	private final ReasonerProgressMonitor pm;
 
 	private boolean prepared = false;
+	private boolean isOntopConnectionInitialized = false;
 
 	private boolean questready = false;
 	
@@ -85,10 +82,6 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	/* The merge and translation of all loaded ontologies */
 	// TODO: see if still relevant
 	private Ontology translatedOntologyMerge;
-
-	private final OBDASpecification obdaSpecification;
-
-	private final ExecutorRegistry executorRegistry;
 
 	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
@@ -111,8 +104,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	/* Used to enable use of same as in mappings. */
 
-	private final OntopSystemFactory engineFactory;
-	private OntopQueryEngine queryEngine;
+	private final OntopQueryEngine queryEngine;
 	private final InputQueryFactory inputQueryFactory;
 	
 	/* Used to signal whether to apply the user constraints above */
@@ -139,27 +131,23 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
         this.structuralReasoner = new StructuralReasoner(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		executorRegistry = ontopConfiguration.getExecutorRegistry();
-
-		Injector injector = ontopConfiguration.getInjector();
-		this.engineFactory = injector.getInstance(OntopSystemFactory.class);
-
 		try {
-			obdaSpecification = ontopConfiguration.loadSpecification();
-			/**
+			queryEngine = ontopConfiguration.loadQueryEngine();
+			/*
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */
 		} catch (OBDASpecificationException e) {
 			throw new IllegalConfigurationException(e, owlConfiguration);
 		}
 
-		this.inputQueryFactory = injector.getInstance(InputQueryFactory.class);
+		inputQueryFactory = ontopConfiguration.getInputQueryFactory();
 
 		pm = owlConfiguration.getProgressMonitor();
 
 		version = extractVersion();
 
 		prepareReasoner();
+
     }
 
 
@@ -197,26 +185,19 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	private void prepareConnector() throws OntopConnectionException {
 
-		try {
-			if (queryEngine != null)
-				queryEngine.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
+		if (!isOntopConnectionInitialized) {
+			log.info("Initializing a new Ontop instance...");
+			queryEngine.connect();
+			isOntopConnectionInitialized = true;
 		}
-
-		log.debug("Initializing a new Quest instance...");
-
 
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
 
-		queryEngine = engineFactory.create(obdaSpecification, executorRegistry);
-		queryEngine.connect();
-
 		// Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 
 		questready = true;
-		log.debug("Ontop has completed the setup and it is ready for query answering!");
+
 	}
 
 	@Override

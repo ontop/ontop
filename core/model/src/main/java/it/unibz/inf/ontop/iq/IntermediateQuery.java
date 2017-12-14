@@ -23,7 +23,7 @@ public interface IntermediateQuery {
 
     DBMetadata getDBMetadata();
 
-    ConstructionNode getRootConstructionNode();
+    QueryNode getRootNode();
 
     ImmutableList<QueryNode> getNodesInBottomUpOrder();
 

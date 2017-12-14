@@ -22,49 +22,33 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
-import eu.optique.r2rml.api.model.ObjectMap;
-import eu.optique.r2rml.api.model.PredicateMap;
-import eu.optique.r2rml.api.model.PredicateObjectMap;
-import eu.optique.r2rml.api.model.SubjectMap;
-import eu.optique.r2rml.api.model.Template;
-import eu.optique.r2rml.api.model.TermMap;
-import eu.optique.r2rml.api.model.TriplesMap;
+import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Term;
-import org.apache.commons.rdf.api.BlankNodeOrIRI;
-import org.apache.commons.rdf.api.Graph;
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.Literal;
-import org.apache.commons.rdf.api.RDFTerm;
+import org.apache.commons.rdf.api.*;
 import org.eclipse.rdf4j.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class R2RMLParser {
 
 	List<Predicate> classPredicates;
 	List<Resource> joinPredObjNodes;
 
-	String parsedString = "";
-	String subjectString = "";
-	String objectString = "";
+
     RDF4JR2RMLMappingManager mapManager;
 	Logger logger = LoggerFactory.getLogger(R2RMLParser.class);
 
@@ -307,29 +291,49 @@ public class R2RMLParser {
 			// } catch (IllegalArgumentException e){
 			//
 			// }
-            String obj = constantObj.toString();
 
 			// if the literal has a language property or a datatype property we
 			// create the function object later
+
 			if (lan != null || datatype != null) {
-				objectAtom = TERM_FACTORY.getConstantLiteral(((Literal) constantObj).getLexicalForm());
+				ValueConstant constantLiteral = TERM_FACTORY.getConstantLiteral(((Literal) constantObj).getLexicalForm());
+				objectAtom = constantLiteral;
 
 			} else {
-//				Term newlit = TERM_FACTORY.getConstantLiteral( ((Literal) constantObj).getLexicalForm());
-//
-//				if (obj.startsWith("http://")) {
-//					objectAtom = TERM_FACTORY.getUriTemplate(newlit);
-//				} else {
-//					objectAtom = TERM_FACTORY.getTypedTerm(newlit, COL_TYPE.LITERAL); // .RDFS_LITERAL;
-//				}
 
 				if (constantObj instanceof Literal){
-                    objectAtom = TERM_FACTORY.getImmutableTypedTerm(
-                    		TERM_FACTORY.getConstantLiteral( ((Literal) constantObj).getLexicalForm()),
-							COL_TYPE.LITERAL); // .RDFS_LITERAL;
+
+					ValueConstant constantLiteral = TERM_FACTORY.getConstantLiteral(((Literal) constantObj).getLexicalForm());
+					Literal constantLit1 = (Literal) constantObj;
+
+					String lanConstant = om.getLanguageTag();
+					IRI datatypeConstant = constantLit1.getDatatype();
+
+					// we check if it is a literal with language tag
+
+					if (lanConstant != null) {
+						objectAtom = TERM_FACTORY.getImmutableTypedTerm(constantLiteral, lanConstant);
+					}
+
+					// we check if it is a typed literal
+					else if (datatypeConstant != null) {
+						Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(datatypeConstant.getIRIString());
+						if (!type.isPresent()) {
+							// throw new RuntimeException("Unsupported datatype: " +
+							// datatype.toString());
+							logger.warn("Unsupported datatype will not be converted: "
+									+ datatypeConstant.toString());
+						} else {
+							objectAtom = TERM_FACTORY.getImmutableTypedTerm(constantLiteral, type.get());
+						}
+					}
+					else {
+
+						objectAtom = constantLiteral;
+								 // .RDFS_LITERAL;
+					}
                 } else if (constantObj instanceof IRI){
-                    objectAtom = TERM_FACTORY.getImmutableTypedTerm(
-                    		TERM_FACTORY.getConstantLiteral( ((IRI) constantObj).getIRIString()), COL_TYPE.LITERAL);
+                    objectAtom = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral( ((IRI) constantObj).getIRIString()));
 
                 }
 			}
@@ -402,35 +406,22 @@ public class R2RMLParser {
 
 		if (lan != null) {
 			objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, lan);
-		}else if ((typ.equals(R2RMLVocabulary.literal)) && (concat)){
-			objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, COL_TYPE.LITERAL);
 		}
 
 		// we check if it is a typed literal
 		if (datatype != null) {
-			Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(datatype.toString());
-			if (type == null) {
+			Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(datatype.toString());
+			if (!type.isPresent()) {
 				// throw new RuntimeException("Unsupported datatype: " +
 				// datatype.toString());
 				logger.warn("Unsupported datatype will not be converted: "
 						+ datatype.toString());
 			} else {
-				objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, type);
+				objectAtom = TERM_FACTORY.getImmutableTypedTerm(objectAtom, type.get());
 			}
 		}
 
 		return objectAtom;
-	}
-
-	@Deprecated
-	private Term getConstantObject(String objectString) {
-		if (objectString.startsWith("http:"))
-			return getURIFunction(objectString);
-		else { // literal
-			Constant constt = TERM_FACTORY.getConstantLiteral(objectString);
-			return TERM_FACTORY.getTypedTerm(constt, COL_TYPE.LITERAL);
-
-		}
 	}
 
 	@Deprecated
@@ -610,10 +601,10 @@ public class R2RMLParser {
 			// simple LITERAL
 		case 3:
 			uriTemplate = terms.remove(0);
-			// pred = TYPE_FACTORY.getTypePredicate(); // OBDAVocabulary.RDFS_LITERAL;
+			// pred = TYPE_FACTORY.getTypePredicate(); //
 			// the URI template is always on the first position in the term list
 			// terms.add(0, uriTemplate);
-			return TERM_FACTORY.getImmutableTypedTerm(uriTemplate, COL_TYPE.LITERAL);
+			return TERM_FACTORY.getImmutableTypedTerm(uriTemplate, COL_TYPE.STRING);
 		case 4://concat
 			ImmutableFunctionalTerm f = TERM_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
             for(int j=2;j<terms.size();j++){

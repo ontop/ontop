@@ -29,19 +29,19 @@ public class OntopMappingModule extends OntopAbstractModule {
     protected void configure() {
         bindTMappingExclusionConfig();
         bind(OntopMappingSettings.class).toInstance(configuration.getSettings());
-        bindFromPreferences(MappingNormalizer.class);
-        bindFromPreferences(MappingSaturator.class);
-        bindFromPreferences(MappingCanonicalRewriter.class);
-        bindFromPreferences(Datalog2QueryMappingConverter.class);
-        bindFromPreferences(Mapping2DatalogConverter.class);
-        bindFromPreferences(MappingVocabularyExtractor.class);
-        bindFromPreferences(ABoxFactIntoMappingConverter.class);
-        bindFromPreferences(MappingDatatypeFiller.class);
-        bindFromPreferences(MappingMerger.class);
-        bindFromPreferences(MappingTransformer.class);
-        bindFromPreferences(MappingOntologyComplianceValidator.class);
-        bindFromPreferences(MappingSameAsInverseRewriter.class);
-        bindFromPreferences(MappingEquivalenceFreeRewriter.class);
+        bindFromSettings(MappingNormalizer.class);
+        bindFromSettings(MappingSaturator.class);
+        bindFromSettings(MappingCanonicalRewriter.class);
+        bindFromSettings(Datalog2QueryMappingConverter.class);
+        bindFromSettings(Mapping2DatalogConverter.class);
+        bindFromSettings(MappingVocabularyExtractor.class);
+        bindFromSettings(ABoxFactIntoMappingConverter.class);
+        bindFromSettings(MappingDatatypeFiller.class);
+        bindFromSettings(MappingMerger.class);
+        bindFromSettings(MappingTransformer.class);
+        bindFromSettings(MappingOntologyComplianceValidator.class);
+        bindFromSettings(MappingSameAsInverseRewriter.class);
+        bindFromSettings(MappingEquivalenceFreeRewriter.class);
 
         Module factoryModule = buildFactory(ImmutableList.of(MappingWithProvenance.class),
                 ProvenanceMappingFactory.class);

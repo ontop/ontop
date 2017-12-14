@@ -2,7 +2,8 @@ package it.unibz.inf.ontop.docker;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.answering.reformulation.input.AskQuery;
+import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
@@ -12,24 +13,26 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.utils.querymanager.QueryController;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
-import junit.framework.TestCase;
+import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
+import org.junit.Before;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * Common initialization for many tests
  */
-public abstract class AbstractVirtualModeTest extends TestCase {
+public abstract class AbstractVirtualModeTest {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final String owlFileName;
@@ -45,7 +48,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         this.propertyFileName = this.getClass().getResource(propertyFile).toString();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         // Creating a new instance of the reasoner
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
@@ -203,29 +206,45 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         }
     }
 
-    protected boolean runASKTests(String query) throws Exception {
-        OWLStatement st = conn.createStatement();
-        boolean retval;
+    protected String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
+
+        OntopOWLStatement st = conn.createStatement();
+        String sql;
+
+        int i = 0;
+        List<String> returnedValues = new ArrayList<>();
         try {
-            // FIXME: use propery ask query
+            ExecutableQuery executableQuery = st.getExecutableQuery(query);
+            if (! (executableQuery instanceof SQLExecutableQuery))
+                throw new IllegalStateException("A SQLExecutableQuery was expected");
+            sql = ((SQLExecutableQuery)executableQuery).getSQL();
             TupleOWLResultSet rs = st.executeSelectQuery(query);
-            assertTrue(rs.hasNext());
-            final OWLBindingSet bindingSet = rs.next();
-            OWLLiteral ind1 = bindingSet.getOWLLiteral(1);
-            retval = ind1.parseBoolean();
+            while (rs.hasNext()) {
+                final OWLBindingSet bindingSet = rs.next();
+                OWLLiteral ind1 = bindingSet.getOWLLiteral("v");
+                // log.debug(ind1.toString());
+                if (ind1 != null) {
+                    returnedValues.add(ind1.getLiteral());
+                    System.out.println(ind1.getLiteral());
+                    i++;
+                }
+            }
         } catch (Exception e) {
             throw e;
         } finally {
-            try {
-
-            } catch (Exception e) {
-                st.close();
-                assertTrue(false);
-            }
             conn.close();
             reasoner.dispose();
         }
-        return retval;
+
+        Collections.sort(returnedValues);
+        Collections.sort(expectedValues);
+
+        assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),expectedValues, returnedValues);
+//        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
+//                returnedValues.equals(expectedValues));
+        assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
+
+        return sql;
     }
 
     protected void runQueries(String queryFileName) throws Exception {

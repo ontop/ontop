@@ -187,8 +187,6 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "oreda_phase" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -253,8 +251,6 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "company_phase" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -705,8 +701,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "pm_manhour" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -747,8 +742,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "pm_interval" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -1548,8 +1542,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "water_deferment_rate" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -1562,8 +1555,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "oil_deferment" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -1576,8 +1568,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "water_deferment" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -1618,8 +1609,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "gas_deferment_rate" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -1632,8 +1622,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "deferment_cost" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -1646,8 +1635,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "gas_deferment" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -1660,8 +1648,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "gas_deferment_cost" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -1674,8 +1661,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "total_cost" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -1688,8 +1674,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "oil_deferment_rate" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -1716,8 +1701,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "water_deferment_cost" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -1744,8 +1728,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "oil_deferment_cost" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -1758,8 +1741,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "intervention_cost" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -2565,8 +2547,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "value_numb" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -2663,8 +2644,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "value_numb" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3508,8 +3488,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_patf_pers" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3522,8 +3501,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_downtime" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3564,8 +3542,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_el_manhour" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3578,8 +3555,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_res_diving_vessel" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3592,8 +3568,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_other_manhour" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3606,8 +3581,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_interval" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3632,8 +3606,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_inst_manhour" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3688,8 +3661,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_res_service_vessel" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3716,8 +3688,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "oreda_phase" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3730,8 +3701,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_active_maint" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3744,8 +3714,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_res_drill_rig" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3800,8 +3769,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_res_divers" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3842,8 +3810,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "company_phase" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3868,8 +3835,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_res_rov_rot" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3894,8 +3860,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_mec_manhour" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -3922,8 +3887,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "m_total_manhour" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -4881,8 +4845,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "i_no_of_starts" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -5115,8 +5078,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "i_oper_time" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -5727,8 +5689,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "i_oper_time" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -5769,8 +5730,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "i_oreda_phase" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -5783,8 +5743,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "i_company_phase" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -5797,8 +5756,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "i_no_of_starts" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -6724,8 +6682,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "inv_spec_numb1" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;
@@ -6780,8 +6737,7 @@
                           [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#ObjectMap> ;
                             <http://www.w3.org/ns/r2rml#column>
                                     "inv_spec_numb2" ;
-                            <http://www.w3.org/ns/r2rml#datatype>
-                                    <http://www.w3.org/2000/01/rdf-schema#Literal> ;
+
                             <http://www.w3.org/ns/r2rml#termType>
                                     <http://www.w3.org/ns/r2rml#Literal>
                           ] ;

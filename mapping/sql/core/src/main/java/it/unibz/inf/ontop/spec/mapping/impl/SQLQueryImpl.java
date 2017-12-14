@@ -29,7 +29,7 @@ public class SQLQueryImpl implements OBDASQLQuery {
 	private final String sqlQuery;
 
 	protected SQLQueryImpl(String sqlQuery) {
-		this.sqlQuery = sqlQuery;
+		this.sqlQuery = sqlQuery.replaceAll("(?m)^[ \t]*\r?\n", "");
 	}
 
 	@Override

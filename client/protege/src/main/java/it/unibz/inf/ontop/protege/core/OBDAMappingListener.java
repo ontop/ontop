@@ -38,7 +38,7 @@ public interface OBDAMappingListener extends Serializable {
 	/**
 	 * Called when a mapping has been updated into the currently selected datasource.
 	 */
-	public void mappingUpdated(URI srcid);
+	public void mappingUpdated();
 
 	/**
 	 * Called when the current data sources has changed.

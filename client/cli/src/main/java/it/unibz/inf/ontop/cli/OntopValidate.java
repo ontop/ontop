@@ -3,12 +3,13 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.annotations.Command;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLNamedObject;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -35,12 +36,14 @@ public class OntopValidate extends OntopReasoningCommandBase {
             config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .ontologyFile(owlFile)
                     .r2rmlMappingFile(mappingFile)
+                    .propertyFile(propertiesFile)
                     .build();
         }
         else {
             config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .ontologyFile(owlFile)
                     .nativeOntopMappingFile(mappingFile)
+                    .propertyFile(propertiesFile)
                     .build();
         }
 
@@ -103,6 +106,8 @@ public class OntopValidate extends OntopReasoningCommandBase {
             e.printStackTrace();
             System.exit(1);
         }
+
+        System.out.println("Validation completed");
 
     }
 }

@@ -5,9 +5,9 @@ import org.junit.Test;
 
 
 public class OptiqueIntegrationTest extends AbstractVirtualSesameTest {
-	private static final String owlfile = "/mysql/example/npd-v2-ql_a.owl";
-	private static final String mappingfile = "/mysql/example/npd-v2-ql_a.ttl";
-	private static final String propertyfile = "/mysql/example/npd-v2-ql_a.properties";
+	private static final String owlfile = "/mysql/npd/npd-v2-ql_a.owl";
+	private static final String mappingfile = "/mysql/npd/npd-v2-ql_a.ttl";
+	private static final String propertyfile = "/mysql/npd/npd-v2-ql_a.properties";
 
 	public OptiqueIntegrationTest() {
 		super(owlfile, mappingfile, propertyfile);

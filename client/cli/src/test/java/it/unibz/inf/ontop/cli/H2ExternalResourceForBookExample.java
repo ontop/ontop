@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.cli;
 
 import org.h2.tools.Server;
-import org.junit.Rule;
 import org.junit.rules.ExternalResource;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

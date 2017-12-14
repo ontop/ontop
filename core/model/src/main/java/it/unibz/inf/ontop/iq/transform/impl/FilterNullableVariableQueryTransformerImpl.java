@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
 import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.foldBooleanExpressions;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
@@ -43,8 +44,8 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
 
     @Override
     public IntermediateQuery transform(IntermediateQuery query) throws NotFilterableNullVariableException {
-        ConstructionNode rootNode = query.getRootConstructionNode();
-        ImmutableList<Variable> nullableProjectedVariables = rootNode.getVariables().stream()
+        QueryNode rootNode = query.getRootNode();
+        ImmutableList<Variable> nullableProjectedVariables = query.getProjectionAtom().getVariables().stream()
                 .filter(v -> rootNode.isVariableNullable(query, v))
                 .collect(ImmutableCollectors.toList());
 
@@ -55,11 +56,15 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
         return constructQuery(query, rootNode, filterCondition);
     }
 
-    private ImmutableExpression extractFilteringCondition(IntermediateQuery query, ConstructionNode rootNode,
+    private ImmutableExpression extractFilteringCondition(IntermediateQuery query, QueryNode rootNode,
                                                           ImmutableList<Variable> nullableProjectedVariables)
             throws NotFilterableNullVariableException {
 
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = rootNode.getSubstitution();
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = Optional.of(rootNode)
+                .filter(n -> n instanceof ConstructionNode)
+                .map(n -> (ConstructionNode)n)
+                .map(ConstructionNode::getSubstitution)
+                .orElseGet(SUBSTITUTION_FACTORY::getSubstitution);
 
         Stream<ImmutableExpression> filteringExpressionStream = nullableProjectedVariables.stream()
                 .map(v -> Optional.ofNullable(topSubstitution.get(v))
@@ -82,7 +87,7 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
             throw new UnexpectedTrueExpressionException(nonOptimizedExpression);
     }
 
-    private IntermediateQuery constructQuery(IntermediateQuery query, ConstructionNode rootNode,
+    private IntermediateQuery constructQuery(IntermediateQuery query, QueryNode rootNode,
                                              ImmutableExpression filterCondition) {
         IntermediateQueryBuilder queryBuilder = query.newBuilder();
         queryBuilder.init(query.getProjectionAtom(), rootNode);

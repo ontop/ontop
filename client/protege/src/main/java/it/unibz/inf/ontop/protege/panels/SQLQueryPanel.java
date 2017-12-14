@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
+import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,7 +171,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 				progMonitor.stop();
 				ResultSet set = action.getResult();
 				if (set != null) {
-					IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
+					ResultSetTableModel model = new ResultSetTableModel(set);
 					tblQueryResult.setModel(model);
 					set.close();
 				}
@@ -187,10 +187,10 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 		if (model == null) {
 			return;
 		}
-		if (!(model instanceof IncrementalResultSetTableModel)) {
+		if (!(model instanceof ResultSetTableModel)) {
 			return;
 		}
-		IncrementalResultSetTableModel imodel = (IncrementalResultSetTableModel) model;
+		ResultSetTableModel imodel = (ResultSetTableModel) model;
 		imodel.close();
 	}
 
@@ -252,12 +252,13 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 					try {
 						TableModel oldmodel = tblQueryResult.getModel();
 
-						if ((oldmodel != null) && (oldmodel instanceof IncrementalResultSetTableModel)) {
-							IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) oldmodel;
+						if ((oldmodel != null) && (oldmodel instanceof ResultSetTableModel)) {
+							ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
 							rstm.close();
 						}
 						Connection c = ConnectionTools.getConnection(selectedSource);
 						Statement s = c.createStatement();
+						s.setMaxRows(100);
 						result = s.executeQuery(txtSqlQuery.getText());
 						latch.countDown();
 					} catch (Exception e) {

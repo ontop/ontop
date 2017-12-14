@@ -20,13 +20,12 @@ package it.unibz.inf.ontop.evaluator;
  * #L%
  */
 
+import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.impl.ExpressionNormalizerImpl;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.TermConstants;
-import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
@@ -36,8 +35,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 
 public class ExpressionEvaluator {
@@ -206,7 +205,7 @@ public class ExpressionEvaluator {
 					double valueD = Double.parseDouble(valueString);
 					return TERM_FACTORY.getBooleanConstant(valueD > 0);
 				} 
-				else if (TYPE_FACTORY.isString(p) || TYPE_FACTORY.isLiteral(p)) {
+				else if (TYPE_FACTORY.isString(p)) {
 					// ROMAN (18 Dec 2015): toString() was wrong -- it contains "" and so is never empty
 					return TERM_FACTORY.getBooleanConstant(valueString.length() != 0);
 				}
@@ -223,64 +222,16 @@ public class ExpressionEvaluator {
 	}
 
 	private Term evalOperation(Function term) {
+
 		Predicate pred = term.getFunctionSymbol();
-		if (pred == ExpressionOperation.AND) {
-			return evalAnd(term.getTerm(0), term.getTerm(1));
-		} else if (pred == ExpressionOperation.OR) {
-			return evalOr(term.getTerm(0), term.getTerm(1));
-		} else if (pred == ExpressionOperation.EQ) {
-			return evalEqNeq(term, true);
-		} else if (pred == ExpressionOperation.GT) {
-			return term;
-		} else if (pred == ExpressionOperation.GTE) {
-			return term;
-		} else if (pred == ExpressionOperation.IS_NOT_NULL) {
-			return evalIsNullNotNull(term, false);
-		} else if (pred == ExpressionOperation.IS_NULL) {
-			return evalIsNullNotNull(term, true);
-		} else if (pred == ExpressionOperation.LT) {
-			return term;
-		} else if (pred == ExpressionOperation.LTE) {
-			return term;
-		} else if (pred == ExpressionOperation.NEQ) {
-			return evalEqNeq(term, false);
-		} else if (pred == ExpressionOperation.NOT) {
-			return evalNot(term);
-		} else if (pred == ExpressionOperation.IS_TRUE) {
-			return evalIsTrue(term);
-		} else if (pred == ExpressionOperation.IS_LITERAL) {
-			return evalIsLiteral(term);
-		} else if (pred == ExpressionOperation.IS_BLANK) {
-			return evalIsBlank(term);
-		} else if (pred == ExpressionOperation.IS_IRI) {
-			return evalIsIri(term);
-		}
-		else if (pred == ExpressionOperation.LANGMATCHES) {
-			return evalLangMatches(term);
-		} else if (pred == ExpressionOperation.REGEX) {
-			return evalRegex(term);
-		} else if (pred == ExpressionOperation.SQL_LIKE) {
-				return term;	
-		} else if (pred == ExpressionOperation.STR_STARTS) {
-			return term;
-		} else if (pred == ExpressionOperation.STR_ENDS) {
-			return term;
-		} else if (pred == ExpressionOperation.CONTAINS) {
-			return term;
-		} else if (pred == ExpressionOperation.SPARQL_STR) {
-			return evalStr(term);
-		} else if (pred == ExpressionOperation.REPLACE) {
-			return term;
-		} else if (pred == ExpressionOperation.SPARQL_DATATYPE) {
-			return evalDatatype(term);
-		} 
-		else if (pred == ExpressionOperation.SPARQL_LANG) {
-			return evalLang(term);
-		} 
-		else if (pred == ExpressionOperation.ADD || pred == ExpressionOperation.SUBTRACT
-				 || pred == ExpressionOperation.MULTIPLY || pred == ExpressionOperation.DIVIDE) {
+		ExpressionOperation expressionOperation = ExpressionOperation.valueOf(pred.toString());
+		switch(expressionOperation){
 			
-			Function returnedDatatype = getDatatype(term);
+			case ADD:
+			case SUBTRACT:
+			case MULTIPLY:
+			case DIVIDE:
+				Function returnedDatatype = getDatatype(term);
             //expression has not been removed
             if(returnedDatatype != null &&
                     (returnedDatatype.getFunctionSymbol().equals(pred) || isNumeric((ValueConstant) returnedDatatype.getTerm(0)))){
@@ -288,15 +239,108 @@ public class ExpressionEvaluator {
             }
 			else
 				return TermConstants.FALSE;
-			
-		} 
-		else if (pred == ExpressionOperation.QUEST_CAST) {
-			return term;
-		}	
-		else {
-			throw new RuntimeException(
+			case AND :
+				return evalAnd(term.getTerm(0), term.getTerm(1));
+			case OR:
+				return evalOr(term.getTerm(0), term.getTerm(1));
+			case NOT:
+				return evalNot(term);
+			case EQ:
+				return evalEqNeq(term, true);
+			case NEQ:
+				return evalEqNeq(term, false);
+			case IS_NULL:
+				return evalIsNullNotNull(term, true);
+			case IS_NOT_NULL:
+				return evalIsNullNotNull(term, false);
+			case IS_TRUE:
+				return evalIsTrue(term);
+			case SPARQL_STR:
+				return evalStr(term);
+			case SPARQL_DATATYPE:
+				return evalDatatype(term);
+			case SPARQL_LANG:
+				return evalLang(term);
+			case IS_NUMERIC:
+				return evalIsNumeric(term);
+			case IS_LITERAL:
+				return evalIsLiteral(term);
+			case IS_IRI:
+				return evalIsIri(term);
+			case IS_BLANK:
+				return evalIsBlank(term);
+			case LANGMATCHES:
+				return evalLangMatches(term);
+			case REGEX:
+				return evalRegex(term);
+			case IF_ELSE_NULL:
+				return evalIfElseNull(term);
+			case UUID:
+			case STRUUID:
+			case MINUS:
+			case ABS:
+			case ROUND:
+			case CEIL:
+			case FLOOR:
+			case RAND:
+			case GTE:
+			case GT:
+			case LTE:
+			case LT:
+			case STR_STARTS:
+			case STR_ENDS:
+			case CONTAINS:
+			case STRLEN:
+			case UCASE:
+			case LCASE:
+			case SUBSTR2:
+			case SUBSTR3:
+			case STRBEFORE:
+			case STRAFTER:
+			case REPLACE:
+			case CONCAT:
+			case ENCODE_FOR_URI:
+			case MD5:
+			case SHA1:
+			case SHA512:
+			case SHA256:
+			case NOW:
+			case YEAR:
+			case DAY:
+			case MONTH:
+			case HOURS:
+			case MINUTES:
+			case SECONDS:
+			case TZ:
+			case SQL_LIKE:
+			case QUEST_CAST:
+			case AVG:
+			case SUM:
+			case MAX:
+			case MIN:
+			case COUNT:
+				return term;
+			default:
+					throw new RuntimeException(
 					"Evaluation of expression not supported: "
 							+ term.toString());
+				
+		}
+
+	}
+
+	/*
+	 * Expression evaluator for isNumeric() function
+	 */
+
+	private Term evalIsNumeric(Function term) {
+		Term innerTerm = term.getTerm(0);
+		if (innerTerm instanceof Function) {
+			Function function = (Function) innerTerm;
+			return TERM_FACTORY.getBooleanConstant(function.isDataTypeFunction() && isNumeric(function.getFunctionSymbol()));
+		}
+		else {
+			return term;
 		}
 	}
 
@@ -350,7 +394,7 @@ public class ExpressionEvaluator {
 			Predicate predicate = function.getFunctionSymbol();
 			Term parameter = function.getTerm(0);
 			if (function.isDataTypeFunction()) {
-				if (TYPE_FACTORY.isString(predicate) || TYPE_FACTORY.isLiteral(predicate)) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
+				if (TYPE_FACTORY.isString(predicate) ) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
 					return TERM_FACTORY.getTypedTerm(
 							TERM_FACTORY.getVariable(parameter.toString()), COL_TYPE.STRING);
 				} 
@@ -456,9 +500,9 @@ public class ExpressionEvaluator {
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype(constantValue);
-		if (type != null) {
-			Predicate p = TYPE_FACTORY.getTypePredicate(type);
+		Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(constantValue);
+		if (type.isPresent()) {
+			Predicate p = TYPE_FACTORY.getTypePredicate(type.get());
 			return isNumeric(p);
 		}
 		return false;	
@@ -608,6 +652,19 @@ public class ExpressionEvaluator {
         return expr;
 
     }
+
+	private Term evalIfElseNull(Function term) {
+		Term formerCondition = term.getTerm(0);
+		Term newCondition = eval(formerCondition);
+		if (newCondition.equals(formerCondition))
+			return term;
+		else if (newCondition.equals(TermConstants.FALSE))
+			return TermConstants.NULL;
+		else if (newCondition.equals(TermConstants.TRUE))
+			return term.getTerm(1);
+		else
+			return TERM_FACTORY.getFunction(term.getFunctionSymbol(), newCondition, term.getTerm(1));
+	}
 
 	private Term evalIsNullNotNull(Function term, boolean isnull) {
 		Term innerTerm = term.getTerms().get(0);
@@ -825,7 +882,7 @@ public class ExpressionEvaluator {
 				if (TYPE_FACTORY.isString(pred1) && TYPE_FACTORY.isString(pred2)) { // R: replaced incorrect check
 																		//  pred1 == TERM_FACTORY.getDataTypePredicateLiteral()
 																		// && pred2 == TERM_FACTORY.getDataTypePredicateLiteral())
-																	    // which does not work for LITERAL_LANG
+																	    // which does not work for LANG_STRING
 					/*
 					 * Special code to handle quality of Literals (plain, and
 					 * with language)

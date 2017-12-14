@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.docker.mysql;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 
 public class NestedConcatTest extends AbstractVirtualModeTest {
@@ -34,7 +35,7 @@ public class NestedConcatTest extends AbstractVirtualModeTest {
         super(owlfile, obdafile, propertyfile);
     }
 
-
+    @Test
     public void testConcat() throws Exception {
 
 		/*

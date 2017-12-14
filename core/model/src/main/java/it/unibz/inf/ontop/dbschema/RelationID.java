@@ -42,7 +42,7 @@ public class RelationID {
 	 * @param table
 	 */
 	
-	RelationID(QuotedID schema, QuotedID table) {
+	protected RelationID(QuotedID schema, QuotedID table) {
 		this.schema = schema;
 		this.table = table;
 	}

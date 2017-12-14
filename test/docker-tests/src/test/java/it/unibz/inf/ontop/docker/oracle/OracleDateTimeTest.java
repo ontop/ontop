@@ -24,18 +24,21 @@ package it.unibz.inf.ontop.docker.oracle;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.*;
 
 public class OracleDateTimeTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "/oracle/datetime/dateTimeExampleBooks.owl";
 	static final String obdafile = "/oracle/datetime/dateTimeExampleBooks.obda";
-	static final String propertyfile = "/oracle/oracle.properties";
+	static final String propertyfile = "/oracle/datetime/dateTimeExampleBooks.properties";
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public OracleDateTimeTest() {
@@ -63,6 +66,7 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void testDateTime() throws Exception {
 		OWLStatement st = null;
 		try {
@@ -74,7 +78,7 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 				String date = runTest(st, query, true);
 				log.debug(date);
 				
-				assertEquals("\"2010-02-18T00:02:00.0\"^^xsd:dateTime", date);
+				assertEquals("\"2010-02-18T10:02:30\"^^xsd:dateTime", date);
 			
 		} catch (Exception e) {
 			throw e;

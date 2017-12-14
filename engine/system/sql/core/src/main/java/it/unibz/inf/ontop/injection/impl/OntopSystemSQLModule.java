@@ -16,6 +16,6 @@ public class OntopSystemSQLModule extends OntopAbstractModule {
     @Override
     protected void configure() {
         bind(OntopSystemSQLSettings.class).toInstance(settings);
-        bindFromPreferences(JDBCConnectionPool.class);
+        bindFromSettings(JDBCConnectionPool.class);
     }
 }

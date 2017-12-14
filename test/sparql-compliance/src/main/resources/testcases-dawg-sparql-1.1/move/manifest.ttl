@@ -14,7 +14,6 @@
     :move02
     :move03
     :move04
-    :move05
     :move06
     :move07
     ) .
@@ -22,7 +21,8 @@
 :move01 rdf:type mf:UpdateEvaluationTest ;
     mf:name "MOVE 1" ;
     rdfs:comment "Move the default graph to an existing graph" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-22#resolution_2> ;
     mf:action [ ut:request <move-01.ru> ;
                 ut:data <move-default.ttl> ;
                 ut:graphData [ ut:graph <move-01.ttl> ;
@@ -35,7 +35,8 @@
 :move02 rdf:type mf:UpdateEvaluationTest ;
     mf:name "MOVE 2" ;
     rdfs:comment "Move the default graph to a non-existing graph" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-22#resolution_2> ;
     mf:action [ ut:request <move-01.ru> ;
                 ut:data <move-default.ttl> ;
               ] ;
@@ -46,7 +47,8 @@
 :move03 rdf:type mf:UpdateEvaluationTest ;
     mf:name "MOVE 3" ;
     rdfs:comment "Move a named graph to an existing graph" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-22#resolution_2> ;
     mf:action [ ut:request <move-03.ru> ;
                 ut:data <move-default.ttl> ;
                 ut:graphData [ ut:graph <move-01.ttl> ;
@@ -62,7 +64,8 @@
 :move04 rdf:type mf:UpdateEvaluationTest ;
     mf:name "MOVE 4" ;
     rdfs:comment "Move a named graph to a non-existing graph" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-22#resolution_2> ;
     mf:action [ ut:request <move-03.ru> ;
                 ut:data <move-default.ttl> ;
                 ut:graphData [ ut:graph <move-01.ttl> ;
@@ -73,24 +76,11 @@
                                rdfs:label "http://example.org/g2" ]
               ] .
 
-:move05 rdf:type mf:UpdateEvaluationTest ;
-    mf:name "MOVE 5" ;
-    rdfs:comment "Move a non-existing graph to an existing graph" ;
-    dawgt:approval dawgt:NotClassified ;
-    mf:action [ ut:request <move-05.ru> ;
-                ut:data <move-default.ttl> ;
-                ut:graphData [ ut:graph <move-01.ttl> ;
-                               rdfs:label "http://example.org/g1" ]
-              ] ;
-    mf:result [ ut:data <move-default.ttl> ;
-                ut:graphData [ ut:graph <move-01.ttl> ;
-                               rdfs:label "http://example.org/g1" ]
-              ] .
-
 :move06 rdf:type mf:UpdateEvaluationTest ;
     mf:name "MOVE 6" ;
     rdfs:comment "Move an existing graph to the default graph" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-22#resolution_2> ;
     mf:action [ ut:request <move-06.ru> ;
                 ut:data <move-default.ttl> ;
                 ut:graphData [ ut:graph <move-01.ttl> ;
@@ -102,7 +92,8 @@
 :move07 rdf:type mf:UpdateEvaluationTest ;
     mf:name "MOVE 7" ;
     rdfs:comment "Move a graph to itself" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-05-22#resolution_2> ;
     mf:action [ ut:request <move-07.ru> ;
                 ut:data <move-default.ttl> ;
                 ut:graphData [ ut:graph <move-01.ttl> ;

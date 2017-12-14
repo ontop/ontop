@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
 
 import java.io.BufferedReader;
@@ -217,10 +218,10 @@ public class BindTestWithFunctions {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0, 43.0\"");
-        expectedValues.add("\"0.0, 23.0\"");
-        expectedValues.add("\"0.0, 34.0\"");
-        expectedValues.add("\"0.0, 10.0\"");
+        expectedValues.add("\"0.0, 43.0\"^^xsd:string");
+        expectedValues.add("\"0.0, 23.0\"^^xsd:string");
+        expectedValues.add("\"0.0, 34.0\"^^xsd:string");
+        expectedValues.add("\"0.0, 10.0\"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
     }
 	
@@ -273,7 +274,7 @@ public class BindTestWithFunctions {
 	              hexString.append(hex);
 	          }
 
-	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
+	          expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
 	  } catch(Exception ex){
 	     throw new RuntimeException(ex);
 	  }
@@ -366,8 +367,8 @@ public class BindTestWithFunctions {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The%20Semantic%20Web\"");
-        expectedValues.add("\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"");
+        expectedValues.add("\"The%20Semantic%20Web\"^^xsd:string");
+        expectedValues.add("\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
     } 
 	
@@ -465,11 +466,11 @@ public class BindTestWithFunctions {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial SPARQL TUTORIAL\"");
-        expectedValues.add("\"The Semantic Web THE SEMANTIC WEB\"");
-        expectedValues.add("\"Crime and Punishment CRIME AND PUNISHMENT\"");
+        expectedValues.add("\"SPARQL Tutorial SPARQL TUTORIAL\"^^xsd:string");
+        expectedValues.add("\"The Semantic Web THE SEMANTIC WEB\"^^xsd:string");
+        expectedValues.add("\"Crime and Punishment CRIME AND PUNISHMENT\"^^xsd:string");
         expectedValues.add("\"The Logic Book: Introduction, Second Edition " + 
-        "The Logic Book: Introduction, Second Edition\"".toUpperCase());
+        "The Logic Book: Introduction, Second Edition\"".toUpperCase()+"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
 
     }
@@ -489,11 +490,11 @@ public class BindTestWithFunctions {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial sparql tutorial\"");
-        expectedValues.add("\"The Semantic Web the semantic web\"");
-        expectedValues.add("\"Crime and Punishment crime and punishment\"");
-        expectedValues.add("\"The Logic Book: Introduction, Second Edition " + 
-        "The Logic Book: Introduction, Second Edition\"".toLowerCase());
+        expectedValues.add("\"SPARQL Tutorial sparql tutorial\"^^xsd:string");
+        expectedValues.add("\"The Semantic Web the semantic web\"^^xsd:string");
+        expectedValues.add("\"Crime and Punishment crime and punishment\"^^xsd:string");
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition " +
+        "The Logic Book: Introduction, Second Edition\"".toLowerCase()+"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
 
     }
@@ -744,6 +745,25 @@ public class BindTestWithFunctions {
 
         runTests(queryBind);
     }
+    
+    @Test
+    public void testDivide() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND ((?p / 2) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"21.5\"^^xsd:decimal");
+        expectedValues.add("\"11.5\"^^xsd:decimal");
+        expectedValues.add("\"17\"^^xsd:decimal");
+        expectedValues.add("\"5\"^^xsd:decimal");
+        checkReturnedValues(queryBind, expectedValues);
+    }
 
 //    @Test timezone is not supported in h2
     public void testTZ() throws Exception {
@@ -809,9 +829,10 @@ public class BindTestWithFunctions {
                 while (rs.hasNext()) {
                     final OWLBindingSet bindingSet = rs.next();
                     OWLObject ind1 = bindingSet.getOWLObject("w");
+                    String value = ToStringRenderer.getInstance().getRendering(ind1);
                     // log.debug(ind1.toString());
-                    returnedValues.add(ind1.toString());
-                    java.lang.System.out.println(ind1);
+                    returnedValues.add(value);
+                    java.lang.System.out.println(value);
                     i++;
                 }
             } catch (Exception e) {

@@ -145,7 +145,7 @@ public class OntologyTypesTest {
 		//no value in the ontology
 		//rdfs:Literal in the mapping
 		String query3 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select DISTINCT * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
+				"select DISTINCT * {?x :hasDepartment ?y. FILTER(datatype(?y) = xsd:string)}";
 
 		runTests(false, query3, 3);
 
@@ -203,7 +203,7 @@ public class OntologyTypesTest {
 		//no value in the ontology
 		//rdfs:Literal in the mapping
 		String query3 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select DISTINCT * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
+				"select DISTINCT * {?x :hasDepartment ?y. FILTER(datatype(?y) = xsd:string)}";
 
 		runTests(true, query3, 3);
 

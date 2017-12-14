@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.docker.postgres;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class OrderByTest extends AbstractVirtualModeTest {
         super(owlFile, obdaFile, propertiesFile);
     }
 
+    @Test
     public void testBolzanoOrderingAsc() throws Exception {
         String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> "
                 + "SELECT ?x ?street WHERE {?x :inState \"Bolzano\"^^<http://www.w3.org/2001/XMLSchema#string>; :inStreet ?street } "
@@ -52,6 +54,7 @@ public class OrderByTest extends AbstractVirtualModeTest {
         checkReturnedUris(query, expectedUris);
     }
 
+    @Test
     public void testBolzanoOrderingAsc2() throws Exception {
         String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> "
                 + "SELECT ?x ?street WHERE {?x :inState \"Bolzano\"^^<http://www.w3.org/2001/XMLSchema#string>; :inStreet ?street } "
@@ -64,6 +67,7 @@ public class OrderByTest extends AbstractVirtualModeTest {
         checkReturnedUris(query, expectedUris);
     }
 
+    @Test
     public void testBolzanoOrderingDesc() throws Exception {
         String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> "
                 + "SELECT ?x ?street WHERE {?x :inState \"Bolzano\"^^<http://www.w3.org/2001/XMLSchema#string>; :inStreet ?street } "
@@ -76,6 +80,7 @@ public class OrderByTest extends AbstractVirtualModeTest {
         checkReturnedUris(query, expectedUris);
     }
 
+    @Test
     public void testBolzanoMultipleOrdering() throws Exception {
         String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> "
                 + "SELECT ?x ?street ?country ?number "

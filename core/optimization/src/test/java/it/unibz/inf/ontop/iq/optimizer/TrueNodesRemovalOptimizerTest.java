@@ -205,47 +205,6 @@ public class TrueNodesRemovalOptimizerTest {
 
 
     @Test
-    public void testSingleTrueNodeRemoval_constructionNodeParent() throws EmptyQueryException {
-
-        //Unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(X, NULL));
-        queryBuilder.init(projectionAtom, rootNode);
-
-        UnionNode un = IQ_FACTORY.createUnionNode(ImmutableSet.of());
-        queryBuilder.addChild(rootNode, un);
-
-        ConstructionNode cn = IQ_FACTORY.createConstructionNode(ImmutableSet.of());
-        queryBuilder.addChild(un, cn);
-        queryBuilder.addChild(un, DATA_NODE_1);
-        queryBuilder.addChild(cn, IQ_FACTORY.createTrueNode());
-
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore TrueNode removal: \n" + unOptimizedQuery);
-
-        // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
-
-        expectedQueryBuilder.init(projectionAtom, rootNode);
-        expectedQueryBuilder.addChild(rootNode, un);
-        expectedQueryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
-        expectedQueryBuilder.addChild(un, DATA_NODE_1);
-
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" + expectedQuery);
-
-        // Optimize and compare
-        IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
-        IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
-
-        System.out.println("\nQuery after TrueNode Removal: \n" + optimizedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
-    }
-
-
-    @Test
     public void testSingleTrueNodeChainRemoval() throws EmptyQueryException {
 
         //Unoptimized query
@@ -262,22 +221,16 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(cn, IQ_FACTORY.createTrueNode());
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore TrueNode removal: \n" + unOptimizedQuery);
+        System.out.println("\nBefore TrueNode optimization: \n" + unOptimizedQuery);
 
-        // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
-
-        expectedQueryBuilder.init(projectionAtom, rootNode);
-        expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
-
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IntermediateQuery expectedQuery = unOptimizedQuery.createSnapshot();
         System.out.println("\nExpected query: \n" + expectedQuery);
 
         // Optimize and compare
         IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
         IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
 
-        System.out.println("\nQuery after TrueNode Removal: \n" + optimizedQuery);
+        System.out.println("\nQuery after: \n" + optimizedQuery);
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 

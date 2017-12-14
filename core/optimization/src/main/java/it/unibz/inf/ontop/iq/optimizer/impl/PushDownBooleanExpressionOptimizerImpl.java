@@ -117,7 +117,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
      */
     private IntermediateQuery pushDownExpressions(final IntermediateQuery initialQuery) {
         // Non-final
-        Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootConstructionNode());
+        Optional<QueryNode> optionalCurrentNode = initialQuery.getFirstChild(initialQuery.getRootNode());
 
         // Non-final
         IntermediateQuery currentQuery = initialQuery;

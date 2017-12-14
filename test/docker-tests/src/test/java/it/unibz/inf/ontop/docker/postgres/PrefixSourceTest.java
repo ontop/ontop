@@ -4,6 +4,9 @@ package it.unibz.inf.ontop.docker.postgres;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Class to test that a URI with double prefix has not a prefix  wrongly removed
@@ -18,7 +21,7 @@ public class PrefixSourceTest extends AbstractVirtualModeTest {
         super(owlfile, obdafile, propertiesfile);
     }
 
-
+    @Test
     public void testPrefixInsideURI() throws Exception {
         String queryBind = "PREFIX :  <http://www.movieontology.org/2009/10/01/movieontology.owl>" +
                 "PREFIX mo:  <http://www.movieontology.org/2009/10/01/movieontology.owl#>" +

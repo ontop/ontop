@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
@@ -117,6 +118,11 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
     }
 
     @Override
+    public IntermediateQueryFactory getIQFactory() {
+        return getInjector().getInstance(IntermediateQueryFactory.class);
+    }
+
+    @Override
     public OntopModelSettings getSettings() {
         return settings;
     }
@@ -190,6 +196,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
                 return properties(p);
 
             } catch (IOException e) {
+//                System.out.println(e);
                 throw new InvalidOntopConfigurationException("Cannot reach the property file: " + propertyFile);
             }
         }

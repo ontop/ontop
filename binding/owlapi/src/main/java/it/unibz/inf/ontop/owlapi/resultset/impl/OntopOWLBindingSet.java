@@ -9,13 +9,7 @@ import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBinding;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
-import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
+import org.semanticweb.owlapi.model.*;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
@@ -24,9 +18,11 @@ import java.util.List;
 public class OntopOWLBindingSet implements OWLBindingSet {
 
     private final OntopBindingSet ontopBindingSet;
+    private final OWLAPIIndividualTranslator translator;
 
     public OntopOWLBindingSet(OntopBindingSet ontopBindingSet) {
         this.ontopBindingSet = ontopBindingSet;
+        this.translator = new OWLAPIIndividualTranslator();
     }
 
     @Override
@@ -132,8 +128,6 @@ public class OntopOWLBindingSet implements OWLBindingSet {
             throw new OntopOWLException(e);
         }
     }
-
-    private OWLAPIIndividualTranslator translator = new OWLAPIIndividualTranslator();
 
     private OWLPropertyAssertionObject translate(Constant c) {
         if (c instanceof ObjectConstant)

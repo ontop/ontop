@@ -1,4 +1,4 @@
-@prefix : <http://example.org/> .
+@prefix :           <http://example.org/> .
 @prefix foaf:       <http://xmlns.com/foaf/0.1/> .
 
 :c foaf:name "Chris" .

@@ -7,14 +7,14 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
 import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
@@ -196,7 +196,7 @@ public class OBDAModel {
             SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(formerTriplesMap.getId(),
                     formerTriplesMap.getSourceQuery(), newTargetAtoms);
 
-            fireMappingUpdated(getSourceId(), newTriplesMap.getId(), newTriplesMap);
+            fireMappingUpdated();
             return newTriplesMap;
         }
         else
@@ -204,34 +204,48 @@ public class OBDAModel {
 
     }
 
-    private void fireMappingUpdated(URI sourceURI, String mappingId, SQLPPTriplesMap mapping) {
+    private void fireMappingUpdated() {
         for (OBDAMappingListener listener : mappingListeners) {
-            listener.mappingUpdated(sourceURI);
+            listener.mappingUpdated();
         }
     }
 
-    public int deletePredicate(Predicate removedPredicate) {
-        AtomicInteger counter = new AtomicInteger();
+    public void deletePredicate(Predicate removedPredicate) {
 
         triplesMapMap = triplesMapMap.values().stream()
-                .map(m -> deletePredicate(m, removedPredicate, counter))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .filter(m -> mustBePreserved(m, removedPredicate, new AtomicInteger()))
+                .map(m -> updateMapping(m, removedPredicate, new AtomicInteger()))
+               // .map(m -> deletePredicate(m, removedPredicate, counter))
+                //.filter(Optional::isPresent)
+                //.map(Optional::get)
                 .collect(collectTriplesMaps(
                         SQLPPTriplesMap::getId,
                         m -> m));
 
-        return counter.get();
+        fireMappingUpdated();
+
     }
 
-    /**
-     * TODO: find a better name
-     */
-    private Optional<SQLPPTriplesMap> deletePredicate(SQLPPTriplesMap formerTriplesMap, Predicate removedPredicate,
-                                                      AtomicInteger counter) {
+    private boolean mustBePreserved(SQLPPTriplesMap formerTriplesMap, Predicate removedPredicate,
+                                    AtomicInteger counter) {
         int initialCount = counter.get();
 
-        ImmutableList<ImmutableFunctionalTerm> newTargetAtoms = formerTriplesMap.getTargetAtoms().stream()
+        ImmutableList<ImmutableFunctionalTerm> newTargetAtoms = getNewTargetAtoms(formerTriplesMap, removedPredicate, counter);
+
+        if (counter.get() > initialCount) {
+            if (newTargetAtoms.isEmpty()) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+        else
+            return true;
+    }
+
+    private ImmutableList<ImmutableFunctionalTerm> getNewTargetAtoms(SQLPPTriplesMap formerTriplesMap, Predicate removedPredicate, AtomicInteger counter) {
+        return formerTriplesMap.getTargetAtoms().stream()
                 .filter(a -> {
                     if (a.getFunctionSymbol().equals(removedPredicate)) {
                         counter.incrementAndGet();
@@ -240,22 +254,30 @@ public class OBDAModel {
                     return true;
                 })
                 .collect(ImmutableCollectors.toList());
+    }
+
+
+    private SQLPPTriplesMap updateMapping(SQLPPTriplesMap formerTriplesMap, Predicate removedPredicate,
+                                                      AtomicInteger counter) {
+        int initialCount = counter.get();
+
+        ImmutableList<ImmutableFunctionalTerm> newTargetAtoms = getNewTargetAtoms(formerTriplesMap, removedPredicate, counter);
 
         if (counter.get() > initialCount) {
             if (newTargetAtoms.isEmpty()) {
-                removeTriplesMap(getSourceId(), formerTriplesMap.getId());
-                return Optional.empty();
+
+                throw new IllegalStateException("Mapping should be deleted");
             }
             else {
                 SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(formerTriplesMap.getId(),
                         formerTriplesMap.getSourceQuery(),
                         newTargetAtoms);
-                fireMappingUpdated(getSourceId(), newTriplesMap.getId(), newTriplesMap);
-                return Optional.of(newTriplesMap);
+
+                return newTriplesMap;
             }
         }
         else
-            return Optional.of(formerTriplesMap);
+            return formerTriplesMap;
     }
 
     private URI getSourceId() {
@@ -350,7 +372,7 @@ public class OBDAModel {
             SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(triplesMapId, sourceQuery,
                     formerTriplesMap.getTargetAtoms());
             triplesMapMap.put(triplesMapId, newTriplesMap);
-            fireMappingUpdated(sourceURI, triplesMapId, newTriplesMap);
+            fireMappingUpdated();
         }
     }
 
@@ -361,7 +383,7 @@ public class OBDAModel {
             SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(id, formerTriplesMap.getSourceQuery(),
                     targetQuery);
             triplesMapMap.put(id, newTriplesMap);
-            fireMappingUpdated(sourceID, id, newTriplesMap);
+            fireMappingUpdated();
         }
     }
 
@@ -373,7 +395,7 @@ public class OBDAModel {
                     formerTriplesMap.getTargetAtoms());
             triplesMapMap.remove(formerMappingId);
             triplesMapMap.put(newMappingId, newTriplesMap);
-            fireMappingUpdated(dataSourceIRI, formerMappingId, newTriplesMap);
+            fireMappingUpdated();
         }
     }
 

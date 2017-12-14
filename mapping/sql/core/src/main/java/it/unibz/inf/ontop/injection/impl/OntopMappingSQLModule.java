@@ -1,17 +1,14 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
-import com.google.common.collect.ImmutableList;
-import com.google.inject.Module;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
-import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
+import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
-import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
+import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 
 public class OntopMappingSQLModule extends OntopAbstractModule {
 
@@ -27,15 +24,16 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
     protected void configure() {
         bind(OntopMappingSQLSettings.class).toInstance(settings);
 
-        bindFromPreferences(SQLPPMappingFactory.class);
-        bindFromPreferences(SQLMappingParser.class);
-        bindFromPreferences(SQLPPMappingConverter.class);
-        bindFromPreferences(PreProcessedImplicitRelationalDBConstraintExtractor.class);
-        bindFromPreferences(MappingExtractor.class);
+        bindFromSettings(SQLPPMappingFactory.class);
+        bindFromSettings(SQLMappingParser.class);
+        bindFromSettings(SQLPPMappingConverter.class);
+        bindFromSettings(PreProcessedImplicitRelationalDBConstraintExtractor.class);
+        bindFromSettings(MappingExtractor.class);
+        bindFromSettings(RDBMetadataExtractor.class);
 
-        Module nativeQLFactoryModule = buildFactory(
-                ImmutableList.of(RDBMetadataExtractor.class),
-                NativeQueryLanguageComponentFactory.class);
-        install(nativeQLFactoryModule);
+//        Module nativeQLFactoryModule = buildFactory(
+//                ImmutableList.of(RDBMetadataExtractor.class),
+//                NativeQueryLanguageComponentFactory.class);
+//        install(nativeQLFactoryModule);
     }
 }

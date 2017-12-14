@@ -22,6 +22,10 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test if the datatypes xsd:date, xsd:time and xsd:year are returned correctly.
@@ -40,7 +44,8 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
 
 
     //With QuestOWL the results for xsd:date, xsd:time and xsd:year are returned as a plain literal since OWLAPI3 supports only xsd:dateTime
-	public void testDatatypeDate() throws Exception {
+	@Test
+    public void testDatatypeDate() throws Exception {
 
         String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?s ?x\n" +
                 "WHERE {\n" +
@@ -49,9 +54,10 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
                 "}";
 
         String result = runQueryAndReturnStringOfLiteralX(query1);
-		assertEquals(result, "\"2013-03-18\"");
+		assertEquals("\"2013-03-18\"^^xsd:date",result );
 	}
-	
+
+    @Test
     public void testDatatypeTime() throws Exception {
 
         String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?s ?x\n" +
@@ -61,9 +67,23 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
                 "}";
 
         String result = runQueryAndReturnStringOfLiteralX(query1);
-        assertEquals(result, "\"10:12:10\"");
+        assertEquals("\"10:12:10\"^^xsd:time", result );
     }
-	
+
+    @Ignore
+    public void testDatatypeTimeTz() throws Exception {
+
+        String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?s ?x\n" +
+                "WHERE {\n" +
+                "   ?s a :Row; :hasTime ?x\n" +
+                "   FILTER ( ?x = \"10:12:10+01:00\"^^xsd:time ) .\n" +
+                "}";
+
+        String result = runQueryAndReturnStringOfLiteralX(query1);
+        assertEquals("\"10:12:10+01:00\"^^xsd:time", result );
+    }
+
+    @Test
     public void testDatatypeYear() throws Exception {
         String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?s ?x\n" +
                 "WHERE {\n" +
@@ -71,7 +91,7 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
                 "   FILTER ( ?x = \"2013\"^^xsd:gYear ) .\n" +
                 "}";
         String result = runQueryAndReturnStringOfLiteralX(query1);
-        assertEquals(result, "\"2013\"");
+        assertEquals("\"2013\"^^xsd:gYear",result );
     }
 
 

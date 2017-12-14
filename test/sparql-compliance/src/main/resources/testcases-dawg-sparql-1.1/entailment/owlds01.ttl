@@ -5,6 +5,9 @@
 _:ont a owl:Ontology .
 
 :p rdf:type owl:ObjectProperty .
+:c rdf:type owl:Class .
+:d rdf:type owl:Class .
+:a rdf:type owl:NamedIndividual .
 
 :a rdf:type :c .
 :a rdf:type :d .

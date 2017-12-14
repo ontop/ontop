@@ -21,10 +21,13 @@ package it.unibz.inf.ontop.docker.oracle;
  */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLIndividual;
+
+import static org.junit.Assert.*;
 
 
 /***
@@ -35,7 +38,7 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 
 	static final String owlFile = "/oracle/regex/oracle-regexp.owl";
 	static final String obdaFile = "/oracle/regex/oracle-regexp.obda";
-	static final String propertyFile = "/oracle/oracle.properties";
+	static final String propertyFile = "/oracle/regex/oracle-regexp.properties";
 
 	public OracleRegexpTestSpace() {
 		super(owlFile, obdaFile, propertyFile);
@@ -62,6 +65,7 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 	 * Tests the use of mapings with regex in subqueries and where with SQL subquery
 	 * @throws Exception
 	 */
+	@Test
 	public void testSparql2OracleRegexWhere() throws Exception {
 		OWLStatement st = null;
 		try {
@@ -89,6 +93,7 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 	 * Tests the use of mapings with regex in subqueries without where with SQL subquery
 	 * @throws Exception
 	 */
+	@Test
 	public void testSparql2OracleRegexNoWhere() throws Exception {
 		OWLStatement st = null;
 		try {
@@ -115,6 +120,7 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 	 * Tests the use of mapings with regex in subqueries without where without subquery
 	 * @throws Exception
 	 */
+	@Test
 	public void testSparql2OracleRegexNoWhereNoSubquery() throws Exception {
 		OWLStatement st = null;
 		try {
