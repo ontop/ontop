@@ -67,10 +67,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 
 	public static TBoxReasoner create(Ontology onto) {
-		return create(onto, false);
-	}
-
-	public static TBoxReasoner create(Ontology onto, boolean equivalenceReduced) {
 		final DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> objectPropertyGraph =
 				getObjectPropertyGraph(onto);
 		final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG =
@@ -102,7 +98,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	/**
 	 * constructs from DAGs
 	 * @param classDAG
-	 * @param propertyDAG
+	 * @param dataRangeDAG
+	 * @param objectPropertyDAG
+	 * @param objectPropertyDAG
 	 */
 	private TBoxReasonerImpl(EquivalencesDAGImpl<ClassExpression> classDAG,
 							 EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG,
@@ -501,7 +499,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *  adds inclusions between the inverses of R and S if
 	 *         R is declared a sub-property of S in the ontology
 	 *
-	 * @param an ontology
+	 * @param ontology
 	 * @return the graph of the property inclusions
 	 */
 
@@ -537,7 +535,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *  adds inclusions between the inverses of R and S if
 	 *         R is declared a sub-property of S in the ontology
 	 *
-	 * @param an ontology
+	 * @param ontology
 	 * @return the graph of the property inclusions
 	 */
 

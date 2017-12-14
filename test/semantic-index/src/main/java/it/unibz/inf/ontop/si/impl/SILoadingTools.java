@@ -77,7 +77,7 @@ class SILoadingTools {
             throws SemanticIndexException {
         ImmutableOntologyVocabulary vocabulary = ontology.getVocabulary();
 
-        final TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(ontology, OPTIMIZE_EQUIVALENCES);
+        final TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(ontology);
 
         SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, vocabulary);
 

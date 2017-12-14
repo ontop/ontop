@@ -23,7 +23,6 @@ public class DefaultMappingTransformer implements MappingTransformer{
     private final MappingMerger mappingMerger;
     private final OntopMappingSettings settings;
     private final MappingSameAsInverseRewriter sameAsInverseRewriter;
-    private final MappingEquivalenceFreeRewriter eqFreeRewriter;
     private final SpecificationFactory specificationFactory;
 
     @Inject
@@ -34,7 +33,6 @@ public class DefaultMappingTransformer implements MappingTransformer{
                                      MappingMerger mappingMerger,
                                      OntopMappingSettings settings,
                                      MappingSameAsInverseRewriter sameAsInverseRewriter,
-                                     MappingEquivalenceFreeRewriter eqFreeRewriter,
                                      SpecificationFactory specificationFactory) {
         this.mappingCanonicalRewriter = mappingCanonicalRewriter;
         this.mappingNormalizer = mappingNormalizer;
@@ -43,7 +41,6 @@ public class DefaultMappingTransformer implements MappingTransformer{
         this.mappingMerger = mappingMerger;
         this.settings = settings;
         this.sameAsInverseRewriter = sameAsInverseRewriter;
-        this.eqFreeRewriter = eqFreeRewriter;
         this.specificationFactory = specificationFactory;
     }
 
@@ -54,8 +51,7 @@ public class DefaultMappingTransformer implements MappingTransformer{
         Mapping factsAsMapping = factConverter.convert(ontology, mapping.getExecutorRegistry(),
                 settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
         Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
-        Mapping eqFreeMapping = eqFreeRewriter.rewrite(mappingWithFacts, tBox, ontology.getVocabulary(), dbMetadata);
-        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(eqFreeMapping, dbMetadata);
+        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mappingWithFacts, dbMetadata);
         Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
         Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tBox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);

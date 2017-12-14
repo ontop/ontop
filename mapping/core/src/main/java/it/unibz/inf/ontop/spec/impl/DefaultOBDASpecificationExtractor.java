@@ -71,7 +71,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
         Ontology ontology = optionalOntology
                 .orElseGet(() -> vocabularyExtractor.extractOntology(mappingAndDBMetadata.getMapping()));
         TBoxReasoner tBox = optionalInputTBox
-                .orElseGet(() -> TBoxReasonerImpl.create(ontology, settings.isEquivalenceOptimizationEnabled()));
+                .orElseGet(() -> TBoxReasonerImpl.create(ontology));
 
         return mappingTransformer.transform(
                 specInput,
@@ -83,7 +83,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
 
     private Optional<TBoxReasoner> saturateTBox(Optional<Ontology> ontology) {
         return ontology
-                .map(o -> TBoxReasonerImpl.create(o, settings.isEquivalenceOptimizationEnabled()));
+                .map(o -> TBoxReasonerImpl.create(o));
     }
 
 

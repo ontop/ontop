@@ -44,7 +44,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 */
 
 		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_401.owl");
-		TBoxReasoner simple = TBoxReasonerImpl.create(ontology, true);
+		TBoxReasoner simple = TBoxReasonerImpl.create(ontology);
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
@@ -85,7 +85,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 */
 
 		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_402.owl");
-		TBoxReasoner simple = TBoxReasonerImpl.create(ontology, true);
+		TBoxReasoner simple = TBoxReasonerImpl.create(ontology);
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
@@ -130,7 +130,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 */
 
 		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_403.owl");
-		TBoxReasoner simple = TBoxReasonerImpl.create(ontology, true);
+		TBoxReasoner simple = TBoxReasonerImpl.create(ontology);
 		
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
@@ -165,7 +165,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 */
 
 		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_404.owl");
-		TBoxReasoner simple = TBoxReasonerImpl.create(ontology, true);
+		TBoxReasoner simple = TBoxReasonerImpl.create(ontology);
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();

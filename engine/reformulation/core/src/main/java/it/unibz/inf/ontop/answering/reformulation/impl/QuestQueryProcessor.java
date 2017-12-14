@@ -89,9 +89,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 
 		if(log.isDebugEnabled()){
-
-			String saturatedMappings = Joiner.on("\n").join(saturatedMapping.getQueries());
-			log.debug("Mapping: \n{}",saturatedMappings);
+			log.debug("Mapping: \n{}", Joiner.on("\n").join(saturatedMapping.getQueries()));
 		}
 
 		this.queryUnfolder = translationFactory.create(saturatedMapping);
