@@ -2,4 +2,4 @@
 @prefix : <http://example.org/> .
 
 # string data
-:s8 :str "\u98DF", "食" .
+:s8 :str "\u98DF" .

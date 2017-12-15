@@ -11,7 +11,7 @@
     rdfs:comment  "DAWG Expression tests: Built-ins" ;
     mf:entries
     ( :dawg-str-1 :dawg-str-2
-      # :dawg-str-3 :dawg-str-4 # Already failed in V1.
+      :dawg-str-3 :dawg-str-4 # Already failed in V1.
       :dawg-isBlank-1 :dawg-isLiteral-1 :dawg-datatype-1 :dawg-datatype-2 :dawg-datatype-3
       :dawg-lang-1 :dawg-lang-2
       :dawg-lang-3
@@ -24,7 +24,7 @@
       :dawg-langMatches-basic
       :lang-case-insensitive-eq
       :lang-case-insensitive-ne
-      #:sameTerm-simple :sameTerm-eq :sameTerm-not-eq # WON'T FIX
+      :sameTerm-simple :sameTerm-eq :sameTerm-not-eq # WON'T FIX
     ).
 
 :dawg-isLiteral-1 a mf:QueryEvaluationTest ;

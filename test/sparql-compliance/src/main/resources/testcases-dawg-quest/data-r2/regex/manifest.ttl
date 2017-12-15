@@ -11,7 +11,7 @@
       :dawg-regex-001 
       :dawg-regex-002 
       :dawg-regex-003 
-      # :dawg-regex-004 #string operation over URI not supported in SI
+      :dawg-regex-004 #string operation over URI not supported in SI
     ).
 
 :dawg-regex-001 a mf:QueryEvaluationTest ;

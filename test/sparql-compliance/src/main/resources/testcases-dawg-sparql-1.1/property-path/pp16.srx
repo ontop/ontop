@@ -31,14 +31,6 @@
     </result>
     <result>
       <binding name="X">
-        <uri>http://example.org/a</uri>
-      </binding>
-      <binding name="Y">
-        <uri>http://example.org/c</uri>
-      </binding>
-    </result>
-    <result>
-      <binding name="X">
         <uri>http://example.org/b</uri>
       </binding>
       <binding name="Y">

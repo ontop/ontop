@@ -18,6 +18,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 public class DatalogFactoryImpl implements DatalogFactory {
 
     private static final DatalogFactory INSTANCE = new DatalogFactoryImpl();
+    private static final String SUBQUERY_PRED_PREFIX = "ontopSubquery";
 
     private DatalogFactoryImpl() {
     }
@@ -87,6 +88,11 @@ public class DatalogFactoryImpl implements DatalogFactory {
     @Override
     public Function getSPARQLLeftJoin(Term t1, Term t2) {
         return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN, t1, t2);
+    }
+
+    @Override
+    public String getSubqueryPredicatePrefix() {
+        return SUBQUERY_PRED_PREFIX;
     }
 
 

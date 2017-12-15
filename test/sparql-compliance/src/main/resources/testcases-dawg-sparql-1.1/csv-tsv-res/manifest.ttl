@@ -17,7 +17,7 @@
     :tsv03
     ) .
 
-:csv01 rdf:type mf:QueryEvaluationTest ;
+:csv01 rdf:type mf:CSVResultFormatTest ;
     mf:name    "csv01 - CSV Result Format" ;
     rdfs:comment "SELECT * WHERE { ?S ?P ?O }";
     dawgt:approval dawgt:Approved ;
@@ -28,7 +28,7 @@
     mf:result  <csvtsv01.csv>
     .
 
-:csv02 rdf:type mf:QueryEvaluationTest ;
+:csv02 rdf:type mf:CSVResultFormatTest ;
     mf:name    "cvs02 - CSV Result Format" ;
     rdfs:comment "SELECT with OPTIONAL (i.e. not all vars bound in all results)";
     dawgt:approval dawgt:Approved ;
@@ -39,7 +39,7 @@
     mf:result  <csvtsv02.csv>
     .
 
-:csv03 rdf:type mf:QueryEvaluationTest ;
+:csv03 rdf:type mf:CSVResultFormatTest ;
     mf:name    "csv03 - CSV Result Format" ;
     rdfs:comment "SELECT * WHERE { ?S ?P ?O } with some corner cases of typed literals";
     dawgt:approval dawgt:Approved ;

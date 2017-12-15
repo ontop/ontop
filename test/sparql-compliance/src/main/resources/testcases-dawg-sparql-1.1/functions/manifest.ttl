@@ -10,63 +10,67 @@
     rdfs:label "Built-in Functions" ;
     mf:entries
     ( 
-	#:strdt01
-	#:strdt02
-	#:strdt03
-	#:strlang01
-	#:strlang02
-	#:strlang03
-	 :isnumeric01
-	 :abs01
-	#:ceil01
-	#:floor01
-	#:round01
-	 :concat01 # Ontop V3: dynamic typing is currently disabled.
-	#:concat02
-	#:substring01
-	#:substring02
-	 :length01
-	#:ucase01
-	#:lcase01
-	#:encode01
-	 :contains01
-	 :starts01
-	 :ends01
-	#:plus-1
-	#:plus-2
-	#:md5-01
-	#:md5-02
-	#:sha1-01
-	#:sha1-02
-	 :sha256-01
-	 :sha256-02
-	#:sha512-01
-	#:sha512-02
-	#:minutes
-	#:seconds
-	#:hours
-	 :month
-	 :year
-	 :day
-	#:timezone
-	#:tz
-	#:bnode01
-	#:bnode02
-	#:in01
-	#:in02
-	#:notin01
-	#:notin02
-	#:now01
-	#:rand01
-	#:iri01
-	#:if01
-	#:if02
-	#:coalesce01
-	#:strbefore01
-	#:strafter01
-	#:replace01
-	 :replace02
-	 :replace03
+	:strdt01
+	:strdt02
+	:strdt03
+	:strlang01
+	:strlang02
+	:strlang03
+	:isnumeric01
+	:abs01
+	:ceil01
+	:floor01
+	:round01
+	:concat01 # Ontop V3: dynamic typing is currently disabled.
+	:concat02
+	:substring01
+	:substring02
+	:length01
+	:ucase01
+	:lcase01
+	:encode01
+	:contains01
+	:starts01
+	:ends01
+	:plus-1
+	:plus-2
+	:md5-01
+	:md5-02
+	:sha1-01
+	:sha1-02
+	:sha256-01
+	:sha256-02
+	:sha512-01
+	:sha512-02
+	:minutes
+	:seconds
+	:hours
+	:month
+	:year
+	:day
+	:timezone
+	:tz
+	:bnode01
+	:bnode02
+	:in01
+	:in02
+	:notin01
+	:notin02
+	:now01
+	:rand01
+	:iri01
+	:if01
+	:if02
+	:coalesce01
+	:strbefore01a
+	:strbefore02
+	:strafter01a
+	:strafter02
+	:replace01
+	:replace02
+	:replace03
+	:uuid01
+	:struuid01
  ) .
 
 
@@ -677,6 +681,28 @@
     mf:result  <strbefore01.srx> ;
 	.
 
+:strbefore01a rdf:type mf:QueryEvaluationTest ;
+	mf:name    "STRBEFORE()" ;
+	mf:feature sparql:strbefore ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-08-07#resolution_2> ;
+    mf:action
+         [ qt:query  <strbefore01.rq> ;
+           qt:data   <data2.ttl> ] ;
+    mf:result  <strbefore01a.srx> ;
+	.
+
+:strbefore02 rdf:type mf:QueryEvaluationTest ;
+	mf:name    "STRBEFORE() datatyping" ;
+	mf:feature sparql:strbefore ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-08-07#resolution_2> ;
+    mf:action
+         [ qt:query  <strbefore02.rq> ;
+           qt:data   <data4.ttl> ] ;
+    mf:result  <strbefore02.srx> ;
+	.
+
 :strafter01 rdf:type mf:QueryEvaluationTest ;
 	mf:name    "STRAFTER()" ;
 	mf:feature sparql:strafter ;
@@ -686,6 +712,28 @@
          [ qt:query  <strafter01.rq> ;
            qt:data   <data2.ttl> ] ;
     mf:result  <strafter01.srx> ;
+	.
+
+:strafter01a rdf:type mf:QueryEvaluationTest ;
+	mf:name    "STRAFTER()" ;
+	mf:feature sparql:strafter ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-08-07#resolution_2> ;
+    mf:action
+         [ qt:query  <strafter01.rq> ;
+           qt:data   <data2.ttl> ] ;
+    mf:result  <strafter01a.srx> ;
+	.
+
+:strafter02 rdf:type mf:QueryEvaluationTest ;
+	mf:name    "STRAFTER() datatyping" ;
+	mf:feature sparql:strafter ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-08-07#resolution_2> ;
+    mf:action
+         [ qt:query  <strafter02.rq> ;
+           qt:data   <data4.ttl> ] ;
+    mf:result  <strafter02.srx> ;
 	.
 
 :replace01 rdf:type mf:QueryEvaluationTest ;
@@ -719,5 +767,27 @@
          [ qt:query  <replace03.rq> ;
            qt:data   <data3.ttl> ] ;
     mf:result  <replace03.srx> ;
+	.
+
+:uuid01 rdf:type mf:QueryEvaluationTest ;
+	mf:name    "UUID() pattern match" ;
+	mf:feature sparql:uuid ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-08-07#resolution_2> ;
+    mf:action
+         [ qt:query  <uuid01.rq> ;
+           qt:data   <data-empty.nt> ] ;
+    mf:result  <uuid01.srx> ;
+	.
+
+:struuid01 rdf:type mf:QueryEvaluationTest ;
+	mf:name    "STRUUID() pattern match" ;
+	mf:feature sparql:struuid ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-08-07#resolution_2> ;
+    mf:action
+         [ qt:query  <struuid01.rq> ;
+           qt:data   <data-empty.nt> ] ;
+    mf:result  <struuid01.srx> ;
 	.
 

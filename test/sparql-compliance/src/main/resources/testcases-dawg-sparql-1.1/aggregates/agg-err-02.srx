@@ -10,7 +10,7 @@
         <uri>http://example.com/data/#x</uri>
       </binding>
       <binding name="avg">
-        <literal datatype="http://www.w3.org/2001/XMLSchema#double">2.5e0</literal>
+        <literal datatype="http://www.w3.org/2001/XMLSchema#double">2.5E0</literal>
       </binding>
     </result>
     <result>
@@ -26,7 +26,7 @@
         <uri>http://example.com/data/#z</uri>
       </binding>
       <binding name="avg">
-        <literal datatype="http://www.w3.org/2001/XMLSchema#double">2.5e0</literal>
+        <literal datatype="http://www.w3.org/2001/XMLSchema#double">2.5E0</literal>
       </binding>
     </result>
   </results>
