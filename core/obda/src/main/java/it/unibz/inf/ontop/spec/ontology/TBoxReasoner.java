@@ -34,7 +34,7 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG();
+	ClassifiedOntologyVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties();
 	
 	/**
 	 * Return the DAG of properties
@@ -42,7 +42,7 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG();
+	ClassifiedOntologyVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties();
 
 	/**
 	 * Return the DAG of classes
@@ -50,7 +50,7 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	EquivalencesDAG<ClassExpression> getClassDAG();
+	ClassifiedOntologyVocabularyCategory<ClassExpression, OClass> classes();
 	
 	/**
 	 * Return the DAG of datatypes and data property ranges
@@ -58,7 +58,7 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	EquivalencesDAG<DataRangeExpression> getDataRangeDAG();
+	ClassifiedOntologyVocabularyCategory<DataRangeExpression, DataRangeExpression> dataRanges();
 
 
 	/**

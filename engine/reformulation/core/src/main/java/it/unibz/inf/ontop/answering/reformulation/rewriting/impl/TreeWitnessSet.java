@@ -373,15 +373,15 @@ public class TreeWitnessSet {
 		}
 		
 		public Intersection<ClassExpression> getTopClass() {
-			return new Intersection<ClassExpression>(reasoner.getClassDAG());
+			return new Intersection<ClassExpression>(reasoner.classes().dag());
 		}
 
 		public Intersection<ObjectPropertyExpression> getTopProperty() {
-			return new Intersection<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
+			return new Intersection<ObjectPropertyExpression>(reasoner.objectProperties().dag());
 		}
 		
 		public Intersection<ClassExpression> getSubConcepts(Collection<Function> atoms) {
-			Intersection<ClassExpression> subc = new Intersection<ClassExpression>(reasoner.getClassDAG());
+			Intersection<ClassExpression> subc = new Intersection<ClassExpression>(reasoner.classes().dag());
 			for (Function a : atoms) {
 				 if (a.getArity() != 1) {
 					 subc.setToBottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
@@ -415,7 +415,7 @@ public class TreeWitnessSet {
 			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
 			Intersection<ObjectPropertyExpression> properties = propertiesCache.get(idx);			
 			if (properties == null) {
-				properties = new Intersection<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
+				properties = new Intersection<>(reasoner.objectProperties().dag());
 				for (Function a : edge.getBAtoms()) {
 					if (a.isOperation()) {
 						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);

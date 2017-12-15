@@ -269,10 +269,10 @@ public class EmptyEntitiesTest {
 	public void testEmptiesWithInverses() throws Exception {
 		TBoxReasoner tboxreasoner = TBoxReasonerImpl.create(onto);
 		System.out.println();
-		System.out.println(tboxreasoner.getObjectPropertyDAG());
+		System.out.println(tboxreasoner.objectProperties().dag());
 
 		int c = 0; // number of empty concepts
-		for (Equivalences<ClassExpression> concept : tboxreasoner.getClassDAG()) {
+		for (Equivalences<ClassExpression> concept : tboxreasoner.classes().dag()) {
 			ClassExpression representative = concept.getRepresentative();
 			if ((!(representative instanceof Datatype)) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
 				emptyBasicConcepts.addAll(concept.getMembers());
@@ -283,7 +283,7 @@ public class EmptyEntitiesTest {
 
 		{
 			int r = 0; // number of empty roles
-			for (Equivalences<ObjectPropertyExpression> properties : tboxreasoner.getObjectPropertyDAG()) {
+			for (Equivalences<ObjectPropertyExpression> properties : tboxreasoner.objectProperties().dag()) {
 				if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
 					emptyProperties.addAll(properties.getMembers());
 					r += properties.size();
@@ -293,7 +293,7 @@ public class EmptyEntitiesTest {
 		}
 		{
 			int r = 0; // number of empty roles
-			for (Equivalences<DataPropertyExpression> properties : tboxreasoner.getDataPropertyDAG()) {
+			for (Equivalences<DataPropertyExpression> properties : tboxreasoner.dataProperties().dag()) {
 				if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
 					emptyProperties.addAll(properties.getMembers());
 					r += properties.size();

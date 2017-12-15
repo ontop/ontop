@@ -256,7 +256,7 @@ public class TMappingProcessor {
 	 */
 	private static void getObjectTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex,
 			Map<Predicate, List<TMappingRule>> originalMappings,
-			EquivalencesDAG<ObjectPropertyExpression> dag, 
+			EquivalencesDAG<ObjectPropertyExpression> dag,
 			TMappingExclusionConfig excludeFromTMappings) {
 
 		for (Equivalences<ObjectPropertyExpression> propertySet : dag) {
@@ -314,7 +314,7 @@ public class TMappingProcessor {
 	 */
 	private static void getDataTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
 			Map<Predicate, List<TMappingRule>> originalMappings,
-			EquivalencesDAG<DataPropertyExpression> dag, 
+			EquivalencesDAG<DataPropertyExpression> dag,
 			TMappingExclusionConfig excludeFromTMappings) {
 		
 		for (Equivalences<DataPropertyExpression> propertySet : dag) {
@@ -431,14 +431,14 @@ public class TMappingProcessor {
 		 * the TMappings specification.
 		 */
 
-		getObjectTMappings(mappingIndex, originalMappingIndex, reasoner.getObjectPropertyDAG(), excludeFromTMappings);
-		getDataTMappings(mappingIndex, originalMappingIndex, reasoner.getDataPropertyDAG(), excludeFromTMappings);
+		getObjectTMappings(mappingIndex, originalMappingIndex, reasoner.objectProperties().dag(), excludeFromTMappings);
+		getDataTMappings(mappingIndex, originalMappingIndex, reasoner.dataProperties().dag(), excludeFromTMappings);
 
 		/*
 		 * Property t-mappings are done, we now continue with class t-mappings.
 		 */
 
-		for (Equivalences<ClassExpression> classSet : reasoner.getClassDAG()) {
+		for (Equivalences<ClassExpression> classSet : reasoner.classes().dag()) {
 
 			if (!(classSet.getRepresentative() instanceof OClass))
 				continue;
@@ -453,7 +453,7 @@ public class TMappingProcessor {
 			Predicate currentPredicate = representative.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
-			for (Equivalences<ClassExpression> descendants : reasoner.getClassDAG().getSub(classSet)) {
+			for (Equivalences<ClassExpression> descendants : reasoner.classes().dag().getSub(classSet)) {
 				for (ClassExpression childDescription : descendants) {
 
                     /* adding the mappings of the children as own mappings, the new

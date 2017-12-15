@@ -111,22 +111,22 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			log.info("Second dag {}", namedDag2);
 			TestTBoxReasonerImpl_Named dag2 = new TestTBoxReasonerImpl_Named(reasoner);
 
-			assertTrue(testDescendants(dag2.getClassDAG(), namedDag2.getClassDAG()));
-			assertTrue(testDescendants(dag2.getObjectPropertyDAG(), namedDag2.getObjectPropertyDAG()));
-			assertTrue(testDescendants(namedDag2.getClassDAG(), dag2.getClassDAG()));
-			assertTrue(testDescendants(namedDag2.getObjectPropertyDAG(), dag2.getObjectPropertyDAG()));
-			assertTrue(testChildren(dag2.getClassDAG(), namedDag2.getClassDAG()));
-			assertTrue(testChildren(dag2.getObjectPropertyDAG(), namedDag2.getObjectPropertyDAG()));
-			assertTrue(testChildren(namedDag2.getClassDAG(), dag2.getClassDAG()));
-			assertTrue(testChildren(namedDag2.getObjectPropertyDAG(), dag2.getObjectPropertyDAG()));
-			assertTrue(testAncestors(dag2.getClassDAG(), namedDag2.getClassDAG()));
-			assertTrue(testAncestors(dag2.getObjectPropertyDAG(), namedDag2.getObjectPropertyDAG()));
-			assertTrue(testAncestors(namedDag2.getClassDAG(), dag2.getClassDAG()));
-			assertTrue(testAncestors(namedDag2.getObjectPropertyDAG(), dag2.getObjectPropertyDAG()));
-			assertTrue(testParents(dag2.getClassDAG(), namedDag2.getClassDAG()));
-			assertTrue(testParents(dag2.getObjectPropertyDAG(), namedDag2.getObjectPropertyDAG()));
-			assertTrue(testParents(namedDag2.getClassDAG(), dag2.getClassDAG()));
-			assertTrue(testParents(namedDag2.getObjectPropertyDAG(), dag2.getObjectPropertyDAG()));
+			assertTrue(testDescendants(dag2.classes().dag(), namedDag2.classes().dag()));
+			assertTrue(testDescendants(dag2.objectProperties().dag(), namedDag2.objectProperties().dag()));
+			assertTrue(testDescendants(namedDag2.classes().dag(), dag2.classes().dag()));
+			assertTrue(testDescendants(namedDag2.objectProperties().dag(), dag2.objectProperties().dag()));
+			assertTrue(testChildren(dag2.classes().dag(), namedDag2.classes().dag()));
+			assertTrue(testChildren(dag2.objectProperties().dag(), namedDag2.objectProperties().dag()));
+			assertTrue(testChildren(namedDag2.classes().dag(), dag2.classes().dag()));
+			assertTrue(testChildren(namedDag2.objectProperties().dag(), dag2.objectProperties().dag()));
+			assertTrue(testAncestors(dag2.classes().dag(), namedDag2.classes().dag()));
+			assertTrue(testAncestors(dag2.objectProperties().dag(), namedDag2.objectProperties().dag()));
+			assertTrue(testAncestors(namedDag2.classes().dag(), dag2.classes().dag()));
+			assertTrue(testAncestors(namedDag2.objectProperties().dag(), dag2.objectProperties().dag()));
+			assertTrue(testParents(dag2.classes().dag(), namedDag2.classes().dag()));
+			assertTrue(testParents(dag2.objectProperties().dag(), namedDag2.objectProperties().dag()));
+			assertTrue(testParents(namedDag2.classes().dag(), dag2.classes().dag()));
+			assertTrue(testParents(namedDag2.objectProperties().dag(), dag2.objectProperties().dag()));
 //			assertTrue(checkVertexReduction(graph1, namedDag2, true));
 			//check only if the number of edges is smaller
 			//assertTrue(checkEdgeReduction(graph1, namedDag2, true)); COMMENTED OUT BY ROMAN
@@ -429,7 +429,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				//
 				//if(d2.isaNamedDAG()){
 				//	for (Description v: d1.vertexSet()){
-				//		if(d1.getRoles().contains(v)| d1.getClassDAG().contains(v)){
+				//		if(d1.getRoles().contains(v)| d1.classes().dag().contains(v)){
 				//			numberVertexesD1++;
 				//			System.out.println(v);
 				//		}
@@ -507,19 +507,19 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			}
 */			
 	private boolean checkforNamedVertexesOnly(TestTBoxReasonerImpl_OnNamedDAG dag, TBoxReasoner reasoner){
-		for (Equivalences<ObjectPropertyExpression> node: dag.getObjectPropertyDAG()) {
+		for (Equivalences<ObjectPropertyExpression> node: dag.objectProperties().dag()) {
 			ObjectPropertyExpression vertex = node.getRepresentative();
-			if (!reasoner.getObjectPropertyDAG().getVertex(vertex).isIndexed())
+			if (!reasoner.objectProperties().dag().getVertex(vertex).isIndexed())
 				return false;
 		}
-		for (Equivalences<DataPropertyExpression> node: dag.getDataPropertyDAG()) {
+		for (Equivalences<DataPropertyExpression> node: dag.dataProperties().dag()) {
 			DataPropertyExpression vertex = node.getRepresentative();
-			if(!reasoner.getDataPropertyDAG().getVertex(vertex).isIndexed())
+			if(!reasoner.dataProperties().dag().getVertex(vertex).isIndexed())
 				return false;
 		}
-		for (Equivalences<ClassExpression> node: dag.getClassDAG()) {
+		for (Equivalences<ClassExpression> node: dag.classes().dag()) {
 			ClassExpression vertex = node.getRepresentative();
-			if (!reasoner.getClassDAG().getVertex(vertex).isIndexed())
+			if (!reasoner.classes().dag().getVertex(vertex).isIndexed())
 				return false;
 		}
 		return true;

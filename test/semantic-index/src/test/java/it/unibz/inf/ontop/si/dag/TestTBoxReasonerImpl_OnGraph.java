@@ -20,7 +20,9 @@ package it.unibz.inf.ontop.si.dag;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.EquivalencesDAGImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 
 import java.util.*;
@@ -41,54 +43,46 @@ import com.google.common.collect.ImmutableSet;
 @Deprecated
 public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 
-	private final EquivalencesDAGImplOnGraph<ObjectPropertyExpression> objectPropertyDAG;
-	private final EquivalencesDAGImplOnGraph<DataPropertyExpression> dataPropertyDAG;
-	private final EquivalencesDAGImplOnGraph<ClassExpression> classDAG;
-	private final EquivalencesDAGImplOnGraph<DataRangeExpression> dataRangeDAG;
+	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
+	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
+	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
+	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, DataRangeExpression> dataRangeDAG;
 	private final TBoxReasonerImpl reasoner;
 
 	public TestTBoxReasonerImpl_OnGraph(TBoxReasonerImpl reasoner) {	
-		this.objectPropertyDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getObjectPropertyGraph());
-		this.dataPropertyDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getDataPropertyGraph());
-		this.classDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getClassGraph());
-		this.dataRangeDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getDataRangeGraph());
+		this.objectPropertyDAG = new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(),
+				new EquivalencesDAGImplOnGraph<>(reasoner.getObjectPropertyGraph()));
+		this.dataPropertyDAG = new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(),
+				new EquivalencesDAGImplOnGraph<>(reasoner.getDataPropertyGraph()));
+		this.classDAG = new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(),
+				new EquivalencesDAGImplOnGraph<>(reasoner.getClassGraph()));
+		this.dataRangeDAG = new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(),
+				new EquivalencesDAGImplOnGraph<>(reasoner.getDataRangeGraph()));
 		this.reasoner = reasoner;
 	}
-	
-	/**
-	 * Return the DAG of properties
-	 * 
-	 * @return DAG 
-	 */
 
-	@Override
-	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
-		return objectPropertyDAG;
-	}
-	
-	@Override
-	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
-		return dataPropertyDAG;
-	}
-	
-	/**
-	 * Return the DAG of classes
-	 * 
-	 * @return DAG 
-	 */
-	
-	@Override
-	public EquivalencesDAG<ClassExpression> getClassDAG() {
-		return classDAG;
-	}
-	
-	@Override
-	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
-		return dataRangeDAG;
-	}
+    @Override
+    public ClassifiedOntologyVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties() {
+        return objectPropertyDAG;
+    }
+
+    @Override
+    public ClassifiedOntologyVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties() {
+        return dataPropertyDAG;
+    }
+
+    @Override
+    public ClassifiedOntologyVocabularyCategory<ClassExpression, OClass> classes() {
+        return classDAG;
+    }
+
+    @Override
+    public ClassifiedOntologyVocabularyCategory<DataRangeExpression, DataRangeExpression> dataRanges() {
+        return dataRangeDAG;
+    }
 
 
-	// DUMMY
+    // DUMMY
 
 	@Override
 	public Collection<OClass> getClasses() {
@@ -174,9 +168,8 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 			Set<Equivalences<T>> result = new LinkedHashSet<>();
 
 			for (T vertex : graph.vertexSet()) {
-					result.add(getVertex(vertex));
-				}
-
+                result.add(getVertex(vertex));
+            }
 			return result.iterator();
 		}
 
@@ -370,20 +363,24 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	
 
 	public int vertexSetSize() {
-		return objectPropertyDAG.graph.vertexSet().size() + dataPropertyDAG.graph.vertexSet().size() + classDAG.graph.vertexSet().size();
+		return ((EquivalencesDAGImplOnGraph<ObjectPropertyExpression>)objectPropertyDAG.dag()).graph.vertexSet().size()
+                + ((EquivalencesDAGImplOnGraph<DataPropertyExpression>)dataPropertyDAG.dag()).graph.vertexSet().size()
+                + ((EquivalencesDAGImplOnGraph<ClassExpression>)classDAG.dag()).graph.vertexSet().size();
 	}
 
 	public int edgeSetSize() {
-		return objectPropertyDAG.graph.edgeSet().size() + dataPropertyDAG.graph.edgeSet().size() +  classDAG.graph.edgeSet().size();
+		return ((EquivalencesDAGImplOnGraph<ObjectPropertyExpression>)objectPropertyDAG.dag()).graph.edgeSet().size()
+                + ((EquivalencesDAGImplOnGraph<DataPropertyExpression>)dataPropertyDAG.dag()).graph.edgeSet().size()
+                + ((EquivalencesDAGImplOnGraph<ClassExpression>)classDAG.dag()).graph.edgeSet().size();
 	}
 
 	public DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> getObjectPropertyGraph() {
-		return objectPropertyDAG.graph;
+		return ((EquivalencesDAGImplOnGraph<ObjectPropertyExpression>)objectPropertyDAG.dag()).graph;
 	}
 	public DefaultDirectedGraph<DataPropertyExpression, DefaultEdge> getDataPropertyGraph() {
-		return dataPropertyDAG.graph;
+		return ((EquivalencesDAGImplOnGraph<DataPropertyExpression>)dataPropertyDAG.dag()).graph;
 	}
 	public DefaultDirectedGraph<ClassExpression, DefaultEdge> getClassGraph() {
-		return classDAG.graph;
+		return ((EquivalencesDAGImplOnGraph<ClassExpression>)classDAG.dag()).graph;
 	}
 }

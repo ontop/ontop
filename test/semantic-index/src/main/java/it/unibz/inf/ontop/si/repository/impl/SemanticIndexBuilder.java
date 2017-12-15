@@ -164,9 +164,9 @@ public class SemanticIndexBuilder  {
 	 */
 	
 	public SemanticIndexBuilder(TBoxReasoner reasoner)  {
-		classRanges = createSemanticIndex(reasoner.getClassDAG());
-		opRanges = createSemanticIndex(reasoner.getObjectPropertyDAG());
-		dpRanges = createSemanticIndex(reasoner.getDataPropertyDAG());
+		classRanges = createSemanticIndex(reasoner.classes().dag());
+		opRanges = createSemanticIndex(reasoner.objectProperties().dag());
+		dpRanges = createSemanticIndex(reasoner.dataProperties().dag());
 	}
 		
 	

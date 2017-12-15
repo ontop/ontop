@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 
@@ -38,55 +39,42 @@ import java.util.Set;
 @Deprecated
 public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 
-	private final EquivalencesDAG<ObjectPropertyExpression> objectPropertyDAG;
-	private final EquivalencesDAG<DataPropertyExpression> dataPropertyDAG;
-	private final EquivalencesDAG<ClassExpression> classDAG;
-	private final EquivalencesDAG<DataRangeExpression> dataRangeDAG;
+	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
+	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
+	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
+	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, DataRangeExpression> dataRangeDAG;
 	private final TBoxReasoner reasoner;
 
 	public TestTBoxReasonerImpl_Named(TBoxReasoner reasoner) {
-		this.objectPropertyDAG = new EquivalencesDAGImpl<>(reasoner.getObjectPropertyDAG());
-		this.dataPropertyDAG = new EquivalencesDAGImpl<>(reasoner.getDataPropertyDAG());
-		this.classDAG = new EquivalencesDAGImpl<>(reasoner.getClassDAG());
-		this.dataRangeDAG = new EquivalencesDAGImpl<>(reasoner.getDataRangeDAG());
+		this.objectPropertyDAG = new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(),
+				new EquivalencesDAGImpl<>(reasoner.objectProperties().dag()));
+		this.dataPropertyDAG = new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(),
+				new EquivalencesDAGImpl<>(reasoner.dataProperties().dag()));
+		this.classDAG = new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(),
+				new EquivalencesDAGImpl<>(reasoner.classes().dag()));
+		this.dataRangeDAG = new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(),
+				new EquivalencesDAGImpl<>(reasoner.dataRanges().dag()));
 		this.reasoner = reasoner;
 	}
 
 
-	/**
-	 * Return the DAG of properties
-	 * 
-	 * @return DAG 
-	 */
-
 	@Override
-	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
+	public ClassifiedOntologyVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties() {
 		return objectPropertyDAG;
 	}
-	/**
-	 * Return the DAG of properties
-	 * 
-	 * @return DAG 
-	 */
 
 	@Override
-	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
+	public ClassifiedOntologyVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties() {
 		return dataPropertyDAG;
 	}
-	
-	/**
-	 * Return the DAG of classes
-	 * 
-	 * @return DAG 
-	 */
 
 	@Override
-	public EquivalencesDAG<ClassExpression> getClassDAG() {
+	public ClassifiedOntologyVocabularyCategory<ClassExpression, OClass> classes() {
 		return classDAG;
 	}
-	
+
 	@Override
-	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
+	public ClassifiedOntologyVocabularyCategory<DataRangeExpression, DataRangeExpression> dataRanges() {
 		return dataRangeDAG;
 	}
 
@@ -275,6 +263,4 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 			return null;
 		}
 	}
-
-
 }

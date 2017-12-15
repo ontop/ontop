@@ -51,18 +51,18 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	
 	// maps all Ts (even from the non-reduced DAG) to the vertices of the possibly reduced  DAG
 	private final ImmutableMap<T, Equivalences<T>> fullVertexIndex;   
-	
+
 	private final Map<Equivalences<T>, Set<Equivalences<T>>> cacheSub;
 	private final Map<T, Set<T>> cacheSubRep;
 
 	private DefaultDirectedGraph<T,DefaultEdge> graph; // used in tests only
 	
-	private EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, ImmutableMap<T, Equivalences<T>> vertexIndex, ImmutableMap<T, Equivalences<T>> fullVertexIndex) {	
+	private EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, ImmutableMap<T, Equivalences<T>> vertexIndex, ImmutableMap<T, Equivalences<T>> fullVertexIndex) {
 		this.graph = graph;
 		this.dag = dag;
 		this.vertexIndex = vertexIndex;
 		this.fullVertexIndex = fullVertexIndex;
-		
+
 		this.cacheSub = new HashMap<>();
 		this.cacheSubRep = new HashMap<>();
 	}
@@ -301,7 +301,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 			}
 		}
 		
-		return new EquivalencesDAGImpl<TT>(graph, dag, vertexIndex, vertexIndex);
+		return new EquivalencesDAGImpl<>(graph, dag, vertexIndex, vertexIndex);
 	}
 
 	

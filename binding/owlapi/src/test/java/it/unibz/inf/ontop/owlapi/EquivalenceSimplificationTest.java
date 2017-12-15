@@ -45,8 +45,8 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_401.owl");
 		TBoxReasoner simple = TBoxReasonerImpl.create(ontology);
 
-		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
-		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
+		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.classes().dag();
+		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.objectProperties().dag();
 		
 		assertEquals(3, classDAG.vertexSetSize()); // A1, B1, C1
 		assertEquals(0, propDAG.vertexSetSize()); // no properties
@@ -63,7 +63,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		ClassExpression C2 = ontology.getClass(testURI + "C2");
 		ClassExpression C3 = ontology.getClass(testURI + "C3");
 
-		EquivalencesDAG<ClassExpression> classes = simple.getClassDAG();
+		EquivalencesDAG<ClassExpression> classes = simple.classes().dag();
 		assertEquals(classes.getCanonicalForm(A1), A1);
 		assertEquals(classes.getCanonicalForm(B1), B1);
 		assertEquals(classes.getCanonicalForm(C1), C1);
@@ -85,8 +85,8 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_402.owl");
 		TBoxReasoner simple = TBoxReasonerImpl.create(ontology);
 
-		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
-		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
+		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.classes().dag();
+		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.objectProperties().dag();
 		
 		// \exists A1, \exists A1^-,  \exists B1, \exists B1^-,  \exists C1, \exists C1^-
 		assertEquals(6, classDAG.vertexSetSize()); 
@@ -106,7 +106,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		ObjectPropertyExpression C2 = ontology.getObjectProperty(testURI + "C2");
 		ObjectPropertyExpression C3 = ontology.getObjectProperty(testURI + "C3");
 
-		EquivalencesDAG<ObjectPropertyExpression> ops = simple.getObjectPropertyDAG();
+		EquivalencesDAG<ObjectPropertyExpression> ops = simple.objectProperties().dag();
 		assertEquals(ops.getCanonicalForm(A1), A1);
 		assertEquals(ops.getCanonicalForm(B1), B1);
 		assertEquals(ops.getCanonicalForm(C1), C1);
@@ -129,8 +129,8 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_403.owl");
 		TBoxReasoner simple = TBoxReasonerImpl.create(ontology);
 		
-		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
-		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
+		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.classes().dag();
+		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.objectProperties().dag();
 		
 		assertEquals(6, propDAG.vertexSetSize()); // M, M^-, R, R^-, S, S^-
 		assertEquals(6, classDAG.vertexSetSize()); // A1, B1, C1, \exists R^-, \exists S, \exists M^-
@@ -144,7 +144,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		ClassExpression B3 = ontology.getClass(testURI + "B3");
 		ClassExpression C3 = ontology.getClass(testURI + "C3");
 
-		EquivalencesDAG<ClassExpression> classes = simple.getClassDAG();
+		EquivalencesDAG<ClassExpression> classes = simple.classes().dag();
 		assertEquals(classes.getCanonicalForm(A1), A1);
 		assertEquals(classes.getCanonicalForm(B1), B1);
 		assertEquals(classes.getCanonicalForm(C1), C1);
@@ -162,8 +162,8 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_404.owl");
 		TBoxReasoner simple = TBoxReasonerImpl.create(ontology);
 
-		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.getClassDAG();
-		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.getObjectPropertyDAG();
+		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.classes().dag();
+		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.objectProperties().dag();
 		
 		assertEquals(6, classDAG.vertexSetSize()); // A1, A1^-, B1, B1^-, C1, C1^-
 		assertEquals(6, propDAG.vertexSetSize()); // 
@@ -180,7 +180,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		ObjectPropertyExpression C2 = ontology.getObjectProperty(testURI + "C2");
 		ObjectPropertyExpression C3 = ontology.getObjectProperty(testURI + "C3");
 
-		EquivalencesDAG<ObjectPropertyExpression> ops = simple.getObjectPropertyDAG();
+		EquivalencesDAG<ObjectPropertyExpression> ops = simple.objectProperties().dag();
 		assertEquals(ops.getCanonicalForm(A1), A1);
 		assertEquals(ops.getCanonicalForm(B1), B1);
 		assertEquals(ops.getCanonicalForm(C1), C1);

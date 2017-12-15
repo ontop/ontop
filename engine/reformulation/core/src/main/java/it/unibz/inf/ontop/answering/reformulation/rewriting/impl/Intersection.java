@@ -93,13 +93,13 @@ public class Intersection<T> {
 	 * IMPORTANT: the class / property is given by the DOWNWRD-SATURATED SET
 	 *              (in other words, by the result of EquivalencesDAG.getSubRepresentatives
 	 * 
-	 * @param sub a non-empty downward saturated set for class / property
+	 * @param e a non-empty downward saturated set for class / property
 	 */
 	
 	public void intersectWith(T e) {
 		
 		if (elements == null) // we have top, the intersection is sub
-			elements = new HashSet<T>(dag.getSubRepresentatives(e)); // copy the set
+			elements = new HashSet<>(dag.getSubRepresentatives(e)); // copy the set
 		else
 			elements.retainAll(dag.getSubRepresentatives(e));			
 	}
@@ -119,7 +119,7 @@ public class Intersection<T> {
 				elements = Collections.emptySet();
 			else {
 				if (elements == null) // we have top, the intersection is sub
-					elements = new HashSet<T>(arg.elements); // copy the set
+					elements = new HashSet<>(arg.elements); // copy the set
 				else
 					elements.retainAll(arg.elements);							
 			}

@@ -55,8 +55,8 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(r);
 		
 		log.info("See information");
-		System.out.println(r.getClassDAG());
-		System.out.println(r.getObjectPropertyDAG());
+		System.out.println(r.classes().dag());
+		System.out.println(r.objectProperties().dag());
 		//System.out.println(r.getDAG());
 		
 //		log.info("See relations");
@@ -74,10 +74,10 @@ public class S_NewGraphTest  extends TestCase{
 		log.info("Get named dag");
 		
 		log.info("See information named DAG");
-		System.out.println(r.getClassDAG());
-		System.out.println(r.getObjectPropertyDAG());
-		System.out.println(SemanticIndexBuilder.getNamedDAG(r.getClassDAG()));
-		System.out.println(SemanticIndexBuilder.getNamedDAG(r.getObjectPropertyDAG()));
+		System.out.println(r.classes().dag());
+		System.out.println(r.objectProperties().dag());
+		System.out.println(SemanticIndexBuilder.getNamedDAG(r.classes().dag()));
+		System.out.println(SemanticIndexBuilder.getNamedDAG(r.objectProperties().dag()));
 		
 //		log.info("See relations named DAG");
 //		TBoxReasonerImpl tbox2= new TBoxReasonerImpl(dag);

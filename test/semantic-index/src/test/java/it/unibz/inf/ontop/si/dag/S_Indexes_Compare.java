@@ -110,7 +110,7 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 		
 		//check that the index of the node is contained in the intervals of the parent node
 		SimpleDirectedGraph<ObjectPropertyExpression, DefaultEdge> namedOP 
-							= SemanticIndexBuilder.getNamedDAG(reasoner.getObjectPropertyDAG());
+							= SemanticIndexBuilder.getNamedDAG(reasoner.objectProperties().dag());
 		for (Entry<ObjectPropertyExpression, SemanticIndexRange> vertex: engine.getIndexedObjectProperties()) { // .getNamedDAG().vertexSet()
 			int index = vertex.getValue().getIndex();
 			log.info("vertex {} index {}", vertex, index);
@@ -121,7 +121,7 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 			}
 		}
 		SimpleDirectedGraph<DataPropertyExpression, DefaultEdge> namedDP
-					= SemanticIndexBuilder.getNamedDAG(reasoner.getDataPropertyDAG());
+					= SemanticIndexBuilder.getNamedDAG(reasoner.dataProperties().dag());
 		for (Entry<DataPropertyExpression, SemanticIndexRange> vertex: engine.getIndexedDataProperties()) { // .getNamedDAG().vertexSet()
 			int index = vertex.getValue().getIndex();
 			log.info("vertex {} index {}", vertex, index);
@@ -132,7 +132,7 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 			}
 		}
 		SimpleDirectedGraph<ClassExpression, DefaultEdge> namedCL 
-						= SemanticIndexBuilder.getNamedDAG(reasoner.getClassDAG());
+						= SemanticIndexBuilder.getNamedDAG(reasoner.classes().dag());
 		for (Entry<ClassExpression, SemanticIndexRange> vertex: engine.getIndexedClasses()) { 
 			int index = vertex.getValue().getIndex();
 			log.info("vertex {} index {}", vertex, index);			

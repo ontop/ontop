@@ -109,7 +109,7 @@ public class S_TestTransitiveReduction extends TestCase {
 		ClassExpression B = onto.getClass("http://www.kro.com/ontologies/B");
 		ClassExpression C = onto.getClass("http://www.kro.com/ontologies/C");
 		
-		EquivalencesDAG<ClassExpression> classes = dag.getClassDAG();
+		EquivalencesDAG<ClassExpression> classes = dag.classes().dag();
 		
 		Equivalences<ClassExpression> vA = classes.getVertex(A);
 		Equivalences<ClassExpression> vB = classes.getVertex(B);
@@ -128,7 +128,7 @@ public class S_TestTransitiveReduction extends TestCase {
 		ClassExpression C = onto.getClass("http://www.kro.com/ontologies/C");
 		ClassExpression D = onto.getClass("http://www.kro.com/ontologies/D");
 		
-		EquivalencesDAG<ClassExpression> classes = dag.getClassDAG();
+		EquivalencesDAG<ClassExpression> classes = dag.classes().dag();
 		
 		Equivalences<ClassExpression> vA = classes.getVertex(A);
 		Equivalences<ClassExpression> vB = classes.getVertex(B);
@@ -171,20 +171,20 @@ public class S_TestTransitiveReduction extends TestCase {
 		int numberEquivalents=0;
 
 		//number of redundant edges 
-		int numberRedundants=0;
+		int numberRedundants = 0;
 
 		for (Equivalences<ObjectPropertyExpression> equivalents: d2.getObjectPropertyDAG())
-			if(equivalents.size()>=2)
+			if (equivalents.size() >= 2)
 				numberEquivalents += equivalents.size();
 		
-		for (Equivalences<ClassExpression> equivalents: d2.getClassDAG())
-			if(equivalents.size()>=2)
+		for (Equivalences<ClassExpression> equivalents: d2.classes().dag())
+			if (equivalents.size() >= 2)
 				numberEquivalents += equivalents.size();
 
 
 		{
 			DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> g1 = 	reasonerd1.getObjectPropertyGraph();
-			for (Equivalences<ObjectPropertyExpression> equivalents: reasonerd1.getObjectPropertyDAG()) {
+			for (Equivalences<ObjectPropertyExpression> equivalents: reasonerd1.objectProperties().dag()) {
 				
 				log.info("equivalents {} ", equivalents);
 				
@@ -212,9 +212,9 @@ public class S_TestTransitiveReduction extends TestCase {
 			}
 		}
 		{
-			DefaultDirectedGraph<ClassExpression,DefaultEdge> g1 =	reasonerd1.getClassGraph();	
+			DefaultDirectedGraph<ClassExpression,DefaultEdge> g1 = reasonerd1.getClassGraph();
 
-			for (Equivalences<ClassExpression> equivalents : reasonerd1.getClassDAG()) {
+			for (Equivalences<ClassExpression> equivalents : reasonerd1.classes().dag()) {
 				
 				log.info("equivalents {} ", equivalents);
 				
@@ -222,11 +222,10 @@ public class S_TestTransitiveReduction extends TestCase {
 				for (ClassExpression vertex: equivalents) {
 					if(g1.incomingEdgesOf(vertex).size()!= g1.inDegreeOf(vertex)) //check that there anren't two edges pointing twice to the same nodes
 						numberRedundants +=g1.inDegreeOf(vertex)- g1.incomingEdgesOf(vertex).size();
-				
-					
+
 					//descendants of the vertex
-					Set<Equivalences<ClassExpression>> descendants = d2.getClassDAG().getSub(equivalents);
-					Set<Equivalences<ClassExpression>> children = d2.getClassDAG().getDirectSub(equivalents);
+					Set<Equivalences<ClassExpression>> descendants = d2.classes().dag().getSub(equivalents);
+					Set<Equivalences<ClassExpression>> children = d2.classes().dag().getDirectSub(equivalents);
 
 					log.info("descendants{} ", descendants);
 					log.info("children {} ", children);
@@ -247,7 +246,6 @@ public class S_TestTransitiveReduction extends TestCase {
 		log.info("redundants {} ", numberRedundants);
 
 		return numberEdgesD1>= (numberRedundants+ numberEquivalents+ numberEdgesD2);
-
 	}
 }
 

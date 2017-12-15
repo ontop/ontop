@@ -492,14 +492,14 @@ public class QueryConnectedComponent {
 		// p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
 		if (/*p.isClass()*/ (p.getArity() == 1) && reasoner.containsClass(p.getName())) {
 			OClass c = reasoner.getClass(p.getName());
-			OClass equivalent = (OClass)reasoner.getClassDAG().getCanonicalForm(c);
+			OClass equivalent = (OClass)reasoner.classes().dag().getCanonicalForm(c);
 			if (equivalent != null && !equivalent.equals(c)) {
 				return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
 			}
 		}
 		else if (/*p.isObjectProperty()*/ (p.getArity() == 2) && reasoner.containsObjectProperty(p.getName())) {
 			ObjectPropertyExpression ope = reasoner.getObjectProperty(p.getName());
-			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyDAG().getCanonicalForm(ope);
+			ObjectPropertyExpression equivalent = reasoner.objectProperties().dag().getCanonicalForm(ope);
 			if (equivalent != null && !equivalent.equals(ope)) {
 				if (!equivalent.isInverse())
 					return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
@@ -509,7 +509,7 @@ public class QueryConnectedComponent {
 		}
 		else if (/*p.isDataProperty()*/ (p.getArity() == 2)  && reasoner.containsDataProperty(p.getName())) {
 			DataPropertyExpression dpe = reasoner.getDataProperty(p.getName());
-			DataPropertyExpression equivalent = reasoner.getDataPropertyDAG().getCanonicalForm(dpe);
+			DataPropertyExpression equivalent = reasoner.dataProperties().dag().getCanonicalForm(dpe);
 			if (equivalent != null && !equivalent.equals(dpe)) {
 				return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
 			}
