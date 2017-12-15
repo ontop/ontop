@@ -40,7 +40,6 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
-
     /**
      * TODO: find a better name
      */
@@ -66,6 +65,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private final TermNullabilityEvaluator nullabilityEvaluator;
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableSubstitution<ImmutableTerm> substitution;
+    private final ImmutableSet<Variable> childVariables;
 
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
 
@@ -78,15 +78,25 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.substitution = substitution;
         this.optionalModifiers = optionalQueryModifiers;
         this.nullabilityEvaluator = nullabilityEvaluator;
+        this.childVariables = extractChildVariables(projectedVariables, substitution);
 
         validate();
     }
 
     private void validate() {
+        ImmutableSet<Variable> substitutionDomain = substitution.getDomain();
+
         // The substitution domain must be a subset of the projectedVariables
-        if (!projectedVariables.containsAll(substitution.getDomain())) {
+        if (!projectedVariables.containsAll(substitutionDomain)) {
             throw new InvalidQueryNodeException("ConstructionNode: all the domain variables " +
                     "of the substitution must be projected.\n" + toString());
+        }
+
+        // The variables contained in the domain and in the range of the substitution must be disjoint
+        if (substitutionDomain.stream()
+                .anyMatch(childVariables::contains)) {
+            throw new InvalidQueryNodeException("ConstructionNode: variables defined by the substitution cannot " +
+                    "be used for defining other variables.\n" + toString());
         }
 
         // Substitution to non-projected variables is incorrect
@@ -111,6 +121,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.substitution = SUBSTITUTION_FACTORY.getSubstitution();
         this.optionalModifiers = Optional.empty();
+        this.childVariables = extractChildVariables(projectedVariables, substitution);
 
         validate();
     }
@@ -123,8 +134,22 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.substitution = substitution;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.optionalModifiers = Optional.empty();
+        this.childVariables = extractChildVariables(projectedVariables, substitution);
 
         validate();
+    }
+
+    private static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> projectedVariables,
+                                                          ImmutableSubstitution<ImmutableTerm> substitution) {
+        ImmutableSet<Variable> variableDefinedByBindings = substitution.getDomain();
+
+        Stream<Variable> variablesRequiredByBindings = substitution.getImmutableMap().values().stream()
+                .flatMap(ImmutableTerm::getVariableStream);
+
+        //return only the variables that are also used in the bindings for the child of the construction node
+        return Stream.concat(projectedVariables.stream(), variablesRequiredByBindings)
+                .filter(v -> !variableDefinedByBindings.contains(v))
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -158,15 +183,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
     @Override
     public ImmutableSet<Variable> getChildVariables() {
-        ImmutableSet<Variable> variableDefinedByBindings = substitution.getDomain();
-
-        Stream<Variable> variablesRequiredByBindings = substitution.getImmutableMap().values().stream()
-                .flatMap(ImmutableTerm::getVariableStream);
-
-        //return only the variables that are also used in the bindings for the child of the construction node
-        return Stream.concat(projectedVariables.stream(), variablesRequiredByBindings)
-                .filter(v -> !variableDefinedByBindings.contains(v))
-                .collect(ImmutableCollectors.toSet());
+        return childVariables;
     }
 
     @Override
