@@ -20,88 +20,34 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.ArrayList;
 import java.util.List;
 
 // TODO: move to a more appropriate package
 
-public class TargetQueryValidator implements TargetQueryVocabularyValidator {
+public class TargetQueryValidator  {
 	
-	// the ontology vocabulary of the OBDA model
-	private final Ontology voc;
+	public static List<String> validate(List<? extends Function> targetQuery, OntologyVocabulary vocabulary) {
 
-	/** List of invalid predicates */
-	private List<String> invalidPredicates = new ArrayList<>();
-
-    @SuppressWarnings("unused")
-    Logger log = LoggerFactory.getLogger(this.getClass());
-
-	public TargetQueryValidator(Ontology voc) {
-		this.voc = voc;
-	}
-	
-	@Override
-	public boolean validate(List<? extends Function> targetQuery) {
-		// Reset the invalid list
-		invalidPredicates.clear();
-
-		// Get the predicates in the target query.
-		for (Function atom : targetQuery) {
-			Predicate p = atom.getFunctionSymbol();
-
-			boolean isClass = isClass(p);
-			boolean isObjectProp = isObjectProperty(p);
-			boolean isDataProp = isDataProperty(p);
-			boolean isAnnotProp = isAnnotationProperty(p);
-			boolean isTriple = isTriple(p);
-			boolean isSameAs = isSameAs(p);
-            boolean isCanonicalIRI = isCanonicalIRI(p);
-
-			// Check if the predicate contains in the ontology vocabulary as one
-			// of these components (i.e., class, object property, data property).
-			boolean isPredicateValid = isClass || isObjectProp || isDataProp || isAnnotProp || isTriple || isSameAs || isCanonicalIRI;
-
-			if (!isPredicateValid) {
-				invalidPredicates.add(p.getName());
-			}
-		}
-		return invalidPredicates.isEmpty();
+	    return targetQuery.stream()
+                .filter(atom -> !isValid(atom.getFunctionSymbol(), vocabulary))
+                .map(atom -> atom.getFunctionSymbol().getName())
+                .collect(ImmutableCollectors.toList());
 	}
 
-	@Override
-	public List<String> getInvalidPredicates() { return invalidPredicates; }
+	public static boolean isValid(Predicate p, OntologyVocabulary vocabulary) {
 
-	@Override
-	public boolean isClass(Predicate predicate) {
-		return voc.containsClass(predicate.getName());
-	}
-
-	@Override
-	public boolean isObjectProperty(Predicate predicate) {
-		return voc.containsObjectProperty(predicate.getName());
-	}
-
-	@Override
-	public boolean isDataProperty(Predicate predicate) {
-		return voc.containsDataProperty(predicate.getName());
-	}
-
-	@Override
-	public boolean isAnnotationProperty(Predicate predicate) {  return voc.containsAnnotationProperty(predicate.getName()); }
-	
-	private boolean isTriple(Predicate predicate){
-		return predicate.isTriplePredicate();
-	}
-
-	private boolean isSameAs(Predicate p) { return p.getName().equals(IriConstants.SAME_AS); }
-
-    private boolean isCanonicalIRI(Predicate p) { return p.getName().equals(IriConstants.CANONICAL_IRI); }
+        return vocabulary.classes().contains(p.getName())
+                || vocabulary.objectProperties().contains(p.getName())
+                || vocabulary.dataProperties().contains(p.getName())
+                || vocabulary.annotationProperties().contains(p.getName())
+                || p.isTriplePredicate()
+                || p.getName().equals(IriConstants.SAME_AS)
+                || p.getName().equals(IriConstants.CANONICAL_IRI);
+    }
 }

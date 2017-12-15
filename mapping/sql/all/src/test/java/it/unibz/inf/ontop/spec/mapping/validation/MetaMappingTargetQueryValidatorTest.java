@@ -71,13 +71,11 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 		 * TODO: do we want to consider a non-empty vocabulary?
 		 */
 		OntologyVocabulary vocabulary = OntologyFactoryImpl.getInstance().createVocabulary();
-		Ontology onto = OntologyFactoryImpl.getInstance().createOntology(vocabulary);
-        TargetQueryVocabularyValidator validator = new TargetQueryValidator(onto);
 
         // run validator
 		try {
             for (SQLPPTriplesMap mapping : ppMapping.getTripleMaps()) {
-                if (!validator.validate(mapping.getTargetAtoms())) {
+                if (!TargetQueryValidator.validate(mapping.getTargetAtoms(), vocabulary).isEmpty()) {
                     throw new Exception("Found an invalid target query: " + mapping.getTargetAtoms());
                 }
             }

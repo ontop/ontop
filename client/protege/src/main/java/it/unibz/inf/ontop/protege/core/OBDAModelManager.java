@@ -35,7 +35,6 @@ import it.unibz.inf.ontop.spec.mapping.converter.OldSyntaxMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
-import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.TargetQueryValidator;
 import it.unibz.inf.ontop.utils.querymanager.*;
@@ -578,11 +577,9 @@ public class OBDAModelManager implements Disposable {
 					log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
 				}
 				// adding type information to the mapping predicates
-				TargetQueryVocabularyValidator validator = new TargetQueryValidator(OntologyFactoryImpl.getInstance().createOntology(obdaModel.getCurrentVocabulary()));
 				for (SQLPPTriplesMap mapping : obdaModel.generatePPMapping().getTripleMaps()) {
 					List<? extends Function> tq = mapping.getTargetAtoms();
-					boolean bSuccess = validator.validate(tq);
-					if (!bSuccess) {
+					if (!TargetQueryValidator.validate(tq, obdaModel.getCurrentVocabulary()).isEmpty()) {
 						throw new Exception("Found an invalid target query: " + tq.toString());
 					}
 				}
@@ -595,7 +592,6 @@ public class OBDAModelManager implements Disposable {
 			finally {
 				loadingData = false; // flag off
 				fireActiveOBDAModelChange();
-
 			}
 		}
 
