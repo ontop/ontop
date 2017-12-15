@@ -24,7 +24,6 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -144,21 +143,4 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 
 	@Override
 	public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
-
-	
-	@Override
-	public void merge(Ontology ontology) {
-		OntologyImpl imp = (OntologyImpl)ontology;
-
-		classes.entities.putAll(imp.vocabulary.concepts.entrySet().stream()
-				.filter(e -> !classes.builtins.containsKey(e.getKey()))
-				.collect(ImmutableCollectors.toMap()));
-		objectProperties.entities.putAll(imp.vocabulary.objectProperties.entrySet().stream()
-				.filter(e -> !objectProperties.builtins.containsKey(e.getKey()))
-				.collect(ImmutableCollectors.toMap()));
-		dataProperties.entities.putAll(imp.vocabulary.dataProperties.entrySet().stream()
-				.filter(e -> !dataProperties.builtins.containsKey(e.getKey()))
-				.collect(ImmutableCollectors.toMap()));
-		annotationProperties.entities.putAll(imp.vocabulary.annotationProperties);
-	}
 }

@@ -6,14 +6,10 @@ import it.unibz.inf.ontop.owlapi.utils.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.si.impl.SILoadingTools.RepositoryInit;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -27,22 +23,6 @@ public class OntologyIndividualLoading {
     /**
      * High-level method
      */
-    public static OntopSemanticIndexLoader loadOntologyIndividuals(String owlFile, Properties properties)
-            throws SemanticIndexException {
-        try {
-            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-            OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
-
-            return loadOntologyIndividuals(ontology, properties);
-
-        } catch (OWLOntologyCreationException e) {
-            throw new SemanticIndexException(e.getMessage());
-        }
-    }
-
-    /**
-     * High-level method
-     */
     public static OntopSemanticIndexLoader loadOntologyIndividuals(OWLOntology owlOntology, Properties properties)
             throws SemanticIndexException {
 
@@ -52,7 +32,7 @@ public class OntologyIndividualLoading {
             /*
             Loads the data
              */
-            OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(init.ontologyClosure
+            OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(init.abox
                     .orElseThrow(() -> new IllegalStateException("An ontology closure was expected")), init.reasoner);
 
             int count = init.dataRepository.insertData(init.localConnection, aBoxIter, 5000, 500);

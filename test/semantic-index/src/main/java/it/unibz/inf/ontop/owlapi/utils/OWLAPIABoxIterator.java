@@ -49,6 +49,11 @@ public class OWLAPIABoxIterator implements Iterator<Assertion> {
 	
 	private final OWLAPITranslatorHelper helper;
 
+    /**
+     * @param ontologies used only for data (ABox)
+     * @param reasoner used only for vocabulary (class and property names)
+     */
+
 	public OWLAPIABoxIterator(Collection<OWLOntology> ontologies, TBoxReasoner reasoner) {
 		helper = new OWLAPITranslatorHelper(reasoner);
 		ontologiesIterator = ontologies.iterator();

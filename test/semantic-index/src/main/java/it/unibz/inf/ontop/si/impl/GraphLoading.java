@@ -108,22 +108,14 @@ public class GraphLoading {
 
         OntologyVocabulary vb = ONTOLOGY_FACTORY.createVocabulary();
         for (IRI graphURI : graphURIs) {
-            Ontology o = getOntology(graphURI);
-            vb.merge(o);
-
-            // TODO: restore copying ontology axioms (it was copying from result into result, at least since July 2013)
-
-            //for (SubPropertyOfAxiom ax : result.getSubPropertyAxioms())
-            //	result.add(ax);
-            //for (SubClassOfAxiom ax : result.getSubClassAxioms())
-            //	result.add(ax);
+            collectOntologyVocabulary(graphURI, vb);
         }
         Ontology result = ONTOLOGY_FACTORY.createOntology(vb);
 
         return result;
     }
 
-    private static Ontology getOntology(IRI graphURI) throws IOException {
+    private static void collectOntologyVocabulary(IRI graphURI, OntologyVocabulary vb) throws IOException {
         RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphURI.toString()).get();
         RDFParser rdfParser = Rio.createParser(rdfFormat, ValueFactoryImpl.getInstance());
         ParserConfig config = rdfParser.getParserConfig();
@@ -136,48 +128,33 @@ public class GraphLoading {
 //		rdfParser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //		rdfParser.setPreserveBNodeIDs(true);
 
-        RDFTBoxReader reader = new RDFTBoxReader();
-        rdfParser.setRDFHandler(reader);
+        rdfParser.setRDFHandler(new RDFHandlerBase() {
+            @Override
+            public void handleStatement(Statement st) throws RDFHandlerException {
+                URI pred = st.getPredicate();
+                Value obj = st.getObject();
+                if (obj instanceof Literal) {
+                    String dataProperty = pred.stringValue();
+                    vb.dataProperties().create(dataProperty);
+                }
+                else if (pred.stringValue().equals(IriConstants.RDF_TYPE)) {
+                    String className = obj.stringValue();
+                    vb.classes().create(className);
+                }
+                else {
+                    String objectProperty = pred.stringValue();
+                    vb.objectProperties().create(objectProperty);
+                }
+            }
+        });
 
         URL graphURL = new URL(graphURI.toString());
         InputStream in = graphURL.openStream();
         try {
             rdfParser.parse(in, graphURI.toString());
-        } finally {
+        }
+        finally {
             in.close();
-        }
-        return reader.getOntology();
-    }
-
-    public static class RDFTBoxReader extends RDFHandlerBase {
-        private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-        private OntologyVocabulary vb = ofac.createVocabulary();
-
-        public Ontology getOntology() {
-            return ofac.createOntology(vb);
-        }
-
-        @Override
-        public void handleStatement(Statement st) throws RDFHandlerException {
-            URI pred = st.getPredicate();
-            Value obj = st.getObject();
-            if (obj instanceof Literal) {
-                String dataProperty = pred.stringValue();
-                vb.dataProperties().create(dataProperty);
-            }
-            else if (pred.stringValue().equals(IriConstants.RDF_TYPE)) {
-                String className = obj.stringValue();
-                vb.classes().create(className);
-            }
-            else {
-                String objectProperty = pred.stringValue();
-                vb.objectProperties().create(objectProperty);
-            }
-
-		/* Roman 10/08/15: recover?
-			Axiom axiom = getTBoxAxiom(st);
-			ontology.addAssertionWithCheck(axiom);
-		*/
         }
     }
 }

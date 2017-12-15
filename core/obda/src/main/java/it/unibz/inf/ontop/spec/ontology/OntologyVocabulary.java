@@ -15,6 +15,4 @@ public interface OntologyVocabulary {
 	OntologyVocabularyCategory<AnnotationProperty> annotationProperties();
 
 	Datatype getDatatype(String uri);
-
-	void merge(Ontology ontology);
 }

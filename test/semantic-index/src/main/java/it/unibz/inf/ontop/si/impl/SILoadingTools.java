@@ -45,15 +45,15 @@ class SILoadingTools {
 
     static class RepositoryInit {
         final SIRepositoryManager dataRepository;
-        final Optional<Set<OWLOntology>> ontologyClosure;
+        final Optional<Set<OWLOntology>> abox;
         final String jdbcUrl;
         final TBoxReasoner reasoner;
         final Connection localConnection;
 
-        private RepositoryInit(SIRepositoryManager dataRepository, Optional<Set<OWLOntology>> ontologyClosure, String jdbcUrl,
+        private RepositoryInit(SIRepositoryManager dataRepository, Optional<Set<OWLOntology>> abox, String jdbcUrl,
                                TBoxReasoner reasoner, Connection localConnection) {
             this.dataRepository = dataRepository;
-            this.ontologyClosure = ontologyClosure;
+            this.abox = abox;
             this.jdbcUrl = jdbcUrl;
             this.reasoner = reasoner;
             this.localConnection = localConnection;
