@@ -192,16 +192,16 @@ public class OBDAModelManager implements Disposable {
 
 					// Setup the entity declarations
 					for (OWLClass c : addedOnto.getClassesInSignature())
-						activeOBDAModel.getCurrentVocabulary().createClass(c.getIRI().toString());
+						activeOBDAModel.getCurrentVocabulary().classes().create(c.getIRI().toString());
 
 					for (OWLObjectProperty r : addedOnto.getObjectPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().createObjectProperty(r.getIRI().toString());
+						activeOBDAModel.getCurrentVocabulary().objectProperties().create(r.getIRI().toString());
 
 					for (OWLDataProperty p : addedOnto.getDataPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().createDataProperty(p.getIRI().toString());
+						activeOBDAModel.getCurrentVocabulary().dataProperties().create(p.getIRI().toString());
 
 					for (OWLAnnotationProperty p : addedOnto.getAnnotationPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().createAnnotationProperty(p.getIRI().toString());
+						activeOBDAModel.getCurrentVocabulary().annotationProperties().create(p.getIRI().toString());
 
 					continue;
 				}
@@ -214,16 +214,16 @@ public class OBDAModelManager implements Disposable {
 					OBDAModel activeOBDAModel = getActiveOBDAModel();
 
 					for (OWLClass c : removedOnto.getClassesInSignature())
-						activeOBDAModel.getCurrentVocabulary().removeClass(c.getIRI().toString());
+						activeOBDAModel.getCurrentVocabulary().classes().remove(c.getIRI().toString());
 
 					for (OWLObjectProperty r : removedOnto.getObjectPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().removeObjectProperty(r.getIRI().toString());
+						activeOBDAModel.getCurrentVocabulary().objectProperties().remove(r.getIRI().toString());
 
 					for (OWLDataProperty p : removedOnto.getDataPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().removeDataProperty(p.getIRI().toString());
+						activeOBDAModel.getCurrentVocabulary().dataProperties().remove(p.getIRI().toString());
 
 					for (OWLAnnotationProperty p : removedOnto.getAnnotationPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().removeAnnotationProperty(p.getIRI().toString());
+						activeOBDAModel.getCurrentVocabulary().annotationProperties().remove(p.getIRI().toString());
 
 					continue;
 				}
@@ -235,19 +235,19 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							activeOBDAModel.getCurrentVocabulary().createClass(oc.getIRI().toString());
+							activeOBDAModel.getCurrentVocabulary().classes().create(oc.getIRI().toString());
 						}
 						else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().createObjectProperty(or.getIRI().toString());
+							activeOBDAModel.getCurrentVocabulary().objectProperties().create(or.getIRI().toString());
 						}
 						else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().createDataProperty(op.getIRI().toString());
+							activeOBDAModel.getCurrentVocabulary().dataProperties().create(op.getIRI().toString());
 						}
 						else if (entity instanceof OWLAnnotationProperty){
 							OWLAnnotationProperty ap = (OWLAnnotationProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().createAnnotationProperty(ap.getIRI().toString());
+							activeOBDAModel.getCurrentVocabulary().annotationProperties().create(ap.getIRI().toString());
 						}
 					}
 				}
@@ -258,20 +258,20 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							activeOBDAModel.getCurrentVocabulary().removeClass(oc.getIRI().toString());
+							activeOBDAModel.getCurrentVocabulary().classes().remove(oc.getIRI().toString());
 						}
 						else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().removeObjectProperty(or.getIRI().toString());
+							activeOBDAModel.getCurrentVocabulary().objectProperties().remove(or.getIRI().toString());
 						}
 						else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().removeDataProperty(op.getIRI().toString());
+							activeOBDAModel.getCurrentVocabulary().dataProperties().remove(op.getIRI().toString());
 						}
 
 						else if (entity instanceof  OWLAnnotationProperty ){
 							OWLAnnotationProperty ap = (OWLAnnotationProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().removeAnnotationProperty(ap.getIRI().toString());
+							activeOBDAModel.getCurrentVocabulary().annotationProperties().remove(ap.getIRI().toString());
 						}
 
 					}
@@ -651,16 +651,16 @@ public class OBDAModelManager implements Disposable {
 		for (OWLOntology ontology : ontologies) {
 			// Setup the entity declarations
 			for (OWLClass c : ontology.getClassesInSignature())
-				obdaModel.getCurrentVocabulary().createClass(c.getIRI().toString());
+				obdaModel.getCurrentVocabulary().classes().create(c.getIRI().toString());
 
 			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature())
-				obdaModel.getCurrentVocabulary().createObjectProperty(r.getIRI().toString());
+				obdaModel.getCurrentVocabulary().objectProperties().create(r.getIRI().toString());
 
 			for (OWLDataProperty p : ontology.getDataPropertiesInSignature())
-				obdaModel.getCurrentVocabulary().createDataProperty(p.getIRI().toString());
+				obdaModel.getCurrentVocabulary().dataProperties().create(p.getIRI().toString());
 
 			for (OWLAnnotationProperty p : ontology.getAnnotationPropertiesInSignature())
-				obdaModel.getCurrentVocabulary().createAnnotationProperty(p.getIRI().toString());
+				obdaModel.getCurrentVocabulary().annotationProperties().create(p.getIRI().toString());
 		}
 
 		String unsafeDefaultPrefix = activeOntology.getOntologyID().getOntologyIRI()

@@ -402,20 +402,20 @@ public class OWL2QLTranslatorTest {
 		OntologyFactory factory = OntologyFactoryImpl.getInstance(); 
 		OntologyVocabulary voc = factory.createVocabulary();
 		
-		ObjectPropertyExpression top = voc.createObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
+		ObjectPropertyExpression top = voc.objectProperties().create("http://www.w3.org/2002/07/owl#topObjectProperty");
 		ObjectPropertyExpression topInv = top.getInverse();
 		ObjectPropertyExpression topInvInv = topInv.getInverse();
 		assertTrue(topInv == topInvInv);
 
-		ObjectPropertyExpression top2 = voc.createObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
+		ObjectPropertyExpression top2 = voc.objectProperties().create("http://www.w3.org/2002/07/owl#topObjectProperty");
 		assertEquals(top2, topInv);
 		
-		ObjectPropertyExpression bot = voc.createObjectProperty("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+		ObjectPropertyExpression bot = voc.objectProperties().create("http://www.w3.org/2002/07/owl#bottomObjectProperty");
 		ObjectPropertyExpression botInv = bot.getInverse();
 		ObjectPropertyExpression botInvInv = botInv.getInverse();
 		assertTrue(botInv == botInvInv);
 		
-		ObjectPropertyExpression bot2 = voc.createObjectProperty("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+		ObjectPropertyExpression bot2 = voc.objectProperties().create("http://www.w3.org/2002/07/owl#bottomObjectProperty");
 		assertEquals(bot2, botInv);		
 		
 		assertFalse(bot.equals(top));

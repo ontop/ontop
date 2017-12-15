@@ -163,15 +163,15 @@ public class GraphLoading {
             Value obj = st.getObject();
             if (obj instanceof Literal) {
                 String dataProperty = pred.stringValue();
-                vb.createDataProperty(dataProperty);
+                vb.dataProperties().create(dataProperty);
             }
             else if (pred.stringValue().equals(IriConstants.RDF_TYPE)) {
                 String className = obj.stringValue();
-                vb.createClass(className);
+                vb.classes().create(className);
             }
             else {
                 String objectProperty = pred.stringValue();
-                vb.createObjectProperty(objectProperty);
+                vb.objectProperties().create(objectProperty);
             }
 
 		/* Roman 10/08/15: recover?

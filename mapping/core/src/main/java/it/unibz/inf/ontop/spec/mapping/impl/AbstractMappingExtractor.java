@@ -23,8 +23,6 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
         T3 extends MappingParser, T4 extends OntopMappingSettings> implements MappingExtractor{
 
 
-    private static final String ONTOLOGY_SATURATED_TBOX_ERROR_MSG = "the Ontology and TBoxReasoner must be both present, or none";
-
     private final MappingOntologyComplianceValidator ontologyComplianceValidator;
     protected final T3 mappingParser;
 
@@ -34,15 +32,15 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
     }
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<Ontology> ontology,
+    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
+                                        @Nonnull Optional<DBMetadata> dbMetadata,
                                         @Nonnull Optional<TBoxReasoner> saturatedTBox,
                                         @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
 
         T1 ppMapping = extractPPMapping(specInput);
 
-        return extract(ppMapping, specInput, dbMetadata, ontology, saturatedTBox, executorRegistry);
+        return extract(ppMapping, specInput, dbMetadata, saturatedTBox, executorRegistry);
     }
 
     protected T1 extractPPMapping(OBDASpecInput specInput)
@@ -67,15 +65,11 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
     @Override
     public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<Ontology> ontology,
                                         @Nonnull Optional<TBoxReasoner> saturatedTBox,
                                         @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
 
-        if (ontology.isPresent() != saturatedTBox.isPresent()) {
-            throw new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG);
-        }
-        return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, ontology, saturatedTBox,
+        return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, saturatedTBox,
                 executorRegistry);
     }
 
@@ -91,7 +85,7 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
         }
     }
 
-    protected abstract MappingAndDBMetadata convertPPMapping(T1 ppMapping, Optional<T2> dbMetadata, OBDASpecInput specInput, Optional<Ontology> ontology, Optional<TBoxReasoner> saturatedTBox, ExecutorRegistry executorRegistry) throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, NullVariableInMappingException, UnknownDatatypeException;
+    protected abstract MappingAndDBMetadata convertPPMapping(T1 ppMapping, Optional<T2> dbMetadata, OBDASpecInput specInput, Optional<TBoxReasoner> saturatedTBox, ExecutorRegistry executorRegistry) throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, NullVariableInMappingException, UnknownDatatypeException;
 
     protected abstract Optional<T2> castDBMetadata(Optional<DBMetadata> dbMetadata);
 

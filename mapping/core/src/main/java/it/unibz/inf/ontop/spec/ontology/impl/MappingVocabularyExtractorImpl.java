@@ -30,14 +30,15 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
         OntologyVocabulary ontologyVocabulary = ONTOLOGY_FACTORY.createVocabulary();
         targetAtoms
                 .forEach(f -> {
+                    String name = f.getFunctionSymbol().getName();
                     if (f.getArity() == 1)
-                        ontologyVocabulary.createClass(f.getFunctionSymbol().getName());
+                        ontologyVocabulary.classes().create(name);
                     else {
                         Predicate.COL_TYPE secondArgType = f.getFunctionSymbol().getType(1);
                         if ((secondArgType != null) && secondArgType.equals(Predicate.COL_TYPE.OBJECT))
-                            ontologyVocabulary.createObjectProperty(f.getFunctionSymbol().getName());
+                            ontologyVocabulary.objectProperties().create(name);
                         else
-                            ontologyVocabulary.createDataProperty(f.getFunctionSymbol().getName());
+                            ontologyVocabulary.dataProperties().create(name);
                     }
                 });
         return ONTOLOGY_FACTORY.createOntology(ontologyVocabulary);

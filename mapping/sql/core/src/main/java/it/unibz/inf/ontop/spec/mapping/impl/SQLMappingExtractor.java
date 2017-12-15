@@ -61,7 +61,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
      * TODO: move this method to AbstractMappingExtractor
      */
     protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
-                                                  OBDASpecInput specInput, Optional<Ontology> optionalOntology,
+                                                  OBDASpecInput specInput,
                                                   Optional<TBoxReasoner> optionalSaturatedTBox,
                                                   ExecutorRegistry executorRegistry)
             throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, UnknownDatatypeException {

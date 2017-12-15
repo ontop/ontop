@@ -1077,9 +1077,6 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	private OWLOntology currentOWLOntology; // required to retrieve datatype definitions 
 	
-	private final Set<String> objectproperties = new HashSet<>();
-	private final Set<String> dataproperties = new HashSet<>();
-	private final Set<String> annotationproperties = new HashSet<>();
 	private final Set<String> punnedPredicates = new HashSet<>();
 	
 	
@@ -1094,39 +1091,35 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		for (OWLOntology owl : owls) {
 			for (OWLClass entity : owl.getClassesInSignature())  {
 				String uri = entity.getIRI().toString();
-				vb.createClass(uri);			
+				vb.classes().create(uri);
 			}
 
 			for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) {
 				String uri = prop.getIRI().toString();
-				if (dataproperties.contains(uri))  {
+				if (vb.dataProperties().contains(uri))  {
 					punnedPredicates.add(uri); 
 					log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
 				}
 				else {
-					objectproperties.add(uri);
-					vb.createObjectProperty(uri);
+					vb.objectProperties().create(uri);
 				}
 			}
 			
 			for (OWLDataProperty prop : owl.getDataPropertiesInSignature())  {
 				String uri = prop.getIRI().toString();
-				if (objectproperties.contains(uri)) {
+				if (vb.objectProperties().contains(uri)) {
 					punnedPredicates.add(uri);
 					log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
 				}
 				else {
-					dataproperties.add(uri);
-					vb.createDataProperty(uri);
+					vb.dataProperties().create(uri);
 				}
 			}
 
 			for (OWLAnnotationProperty prop : owl.getAnnotationPropertiesInSignature()) {
 				String uri = prop.getIRI().toString();
-				annotationproperties.add(uri);
-				vb.createAnnotationProperty(uri);
+				vb.annotationProperties().create(uri);
 			}
-
 		}
 		return ofac.createOntology(vb);		
 	}

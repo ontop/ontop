@@ -43,12 +43,12 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 	
 	protected void setUp() throws Exception {
 		OntologyVocabulary voc = OntologyFactoryImpl.getInstance().createVocabulary();
-		voc.createObjectProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#P");
-		voc.createObjectProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#R");
-	    voc.createDataProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#age");
-	    voc.createClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Man");
-	    voc.createClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Person");
-	    voc.createClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Woman");
+		voc.objectProperties().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#P");
+		voc.objectProperties().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#R");
+	    voc.dataProperties().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#age");
+	    voc.classes().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Man");
+	    voc.classes().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Person");
+	    voc.classes().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Woman");
 	    Ontology onto = OntologyFactoryImpl.getInstance().createOntology(voc);
 	    reasoner = TBoxReasonerImpl.create(onto);
 		super.setUp();

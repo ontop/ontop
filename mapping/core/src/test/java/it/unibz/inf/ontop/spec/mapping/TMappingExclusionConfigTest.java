@@ -18,17 +18,17 @@ public class TMappingExclusionConfigTest {
         TMappingExclusionConfig conf = TMappingExclusionConfig.parseFile("src/test/resources/tmappingExclusionConf/good.conf");
         OntologyVocabulary voc = factory.createVocabulary();
         // in the config
-        assertTrue(conf.contains(voc.createClass("http://www.example.org/A")));
+        assertTrue(conf.contains(voc.classes().create("http://www.example.org/A")));
         // not in the config
-        assertFalse(conf.contains(voc.createClass("http://wwww.example.org/B")));
+        assertFalse(conf.contains(voc.classes().create("http://wwww.example.org/B")));
         // wrong type
-        assertFalse(conf.contains(voc.createObjectProperty("http://wwww.example.org/B")));
+        assertFalse(conf.contains(voc.classes().create("http://wwww.example.org/B")));
         // in the config
-        assertTrue(conf.contains(voc.createObjectProperty("http://www.example.org/P")));
+        assertTrue(conf.contains(voc.objectProperties().create("http://www.example.org/P")));
         // not in the config
-        assertFalse(conf.contains(voc.createObjectProperty("http://wwww.example.org/Q")));
+        assertFalse(conf.contains(voc.objectProperties().create("http://wwww.example.org/Q")));
         // wrong type
-        assertFalse(conf.contains(voc.createClass("http://wwww.example.org/P")));
+        assertFalse(conf.contains(voc.objectProperties().create("http://wwww.example.org/P")));
     }
 
     // File not found

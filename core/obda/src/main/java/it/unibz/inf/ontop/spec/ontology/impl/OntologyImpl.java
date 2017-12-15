@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 import java.util.*;
@@ -224,19 +225,19 @@ public class OntologyImpl implements Ontology {
 		
 		ImmutableOntologyVocabularyImpl(OntologyVocabularyImpl voc) {
 			concepts = ImmutableMap.<String, OClass>builder()
-				.putAll(voc.concepts)
+				.putAll(voc.classes().all().stream().collect(ImmutableCollectors.toMap(c -> c.getName(), c -> c)))
 				.put(ClassImpl.owlThingIRI, ClassImpl.owlThing)
 				.put(ClassImpl.owlNothingIRI, ClassImpl.owlNothing).build();
 			objectProperties = ImmutableMap.<String, ObjectPropertyExpression>builder()
-				.putAll(voc.objectProperties)
+				.putAll(voc.objectProperties().all().stream().collect(ImmutableCollectors.toMap(c -> c.getName(), c -> c)))
 				.put(ObjectPropertyExpressionImpl.owlTopObjectPropertyIRI, ObjectPropertyExpressionImpl.owlTopObjectProperty)
 				.put(ObjectPropertyExpressionImpl.owlBottomObjectPropertyIRI, ObjectPropertyExpressionImpl.owlBottomObjectProperty).build();
 			dataProperties  = ImmutableMap.<String, DataPropertyExpression>builder() 
-				.putAll(voc.dataProperties)
+				.putAll(voc.dataProperties().all().stream().collect(ImmutableCollectors.toMap(c -> c.getName(), c -> c)))
 				.put(DataPropertyExpressionImpl.owlTopDataPropertyIRI, DataPropertyExpressionImpl.owlTopDataProperty)
 				.put(DataPropertyExpressionImpl.owlBottomDataPropertyIRI, DataPropertyExpressionImpl.owlBottomDataProperty).build();
 			annotationProperties  = ImmutableMap.<String, AnnotationProperty>builder()
-					.putAll(voc.annotationProperties).build();
+					.putAll(voc.annotationProperties().all().stream().collect(ImmutableCollectors.toMap(c -> c.getName(), c -> c))).build();
 		}
 		
 		public OClass getClass(String uri) {

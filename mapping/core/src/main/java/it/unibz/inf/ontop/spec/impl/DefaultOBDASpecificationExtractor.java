@@ -47,7 +47,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
         Optional<TBoxReasoner> optionalSaturatedTBox = optionalOntology
                 .map(o -> TBoxReasonerImpl.create(o));
 
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata, optionalOntology,
+        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata,
                 optionalSaturatedTBox, executorRegistry);
 
         return transform(specInput, optionalOntology, optionalSaturatedTBox, mappingAndDBMetadata);
@@ -61,7 +61,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                 .map(o -> TBoxReasonerImpl.create(o));
 
         MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
-                optionalOntology, optionalSaturatedTBox, executorRegistry);
+                optionalSaturatedTBox, executorRegistry);
 
         return transform(specInput, optionalOntology, optionalSaturatedTBox, mappingAndDBMetadata);
     }

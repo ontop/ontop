@@ -22,12 +22,16 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  */
 
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Implements OntologyVocabulary 
@@ -43,68 +47,78 @@ import java.util.Map;
 
 public class OntologyVocabularyImpl implements OntologyVocabulary {
 
-	final Map<String, OClass> concepts = new HashMap<>();
-	final Map<String, ObjectPropertyExpression> objectProperties = new HashMap<>();
-	final Map<String, DataPropertyExpression> dataProperties = new HashMap<>();
-	final Map<String, AnnotationProperty> annotationProperties = new HashMap<>();
+	private static final class OntologyVocabularyCategoryImpl<T> implements OntologyVocabularyCategory<T> {
+		private final Map<String, T> entities = new HashMap<>();
 
-	private static final String CLASS_NOT_FOUND = "Class not found: ";	
-	private static final String OBJECT_PROPERTY_NOT_FOUND = "ObjectProperty not found: ";
-	private static final String DATA_PROPERTY_NOT_FOUND = "DataProperty not found: ";
-	private static final String ANNOTATION_PROPERTY_NOT_FOUND = "AnnotationProperty not found" ;
+		private final ImmutableMap<String, T> builtins;
+		private final Function<String, ? extends T> ctor;
+		private final String NOT_FOUND_MESSAGE;
+
+		OntologyVocabularyCategoryImpl(ImmutableMap<String, T> builtins, Function<String, ? extends T> ctor, String NOT_FOUND_MESSAGE) {
+			this.builtins = builtins;
+			this.ctor = ctor;
+			this.NOT_FOUND_MESSAGE = NOT_FOUND_MESSAGE;
+		}
+
+		@Override
+		public T get(String uri) {
+			T e = entities.get(uri);
+			if (e != null)
+				return e;
+			e = builtins.get(uri);
+			if (e != null)
+				return e;
+			throw new RuntimeException(NOT_FOUND_MESSAGE + uri);
+		}
+
+		@Override
+		public boolean contains(String uri) {
+			return entities.containsKey(uri);
+		}
+
+		@Override
+		public Collection<T> all() {
+			return entities.values();
+		}
+
+		@Override
+		public T create(String uri) {
+			if (builtins.containsKey(uri))
+				return builtins.get(uri);
+
+			T e = ctor.apply(uri);
+			entities.put(uri, e);
+			return e;
+		}
+
+		@Override
+		public void remove(String uri) { entities.remove(uri); }
+	}
+
+	private final OntologyVocabularyCategoryImpl<OClass> classes = new OntologyVocabularyCategoryImpl<>(
+			ImmutableMap.of(ClassImpl.owlThingIRI, ClassImpl.owlThing,
+					ClassImpl.owlNothingIRI, ClassImpl.owlNothing),
+			s -> new ClassImpl(s), "Class not found: ");
+
+	private final OntologyVocabularyCategoryImpl<ObjectPropertyExpression> objectProperties = new OntologyVocabularyCategoryImpl<>(
+			ImmutableMap.of(ObjectPropertyExpressionImpl.owlBottomObjectPropertyIRI, ObjectPropertyExpressionImpl.owlBottomObjectProperty,
+					ObjectPropertyExpressionImpl.owlTopObjectPropertyIRI, ObjectPropertyExpressionImpl.owlTopObjectProperty),
+			s -> new ObjectPropertyExpressionImpl(s), "ObjectProperty not found: ");
+
+	private final OntologyVocabularyCategoryImpl<DataPropertyExpression> dataProperties = new OntologyVocabularyCategoryImpl<>(
+			ImmutableMap.of(DataPropertyExpressionImpl.owlBottomDataPropertyIRI, DataPropertyExpressionImpl.owlBottomDataProperty,
+					DataPropertyExpressionImpl.owlTopDataPropertyIRI, DataPropertyExpressionImpl.owlTopDataProperty),
+			s -> new DataPropertyExpressionImpl(s), "DataProperty not found: ");
+
+	private final OntologyVocabularyCategoryImpl<AnnotationProperty> annotationProperties = new OntologyVocabularyCategoryImpl<>(
+			ImmutableMap.of(),
+			s -> new AnnotationPropertyImpl(s), "AnnotationProperty not found: ");
+
 	private static final String DATATYPE_NOT_FOUND = "Datatype not found: ";
 	
 	public OntologyVocabularyImpl() {		
 	}
 
-	@Override
-	public OClass getClass(String uri) {
-		OClass oc = concepts.get(uri);
-		if (oc != null) 
-			return oc;
-		else if (uri.equals(ClassImpl.owlThingIRI))
-			return ClassImpl.owlThing;
-		else if (uri.equals(ClassImpl.owlNothingIRI))
-			return ClassImpl.owlNothing;
-		else
-			throw new RuntimeException(CLASS_NOT_FOUND + uri);
-	}
-	
-
-	@Override
-	public ObjectPropertyExpression getObjectProperty(String uri) {
-		ObjectPropertyExpression ope = objectProperties.get(uri);
-		if (ope != null) 
-			return ope;
-		else if (uri.equals(ObjectPropertyExpressionImpl.owlBottomObjectPropertyIRI))
-			return ObjectPropertyExpressionImpl.owlBottomObjectProperty;
-		else if (uri.equals(ObjectPropertyExpressionImpl.owlTopObjectPropertyIRI))
-			return ObjectPropertyExpressionImpl.owlTopObjectProperty;
-		else
-			throw new RuntimeException(OBJECT_PROPERTY_NOT_FOUND + uri);
-	}
-	
-	@Override
-	public DataPropertyExpression getDataProperty(String uri) {
-		DataPropertyExpression dpe = dataProperties.get(uri);
-		if (dpe != null) 
-			return dpe;
-		else if (uri.equals(DataPropertyExpressionImpl.owlBottomDataPropertyIRI))
-			return DataPropertyExpressionImpl.owlBottomDataProperty;
-		else if (uri.equals(DataPropertyExpressionImpl.owlTopDataPropertyIRI))
-			return DataPropertyExpressionImpl.owlTopDataProperty;
-		else
-			throw new RuntimeException(DATA_PROPERTY_NOT_FOUND + uri);
-	}
-
-	@Override
-	public AnnotationProperty getAnnotationProperty(String uri) {
-		AnnotationProperty ap = annotationProperties.get(uri);
-		if (ap != null)
-			return ap;
-		else
-			throw new RuntimeException(ANNOTATION_PROPERTY_NOT_FOUND + uri);
-	}
 
 	@Override
 	public Datatype getDatatype(String uri) {
@@ -116,111 +130,37 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	
 	@Override
-	public Collection<OClass> getClasses() {
-		return concepts.values();
+	public OntologyVocabularyCategory<OClass> classes() {
+		return classes;
 	}
 
 	@Override
-	public Collection<ObjectPropertyExpression> getObjectProperties() {
-		return objectProperties.values();
+	public OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() {
+		return objectProperties;
 	}
 
 	@Override
-	public Collection<DataPropertyExpression> getDataProperties() {
-		return dataProperties.values();
+	public OntologyVocabularyCategory<DataPropertyExpression> dataProperties() {
+		return dataProperties;
 	}
 
 	@Override
-	public Collection<AnnotationProperty> getAnnotationProperties() {
-		return annotationProperties.values();
-	}
+	public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
 
 	
-	@Override
-	public OClass createClass(String uri) {
-		OClass cd = new ClassImpl(uri);
-		if (!cd.isBottom() && !cd.isTop())
-			concepts.put(uri, cd);
-		return cd;
-	}
-
-	@Override
-	public DataPropertyExpression createDataProperty(String uri) {
-		DataPropertyExpression rd = new DataPropertyExpressionImpl(uri);
-		if (!rd.isBottom() && !rd.isTop()) 
-			dataProperties.put(uri, rd);
-		return rd;
-	}
-
-	@Override
-	public AnnotationProperty createAnnotationProperty(String uri) {
-		AnnotationProperty ap = new AnnotationPropertyImpl(uri);
-			annotationProperties.put(uri, ap);
-		return ap;
-	}
-
-	@Override
-	public ObjectPropertyExpression createObjectProperty(String uri) {
-		ObjectPropertyExpression rd = new ObjectPropertyExpressionImpl(uri);
-		if (!rd.isBottom() && !rd.isTop()) 
-			objectProperties.put(uri, rd);
-		return rd;
-	}
-
 	@Override
 	public void merge(Ontology ontology) {
 		OntologyImpl imp = (OntologyImpl)ontology;
 
-		concepts.putAll(imp.vocabulary.concepts.entrySet().stream()
-				.filter(e -> !e.getValue().isBottom() && !e.getValue().isTop())
+		classes.entities.putAll(imp.vocabulary.concepts.entrySet().stream()
+				.filter(e -> !classes.builtins.containsKey(e.getKey()))
 				.collect(ImmutableCollectors.toMap()));
-		objectProperties.putAll(imp.vocabulary.objectProperties.entrySet().stream()
-				.filter(e -> !e.getValue().isBottom() && !e.getValue().isTop())
+		objectProperties.entities.putAll(imp.vocabulary.objectProperties.entrySet().stream()
+				.filter(e -> !objectProperties.builtins.containsKey(e.getKey()))
 				.collect(ImmutableCollectors.toMap()));
-		dataProperties.putAll(imp.vocabulary.dataProperties.entrySet().stream()
-				.filter(e -> !e.getValue().isBottom() && !e.getValue().isTop())
+		dataProperties.entities.putAll(imp.vocabulary.dataProperties.entrySet().stream()
+				.filter(e -> !dataProperties.builtins.containsKey(e.getKey()))
 				.collect(ImmutableCollectors.toMap()));
-		annotationProperties.putAll(imp.vocabulary.annotationProperties);
-	}
-
-	
-	@Override
-	public void removeClass(String classname) {
-		concepts.remove(classname);
-	}
-
-	@Override
-	public void removeObjectProperty(String property) {
-		objectProperties.remove(property);
-	}
-
-	@Override
-	public void removeDataProperty(String property) {
-		dataProperties.remove(property);
-	}
-
-	@Override
-	public void removeAnnotationProperty(String property) {
-		annotationProperties.remove(property);
-	}
-
-	@Override
-	public boolean containsClass(String uri) {
-		return concepts.containsKey(uri);
-	}
-
-	@Override
-	public boolean containsObjectProperty(String uri) {
-		return objectProperties.containsKey(uri);
-	}
-
-	@Override
-	public boolean containsDataProperty(String uri) {
-		return dataProperties.containsKey(uri);
-	}
-
-	@Override
-	public boolean containsAnnotationProperty(String uri) {
-		return annotationProperties.containsKey(uri);
+		annotationProperties.entities.putAll(imp.vocabulary.annotationProperties);
 	}
 }
