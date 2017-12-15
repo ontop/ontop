@@ -110,28 +110,24 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
         //add all class/data/object predicates to selectedVocabulary
             //from ontology
-            for (OClass cl : vocabulary.getClasses()) {
+            for (OClass cl : vocabulary.classes().all()) {
                 Predicate p = cl.getPredicate();
-                if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-                        && !predicates.contains(p))
+                if (!isBuiltin(p))
                     predicates.add(p);
             }
-            for (ObjectPropertyExpression role : vocabulary.getObjectProperties()) {
+            for (ObjectPropertyExpression role : vocabulary.objectProperties().all()) {
                 Predicate p = role.getPredicate();
-                if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-                        && !predicates.contains(p))
+                if (!isBuiltin(p))
                     predicates.add(p);
             }
-            for (DataPropertyExpression role : vocabulary.getDataProperties()) {
+            for (DataPropertyExpression role : vocabulary.dataProperties().all()) {
                 Predicate p = role.getPredicate();
-                if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-                        && !predicates.contains(p))
+                if (!isBuiltin(p))
                     predicates.add(p);
             }
-			for (AnnotationProperty role : vocabulary.getAnnotationProperties()) {
+			for (AnnotationProperty role : vocabulary.annotationProperties().all()) {
 				Predicate p = role.getPredicate();
-				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-							&& !predicates.contains(p))
+				if (!isBuiltin(p))
 					predicates.add(p);
 			}
 //        else {
@@ -144,6 +140,10 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 //        }
 
         return ImmutableSet.copyOf(predicates);
+    }
+
+    private static boolean isBuiltin(Predicate p) {
+	    return p.toString().startsWith("http://www.w3.org/2002/07/owl#");
     }
 
 	private static URI convertIntoURI(Predicate vocabularyPredicate) {

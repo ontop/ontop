@@ -214,13 +214,13 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         /*
          * Cannot be a data property (should be either an object or an annotation property)
          */
-        if (saturatedTBox.containsDataProperty(predicateIRI))
+        if (saturatedTBox.dataProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     DATA_PROPERTY_STR, OBJECT_PROPERTY_STR));
         /*
          * Cannot be a class
          */
-        if (saturatedTBox.containsClass(predicateIRI))
+        if (saturatedTBox.classes().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     CLASS_STR, OBJECT_PROPERTY_STR));
     }
@@ -233,13 +233,13 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         /*
          * Cannot be an object property
          */
-        if (saturatedTBox.containsObjectProperty(predicateIRI))
+        if (saturatedTBox.objectProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     OBJECT_PROPERTY_STR, DATA_PROPERTY_STR));
         /*
          * Cannot be a class
          */
-        if (saturatedTBox.containsClass(predicateIRI))
+        if (saturatedTBox.classes().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     CLASS_STR, DATA_PROPERTY_STR));
 
@@ -278,20 +278,20 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         /*
          * Cannot be an object property
          */
-        if (saturatedTBox.containsObjectProperty(predicateIRI))
+        if (saturatedTBox.objectProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     OBJECT_PROPERTY_STR, CLASS_STR));
         /*
          * Cannot be a data property
          */
-        else if (saturatedTBox.containsDataProperty(predicateIRI))
+        else if (saturatedTBox.dataProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     DATA_PROPERTY_STR, CLASS_STR));
 
         /*
          * Cannot be an annotation property
          */
-        if (saturatedTBox.containsAnnotationProperty(predicateIRI))
+        if (saturatedTBox.annotationProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     ANNOTATION_PROPERTY_STR, DATA_PROPERTY_STR));
     }

@@ -31,7 +31,7 @@ public class OWLAPITranslatorHelper {
 			throw new OWLAPITranslatorOWL2QL.TranslationException("complex class expressions are not supported");
 		
 		OWLClass namedclass = (OWLClass) classExpression;
-		OClass concept = reasoner.getClass(namedclass.getIRI().toString());
+		OClass concept = reasoner.classes().get(namedclass.getIRI().toString());
 		
 		URIConstant c = getIndividual(ax.getIndividual());
 
@@ -89,7 +89,7 @@ public class OWLAPITranslatorHelper {
 	
 	public OClass getOClass(OWLClass clExpression) {
 		String uri = clExpression.getIRI().toString();
-		return reasoner.getClass(uri);
+		return reasoner.classes().get(uri);
 	}
 	
 	
@@ -104,13 +104,13 @@ public class OWLAPITranslatorHelper {
 	public ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression opeExpression) {
 
 		if (opeExpression instanceof OWLObjectProperty) 
-			return reasoner.getObjectProperty(opeExpression.asOWLObjectProperty().getIRI().toString());
+			return reasoner.objectProperties().get(opeExpression.asOWLObjectProperty().getIRI().toString());
 	
 		else {
 			assert(opeExpression instanceof OWLObjectInverseOf);
 			
 			OWLObjectInverseOf aux = (OWLObjectInverseOf) opeExpression;
-			return reasoner.getObjectProperty(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
+			return reasoner.objectProperties().get(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
 		} 			
 	}
 
@@ -125,7 +125,7 @@ public class OWLAPITranslatorHelper {
 	
 	public DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression dpeExpression)  {
 		assert (dpeExpression instanceof OWLDataProperty); 
-		return reasoner.getDataProperty(dpeExpression.asOWLDataProperty().getIRI().toString());
+		return reasoner.dataProperties().get(dpeExpression.asOWLDataProperty().getIRI().toString());
 	}
 
 
@@ -137,7 +137,7 @@ public class OWLAPITranslatorHelper {
 	 */
 
 	public AnnotationProperty getPropertyExpression(OWLAnnotationProperty ap)  {
-		return reasoner.getAnnotationProperty(ap.getIRI().toString());
+		return reasoner.annotationProperties().get(ap.getIRI().toString());
 	}
 
 

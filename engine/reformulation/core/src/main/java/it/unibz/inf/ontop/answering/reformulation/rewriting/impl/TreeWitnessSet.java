@@ -377,11 +377,11 @@ public class TreeWitnessSet {
 		}
 
 		public Intersection<ObjectPropertyExpression> getTopProperty() {
-			return new Intersection<ObjectPropertyExpression>(reasoner.objectProperties().dag());
+			return new Intersection<>(reasoner.objectProperties().dag());
 		}
 		
 		public Intersection<ClassExpression> getSubConcepts(Collection<Function> atoms) {
-			Intersection<ClassExpression> subc = new Intersection<ClassExpression>(reasoner.classes().dag());
+			Intersection<ClassExpression> subc = new Intersection<>(reasoner.classes().dag());
 			for (Function a : atoms) {
 				 if (a.getArity() != 1) {
 					 subc.setToBottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
@@ -389,8 +389,8 @@ public class TreeWitnessSet {
 				 }
 				 
 				 Predicate pred = a.getFunctionSymbol();
-				 if (reasoner.containsClass(pred.getName()))
-					 subc.intersectWith(reasoner.getClass(pred.getName()));
+				 if (reasoner.classes().contains(pred.getName()))
+					 subc.intersectWith(reasoner.classes().get(pred.getName()));
 				 else
 					 subc.setToBottom();
 				 if (subc.isBottom())
@@ -424,8 +424,8 @@ public class TreeWitnessSet {
 					}
 					else {
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-						if (reasoner.containsObjectProperty(a.getFunctionSymbol().getName())) {
-							ObjectPropertyExpression prop = reasoner.getObjectProperty(a.getFunctionSymbol().getName());
+						if (reasoner.objectProperties().contains(a.getFunctionSymbol().getName())) {
+							ObjectPropertyExpression prop = reasoner.objectProperties().get(a.getFunctionSymbol().getName());
 							if (!root.equals(a.getTerm(0)))
 									prop = prop.getInverse();
 							properties.intersectWith(prop);

@@ -20,115 +20,50 @@ package it.unibz.inf.ontop.spec.ontology;
  * #L%
  */
 
-
-import java.util.Collection;
-
 /**
- *  This is the interface for the class TBoxReasoner where we are able to retrieve all the connection built in our DAG 
+ *  This is the interface for the class TBoxReasoner where we are able
+ *  to retrieve all the connection built in our DAG
  */
 public interface TBoxReasoner {
 	
 	/**
-	 * Return the DAG of properties
+	 * object properties
 	 * 
-	 * @return DAG 
+	 * @return object properties with their dag
 	 */
 
 	ClassifiedOntologyVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties();
 	
 	/**
-	 * Return the DAG of properties
+	 * data properties
 	 * 
-	 * @return DAG 
+	 * @return data properties with their dag
 	 */
 
 	ClassifiedOntologyVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties();
 
 	/**
-	 * Return the DAG of classes
+	 * classes
 	 * 
-	 * @return DAG 
+	 * @return classes with their dag
 	 */
 
 	ClassifiedOntologyVocabularyCategory<ClassExpression, OClass> classes();
 	
 	/**
-	 * Return the DAG of datatypes and data property ranges
+	 * datatypes and data property ranges
 	 * 
-	 * @return DAG 
+	 * @return datatypes and data property ranges with their dag
 	 */
 
-	ClassifiedOntologyVocabularyCategory<DataRangeExpression, DataRangeExpression> dataRanges();
+	ClassifiedOntologyVocabularyCategory<DataRangeExpression, Datatype> dataRanges();
 
 
-	/**
-	 * return all declared classes
-	 *
-	 * @return
-	 */
+    /**
+     * annotation properties
+     *
+     * @return annotation properties (without dag)
+     */
 
-	Collection<OClass> getClasses();
-
-	/**
-	 * return all declared object properties
-	 *
-	 * @return
-	 */
-
-	Collection<ObjectPropertyExpression> getObjectProperties();
-
-	/**
-	 * return all declared data properties
-	 *
-	 * @return
-	 */
-
-	Collection<DataPropertyExpression> getDataProperties();
-
-	Collection<AnnotationProperty> getAnnotationProperties();
-
-	/**
-	 * check whether the class has been declared and return the class object
-	 *
-	 * @param uri
-	 * @return
-	 * @throws RuntimeException if the class has not been declared
-	 */
-
-	OClass getClass(String uri);
-
-
-	/**
-	 * check whether the object property has been declared and return the class object
-	 *
-	 * @param uri
-	 * @return
-	 * @throws RuntimeException if the object property has not been declared
-	 */
-
-	ObjectPropertyExpression getObjectProperty(String uri);
-
-
-	/**
-	 * check whether the data property has been declared and return the class object
-	 *
-	 * @param uri
-	 * @return
-	 * @throws RuntimeException if the data property has not been declared
-	 */
-
-	DataPropertyExpression getDataProperty(String uri);
-
-	AnnotationProperty getAnnotationProperty(String uri);
-
-	Datatype getDatatype(String uri);
-
-	boolean containsClass(String uri);
-
-	boolean containsObjectProperty(String uri);
-
-	boolean containsDataProperty(String uri);
-
-	boolean containsAnnotationProperty(String uri);
-
+    ClassifiedOntologyVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties();
 }

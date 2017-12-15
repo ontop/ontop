@@ -50,7 +50,7 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
 	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
 	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
-	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, DataRangeExpression> dataRangeDAG;
+	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG;
 	private final TBoxReasoner reasoner;
 
 	/**
@@ -58,7 +58,6 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	 * @param reasoner DAG to be used for reasoning
 	 */
 	public TestTBoxReasonerImpl_OnNamedDAG(TBoxReasoner reasoner) {
-		TBoxReasonerImpl impl = (TBoxReasonerImpl)reasoner;
 
 		this.objectPropertyDAG =
 				new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
@@ -88,80 +87,19 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 
 	@Override
 	public ClassifiedOntologyVocabularyCategory<ClassExpression, OClass> classes() {
-		return classDAG;
+	    return classDAG;
 	}
 
 	@Override
-	public ClassifiedOntologyVocabularyCategory<DataRangeExpression, DataRangeExpression> dataRanges() {
+	public ClassifiedOntologyVocabularyCategory<DataRangeExpression, Datatype> dataRanges() {
 		return dataRangeDAG;
 	}
-
 
 	// DUMMY
 
 	@Override
-	public Collection<OClass> getClasses() {
+	public ClassifiedOntologyVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties() {
 		return null;
-	}
-
-	@Override
-	public Collection<ObjectPropertyExpression> getObjectProperties() {
-		return null;
-	}
-
-	@Override
-	public Collection<DataPropertyExpression> getDataProperties() {
-		return null;
-	}
-
-	@Override
-	public Collection<AnnotationProperty> getAnnotationProperties() {
-		return null;
-	}
-
-	@Override
-	public OClass getClass(String uri) {
-		return null;
-	}
-
-	@Override
-	public ObjectPropertyExpression getObjectProperty(String uri) {
-		return null;
-	}
-
-	@Override
-	public DataPropertyExpression getDataProperty(String uri) {
-		return null;
-	}
-
-	@Override
-	public AnnotationProperty getAnnotationProperty(String uri) {
-		return null;
-	}
-
-	@Override
-	public Datatype getDatatype(String uri) {
-		return null;
-	}
-
-	@Override
-	public boolean containsClass(String uri) {
-		return false;
-	}
-
-	@Override
-	public boolean containsObjectProperty(String uri) {
-		return false;
-	}
-
-	@Override
-	public boolean containsDataProperty(String uri) {
-		return false;
-	}
-
-	@Override
-	public boolean containsAnnotationProperty(String uri) {
-		return false;
 	}
 
 	/**

@@ -48,9 +48,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private final ClassifiedOntologyVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
     private final ClassifiedOntologyVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
     private final ClassifiedOntologyVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
-    private final ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, DataRangeExpression> dataRangeDAG;
-    private final ImmutableMap<String, AnnotationProperty> annotations;
-    private final ImmutableMap<String, Datatype> datatypes;
+    private final ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG;
+    private final ClassifiedOntologyVocabularyCategoryImpl<AnnotationProperty, AnnotationProperty> annotationProperties;
 
     public static final class ClassifiedOntologyVocabularyCategoryImpl<T, V> implements ClassifiedOntologyVocabularyCategory<T,V> {
         private final ImmutableMap<String, V> iriIndex;
@@ -118,11 +117,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		TBoxReasonerImpl r = new TBoxReasonerImpl(
 		        new ClassifiedOntologyVocabularyCategoryImpl<>(impl.vocabulary.concepts, classDAG),
-                new ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(), dataRangeDAG),
+                new ClassifiedOntologyVocabularyCategoryImpl<>(OntologyImpl.OWL2QLDatatypes, dataRangeDAG),
                 new ClassifiedOntologyVocabularyCategoryImpl<>(impl.vocabulary.objectProperties, objectPropertyDAG),
                 new ClassifiedOntologyVocabularyCategoryImpl<>(impl.vocabulary.dataProperties, dataPropertyDAG),
-                impl.vocabulary.annotationProperties,
-                OntologyImpl.OWL2QLDatatypes);
+                new ClassifiedOntologyVocabularyCategoryImpl<>(impl.vocabulary.annotationProperties, null));
 //		if (equivalenceReduced) {
 //			r = getEquivalenceSimplifiedReasoner(r);
 //		}
@@ -137,17 +135,15 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * @param objectPropertyDAG
 	 */
 	private TBoxReasonerImpl(ClassifiedOntologyVocabularyCategoryImpl<ClassExpression, OClass> classDAG,
-                             ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, DataRangeExpression> dataRangeDAG,
+                             ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG,
                              ClassifiedOntologyVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG,
                              ClassifiedOntologyVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG,
-                             ImmutableMap<String, AnnotationProperty> annotations,
-                             ImmutableMap<String, Datatype> dataypes) {
+                             ClassifiedOntologyVocabularyCategoryImpl<AnnotationProperty, AnnotationProperty> annotationProperties) {
 		this.objectPropertyDAG = objectPropertyDAG;
 		this.dataPropertyDAG = dataPropertyDAG;
 		this.classDAG = classDAG;
 		this.dataRangeDAG = dataRangeDAG;
-		this.annotations = annotations;
-		this.datatypes = dataypes;
+		this.annotationProperties = annotationProperties;
 	}
 
 	@Override
@@ -186,68 +182,14 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 
 	@Override
-	public ClassifiedOntologyVocabularyCategory<DataRangeExpression, DataRangeExpression> dataRanges() {
+	public ClassifiedOntologyVocabularyCategory<DataRangeExpression, Datatype> dataRanges() {
 		return dataRangeDAG;
 	}
 
-	@Override
-	public Collection<OClass> getClasses() { return classDAG.all(); }
-
-	@Override
-	public Collection<ObjectPropertyExpression> getObjectProperties() {
-		return objectPropertyDAG.all();
-	}
-
-	@Override
-	public Collection<DataPropertyExpression> getDataProperties() { return dataPropertyDAG.all(); }
-
-	@Override
-	public Collection<AnnotationProperty> getAnnotationProperties() {
-		return annotations.values();
-	}
-
-	@Override
-	public OClass getClass(String uri) { return classDAG.get(uri); }
-
-	@Override
-	public ObjectPropertyExpression getObjectProperty(String uri) {
-		return objectPropertyDAG.get(uri);
-	}
-
-	@Override
-	public DataPropertyExpression getDataProperty(String uri) {
-		return dataPropertyDAG.get(uri);
-	}
-
-	@Override
-    // TODO: insert check
-	public AnnotationProperty getAnnotationProperty(String uri) {
-		return annotations.get(uri);
-	}
-
-	@Override
-    // TODO: insert check
-	public Datatype getDatatype(String uri) {
-		return datatypes.get(uri);
-	}
-
-	@Override
-	public boolean containsClass(String uri) {
-		return classDAG.contains(uri);
-	}
-
-	@Override
-	public boolean containsObjectProperty(String uri) {
-		return objectPropertyDAG.contains(uri);
-	}
-
-	@Override
-	public boolean containsDataProperty(String uri) { return dataPropertyDAG.contains(uri); }
-
-	@Override
-	public boolean containsAnnotationProperty(String uri) {
-		return annotations.containsKey(uri);
-	}
+    @Override
+    public ClassifiedOntologyVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties() {
+        return annotationProperties;
+    }
 
 	/**
 	 * Return the DAG of object properties
@@ -597,13 +539,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
                 impl.dataRangeDAG,
                 new ClassifiedOntologyVocabularyCategoryImpl<>(impl.objectPropertyDAG.iriIndex, objectPropertyDAG),
                 new ClassifiedOntologyVocabularyCategoryImpl<>(impl.dataPropertyDAG.iriIndex, dataPropertyDAG),
-                impl.annotations,
-                impl.datatypes);
+                impl.annotationProperties);
 	}
-
-
-
-
 
 
 

@@ -42,7 +42,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
 	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
 	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
-	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, DataRangeExpression> dataRangeDAG;
+	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG;
 	private final TBoxReasoner reasoner;
 
 	public TestTBoxReasonerImpl_Named(TBoxReasoner reasoner) {
@@ -74,76 +74,15 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	}
 
 	@Override
-	public ClassifiedOntologyVocabularyCategory<DataRangeExpression, DataRangeExpression> dataRanges() {
+	public ClassifiedOntologyVocabularyCategory<DataRangeExpression, Datatype> dataRanges() {
 		return dataRangeDAG;
 	}
 
-
-	// DUMMMY
+	// DUMMY
 
 	@Override
-	public Collection<OClass> getClasses() {
+	public ClassifiedOntologyVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties() {
 		return null;
-	}
-
-	@Override
-	public Collection<ObjectPropertyExpression> getObjectProperties() {
-		return null;
-	}
-
-	@Override
-	public Collection<DataPropertyExpression> getDataProperties() {
-		return null;
-	}
-
-	@Override
-	public Collection<AnnotationProperty> getAnnotationProperties() {
-		return null;
-	}
-
-	@Override
-	public OClass getClass(String uri) {
-		return null;
-	}
-
-	@Override
-	public ObjectPropertyExpression getObjectProperty(String uri) {
-		return null;
-	}
-
-	@Override
-	public DataPropertyExpression getDataProperty(String uri) {
-		return null;
-	}
-
-	@Override
-	public AnnotationProperty getAnnotationProperty(String uri) {
-		return null;
-	}
-
-	@Override
-	public Datatype getDatatype(String uri) {
-		return null;
-	}
-
-	@Override
-	public boolean containsClass(String uri) {
-		return false;
-	}
-
-	@Override
-	public boolean containsObjectProperty(String uri) {
-		return false;
-	}
-
-	@Override
-	public boolean containsDataProperty(String uri) {
-		return false;
-	}
-
-	@Override
-	public boolean containsAnnotationProperty(String uri) {
-		return false;
 	}
 
 
@@ -163,7 +102,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 		
 		@Override
 		public Iterator<Equivalences<T>> iterator() {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 			
 			for (Equivalences<T> e : reasonerDAG) {
 				Equivalences<T> nodes = getVertex(e.getRepresentative());
@@ -187,7 +126,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 		
 		@Override
 		public Set<Equivalences<T>> getDirectSub(Equivalences<T> v) {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 
 			for (Equivalences<T> e : reasonerDAG.getDirectSub(v)) {
 				T child = e.getRepresentative();
@@ -204,7 +143,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 
 		@Override
 		public Set<Equivalences<T>> getSub(Equivalences<T> v) {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 			
 			for (Equivalences<T> e : reasonerDAG.getSub(v)) {
 				Equivalences<T> nodes = getVertex(e.getRepresentative());
@@ -217,7 +156,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 		@Override
 		public Set<T> getSubRepresentatives(T v) {
 			Equivalences<T> eq = reasonerDAG.getVertex(v);
-			LinkedHashSet<T> result = new LinkedHashSet<T>();
+			LinkedHashSet<T> result = new LinkedHashSet<>();
 			
 			for (Equivalences<T> e : reasonerDAG.getSub(eq)) {
 				Equivalences<T> nodes = getVertex(e.getRepresentative());
@@ -229,7 +168,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 
 		@Override
 		public Set<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 			
 			for (Equivalences<T> e : reasonerDAG.getDirectSuper(v)) {
 				T parent = e.getRepresentative();
@@ -246,7 +185,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 		
 		@Override
 		public Set<Equivalences<T>> getSuper(Equivalences<T> v) {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 
 			for (Equivalences<T> e : reasonerDAG.getSuper(v)) {
 				Equivalences<T> nodes = getVertex(e.getRepresentative());

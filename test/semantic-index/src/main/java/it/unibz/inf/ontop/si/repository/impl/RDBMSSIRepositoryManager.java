@@ -687,7 +687,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	
 	private void setIndex(String iri, int type, int idx) {
 		if (type == CLASS_TYPE) {
-			OClass c = reasonerDag.getClass(iri);
+			OClass c = reasonerDag.classes().get(iri);
 			if (reasonerDag.classes().dag().getVertex(c) == null)
 				throw new RuntimeException("UNKNOWN CLASS: " + iri);
 			
@@ -697,7 +697,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			cacheSI.setIndex(c, idx);
 		}
 		else {
-			if (reasonerDag.containsObjectProperty(iri)) {
+			if (reasonerDag.objectProperties().contains(iri)) {
 				//
 				// a bit elaborate logic is a consequence of using the same type for
 				// both object and data properties (which can have the same name)
@@ -707,9 +707,9 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 				// and the second occurrence is a datatype property
 				// (here we use the fact that the query result is sorted by idx)
 				//
-				ObjectPropertyExpression ope = reasonerDag.getObjectProperty(iri);
+				ObjectPropertyExpression ope = reasonerDag.objectProperties().get(iri);
 				if (cacheSI.getEntry(ope) != null)  {
-					DataPropertyExpression dpe = reasonerDag.getDataProperty(iri);
+					DataPropertyExpression dpe = reasonerDag.dataProperties().get(iri);
 					if (reasonerDag.dataProperties().dag().getVertex(dpe) != null) {
 						if (cacheSI.getEntry(dpe) != null)
 							throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
@@ -723,7 +723,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 					cacheSI.setIndex(ope, idx);
 			}
 			else {
-				DataPropertyExpression dpe = reasonerDag.getDataProperty(iri);
+				DataPropertyExpression dpe = reasonerDag.dataProperties().get(iri);
 				if (reasonerDag.dataProperties().dag().getVertex(dpe) != null) {
 					if (cacheSI.getEntry(dpe) != null)
 						throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
@@ -740,18 +740,18 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		
 		SemanticIndexRange range;
 		if (type == CLASS_TYPE) {
-			OClass c = reasonerDag.getClass(iri);
+			OClass c = reasonerDag.classes().get(iri);
 			range = cacheSI.getEntry(c);
 		}
 		else {
 			Interval interval = intervals.get(0);
 			// if the first interval is within object property indexes
 			if (interval.getEnd() <= maxObjectPropertyIndex) {
-				ObjectPropertyExpression ope = reasonerDag.getObjectProperty(iri);
+				ObjectPropertyExpression ope = reasonerDag.objectProperties().get(iri);
 				range = cacheSI.getEntry(ope);
 			}
 			else {
-				DataPropertyExpression dpe = reasonerDag.getDataProperty(iri);
+				DataPropertyExpression dpe = reasonerDag.dataProperties().get(iri);
 				range = cacheSI.getEntry(dpe);
 			}
 		}
@@ -868,7 +868,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 				continue;
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!reasonerDag.containsObjectProperty(ope.getName()))
+			if (!reasonerDag.objectProperties().contains(ope.getName()))
 				continue;
 
 			SemanticIndexRange range = cacheSI.getEntry(ope);
@@ -907,7 +907,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			DataPropertyExpression dpe = set.getRepresentative();
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!reasonerDag.containsDataProperty(dpe.getName()))
+			if (!reasonerDag.dataProperties().contains(dpe.getName()))
 				continue;
 			
 			SemanticIndexRange range = cacheSI.getEntry(dpe);
