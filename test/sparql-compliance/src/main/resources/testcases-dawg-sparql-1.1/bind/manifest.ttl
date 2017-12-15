@@ -11,11 +11,11 @@
     ( 
     :bind01
     :bind02
-   #:bind03
-   #:bind04
+    :bind03
+    :bind04
     :bind05
     :bind06
-   #:bind07
+    :bind07
     :bind08
     :bind10
     :bind11

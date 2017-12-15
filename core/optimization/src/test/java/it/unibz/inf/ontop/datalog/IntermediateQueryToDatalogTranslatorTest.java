@@ -36,13 +36,13 @@ public class IntermediateQueryToDatalogTranslatorTest {
             P2_IQ_PREDICATE, ImmutableList.of(X));
 
     private static Predicate ANS1_DATALOG_PREDICATE;
-    private static Predicate ANSSQ1_DATALOG_PREDICATE;
+    private static Predicate SUBQUERY1_DATALOG_PREDICATE;
     private static Predicate P1_DATALOG_PREDICATE;
     private static Predicate P2_DATALOG_PREDICATE;
 
     static {
         ANS1_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate("ans1");
-        ANSSQ1_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate("ansSQ1");
+        SUBQUERY1_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate(DATALOG_FACTORY.getSubqueryPredicatePrefix()+"1");
         P1_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate("p1");
         P2_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate("p2");
     }
@@ -93,7 +93,7 @@ public class IntermediateQueryToDatalogTranslatorTest {
          Expected Datalog program
          */
         Function ans1Atom = TERM_FACTORY.getFunction(ANS1_DATALOG_PREDICATE, X);
-        Function ansSQ1Atom = TERM_FACTORY.getFunction(ANSSQ1_DATALOG_PREDICATE, X);
+        Function ansSQ1Atom = TERM_FACTORY.getFunction(SUBQUERY1_DATALOG_PREDICATE, X);
         Function p1Atom = TERM_FACTORY.getFunction(P1_DATALOG_PREDICATE, X);
         Function p2Atom = TERM_FACTORY.getFunction(P2_DATALOG_PREDICATE, X);
 

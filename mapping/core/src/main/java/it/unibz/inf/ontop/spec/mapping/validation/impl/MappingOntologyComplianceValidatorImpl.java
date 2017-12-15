@@ -110,7 +110,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             ImmutableTerm constructionTerm = Optional.of(mappingAssertion.getRootNode())
                     .filter(n -> n instanceof ConstructionNode)
                     .map((n) -> (ConstructionNode) n)
-                    .map(ConstructionNode::getDirectBindingSubstitution)
+                    .map(ConstructionNode::getSubstitution)
                     .flatMap(s -> Optional.ofNullable(s.get(objectVariable)))
                     .orElseThrow(() -> new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
                             "Not defined in the root node (expected for a mapping assertion)"));

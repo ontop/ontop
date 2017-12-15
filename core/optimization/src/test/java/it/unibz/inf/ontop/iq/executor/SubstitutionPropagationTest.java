@@ -1521,6 +1521,43 @@ public class SubstitutionPropagationTest {
         propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
     }
 
+    @Test
+    public void testLiftingDefinitionEqualVariables() throws EmptyQueryException {
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
+
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(
+                projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(Y,X));
+        initialQueryBuilder.init(projectionAtom, initialRootNode);
+
+        ImmutableFunctionalTerm uriA = generateURI1(A);
+
+        ConstructionNode subConstructionNode = IQ_FACTORY.createConstructionNode(
+                ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(X, uriA));
+        initialQueryBuilder.addChild(initialRootNode, subConstructionNode);
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, A, F));
+        initialQueryBuilder.addChild(subConstructionNode, dataNode);
+
+        IntermediateQuery initialQuery = initialQueryBuilder.build();
+
+        IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
+                projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X, uriA, Y, uriA));
+        expectedQueryBuilder.init(projectionAtom, newConstructionNode);
+        expectedQueryBuilder.addChild(newConstructionNode, dataNode);
+
+        SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
+                new SubstitutionPropagationProposalImpl<>(subConstructionNode, subConstructionNode.getSubstitution());
+
+        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+    }
+
 
     private static NodeCentricOptimizationResults<? extends QueryNode> propagateAndCompare(
             IntermediateQuery query, IntermediateQuery expectedQuery,

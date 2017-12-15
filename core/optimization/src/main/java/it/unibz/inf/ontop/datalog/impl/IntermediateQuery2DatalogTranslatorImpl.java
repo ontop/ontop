@@ -53,7 +53,6 @@ import java.util.*;
  */
 public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuery2DatalogTranslator {
 
-	private static final String SUBQUERY_PRED_PREFIX = "ansSQ";
 	private final IntermediateQueryFactory iqFactory;
 	private final AtomFactory atomFactory;
 	private final SubstitutionFactory substitutionFactory;
@@ -352,7 +351,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	}
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
-		AtomPredicate newPredicate = atomFactory.getAtomPredicate(SUBQUERY_PRED_PREFIX+ ++subQueryCounter,
+		AtomPredicate newPredicate = atomFactory.getAtomPredicate(datalogFactory.getSubqueryPredicatePrefix()+ ++subQueryCounter,
 				projectedVariables.size());
 		return atomFactory.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}

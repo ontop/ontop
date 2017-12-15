@@ -92,15 +92,19 @@ public class LegacyMappingSaturator implements MappingSaturator {
      *
      * TODO: clean it
      */
-    private List<CQIE> generateTripleMappings(ImmutableSet<CQIE> saturatedRules) {
-        List<CQIE> newmappings = new LinkedList<CQIE>();
+    private ImmutableList<CQIE> generateTripleMappings(ImmutableSet<CQIE> saturatedRules) {
+        return saturatedRules.stream()
+                .filter(r -> !r.getHead().getFunctionSymbol().getName().startsWith(datalogFactory.getSubqueryPredicatePrefix()))
+                .map(r -> generateTripleMapping(r))
+                .collect(ImmutableCollectors.toList());
+    }
 
-        for (CQIE mapping : saturatedRules) {
-            Function newhead;
-            Function currenthead = mapping.getHead();
-            if (currenthead.getArity() == 1) {
-				/*
-				 * head is Class(x) Forming head as triple(x,uri(rdf:type),
+    private CQIE generateTripleMapping(CQIE rule) {
+        Function newhead;
+        Function currenthead = rule.getHead();
+        if (currenthead.getArity() == 1) {
+                /*
+                 * head is Class(x) Forming head as triple(x,uri(rdf:type),
 				 * uri(Class))
 				 */
                 Function rdfTypeConstant = termFactory.getUriTemplate(termFactory.getConstantLiteral(IriConstants.RDF_TYPE));
@@ -124,11 +128,8 @@ public class LegacyMappingSaturator implements MappingSaturator {
 				/*
 				 * head is triple(x,uri(Property),y)
 				 */
-                newhead = (Function) currenthead.clone();
-            }
-            CQIE newmapping = datalogFactory.getCQIE(newhead, mapping.getBody());
-            newmappings.add(newmapping);
+            newhead = (Function) currenthead.clone();
         }
-        return newmappings;
+        return datalogFactory.getCQIE(newhead, rule.getBody());
     }
 }

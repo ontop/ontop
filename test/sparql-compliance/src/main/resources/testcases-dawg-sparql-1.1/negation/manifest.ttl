@@ -19,12 +19,15 @@
     :subset-03
     :exists-01
     :exists-02
+    :full-minuend
+    :partial-minuend
    ) .
 
 
 :subset-by-exclusion-nex-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Subsets by exclusion (NOT EXISTS)" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-01-31#resolution_3> ;
     mf:action
          [ qt:query  <subsetByExcl01.rq> ;
            qt:data   <subsetByExcl.ttl> ] ;
@@ -32,7 +35,8 @@
 
 :subset-by-exclusion-minus-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Subsets by exclusion (MINUS)" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-01-31#resolution_3> ;
     mf:action
          [ qt:query  <subsetByExcl02.rq> ;
            qt:data   <subsetByExcl.ttl> ] ;
@@ -40,7 +44,8 @@
 
 :temporal-proximity-by-exclusion-nex-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Medical, temporal proximity by exclusion (NOT EXISTS)" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-01-31#resolution_3> ;
     mf:action
          [ qt:query  <temporalProximity01.rq> ;
            qt:data   <temporalProximity01.ttl> ] ;
@@ -48,7 +53,8 @@
 
 :temporal-proximity-by-exclusion-minus-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Medical, temporal proximity by exclusion (MINUS)" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-01-31#resolution_3> ;
     mf:action
          [ qt:query  <temporalProximity02.rq> ;
            qt:data   <temporalProximity02.ttl> ] ;
@@ -56,7 +62,8 @@
 
 :subset-01 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Calculate which sets are subsets of others (include A subsetOf A)" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-01-31#resolution_3> ;
     mf:action
          [ qt:query  <subset-01.rq> ;
            qt:data   <set-data.ttl> ] ;
@@ -64,7 +71,8 @@
 
 :subset-02 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Calculate which sets are subsets of others (exclude A subsetOf A)" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-01-31#resolution_3> ;
     mf:action
          [ qt:query  <subset-02.rq> ;
            qt:data   <set-data.ttl> ] ;
@@ -72,7 +80,8 @@
 
 :set-equals-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Calculate which sets have the same elements" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-01-31#resolution_3> ;
     mf:action
          [ qt:query  <set-equals-1.rq> ;
            qt:data   <set-data.ttl> ] ;
@@ -80,7 +89,8 @@
 
 :subset-03 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Calculate proper subset" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-01-31#resolution_3> ;
     mf:action
          [ qt:query  <subset-03.rq> ;
            qt:data   <set-data.ttl> ] ;
@@ -88,7 +98,8 @@
 
 :exists-01 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Positive EXISTS 1" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-01-31#resolution_3> ;
     mf:action
          [ qt:query  <exists-01.rq> ;
            qt:data   <set-data.ttl> ] ;
@@ -96,9 +107,26 @@
 
 :exists-02 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Positive EXISTS 2" ;
-    dawgt:approval dawgt:NotClassified ;
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-01-31#resolution_3> ;
     mf:action
          [ qt:query  <exists-02.rq> ;
            qt:data   <set-data.ttl> ] ;
     mf:result  <exists-02.srx> .
+
+:full-minuend rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Subtraction with MINUS from a fully bound minuend" ;
+    dawgt:approval dawgt:Approved ;
+    mf:action
+         [ qt:query  <full-minuend.rq> ;
+           qt:data   <full-minuend.ttl> ] ;
+    mf:result  <full-minuend.srx> .
+
+:partial-minuend rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Subtraction with MINUS from a partially bound minuend" ;
+    dawgt:approval dawgt:Approved ;
+    mf:action
+         [ qt:query  <part-minuend.rq> ;
+           qt:data   <part-minuend.ttl> ] ;
+    mf:result  <part-minuend.srx> .
 
