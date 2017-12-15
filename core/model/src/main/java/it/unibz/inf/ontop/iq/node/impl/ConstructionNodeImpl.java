@@ -212,31 +212,6 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         return collectedVariableBuilder.build();
     }
 
-    @Override
-    public ImmutableSubstitution<ImmutableTerm> getDirectBindingSubstitution() {
-        if (substitution.isEmpty())
-            return substitution;
-
-        // Non-final
-        ImmutableSubstitution<ImmutableTerm> previousSubstitution;
-        // Non-final
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution;
-
-        int i = 0;
-        do {
-            previousSubstitution = newSubstitution;
-            newSubstitution = newSubstitution.composeWith(substitution);
-            i++;
-        } while ((i < CONVERGENCE_BOUND) && (!previousSubstitution.equals(newSubstitution)));
-
-        if (i == CONVERGENCE_BOUND) {
-            LOGGER.warn(substitution + " has not converged after " + CONVERGENCE_BOUND + " recursions over itself");
-        }
-
-        return newSubstitution;
-
-    }
-
     /**
      * Creates a new ConstructionNode with a new substitution.
      * This substitution is obtained by composition and then cleaned (only defines the projected variables)

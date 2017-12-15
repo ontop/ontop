@@ -228,7 +228,7 @@ public class ConstructionNodeTools {
             ImmutableSubstitution<VariableOrGroundTerm> newBindings) {
         ImmutableMap.Builder<Variable, ImmutableTerm> mapBuilder = ImmutableMap.builder();
 
-        ImmutableMap<Variable, ImmutableTerm> formerSubstitutionMap = formerConstructionNode.getDirectBindingSubstitution().getImmutableMap();
+        ImmutableMap<Variable, ImmutableTerm> formerSubstitutionMap = formerConstructionNode.getSubstitution().getImmutableMap();
         for (Variable variable : formerSubstitutionMap.keySet()) {
             if (!variablesToRemove.contains(variable)) {
                 mapBuilder.put(variable, formerSubstitutionMap.get(variable));
@@ -248,7 +248,7 @@ public class ConstructionNodeTools {
             ConstructionNode formerConstructionNode, ImmutableSet<Variable> variablesToRemove,
             ImmutableSubstitution<ImmutableTerm> bindingsToRemove) {
 
-        ImmutableSubstitution<ImmutableTerm> formerSubstitution = formerConstructionNode.getDirectBindingSubstitution();
+        ImmutableSubstitution<ImmutableTerm> formerSubstitution = formerConstructionNode.getSubstitution();
 
         ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> substitutionListBuilder = ImmutableList.builder();
 
