@@ -11,8 +11,8 @@
     ( 
       :construct-1
       :construct-2
-     # :construct-3 :construct-4 blank node names are always changing
-     # :construct-5 result has duplicates
+      :construct-3 :construct-4 #blank node names are always changing
+      :construct-5 #result has duplicates
     ) .
 
 :construct-1 rdf:type mf:QueryEvaluationTest ;

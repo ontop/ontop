@@ -6,3 +6,4 @@
 :b foaf:name "Bob" .
 :b foaf:mbox "bob@example.org" .
 :a foaf:knows :b .
+

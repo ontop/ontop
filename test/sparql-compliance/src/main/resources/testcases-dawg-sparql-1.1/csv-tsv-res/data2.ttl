@@ -6,5 +6,5 @@
 :s3 :p3 "-3"^^xsd:negativeInteger .
 :s4 :p4 "4,4"^^xsd:string .
 :s5 :p5 "5,5"^^:myCustomDatatype .
-:s6 :p6 "1.0e6"^^xsd:double .
+:s6 :p6 "1.0E6"^^xsd:double .
 :s7 :p7 "a7"^^xsd:hexBinary .
