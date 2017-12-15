@@ -26,15 +26,18 @@ import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.converter.OldSyntaxMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
-import it.unibz.inf.ontop.spec.mapping.validation.SQLPPMappingValidator;
+import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.TargetQueryValidator;
 import it.unibz.inf.ontop.utils.querymanager.*;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
@@ -575,8 +578,14 @@ public class OBDAModelManager implements Disposable {
 					log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
 				}
 				// adding type information to the mapping predicates
-				SQLPPMappingValidator.validate(obdaModel.generatePPMapping(),
-						OntologyFactoryImpl.getInstance().createOntology(obdaModel.getCurrentVocabulary()));
+				TargetQueryVocabularyValidator validator = new TargetQueryValidator(OntologyFactoryImpl.getInstance().createOntology(obdaModel.getCurrentVocabulary()));
+				for (SQLPPTriplesMap mapping : obdaModel.generatePPMapping().getTripleMaps()) {
+					List<? extends Function> tq = mapping.getTargetAtoms();
+					boolean bSuccess = validator.validate(tq);
+					if (!bSuccess) {
+						throw new Exception("Found an invalid target query: " + tq.toString());
+					}
+				}
 			}
 			catch (Exception e) {
 				InvalidOntopConfigurationException ex = new InvalidOntopConfigurationException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());

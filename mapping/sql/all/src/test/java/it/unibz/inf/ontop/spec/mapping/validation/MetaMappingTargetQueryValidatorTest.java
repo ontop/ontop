@@ -22,15 +22,19 @@ package it.unibz.inf.ontop.spec.mapping.validation;
 
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.spec.mapping.validation.SQLPPMappingValidator;
+import it.unibz.inf.ontop.spec.ontology.impl.TargetQueryValidator;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 
 /**
@@ -68,10 +72,15 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 		 */
 		OntologyVocabulary vocabulary = OntologyFactoryImpl.getInstance().createVocabulary();
 		Ontology onto = OntologyFactoryImpl.getInstance().createOntology(vocabulary);
+        TargetQueryVocabularyValidator validator = new TargetQueryValidator(onto);
 
-		// run validator
+        // run validator
 		try {
-			SQLPPMappingValidator.validate(ppMapping, onto);
+            for (SQLPPTriplesMap mapping : ppMapping.getTripleMaps()) {
+                if (!validator.validate(mapping.getTargetAtoms())) {
+                    throw new Exception("Found an invalid target query: " + mapping.getTargetAtoms());
+                }
+            }
 		}
 		catch (Exception e) {
 			fail("The target query has problem:" + e.getMessage());
