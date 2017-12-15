@@ -106,20 +106,23 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                     targetAtom.getSubstitution(), Optional.empty());
             TIQBuilder.init(projectionAtom, constructionNode);
 
-            QueryNode currParentNode = constructionNode;
-
             while (!teStack.isEmpty()) {
                 DatalogMTLExpression currentExpression = teStack.pop();
+                QueryNode newNode;
 
-                if (currentExpression instanceof StaticAtomicExpression) {
-                    QueryNode qNode = mapping.getDefinition(((StaticAtomicExpression) currentExpression).getPredicate()).get().getRootNode();
-                    qnStack.push(qNode);
+                if(currentExpression instanceof AtomicExpression) {
 
-                } else if(currentExpression instanceof TemporalAtomicExpression){
-                    QueryNode qNode = temporalMapping.getDefinitions().get(((TemporalAtomicExpression) currentExpression).getPredicate()).getQuadruple().getIntermediateQuery().getRootNode();
-                    qnStack.push(qNode);
+                    if (currentExpression instanceof StaticAtomicExpression)
+                        newNode = mapping.getDefinition(((StaticAtomicExpression) currentExpression).getPredicate()).get().getRootNode();
+                    else
+                        newNode = temporalMapping.getDefinitions().get(((TemporalAtomicExpression) currentExpression).getPredicate()).getQuadruple().getIntermediateQuery().getRootNode();
+
+                    QueryNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
+                    TIQBuilder.addChild(coalesceNode, newNode);
+                    qnStack.push(coalesceNode);
 
                 }else if(currentExpression instanceof TemporalJoinExpression){
+
                     QueryNode qn1 = qnStack.pop();
                     QueryNode qn2 = qnStack.pop();
                     QueryNode newJoinNode = TIQFactory.createTemporalJoinNode();
@@ -128,7 +131,6 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                     qnStack.push(newJoinNode);
 
                 }else if (currentExpression instanceof UnaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange){
-                    QueryNode newNode;
 
                     if(currentExpression instanceof BoxMinusExpression)
                          newNode = TIQFactory.createBoxMinusNode(((BoxMinusExpression) currentExpression).getRange());
@@ -147,7 +149,6 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
 
                     //TODO: fill here
                 }else if (currentExpression instanceof BinaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange) {
-                    QueryNode newNode;
 
                     if (currentExpression instanceof SinceExpression){
 
@@ -157,6 +158,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                     }
                 }
             }
+            TIQBuilder.build();
         }else{
             //TODO:????
         }
