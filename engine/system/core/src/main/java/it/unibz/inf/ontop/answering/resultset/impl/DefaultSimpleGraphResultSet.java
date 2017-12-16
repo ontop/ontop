@@ -28,10 +28,8 @@ import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
-import it.unibz.inf.ontop.spec.ontology.AssertionFactory;
-import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
-import it.unibz.inf.ontop.spec.ontology.impl.AssertionFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.query.algebra.*;
@@ -44,19 +42,14 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
 	private List<Assertion> results = new ArrayList<>();
 
-	private TupleResultSet tupleResultSet;
+	private final TupleResultSet tupleResultSet;
 
+	private final ConstructTemplate constructTemplate;
 
-	private ConstructTemplate constructTemplate;
+	private Map<String, ValueExpr> extMap = null;
 
-	List<ExtensionElem> extList = null;
-	
-	Map<String, ValueExpr> extMap = null;
-	
 	//store results in case of describe queries
-	private boolean storeResults = false;
-
-	private AssertionFactory ofac = AssertionFactoryImpl.getInstance();
+	private final boolean storeResults;
 
 	public DefaultSimpleGraphResultSet(TupleResultSet results, ConstructTemplate template,
                                        boolean storeResult) throws OntopResultConversionException, OntopConnectionException {
@@ -72,7 +65,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 			//process current result set into local buffer, 
 			//since additional results will be collected
 			while (resSet.hasNext()) {
-				this.results.addAll(processResults(resSet, template));
+				results.addAll(processResults(resSet, template));
 			}
 		}
 	}
@@ -104,13 +97,16 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
         Extension ex = template.getExtension();
         if (ex != null) {
-            extList = ex.getElements();
+            List<ExtensionElem> extList = ex.getElements();
             Map<String, ValueExpr> newExtMap = new HashMap<>();
             for (ExtensionElem anExtList : extList) {
                 newExtMap.put(anExtList.getName(), anExtList.getExpr());
             }
             extMap = newExtMap;
         }
+
+        Ontology onto = OntologyFactoryImpl.getInstance().createOntology();
+
         for (ProjectionElemList peList : peLists) {
             int size = peList.getElements().size();
 
@@ -130,18 +126,25 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 Assertion assertion;
                 try {
                     if (predicateName.equals(IriConstants.RDF_TYPE)) {
-                        assertion = ofac.createClassAssertion(objectConstant.getValue(), subjectConstant);
-                    } else {
-                        if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode))
-                            assertion = ofac.createObjectPropertyAssertion(predicateName,
+                        OClass oc = onto.classes().create(objectConstant.getValue());
+                        assertion = onto.createClassAssertion(oc, subjectConstant);
+                    }
+                    else {
+                        if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) {
+                            ObjectPropertyExpression ope = onto.objectProperties().create(predicateName);
+                            assertion = onto.createObjectPropertyAssertion(ope,
                                     subjectConstant, (ObjectConstant) objectConstant);
-                        else
-                            assertion = ofac.createDataPropertyAssertion(predicateName,
+                        }
+                        else {
+                            DataPropertyExpression dpe = onto.dataProperties().create(predicateName);
+                            assertion = onto.createDataPropertyAssertion(dpe,
                                     subjectConstant, (ValueConstant) objectConstant);
+                        }
                     }
                     if (assertion != null)
                         tripleAssertions.add(assertion);
-                } catch (InconsistentOntologyException e) {
+                }
+                catch (InconsistentOntologyException e) {
                     throw new OntopResultConversionException("InconsistentOntologyException: " +
                             predicateName + " " + subjectConstant + " " + objectConstant);
                 }
@@ -210,5 +213,4 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 	public void close() throws OntopConnectionException {
 		tupleResultSet.close();
 	}
-
 }

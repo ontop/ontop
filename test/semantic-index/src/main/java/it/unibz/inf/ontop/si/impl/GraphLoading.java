@@ -49,8 +49,8 @@ public class GraphLoading {
              */
             OntopSQLOWLAPIConfiguration configuration = createConfiguration(init.dataRepository, init.jdbcUrl, properties);
             return new OntopSemanticIndexLoaderImpl(configuration, init.localConnection);
-
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new SemanticIndexException(e.getMessage());
         }
     }
@@ -91,9 +91,8 @@ public class GraphLoading {
 
             rdfParser.parse(in, graphIRI.toString());
             LOG.debug("Inserted {} triples from the graph {}", rdfHandler.getCount(), graphIRI);
-
-
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new SemanticIndexException(e.getMessage());
         }
     }

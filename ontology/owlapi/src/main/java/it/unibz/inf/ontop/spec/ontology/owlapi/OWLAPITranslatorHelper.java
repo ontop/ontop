@@ -17,13 +17,11 @@ public class OWLAPITranslatorHelper {
 
 	private final TBoxReasoner reasoner;
 	
-	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-	
-	
+	private static final Ontology onto = OntologyFactoryImpl.getInstance().createOntology();
+
 	public OWLAPITranslatorHelper(TBoxReasoner reasoner) {
 		this.reasoner = reasoner;
 	}
-
 	
 	public ClassAssertion translate(OWLClassAssertionAxiom ax) throws OWLAPITranslatorOWL2QL.TranslationException, InconsistentOntologyException {
 		OWLClassExpression classExpression = ax.getClassExpression();
@@ -35,7 +33,7 @@ public class OWLAPITranslatorHelper {
 		
 		URIConstant c = getIndividual(ax.getIndividual());
 
-		return ofac.createClassAssertion(concept, c);
+		return onto.createClassAssertion(concept, c);
 	}
 	
 	public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) throws OWLAPITranslatorOWL2QL.TranslationException, InconsistentOntologyException {
@@ -44,7 +42,7 @@ public class OWLAPITranslatorHelper {
 
 		ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty());
 
-		return ofac.createObjectPropertyAssertion(ope, c1, c2);
+		return onto.createObjectPropertyAssertion(ope, c1, c2);
 	}	
 	
 	public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax) throws OWLAPITranslatorOWL2QL.TranslationException, InconsistentOntologyException {
@@ -67,7 +65,7 @@ public class OWLAPITranslatorHelper {
 
 		DataPropertyExpression dpe = getPropertyExpression(ax.getProperty());
 
-		return ofac.createDataPropertyAssertion(dpe, c1, c2);
+		return onto.createDataPropertyAssertion(dpe, c1, c2);
 	}
 
 	public AnnotationAssertion translate(OWLAnnotationAssertionAxiom ax) throws OWLAPITranslatorOWL2QL.TranslationException, InconsistentOntologyException {
@@ -78,7 +76,7 @@ public class OWLAPITranslatorHelper {
 
 		AnnotationProperty ap = getPropertyExpression(ax.getProperty());
 
-		return ofac.createAnnotationAssertion(ap, c1, c2);
+		return onto.createAnnotationAssertion(ap, c1, c2);
 	}
 	
 	/**
