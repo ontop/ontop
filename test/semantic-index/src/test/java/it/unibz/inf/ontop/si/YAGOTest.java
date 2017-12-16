@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.si;
 
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
-import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.ontology.impl;
+package it.unibz.inf.ontop.protege.core;
 
 
 /*
@@ -24,6 +24,10 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.AnnotationPropertyImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.ObjectPropertyExpressionImpl;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,7 +35,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * Implements OntologyVocabulary 
+ * Implements MutableOntologyVocabulary
  * by providing look-up tables for classes, object and data properties
  * (checks whether the name has been declared)
  * 
@@ -42,16 +46,16 @@ import java.util.function.Function;
  * @author Roman Kontchakov
  */
 
-public class OntologyVocabularyImpl implements OntologyVocabulary {
+public class MutableOntologyVocabularyImpl implements MutableOntologyVocabulary {
 
-	private static final class OntologyVocabularyCategoryImpl<T> implements OntologyVocabularyCategory<T> {
+	private static final class MutableOntologyVocabularyCategoryImpl<T> implements MutableOntologyVocabularyCategory<T> {
 		private final Map<String, T> entities = new HashMap<>();
 
 		private final ImmutableMap<String, T> builtins;
 		private final Function<String, ? extends T> ctor;
 		private final String NOT_FOUND_MESSAGE;
 
-		OntologyVocabularyCategoryImpl(ImmutableMap<String, T> builtins, Function<String, ? extends T> ctor, String NOT_FOUND_MESSAGE) {
+		MutableOntologyVocabularyCategoryImpl(ImmutableMap<String, T> builtins, Function<String, ? extends T> ctor, String NOT_FOUND_MESSAGE) {
 			this.builtins = builtins;
 			this.ctor = ctor;
 			this.NOT_FOUND_MESSAGE = NOT_FOUND_MESSAGE;
@@ -92,55 +96,44 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		public void remove(String uri) { entities.remove(uri); }
 	}
 
-	private final OntologyVocabularyCategoryImpl<OClass> classes = new OntologyVocabularyCategoryImpl<>(
+	private final MutableOntologyVocabularyCategoryImpl<OClass> classes = new MutableOntologyVocabularyCategoryImpl<>(
 			ImmutableMap.of(ClassImpl.owlThingIRI, ClassImpl.owlThing,
 					ClassImpl.owlNothingIRI, ClassImpl.owlNothing),
-			s -> new ClassImpl(s), "Class not found: ");
+			ClassImpl::new, "Class not found: ");
 
-	private final OntologyVocabularyCategoryImpl<ObjectPropertyExpression> objectProperties = new OntologyVocabularyCategoryImpl<>(
+	private final MutableOntologyVocabularyCategoryImpl<ObjectPropertyExpression> objectProperties = new MutableOntologyVocabularyCategoryImpl<>(
 			ImmutableMap.of(ObjectPropertyExpressionImpl.owlBottomObjectPropertyIRI, ObjectPropertyExpressionImpl.owlBottomObjectProperty,
 					ObjectPropertyExpressionImpl.owlTopObjectPropertyIRI, ObjectPropertyExpressionImpl.owlTopObjectProperty),
-			s -> new ObjectPropertyExpressionImpl(s), "ObjectProperty not found: ");
+			ObjectPropertyExpressionImpl::new, "ObjectProperty not found: ");
 
-	private final OntologyVocabularyCategoryImpl<DataPropertyExpression> dataProperties = new OntologyVocabularyCategoryImpl<>(
+	private final MutableOntologyVocabularyCategoryImpl<DataPropertyExpression> dataProperties = new MutableOntologyVocabularyCategoryImpl<>(
 			ImmutableMap.of(DataPropertyExpressionImpl.owlBottomDataPropertyIRI, DataPropertyExpressionImpl.owlBottomDataProperty,
 					DataPropertyExpressionImpl.owlTopDataPropertyIRI, DataPropertyExpressionImpl.owlTopDataProperty),
-			s -> new DataPropertyExpressionImpl(s), "DataProperty not found: ");
+			DataPropertyExpressionImpl::new, "DataProperty not found: ");
 
-	private final OntologyVocabularyCategoryImpl<AnnotationProperty> annotationProperties = new OntologyVocabularyCategoryImpl<>(
+	private final MutableOntologyVocabularyCategoryImpl<AnnotationProperty> annotationProperties = new MutableOntologyVocabularyCategoryImpl<>(
 			ImmutableMap.of(),
-			s -> new AnnotationPropertyImpl(s), "AnnotationProperty not found: ");
+			AnnotationPropertyImpl::new, "AnnotationProperty not found: ");
 
-	private static final String DATATYPE_NOT_FOUND = "Datatype not found: ";
-	
-	public OntologyVocabularyImpl() {		
+	public MutableOntologyVocabularyImpl() {
 	}
 
 
 	@Override
-	public Datatype getDatatype(String uri) {
-		Datatype dt = OntologyImpl.OWL2QLDatatypes.get(uri);
-		if (dt == null)
-			throw new RuntimeException(DATATYPE_NOT_FOUND + uri);
-		return dt;
-	}
-	
-	
-	@Override
-	public OntologyVocabularyCategory<OClass> classes() {
+	public MutableOntologyVocabularyCategory<OClass> classes() {
 		return classes;
 	}
 
 	@Override
-	public OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() {
+	public MutableOntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() {
 		return objectProperties;
 	}
 
 	@Override
-	public OntologyVocabularyCategory<DataPropertyExpression> dataProperties() {
+	public MutableOntologyVocabularyCategory<DataPropertyExpression> dataProperties() {
 		return dataProperties;
 	}
 
 	@Override
-	public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
+	public MutableOntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
 }

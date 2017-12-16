@@ -39,8 +39,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
-import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.impl.TargetQueryValidator;
+import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

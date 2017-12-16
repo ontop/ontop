@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;

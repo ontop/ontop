@@ -62,7 +62,8 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
     public static final DataPropertyExpression owlBottomDataProperty = new DataPropertyExpressionImpl(owlBottomDataPropertyIRI);
 	
 
-	DataPropertyExpressionImpl(String name) {
+    // TODO: remove public access
+	public DataPropertyExpressionImpl(String name) {
 		this.predicate = TERM_FACTORY.getDataPropertyPredicate(name);
 		this.name = name;		
 		this.isTop = name.equals(owlTopDataPropertyIRI);

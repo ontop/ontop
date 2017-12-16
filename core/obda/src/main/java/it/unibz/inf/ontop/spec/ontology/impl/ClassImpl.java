@@ -33,13 +33,14 @@ public class ClassImpl implements OClass {
 	private final String name;
 	private final boolean isNothing, isThing;
 
-	static final String owlThingIRI = "http://www.w3.org/2002/07/owl#Thing";
-	static final String owlNothingIRI  = "http://www.w3.org/2002/07/owl#Nothing";
+	public static final String owlThingIRI = "http://www.w3.org/2002/07/owl#Thing";
+	public static final String owlNothingIRI  = "http://www.w3.org/2002/07/owl#Nothing";
 	
     public static final OClass owlThing = new ClassImpl(owlThingIRI); 
     public static final OClass owlNothing = new ClassImpl(owlNothingIRI); 
-    	
-	ClassImpl(String name) {
+
+    // TODO: remove public access
+	public ClassImpl(String name) {
 		this.predicate = TERM_FACTORY.getClassPredicate(name);
 		this.name = name;
 		this.isNothing = name.equals(owlNothingIRI);

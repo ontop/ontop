@@ -30,8 +30,8 @@ import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.impl.TargetQueryValidator;
+import it.unibz.inf.ontop.protege.core.MutableOntologyVocabulary;
+import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -394,7 +394,7 @@ public class QueryPainter {
 			doc.setCharacterAttributes(pos, 1, black, false);
 			pos = input.indexOf(":", pos + 1);
 		}
-		OntologyVocabulary vocabulary = apic.getCurrentVocabulary();
+		MutableOntologyVocabulary vocabulary = apic.getCurrentVocabulary();
 		for (Function atom : current_query) {
 			Predicate predicate = atom.getFunctionSymbol();
 			String predicateName = man.getShortForm(atom.getFunctionSymbol().toString());

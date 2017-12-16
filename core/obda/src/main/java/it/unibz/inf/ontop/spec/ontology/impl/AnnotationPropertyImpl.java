@@ -42,17 +42,11 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 
 	private final Predicate predicate;
 	private final String name;
-//	private final AnnotationPropertyDomainImpl domain;
-//	private final AnnotationPropertyRangeImpl range;
 
-
-	AnnotationPropertyImpl(String name) {
-
+	// TODO: remove public access
+	public AnnotationPropertyImpl(String name) {
 		this.predicate = TERM_FACTORY.getAnnotationPropertyPredicate(name);
 		this.name = name;
-//		this.domain =  new AnnotationPropertyDomainImpl(this);
-//		this.range = new AnnotationPropertyRangeImpl(this);
-
 	}
 
 	@Override
@@ -64,17 +58,6 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 	public String getName() {
 		return name;
 	}
-
-//	@Override
-//	public AnnotationPropertyDomain getDomain() {
-//		return domain;
-//	}
-//
-//	@Override
-//	public AnnotationPropertyRange getRange() {
-//		return range;
-//	}
-
 
 	@Override
 	public boolean equals(Object obj) {

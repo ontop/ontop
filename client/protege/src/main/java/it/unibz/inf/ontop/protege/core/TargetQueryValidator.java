@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.ontology.impl;
+package it.unibz.inf.ontop.protege.core;
 
 /*
  * #%L
@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.List;
@@ -32,7 +31,7 @@ import java.util.List;
 
 public class TargetQueryValidator  {
 	
-	public static List<String> validate(List<? extends Function> targetQuery, OntologyVocabulary vocabulary) {
+	public static List<String> validate(List<? extends Function> targetQuery, MutableOntologyVocabulary vocabulary) {
 
 	    return targetQuery.stream()
                 .filter(atom -> !isValid(atom.getFunctionSymbol(), vocabulary))
@@ -40,7 +39,7 @@ public class TargetQueryValidator  {
                 .collect(ImmutableCollectors.toList());
 	}
 
-	public static boolean isValid(Predicate p, OntologyVocabulary vocabulary) {
+	public static boolean isValid(Predicate p, MutableOntologyVocabulary vocabulary) {
 
         return vocabulary.classes().contains(p.getName())
                 || vocabulary.objectProperties().contains(p.getName())

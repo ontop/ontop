@@ -56,16 +56,17 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	public static final String owlTopObjectPropertyIRI = "http://www.w3.org/2002/07/owl#topObjectProperty";
 	public static final String owlBottomObjectPropertyIRI = "http://www.w3.org/2002/07/owl#bottomObjectProperty";
 	
-	static final ObjectPropertyExpression owlTopObjectProperty = new ObjectPropertyExpressionImpl(owlTopObjectPropertyIRI); 
-	static final ObjectPropertyExpression owlBottomObjectProperty = new ObjectPropertyExpressionImpl(owlBottomObjectPropertyIRI); 
+	public static final ObjectPropertyExpression owlTopObjectProperty = new ObjectPropertyExpressionImpl(owlTopObjectPropertyIRI);
+	public static final ObjectPropertyExpression owlBottomObjectProperty = new ObjectPropertyExpressionImpl(owlBottomObjectPropertyIRI);
 
 	/**
 	 * general constructor 
 	 * 
 	 * @param name
 	 */
-	
-	ObjectPropertyExpressionImpl(String name) {
+
+	// TODO: remove public access
+	public ObjectPropertyExpressionImpl(String name) {
 		this.predicate = TERM_FACTORY.getObjectPropertyPredicate(name);
 		this.isInverse = false;
 		this.string = name;

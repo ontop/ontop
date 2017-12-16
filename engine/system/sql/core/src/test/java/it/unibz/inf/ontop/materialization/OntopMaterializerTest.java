@@ -292,7 +292,7 @@ public class OntopMaterializerTest {
 //
 //            PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
 //            OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager,
-//					new OntologyVocabularyImpl());
+//					new MutableOntologyVocabularyImpl());
 //
 //            QuestMaterializer materializer = new QuestMaterializer(model, false);
 //
@@ -401,7 +401,7 @@ public class OntopMaterializerTest {
 //		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 //
 //        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-//        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
+//        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager, new MutableOntologyVocabularyImpl());
 //
 //		QuestMaterializer materializer = new QuestMaterializer(model, false);
 //
@@ -473,7 +473,7 @@ public class OntopMaterializerTest {
 //        dataSources.add(source3);
 //
 //        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-//        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
+//        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager, new MutableOntologyVocabularyImpl());
 //		QuestMaterializer materializer = new QuestMaterializer(model, false);
 //
 //		List<Assertion> assertions = materializer.getAssertionList();
@@ -581,7 +581,7 @@ public class OntopMaterializerTest {
 //
 //        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
 //        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager,
-//				new OntologyVocabularyImpl());
+//				new MutableOntologyVocabularyImpl());
 //
 //		QuestMaterializer materializer = new QuestMaterializer(model, false);
 //
@@ -688,7 +688,7 @@ public class OntopMaterializerTest {
 //        mappingIndex.put(source.getSourceID(), ImmutableList.of(map1, map2, map3, map4, map5, map6));
 //
 //        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-//        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
+//        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager, new MutableOntologyVocabularyImpl());
 //
 //		QuestMaterializer materializer = new QuestMaterializer(model, false);
 //

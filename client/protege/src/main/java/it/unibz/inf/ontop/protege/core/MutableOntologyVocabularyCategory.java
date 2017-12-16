@@ -1,8 +1,8 @@
-package it.unibz.inf.ontop.spec.ontology;
+package it.unibz.inf.ontop.protege.core;
 
 import java.util.Collection;
 
-public interface OntologyVocabularyCategory<T> {
+public interface MutableOntologyVocabularyCategory<T> {
 
     /**
      * check whether the entity has been declared and return the entity object
