@@ -49,8 +49,6 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repository.SIRepositoryManager {
 
-	
-	private static final long serialVersionUID = -6494667662327970606L;
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
@@ -234,12 +232,8 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 
 	private SemanticIndexCache cacheSI;
 	
-	private boolean isIndexed;  // database index created
-
 	private SemanticIndexViewsManager views = new SemanticIndexViewsManager();
 	
-	private final List<RepositoryChangedListener> changeList = new LinkedList<>();
-
 	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag) {
 		this.reasonerDag = reasonerDag;
 	}
@@ -250,11 +244,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		cacheSI.buildSemanticIndexFromReasoner();		
 	}
 	
-	@Override
-	public void addRepositoryChangedListener(RepositoryChangedListener list) {
-		this.changeList.add(list);
-	}
-
 
 	@Override
 	public SemanticIndexURIMap getUriMap() {
@@ -316,7 +305,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	}
 	
 	
-	@Override
 	public void dropDBSchema(Connection conn) throws SQLException {
 
 		try (Statement st = conn.createStatement()) {
@@ -457,14 +445,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		if (totalFailures > 0) {
 			log.warn("Total failed insertions: " + totalFailures + ". (REASON: datatype mismatch between the ontology and database).");
 		}
-
-		/*
-		 * fired ONLY when new data is inserted and emptiness index is updated
-		 * (this is done in order to update T-mappings)
-		 */
-
-		for (RepositoryChangedListener listener : changeList) 
-			listener.repositoryChanged();
 
 		return success;
 	}
@@ -769,7 +749,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		range.addRange(intervals);	
 	}
 	
-	@Override
 	public void loadMetadata(Connection conn) throws SQLException {
 		log.debug("Loading semantic index metadata from the database *");
 
@@ -1210,7 +1189,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	
 	
 	
-	@Override
 	public void createIndexes(Connection conn) throws SQLException {
 		log.debug("Creating indexes");
 		try (Statement st = conn.createStatement()) {
@@ -1227,8 +1205,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			log.debug("Executing ANALYZE");
 			st.addBatch("ANALYZE");
 			st.executeBatch();
-			
-			isIndexed = true;
 		}
 	}
 	
@@ -1237,7 +1213,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	 */
 		
 
-	@Override
 	public void dropIndexes(Connection conn) throws SQLException {
 		log.debug("Dropping indexes");
 
@@ -1250,13 +1225,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 					st.addBatch(s);
 			
 			st.executeBatch();
-
-			isIndexed = false;
 		}
-	}
-
-	@Override
-	public boolean isIndexed(Connection conn) {
-		return isIndexed;
 	}
 }
