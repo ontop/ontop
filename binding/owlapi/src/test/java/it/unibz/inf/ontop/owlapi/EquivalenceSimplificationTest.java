@@ -53,15 +53,15 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(2, classDAG.edgeSetSize());  // A1 <- B1 <- C1
 		assertEquals(0, propDAG.edgeSetSize());  // no properties
 
-		ClassExpression A1 = ontology.getClass(testURI + "A1");
-		ClassExpression B1 = ontology.getClass(testURI + "B1");
-		ClassExpression C1 = ontology.getClass(testURI + "C1");
-		ClassExpression A2 = ontology.getClass(testURI + "A2");
-		ClassExpression A3 = ontology.getClass(testURI + "A3");
-		ClassExpression B2 = ontology.getClass(testURI + "B2");
-		ClassExpression B3 = ontology.getClass(testURI + "B3");
-		ClassExpression C2 = ontology.getClass(testURI + "C2");
-		ClassExpression C3 = ontology.getClass(testURI + "C3");
+		ClassExpression A1 = ontology.classes().get(testURI + "A1");
+		ClassExpression B1 = ontology.classes().get(testURI + "B1");
+		ClassExpression C1 = ontology.classes().get(testURI + "C1");
+		ClassExpression A2 = ontology.classes().get(testURI + "A2");
+		ClassExpression A3 = ontology.classes().get(testURI + "A3");
+		ClassExpression B2 = ontology.classes().get(testURI + "B2");
+		ClassExpression B3 = ontology.classes().get(testURI + "B3");
+		ClassExpression C2 = ontology.classes().get(testURI + "C2");
+		ClassExpression C3 = ontology.classes().get(testURI + "C3");
 
 		EquivalencesDAG<ClassExpression> classes = simple.classes().dag();
 		assertEquals(classes.getCanonicalForm(A1), A1);
@@ -96,15 +96,15 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(4, classDAG.edgeSetSize()); // A1 <- B1 <- C1, A1^- <- B1^- <- C1^-
 
 		
-		ObjectPropertyExpression A1 = ontology.getObjectProperty(testURI + "A1");
-		ObjectPropertyExpression B1 = ontology.getObjectProperty(testURI + "B1");
-		ObjectPropertyExpression C1 = ontology.getObjectProperty(testURI + "C1");
-		ObjectPropertyExpression A2 = ontology.getObjectProperty(testURI + "A2");
-		ObjectPropertyExpression A3 = ontology.getObjectProperty(testURI + "A3");
-		ObjectPropertyExpression B2 = ontology.getObjectProperty(testURI + "B2");
-		ObjectPropertyExpression B3 = ontology.getObjectProperty(testURI + "B3");
-		ObjectPropertyExpression C2 = ontology.getObjectProperty(testURI + "C2");
-		ObjectPropertyExpression C3 = ontology.getObjectProperty(testURI + "C3");
+		ObjectPropertyExpression A1 = ontology.objectProperties().get(testURI + "A1");
+		ObjectPropertyExpression B1 = ontology.objectProperties().get(testURI + "B1");
+		ObjectPropertyExpression C1 = ontology.objectProperties().get(testURI + "C1");
+		ObjectPropertyExpression A2 = ontology.objectProperties().get(testURI + "A2");
+		ObjectPropertyExpression A3 = ontology.objectProperties().get(testURI + "A3");
+		ObjectPropertyExpression B2 = ontology.objectProperties().get(testURI + "B2");
+		ObjectPropertyExpression B3 = ontology.objectProperties().get(testURI + "B3");
+		ObjectPropertyExpression C2 = ontology.objectProperties().get(testURI + "C2");
+		ObjectPropertyExpression C3 = ontology.objectProperties().get(testURI + "C3");
 
 		EquivalencesDAG<ObjectPropertyExpression> ops = simple.objectProperties().dag();
 		assertEquals(ops.getCanonicalForm(A1), A1);
@@ -137,12 +137,12 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(0, propDAG.edgeSetSize()); // 
 		assertEquals(2, classDAG.edgeSetSize()); // A1 <- B1 <- C1
 
-		ClassExpression A1 = ontology.getClass(testURI + "A1");
-		ClassExpression B1 = ontology.getClass(testURI + "B1");
-		ClassExpression C1 = ontology.getClass(testURI + "C1");
-		ClassExpression A3 = ontology.getClass(testURI + "A3");
-		ClassExpression B3 = ontology.getClass(testURI + "B3");
-		ClassExpression C3 = ontology.getClass(testURI + "C3");
+		ClassExpression A1 = ontology.classes().get(testURI + "A1");
+		ClassExpression B1 = ontology.classes().get(testURI + "B1");
+		ClassExpression C1 = ontology.classes().get(testURI + "C1");
+		ClassExpression A3 = ontology.classes().get(testURI + "A3");
+		ClassExpression B3 = ontology.classes().get(testURI + "B3");
+		ClassExpression C3 = ontology.classes().get(testURI + "C3");
 
 		EquivalencesDAG<ClassExpression> classes = simple.classes().dag();
 		assertEquals(classes.getCanonicalForm(A1), A1);
@@ -170,15 +170,15 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(4, classDAG.edgeSetSize()); // A1 >= B1 >= C1, A1^- >= B1^- >= C1^-
 		assertEquals(4, propDAG.edgeSetSize()); //
 
-		ObjectPropertyExpression A1 = ontology.getObjectProperty(testURI + "A1");
-		ObjectPropertyExpression B1 = ontology.getObjectProperty(testURI + "B1");
-		ObjectPropertyExpression C1 = ontology.getObjectProperty(testURI + "C1");
-		ObjectPropertyExpression A2 = ontology.getObjectProperty(testURI + "A2");
-		ObjectPropertyExpression A3 = ontology.getObjectProperty(testURI + "A3");
-		ObjectPropertyExpression B2 = ontology.getObjectProperty(testURI + "B2");
-		ObjectPropertyExpression B3 = ontology.getObjectProperty(testURI + "B3");
-		ObjectPropertyExpression C2 = ontology.getObjectProperty(testURI + "C2");
-		ObjectPropertyExpression C3 = ontology.getObjectProperty(testURI + "C3");
+		ObjectPropertyExpression A1 = ontology.objectProperties().get(testURI + "A1");
+		ObjectPropertyExpression B1 = ontology.objectProperties().get(testURI + "B1");
+		ObjectPropertyExpression C1 = ontology.objectProperties().get(testURI + "C1");
+		ObjectPropertyExpression A2 = ontology.objectProperties().get(testURI + "A2");
+		ObjectPropertyExpression A3 = ontology.objectProperties().get(testURI + "A3");
+		ObjectPropertyExpression B2 = ontology.objectProperties().get(testURI + "B2");
+		ObjectPropertyExpression B3 = ontology.objectProperties().get(testURI + "B3");
+		ObjectPropertyExpression C2 = ontology.objectProperties().get(testURI + "C2");
+		ObjectPropertyExpression C3 = ontology.objectProperties().get(testURI + "C3");
 
 		EquivalencesDAG<ObjectPropertyExpression> ops = simple.objectProperties().dag();
 		assertEquals(ops.getCanonicalForm(A1), A1);
@@ -191,5 +191,4 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(ops.getCanonicalForm(C2), C1.getInverse());
 		assertEquals(ops.getCanonicalForm(C3), C1);
 	}
-
 }

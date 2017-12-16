@@ -106,16 +106,14 @@ public class GraphLoading {
         graphURIs.addAll(dataset.getDefaultGraphs());
         graphURIs.addAll(dataset.getNamedGraphs());
 
-        OntologyVocabulary vb = ONTOLOGY_FACTORY.createVocabulary();
+        Ontology vb = ONTOLOGY_FACTORY.createOntology();
         for (IRI graphURI : graphURIs) {
             collectOntologyVocabulary(graphURI, vb);
         }
-        Ontology result = ONTOLOGY_FACTORY.createOntology(vb);
-
-        return result;
+        return vb;
     }
 
-    private static void collectOntologyVocabulary(IRI graphURI, OntologyVocabulary vb) throws IOException {
+    private static void collectOntologyVocabulary(IRI graphURI, Ontology vb) throws IOException {
         RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphURI.toString()).get();
         RDFParser rdfParser = Rio.createParser(rdfFormat, ValueFactoryImpl.getInstance());
         ParserConfig config = rdfParser.getParserConfig();

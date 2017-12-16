@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping;
 
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
-import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import org.junit.Test;
 
@@ -16,7 +16,7 @@ public class TMappingExclusionConfigTest {
     public void testParseFile() throws Exception {
         OntologyFactory factory = OntologyFactoryImpl.getInstance();
         TMappingExclusionConfig conf = TMappingExclusionConfig.parseFile("src/test/resources/tmappingExclusionConf/good.conf");
-        OntologyVocabulary voc = factory.createVocabulary();
+        Ontology voc = factory.createOntology();
         // in the config
         assertTrue(conf.contains(voc.classes().create("http://www.example.org/A")));
         // not in the config

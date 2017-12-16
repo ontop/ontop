@@ -27,21 +27,21 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
 
     @Override
     public Ontology extractVocabulary(Stream<? extends Function> targetAtoms) {
-        OntologyVocabulary ontologyVocabulary = ONTOLOGY_FACTORY.createVocabulary();
+        Ontology ontology = ONTOLOGY_FACTORY.createOntology();
         targetAtoms
                 .forEach(f -> {
                     String name = f.getFunctionSymbol().getName();
                     if (f.getArity() == 1)
-                        ontologyVocabulary.classes().create(name);
+                        ontology.classes().create(name);
                     else {
                         Predicate.COL_TYPE secondArgType = f.getFunctionSymbol().getType(1);
                         if ((secondArgType != null) && secondArgType.equals(Predicate.COL_TYPE.OBJECT))
-                            ontologyVocabulary.objectProperties().create(name);
+                            ontology.objectProperties().create(name);
                         else
-                            ontologyVocabulary.dataProperties().create(name);
+                            ontology.dataProperties().create(name);
                     }
                 });
-        return ONTOLOGY_FACTORY.createOntology(ontologyVocabulary);
+        return ontology;
     }
 
     @Override

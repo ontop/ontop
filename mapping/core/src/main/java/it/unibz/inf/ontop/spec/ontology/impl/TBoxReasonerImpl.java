@@ -116,11 +116,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		chooseDataRangeRepresentatives(dataRangeDAG, dataPropertyDAG);
 
 		TBoxReasonerImpl r = new TBoxReasonerImpl(
-		        new ClassifiedOntologyVocabularyCategoryImpl<>(impl.vocabulary.concepts, classDAG),
+		        new ClassifiedOntologyVocabularyCategoryImpl<>(impl.getClassesRawMap(), classDAG),
                 new ClassifiedOntologyVocabularyCategoryImpl<>(OntologyImpl.OWL2QLDatatypes, dataRangeDAG),
-                new ClassifiedOntologyVocabularyCategoryImpl<>(impl.vocabulary.objectProperties, objectPropertyDAG),
-                new ClassifiedOntologyVocabularyCategoryImpl<>(impl.vocabulary.dataProperties, dataPropertyDAG),
-                new ClassifiedOntologyVocabularyCategoryImpl<>(impl.vocabulary.annotationProperties, null));
+                new ClassifiedOntologyVocabularyCategoryImpl<>(impl.getObjectPropertiesRawMap(), objectPropertyDAG),
+                new ClassifiedOntologyVocabularyCategoryImpl<>(impl.getDataPropertiesRawMap(), dataPropertyDAG),
+                new ClassifiedOntologyVocabularyCategoryImpl<>(impl.getAnnotationPropertiesRawMap(), null));
 //		if (equivalenceReduced) {
 //			r = getEquivalenceSimplifiedReasoner(r);
 //		}
@@ -559,7 +559,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 
-		for (ObjectPropertyExpression role : ontology.getObjectProperties()) {
+		for (ObjectPropertyExpression role : ontology.objectProperties().all()) {
 			if (!role.isBottom() && !role.isTop()) {
 				graph.addVertex(role);
 				graph.addVertex(role.getInverse());
@@ -595,7 +595,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 
-		for (DataPropertyExpression role : ontology.getDataProperties())
+		for (DataPropertyExpression role : ontology.dataProperties().all())
 			if (!role.isBottom() && !role.isTop())
 				graph.addVertex(role);
 
@@ -625,7 +625,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		DefaultDirectedGraph<ClassExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 
-		for (OClass concept : ontology.getClasses())
+		for (OClass concept : ontology.classes().all())
 			if (!concept.isBottom() && !concept.isTop())
 				graph.addVertex(concept);
 
@@ -664,7 +664,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 																							DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> dataPropertyGraph) {
 
 		DefaultDirectedGraph<DataRangeExpression,DefaultEdge> dataRangeGraph
-				= new  DefaultDirectedGraph<DataRangeExpression,DefaultEdge>(DefaultEdge.class);
+				= new DefaultDirectedGraph<>(DefaultEdge.class);
 
 		// ranges of roles
 		for (DataPropertyExpression role : dataPropertyGraph.vertexSet())

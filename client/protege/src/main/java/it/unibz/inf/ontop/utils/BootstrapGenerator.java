@@ -128,19 +128,19 @@ public class BootstrapGenerator {
         List<AddAxiom> declarationAxioms = new ArrayList<>();
 
         //Add all the classes
-        for (OClass c :  vocabulary.getClasses()) {
+        for (OClass c :  vocabulary.classes().all()) {
             OWLClass owlClass = dataFactory.getOWLClass(IRI.create(c.getName()));
             declarationAxioms.add(new AddAxiom(ontology, dataFactory.getOWLDeclarationAxiom(owlClass)));
         }
 
         //Add all the object properties
-        for (ObjectPropertyExpression p : vocabulary.getObjectProperties()){
+        for (ObjectPropertyExpression p : vocabulary.objectProperties().all()){
             OWLObjectProperty property = dataFactory.getOWLObjectProperty(IRI.create(p.getName()));
             declarationAxioms.add(new AddAxiom(ontology, dataFactory.getOWLDeclarationAxiom(property)));
         }
 
         //Add all the data properties
-        for (DataPropertyExpression p : vocabulary.getDataProperties()){
+        for (DataPropertyExpression p : vocabulary.dataProperties().all()){
             OWLDataProperty property = dataFactory.getOWLDataProperty(IRI.create(p.getName()));
             declarationAxioms.add(new AddAxiom(ontology, dataFactory.getOWLDeclarationAxiom(property)));
         }

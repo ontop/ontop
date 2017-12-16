@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.TargetQueryValidator;
 import junit.framework.TestCase;
 
@@ -70,7 +71,7 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 		/**
 		 * TODO: do we want to consider a non-empty vocabulary?
 		 */
-		OntologyVocabulary vocabulary = OntologyFactoryImpl.getInstance().createVocabulary();
+		OntologyVocabulary vocabulary = new OntologyVocabularyImpl();
 
         // run validator
 		try {

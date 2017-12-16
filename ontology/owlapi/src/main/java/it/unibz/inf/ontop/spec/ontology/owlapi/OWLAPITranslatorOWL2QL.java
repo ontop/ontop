@@ -1084,43 +1084,43 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		currentOWLOntology = owl;
 	}
 	
-	private final Ontology createOntology(Collection<OWLOntology> owls) {
-		OntologyVocabulary vb = OntologyFactoryImpl.getInstance().createVocabulary();
+	private Ontology createOntology(Collection<OWLOntology> owls) {
+		Ontology o = OntologyFactoryImpl.getInstance().createOntology();
 		
 		// add all definitions for classes and properties		
 		for (OWLOntology owl : owls) {
 			for (OWLClass entity : owl.getClassesInSignature())  {
 				String uri = entity.getIRI().toString();
-				vb.classes().create(uri);
+				o.classes().create(uri);
 			}
 
 			for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) {
 				String uri = prop.getIRI().toString();
-				if (vb.dataProperties().contains(uri))  {
+				if (o.dataProperties().contains(uri))  {
 					punnedPredicates.add(uri); 
 					log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
 				}
 				else {
-					vb.objectProperties().create(uri);
+					o.objectProperties().create(uri);
 				}
 			}
 			
 			for (OWLDataProperty prop : owl.getDataPropertiesInSignature())  {
 				String uri = prop.getIRI().toString();
-				if (vb.objectProperties().contains(uri)) {
+				if (o.objectProperties().contains(uri)) {
 					punnedPredicates.add(uri);
 					log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
 				}
 				else {
-					vb.dataProperties().create(uri);
+					o.dataProperties().create(uri);
 				}
 			}
 
 			for (OWLAnnotationProperty prop : owl.getAnnotationPropertiesInSignature()) {
 				String uri = prop.getIRI().toString();
-				vb.annotationProperties().create(uri);
+				o.annotationProperties().create(uri);
 			}
 		}
-		return ofac.createOntology(vb);		
+		return o;
 	}
 }

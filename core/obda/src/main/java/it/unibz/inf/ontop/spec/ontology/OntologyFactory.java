@@ -33,22 +33,12 @@ import it.unibz.inf.ontop.model.term.Constant;
 public interface OntologyFactory {
 
 	/**
-	 * creates a modifiable ontology vocabulary 
-	 * 
-	 * @return created vocabulary
-	 */
-	
-	public OntologyVocabulary createVocabulary();
-	
-	/**
-	 * creates an ontology using a given vocabulary
-	 * (the vocabulary is copied and fixes it)
-	 * 
-	 * @param voc
+	 * creates an ontology
+	 *
 	 * @return
 	 */
 	
-	public Ontology createOntology(OntologyVocabulary voc);
+	Ontology createOntology();
 	
 	/**
 	 * Creates a class assertion 
@@ -61,7 +51,7 @@ public interface OntologyFactory {
 	 * @throws InconsistentOntologyException if ce is the bottom class ([C4])
 	 */
 	
-	public ClassAssertion createClassAssertion(OClass ce, ObjectConstant o) throws InconsistentOntologyException;
+	ClassAssertion createClassAssertion(OClass ce, ObjectConstant o) throws InconsistentOntologyException;
 	
 	
 	/**
@@ -76,7 +66,7 @@ public interface OntologyFactory {
 	 * @throws InconsistentOntologyException if ope is the bottom property ([O4])
 	 */
 	
-	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException;
+	ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException;
 
 	/**
 	 * Creates a data property assertion 
@@ -89,15 +79,12 @@ public interface OntologyFactory {
 	 * @throws InconsistentOntologyException if dpe is the bottom property ([D4])
 	 */
 	
-	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException;
+	DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException;
 
 	/**
 	 * Creates an annotation property assertion
 	 *
 	 */
 
-	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c);
-
-
-//	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap);
+	AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c);
 }

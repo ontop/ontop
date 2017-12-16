@@ -26,20 +26,15 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class OntologyImpl implements Ontology {
 
-	private static final long serialVersionUID = 758424053258299151L;
-
-	// TEMPORARY
-	public final ImmutableOntologyVocabularyImpl vocabulary;
-	
 	// axioms 
 
 	private final static class Hierarchy<T extends DescriptionBT> {
@@ -212,158 +207,91 @@ public class OntologyImpl implements Ontology {
 		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DATETIME_STAMP)); // OBDAVocabulary.XSD_DATETIME_STAMP
 	}
 */	
+	private static final class OntologyCategoryImpl<T> implements OntologyCategory<T> {
+        private final Map<String, T> map = new HashMap<>();
+
+        private final String NOT_FOUND, EXISTS;
+        private final Function<String, ? extends T> ctor;
+
+        OntologyCategoryImpl(Function<String, ? extends T> ctor, String NOT_FOUND, String EXISTS) {
+            this.ctor = ctor;
+            this.NOT_FOUND = NOT_FOUND;
+            this.EXISTS = EXISTS;
+        }
+
+        @Override
+        public T get(String uri) {
+            T oc = map.get(uri);
+            if (oc == null)
+                throw new RuntimeException(NOT_FOUND + uri);
+            return oc;
+        }
+
+        @Override
+        public T create(String uri) {
+            // TODO: check for built-in
+            //if (map.containsKey(uri))
+            //    throw new RuntimeException(EXISTS + uri);
+            T n = ctor.apply(uri);
+            map.put(uri, n);
+            return n;
+        }
+
+        @Override
+        public Collection<T> all() {
+            return map.values();
+        }
+
+        @Override
+        public boolean contains(String uri) {
+            return map.containsKey(uri);
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return map.values().iterator();
+        }
+    }
+
 	
-	
-	
-	
-	public final class ImmutableOntologyVocabularyImpl  {
+    private final OntologyCategoryImpl<OClass> classes =
+            new OntologyCategoryImpl<>(ClassImpl::new, CLASS_NOT_FOUND,"");
+	private final OntologyCategoryImpl<ObjectPropertyExpression> objectProperties =
+            new OntologyCategoryImpl<>(ObjectPropertyExpressionImpl::new, OBJECT_PROPERTY_NOT_FOUND,"");
+	private final OntologyCategoryImpl<DataPropertyExpression> dataProperties =
+            new OntologyCategoryImpl<>(DataPropertyExpressionImpl::new, DATA_PROPERTY_NOT_FOUND,"");
+	private final OntologyCategoryImpl<AnnotationProperty> annotationProperties =
+            new OntologyCategoryImpl<>(AnnotationPropertyImpl::new, ANNOTATION_PROPERTY_NOT_FOUND,"");
 
-		final ImmutableMap<String, OClass> concepts;
-		final ImmutableMap<String, ObjectPropertyExpression> objectProperties;
-		final ImmutableMap<String, DataPropertyExpression> dataProperties;
-		final ImmutableMap<String, AnnotationProperty> annotationProperties;
-		
-		ImmutableOntologyVocabularyImpl(OntologyVocabularyImpl voc) {
-			concepts = ImmutableMap.<String, OClass>builder()
-				.putAll(voc.classes().all().stream().collect(ImmutableCollectors.toMap(c -> c.getName(), c -> c)))
-				.put(ClassImpl.owlThingIRI, ClassImpl.owlThing)
-				.put(ClassImpl.owlNothingIRI, ClassImpl.owlNothing).build();
-			objectProperties = ImmutableMap.<String, ObjectPropertyExpression>builder()
-				.putAll(voc.objectProperties().all().stream().collect(ImmutableCollectors.toMap(c -> c.getName(), c -> c)))
-				.put(ObjectPropertyExpressionImpl.owlTopObjectPropertyIRI, ObjectPropertyExpressionImpl.owlTopObjectProperty)
-				.put(ObjectPropertyExpressionImpl.owlBottomObjectPropertyIRI, ObjectPropertyExpressionImpl.owlBottomObjectProperty).build();
-			dataProperties  = ImmutableMap.<String, DataPropertyExpression>builder() 
-				.putAll(voc.dataProperties().all().stream().collect(ImmutableCollectors.toMap(c -> c.getName(), c -> c)))
-				.put(DataPropertyExpressionImpl.owlTopDataPropertyIRI, DataPropertyExpressionImpl.owlTopDataProperty)
-				.put(DataPropertyExpressionImpl.owlBottomDataPropertyIRI, DataPropertyExpressionImpl.owlBottomDataProperty).build();
-			annotationProperties  = ImmutableMap.<String, AnnotationProperty>builder()
-					.putAll(voc.annotationProperties().all().stream().collect(ImmutableCollectors.toMap(c -> c.getName(), c -> c))).build();
-		}
-		
-		public OClass getClass(String uri) {
-			OClass oc = concepts.get(uri);
-			if (oc == null)
-				throw new RuntimeException(CLASS_NOT_FOUND + uri);
-			return oc;
-		}
-
-		public ObjectPropertyExpression getObjectProperty(String uri) {
-			ObjectPropertyExpression ope = objectProperties.get(uri);
-			if (ope == null)
-				throw new RuntimeException(OBJECT_PROPERTY_NOT_FOUND + uri);
-			return ope;
-		}
-
-		public DataPropertyExpression getDataProperty(String uri) {
-			DataPropertyExpression dpe = dataProperties.get(uri);
-			if (dpe == null)
-				throw new RuntimeException(DATA_PROPERTY_NOT_FOUND + uri);
-			return dpe;
-		}
-
-		public AnnotationProperty getAnnotationProperty(String uri) {
-			AnnotationProperty ap = annotationProperties.get(uri);
-			if (ap == null)
-				throw new RuntimeException(ANNOTATION_PROPERTY_NOT_FOUND + uri);
-			return ap;
-		}
-
-
-		public boolean containsClass(String uri) {
-			return concepts.containsKey(uri);
-		}
-
-		public boolean containsObjectProperty(String uri) {
-			return objectProperties.containsKey(uri);
-		}
-
-		public boolean containsDataProperty(String uri) {
-			return dataProperties.containsKey(uri);
-		}
-
-		public boolean containsAnnotationProperty(String uri) {
-			return annotationProperties.containsKey(uri);
-		}
-
-		public Collection<OClass> getClasses() {
-			return concepts.values();
-		}
-
-		public Collection<ObjectPropertyExpression> getObjectProperties() {
-			return objectProperties.values();
-		}
-
-		public Collection<DataPropertyExpression> getDataProperties() {
-			return dataProperties.values();
-		}
-
-		public Collection<AnnotationProperty> getAnnotationProperties() {
-			return annotationProperties.values();
-		}
-
-		public Datatype getDatatype(String uri) {
-			Datatype dt = OWL2QLDatatypes.get(uri);
-			if (dt == null)
-				throw new RuntimeException(DATATYPE_NOT_FOUND + uri);
-			return dt;
-		}
-	}
-
-	OntologyImpl(OntologyVocabularyImpl voc) {
-		this.vocabulary = new ImmutableOntologyVocabularyImpl(voc);
+	OntologyImpl() {
+        classes.map.put(ClassImpl.owlThingIRI, ClassImpl.owlThing);
+        classes.map.put(ClassImpl.owlNothingIRI, ClassImpl.owlNothing);
+		objectProperties.map.put(ObjectPropertyExpressionImpl.owlTopObjectPropertyIRI, ObjectPropertyExpressionImpl.owlTopObjectProperty);
+        objectProperties.map.put(ObjectPropertyExpressionImpl.owlBottomObjectPropertyIRI, ObjectPropertyExpressionImpl.owlBottomObjectProperty);
+		dataProperties.map.put(DataPropertyExpressionImpl.owlTopDataPropertyIRI, DataPropertyExpressionImpl.owlTopDataProperty);
+        dataProperties.map.put(DataPropertyExpressionImpl.owlBottomDataPropertyIRI, DataPropertyExpressionImpl.owlBottomDataProperty);
 	}
 
 
-	@Override
-	public Collection<OClass> getClasses() {
-		return vocabulary.getClasses();
-	}
+    @Override
+    public OntologyCategory<OClass> classes() { return classes; }
 
-	@Override
-	public Collection<ObjectPropertyExpression> getObjectProperties() {
-		return vocabulary.getObjectProperties();
-	}
+    @Override
+    public OntologyCategory<ObjectPropertyExpression> objectProperties() { return objectProperties; }
 
-	@Override
-	public Collection<DataPropertyExpression> getDataProperties() {
-		return vocabulary.getDataProperties();
-	}
+    @Override
+    public OntologyCategory<DataPropertyExpression> dataProperties() { return dataProperties; }
 
-	@Override
-	public OClass getClass(String uri) {
-		return vocabulary.getClass(uri);
-	}
+    @Override
+    public OntologyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
 
-	@Override
-	public ObjectPropertyExpression getObjectProperty(String uri) {
-		return vocabulary.getObjectProperty(uri);
-	}
-
-	@Override
-	public DataPropertyExpression getDataProperty(String uri) {
-		return vocabulary.getDataProperty(uri);
-	}
-
-	@Override
+ 	@Override
 	public Datatype getDatatype(String uri) {
-		return vocabulary.getDatatype(uri);
+        Datatype dt = OWL2QLDatatypes.get(uri);
+        if (dt == null)
+            throw new RuntimeException(DATATYPE_NOT_FOUND + uri);
+        return dt;
 	}
-
-	@Override
-	public boolean containsClass(String uri) { return vocabulary.containsClass(uri); }
-
-	@Override
-	public boolean containsObjectProperty(String uri) {
-		return vocabulary.containsObjectProperty(uri);
-	}
-
-	@Override
-	public boolean containsDataProperty(String uri) {
-		return vocabulary.containsDataProperty(uri);
-	}
-
-	@Override
-	public boolean containsAnnotationProperty(String uri) { return vocabulary.containsAnnotationProperty(uri); }
 
 
 	/**
@@ -728,10 +656,10 @@ public class OntologyImpl implements Ontology {
 		str.append("[Ontology info.")
 		 	.append(String.format(" Axioms: %d", classAxioms.inclusions.size() + 
 		 			objectPropertyAxioms.inclusions.size() + dataPropertyAxioms.inclusions.size()))
-			.append(String.format(" Classes: %d", vocabulary.getClasses().size()))
-			.append(String.format(" Object Properties: %d", vocabulary.getObjectProperties().size()))
-			.append(String.format(" Data Properties: %d", vocabulary.getDataProperties().size()))
-		    .append(String.format(" Annotation Properties: %d]", vocabulary.getAnnotationProperties().size()));
+			.append(String.format(" Classes: %d", classes.all().size()))
+			.append(String.format(" Object Properties: %d", objectProperties.all().size()))
+			.append(String.format(" Data Properties: %d", dataProperties.all().size()))
+		    .append(String.format(" Annotation Properties: %d]", annotationProperties.all().size()));
 		return str.toString();
 	}
 
@@ -755,7 +683,7 @@ public class OntologyImpl implements Ontology {
 	private void checkSignature(ClassExpression desc) {		
 		if (desc instanceof OClass) {
 			OClass cl = (OClass) desc;
-			if (!vocabulary.concepts.containsKey(cl.getName()))
+			if (!classes.contains(cl.getName()))
 				throw new IllegalArgumentException(CLASS_NOT_FOUND + desc);
 		}	
 		else if (desc instanceof ObjectSomeValuesFrom) {
@@ -781,18 +709,26 @@ public class OntologyImpl implements Ontology {
 		if (prop.isInverse()) 
 			prop = prop.getInverse();
 		
-		if (!vocabulary.containsObjectProperty(prop.getName()) && !auxObjectProperties.contains(prop)) 
+		if (!objectProperties.contains(prop.getName()) && !auxObjectProperties.contains(prop))
 				throw new IllegalArgumentException(OBJECT_PROPERTY_NOT_FOUND + prop);
 	}
 
 	private void checkSignature(DataPropertyExpression prop) {
-		if (!vocabulary.containsDataProperty(prop.getName()))
+		if (!dataProperties.contains(prop.getName()))
 			throw new IllegalArgumentException(DATA_PROPERTY_NOT_FOUND + prop);
 	}
 
 	private void checkSignature(AnnotationProperty prop) {
-		if (!vocabulary.containsAnnotationProperty(prop.getName()))
+		if (!annotationProperties.contains(prop.getName()))
 			throw new IllegalArgumentException(ANNOTATION_PROPERTY_NOT_FOUND + prop);
 	}
 
+
+	public ImmutableMap<String, OClass> getClassesRawMap() { return ImmutableMap.copyOf(classes.map); }
+
+    public ImmutableMap<String, ObjectPropertyExpression> getObjectPropertiesRawMap() { return ImmutableMap.copyOf(objectProperties.map); }
+
+    public ImmutableMap<String, DataPropertyExpression> getDataPropertiesRawMap() { return ImmutableMap.copyOf(dataProperties.map); }
+
+    public ImmutableMap<String, AnnotationProperty> getAnnotationPropertiesRawMap() { return ImmutableMap.copyOf(annotationProperties.map); }
 }

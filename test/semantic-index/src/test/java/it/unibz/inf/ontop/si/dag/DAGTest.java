@@ -118,30 +118,30 @@ public class DAGTest extends TestCase {
 
 				if (type.equals("classes")) {
 					if (exists) {
-						if (onto.containsObjectProperty(uri)) {
-							ObjectPropertyExpression prop = onto.getObjectProperty(uri);
+						if (onto.objectProperties().contains(uri)) {
+							ObjectPropertyExpression prop = onto.objectProperties().get(uri);
 							if (inverse)
 								prop = prop.getInverse();
 							description = prop.getDomain();
 						}
 						else {
-							DataPropertyExpression prop = onto.getDataProperty(uri);
+							DataPropertyExpression prop = onto.dataProperties().get(uri);
 							description = prop.getDomainRestriction(DatatypeImpl.rdfsLiteral);
 						}
 					}
 					else
-						description = onto.getClass(uri);
+						description = onto.classes().get(uri);
 				}
 				else {
-					if (onto.containsObjectProperty(uri)) {
-						ObjectPropertyExpression prop = onto.getObjectProperty(uri);
+					if (onto.objectProperties().contains(uri)) {
+						ObjectPropertyExpression prop = onto.objectProperties().get(uri);
 						if (inverse)
 							description = prop.getInverse();
 						else
 							description = prop;
 					}
 					else {
-						description = onto.getDataProperty(uri);
+						description = onto.dataProperties().get(uri);
 					}
 				}
 

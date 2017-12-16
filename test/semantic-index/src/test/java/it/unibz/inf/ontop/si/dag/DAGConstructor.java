@@ -86,7 +86,7 @@ public class DAGConstructor {
 				ObjectPropertyExpression nodeDesc = (ObjectPropertyExpression) node.getDescription();
 
 				// auxiliary symbol
-				if (!voc.containsObjectProperty(nodeDesc.getName())) 
+				if (!voc.objectProperties().contains(nodeDesc.getName()))
 					continue;
 
 				if (nodeDesc.isInverse()) {
@@ -112,7 +112,7 @@ public class DAGConstructor {
 						ObjectPropertyExpression childDesc = (ObjectPropertyExpression) child.getDescription();
 
 						// auxiliary symbol
-						if (!voc.containsObjectProperty(nodeDesc.getName())) 
+						if (!voc.objectProperties().contains(nodeDesc.getName()))
 							continue;
 
 						if (childDesc.isInverse()) {
@@ -144,7 +144,7 @@ public class DAGConstructor {
 				DataPropertyExpression nodeDesc = (DataPropertyExpression) node.getDescription();
 
 				// auxiliary symbol
-				if (!voc.containsDataProperty(nodeDesc.getName())) 
+				if (!voc.dataProperties().contains(nodeDesc.getName()))
 					continue;
 
 				DAGNode newNode = roles.get(nodeDesc);
@@ -158,7 +158,7 @@ public class DAGConstructor {
 				for (DAGNode child : node.getChildren()) {
 						DataPropertyExpression childDesc = (DataPropertyExpression) child.getDescription();
 						// auxiliary symbol
-						if (!voc.containsDataProperty(childDesc.getName())) 
+						if (!voc.dataProperties().contains(childDesc.getName()))
 							continue;
 
 						DAGNode newChild = roles.get(childDesc);

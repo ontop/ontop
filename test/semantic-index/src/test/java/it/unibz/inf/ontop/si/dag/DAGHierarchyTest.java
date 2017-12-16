@@ -71,12 +71,12 @@ public class DAGHierarchyTest extends TestCase {
 
 		EquivalencesDAG<ClassExpression> classes = namedReasoner.classes().dag();
 		
-		ClassExpression A = onto.getClass(ontoURI + "A");
-		ClassExpression B = onto.getClass(ontoURI + "B");
-		ClassExpression C = onto.getClass(ontoURI + "C");
-		ClassExpression D = onto.getClass(ontoURI + "D");
-		ClassExpression E = onto.getClass(ontoURI + "E");
-		ClassExpression F = onto.getClass(ontoURI + "F");
+		ClassExpression A = onto.classes().get(ontoURI + "A");
+		ClassExpression B = onto.classes().get(ontoURI + "B");
+		ClassExpression C = onto.classes().get(ontoURI + "C");
+		ClassExpression D = onto.classes().get(ontoURI + "D");
+		ClassExpression E = onto.classes().get(ontoURI + "E");
+		ClassExpression F = onto.classes().get(ontoURI + "F");
 		
 		/**
 		 * The initial node is Node A.
@@ -153,12 +153,12 @@ public class DAGHierarchyTest extends TestCase {
 
 		EquivalencesDAG<ClassExpression> classes = namedReasoner.classes().dag();
 		
-		ClassExpression A = onto.getClass(ontoURI + "A");
-		ClassExpression B = onto.getClass(ontoURI + "B");
-		ClassExpression C = onto.getClass(ontoURI + "C");
-		ClassExpression D = onto.getClass(ontoURI + "D");
-		ClassExpression E = onto.getClass(ontoURI + "E");
-		ClassExpression F = onto.getClass(ontoURI + "F");
+		ClassExpression A = onto.classes().get(ontoURI + "A");
+		ClassExpression B = onto.classes().get(ontoURI + "B");
+		ClassExpression C = onto.classes().get(ontoURI + "C");
+		ClassExpression D = onto.classes().get(ontoURI + "D");
+		ClassExpression E = onto.classes().get(ontoURI + "E");
+		ClassExpression F = onto.classes().get(ontoURI + "F");
 	
 		/**
 		 * The initial node is Node A.
@@ -237,12 +237,12 @@ public class DAGHierarchyTest extends TestCase {
 
 		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.objectProperties().dag();
 		
-		ObjectPropertyExpression P = onto.getObjectProperty(ontoURI + "P");
-		ObjectPropertyExpression S = onto.getObjectProperty(ontoURI + "S");
-		ObjectPropertyExpression R = onto.getObjectProperty(ontoURI + "R");
-		ObjectPropertyExpression Q = onto.getObjectProperty(ontoURI + "Q");
-		ObjectPropertyExpression T = onto.getObjectProperty(ontoURI + "T");
-		ObjectPropertyExpression U = onto.getObjectProperty(ontoURI + "U");
+		ObjectPropertyExpression P = onto.objectProperties().get(ontoURI + "P");
+		ObjectPropertyExpression S = onto.objectProperties().get(ontoURI + "S");
+		ObjectPropertyExpression R = onto.objectProperties().get(ontoURI + "R");
+		ObjectPropertyExpression Q = onto.objectProperties().get(ontoURI + "Q");
+		ObjectPropertyExpression T = onto.objectProperties().get(ontoURI + "T");
+		ObjectPropertyExpression U = onto.objectProperties().get(ontoURI + "U");
 		
 		
 		/**
@@ -317,12 +317,12 @@ public class DAGHierarchyTest extends TestCase {
 		
 		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.objectProperties().dag();
 		
-		ObjectPropertyExpression P = onto.getObjectProperty(ontoURI + "P");
-		ObjectPropertyExpression S = onto.getObjectProperty(ontoURI + "S");
-		ObjectPropertyExpression R = onto.getObjectProperty(ontoURI + "R");
-		ObjectPropertyExpression Q = onto.getObjectProperty(ontoURI + "Q");
-		ObjectPropertyExpression T = onto.getObjectProperty(ontoURI + "T");
-		ObjectPropertyExpression U = onto.getObjectProperty(ontoURI + "U");
+		ObjectPropertyExpression P = onto.objectProperties().get(ontoURI + "P");
+		ObjectPropertyExpression S = onto.objectProperties().get(ontoURI + "S");
+		ObjectPropertyExpression R = onto.objectProperties().get(ontoURI + "R");
+		ObjectPropertyExpression Q = onto.objectProperties().get(ontoURI + "Q");
+		ObjectPropertyExpression T = onto.objectProperties().get(ontoURI + "T");
+		ObjectPropertyExpression U = onto.objectProperties().get(ontoURI + "U");
 	
 		/**
 		 * The initial node is Node P.

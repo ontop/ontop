@@ -56,8 +56,7 @@ public class YAGOTest {
 
         Pattern pattern = Pattern.compile("<(.+?)>\\s(.+?)\\s[<\"](.+?)[>\"]\\s\\.");
  
-		OntologyVocabulary voc = descFactory.createVocabulary();
-		Ontology onto = descFactory.createOntology(voc);
+		Ontology onto = descFactory.createOntology();
 
         while ((line = triples.readLine()) != null) {
             if (line.startsWith("@")) {

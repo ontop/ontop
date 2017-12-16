@@ -417,11 +417,9 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
 			
-	        OntologyVocabulary vb = dfac.createVocabulary();
-			OClass left = vb.classes().create("A");
-			OClass right = vb.classes().create("C");
-	        
-			Ontology sigma = dfac.createOntology(vb);
+	        Ontology sigma = dfac.createOntology();
+			OClass left = sigma.classes().create("A");
+			OClass right = sigma.classes().create("C");
 			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", Collections.<Term>singletonList(TERM_FACTORY.getVariable("x")));
@@ -444,11 +442,10 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
-	        OntologyVocabulary vb = dfac.createVocabulary();
-	        OClass left = vb.classes().create("A");
-			ObjectPropertyExpression pright = vb.objectProperties().create("R");
+			Ontology sigma = dfac.createOntology();
+	        OClass left = sigma.classes().create("A");
+			ObjectPropertyExpression pright = sigma.objectProperties().create("R");
 			
-			Ontology sigma = dfac.createOntology(vb);
 			ObjectSomeValuesFrom right = pright.getDomain();
 			sigma.addSubClassOfAxiom(left, right);
 
@@ -472,11 +469,10 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
-	        OntologyVocabulary vb = dfac.createVocabulary();			
-			OClass left = vb.classes().create("A");
-			ObjectPropertyExpression pright = vb.objectProperties().create("R").getInverse();
+			Ontology sigma = dfac.createOntology();
+			OClass left = sigma.classes().create("A");
+			ObjectPropertyExpression pright = sigma.objectProperties().create("R").getInverse();
 						
-			Ontology sigma = dfac.createOntology(vb);
 			ObjectSomeValuesFrom right = pright.getDomain();
 			sigma.addSubClassOfAxiom(left, right);
 
@@ -500,11 +496,10 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
-	        OntologyVocabulary vb = dfac.createVocabulary();			
-			ObjectPropertyExpression pleft = vb.objectProperties().create("R");
-			OClass right = vb.classes().create("A");
+			Ontology sigma = dfac.createOntology();
+			ObjectPropertyExpression pleft = sigma.objectProperties().create("R");
+			OClass right = sigma.classes().create("A");
 			
-			Ontology sigma = dfac.createOntology(vb);
 			ObjectSomeValuesFrom left = pleft.getDomain();
 			sigma.addSubClassOfAxiom(left, right);
 
@@ -528,12 +523,11 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
-			
-	        OntologyVocabulary vb = dfac.createVocabulary();
-			OClass right = vb.classes().create("A");
-			ObjectPropertyExpression pleft = vb.objectProperties().create("R").getInverse();
+
+			Ontology sigma = dfac.createOntology();
+			OClass right = sigma.classes().create("A");
+			ObjectPropertyExpression pleft = sigma.objectProperties().create("R").getInverse();
 	        
-			Ontology sigma = dfac.createOntology(vb);			
 			ObjectSomeValuesFrom left = pleft.getDomain();
 			sigma.addSubClassOfAxiom(left, right);
 
@@ -580,11 +574,10 @@ public class CQCUtilitiesTest {
 
         // q(x) :- , q(x) :- R(x,y), A(x)
 
-        OntologyVocabulary vb = dfac.createVocabulary();
-        OClass left = vb.classes().create("A");
-        ObjectPropertyExpression pleft = vb.objectProperties().create("R");
+		Ontology sigma = dfac.createOntology();
+        OClass left = sigma.classes().create("A");
+        ObjectPropertyExpression pleft = sigma.objectProperties().create("R");
         
-        Ontology sigma = dfac.createOntology(vb);
         ObjectSomeValuesFrom right = pleft.getDomain();
         sigma.addSubClassOfAxiom(left, right);
 

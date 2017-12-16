@@ -45,14 +45,10 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return instance;
 	}
 
+
 	@Override
-	public OntologyVocabulary createVocabulary() {
-		return new OntologyVocabularyImpl();
-	}
-	
-	@Override
-	public Ontology createOntology(OntologyVocabulary vb) {
-		return new OntologyImpl((OntologyVocabularyImpl)vb);
+	public Ontology createOntology() {
+		return new OntologyImpl();
 	}
 	
 	/**
@@ -130,16 +126,4 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c) {
 		return new AnnotationAssertionImpl(ap,o,c);
 	}
-
-	/**
-	 * Creates an annotation assertion
-	 * AnnotationAssertion := 'AnnotationAssertion' '(' axiomAnnotations AnnotationProperty AnnotationSubject AnnotationValue ')'
-	 * AnnotationSubject := IRI | AnonymousIndividual
-	 * Subjects and value are not currently stored
-	 */
-//	@Override
-//	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap) {
-//		return new AnnotationAssertionImpl(ap, o1, o2);
-//	}
-
 }

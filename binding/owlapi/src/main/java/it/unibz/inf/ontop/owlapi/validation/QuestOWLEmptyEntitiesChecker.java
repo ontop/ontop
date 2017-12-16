@@ -62,12 +62,12 @@ public class QuestOWLEmptyEntitiesChecker {
 	}
 
 	public Iterator<Predicate> iEmptyConcepts() {
-		return new EmptyEntitiesIterator(onto.getClasses().iterator(), conn);
+		return new EmptyEntitiesIterator(onto.classes().iterator(), conn);
 	}
 
 
 	public Iterator<Predicate> iEmptyRoles() {
-		return new EmptyEntitiesIterator(onto.getObjectProperties().iterator(), onto.getDataProperties().iterator(), conn);
+		return new EmptyEntitiesIterator(onto.objectProperties().iterator(), onto.dataProperties().iterator(), conn);
 	}
 
 	public int getEConceptsSize() {

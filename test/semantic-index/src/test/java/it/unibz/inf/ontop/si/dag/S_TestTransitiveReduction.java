@@ -105,9 +105,9 @@ public class S_TestTransitiveReduction extends TestCase {
 		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive.owl");
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		
-		ClassExpression A = onto.getClass("http://www.kro.com/ontologies/A");
-		ClassExpression B = onto.getClass("http://www.kro.com/ontologies/B");
-		ClassExpression C = onto.getClass("http://www.kro.com/ontologies/C");
+		ClassExpression A = onto.classes().get("http://www.kro.com/ontologies/A");
+		ClassExpression B = onto.classes().get("http://www.kro.com/ontologies/B");
+		ClassExpression C = onto.classes().get("http://www.kro.com/ontologies/C");
 		
 		EquivalencesDAG<ClassExpression> classes = dag.classes().dag();
 		
@@ -123,10 +123,10 @@ public class S_TestTransitiveReduction extends TestCase {
 		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive2.owl");
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		
-		ClassExpression A = onto.getClass("http://www.kro.com/ontologies/A");
-		ClassExpression B = onto.getClass("http://www.kro.com/ontologies/B");
-		ClassExpression C = onto.getClass("http://www.kro.com/ontologies/C");
-		ClassExpression D = onto.getClass("http://www.kro.com/ontologies/D");
+		ClassExpression A = onto.classes().get("http://www.kro.com/ontologies/A");
+		ClassExpression B = onto.classes().get("http://www.kro.com/ontologies/B");
+		ClassExpression C = onto.classes().get("http://www.kro.com/ontologies/C");
+		ClassExpression D = onto.classes().get("http://www.kro.com/ontologies/D");
 		
 		EquivalencesDAG<ClassExpression> classes = dag.classes().dag();
 		

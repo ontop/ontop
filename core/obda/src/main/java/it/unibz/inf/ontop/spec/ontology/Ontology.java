@@ -20,78 +20,22 @@ package it.unibz.inf.ontop.spec.ontology;
  * #L%
  */
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-public interface Ontology extends Serializable {
+public interface Ontology  {
 
-	/**
-	 * return all declared classes
-	 *
-	 * @return
-	 */
+	OntologyCategory<OClass> classes();
 
-	Collection<OClass> getClasses();
+    OntologyCategory<ObjectPropertyExpression> objectProperties();
 
-	/**
-	 * return all declared object properties
-	 *
-	 * @return
-	 */
+    OntologyCategory<DataPropertyExpression> dataProperties();
 
-	Collection<ObjectPropertyExpression> getObjectProperties();
-
-	/**
-	 * return all declared data properties
-	 *
-	 * @return
-	 */
-
-	Collection<DataPropertyExpression> getDataProperties();
-
-	/**
-	 * check whether the class has been declared and return the class object
-	 *
-	 * @param uri
-	 * @return
-	 * @throws RuntimeException if the class has not been declared
-	 */
-
-	OClass getClass(String uri);
-
-
-	/**
-	 * check whether the object property has been declared and return the class object
-	 *
-	 * @param uri
-	 * @return
-	 * @throws RuntimeException if the object property has not been declared
-	 */
-
-	ObjectPropertyExpression getObjectProperty(String uri);
-
-
-	/**
-	 * check whether the data property has been declared and return the class object
-	 *
-	 * @param uri
-	 * @return
-	 * @throws RuntimeException if the data property has not been declared
-	 */
-
-	DataPropertyExpression getDataProperty(String uri);
+    OntologyCategory<AnnotationProperty> annotationProperties();
 
 	Datatype getDatatype(String uri);
 
-	boolean containsClass(String uri);
-
-	boolean containsObjectProperty(String uri);
-
-	boolean containsDataProperty(String uri);
-
-	boolean containsAnnotationProperty(String uri);
 
 	// SUBCLASS/PROPERTY
 

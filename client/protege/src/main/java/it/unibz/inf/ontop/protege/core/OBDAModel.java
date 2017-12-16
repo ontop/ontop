@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
 import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
@@ -86,7 +87,7 @@ public class OBDAModel {
         this.sourceListeners = new ArrayList<>();
         this.mappingListeners = new ArrayList<>();
         source = initDataSource();
-        currentMutableVocabulary = ONTOLOGY_FACTORY.createVocabulary();
+        currentMutableVocabulary = new OntologyVocabularyImpl();
     }
 
     private static OBDADataSource initDataSource() {
@@ -312,7 +313,7 @@ public class OBDAModel {
     public void reset(PrefixDocumentFormat owlPrefixMapper) {
         triplesMapMap.clear();
         prefixManager = new MutablePrefixManager(owlPrefixMapper);
-        currentMutableVocabulary = ONTOLOGY_FACTORY.createVocabulary();
+        currentMutableVocabulary = new OntologyVocabularyImpl();
     }
 
 
