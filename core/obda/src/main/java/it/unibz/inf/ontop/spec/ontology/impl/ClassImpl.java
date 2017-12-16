@@ -39,8 +39,7 @@ public class ClassImpl implements OClass {
     public static final OClass owlThing = new ClassImpl(owlThingIRI); 
     public static final OClass owlNothing = new ClassImpl(owlNothingIRI); 
 
-    // TODO: remove public access
-	public ClassImpl(String name) {
+	ClassImpl(String name) {
 		this.predicate = TERM_FACTORY.getClassPredicate(name);
 		this.name = name;
 		this.isNothing = name.equals(owlNothingIRI);

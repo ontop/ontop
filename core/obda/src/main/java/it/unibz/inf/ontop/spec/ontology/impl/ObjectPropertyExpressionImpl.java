@@ -65,8 +65,7 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	 * @param name
 	 */
 
-	// TODO: remove public access
-	public ObjectPropertyExpressionImpl(String name) {
+	ObjectPropertyExpressionImpl(String name) {
 		this.predicate = TERM_FACTORY.getObjectPropertyPredicate(name);
 		this.isInverse = false;
 		this.string = name;

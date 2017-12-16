@@ -37,7 +37,6 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.spec.ontology.OClass;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLServerSQLDialectAdapter;
@@ -303,10 +302,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		pnlClassMap.setLayout(new java.awt.BorderLayout());
 
 		pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
-		Vector<Object> v = new Vector<Object>();
-		for (OClass c : obdaModel.getCurrentVocabulary().classes().all()) {
-			Predicate pred = c.getPredicate();
-			v.addElement(new PredicateItem(pred, prefixManager));
+		Vector<Object> v = new Vector<>();
+		for (Predicate c : obdaModel.getCurrentVocabulary().classes()) {
+			v.addElement(new PredicateItem(c, prefixManager));
 		}
 		cboClassAutoSuggest = new AutoSuggestComboBox(v);
 		cboClassAutoSuggest.setRenderer(new ClassListCellRenderer());

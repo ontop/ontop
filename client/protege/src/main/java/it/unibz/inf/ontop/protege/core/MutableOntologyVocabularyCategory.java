@@ -1,51 +1,32 @@
 package it.unibz.inf.ontop.protege.core;
 
-import java.util.Collection;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import org.semanticweb.owlapi.model.IRI;
 
-public interface MutableOntologyVocabularyCategory<T> {
-
-    /**
-     * check whether the entity has been declared and return the entity object
-     *
-     * @param uri
-     * @return
-     * @throws RuntimeException if the entity has not been declared
-     */
-
-    T get(String uri);
+public interface MutableOntologyVocabularyCategory extends Iterable<Predicate> {
 
     /**
      * check whether the entity has been declared
      *
-     * @param uri
+     * @param iri
      * @return
      */
-
-    boolean contains(String uri);
-
-
-    /**
-     * return all declared entities
-     *
-     * @return
-     */
-
-    Collection<T> all();
+    // TODO: fix the rest of the code so that contains can take IRI
+    boolean contains(String iri);
 
     /**
      * declare an entity
      *
-     * @param uri
-     * @return entity object
+     * @param iri
      */
 
-    T create(String uri);
+    void declare(IRI iri);
 
     /**
      * remove the entity
      *
-     * @param uri
+     * @param iri
      */
 
-    void remove(String uri);
+    void remove(IRI iri);
 }
