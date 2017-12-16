@@ -207,7 +207,7 @@ public class OntologyImpl implements Ontology {
 		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.DATETIME_STAMP)); // OBDAVocabulary.XSD_DATETIME_STAMP
 	}
 */	
-	private static final class OntologyCategoryImpl<T> implements OntologyCategory<T> {
+	private static final class OntologyCategoryImpl<T> implements OntologyVocabularyCategory<T> {
         private final Map<String, T> map = new HashMap<>();
 
         private final String NOT_FOUND, EXISTS;
@@ -235,11 +235,6 @@ public class OntologyImpl implements Ontology {
             T n = ctor.apply(uri);
             map.put(uri, n);
             return n;
-        }
-
-        @Override
-        public Collection<T> all() {
-            return map.values();
         }
 
         @Override
@@ -274,16 +269,16 @@ public class OntologyImpl implements Ontology {
 
 
     @Override
-    public OntologyCategory<OClass> classes() { return classes; }
+    public OntologyVocabularyCategory<OClass> classes() { return classes; }
 
     @Override
-    public OntologyCategory<ObjectPropertyExpression> objectProperties() { return objectProperties; }
+    public OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() { return objectProperties; }
 
     @Override
-    public OntologyCategory<DataPropertyExpression> dataProperties() { return dataProperties; }
+    public OntologyVocabularyCategory<DataPropertyExpression> dataProperties() { return dataProperties; }
 
     @Override
-    public OntologyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
+    public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
 
  	@Override
 	public Datatype getDatatype(String uri) {
@@ -656,10 +651,10 @@ public class OntologyImpl implements Ontology {
 		str.append("[Ontology info.")
 		 	.append(String.format(" Axioms: %d", classAxioms.inclusions.size() + 
 		 			objectPropertyAxioms.inclusions.size() + dataPropertyAxioms.inclusions.size()))
-			.append(String.format(" Classes: %d", classes.all().size()))
-			.append(String.format(" Object Properties: %d", objectProperties.all().size()))
-			.append(String.format(" Data Properties: %d", dataProperties.all().size()))
-		    .append(String.format(" Annotation Properties: %d]", annotationProperties.all().size()));
+			.append(String.format(" Classes: %d", classes.map.size()))
+			.append(String.format(" Object Properties: %d", objectProperties.map.size()))
+			.append(String.format(" Data Properties: %d", dataProperties.map.size()))
+		    .append(String.format(" Annotation Properties: %d]", annotationProperties.map.size()));
 		return str.toString();
 	}
 

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -25,10 +26,8 @@ import org.semanticweb.owlapi.model.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
@@ -119,33 +118,12 @@ public class BootstrapGenerator {
     private void updateProtegeOntology(OWLOntology ontology, Ontology vocabulary)
             throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException {
 
-        OWLDataFactory dataFactory = owlManager.getOWLDataFactory();
+        Set<OWLDeclarationAxiom> declarationAxioms = DirectMappingEngine.extractDeclarationAxioms(ontology, vocabulary);
+        List<AddAxiom> addAxioms = declarationAxioms.stream()
+                .map(ax -> new AddAxiom(ontology, ax))
+                .collect(Collectors.toList());
 
-        owlManager.applyChanges(extractDeclarationAxioms(ontology, vocabulary, dataFactory));
-    }
-
-    private List<AddAxiom> extractDeclarationAxioms(OWLOntology ontology, Ontology vocabulary, OWLDataFactory dataFactory) {
-        List<AddAxiom> declarationAxioms = new ArrayList<>();
-
-        //Add all the classes
-        for (OClass c :  vocabulary.classes().all()) {
-            OWLClass owlClass = dataFactory.getOWLClass(IRI.create(c.getName()));
-            declarationAxioms.add(new AddAxiom(ontology, dataFactory.getOWLDeclarationAxiom(owlClass)));
-        }
-
-        //Add all the object properties
-        for (ObjectPropertyExpression p : vocabulary.objectProperties().all()){
-            OWLObjectProperty property = dataFactory.getOWLObjectProperty(IRI.create(p.getName()));
-            declarationAxioms.add(new AddAxiom(ontology, dataFactory.getOWLDeclarationAxiom(property)));
-        }
-
-        //Add all the data properties
-        for (DataPropertyExpression p : vocabulary.dataProperties().all()){
-            OWLDataProperty property = dataFactory.getOWLDataProperty(IRI.create(p.getName()));
-            declarationAxioms.add(new AddAxiom(ontology, dataFactory.getOWLDeclarationAxiom(property)));
-        }
-
-        return declarationAxioms;
+        owlManager.applyChanges(addAxioms);
     }
 
     private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {

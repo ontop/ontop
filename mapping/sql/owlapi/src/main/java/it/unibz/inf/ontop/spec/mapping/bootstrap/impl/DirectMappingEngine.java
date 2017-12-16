@@ -133,7 +133,8 @@ public class DirectMappingEngine {
 					: updateOntology(createEmptyOntology(baseIRI), newVocabulary);
 
 			return new DefaultBootstrappingResults(newPPMapping, newOntology);
-		} catch (SQLException | MappingException | OWLOntologyStorageException | OWLOntologyCreationException e) {
+		}
+		catch (SQLException | MappingException | OWLOntologyCreationException e) {
 			throw new MappingBootstrappingException(e);
 		}
 	}
@@ -162,35 +163,39 @@ public class DirectMappingEngine {
 	 * @return a new ontology storing all classes and properties used in the mappings
 	 *
 	 */
-	private OWLOntology updateOntology(OWLOntology ontology, Ontology vocabulary)
-			throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException {
+	private OWLOntology updateOntology(OWLOntology ontology, Ontology vocabulary) {
 		OWLOntologyManager manager = ontology.getOWLOntologyManager();
-
-		OWLDataFactory dataFactory = manager.getOWLDataFactory();
-		Set<OWLDeclarationAxiom> declarationAxioms = new HashSet<>();
-
-		//Add all the classes
-		for (OClass c :  vocabulary.classes().all()) {
-			OWLClass owlClass = dataFactory.getOWLClass(IRI.create(c.getName()));
-			declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(owlClass));
-		}
-		
-		//Add all the object properties
-		for (ObjectPropertyExpression p : vocabulary.objectProperties().all()) {
-			OWLObjectProperty property = dataFactory.getOWLObjectProperty(IRI.create(p.getName()));
-			declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(property));
-		}
-		
-		//Add all the data properties
-		for (DataPropertyExpression p : vocabulary.dataProperties().all()) {
-			OWLDataProperty property = dataFactory.getOWLDataProperty(IRI.create(p.getName()));
-			declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(property));
-		}
-
+		Set<OWLDeclarationAxiom> declarationAxioms = extractDeclarationAxioms(ontology, vocabulary);
 		manager.addAxioms(ontology, declarationAxioms);
 		return ontology;		
 	}
 
+	public static Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntology ontology, Ontology vocabulary) {
+        OWLOntologyManager manager = ontology.getOWLOntologyManager();
+
+        OWLDataFactory dataFactory = manager.getOWLDataFactory();
+        Set<OWLDeclarationAxiom> declarationAxioms = new HashSet<>();
+
+        //Add all the classes
+        for (OClass c :  vocabulary.classes()) {
+            OWLClass owlClass = dataFactory.getOWLClass(IRI.create(c.getName()));
+            declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(owlClass));
+        }
+
+        //Add all the object properties
+        for (ObjectPropertyExpression p : vocabulary.objectProperties()) {
+            OWLObjectProperty property = dataFactory.getOWLObjectProperty(IRI.create(p.getName()));
+            declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(property));
+        }
+
+        //Add all the data properties
+        for (DataPropertyExpression p : vocabulary.dataProperties()) {
+            OWLDataProperty property = dataFactory.getOWLDataProperty(IRI.create(p.getName()));
+            declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(property));
+        }
+
+        return declarationAxioms;
+    }
 
 	/***
 	 * extract all the mappings from a datasource

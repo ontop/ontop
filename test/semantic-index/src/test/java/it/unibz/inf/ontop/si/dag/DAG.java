@@ -34,7 +34,6 @@ import it.unibz.inf.ontop.spec.ontology.BinaryAxiom;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRange;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -42,12 +41,11 @@ import java.util.LinkedList;
 import java.util.Map;
 
 @Deprecated
-public class DAG implements Serializable {
+public class DAG {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -9208872698083322721L;
 
 	private int index_counter = 1;
 
@@ -55,7 +53,7 @@ public class DAG implements Serializable {
 
 	public final static int NULL_INDEX = -1;
 
-	public Map<Description, Description> equi_mappings = new HashMap<Description, Description>();
+	public Map<Description, Description> equi_mappings = new HashMap<>();
 
 	public final Map<Description, DAGNode> classes;
 
@@ -81,18 +79,18 @@ public class DAG implements Serializable {
 	 */
 	public DAG(Ontology ontology) {
 
-		int rolenodes = (ontology.objectProperties().all().size() + ontology.dataProperties().all().size()) * 2;
+		//int rolenodes = (ontology.objectProperties().all().size() + ontology.dataProperties().all().size()) * 2;
 
-		int classnodes = ontology.classes().all().size() + rolenodes * 2;
+		//int classnodes = ontology.classes().all().size() + rolenodes * 2;
 
-		classes = new LinkedHashMap<Description, DAGNode>(classnodes * 2);
-		roles = new LinkedHashMap<Description, DAGNode>(rolenodes * 2);
+		classes = new LinkedHashMap<>(); // classnodes * 2
+		roles = new LinkedHashMap<>(); // rolenodes * 2
 
-		allnodes = new HashMap<Description, DAGNode>((rolenodes + classnodes) * 2);
+		allnodes = new HashMap<>(); // (rolenodes + classnodes) * 2
 
 		// classes.put(thingConcept, thing);
 
-		for (OClass concept : ontology.classes().all()) {
+		for (OClass concept : ontology.classes()) {
 			if (!concept.isBottom() && !concept.isTop()) {
 				DAGNode node = new DAGNode(concept);
 
@@ -108,7 +106,7 @@ public class DAG implements Serializable {
 		 * For each role we add nodes for its inverse, its domain and its range
 		 */
 		
-		for (ObjectPropertyExpression role : ontology.objectProperties().all()) {
+		for (ObjectPropertyExpression role : ontology.objectProperties()) {
 			if (!role.isBottom() && !role.isTop()) {
 				DAGNode rolenode = new DAGNode(role);
 
@@ -131,7 +129,7 @@ public class DAG implements Serializable {
 				allnodes.put(roleInv, rolenodeinv);
 			}
 		}
-		for (DataPropertyExpression role : ontology.dataProperties().all()) {
+		for (DataPropertyExpression role : ontology.dataProperties()) {
 			if (!role.isBottom() && !role.isTop()) {
 				DAGNode rolenode = new DAGNode(role);
 

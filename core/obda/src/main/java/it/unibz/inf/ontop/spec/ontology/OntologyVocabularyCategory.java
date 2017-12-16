@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.spec.ontology;
 
-import java.util.Collection;
-import java.util.Iterator;
 
-public interface OntologyCategory<T> {
+public interface OntologyVocabularyCategory<T> extends Iterable<T> {
     /**
      * check whether the entity has been declared and return the entity object
      *
@@ -25,14 +23,6 @@ public interface OntologyCategory<T> {
 
 
     /**
-     * return all declared entities
-     *
-     * @return
-     */
-
-    Collection<T> all();
-
-    /**
      * declare an entity
      *
      * @param uri
@@ -40,6 +30,4 @@ public interface OntologyCategory<T> {
      */
 
     T create(String uri);
-
-    Iterator<T> iterator();
 }

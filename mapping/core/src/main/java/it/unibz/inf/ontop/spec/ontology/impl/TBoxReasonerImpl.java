@@ -559,7 +559,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 
-		for (ObjectPropertyExpression role : ontology.objectProperties().all()) {
+		for (ObjectPropertyExpression role : ontology.objectProperties()) {
 			if (!role.isBottom() && !role.isTop()) {
 				graph.addVertex(role);
 				graph.addVertex(role.getInverse());
@@ -595,7 +595,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 
-		for (DataPropertyExpression role : ontology.dataProperties().all())
+		for (DataPropertyExpression role : ontology.dataProperties())
 			if (!role.isBottom() && !role.isTop())
 				graph.addVertex(role);
 
@@ -625,7 +625,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		DefaultDirectedGraph<ClassExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 
-		for (OClass concept : ontology.classes().all())
+		for (OClass concept : ontology.classes())
 			if (!concept.isBottom() && !concept.isTop())
 				graph.addVertex(concept);
 

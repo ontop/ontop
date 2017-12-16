@@ -26,13 +26,13 @@ import java.util.Set;
 
 public interface Ontology  {
 
-	OntologyCategory<OClass> classes();
+	OntologyVocabularyCategory<OClass> classes();
 
-    OntologyCategory<ObjectPropertyExpression> objectProperties();
+    OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties();
 
-    OntologyCategory<DataPropertyExpression> dataProperties();
+    OntologyVocabularyCategory<DataPropertyExpression> dataProperties();
 
-    OntologyCategory<AnnotationProperty> annotationProperties();
+    OntologyVocabularyCategory<AnnotationProperty> annotationProperties();
 
 	Datatype getDatatype(String uri);
 

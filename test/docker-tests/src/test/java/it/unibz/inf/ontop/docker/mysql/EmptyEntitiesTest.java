@@ -181,7 +181,7 @@ public class EmptyEntitiesTest {
 	@Test
 	public void testEmptyConcepts() throws Exception {
 		int c = 0; // number of empty concepts
-		for (OClass cl : onto.classes().all()) {
+		for (OClass cl : onto.classes()) {
 			String concept = cl.getName();
 			if (!runSPARQLConceptsQuery("<" + concept + ">")) {
 				emptyConcepts.add(concept);
@@ -200,7 +200,7 @@ public class EmptyEntitiesTest {
 	@Test
 	public void testEmptyRoles() throws Exception {
 		int r = 0; // number of empty roles
-		for (ObjectPropertyExpression prop : onto.objectProperties().all()) {
+		for (ObjectPropertyExpression prop : onto.objectProperties()) {
 			String role = prop.getName();
 			if (!runSPARQLRolesQuery("<" + role + ">")) {
 				emptyRoles.add(role);
@@ -210,7 +210,7 @@ public class EmptyEntitiesTest {
 		log.info(r + " Empty role/s: " + emptyRoles);
 
 		r = 0; // number of empty roles
-		for (DataPropertyExpression prop : onto.dataProperties().all()) {
+		for (DataPropertyExpression prop : onto.dataProperties()) {
 			String role = prop.getName();
 			if (!runSPARQLRolesQuery("<" + role + ">")) {
 				emptyRoles.add(role);
@@ -229,7 +229,7 @@ public class EmptyEntitiesTest {
 	public void testEmpties() throws Exception {
 
 		int c = 0; // number of empty concepts
-		for (OClass cl : onto.classes().all()) {
+		for (OClass cl : onto.classes()) {
 			String concept = cl.getName();
 			if (!runSPARQLConceptsQuery("<" + concept + ">")) {
 				emptyConcepts.add(concept);
@@ -239,7 +239,7 @@ public class EmptyEntitiesTest {
 		log.info(c + " Empty concept/s: " + emptyConcepts);
 
 		int r = 0; // number of empty roles
-		for (ObjectPropertyExpression prop : onto.objectProperties().all()) {
+		for (ObjectPropertyExpression prop : onto.objectProperties()) {
 			String role = prop.getName();
 			if (!runSPARQLRolesQuery("<" + role + ">")) {
 				emptyRoles.add(role);
@@ -249,7 +249,7 @@ public class EmptyEntitiesTest {
 		log.info(r + " Empty role/s: " + emptyRoles);
 
 		r = 0; // number of empty roles
-		for (DataPropertyExpression prop : onto.dataProperties().all()) {
+		for (DataPropertyExpression prop : onto.dataProperties()) {
 			String role = prop.getName();
 			if (!runSPARQLRolesQuery("<" + role + ">")) {
 				emptyRoles.add(role);
