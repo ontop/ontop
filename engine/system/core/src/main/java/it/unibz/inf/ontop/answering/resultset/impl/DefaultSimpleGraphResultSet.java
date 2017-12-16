@@ -117,14 +117,14 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), result);
 
                 // A triple can only be constructed when none of bindings is missing
-                if (subjectConstant == null || predicateConstant == null || objectConstant==null){
+                if (subjectConstant == null || predicateConstant == null || objectConstant==null) {
                     continue;
                 }
 
                 // Determines the type of assertion
                 String predicateName = predicateConstant.getValue();
-                Assertion assertion;
                 try {
+                    Assertion assertion;
                     if (predicateName.equals(IriConstants.RDF_TYPE)) {
                         OClass oc = onto.classes().create(objectConstant.getValue());
                         assertion = onto.createClassAssertion(oc, subjectConstant);
@@ -196,12 +196,15 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
             org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
             if (vc.getValue() instanceof IRI) {
                 constant = TERM_FACTORY.getConstantURI(vc.getValue().stringValue());
-            } else if (vc.getValue() instanceof Literal) {
+            }
+            else if (vc.getValue() instanceof Literal) {
                 constant = TERM_FACTORY.getConstantLiteral(vc.getValue().stringValue());
-            } else {
+            }
+            else {
                 constant = TERM_FACTORY.getConstantBNode(vc.getValue().stringValue());
             }
-        } else {
+        }
+        else {
             // constant = resSet.getConstant(node_name);
             // TODO(xiao): this fix is suspecious
             constant = resSet.next().getConstant(node_name);

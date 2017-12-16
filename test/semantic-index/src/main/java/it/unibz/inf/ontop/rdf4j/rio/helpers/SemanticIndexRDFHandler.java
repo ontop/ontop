@@ -117,20 +117,22 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 			throw new RuntimeException("Unsupported subject found in triple: "	+ st + " (Required URI or BNode)");
 		}
 
-		String predicateName = st.getPredicate().stringValue();
+        String predicateName = st.getPredicate().stringValue();
 		Value object = st.getObject();
+
+		System.out.println(st);
 
 		// Create the assertion
 		final Assertion assertion;
 		try {
 			if (predicateName.equals(IriConstants.RDF_TYPE)) {
-                OClass oc = ontology.classes().create(predicateName);
+                OClass oc = ontology.classes().create(object.stringValue());
 				assertion = ontology.createClassAssertion(oc, c);
 			} 
 			else {
 				if (object instanceof IRI) {
+                    ObjectPropertyExpression ope  = ontology.objectProperties().create(predicateName);
 					ObjectConstant c2 = TERM_FACTORY.getConstantURI(object.stringValue());
-					ObjectPropertyExpression ope  = ontology.objectProperties().create(predicateName);
 					assertion = ontology.createObjectPropertyAssertion(ope, c, c2);
 				} 
 				else if (object instanceof BNode) {
