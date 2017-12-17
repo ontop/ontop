@@ -226,9 +226,9 @@ public class R2RMLManager {
 			//CQIE targetQuery = DATALOG_FACTORY.getCQIE(head, body);
 			
 			if (sourceQuery.isEmpty()) {
-				throw new Exception("Could not create source query for join in "+tm.toString());
+				throw new Exception("Could not classify source query for join in "+tm.toString());
 			}
-			//finally, create mapping and add it to the list
+			//finally, classify mapping and add it to the list
                 //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
 			// TODO: use a R2RML-specific class	instead
 			SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap("mapping-join-"+robm.hashCode(),
@@ -302,7 +302,7 @@ public class R2RMLManager {
 				
 				//check if predicate = rdf:type
 				if (bodyPred.toString().equals(IriConstants.RDF_TYPE)) {
-					//create term triple(subjAtom, URI("...rdf_type"), objAtom)
+					//classify term triple(subjAtom, URI("...rdf_type"), objAtom)
 					// if object is a predicate
 					Set<Variable> vars = new HashSet<>();
 					TermUtils.addReferencedVariablesTo(vars, objectAtom);
@@ -336,14 +336,14 @@ public class R2RMLManager {
 					}
 				} 
 				else {
-					// create predicate(subject, object) and add it to the body
+					// classify predicate(subject, object) and add it to the body
 					bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(bodyPred, subjectAtom, objectAtom));
 				}
 			}
 			
 			//treat predicates that contain a variable (column or template declarations)
 			for (ImmutableFunctionalTerm predFunction : bodyURIPredicates) {
-				//create triple(subj, predURIFunction, objAtom) terms
+				//classify triple(subj, predURIFunction, objAtom) terms
 				//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 				//terms.add(predFunction);
 				//terms.add(objectAtom);

@@ -39,9 +39,8 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 * The ontology contains classes A1 = A2 = A3 >= B1 = B2 = B3 >= C1 = C2 = C3
 		 */
 
-		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_401.owl");
-		OntologyTBox ontology = o.tbox();
-		ClassifiedTBox simple = ClassifiedTBoxImpl.create(o);
+		OntologyTBox ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_401.owl").tbox();
+		ClassifiedTBox simple = ClassifiedTBoxImpl.classify(ontology);
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.classes().dag();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.objectProperties().dag();
@@ -80,9 +79,8 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 * The ontology contains object properties A1 = A2 = A3 >= B1 = B2 = B3 >= C1 = C2 = C3
 		 */
 
-		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_402.owl");
-        OntologyTBox ontology = o.tbox();
-        ClassifiedTBox simple = ClassifiedTBoxImpl.create(o);
+		OntologyTBox ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_402.owl").tbox();
+        ClassifiedTBox simple = ClassifiedTBoxImpl.classify(ontology);
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.classes().dag();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.objectProperties().dag();
@@ -125,9 +123,8 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 * and classes A1 = A3 = \exists R <= B1 = B3 = \exists S^- <= C1 = C3 = \exists M
 		 */
 
-		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_403.owl");
-        OntologyTBox ontology = o.tbox();
-        ClassifiedTBox simple = ClassifiedTBoxImpl.create(o);
+		OntologyTBox ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_403.owl").tbox();
+        ClassifiedTBox simple = ClassifiedTBoxImpl.classify(ontology);
 		
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.classes().dag();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.objectProperties().dag();
@@ -159,9 +156,8 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 * The ontology contains object properties A1 = A2^- = A3 >= B1 = B2^- = B3 >= C1 = C2^- = C3
 		 */
 
-		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_404.owl");
-        OntologyTBox ontology = o.tbox();
-        ClassifiedTBox simple = ClassifiedTBoxImpl.create(o);
+		OntologyTBox ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_404.owl").tbox();
+        ClassifiedTBox simple = ClassifiedTBoxImpl.classify(ontology);
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.classes().dag();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.objectProperties().dag();

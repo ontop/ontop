@@ -77,7 +77,7 @@ class SILoadingTools {
     private static RepositoryInit createRepository(Ontology ontology, Optional<Set<OWLOntology>> ontologyClosure)
             throws SemanticIndexException {
 
-        ClassifiedTBox reformulationReasoner = ClassifiedTBoxImpl.create(ontology);
+        ClassifiedTBox reformulationReasoner = ClassifiedTBoxImpl.classify(ontology.tbox());
 
         SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner);
 
@@ -94,8 +94,8 @@ class SILoadingTools {
             // Creating the ABox repository
             dataRepository.createDBSchemaAndInsertMetadata(localConnection);
             return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner, ontology.abox(), localConnection);
-
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new SemanticIndexException(e.getMessage());
         }
     }

@@ -55,7 +55,7 @@ public class LeftJoinMultipleMatchingTest {
         java.sql.Statement s = sqlConnection.createStatement();
 
         try {
-            String text = new Scanner( new File("src/test/resources/ljoptional/rais-create-h2.sql") ).useDelimiter("\\A").next();
+            String text = new Scanner( new File("src/test/resources/ljoptional/rais-classify-h2.sql") ).useDelimiter("\\A").next();
             s.execute(text);
 
         } catch(SQLException sqle) {

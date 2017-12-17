@@ -74,7 +74,7 @@ public class TMappingConcurrencyErrorFixTest{
 		connection = DriverManager.getConnection(url, username, password);
 		Statement st = connection.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/tmapping/create-tables.sql");
+		FileReader reader = new FileReader("src/test/resources/test/tmapping/classify-tables.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();

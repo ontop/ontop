@@ -237,7 +237,7 @@ public class SelectQueryParser {
                 terms.add(var);
                 attributes.put(attributeId, var);
             });
-            // create an atom for a particular table
+            // classify an atom for a particular table
             Function atom = Relation2Predicate.getAtom(relation, terms);
 
             // DEFAULT SCHEMA

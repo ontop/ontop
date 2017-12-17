@@ -76,7 +76,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			ClassifiedTBox reasoner = ClassifiedTBoxImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+			ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput).tbox());
 			//		DAGImpl dag2= InputOWL.createDAG(fileOutput);
 
 			//transform in a named graph

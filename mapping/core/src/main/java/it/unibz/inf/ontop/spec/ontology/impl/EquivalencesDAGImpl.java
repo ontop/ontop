@@ -247,7 +247,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		GabowSCC<TT, DefaultEdge> inspector = new GabowSCC<>(graph);
 		List<Equivalences<TT>> equivalenceSets = inspector.stronglyConnectedSets();
 
-		// create the vertex index
+		// classify the vertex index
 		
 		ImmutableMap.Builder<TT, Equivalences<TT>> vertexIndexBuilder = new ImmutableMap.Builder<>();
 		for (Equivalences<TT> equivalenceSet : equivalenceSets) {
@@ -315,7 +315,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		}
 		ImmutableMap<T, Equivalences<T>> vertexIndex = vertexIndexBuilder.build();	
 		
-		// create induced edges in the target graph		
+		// classify induced edges in the target graph
 		for (Equivalences<T> sSet : source) {
 			Equivalences<T> tSet = vertexIndex.get(sSet.getRepresentative());
 			

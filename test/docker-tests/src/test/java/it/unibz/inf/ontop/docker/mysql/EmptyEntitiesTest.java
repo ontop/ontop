@@ -72,7 +72,6 @@ public class EmptyEntitiesTest {
 
 	private OntopOWLReasoner reasoner;
 	private OntologyTBox onto;
-	private Ontology ontology;
 
 	@Before
 	public void setUp() throws Exception {
@@ -97,8 +96,7 @@ public class EmptyEntitiesTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		ontology = OWLAPITranslatorUtility.translate(config.loadProvidedInputOntology());
-		onto = ontology.tbox();
+		onto = OWLAPITranslatorUtility.translate(config.loadProvidedInputOntology()).tbox();
 	}
 
 	@After
@@ -269,7 +267,7 @@ public class EmptyEntitiesTest {
 	 */
 	// @Test
 	public void testEmptiesWithInverses() throws Exception {
-		ClassifiedTBox tboxreasoner = ClassifiedTBoxImpl.create(ontology);
+		ClassifiedTBox tboxreasoner = ClassifiedTBoxImpl.classify(onto);
 		System.out.println();
 		System.out.println(tboxreasoner.objectProperties().dag());
 

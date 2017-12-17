@@ -165,7 +165,7 @@ public class OBDAMappingTransformer {
 								
  				if (object instanceof Variable){
 					if(ontology!= null && objectProperties.contains(objectProperty)){
-                        //we create an rr:column
+                        //we classify an rr:column
 						obm = mfact.createObjectMap((((Variable) object).getName()));
 						obm.setTermType(R2RMLVocabulary.iri);
 					} else {
@@ -192,8 +192,8 @@ public class OBDAMappingTransformer {
 					pom = mfact.createPredicateObjectMap(predM, obm);
 					tm.addPredicateObjectMap(pom);
 				} 
- 				else if (object instanceof Function) { //we create a template
-					//check if uritemplate we create a template, in case of datatype with single varible we create a column
+ 				else if (object instanceof Function) { //we classify a template
+					//check if uritemplate we classify a template, in case of datatype with single varible we classify a column
  					Function o = (Function) object;
  					Predicate objectPred = o.getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {

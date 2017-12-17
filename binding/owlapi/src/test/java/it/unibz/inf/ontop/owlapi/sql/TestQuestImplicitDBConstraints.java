@@ -31,12 +31,12 @@ public class TestQuestImplicitDBConstraints {
 	static String uc_owlfile = RESOURCE_DIR + "uc.owl";
 	static String uc_obdafile = RESOURCE_DIR + "uc.obda";
 	static String uc_keyfile = RESOURCE_DIR + "keys.lst";
-	static String uc_create = RESOURCE_DIR + "create.sql";
+	static String uc_create = RESOURCE_DIR + "classify.sql";
 	
 	static String fk_owlfile = RESOURCE_DIR + "uc.owl";
 	static String fk_obdafile = RESOURCE_DIR + "fk.obda";
 	static String fk_keyfile = RESOURCE_DIR + "fk-keys.lst";
-	static String fk_create = RESOURCE_DIR + "fk-create.sql";
+	static String fk_create = RESOURCE_DIR + "fk-classify.sql";
 
 	private static final String URL = "jdbc:h2:mem:countries";
 	private static final String USER = "sa";

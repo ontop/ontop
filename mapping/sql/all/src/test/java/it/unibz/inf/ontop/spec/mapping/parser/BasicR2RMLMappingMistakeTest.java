@@ -20,8 +20,8 @@ public class BasicR2RMLMappingMistakeTest extends AbstractBasicMappingMistakeTes
         execute("/mistake/invalid-sql1-r2rml.ttl");
     }
 
-    @Ignore("TODO: create an option for disabling black-box view creation "
-            + "and create a specific exception for it")
+    @Ignore("TODO: classify an option for disabling black-box view creation "
+            + "and classify a specific exception for it")
     @Test
     public void testInvalidSQLQuery2() throws OBDASpecificationException {
         execute("/mistake/invalid-sql2-r2rml.ttl");

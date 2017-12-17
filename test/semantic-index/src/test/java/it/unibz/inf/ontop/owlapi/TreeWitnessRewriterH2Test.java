@@ -149,7 +149,7 @@ public class TreeWitnessRewriterH2Test{
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/treewitness/bsbm-schema-create-mysql.sql");
+		FileReader reader = new FileReader("src/test/resources/test/treewitness/bsbm-schema-classify-mysql.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();

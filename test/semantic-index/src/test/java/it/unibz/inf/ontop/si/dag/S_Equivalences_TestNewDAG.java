@@ -100,7 +100,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.classify(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput).tbox());
 			TestClassifiedTBoxImpl_OnGraph graphReasoner = new TestClassifiedTBoxImpl_OnGraph(reasoner);
 
 			log.debug("Input number {}", i+1 );

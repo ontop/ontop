@@ -45,7 +45,7 @@ public class S_NewGraphTest  extends TestCase{
 		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile(roleowlfile);
 
 		log.info("Generating graph");
-		ClassifiedTBoxImpl r = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.create(o);
+		ClassifiedTBoxImpl r = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.classify(o.tbox());
 		
 		log.info("See information");
 		log.debug("properties {}", r.getObjectPropertyGraph());

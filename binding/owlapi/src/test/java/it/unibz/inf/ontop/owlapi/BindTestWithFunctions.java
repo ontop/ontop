@@ -75,7 +75,7 @@ public class BindTestWithFunctions {
 
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBindWithFns-create-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBindWithFns-classify-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();

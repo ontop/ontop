@@ -562,7 +562,7 @@
                 <extensions>true</extensions>
                 <configuration>
 
-                    <!-- The following is the set of instructions of how pack the bundle and how to create the
+                    <!-- The following is the set of instructions of how pack the bundle and how to classify the
                          MANIFEST.MF for the bundle. The configuration does 3 things.
 
                         1. It makes sure that the "tight" dependencies are not packed as jars, but as .class files

@@ -56,7 +56,7 @@ import static org.junit.Assert.assertTrue;
  * classes/roles and attributes even if there are no URI templates. i.e., the
  * database stores URI's directly.
  * 
- * We are going to create an H2 DB, the .sql file is fixed. We will map directly
+ * We are going to classify an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
 public class MetaMappingVirtualABoxTest {
@@ -87,7 +87,7 @@ public class MetaMappingVirtualABoxTest {
 		Statement st = conn.createStatement();
 
         String sql = Joiner.on("\n").join(
-                CharStreams.readLines(new FileReader("src/test/resources/test/metamapping-create-h2.sql")));
+                CharStreams.readLines(new FileReader("src/test/resources/test/metamapping-classify-h2.sql")));
 
 
         st.executeUpdate(sql);

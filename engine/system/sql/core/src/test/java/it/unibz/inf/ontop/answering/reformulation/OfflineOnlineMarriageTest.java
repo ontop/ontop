@@ -36,7 +36,7 @@ import static junit.framework.TestCase.assertFalse;
 public class OfflineOnlineMarriageTest {
 
     private static final String OBDA_FILE = "src/test/resources/marriage/marriage.obda";
-    private static final String CREATE_DB_FILE = "src/test/resources/marriage/create-db.sql";
+    private static final String CREATE_DB_FILE = "src/test/resources/marriage/classify-db.sql";
     private static final String JDBC_URL = "jdbc:h2:mem:questjunitdb";
     private static final String JDBC_USER = "sa";
     private static final String JDBC_PASSWORD = "";

@@ -151,9 +151,8 @@ public class DAGTest extends TestCase {
 
 	private void test_dag_index_nodes(String testname) throws Exception {
 
-		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(owlloc + testname + ".owl");
-		onto = ontology.tbox();
-		ClassifiedTBox reasoner = ClassifiedTBoxImpl.create(ontology);
+		onto = OWLAPITranslatorUtility.loadOntologyFromFile(owlloc + testname + ".owl").tbox();
+		ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(onto);
 		List<List<Description>> exp_idx = get_results(testname);
 
 		List<Description> classes= new LinkedList<>();

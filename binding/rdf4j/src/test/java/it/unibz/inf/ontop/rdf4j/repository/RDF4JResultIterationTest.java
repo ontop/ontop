@@ -51,7 +51,7 @@ public class RDF4JResultIterationTest {
     static String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
 
     static String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
-    static String uc_create = "src/test/resources/userconstraints/create.sql";
+    static String uc_create = "src/test/resources/userconstraints/classify.sql";
 
     private static final String URL = "jdbc:h2:mem:countries_iteration_test";
     private static final String USER = "sa";

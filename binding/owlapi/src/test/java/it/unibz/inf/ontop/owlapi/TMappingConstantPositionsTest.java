@@ -64,7 +64,7 @@ public class TMappingConstantPositionsTest extends TestCase {
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/tmapping-positions-create-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/tmapping-positions-classify-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();

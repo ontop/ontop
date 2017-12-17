@@ -37,7 +37,7 @@ public class TypeInferenceTest {
 
     private static final String ONTOLOGY_FILE = "src/test/resources/test/typeinference/types.owl";
     private static final String OBDA_FILE = "src/test/resources/test/typeinference/types.obda";
-    private static final String CREATE_DB_FILE = "src/test/resources/test/typeinference/types-create-db.sql";
+    private static final String CREATE_DB_FILE = "src/test/resources/test/typeinference/types-classify-db.sql";
     private static final String DROP_DB_FILE = "src/test/resources/test/typeinference/types-drop-db.sql";
 
     private static final String URL = "jdbc:h2:mem:types";

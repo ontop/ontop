@@ -587,7 +587,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		}
 		int confirm = JOptionPane.showConfirmDialog(
 				this,
-				"This will create copies of the selected mappings. \nNumber of mappings selected = " 
+				"This will classify copies of the selected mappings. \nNumber of mappings selected = "
 				+ currentSelection.length + "\nContinue? ", 
 				"Copy confirmation", 
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);

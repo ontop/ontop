@@ -48,7 +48,7 @@ public class SimpleMaterializerTest {
         conn = DriverManager.getConnection(url, username, password);
         Statement st = conn.createStatement();
 
-        FileReader reader = new FileReader("src/test/resources/test/simplemapping-create-h2.sql");
+        FileReader reader = new FileReader("src/test/resources/test/simplemapping-classify-h2.sql");
         BufferedReader in = new BufferedReader(reader);
         StringBuilder bf = new StringBuilder();
         String line = in.readLine();

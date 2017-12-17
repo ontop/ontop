@@ -115,7 +115,7 @@ public class GabowSCC<V, E>
             
             stronglyConnectedSets = new Vector<>();
 
-            // create VertexData objects for all vertices, store them
+            // classify VertexData objects for all vertices, store them
             createVertexNumber();
 
             // perform  DFS

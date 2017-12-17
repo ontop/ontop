@@ -66,7 +66,7 @@ public class H2IdentifierTest {
 		java.sql.Statement s = sqlConnection.createStatement();
 
 		try {
-			String text = new Scanner( new File("src/test/resources/identifiers/create-h2.sql") ).useDelimiter("\\A").next();
+			String text = new Scanner( new File("src/test/resources/identifiers/classify-h2.sql") ).useDelimiter("\\A").next();
 			s.execute(text);
 			//Server.startWebServer(sqlConnection);
 

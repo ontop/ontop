@@ -40,8 +40,7 @@ import java.util.Set;
 
 public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
-	ArrayList<String> input= new ArrayList<String>();
-	ArrayList<String> output= new ArrayList<String>();
+	ArrayList<String> input = new ArrayList<>();
 
 	Logger log = LoggerFactory.getLogger(S_HierarchyTestNewDAG.class);
 
@@ -50,9 +49,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 	}
 
 	public void setUp(){
-		
-		
-		
+
 		input.add("src/test/resources/test/stockexchange-unittest.owl");
 		input.add("src/test/resources/test/dag/test-equivalence-roles-inverse.owl");
 		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
@@ -91,21 +88,15 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		input.add("src/test/resources/test/newDag/inverseEquivalents7.owl");
 		/** B->A=ET- ->ER- C->ES- = D->A*/
 		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
-		
-
-
-
 	}
 	
 	public void testNamedAndEquivalences() throws Exception{
 		//for each file in the input
-		for (int i=0; i<input.size(); i++){
-			String fileInput=input.get(i);
-
-			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+		for (String fileInput : input){
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.classify(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput).tbox());
 			//transform in a named graph
 			TestClassifiedTBoxImpl_OnNamedDAG namedDag2 = new TestClassifiedTBoxImpl_OnNamedDAG(reasoner);
-			log.debug("Input number {}", i+1 );
+			log.debug("Input {}", fileInput);
 			log.info("First graph {}", reasoner.getClassGraph());
 			log.info("First graph {}", reasoner.getObjectPropertyGraph());
 			log.info("Second dag {}", namedDag2);
@@ -131,7 +122,6 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			//check only if the number of edges is smaller
 			//assertTrue(checkEdgeReduction(graph1, namedDag2, true)); COMMENTED OUT BY ROMAN
 			assertTrue(checkforNamedVertexesOnly(namedDag2, reasoner));
-	
 		}
 	}
 

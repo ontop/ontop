@@ -45,7 +45,7 @@ import java.util.Properties;
  * classes/roles and attributes even if there are no URI templates. i.e., the
  * database stores URI's directly.
  * 
- * We are going to create an H2 DB, the .sql file is fixed. We will map directly
+ * We are going to classify an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
 public class SimpleMappingVirtualABoxTest extends TestCase {
@@ -69,7 +69,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/simplemapping-create-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/simplemapping-classify-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();

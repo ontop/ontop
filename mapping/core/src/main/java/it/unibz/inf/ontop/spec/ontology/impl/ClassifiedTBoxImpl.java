@@ -90,25 +90,25 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 	 * @param onto: ontology
 	 */
 
-	public static ClassifiedTBox create(Ontology onto) {
+	public static ClassifiedTBox classify(OntologyTBox onto) {
 
-	    OntologyImpl impl = (OntologyImpl)onto;
+	    OntologyImpl.OntologyTBoxImpl impl = (OntologyImpl.OntologyTBoxImpl)onto;
 
-		final DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> objectPropertyGraph =
-				getObjectPropertyGraph(onto.tbox());
-		final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG =
+		DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> objectPropertyGraph =
+				getObjectPropertyGraph(onto);
+		EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG =
 				EquivalencesDAGImpl.getEquivalencesDAG(objectPropertyGraph);
 
-		final DefaultDirectedGraph<DataPropertyExpression, DefaultEdge> dataPropertyGraph =
-				getDataPropertyGraph(onto.tbox());
-		final EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG =
+		DefaultDirectedGraph<DataPropertyExpression, DefaultEdge> dataPropertyGraph =
+				getDataPropertyGraph(onto);
+		EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG =
 				EquivalencesDAGImpl.getEquivalencesDAG(dataPropertyGraph);
 
-		final EquivalencesDAGImpl<ClassExpression> classDAG =
-				EquivalencesDAGImpl.getEquivalencesDAG(getClassGraph(onto.tbox(), objectPropertyGraph, dataPropertyGraph));
+		EquivalencesDAGImpl<ClassExpression> classDAG =
+				EquivalencesDAGImpl.getEquivalencesDAG(getClassGraph(onto, objectPropertyGraph, dataPropertyGraph));
 
-		final EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG =
-				EquivalencesDAGImpl.getEquivalencesDAG(getDataRangeGraph(onto.tbox(), dataPropertyGraph));
+		EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG =
+				EquivalencesDAGImpl.getEquivalencesDAG(getDataRangeGraph(onto, dataPropertyGraph));
 
 		chooseObjectPropertyRepresentatives(objectPropertyDAG);
 		chooseDataPropertyRepresentatives(dataPropertyDAG);
@@ -458,7 +458,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		SimpleDirectedGraph<Equivalences<ObjectPropertyExpression>, DefaultEdge> objectProperties
 				= new SimpleDirectedGraph<>(DefaultEdge.class);
 
-		// create vertices for properties
+		// classify vertices for properties
 		for(Equivalences<ObjectPropertyExpression> node : reasoner.objectProperties().dag()) {
 			ObjectPropertyExpression rep = node.getRepresentative();
 			ObjectPropertyExpression repInv = rep.getInverse();
@@ -481,7 +481,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		SimpleDirectedGraph<Equivalences<DataPropertyExpression>, DefaultEdge> dataProperties
 				= new SimpleDirectedGraph<>(DefaultEdge.class);
 
-		// create vertices for properties
+		// classify vertices for properties
 		for(Equivalences<DataPropertyExpression> node : reasoner.dataProperties().dag()) {
 			DataPropertyExpression rep = node.getRepresentative();
 
@@ -496,7 +496,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		//
 		SimpleDirectedGraph<Equivalences<ClassExpression>, DefaultEdge> classes = new SimpleDirectedGraph<>(DefaultEdge.class);
 
-		// create vertices for classes
+		// classify vertices for classes
 		for(Equivalences<ClassExpression> node : reasoner.classes().dag()) {
 			ClassExpression rep = node.getRepresentative();
 

@@ -98,7 +98,8 @@ public void testIndexes() throws Exception{
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		ClassifiedTBox dag = ClassifiedTBoxImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+		OntologyTBox onto = OWLAPITranslatorUtility.loadOntologyFromFile(fileInput).tbox();
+		ClassifiedTBox dag = ClassifiedTBoxImpl.classify(onto);
 
 		//add input named graph
 		SemanticIndexBuilder engine= new SemanticIndexBuilder(dag);
@@ -113,7 +114,7 @@ public void testIndexes() throws Exception{
 	private boolean testIndexes(SemanticIndexBuilder engine, ClassifiedTBox reasoner){
 		boolean result = true;
 		
-		//create semantic index
+		//classify semantic index
 		//check that the index of the node is contained in the intervals of the parent node
 		SimpleDirectedGraph<ObjectPropertyExpression, DefaultEdge> namedOP
 						= SemanticIndexBuilder.getNamedDAG(reasoner.objectProperties().dag());

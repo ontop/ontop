@@ -131,7 +131,7 @@ public class DAGPerformanceTest extends TestCase {
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		ClassifiedTBox reasoner= ClassifiedTBoxImpl.create(o);
+		ClassifiedTBox reasoner= ClassifiedTBoxImpl.classify(o.tbox());
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -223,7 +223,7 @@ public class DAGPerformanceTest extends TestCase {
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		ClassifiedTBox reasoner = ClassifiedTBoxImpl.create(o);
+		ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(o.tbox());
 		reasoner.getClass();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
@@ -319,7 +319,7 @@ public class DAGPerformanceTest extends TestCase {
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		ClassifiedTBox reasoner= ClassifiedTBoxImpl.create(o);
+		ClassifiedTBox reasoner= ClassifiedTBoxImpl.classify(o.tbox());
 		reasoner.getClass();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 

@@ -93,9 +93,9 @@ public class SubqueryTripleMappingGenerationTest {
                 EXECUTOR_REGISTRY,
                 EMPTY_MAPPING_METADATA
         );
-        ClassifiedTBox tBoxReasoner = ClassifiedTBoxImpl.create(OntologyFactoryImpl.getInstance().createOntology());
+        ClassifiedTBox tBoxReasoner = ClassifiedTBoxImpl.classify(OntologyFactoryImpl.getInstance().createOntology().tbox());
         Mapping saturatedMapping = MAPPING_SATURATOR.saturate(mapping, METADATA, tBoxReasoner);
-        String debug =saturatedMapping.getPredicates().stream()
+        String debug = saturatedMapping.getPredicates().stream()
                 .map(p -> saturatedMapping.getDefinition(p).get().toString())
                 .collect(Collectors.joining(""));
         log.debug("Saturated mapping:\n" + debug);
