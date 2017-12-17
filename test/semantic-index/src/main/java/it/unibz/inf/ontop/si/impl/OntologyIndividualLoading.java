@@ -33,7 +33,7 @@ public class OntologyIndividualLoading {
             Loads the data
              */
             OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(init.abox
-                    .orElseThrow(() -> new IllegalStateException("An ontology closure was expected")), init.reasoner);
+                    .orElseThrow(() -> new IllegalStateException("An ontology closure was expected")), init.ontologyABox);
 
             int count = init.dataRepository.insertData(init.localConnection, aBoxIter, 5000, 500);
             LOG.debug("Inserted {} triples from the ontology.", count);
@@ -43,8 +43,8 @@ public class OntologyIndividualLoading {
              */
             OntopSQLOWLAPIConfiguration configuration = createConfiguration(init.dataRepository, owlOntology, init.jdbcUrl, properties);
             return new OntopSemanticIndexLoaderImpl(configuration, init.localConnection);
-
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new SemanticIndexException(e.getMessage());
         }
     }

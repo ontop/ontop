@@ -23,8 +23,6 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	// put them in this map to avoid generating too many auxiliary roles/classes
 	private final Map<OWLObjectPropertyExpression, Map<OWLClassExpression, ObjectSomeValuesFrom>> auxiliaryClassProperties = new HashMap<>();
 
-	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
 	private static final Logger log = LoggerFactory.getLogger(OWLAPITranslatorOWL2QL.class);
 	
 	private static final String INCONSISTENT_ONTOLOGY = "The OWL 2 QL ontology is inconsistent due to axiom {}";
@@ -34,7 +32,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	
 	private final Ontology dl_onto;
-	private final OWLAPITranslatorHelper helper;
+	private final OWLAPITranslatorABoxHelper helper;
 	
 	private final boolean functionalityAxioms = true; // TEMPORARY FIX
 	private final boolean minCardinalityClassExpressions = true; // TEMPORARY FIX
@@ -42,8 +40,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	public OWLAPITranslatorOWL2QL(Collection<OWLOntology> owls) {
 		dl_onto = createOntology(owls);
-		// creates dummy reasoner - may be slow
-		helper = new OWLAPITranslatorHelper(TBoxReasonerImpl.create(dl_onto));
+		helper = new OWLAPITranslatorABoxHelper(dl_onto.abox());
 	}
 	
 	public Ontology getOntology() {
@@ -165,7 +162,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		try {
 			ClassAssertion a = helper.translate(ax);
 			if (a != null)
-				dl_onto.addClassAssertion(a);
+				dl_onto.abox().addClassAssertion(a);
 		}
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
@@ -415,7 +412,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		try {
 			ObjectPropertyAssertion a = helper.translate(ax);
 			if (a != null)
-				dl_onto.addObjectPropertyAssertion(a);
+				dl_onto.abox().addObjectPropertyAssertion(a);
 		}
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
@@ -575,7 +572,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		try {
 			DataPropertyAssertion a = helper.translate(ax);
 			if (a != null)
-				dl_onto.addDataPropertyAssertion(a);
+				dl_onto.abox().addDataPropertyAssertion(a);
 		} 
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -1038,7 +1035,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		try {
 			AnnotationAssertion a = helper.translate(ax);
 			if (a != null)
-				dl_onto.addAnnotationAssertion(a);
+				dl_onto.abox().addAnnotationAssertion(a);
 		}
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());

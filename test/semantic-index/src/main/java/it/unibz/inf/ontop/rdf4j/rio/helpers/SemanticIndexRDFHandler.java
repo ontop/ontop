@@ -48,18 +48,18 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
-	private static final OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
 	private final SIRepositoryManager repositoryManager;
 	private final Connection connection;
 	private final Ontology ontology;
 
+    private static final int MAX_BUFFER_SIZE = 5000;
+
 	private List<Statement> buffer;
-	private int MAX_BUFFER_SIZE = 5000;
 	private int count;
 
 	public SemanticIndexRDFHandler(SIRepositoryManager repositoryManager, Connection connection) {
 		this.repositoryManager = repositoryManager;
-		this.ontology =ONTOLOGY_FACTORY.createOntology();
+		this.ontology = OntologyFactoryImpl.getInstance().createOntology();
 		this.connection = connection;
 		this.buffer = new ArrayList<>(MAX_BUFFER_SIZE);
 		this.count = 0;
@@ -120,25 +120,23 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
         String predicateName = st.getPredicate().stringValue();
 		Value object = st.getObject();
 
-		System.out.println(st);
-
 		// Create the assertion
 		final Assertion assertion;
 		try {
 			if (predicateName.equals(IriConstants.RDF_TYPE)) {
                 OClass oc = ontology.classes().create(object.stringValue());
-				assertion = ontology.createClassAssertion(oc, c);
+				assertion = ontology.abox().createClassAssertion(oc, c);
 			} 
 			else {
 				if (object instanceof IRI) {
                     ObjectPropertyExpression ope  = ontology.objectProperties().create(predicateName);
 					ObjectConstant c2 = TERM_FACTORY.getConstantURI(object.stringValue());
-					assertion = ontology.createObjectPropertyAssertion(ope, c, c2);
+					assertion = ontology.abox().createObjectPropertyAssertion(ope, c, c2);
 				} 
 				else if (object instanceof BNode) {
                     ObjectPropertyExpression ope  = ontology.objectProperties().create(predicateName);
 					ObjectConstant c2 = TERM_FACTORY.getConstantBNode(object.stringValue());
-					assertion = ontology.createObjectPropertyAssertion(ope, c, c2);
+					assertion = ontology.abox().createObjectPropertyAssertion(ope, c, c2);
 				} 
 				else if (object instanceof Literal) {
                     DataPropertyExpression dpe  = ontology.dataProperties().create(predicateName);
@@ -161,7 +159,7 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 					else {
 						c2 = TERM_FACTORY.getConstantLiteral(l.getLabel(), lang.get());
 					}
-					assertion = ontology.createDataPropertyAssertion(dpe, c, c2);
+					assertion = ontology.abox().createDataPropertyAssertion(dpe, c, c2);
 				} 
 				else {
 					throw new RuntimeException("Unsupported object found in triple: " + st + " (Required URI, BNode or Literal)");

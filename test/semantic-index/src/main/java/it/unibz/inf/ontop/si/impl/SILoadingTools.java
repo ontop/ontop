@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.OntologyABox;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.si.repository.impl.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
@@ -46,16 +47,18 @@ class SILoadingTools {
     static class RepositoryInit {
         final SIRepositoryManager dataRepository;
         final Optional<Set<OWLOntology>> abox;
+        final OntologyABox ontologyABox;
         final String jdbcUrl;
         final TBoxReasoner reasoner;
         final Connection localConnection;
 
         private RepositoryInit(SIRepositoryManager dataRepository, Optional<Set<OWLOntology>> abox, String jdbcUrl,
-                               TBoxReasoner reasoner, Connection localConnection) {
+                               TBoxReasoner reasoner, OntologyABox ontologyABox, Connection localConnection) {
             this.dataRepository = dataRepository;
             this.abox = abox;
             this.jdbcUrl = jdbcUrl;
             this.reasoner = reasoner;
+            this.ontologyABox = ontologyABox;
             this.localConnection = localConnection;
         }
     }
@@ -90,7 +93,7 @@ class SILoadingTools {
 
             // Creating the ABox repository
             dataRepository.createDBSchemaAndInsertMetadata(localConnection);
-            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner, localConnection);
+            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner, ontology.abox(), localConnection);
 
         } catch (SQLException e) {
             throw new SemanticIndexException(e.getMessage());

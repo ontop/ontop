@@ -20,10 +20,6 @@ package it.unibz.inf.ontop.spec.ontology;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.Constant;
-
 /**
  * 
  * @author Roman Kontchakov

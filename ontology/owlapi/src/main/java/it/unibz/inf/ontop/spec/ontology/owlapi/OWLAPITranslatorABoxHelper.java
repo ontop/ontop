@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.Optional;
@@ -13,14 +12,12 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
-public class OWLAPITranslatorHelper {
+public class OWLAPITranslatorABoxHelper {
 
-	private final TBoxReasoner reasoner;
+	private final OntologyABox abox;
 	
-	private static final Ontology onto = OntologyFactoryImpl.getInstance().createOntology();
-
-	public OWLAPITranslatorHelper(TBoxReasoner reasoner) {
-		this.reasoner = reasoner;
+	public OWLAPITranslatorABoxHelper(OntologyABox abox) {
+		this.abox = abox;
 	}
 	
 	public ClassAssertion translate(OWLClassAssertionAxiom ax) throws OWLAPITranslatorOWL2QL.TranslationException, InconsistentOntologyException {
@@ -28,33 +25,30 @@ public class OWLAPITranslatorHelper {
 		if (!(classExpression instanceof OWLClass))
 			throw new OWLAPITranslatorOWL2QL.TranslationException("complex class expressions are not supported");
 		
-		OWLClass namedclass = (OWLClass) classExpression;
-		OClass concept = reasoner.classes().get(namedclass.getIRI().toString());
-		
+		OClass concept = getOClass((OWLClass) classExpression);
 		URIConstant c = getIndividual(ax.getIndividual());
 
-		return onto.createClassAssertion(concept, c);
+		return abox.createClassAssertion(concept, c);
 	}
 	
 	public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) throws OWLAPITranslatorOWL2QL.TranslationException, InconsistentOntologyException {
 		URIConstant c1 = getIndividual(ax.getSubject());
 		URIConstant c2 = getIndividual(ax.getObject());
-
 		ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty());
 
-		return onto.createObjectPropertyAssertion(ope, c1, c2);
+		return abox.createObjectPropertyAssertion(ope, c1, c2);
 	}	
 	
 	public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax) throws OWLAPITranslatorOWL2QL.TranslationException, InconsistentOntologyException {
 		OWLLiteral object = ax.getObject();
 
-		ValueConstant c2;
-		if(!object.getLang().isEmpty()) {
+		final ValueConstant c2;
+		if (!object.getLang().isEmpty()) {
 			c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), object.getLang());
 		}
 		else {
 			Optional<Predicate.COL_TYPE> type = TYPE_FACTORY.getDatatype(object.getDatatype().toStringID());
-			if(type.isPresent()){
+			if (type.isPresent()) {
 				c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), type.get());
 			}
 			else {
@@ -62,21 +56,18 @@ public class OWLAPITranslatorHelper {
 			}
 		}
 		URIConstant c1 = getIndividual(ax.getSubject());
-
 		DataPropertyExpression dpe = getPropertyExpression(ax.getProperty());
 
-		return onto.createDataPropertyAssertion(dpe, c1, c2);
+		return abox.createDataPropertyAssertion(dpe, c1, c2);
 	}
 
 	public AnnotationAssertion translate(OWLAnnotationAssertionAxiom ax) throws OWLAPITranslatorOWL2QL.TranslationException, InconsistentOntologyException {
 
 		URIConstant c1 = getIndividual(ax.getSubject());
-
 		Constant c2 = getValue(ax.getValue());
-
 		AnnotationProperty ap = getPropertyExpression(ax.getProperty());
 
-		return onto.createAnnotationAssertion(ap, c1, c2);
+		return abox.createAnnotationAssertion(ap, c1, c2);
 	}
 	
 	/**
@@ -87,7 +78,7 @@ public class OWLAPITranslatorHelper {
 	
 	public OClass getOClass(OWLClass clExpression) {
 		String uri = clExpression.getIRI().toString();
-		return reasoner.classes().get(uri);
+		return abox.getClass(uri);
 	}
 	
 	
@@ -101,14 +92,14 @@ public class OWLAPITranslatorHelper {
 	
 	public ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression opeExpression) {
 
-		if (opeExpression instanceof OWLObjectProperty) 
-			return reasoner.objectProperties().get(opeExpression.asOWLObjectProperty().getIRI().toString());
-	
+		if (opeExpression instanceof OWLObjectProperty) {
+            return abox.getObjectProperty(opeExpression.asOWLObjectProperty().getIRI().toString());
+        }
 		else {
 			assert(opeExpression instanceof OWLObjectInverseOf);
 			
 			OWLObjectInverseOf aux = (OWLObjectInverseOf) opeExpression;
-			return reasoner.objectProperties().get(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
+			return abox.getObjectProperty(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
 		} 			
 	}
 
@@ -123,7 +114,7 @@ public class OWLAPITranslatorHelper {
 	
 	public DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression dpeExpression)  {
 		assert (dpeExpression instanceof OWLDataProperty); 
-		return reasoner.dataProperties().get(dpeExpression.asOWLDataProperty().getIRI().toString());
+		return abox.getDataProperty(dpeExpression.asOWLDataProperty().getIRI().toString());
 	}
 
 
@@ -135,7 +126,7 @@ public class OWLAPITranslatorHelper {
 	 */
 
 	public AnnotationProperty getPropertyExpression(OWLAnnotationProperty ap)  {
-		return reasoner.annotationProperties().get(ap.getIRI().toString());
+		return abox.getAnnotationProperty(ap.getIRI().toString());
 	}
 
 
@@ -149,19 +140,17 @@ public class OWLAPITranslatorHelper {
 
 
 	/**
-	 * Use to translatein URIConstant the subject of an annotation property
+	 * Use to translate URIConstant in the subject of an annotation property
 	 * @param subject
 	 * @return
 	 * @throws OWLAPITranslatorOWL2QL.TranslationException
      */
 	private URIConstant getIndividual(OWLAnnotationSubject subject) throws OWLAPITranslatorOWL2QL.TranslationException {
 		if (subject instanceof IRI) {
-			return TERM_FACTORY.getConstantURI( ((IRI) subject).asIRI().get().toString());
+			return TERM_FACTORY.getConstantURI(((IRI)subject).asIRI().get().toString());
 		}
-		else{
+		else
 			throw new OWLAPITranslatorOWL2QL.TranslationException("Found anonymous individual, this feature is not supported:" + subject);
-
-		}
 	}
 
 	/**
@@ -170,33 +159,28 @@ public class OWLAPITranslatorHelper {
 	 * @return
 	 * @throws OWLAPITranslatorOWL2QL.TranslationException
      */
-	private Constant getValue (OWLAnnotationValue value)  throws OWLAPITranslatorOWL2QL.TranslationException {
+	private Constant getValue(OWLAnnotationValue value)  throws OWLAPITranslatorOWL2QL.TranslationException {
 		try {
 			if (value instanceof IRI) {
 				return TERM_FACTORY.getConstantURI(value.asIRI().get().toString());
 			}
-			if (value instanceof OWLLiteral) {
+			else if (value instanceof OWLLiteral) {
 				OWLLiteral owlLiteral = value.asLiteral().get();
 				if (!owlLiteral.getLang().isEmpty()) {
-
 					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), owlLiteral.getLang());
-				} else {
-					Optional<Predicate.COL_TYPE> type = TYPE_FACTORY.getDatatype(owlLiteral.getDatatype().toStringID());
-					if(!type.isPresent()){
-						return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral());
-					}
-					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), type.get());
 				}
-
-			} else {
-				throw new OWLAPITranslatorOWL2QL.TranslationException("Found anonymous individual, this feature is not supported:" + value);
-
+				else {
+					Optional<Predicate.COL_TYPE> type = TYPE_FACTORY.getDatatype(owlLiteral.getDatatype().toStringID());
+					return !type.isPresent()
+						? TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral())
+					    : TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), type.get());
+				}
 			}
+			else
+				throw new OWLAPITranslatorOWL2QL.TranslationException("Found anonymous individual, this feature is not supported:" + value);
 		}
-		catch(OWLRuntimeException ore){
+		catch (OWLRuntimeException ore) {
 			throw new OWLAPITranslatorOWL2QL.TranslationException(ore.getMessage());
 		}
 	}
-
-
 }

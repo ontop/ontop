@@ -22,8 +22,8 @@ package it.unibz.inf.ontop.owlapi.utils;
 
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorHelper;
+import it.unibz.inf.ontop.spec.ontology.OntologyABox;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorABoxHelper;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL.TranslationException;
 import org.semanticweb.owlapi.model.*;
 
@@ -47,15 +47,15 @@ public class OWLAPIABoxIterator implements Iterator<Assertion> {
 	private Iterator<OWLAxiom> owlaxiomIterator = null;
 	private Assertion next = null;
 	
-	private final OWLAPITranslatorHelper helper;
+	private final OWLAPITranslatorABoxHelper helper;
 
     /**
      * @param ontologies used only for data (ABox)
-     * @param reasoner used only for vocabulary (class and property names)
+     * @param ontologyABox used only for vocabulary (class and property names)
      */
 
-	public OWLAPIABoxIterator(Collection<OWLOntology> ontologies, TBoxReasoner reasoner) {
-		helper = new OWLAPITranslatorHelper(reasoner);
+	public OWLAPIABoxIterator(Collection<OWLOntology> ontologies, OntologyABox ontologyABox) {
+		helper = new OWLAPITranslatorABoxHelper(ontologyABox);
 		ontologiesIterator = ontologies.iterator();
 		if (ontologiesIterator.hasNext()) 
 			owlaxiomIterator = ontologiesIterator.next().getAxioms().iterator();

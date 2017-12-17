@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.answering.resultset.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
@@ -30,6 +31,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.query.algebra.*;
@@ -40,35 +42,39 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
-	private List<Assertion> results = new ArrayList<>();
+	private final List<Assertion> results = new ArrayList<>();
 
 	private final TupleResultSet tupleResultSet;
 
 	private final ConstructTemplate constructTemplate;
 
-	private Map<String, ValueExpr> extMap = null;
+	private final ImmutableMap<String, ValueExpr> extMap;
 
-	//store results in case of describe queries
+	// store results in case of describe queries
 	private final boolean storeResults;
 
-	public DefaultSimpleGraphResultSet(TupleResultSet results, ConstructTemplate template,
-                                       boolean storeResult) throws OntopResultConversionException, OntopConnectionException {
-		this.tupleResultSet = results;
-		this.constructTemplate = template;
-		this.storeResults = storeResult;
-		processResultSet(tupleResultSet, constructTemplate);
+	public DefaultSimpleGraphResultSet(TupleResultSet tupleResultSet, ConstructTemplate constructTemplate,
+                                       boolean storeResults) throws OntopResultConversionException, OntopConnectionException {
+		this.tupleResultSet = tupleResultSet;
+		this.constructTemplate = constructTemplate;
+        Extension ex = constructTemplate.getExtension();
+        if (ex != null) {
+            extMap = ex.getElements().stream()
+                    .collect(ImmutableCollectors.toMap(e -> e.getName(), e -> e.getExpr()));
+        }
+        else
+            extMap = null;
+
+        this.storeResults = storeResults;
+        if (storeResults) {
+            //process current result set into local buffer,
+            //since additional results will be collected
+            while (tupleResultSet.hasNext()) {
+                results.addAll(processResults());
+            }
+        }
 	}
 
-    private void processResultSet(TupleResultSet resSet, ConstructTemplate template)
-            throws OntopResultConversionException, OntopConnectionException {
-		if (storeResults) {
-			//process current result set into local buffer, 
-			//since additional results will be collected
-			while (resSet.hasNext()) {
-				results.addAll(processResults(resSet, template));
-			}
-		}
-	}
 
     @Override
     public int getFetchSize() throws OntopConnectionException {
@@ -89,32 +95,20 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 	 * In case of construct it is called upon next, to process
 	 * the only current result set.
 	 */
-    private List<Assertion> processResults(TupleResultSet result,
-                                           ConstructTemplate template)
+    private List<Assertion> processResults()
             throws OntopResultConversionException, OntopConnectionException {
+
         List<Assertion> tripleAssertions = new ArrayList<>();
-        List<ProjectionElemList> peLists = template.getProjectionElemList();
-
-        Extension ex = template.getExtension();
-        if (ex != null) {
-            List<ExtensionElem> extList = ex.getElements();
-            Map<String, ValueExpr> newExtMap = new HashMap<>();
-            for (ExtensionElem anExtList : extList) {
-                newExtMap.put(anExtList.getName(), anExtList.getExpr());
-            }
-            extMap = newExtMap;
-        }
-
         Ontology onto = OntologyFactoryImpl.getInstance().createOntology();
 
-        for (ProjectionElemList peList : peLists) {
+        for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
             int size = peList.getElements().size();
 
             for (int i = 0; i < size / 3; i++) {
 
-                ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i * 3), result);
-                Constant predicateConstant = getConstant(peList.getElements().get(i * 3 + 1), result);
-                Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), result);
+                ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i * 3), tupleResultSet);
+                Constant predicateConstant = getConstant(peList.getElements().get(i * 3 + 1), tupleResultSet);
+                Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), tupleResultSet);
 
                 // A triple can only be constructed when none of bindings is missing
                 if (subjectConstant == null || predicateConstant == null || objectConstant==null) {
@@ -127,17 +121,17 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                     Assertion assertion;
                     if (predicateName.equals(IriConstants.RDF_TYPE)) {
                         OClass oc = onto.classes().create(objectConstant.getValue());
-                        assertion = onto.createClassAssertion(oc, subjectConstant);
+                        assertion = onto.abox().createClassAssertion(oc, subjectConstant);
                     }
                     else {
                         if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) {
                             ObjectPropertyExpression ope = onto.objectProperties().create(predicateName);
-                            assertion = onto.createObjectPropertyAssertion(ope,
+                            assertion = onto.abox().createObjectPropertyAssertion(ope,
                                     subjectConstant, (ObjectConstant) objectConstant);
                         }
                         else {
                             DataPropertyExpression dpe = onto.dataProperties().create(predicateName);
-                            assertion = onto.createDataPropertyAssertion(dpe,
+                            assertion = onto.abox().createDataPropertyAssertion(dpe,
                                     subjectConstant, (ValueConstant) objectConstant);
                         }
                     }
@@ -161,8 +155,8 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 		if (storeResults)
 			return false;
 		// construct
-        while(tupleResultSet.hasNext()) {
-            List<Assertion> newTriples = processResults(tupleResultSet, constructTemplate);
+        while (tupleResultSet.hasNext()) {
+            List<Assertion> newTriples = processResults();
             if (!newTriples.isEmpty()) {
                 results.addAll(newTriples);
                 return true;

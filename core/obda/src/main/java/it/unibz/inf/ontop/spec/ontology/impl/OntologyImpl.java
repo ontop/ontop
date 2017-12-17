@@ -544,51 +544,146 @@ public class OntologyImpl implements Ontology {
 		checkSignature(prop);
 		functionalDataPropertyAxioms.add(prop);
 	}
+
+	@Override
+	public OntologyABox abox() {
+	    return new OntologyABox() {
+            @Override
+            public OClass getClass(String uri) { return classes.get(uri); }
+
+            @Override
+            public ObjectPropertyExpression getObjectProperty(String uri) { return objectProperties.get(uri); }
+
+            @Override
+            public DataPropertyExpression getDataProperty(String uri) { return dataProperties.get(uri); }
+
+            @Override
+            public AnnotationProperty getAnnotationProperty(String uri) { return annotationProperties.get(uri); }
+
+            @Override
+            public void addClassAssertion(ClassAssertion assertion) {
+                checkSignature(assertion.getConcept());
+                classAssertions.add(assertion);
+            }
+
+            @Override
+            public void addObjectPropertyAssertion(ObjectPropertyAssertion assertion) {
+                checkSignature(assertion.getProperty());
+                objectPropertyAssertions.add(assertion);
+            }
+
+            @Override
+            public void addDataPropertyAssertion(DataPropertyAssertion assertion) {
+                checkSignature(assertion.getProperty());
+                dataPropertyAssertions.add(assertion);
+            }
+
+            @Override
+            public void addAnnotationAssertion(AnnotationAssertion assertion) {
+                checkSignature(assertion.getProperty());
+                annotationAssertions.add(assertion);
+            }
+
+
+            @Override
+            public List<ClassAssertion> getClassAssertions() {
+                return Collections.unmodifiableList(classAssertions);
+            }
+
+            @Override
+            public List<ObjectPropertyAssertion> getObjectPropertyAssertions() {
+                return Collections.unmodifiableList(objectPropertyAssertions);
+            }
+
+            @Override
+            public List<DataPropertyAssertion> getDataPropertyAssertions() {
+                return Collections.unmodifiableList(dataPropertyAssertions);
+            }
+
+            @Override
+            public List<AnnotationAssertion> getAnnotationAssertions() {
+                return Collections.unmodifiableList(annotationAssertions);
+            }
+            /**
+             * Creates a class assertion
+             * <p>
+             * ClassAssertion := 'ClassAssertion' '(' axiomAnnotations Class Individual ')'
+             * <p>
+             * Implements rule [C4]:
+             *     - ignore (return null) if the class is top
+             *     - inconsistency if the class is bot
+             */
+
+            @Override
+            public ClassAssertion createClassAssertion(OClass ce, ObjectConstant object) throws InconsistentOntologyException {
+                if (ce.isTop())
+                    return null;
+                if (ce.isBottom())
+                    throw new InconsistentOntologyException();
+
+                return new ClassAssertionImpl(ce, object);
+            }
+
+            /**
+             * Creates an object property assertion
+             * <p>
+             * ObjectPropertyAssertion := 'ObjectPropertyAssertion' '(' axiomAnnotations
+             *				ObjectPropertyExpression sourceIndividual targetIndividual ')'
+             * <p>
+             * Implements rule [O4]:
+             *     - ignore (return null) if the property is top
+             *     - inconsistency if the property is bot
+             *     - swap the arguments to eliminate inverses
+             */
+
+            @Override
+            public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
+                if (ope.isTop())
+                    return null;
+                if (ope.isBottom())
+                    throw new InconsistentOntologyException();
+
+                if (ope.isInverse())
+                    return new ObjectPropertyAssertionImpl(ope.getInverse(), o2, o1);
+                else
+                    return new ObjectPropertyAssertionImpl(ope, o1, o2);
+            }
+
+            /**
+             * Creates a data property assertion
+             * <p>
+             * DataPropertyAssertion := 'DataPropertyAssertion' '(' axiomAnnotations
+             * 					DataPropertyExpression sourceIndividual targetValue ')'
+             * <p>
+             * Implements rule [D4]:
+             *     - ignore (return null) if the property is top
+             *     - inconsistency if the property is bot
+             */
+
+            @Override
+            public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o1, ValueConstant o2) throws InconsistentOntologyException {
+                if (dpe.isTop())
+                    return null;
+                if (dpe.isBottom())
+                    throw new InconsistentOntologyException();
+
+                return new DataPropertyAssertionImpl(dpe, o1, o2);
+            }
+
+            /**
+             * Creates an annotation assertion
+             * AnnotationAssertion := 'AnnotationAssertion' '(' axiomAnnotations AnnotationProperty AnnotationSubject AnnotationValue ')'
+             * AnnotationSubject := IRI | AnonymousIndividual
+             *
+             */
+            @Override
+            public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c) {
+                return new AnnotationAssertionImpl(ap,o,c);
+            }
+
+        };
+    }
 	
-	@Override
-	public void addClassAssertion(ClassAssertion assertion) {
-		checkSignature(assertion.getConcept());
-		classAssertions.add(assertion);
-	}
-
-	@Override
-	public void addObjectPropertyAssertion(ObjectPropertyAssertion assertion) {
-		checkSignature(assertion.getProperty());
-		objectPropertyAssertions.add(assertion);
-	}
-	
-	@Override
-	public void addDataPropertyAssertion(DataPropertyAssertion assertion) {
-		checkSignature(assertion.getProperty());
-		dataPropertyAssertions.add(assertion);
-	}
-
-	@Override
-	public void addAnnotationAssertion(AnnotationAssertion assertion) {
-		checkSignature(assertion.getProperty());
-		annotationAssertions.add(assertion);
-	}
-
-
-	@Override 
-	public List<ClassAssertion> getClassAssertions() {
-		return Collections.unmodifiableList(classAssertions);
-	}
-	
-	@Override 
-	public List<ObjectPropertyAssertion> getObjectPropertyAssertions() {
-		return Collections.unmodifiableList(objectPropertyAssertions);
-	}
-
-	@Override 
-	public List<DataPropertyAssertion> getDataPropertyAssertions() {
-		return Collections.unmodifiableList(dataPropertyAssertions);
-	}
-
-	@Override
-	public List<AnnotationAssertion> getAnnotationAssertions() {
-		return Collections.unmodifiableList(annotationAssertions);
-	}
 
 	@Override
 	public Collection<BinaryAxiom<ClassExpression>> getSubClassAxioms() {
@@ -729,83 +824,5 @@ public class OntologyImpl implements Ontology {
     public ImmutableMap<String, DataPropertyExpression> getDataPropertiesRawMap() { return ImmutableMap.copyOf(dataProperties.map); }
 
     public ImmutableMap<String, AnnotationProperty> getAnnotationPropertiesRawMap() { return ImmutableMap.copyOf(annotationProperties.map); }
-
-
-
-    /**
-     * Creates a class assertion
-     * <p>
-     * ClassAssertion := 'ClassAssertion' '(' axiomAnnotations Class Individual ')'
-     * <p>
-     * Implements rule [C4]:
-     *     - ignore (return null) if the class is top
-     *     - inconsistency if the class is bot
-     */
-
-    @Override
-    public ClassAssertion createClassAssertion(OClass ce, ObjectConstant object) throws InconsistentOntologyException {
-        if (ce.isTop())
-            return null;
-        if (ce.isBottom())
-            throw new InconsistentOntologyException();
-
-        return new ClassAssertionImpl(ce, object);
-    }
-
-    /**
-     * Creates an object property assertion
-     * <p>
-     * ObjectPropertyAssertion := 'ObjectPropertyAssertion' '(' axiomAnnotations
-     *				ObjectPropertyExpression sourceIndividual targetIndividual ')'
-     * <p>
-     * Implements rule [O4]:
-     *     - ignore (return null) if the property is top
-     *     - inconsistency if the property is bot
-     *     - swap the arguments to eliminate inverses
-     */
-
-    public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
-        if (ope.isTop())
-            return null;
-        if (ope.isBottom())
-            throw new InconsistentOntologyException();
-
-        if (ope.isInverse())
-            return new ObjectPropertyAssertionImpl(ope.getInverse(), o2, o1);
-        else
-            return new ObjectPropertyAssertionImpl(ope, o1, o2);
-    }
-
-    /**
-     * Creates a data property assertion
-     * <p>
-     * DataPropertyAssertion := 'DataPropertyAssertion' '(' axiomAnnotations
-     * 					DataPropertyExpression sourceIndividual targetValue ')'
-     * <p>
-     * Implements rule [D4]:
-     *     - ignore (return null) if the property is top
-     *     - inconsistency if the property is bot
-     */
-
-    @Override
-    public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o1, ValueConstant o2) throws InconsistentOntologyException {
-        if (dpe.isTop())
-            return null;
-        if (dpe.isBottom())
-            throw new InconsistentOntologyException();
-
-        return new DataPropertyAssertionImpl(dpe, o1, o2);
-    }
-
-    /**
-     * Creates an annotation assertion
-     * AnnotationAssertion := 'AnnotationAssertion' '(' axiomAnnotations AnnotationProperty AnnotationSubject AnnotationValue ')'
-     * AnnotationSubject := IRI | AnonymousIndividual
-     *
-     */
-    @Override
-    public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c) {
-        return new AnnotationAssertionImpl(ap,o,c);
-    }
 
 }

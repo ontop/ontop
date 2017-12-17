@@ -8,12 +8,13 @@ import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.OntologyABox;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 
-public class DefaultMappingTransformer implements MappingTransformer{
+public class DefaultMappingTransformer implements MappingTransformer {
 
 
     private final MappingCanonicalRewriter mappingCanonicalRewriter;
@@ -45,10 +46,10 @@ public class DefaultMappingTransformer implements MappingTransformer{
     }
 
     @Override
-    public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata, Ontology ontology,
+    public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata, OntologyABox abox,
                                        TBoxReasoner tBox)
             throws MappingException, DBMetadataExtractionException {
-        Mapping factsAsMapping = factConverter.convert(ontology, mapping.getExecutorRegistry(),
+        Mapping factsAsMapping = factConverter.convert(abox, mapping.getExecutorRegistry(),
                 settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
         Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
         Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mappingWithFacts, dbMetadata);
