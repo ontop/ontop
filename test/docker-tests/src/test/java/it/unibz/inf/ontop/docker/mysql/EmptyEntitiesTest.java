@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker.mysql;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
@@ -55,12 +56,9 @@ public class EmptyEntitiesTest {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
-//	final String owlFile = "src/test/resources/emptiesDatabase.owl";
-//	final String obdaFile = "src/test/resources/emptiesDatabase.obda";
-	
-	 final String owlFile =
+    final String owlFile =
 	 "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	 final String obdaFile =
+    final String obdaFile =
 	 "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
 	final String propertyFile =
 			"/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.properties";
@@ -96,7 +94,7 @@ public class EmptyEntitiesTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		onto = OWLAPITranslatorUtility.translate(config.loadProvidedInputOntology()).tbox();
+		onto = OWLAPITranslatorUtility.translate(ImmutableList.of(config.loadProvidedInputOntology())).tbox();
 	}
 
 	@After

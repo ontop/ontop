@@ -58,8 +58,7 @@ import static org.junit.Assert.assertTrue;
 public class R2rmlCheckerTest {
 	private OWLConnection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology owlOntology;
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	private OntologyTBox onto;
 
 	final String owlFile = "/mysql/npd/npd-v2-ql_a.owl";
@@ -67,7 +66,7 @@ public class R2rmlCheckerTest {
 	final String propertyFile = "/mysql/npd/npd-v2-ql_a.properties";
 	final String r2rmlFile = "/mysql/npd/npd-v2-ql_a.ttl";
 
-	final InputStream owlFileName =  this.getClass().getResourceAsStream(owlFile);
+    final String owlFileName =  this.getClass().getResource(owlFile).toString();
 	final String obdaFileName =  this.getClass().getResource(obdaFile).toString();
 	final String r2rmlFileName =  this.getClass().getResource(r2rmlFile).toString();
 	final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
@@ -75,22 +74,14 @@ public class R2rmlCheckerTest {
 	private List<Predicate> emptyConceptsObda = new ArrayList<>();
 	private List<Predicate> emptyRolesObda = new ArrayList<>();
 	private List<Predicate> emptyConceptsR2rml = new ArrayList<>();
-	private List<Predicate> emptyRolesR2rml = new ArrayList<Predicate>();
+	private List<Predicate> emptyRolesR2rml = new ArrayList<>();
 
 	private OntopOWLReasoner reasonerOBDA;
 	private OntopOWLReasoner reasonerR2rml;
 
 	@Before
 	public void setUp() throws Exception {
-		// Loading the OWL file
-
-
-
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		owlOntology = manager
-				.loadOntologyFromOntologyDocument(owlFileName);
-
-		onto = OWLAPITranslatorUtility.translate(owlOntology).tbox();
+		onto = OWLAPITranslatorUtility.loadOntologyFromFile(owlFileName);
 
 		loadOBDA();
 		loadR2rml();
@@ -186,8 +177,7 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		conn = reasonerOBDA.getConnection();
-		Ontology ontology =  OWLAPITranslatorUtility.translate(owlOntology);
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology.tbox(), conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
 		Iterator<Predicate> iteratorC = empties.iEmptyConcepts();
 		while (iteratorC.hasNext()){
 			emptyConceptsObda.add(iteratorC.next());
@@ -215,8 +205,7 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		conn = reasonerR2rml.getConnection();
-		Ontology ontology =  OWLAPITranslatorUtility.translate(owlOntology);
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology.tbox(), conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
 		Iterator<Predicate> iteratorC = empties.iEmptyConcepts();
 		while (iteratorC.hasNext()){
 			emptyConceptsR2rml.add(iteratorC.next());
@@ -349,7 +338,7 @@ public class R2rmlCheckerTest {
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlFileName)
-				.ontology(owlOntology)
+				.ontologyFile(owlFileName)
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
@@ -372,12 +361,10 @@ public class R2rmlCheckerTest {
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.propertyFile(propertyFileName)
-				.ontology(owlOntology)
+				.ontologyFile(owlFileName)
 				.enableTestMode()
 				.build();
 		reasonerOBDA = factory.createReasoner(config);
-
-
 	}
 
 	private int runSPARQLConceptsQuery(String description,	OWLConnection conn) throws Exception {

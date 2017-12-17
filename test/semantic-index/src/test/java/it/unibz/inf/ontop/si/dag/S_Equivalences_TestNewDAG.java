@@ -96,14 +96,12 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 	}
 
 	public void testEquivalences() throws Exception{
-		//for each file in the input
-		for (int i=0; i<input.size(); i++){
-			String fileInput=input.get(i);
+		for (String fileInput: input) {
 
-			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.classify(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput).tbox());
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.classify(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
 			TestClassifiedTBoxImpl_OnGraph graphReasoner = new TestClassifiedTBoxImpl_OnGraph(reasoner);
 
-			log.debug("Input number {}", i+1 );
+			log.debug("Input {}", fileInput);
 			log.info("First graph {}", reasoner.getClassGraph());
 			log.info("First graph {}", reasoner.getObjectPropertyGraph());
 			log.info("Second dag {}", reasoner);

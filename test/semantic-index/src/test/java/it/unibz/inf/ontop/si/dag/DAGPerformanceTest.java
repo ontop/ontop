@@ -21,8 +21,9 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.OntologyTBox;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import junit.framework.TestCase;
@@ -37,8 +38,8 @@ public class DAGPerformanceTest extends TestCase {
 
 	Logger log = LoggerFactory.getLogger(DAGPerformanceTest.class);
 
-	int size = 1000;
-	int maxdepth = 10;
+	final int size = 1000;
+	final int maxdepth = 10;
 
 	private class LevelRange {
 		int min = 0;
@@ -121,17 +122,14 @@ public class DAGPerformanceTest extends TestCase {
 			OWLClass c2 = classes[rand2];
 			OWLAxiom subc = fac.getOWLSubClassOfAxiom(c2, c1);
 			man.addAxiom(ont, subc);
-    		
     	}
 		
 
 		log.debug("Translating into quest API");
-		Ontology o = OWLAPITranslatorUtility.translate(ont);
+		OntologyTBox tbox = OWLAPITranslatorUtility.translate(ImmutableList.of(ont)).tbox();
 
 		long start = System.nanoTime();
-		log.debug("Creating a DAG out of it");
-		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		ClassifiedTBox reasoner= ClassifiedTBoxImpl.classify(o.tbox());
+		ClassifiedTBox reasoner= ClassifiedTBoxImpl.classify(tbox);
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -216,15 +214,12 @@ public class DAGPerformanceTest extends TestCase {
     		
     	}
 		log.debug("Translating into quest API");
-		Ontology o = OWLAPITranslatorUtility.translate(ont);
+		OntologyTBox tbox = OWLAPITranslatorUtility.translate(ImmutableList.of(ont)).tbox();
 
 		log.debug("Creating a DAG out of it");
 
 		long start = System.nanoTime();
-		log.debug("Creating a DAG out of it");
-		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(o.tbox());
-		reasoner.getClass();
+		ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(tbox);
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -307,20 +302,16 @@ public class DAGPerformanceTest extends TestCase {
 			OWLClass c2 = classes[rand2];
 			OWLAxiom subc = fac.getOWLSubClassOfAxiom(c2, c1);
 			man.addAxiom(ont, subc);
-    		
     	}
 		
 
 		log.debug("Translating into quest API");
-		Ontology o = OWLAPITranslatorUtility.translate(ont);
+		OntologyTBox tbox = OWLAPITranslatorUtility.translate(ImmutableList.of(ont)).tbox();
 
 		log.debug("Creating a DAG out of it");
 
 		long start = System.nanoTime();
-		log.debug("Creating a DAG out of it");
-		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		ClassifiedTBox reasoner= ClassifiedTBoxImpl.classify(o.tbox());
-		reasoner.getClass();
+		ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(tbox);
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();

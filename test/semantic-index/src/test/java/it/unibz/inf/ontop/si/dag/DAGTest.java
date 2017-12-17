@@ -151,11 +151,11 @@ public class DAGTest extends TestCase {
 
 	private void test_dag_index_nodes(String testname) throws Exception {
 
-		onto = OWLAPITranslatorUtility.loadOntologyFromFile(owlloc + testname + ".owl").tbox();
+		onto = OWLAPITranslatorUtility.loadOntologyFromFile(owlloc + testname + ".owl");
 		ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(onto);
 		List<List<Description>> exp_idx = get_results(testname);
 
-		List<Description> classes= new LinkedList<>();
+		List<Description> classes = new LinkedList<>();
 		for (Equivalences<ClassExpression> node : reasoner.classes().dag()) {
 			for (ClassExpression c : node)
 				classes.add(c);
@@ -165,7 +165,7 @@ public class DAGTest extends TestCase {
 				classes.add(c);
 		}
 		
-		List<Description> roles= new LinkedList<Description>();
+		List<Description> roles = new LinkedList<Description>();
 		for (Equivalences<ObjectPropertyExpression> node : reasoner.objectProperties().dag()) {
 			for (ObjectPropertyExpression r : node)
 				roles.add(r);

@@ -33,8 +33,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public class S_HierarchyTestNewDAG extends TestCase {
-	ArrayList<String> input= new ArrayList<String>();
-	ArrayList<String> output= new ArrayList<String>();
+	ArrayList<String> input= new ArrayList<>();
 
 	Logger log = LoggerFactory.getLogger(S_HierarchyTestNewDAG.class);
 
@@ -64,25 +63,19 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		input.add("src/test/resources/test/newDag/inverseAncestor3.owl");
 		/**Graph B->A->ER C->ES->A->ER */
 		input.add("src/test/resources/test/newDag/inverseAncestor4.owl");
-
-
-
 	}
 
 
 	public void testReachability() throws Exception{
 
 		//for each file in the input
-		for (int i=0; i<input.size(); i++){
-			String fileInput=input.get(i);
-
-			ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput).tbox());
-			//		DAGImpl dag2= InputOWL.createDAG(fileOutput);
+		for (String fileInput: input) {
+			ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
 
 			//transform in a named graph
 			TestClassifiedTBoxImpl_OnNamedDAG dag2= new TestClassifiedTBoxImpl_OnNamedDAG(reasoner);
 			TestClassifiedTBoxImpl_Named dag1 = new TestClassifiedTBoxImpl_Named(reasoner);
-			log.debug("Input number {}", i+1 );
+			log.debug("Input {}", fileInput);
 			log.info("First dag {}", dag1);
 			log.info("Second dag {}", dag2);
 			
@@ -101,11 +94,10 @@ public class S_HierarchyTestNewDAG extends TestCase {
 
 	private <T> boolean testDescendants(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
 
-		for(Equivalences<T> node : d1) {
+		for (Equivalences<T> node : d1) {
 			Set<Equivalences<T>> setd1 = d1.getSub(node);
 			Set<Equivalences<T>> setd2 = d2.getSub(node);
-
-			if(!setd1.equals(setd2))
+			if (!setd1.equals(setd2))
 				return false;
 		}
 		return true;
@@ -142,5 +134,4 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		}
 		return true;
 	}
-
 }

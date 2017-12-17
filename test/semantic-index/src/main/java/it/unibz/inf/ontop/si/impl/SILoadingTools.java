@@ -66,7 +66,7 @@ class SILoadingTools {
     static RepositoryInit createRepository(OWLOntology owlOntology) throws SemanticIndexException {
 
         Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
-        Ontology ontology = OWLAPITranslatorUtility.mergeTranslateOntologies(ontologyClosure);
+        Ontology ontology = OWLAPITranslatorUtility.translate(ontologyClosure);
         return createRepository(ontology, Optional.of(ontologyClosure));
     }
 

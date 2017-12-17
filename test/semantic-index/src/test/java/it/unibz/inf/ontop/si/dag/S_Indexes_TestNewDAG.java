@@ -95,16 +95,14 @@ public void setUp(){
 
 public void testIndexes() throws Exception{
 	//for each file in the input
-	for (int i=0; i<input.size(); i++){
-		String fileInput=input.get(i);
-
-		OntologyTBox onto = OWLAPITranslatorUtility.loadOntologyFromFile(fileInput).tbox();
+	for (String fileInput : input) {
+		OntologyTBox onto = OWLAPITranslatorUtility.loadOntologyFromFile(fileInput);
 		ClassifiedTBox dag = ClassifiedTBoxImpl.classify(onto);
 
 		//add input named graph
-		SemanticIndexBuilder engine= new SemanticIndexBuilder(dag);
+		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		
-		log.debug("Input number {}", i+1 );
+		log.debug("Input {}", fileInput);
 		log.info("named graph {}", engine);
 		
 		assertTrue(testIndexes(engine, dag));

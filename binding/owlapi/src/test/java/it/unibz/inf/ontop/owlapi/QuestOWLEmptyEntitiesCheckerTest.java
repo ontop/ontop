@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
@@ -103,8 +104,8 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-		onto =  OWLAPITranslatorUtility.translate(ontology);
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+		onto =  OWLAPITranslatorUtility.translate(ImmutableList.of(ontology));
 
 		// Creating a new instance of the reasoner
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
@@ -119,7 +120,6 @@ public class QuestOWLEmptyEntitiesCheckerTest {
         reasoner = factory.createReasoner(config);
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
-
 	}
 
 	@After

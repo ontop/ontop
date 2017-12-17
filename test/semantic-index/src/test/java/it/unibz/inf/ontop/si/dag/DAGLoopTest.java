@@ -40,7 +40,7 @@ public class DAGLoopTest {
 	OntologyTBox onto;
 	@Before
 	public void setUp() throws Exception {
-		onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/dag/final_project_original.owl").tbox();
+		onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/dag/final_project_original.owl");
 	}
 
 	

@@ -20,7 +20,12 @@ package it.unibz.inf.ontop.spec.ontology.owlapi;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.OntologyTBox;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -46,7 +51,7 @@ public class OWLAPITranslatorUtility {
 
 	private static final Logger log = LoggerFactory.getLogger(OWLAPITranslatorUtility.class);
 
-	/***
+	/**
 	 * Load all the imports of the ontology and merges into a single ontop internal representation
 	 * 
 	 * @param ontology
@@ -55,51 +60,31 @@ public class OWLAPITranslatorUtility {
 	
 	public static Ontology translateImportsClosure(OWLOntology ontology) {
 		Set<OWLOntology> closure = ontology.getOWLOntologyManager().getImportsClosure(ontology);
-		return mergeTranslateOntologies(closure);
+		return translate(closure);
 	}
 	
-	/***
+	/**
 	 * Load all the ontologies into a single translated merge.
 	 * 
 	 * @param ontologies
 	 * @return
 	 */
 	
-	@Deprecated
-	public static Ontology mergeTranslateOntologies(Collection<OWLOntology> ontologies)   {
+	public static Ontology translate(Collection<OWLOntology> ontologies)   {
 		log.debug("Load ontologies called. Translating {} ontologies.", ontologies.size());
 
 		OWLAPITranslatorOWL2QL translator = new OWLAPITranslatorOWL2QL(ontologies);
 		for (OWLOntology owl : ontologies) {
 			translator.setCurrentOWLOntology(owl);
 			for (OWLAxiom axiom : owl.getAxioms())  {
-				//if (!(axiom.isAnnotationAxiom()) && !(axiom instanceof OWLDeclarationAxiom))
-				//	System.out.println(axiom);
 				axiom.accept(translator);
 			}
 		}
 		
 		log.debug("Ontology loaded: {}", translator.getOntology());
-
 		return translator.getOntology();
 	}
 
-	/**
-	 * USE FOR TESTS ONLY
-	 * 
-	 * @param owl
-	 * @return
-	 */
-	
-	public static Ontology translate(OWLOntology owl) {
-		OWLAPITranslatorOWL2QL translator = new OWLAPITranslatorOWL2QL(Collections.singleton(owl));
-		translator.setCurrentOWLOntology(owl);
-
-		for (OWLAxiom axiom : owl.getAxioms()) 
-			axiom.accept(translator);
-		return translator.getOntology();	
-	}
-	
 	/**
 	 * USE FOR TESTS ONLY
 	 * 
@@ -108,16 +93,24 @@ public class OWLAPITranslatorUtility {
 	 * @throws OWLOntologyCreationException
 	 */
 	
-	public static Ontology loadOntologyFromFile(String filename) throws OWLOntologyCreationException {
+	public static OntologyTBox loadOntologyFromFile(String filename) throws OWLOntologyCreationException {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-		OWLAPITranslatorOWL2QL translator = new OWLAPITranslatorOWL2QL(Collections.singleton(owl));
-		translator.setCurrentOWLOntology(owl);
-
-		for (OWLAxiom axiom : owl.getAxioms()) 
-			axiom.accept(translator);
-	
-		return translator.getOntology();	
+		return translate(ImmutableList.of(owl)).tbox();
 	}
-	
+
+    /**
+     * USE FOR TESTS ONLY
+     *
+     * @param filename
+     * @return
+     * @throws OWLOntologyCreationException
+     */
+
+    public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
+        OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+        OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
+        OntologyTBox tbox = translate(ImmutableList.of(owl)).tbox();
+        return ClassifiedTBoxImpl.classify(tbox);
+    }
 }

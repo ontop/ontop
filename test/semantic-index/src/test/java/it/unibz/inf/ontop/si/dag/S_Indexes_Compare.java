@@ -56,7 +56,7 @@ public class S_Indexes_Compare extends TestCase {
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		ClassifiedTBox dag = ClassifiedTBoxImpl.classify(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput).tbox());
+		ClassifiedTBox dag = ClassifiedTBoxImpl.classify(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
 
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 
@@ -65,18 +65,17 @@ public class S_Indexes_Compare extends TestCase {
 		
 		testIndexes(engine, dag);
 
-		OntologyTBox onto = OWLAPITranslatorUtility.loadOntologyFromFile(fileInput).tbox();
+		OntologyTBox onto = OWLAPITranslatorUtility.loadOntologyFromFile(fileInput);
 		DAG dag2 = DAGConstructor.getISADAG(onto);
 		dag2.clean();
         DAGOperations.buildDescendants(dag2);
         DAGOperations.buildAncestors(dag2);
 		DAG pureIsa = DAGConstructor.filterPureISA(dag2, onto);
-		 pureIsa.clean();
-			pureIsa.index();
-			 DAGOperations.buildDescendants(pureIsa);
-		        DAGOperations.buildAncestors(pureIsa);
-		 testOldIndexes(pureIsa, engine);
-		
+		pureIsa.clean();
+		pureIsa.index();
+		DAGOperations.buildDescendants(pureIsa);
+		DAGOperations.buildAncestors(pureIsa);
+		testOldIndexes(pureIsa, engine);
 	}
 }
 
