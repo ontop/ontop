@@ -39,29 +39,26 @@ import java.util.Iterator;
  */
 public class QuestOWLEmptyEntitiesChecker {
 
-	private OntologyTBox onto;
-	private OWLConnection conn;
+	private final ClassifiedTBox onto;
+	private final OWLConnection conn;
 
 	private int nEmptyConcepts = 0;
 	private int nEmptyRoles = 0;
 
-
 	/**
 	 * Generate SPARQL queries to check if there are instances for each concept and role in the ontology
 	 *
-	 * @param translatedOntologyMerge the OWLAPI ontology, conn QuestOWL connection
+	 * @param tbox the ontology, conn QuestOWL connection
 	 * @throws Exception
 	 */
-	public QuestOWLEmptyEntitiesChecker(OntologyTBox translatedOntologyMerge, OWLConnection conn) throws Exception {
-		this.onto = translatedOntologyMerge;
+	public QuestOWLEmptyEntitiesChecker(ClassifiedTBox tbox, OWLConnection conn)	 {
+		this.onto = tbox;
 		this.conn = conn;
-
 	}
 
 	public Iterator<Predicate> iEmptyConcepts() {
 		return new EmptyEntitiesIterator(onto.classes().iterator(), conn);
 	}
-
 
 	public Iterator<Predicate> iEmptyRoles() {
 		return new EmptyEntitiesIterator(onto.objectProperties().iterator(), onto.dataProperties().iterator(), conn);
@@ -96,16 +93,17 @@ public class QuestOWLEmptyEntitiesChecker {
 	private class EmptyEntitiesIterator implements Iterator<Predicate> {
 
 
-		private String queryConcepts = "SELECT ?x WHERE {?x a <%s>.} LIMIT 1";
-		private String queryRoles = "SELECT * WHERE {?x <%s> ?y.} LIMIT 1";
+		private static final String queryConcepts = "SELECT ?x WHERE {?x a <%s>.} LIMIT 1";
+		private static final String queryRoles = "SELECT * WHERE {?x <%s> ?y.} LIMIT 1";
 
-		private OWLConnection questConn;
+		private final OWLConnection questConn;
+
 		private boolean hasNext = false;
 		private Predicate nextConcept;
 
-		Iterator<OClass> classIterator;
-		Iterator<ObjectPropertyExpression> objectRoleIterator;
-		Iterator<DataPropertyExpression> dataRoleIterator;
+		private final Iterator<OClass> classIterator;
+		private final Iterator<ObjectPropertyExpression> objectRoleIterator;
+		private final Iterator<DataPropertyExpression> dataRoleIterator;
 
 		private Logger log = LoggerFactory.getLogger(EmptyEntitiesIterator.class);
 
@@ -159,19 +157,18 @@ public class QuestOWLEmptyEntitiesChecker {
 			};
 
 			this.objectRoleIterator = objectRoleIterator;
-
 			this.dataRoleIterator = dataRoleIterator;
-
 		}
 
 		private String getPredicateQuery(Predicate p) {
-			return String.format(queryRoles, p.toString()); }
+			return String.format(queryRoles, p.toString());
+		}
 
 		private String getClassQuery(Predicate p) {
-			return String.format(queryConcepts, p.toString()); }
+			return String.format(queryConcepts, p.toString());
+		}
 
-		private String getQuery(Predicate p)
-		{
+		private String getQuery(Predicate p) {
 			if (p.getArity() == 1)
 				return getClassQuery(p);
 			else if (p.getArity() == 2)
@@ -190,7 +187,6 @@ public class QuestOWLEmptyEntitiesChecker {
 						return hasNext;
 					}
 				}
-
 			}
 			log.debug( "No more empty concepts" );
 
@@ -215,7 +211,6 @@ public class QuestOWLEmptyEntitiesChecker {
 						return hasNext;
 					}
 				}
-
 			}
 			log.debug( "No more empty data roles" );
 			hasNext = false;
@@ -229,36 +224,29 @@ public class QuestOWLEmptyEntitiesChecker {
 
 			//execute next query
 			try (OWLStatement stm = questConn.createStatement()){
-
 				try (TupleOWLResultSet rs = stm.executeSelectQuery(query)) {
-
 					if (!rs.hasNext()) {
-
 						nextConcept = entity;
 						log.debug( "Empty " + entity );
 
 						hasNext = true;
 						return true;
-
 					}
 
 					return false;
-
 				}
-			} catch (OWLException e) {
+			}
+			catch (OWLException e) {
 				e.printStackTrace();
 			}
-
 			return false;
 		}
 
 		@Override
 		public Predicate next() {
-
-			if(hasNext) {
+			if (hasNext) {
 				return nextConcept;
 			}
-
 			return null;
 		}
 
@@ -267,6 +255,5 @@ public class QuestOWLEmptyEntitiesChecker {
 			throw new UnsupportedOperationException();
 		}
 	}
-
 }
 

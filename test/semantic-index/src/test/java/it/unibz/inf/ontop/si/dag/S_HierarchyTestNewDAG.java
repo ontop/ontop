@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.si.dag;
 
 
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import junit.framework.TestCase;
@@ -33,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public class S_HierarchyTestNewDAG extends TestCase {
-	ArrayList<String> input= new ArrayList<>();
+	ArrayList<String> input = new ArrayList<>();
 
 	Logger log = LoggerFactory.getLogger(S_HierarchyTestNewDAG.class);
 
@@ -67,10 +66,8 @@ public class S_HierarchyTestNewDAG extends TestCase {
 
 
 	public void testReachability() throws Exception{
-
-		//for each file in the input
 		for (String fileInput: input) {
-			ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+			ClassifiedTBox reasoner = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(fileInput);
 
 			//transform in a named graph
 			TestClassifiedTBoxImpl_OnNamedDAG dag2= new TestClassifiedTBoxImpl_OnNamedDAG(reasoner);

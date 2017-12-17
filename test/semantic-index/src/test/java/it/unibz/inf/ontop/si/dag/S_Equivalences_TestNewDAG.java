@@ -98,7 +98,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 	public void testEquivalences() throws Exception{
 		for (String fileInput: input) {
 
-			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.classify(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(fileInput);
 			TestClassifiedTBoxImpl_OnGraph graphReasoner = new TestClassifiedTBoxImpl_OnGraph(reasoner);
 
 			log.debug("Input {}", fileInput);

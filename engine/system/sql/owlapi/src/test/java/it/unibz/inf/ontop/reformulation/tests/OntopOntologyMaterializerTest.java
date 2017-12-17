@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import junit.framework.TestCase;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,7 +156,9 @@ public class OntopOntologyMaterializerTest extends TestCase {
 				.build();
 
 		// read onto
-		Ontology onto =  OWLAPITranslatorUtility.translateImportsClosure(configuration.loadProvidedInputOntology());
+		OWLOntology ontology = configuration.loadProvidedInputOntology();
+		Ontology onto =  OWLAPITranslatorUtility.translate(
+				ontology.getOWLOntologyManager().getImportsClosure(ontology));
 		System.out.println(onto.tbox().getSubClassAxioms());
 		System.out.println(onto.tbox().getSubObjectPropertyAxioms());
 		System.out.println(onto.tbox().getSubDataPropertyAxioms());

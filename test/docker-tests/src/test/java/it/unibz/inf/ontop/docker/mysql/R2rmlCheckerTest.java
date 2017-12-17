@@ -59,7 +59,7 @@ public class R2rmlCheckerTest {
 	private OWLConnection conn;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
-	private OntologyTBox onto;
+	private ClassifiedTBox onto;
 
 	final String owlFile = "/mysql/npd/npd-v2-ql_a.owl";
 	final String obdaFile = "/mysql/npd/npd-v2-ql_a.obda";
@@ -81,7 +81,7 @@ public class R2rmlCheckerTest {
 
 	@Before
 	public void setUp() throws Exception {
-		onto = OWLAPITranslatorUtility.loadOntologyFromFile(owlFileName);
+		onto = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(owlFile);
 
 		loadOBDA();
 		loadR2rml();
@@ -173,7 +173,6 @@ public class R2rmlCheckerTest {
 	 */
 //	@Test
 	public void testOBDAEmpties() throws Exception {
-
 
 		// Now we are ready for querying
 		conn = reasonerOBDA.getConnection();
@@ -465,7 +464,6 @@ public class R2rmlCheckerTest {
 			}
 			// conn.close();
 			st.close();
-
 		}
 	}
 

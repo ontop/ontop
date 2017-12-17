@@ -37,8 +37,7 @@ import java.util.Set;
 
 public class S_TestTransitiveReduction extends TestCase {
 
-	ArrayList<String> input= new ArrayList<String>();
-	ArrayList<String> output= new ArrayList<String>();
+	ArrayList<String> input= new ArrayList<>();
 
 	Logger log = LoggerFactory.getLogger(S_TestTransitiveReduction.class);
 
@@ -46,7 +45,7 @@ public class S_TestTransitiveReduction extends TestCase {
 		super(name);
 	}
 
-	public void setUp(){
+	public void setUp() {
 		
 		input.add("src/test/resources/test/dag/test-equivalence-roles-inverse.owl");
 		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
@@ -91,19 +90,15 @@ public class S_TestTransitiveReduction extends TestCase {
 		input.add("src/test/resources/test/newDag/inverseEquivalents7.owl");
 		/** B->A=ET- ->ER- C->ES- = D->A*/
 		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
-
-
-
 	}
 	
 	
 	public void testR() throws Exception{
-		OntologyTBox onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive.owl");
-		ClassifiedTBox dag = ClassifiedTBoxImpl.classify(onto);
-		
-		ClassExpression A = onto.classes().get("http://www.kro.com/ontologies/A");
-		ClassExpression B = onto.classes().get("http://www.kro.com/ontologies/B");
-		ClassExpression C = onto.classes().get("http://www.kro.com/ontologies/C");
+		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive.owl");
+
+		ClassExpression A = dag.classes().get("http://www.kro.com/ontologies/A");
+		ClassExpression B = dag.classes().get("http://www.kro.com/ontologies/B");
+		ClassExpression C = dag.classes().get("http://www.kro.com/ontologies/C");
 		
 		EquivalencesDAG<ClassExpression> classes = dag.classes().dag();
 		
@@ -116,13 +111,12 @@ public class S_TestTransitiveReduction extends TestCase {
 	}
 
 	public void testR2() throws Exception{
-		OntologyTBox onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive2.owl");
-		ClassifiedTBox dag = ClassifiedTBoxImpl.classify(onto);
-		
-		ClassExpression A = onto.classes().get("http://www.kro.com/ontologies/A");
-		ClassExpression B = onto.classes().get("http://www.kro.com/ontologies/B");
-		ClassExpression C = onto.classes().get("http://www.kro.com/ontologies/C");
-		ClassExpression D = onto.classes().get("http://www.kro.com/ontologies/D");
+		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive2.owl");
+
+		ClassExpression A = dag.classes().get("http://www.kro.com/ontologies/A");
+		ClassExpression B = dag.classes().get("http://www.kro.com/ontologies/B");
+		ClassExpression C = dag.classes().get("http://www.kro.com/ontologies/C");
+		ClassExpression D = dag.classes().get("http://www.kro.com/ontologies/D");
 		
 		EquivalencesDAG<ClassExpression> classes = dag.classes().dag();
 		
@@ -138,22 +132,16 @@ public class S_TestTransitiveReduction extends TestCase {
 	
 	
 	public void testSimplification() throws Exception{
-		//for each file in the input
-		for (int i=0; i<input.size(); i++){
-			String fileInput=input.get(i);
+		for (String fileInput: input) {
+			ClassifiedTBox dag2 = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(fileInput);
+			TestClassifiedTBoxImpl_OnGraph reasonerd1 = new TestClassifiedTBoxImpl_OnGraph((ClassifiedTBoxImpl)dag2);
 
-			OntologyTBox onto = OWLAPITranslatorUtility.loadOntologyFromFile(fileInput);
-			ClassifiedTBoxImpl dag2 = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.classify(onto);
-			TestClassifiedTBoxImpl_OnGraph reasonerd1 = new TestClassifiedTBoxImpl_OnGraph(dag2);
-
-			log.debug("Input number {}", i+1 );
-			log.info("First graph {}", dag2.getObjectPropertyGraph());
-			log.info("First graph {}", dag2.getClassGraph());
+			log.debug("Input number {}", fileInput);
+			log.info("First graph {}", ((ClassifiedTBoxImpl)dag2).getObjectPropertyGraph());
+			log.info("First graph {}", ((ClassifiedTBoxImpl)dag2).getClassGraph());
 			log.info("Second dag {}", dag2);
 						
-			assertTrue(testRedundantEdges(reasonerd1,dag2));
-
-
+			assertTrue(testRedundantEdges(reasonerd1, (ClassifiedTBoxImpl)dag2));
 		}
 	}
 
@@ -165,7 +153,7 @@ public class S_TestTransitiveReduction extends TestCase {
 		int numberEdgesD2 = d2.edgeSetSize();
 
 		//number of edges between the equivalent nodes
-		int numberEquivalents=0;
+		int numberEquivalents = 0;
 
 		//number of redundant edges 
 		int numberRedundants = 0;
@@ -180,15 +168,15 @@ public class S_TestTransitiveReduction extends TestCase {
 
 
 		{
-			DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> g1 = 	reasonerd1.getObjectPropertyGraph();
+			DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> g1 = reasonerd1.getObjectPropertyGraph();
 			for (Equivalences<ObjectPropertyExpression> equivalents: reasonerd1.objectProperties().dag()) {
 				
 				log.info("equivalents {} ", equivalents);
 				
 				//check if there are redundant edges
 				for (ObjectPropertyExpression vertex: equivalents) {
-					if(g1.incomingEdgesOf(vertex).size()!= g1.inDegreeOf(vertex)) //check that there anren't two edges pointing twice to the same nodes
-						numberRedundants +=g1.inDegreeOf(vertex)- g1.incomingEdgesOf(vertex).size();
+					if(g1.incomingEdgesOf(vertex).size() != g1.inDegreeOf(vertex)) //check that there aren't two edges pointing twice to the same nodes
+						numberRedundants += g1.inDegreeOf(vertex)- g1.incomingEdgesOf(vertex).size();
 				
 					
 					//descendants of the vertex
@@ -199,10 +187,10 @@ public class S_TestTransitiveReduction extends TestCase {
 					log.info("children {} ", children);
 
 					for(DefaultEdge edge: g1.incomingEdgesOf(vertex)) {
-						ObjectPropertyExpression source=g1.getEdgeSource(edge);
+						ObjectPropertyExpression source = g1.getEdgeSource(edge);
 						for(Equivalences<ObjectPropertyExpression> descendant:descendants) {
 							if (!children.contains(descendant) & ! equivalents.contains(descendant.iterator().next()) &descendant.contains(source))
-								numberRedundants +=1;	
+								numberRedundants++;
 						}
 					}
 				}
@@ -217,7 +205,7 @@ public class S_TestTransitiveReduction extends TestCase {
 				
 				//check if there are redundant edges
 				for (ClassExpression vertex: equivalents) {
-					if(g1.incomingEdgesOf(vertex).size()!= g1.inDegreeOf(vertex)) //check that there anren't two edges pointing twice to the same nodes
+					if(g1.incomingEdgesOf(vertex).size()!= g1.inDegreeOf(vertex)) //check that there aren't two edges pointing twice to the same nodes
 						numberRedundants +=g1.inDegreeOf(vertex)- g1.incomingEdgesOf(vertex).size();
 
 					//descendants of the vertex

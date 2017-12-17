@@ -47,14 +47,13 @@ public class DAGTest extends TestCase {
 	public final static Logger log = LoggerFactory.getLogger(DAGTest.class);
 
 	public static final String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
-	private OntologyTBox onto;
 
 	private static final String owl_exists = "::__exists__::";
 	private static final String owl_inverse_exists = "::__inverse__exists__::";
 	private static final String owl_inverse = "::__inverse__::";
 
 
-	public List<List<Description>> get_results(String resname) {
+	public List<List<Description>> get_results(ClassifiedTBox reasoner, String resname) {
 		String resfile = owlloc + resname + ".si";
 		File results = new File(resfile);
 		Document doc = null;
@@ -69,8 +68,8 @@ public class DAGTest extends TestCase {
 		}
 
 		doc.getDocumentElement().normalize();
-		List<Description> cls = get_dag_type(doc, "classes");
-		List<Description> roles = get_dag_type(doc, "rolles");
+		List<Description> cls = get_dag_type(reasoner, doc, "classes");
+		List<Description> roles = get_dag_type(reasoner, doc, "rolles");
 
 		List<List<Description>> rv = new ArrayList<List<Description>>(2);
 		rv.add(cls);
@@ -85,8 +84,8 @@ public class DAGTest extends TestCase {
 	 * @param type type of DAGNodes to extract
 	 * @return a list of DAGNodes
 	 */
-	private List<Description> get_dag_type(Document doc, String type) {
-		List<Description> rv = new LinkedList<Description>();
+	private List<Description> get_dag_type(ClassifiedTBox reasoner, Document doc, String type) {
+		List<Description> rv = new LinkedList<>();
 		Node root = doc.getElementsByTagName(type).item(0);
 		NodeList childNodes = root.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
@@ -115,30 +114,30 @@ public class DAGTest extends TestCase {
 
 				if (type.equals("classes")) {
 					if (exists) {
-						if (onto.objectProperties().contains(uri)) {
-							ObjectPropertyExpression prop = onto.objectProperties().get(uri);
+						if (reasoner.objectProperties().contains(uri)) {
+							ObjectPropertyExpression prop = reasoner.objectProperties().get(uri);
 							if (inverse)
 								prop = prop.getInverse();
 							description = prop.getDomain();
 						}
 						else {
-							DataPropertyExpression prop = onto.dataProperties().get(uri);
+							DataPropertyExpression prop = reasoner.dataProperties().get(uri);
 							description = prop.getDomainRestriction(DatatypeImpl.rdfsLiteral);
 						}
 					}
 					else
-						description = onto.classes().get(uri);
+						description = reasoner.classes().get(uri);
 				}
 				else {
-					if (onto.objectProperties().contains(uri)) {
-						ObjectPropertyExpression prop = onto.objectProperties().get(uri);
+					if (reasoner.objectProperties().contains(uri)) {
+						ObjectPropertyExpression prop = reasoner.objectProperties().get(uri);
 						if (inverse)
 							description = prop.getInverse();
 						else
 							description = prop;
 					}
 					else {
-						description = onto.dataProperties().get(uri);
+						description = reasoner.dataProperties().get(uri);
 					}
 				}
 
@@ -151,9 +150,8 @@ public class DAGTest extends TestCase {
 
 	private void test_dag_index_nodes(String testname) throws Exception {
 
-		onto = OWLAPITranslatorUtility.loadOntologyFromFile(owlloc + testname + ".owl");
-		ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(onto);
-		List<List<Description>> exp_idx = get_results(testname);
+		ClassifiedTBox reasoner = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(owlloc + testname + ".owl");
+		List<List<Description>> exp_idx = get_results(reasoner, testname);
 
 		List<Description> classes = new LinkedList<>();
 		for (Equivalences<ClassExpression> node : reasoner.classes().dag()) {

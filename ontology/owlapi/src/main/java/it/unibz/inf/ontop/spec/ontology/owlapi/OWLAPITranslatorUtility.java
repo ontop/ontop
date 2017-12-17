@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -36,10 +35,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 
-/***
+/**
  * Translates an OWLOntology into ontop's internal ontology representation. 
  * It performs a check whether the ontology belongs to OWL 2 QL and reports 
  * all axioms that do not belong to the profile.
@@ -51,18 +49,6 @@ public class OWLAPITranslatorUtility {
 
 	private static final Logger log = LoggerFactory.getLogger(OWLAPITranslatorUtility.class);
 
-	/**
-	 * Load all the imports of the ontology and merges into a single ontop internal representation
-	 * 
-	 * @param ontology
-	 * @return
-	 */
-	
-	public static Ontology translateImportsClosure(OWLOntology ontology) {
-		Set<OWLOntology> closure = ontology.getOWLOntologyManager().getImportsClosure(ontology);
-		return translate(closure);
-	}
-	
 	/**
 	 * Load all the ontologies into a single translated merge.
 	 * 
@@ -85,20 +71,6 @@ public class OWLAPITranslatorUtility {
 		return translator.getOntology();
 	}
 
-	/**
-	 * USE FOR TESTS ONLY
-	 * 
-	 * @param filename
-	 * @return
-	 * @throws OWLOntologyCreationException
-	 */
-	
-	public static OntologyTBox loadOntologyFromFile(String filename) throws OWLOntologyCreationException {
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-		return translate(ImmutableList.of(owl)).tbox();
-	}
-
     /**
      * USE FOR TESTS ONLY
      *
@@ -110,7 +82,7 @@ public class OWLAPITranslatorUtility {
     public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
         OWLOntologyManager man = OWLManager.createOWLOntologyManager();
         OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-        OntologyTBox tbox = translate(ImmutableList.of(owl)).tbox();
-        return ClassifiedTBoxImpl.classify(tbox);
+        Ontology onto = translate(ImmutableList.of(owl));
+        return ClassifiedTBoxImpl.classify(onto.tbox());
     }
 }

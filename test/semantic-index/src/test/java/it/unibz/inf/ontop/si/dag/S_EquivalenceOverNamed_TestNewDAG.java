@@ -48,7 +48,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		super(name);
 	}
 
-	public void setUp(){
+	public void setUp() {
 
 		input.add("src/test/resources/test/stockexchange-unittest.owl");
 		input.add("src/test/resources/test/dag/test-equivalence-roles-inverse.owl");
@@ -90,10 +90,10 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
 	}
 	
-	public void testNamedAndEquivalences() throws Exception{
+	public void testNamedAndEquivalences() throws Exception {
 		//for each file in the input
 		for (String fileInput : input){
-			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.classify(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(fileInput);
 			//transform in a named graph
 			TestClassifiedTBoxImpl_OnNamedDAG namedDag2 = new TestClassifiedTBoxImpl_OnNamedDAG(reasoner);
 			log.debug("Input {}", fileInput);
@@ -514,7 +514,6 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		}
 		return true;
 	}
-
 }
 
 

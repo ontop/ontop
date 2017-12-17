@@ -234,7 +234,8 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
 
-        Ontology mergeOntology = OWLAPITranslatorUtility.translateImportsClosure(ontology);
+        Ontology mergeOntology = OWLAPITranslatorUtility.translate(
+				ontology.getOWLOntologyManager().getImportsClosure(ontology));
         return mergeOntology.tbox();
 //		log.debug("Ontology loaded: {}", mergeOntology);
 	}

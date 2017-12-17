@@ -96,8 +96,7 @@ public void setUp(){
 public void testIndexes() throws Exception{
 	//for each file in the input
 	for (String fileInput : input) {
-		OntologyTBox onto = OWLAPITranslatorUtility.loadOntologyFromFile(fileInput);
-		ClassifiedTBox dag = ClassifiedTBoxImpl.classify(onto);
+		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(fileInput);
 
 		//add input named graph
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
