@@ -20,11 +20,7 @@ package it.unibz.inf.ontop.si.dag;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Description;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.*;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,11 +31,11 @@ import java.util.Map;
 @Deprecated
 public class DAGConstructor {
 
-	public static DAG getISADAG(Ontology ontology) {
+	public static DAG getISADAG(OntologyTBox ontology) {
 		return new DAG(ontology);
 	}
 
-	public static DAG filterPureISA(DAG dag, Ontology voc) {
+	public static DAG filterPureISA(DAG dag, OntologyTBox voc) {
 
 		Map<Description, DAGNode> classes = new LinkedHashMap<>();
 		Map<Description, DAGNode> roles = new LinkedHashMap<>();

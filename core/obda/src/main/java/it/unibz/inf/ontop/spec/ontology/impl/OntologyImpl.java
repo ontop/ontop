@@ -117,8 +117,7 @@ public class OntologyImpl implements Ontology {
 	private final Hierarchy<ClassExpression> classAxioms = new Hierarchy<>();
 	private final Hierarchy<ObjectPropertyExpression> objectPropertyAxioms = new Hierarchy<>();
 	private final Hierarchy<DataPropertyExpression> dataPropertyAxioms = new Hierarchy<>();
-	private final List<BinaryAxiom<AnnotationProperty>> annotationAxioms = new ArrayList<>();
-	
+
 	private final List<BinaryAxiom<DataRangeExpression>> subDataRangeAxioms = new ArrayList<>();
 
 	private final Set<ObjectPropertyExpression> reflexiveObjectPropertyAxioms = new HashSet<>();
@@ -291,259 +290,316 @@ public class OntologyImpl implements Ontology {
         return dt;
 	}
 
+    @Override
+	public OntologyTBox tbox() {
+	    return new OntologyTBox() {
+            @Override
+            public OntologyVocabularyCategory<OClass> classes() { return classes; }
 
-	/**
-	 * Normalizes and adds subclass axiom
-	 * <p>
-	 * SubClassOf := 'SubClassOf' '(' axiomAnnotations subClassExpression superClassExpression ')'
-	 * <p>
-	 * Implements rule [C1]:<br>
-	 *    - ignore the axiom if the first argument is owl:Nothing or the second argument is owl:Thing<br>
-	 *    - replace by a disjointness axiom if the second argument is owl:Nothing but the first is not owl:Thing<br>
-	 *    - inconsistency if the first argument is owl:Thing but the second one is not owl:Nothing
-	 * <p>
-	 * Implements rules [D5] and [O5] (in conjunction with DataSomeValuesFromImpl and ObjectSomeValuesFromImpl)<br>
-	 *    - if the first argument is syntactically "equivalent" to owl:Thing, then replace it by owl:Thing
-	 *    
-	 * @throws InconsistentOntologyException 
-	 */
-	
-	@Override
-	public void addSubClassOfAxiom(ClassExpression ce1, ClassExpression ce2) throws InconsistentOntologyException {
-		checkSignature(ce1);
-		checkSignature(ce2);
-		if (ce1.isTop())
-			ce1 = ClassImpl.owlThing; // rules [D5] and [O5]
-		classAxioms.addInclusion(ce1, ce2);
-	}	
-	
-	/**
-	 * Normalizes and adds a data property range axiom
-	 * <p>
-	 * DataPropertyRange := 'DataPropertyRange' '(' axiomAnnotations DataPropertyExpression DataRange ')'
-	 * <p>
-	 * Implements rule [D3]:
-	 *     - ignore if the property is bot or the range is rdfs:Literal (top datatype)
-	 *     - inconsistency if the property is top but the range is not rdfs:Literal
-	 *     
-	 * @throws InconsistentOntologyException 
-	 */
+            @Override
+            public OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() { return objectProperties; }
 
-	@Override
-	public void addDataPropertyRangeAxiom(DataPropertyRangeExpression range, Datatype datatype) throws InconsistentOntologyException {
-		checkSignature(range);
-		checkSignature(datatype);
-		if (datatype.equals(DatatypeImpl.rdfsLiteral))
-			return;
-		
-		// otherwise the datatype is not top
-		if (range.getProperty().isBottom())
-			return;
-		if (range.getProperty().isTop())
-			throw new InconsistentOntologyException();
-		
-		BinaryAxiom<DataRangeExpression> ax = new BinaryAxiomImpl<>(range, datatype);
-		subDataRangeAxioms.add(ax);
-	}
+            @Override
+            public OntologyVocabularyCategory<DataPropertyExpression> dataProperties() { return dataProperties; }
+            /**
+             * Normalizes and adds subclass axiom
+             * <p>
+             * SubClassOf := 'SubClassOf' '(' axiomAnnotations subClassExpression superClassExpression ')'
+             * <p>
+             * Implements rule [C1]:<br>
+             *    - ignore the axiom if the first argument is owl:Nothing or the second argument is owl:Thing<br>
+             *    - replace by a disjointness axiom if the second argument is owl:Nothing but the first is not owl:Thing<br>
+             *    - inconsistency if the first argument is owl:Thing but the second one is not owl:Nothing
+             * <p>
+             * Implements rules [D5] and [O5] (in conjunction with DataSomeValuesFromImpl and ObjectSomeValuesFromImpl)<br>
+             *    - if the first argument is syntactically "equivalent" to owl:Thing, then replace it by owl:Thing
+             *
+             * @throws InconsistentOntologyException
+             */
 
-	
-	/**
-	 * Normalizes and adds an object subproperty axiom
-	 * <p>
-	 * SubObjectPropertyOf := 'SubObjectPropertyOf' '(' axiomAnnotations 
-	 * 						ObjectPropertyExpression ObjectPropertyExpression ')'
-	 * <p>
-	 * Implements rule [O1]:<br>
-	 *    - ignore the axiom if the first argument is owl:bottomObjectProperty 
-	 *    				or the second argument is owl:topObjectProperty<br>
-	 *    - replace by a disjointness axiom if the second argument is owl:bottomObjectProperty 
-	 *                but the first one is not owl:topObjectProperty<br>
-	 *    - inconsistency if the first is  owl:topObjectProperty but the second is owl:bottomObjectProperty 
-	 *    
-	 * @throws InconsistentOntologyException 
-	 * 
-	 */
-	
-	@Override
-	public void addSubPropertyOfAxiom(ObjectPropertyExpression ope1, ObjectPropertyExpression ope2) throws InconsistentOntologyException {
-		checkSignature(ope1);
-		checkSignature(ope2);
-		objectPropertyAxioms.addInclusion(ope1, ope2);
-	}
-	
-	/**
-	 * Normalizes and adds a data subproperty axiom
-	 * <p>
-	 * SubDataPropertyOf := 'SubDataPropertyOf' '(' axiomAnnotations 
-	 * 					subDataPropertyExpression superDataPropertyExpression ')'<br>
-	 * subDataPropertyExpression := DataPropertyExpression<br>
-	 * superDataPropertyExpression := DataPropertyExpression
-	 * <p>
-	 * implements rule [D1]:<br>
-	 *    - ignore the axiom if the first argument is owl:bottomDataProperty 
-	 *    			  or the second argument is owl:topDataProperty<br>
-	 *    - replace by a disjointness axiom if the second argument is owl:bottomDataProperty 
-	 *                but the first one is not owl:topDataProperty<br>
-	 *    - inconsistency if the first is  owl:topDataProperty but the second is owl:bottomDataProperty 
-	 *    
-	 * @throws InconsistentOntologyException 
-	 */
-	
-	@Override
-	public void addSubPropertyOfAxiom(DataPropertyExpression dpe1, DataPropertyExpression dpe2) throws InconsistentOntologyException {
-		checkSignature(dpe1);
-		checkSignature(dpe2);
-		dataPropertyAxioms.addInclusion(dpe1, dpe2);
-	}
+            @Override
+            public void addSubClassOfAxiom(ClassExpression ce1, ClassExpression ce2) throws InconsistentOntologyException {
+                checkSignature(ce1);
+                checkSignature(ce2);
+                if (ce1.isTop())
+                    ce1 = ClassImpl.owlThing; // rules [D5] and [O5]
+                classAxioms.addInclusion(ce1, ce2);
+            }
 
-	/**
-	 * Adds an annotation subproperty axiom
-	 * <p>
-	 * SubAnnotationPropertyOf := 'SubAnnotationPropertyOf' '(' axiomAnnotations subAnnotationProperty superAnnotationProperty ')'<br>
-	 * subAnnotationProperty := AnnotationProperty<br>
-	 * superAnnotationProperty := AnnotationProperty
-	 * <p>
-	 *
-	 * @throws InconsistentOntologyException
-	 */
-	@Override
-	public void addSubPropertyOfAxiom(AnnotationProperty ap1, AnnotationProperty ap2)  {
-		checkSignature(ap1);
-		checkSignature(ap2);
+            /**
+             * Normalizes and adds a data property range axiom
+             * <p>
+             * DataPropertyRange := 'DataPropertyRange' '(' axiomAnnotations DataPropertyExpression DataRange ')'
+             * <p>
+             * Implements rule [D3]:
+             *     - ignore if the property is bot or the range is rdfs:Literal (top datatype)
+             *     - inconsistency if the property is top but the range is not rdfs:Literal
+             *
+             * @throws InconsistentOntologyException
+             */
 
-		BinaryAxiom<AnnotationProperty> ax = new BinaryAxiomImpl<>(ap1, ap2);
-		annotationAxioms.add(ax);
-	}
+            @Override
+            public void addDataPropertyRangeAxiom(DataPropertyRangeExpression range, Datatype datatype) throws InconsistentOntologyException {
+                checkSignature(range);
+                checkSignature(datatype);
+                if (datatype.equals(DatatypeImpl.rdfsLiteral))
+                    return;
+
+                // otherwise the datatype is not top
+                if (range.getProperty().isBottom())
+                    return;
+                if (range.getProperty().isTop())
+                    throw new InconsistentOntologyException();
+
+                BinaryAxiom<DataRangeExpression> ax = new BinaryAxiomImpl<>(range, datatype);
+                subDataRangeAxioms.add(ax);
+            }
 
 
-	/**
-	 * Normalizes and adds class disjointness axiom
-	 * <p>
-	 * DisjointClasses := 'DisjointClasses' '(' axiomAnnotations 
-	 * 			subClassExpression subClassExpression { subClassExpression } ')'<br>
-	 * <p>
-	 * Implements rule [C2]:<br>
-	 *     - eliminates all occurrences of bot and if the result contains<br>
-	 *     - no top and at least two elements then disjointness<br>
-	 *     - one top then emptiness of all other elements<br>
-	 *     - two tops then inconsistency (this behavior is an extension of OWL 2, where duplicates are removed from the list) 
-	 */
-	
-	@Override
-	public void addDisjointClassesAxiom(ClassExpression... ces) throws InconsistentOntologyException {	
-		for (ClassExpression c : ces)
-			checkSignature(c);
-		classAxioms.addDisjointness(ces);
-	}
+            /**
+             * Normalizes and adds an object subproperty axiom
+             * <p>
+             * SubObjectPropertyOf := 'SubObjectPropertyOf' '(' axiomAnnotations
+             * 						ObjectPropertyExpression ObjectPropertyExpression ')'
+             * <p>
+             * Implements rule [O1]:<br>
+             *    - ignore the axiom if the first argument is owl:bottomObjectProperty
+             *    				or the second argument is owl:topObjectProperty<br>
+             *    - replace by a disjointness axiom if the second argument is owl:bottomObjectProperty
+             *                but the first one is not owl:topObjectProperty<br>
+             *    - inconsistency if the first is  owl:topObjectProperty but the second is owl:bottomObjectProperty
+             *
+             * @throws InconsistentOntologyException
+             *
+             */
 
-	/**
-	 * Normalizes and adds object property disjointness axiom
-	 * <p>
-	 * DisjointObjectProperties := 'DisjointObjectProperties' '(' axiomAnnotations
-	 * 		 ObjectPropertyExpression ObjectPropertyExpression { ObjectPropertyExpression } ')'<br>
-	 * <p>
-	 * Implements rule [O2]:<br>
-	 *     - eliminates all occurrences of bot and if the result contains<br>
-	 *     - no top and at least two elements then disjointness<br>
-	 *     - one top then emptiness of all other elements<br>
-	 *     - two tops then inconsistency (this behavior is an extension of OWL 2, where duplicates are removed from the list) 
-	 */
+            @Override
+            public void addSubPropertyOfAxiom(ObjectPropertyExpression ope1, ObjectPropertyExpression ope2) throws InconsistentOntologyException {
+                checkSignature(ope1);
+                checkSignature(ope2);
+                objectPropertyAxioms.addInclusion(ope1, ope2);
+            }
 
-	@Override
-	public void addDisjointObjectPropertiesAxiom(ObjectPropertyExpression... opes) throws InconsistentOntologyException {
-		for (ObjectPropertyExpression p : opes)
-			checkSignature(p);
-		objectPropertyAxioms.addDisjointness(opes);
-	}
+            /**
+             * Normalizes and adds a data subproperty axiom
+             * <p>
+             * SubDataPropertyOf := 'SubDataPropertyOf' '(' axiomAnnotations
+             * 					subDataPropertyExpression superDataPropertyExpression ')'<br>
+             * subDataPropertyExpression := DataPropertyExpression<br>
+             * superDataPropertyExpression := DataPropertyExpression
+             * <p>
+             * implements rule [D1]:<br>
+             *    - ignore the axiom if the first argument is owl:bottomDataProperty
+             *    			  or the second argument is owl:topDataProperty<br>
+             *    - replace by a disjointness axiom if the second argument is owl:bottomDataProperty
+             *                but the first one is not owl:topDataProperty<br>
+             *    - inconsistency if the first is  owl:topDataProperty but the second is owl:bottomDataProperty
+             *
+             * @throws InconsistentOntologyException
+             */
 
-	/**
-	 * Normalizes and adds data property disjointness axiom
-	 * <p>
-	 * DisjointDataProperties := 'DisjointDataProperties' '(' axiomAnnotations 
-	 * 				DataPropertyExpression DataPropertyExpression { DataPropertyExpression } ')'<br>
-	 * <p>
-	 * Implements rule [D2]:<br>
-	 *     - eliminates all occurrences of bot and if the result contains<br>
-	 *     - no top and at least two elements then disjointness<br>
-	 *     - one top then emptiness of all other elements<br>
-	 *     - two tops then inconsistency (this behavior is an extension of OWL 2, where duplicates are removed from the list) 
-	 */
-	
-	@Override
-	public void addDisjointDataPropertiesAxiom(DataPropertyExpression... dpes) throws InconsistentOntologyException {
-		for (DataPropertyExpression dpe : dpes)
-			checkSignature(dpe);
-		dataPropertyAxioms.addDisjointness(dpes);
-	}
-	
-	
-	/**
-	 * Normalizes and adds a reflexive object property axiom
-	 * <p>
-	 * ReflexiveObjectProperty := 'ReflexiveObjectProperty' '(' axiomAnnotations ObjectPropertyExpression ')'
-	 * <p>
-	 * Implements rule [O3]:<br>
-	 *     - ignores if top (which is reflexive by definition)<br>
-	 *     - inconsistency if bot (which is not reflexive)<br>
-	 *     - otherwise, removes the inverse if required
-	 *     
-	 * @throws InconsistentOntologyException 
-	 */
-	
-	@Override
-	public void addReflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException {
-		if (ope.isTop())
-			return;
-		if (ope.isBottom())
-			throw new InconsistentOntologyException();
-		
-		if (ope.isInverse())
-			reflexiveObjectPropertyAxioms.add(ope.getInverse());
-		else
-			reflexiveObjectPropertyAxioms.add(ope);
-	}
+            @Override
+            public void addSubPropertyOfAxiom(DataPropertyExpression dpe1, DataPropertyExpression dpe2) throws InconsistentOntologyException {
+                checkSignature(dpe1);
+                checkSignature(dpe2);
+                dataPropertyAxioms.addInclusion(dpe1, dpe2);
+            }
 
-	/**
-	 * Normalizes and adds an irreflexive object property axiom
-	 * <p>
-	 * ReflexiveObjectProperty := 'ReflexiveObjectProperty' '(' axiomAnnotations ObjectPropertyExpression ')'
-	 * <p>
-	 * Implements rule [O3]:<br>
-	 *     - ignores if bot (which is irreflexive by definition)<br>
-	 *     - inconsistency if top (which is reflexive)<br>
-	 *     - otherwise, removes the inverse if required
-	 *     
-	 * @throws InconsistentOntologyException 
-	 */
-	
-	@Override
-	public void addIrreflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException {
-		if (ope.isTop())
-			throw new InconsistentOntologyException();
-		if (ope.isBottom())
-			return;
-		
-		if (ope.isInverse())
-			irreflexiveObjectPropertyAxioms.add(ope.getInverse());
-		else
-			irreflexiveObjectPropertyAxioms.add(ope);
-	}
 
-	
-	
-	
-	
-	@Override
-	public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop) {
-		checkSignature(prop);
-		functionalObjectPropertyAxioms.add(prop);
-	}
+            /**
+             * Normalizes and adds class disjointness axiom
+             * <p>
+             * DisjointClasses := 'DisjointClasses' '(' axiomAnnotations
+             * 			subClassExpression subClassExpression { subClassExpression } ')'<br>
+             * <p>
+             * Implements rule [C2]:<br>
+             *     - eliminates all occurrences of bot and if the result contains<br>
+             *     - no top and at least two elements then disjointness<br>
+             *     - one top then emptiness of all other elements<br>
+             *     - two tops then inconsistency (this behavior is an extension of OWL 2, where duplicates are removed from the list)
+             */
 
-	@Override
-	public void addFunctionalDataPropertyAxiom(DataPropertyExpression prop) {
-		checkSignature(prop);
-		functionalDataPropertyAxioms.add(prop);
-	}
+            @Override
+            public void addDisjointClassesAxiom(ClassExpression... ces) throws InconsistentOntologyException {
+                for (ClassExpression c : ces)
+                    checkSignature(c);
+                classAxioms.addDisjointness(ces);
+            }
+
+            /**
+             * Normalizes and adds object property disjointness axiom
+             * <p>
+             * DisjointObjectProperties := 'DisjointObjectProperties' '(' axiomAnnotations
+             * 		 ObjectPropertyExpression ObjectPropertyExpression { ObjectPropertyExpression } ')'<br>
+             * <p>
+             * Implements rule [O2]:<br>
+             *     - eliminates all occurrences of bot and if the result contains<br>
+             *     - no top and at least two elements then disjointness<br>
+             *     - one top then emptiness of all other elements<br>
+             *     - two tops then inconsistency (this behavior is an extension of OWL 2, where duplicates are removed from the list)
+             */
+
+            @Override
+            public void addDisjointObjectPropertiesAxiom(ObjectPropertyExpression... opes) throws InconsistentOntologyException {
+                for (ObjectPropertyExpression p : opes)
+                    checkSignature(p);
+                objectPropertyAxioms.addDisjointness(opes);
+            }
+
+            /**
+             * Normalizes and adds data property disjointness axiom
+             * <p>
+             * DisjointDataProperties := 'DisjointDataProperties' '(' axiomAnnotations
+             * 				DataPropertyExpression DataPropertyExpression { DataPropertyExpression } ')'<br>
+             * <p>
+             * Implements rule [D2]:<br>
+             *     - eliminates all occurrences of bot and if the result contains<br>
+             *     - no top and at least two elements then disjointness<br>
+             *     - one top then emptiness of all other elements<br>
+             *     - two tops then inconsistency (this behavior is an extension of OWL 2, where duplicates are removed from the list)
+             */
+
+            @Override
+            public void addDisjointDataPropertiesAxiom(DataPropertyExpression... dpes) throws InconsistentOntologyException {
+                for (DataPropertyExpression dpe : dpes)
+                    checkSignature(dpe);
+                dataPropertyAxioms.addDisjointness(dpes);
+            }
+
+
+            /**
+             * Normalizes and adds a reflexive object property axiom
+             * <p>
+             * ReflexiveObjectProperty := 'ReflexiveObjectProperty' '(' axiomAnnotations ObjectPropertyExpression ')'
+             * <p>
+             * Implements rule [O3]:<br>
+             *     - ignores if top (which is reflexive by definition)<br>
+             *     - inconsistency if bot (which is not reflexive)<br>
+             *     - otherwise, removes the inverse if required
+             *
+             * @throws InconsistentOntologyException
+             */
+
+            @Override
+            public void addReflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException {
+                if (ope.isTop())
+                    return;
+                if (ope.isBottom())
+                    throw new InconsistentOntologyException();
+
+                if (ope.isInverse())
+                    reflexiveObjectPropertyAxioms.add(ope.getInverse());
+                else
+                    reflexiveObjectPropertyAxioms.add(ope);
+            }
+
+            /**
+             * Normalizes and adds an irreflexive object property axiom
+             * <p>
+             * ReflexiveObjectProperty := 'ReflexiveObjectProperty' '(' axiomAnnotations ObjectPropertyExpression ')'
+             * <p>
+             * Implements rule [O3]:<br>
+             *     - ignores if bot (which is irreflexive by definition)<br>
+             *     - inconsistency if top (which is reflexive)<br>
+             *     - otherwise, removes the inverse if required
+             *
+             * @throws InconsistentOntologyException
+             */
+
+            @Override
+            public void addIrreflexiveObjectPropertyAxiom(ObjectPropertyExpression ope) throws InconsistentOntologyException {
+                if (ope.isTop())
+                    throw new InconsistentOntologyException();
+                if (ope.isBottom())
+                    return;
+
+                if (ope.isInverse())
+                    irreflexiveObjectPropertyAxioms.add(ope.getInverse());
+                else
+                    irreflexiveObjectPropertyAxioms.add(ope);
+            }
+
+
+            @Override
+            public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop) {
+                checkSignature(prop);
+                functionalObjectPropertyAxioms.add(prop);
+            }
+
+            @Override
+            public void addFunctionalDataPropertyAxiom(DataPropertyExpression prop) {
+                checkSignature(prop);
+                functionalDataPropertyAxioms.add(prop);
+            }
+            @Override
+            public Collection<BinaryAxiom<ClassExpression>> getSubClassAxioms() {
+                return Collections.unmodifiableList(classAxioms.inclusions);
+            }
+
+            @Override
+            public Collection<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms() {
+                return Collections.unmodifiableList(subDataRangeAxioms);
+            }
+
+
+            @Override
+            public Collection<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms() {
+                return Collections.unmodifiableList(objectPropertyAxioms.inclusions);
+            }
+
+            @Override
+            public Collection<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms() {
+                return Collections.unmodifiableList(dataPropertyAxioms.inclusions);
+            }
+
+            @Override
+            public Set<ObjectPropertyExpression> getFunctionalObjectProperties() {
+                return Collections.unmodifiableSet(functionalObjectPropertyAxioms);
+            }
+
+            @Override
+            public Set<DataPropertyExpression> getFunctionalDataProperties() {
+                return Collections.unmodifiableSet(functionalDataPropertyAxioms);
+            }
+
+            @Override
+            public Collection<NaryAxiom<ClassExpression>> getDisjointClassesAxioms() {
+                return Collections.unmodifiableList(classAxioms.disjointness);
+            }
+
+            @Override
+            public Collection<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms() {
+                return Collections.unmodifiableList(objectPropertyAxioms.disjointness);
+            }
+
+            @Override
+            public Collection<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms() {
+                return Collections.unmodifiableList(dataPropertyAxioms.disjointness);
+            }
+
+            @Override
+            public Collection<ObjectPropertyExpression> getReflexiveObjectPropertyAxioms() {
+                return Collections.unmodifiableSet(reflexiveObjectPropertyAxioms);
+            }
+
+            @Override
+            public Collection<ObjectPropertyExpression> getIrreflexiveObjectPropertyAxioms() {
+                return Collections.unmodifiableSet(irreflexiveObjectPropertyAxioms);
+            }
+            @Override
+            public ObjectPropertyExpression createAuxiliaryObjectProperty() {
+                ObjectPropertyExpression ope = new ObjectPropertyExpressionImpl(AUXROLEURI + auxCounter);
+                auxCounter++ ;
+                auxObjectProperties.add(ope);
+                return ope;
+            }
+
+            @Override
+            public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties() {
+                return Collections.unmodifiableSet(auxObjectProperties);
+            }
+        };
+    }
 
 	@Override
 	public OntologyABox abox() {
@@ -683,67 +739,12 @@ public class OntologyImpl implements Ontology {
 
         };
     }
-	
 
-	@Override
-	public Collection<BinaryAxiom<ClassExpression>> getSubClassAxioms() {
-		return Collections.unmodifiableList(classAxioms.inclusions);
-	}
-	
-	@Override
-	public Collection<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms() {
-		return Collections.unmodifiableList(subDataRangeAxioms);
-	}
-	
-	
-	@Override
-	public Collection<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms() {
-		return Collections.unmodifiableList(objectPropertyAxioms.inclusions);
-	}
-	
-	@Override
-	public Collection<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms() {
-		return Collections.unmodifiableList(dataPropertyAxioms.inclusions);
-	}
 
-	@Override
-	public Set<ObjectPropertyExpression> getFunctionalObjectProperties() {
-		return Collections.unmodifiableSet(functionalObjectPropertyAxioms);
-	}
-	
-	@Override 
-	public Set<DataPropertyExpression> getFunctionalDataProperties() {
-		return Collections.unmodifiableSet(functionalDataPropertyAxioms);
-	}
-	
-	@Override 
-	public Collection<NaryAxiom<ClassExpression>> getDisjointClassesAxioms() {
-		return Collections.unmodifiableList(classAxioms.disjointness);
-	}
-	
-	@Override 
-	public Collection<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms() {
-		return Collections.unmodifiableList(objectPropertyAxioms.disjointness);
-	}
 
-	@Override 
-	public Collection<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms() {
-		return Collections.unmodifiableList(dataPropertyAxioms.disjointness);
-	}
 
-	@Override
-	public Collection<ObjectPropertyExpression> getReflexiveObjectPropertyAxioms() {
-		return Collections.unmodifiableSet(reflexiveObjectPropertyAxioms);
-	}
 
-	@Override
-	public Collection<ObjectPropertyExpression> getIrreflexiveObjectPropertyAxioms() {
-		return Collections.unmodifiableSet(irreflexiveObjectPropertyAxioms);
-	}
-	
-
-	
-	@Override
+    @Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();
 		str.append("[Ontology info.")
@@ -757,19 +758,6 @@ public class OntologyImpl implements Ontology {
 	}
 
 	
-	@Override
-	public ObjectPropertyExpression createAuxiliaryObjectProperty() {
-		ObjectPropertyExpression ope = new ObjectPropertyExpressionImpl(AUXROLEURI + auxCounter);
-		auxCounter++ ;
-		auxObjectProperties.add(ope);
-		return ope;
-	}
-	
-	@Override
-	public Collection<ObjectPropertyExpression> getAuxiliaryObjectProperties() {
-		return Collections.unmodifiableSet(auxObjectProperties);
-	}
-
 
 	
 	

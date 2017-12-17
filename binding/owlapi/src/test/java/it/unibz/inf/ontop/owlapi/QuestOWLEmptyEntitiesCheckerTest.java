@@ -155,7 +155,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	@Test
 	public void testEmptyConcepts() throws Exception {
 
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto.tbox(), conn);
 		Iterator<Predicate> iterator = empties.iEmptyConcepts();
 		while (iterator.hasNext()){
 			emptyConcepts.add(iterator.next());
@@ -174,7 +174,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	 */
 	@Test
 	public void testEmptyRoles() throws Exception {
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto.tbox(), conn);
 		Iterator<Predicate> iterator = empties.iEmptyRoles();
 		while (iterator.hasNext()){
 			emptyRoles.add(iterator.next());

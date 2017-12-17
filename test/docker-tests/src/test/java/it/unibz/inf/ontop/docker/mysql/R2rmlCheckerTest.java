@@ -192,8 +192,7 @@ public class R2rmlCheckerTest {
 		// Now we are ready for querying
 		conn = reasonerOBDA.getConnection();
 		Ontology ontology =  OWLAPITranslatorUtility.translate(owlOntology);
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(
-				ontology, conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology.tbox(), conn);
 		Iterator<Predicate> iteratorC = empties.iEmptyConcepts();
 		while (iteratorC.hasNext()){
 			emptyConceptsObda.add(iteratorC.next());
@@ -222,8 +221,7 @@ public class R2rmlCheckerTest {
 		// Now we are ready for querying
 		conn = reasonerR2rml.getConnection();
 		Ontology ontology =  OWLAPITranslatorUtility.translate(owlOntology);
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(
-				ontology, conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology.tbox(), conn);
 		Iterator<Predicate> iteratorC = empties.iEmptyConcepts();
 		while (iteratorC.hasNext()){
 			emptyConceptsR2rml.add(iteratorC.next());

@@ -4,7 +4,6 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface OntologyABox {

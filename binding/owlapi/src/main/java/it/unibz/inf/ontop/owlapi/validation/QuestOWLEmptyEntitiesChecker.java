@@ -24,10 +24,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.*;
 import org.semanticweb.owlapi.model.OWLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +39,7 @@ import java.util.Iterator;
  */
 public class QuestOWLEmptyEntitiesChecker {
 
-	private Ontology onto;
+	private OntologyTBox onto;
 	private OWLConnection conn;
 
 	private int nEmptyConcepts = 0;
@@ -55,7 +52,7 @@ public class QuestOWLEmptyEntitiesChecker {
 	 * @param translatedOntologyMerge the OWLAPI ontology, conn QuestOWL connection
 	 * @throws Exception
 	 */
-	public QuestOWLEmptyEntitiesChecker(Ontology translatedOntologyMerge, OWLConnection conn) throws Exception {
+	public QuestOWLEmptyEntitiesChecker(OntologyTBox translatedOntologyMerge, OWLConnection conn) throws Exception {
 		this.onto = translatedOntologyMerge;
 		this.conn = conn;
 

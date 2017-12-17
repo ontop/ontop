@@ -60,8 +60,6 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
     private final Version version;
 
-	private boolean interrupted = false;
-
 	private final ReasonerProgressMonitor pm;
 
 	private boolean prepared = false;
@@ -81,7 +79,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	/* The merge and translation of all loaded ontologies */
 	// TODO: see if still relevant
-	private Ontology translatedOntologyMerge;
+	private OntologyTBox translatedOntologyMerge;
 
 	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
@@ -229,7 +227,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	 * are used later when classify() is called.
 	 * 
 	 */
-	public static Ontology loadOntologies(OWLOntology ontology) throws Exception {
+	public static OntologyTBox loadOntologies(OWLOntology ontology) throws Exception {
 		/*
 		 * We will keep track of the loaded ontologies and translate the TBox
 		 * part of them into our internal representation.
@@ -237,7 +235,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		log.debug("Load ontologies called. Translating ontologies.");
 
         Ontology mergeOntology = OWLAPITranslatorUtility.translateImportsClosure(ontology);
-        return mergeOntology;
+        return mergeOntology.tbox();
 //		log.debug("Ontology loaded: {}", mergeOntology);
 	}
 
@@ -308,7 +306,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	@Override
     public void interrupt() {
-		interrupted = true;
+		/* interrupted = true; */
 	}
 
 	private void ensurePrepared() {
@@ -414,7 +412,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
 			for(NaryAxiom<ObjectPropertyExpression> dda
-						: translatedOntologyMerge.getDisjointObjectPropertiesAxioms()) {		
+						: translatedOntologyMerge.getDisjointObjectPropertiesAxioms()) {
 				// TODO: handle role inverses and multiple arguments			
 				Collection<ObjectPropertyExpression> props = dda.getComponents();
 				Iterator<ObjectPropertyExpression> iterator = props.iterator();
@@ -434,7 +432,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
 			for(NaryAxiom<DataPropertyExpression> dda
-						: translatedOntologyMerge.getDisjointDataPropertiesAxioms()) {		
+						: translatedOntologyMerge.getDisjointDataPropertiesAxioms()) {
 				// TODO: handle role inverses and multiple arguments			
 				Collection<DataPropertyExpression> props = dda.getComponents();
 				Iterator<DataPropertyExpression> iterator = props.iterator();
@@ -723,7 +721,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	}
 
     @Override
-	public void close() throws Exception {
+	public void close() {
 		dispose();
 	}
 

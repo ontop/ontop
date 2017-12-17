@@ -566,13 +566,13 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 			}
 		}
 
-		for (ObjectPropertyExpression role : ontology.getAuxiliaryObjectProperties()) {
+		for (ObjectPropertyExpression role : ontology.tbox().getAuxiliaryObjectProperties()) {
 			graph.addVertex(role);
 			graph.addVertex(role.getInverse());
 		}
 
 		// property inclusions
-		for (BinaryAxiom<ObjectPropertyExpression> roleIncl : ontology.getSubObjectPropertyAxioms()) {
+		for (BinaryAxiom<ObjectPropertyExpression> roleIncl : ontology.tbox().getSubObjectPropertyAxioms()) {
 			// adds the direct edge and the inverse (e.g., R ISA S and R- ISA S-)
 			graph.addEdge(roleIncl.getSub(), roleIncl.getSuper());
 			graph.addEdge(roleIncl.getSub().getInverse(), roleIncl.getSuper().getInverse());
@@ -599,7 +599,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 			if (!role.isBottom() && !role.isTop())
 				graph.addVertex(role);
 
-		for (BinaryAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms())
+		for (BinaryAxiom<DataPropertyExpression> roleIncl : ontology.tbox().getSubDataPropertyAxioms())
 			graph.addEdge(roleIncl.getSub(), roleIncl.getSuper());
 
 		return graph;
@@ -654,7 +654,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 
 
 		// class inclusions from the ontology
-		for (BinaryAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms())
+		for (BinaryAxiom<ClassExpression> clsIncl : ontology.tbox().getSubClassAxioms())
 			graph.addEdge(clsIncl.getSub(), clsIncl.getSuper());
 
 		return graph;
@@ -678,7 +678,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		}
 
 		// data range inclusions from the ontology
-		for (BinaryAxiom<DataRangeExpression> clsIncl : ontology.getSubDataRangeAxioms()) {
+		for (BinaryAxiom<DataRangeExpression> clsIncl : ontology.tbox().getSubDataRangeAxioms()) {
 			dataRangeGraph.addVertex(clsIncl.getSuper()); // Datatype is not among the vertices from the start
 			dataRangeGraph.addEdge(clsIncl.getSub(), clsIncl.getSuper());
 		}

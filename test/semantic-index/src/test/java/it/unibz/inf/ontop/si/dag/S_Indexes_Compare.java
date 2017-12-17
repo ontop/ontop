@@ -65,7 +65,7 @@ public class S_Indexes_Compare extends TestCase {
 		
 		testIndexes(engine, dag);
 
-		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(fileInput);
+		OntologyTBox onto = OWLAPITranslatorUtility.loadOntologyFromFile(fileInput).tbox();
 		DAG dag2 = DAGConstructor.getISADAG(onto);
 		dag2.clean();
         DAGOperations.buildDescendants(dag2);

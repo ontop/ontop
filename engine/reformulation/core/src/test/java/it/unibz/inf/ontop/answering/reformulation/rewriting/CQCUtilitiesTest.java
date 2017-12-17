@@ -420,7 +420,7 @@ public class CQCUtilitiesTest {
 	        Ontology sigma = dfac.createOntology();
 			OClass left = sigma.classes().create("A");
 			OClass right = sigma.classes().create("C");
-			sigma.addSubClassOfAxiom(left, right);
+			sigma.tbox().addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", Collections.<Term>singletonList(TERM_FACTORY.getVariable("x")));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
@@ -447,7 +447,7 @@ public class CQCUtilitiesTest {
 			ObjectPropertyExpression pright = sigma.objectProperties().create("R");
 			
 			ObjectSomeValuesFrom right = pright.getDomain();
-			sigma.addSubClassOfAxiom(left, right);
+			sigma.tbox().addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
@@ -474,7 +474,7 @@ public class CQCUtilitiesTest {
 			ObjectPropertyExpression pright = sigma.objectProperties().create("R").getInverse();
 						
 			ObjectSomeValuesFrom right = pright.getDomain();
-			sigma.addSubClassOfAxiom(left, right);
+			sigma.tbox().addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
@@ -501,7 +501,7 @@ public class CQCUtilitiesTest {
 			OClass right = sigma.classes().create("A");
 			
 			ObjectSomeValuesFrom left = pleft.getDomain();
-			sigma.addSubClassOfAxiom(left, right);
+			sigma.tbox().addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"),
@@ -529,7 +529,7 @@ public class CQCUtilitiesTest {
 			ObjectPropertyExpression pleft = sigma.objectProperties().create("R").getInverse();
 	        
 			ObjectSomeValuesFrom left = pleft.getDomain();
-			sigma.addSubClassOfAxiom(left, right);
+			sigma.tbox().addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("y"));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"),
@@ -579,7 +579,7 @@ public class CQCUtilitiesTest {
         ObjectPropertyExpression pleft = sigma.objectProperties().create("R");
         
         ObjectSomeValuesFrom right = pleft.getDomain();
-        sigma.addSubClassOfAxiom(left, right);
+        sigma.tbox().addSubClassOfAxiom(left, right);
 
 
         // Query 1 q(x) :- R(x,y), A(x)

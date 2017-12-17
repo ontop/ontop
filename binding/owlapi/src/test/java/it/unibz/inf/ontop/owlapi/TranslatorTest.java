@@ -47,7 +47,7 @@ public class TranslatorTest extends TestCase {
 		
 		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 		
-		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
+		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.tbox().getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
 		assertEquals(1, ass.size());
 		
@@ -72,7 +72,7 @@ public class TranslatorTest extends TestCase {
 		
 		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 		
-		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
+		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.tbox().getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
 		assertEquals(1, ass.size());
 		
@@ -95,7 +95,7 @@ public class TranslatorTest extends TestCase {
 		
 		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 		
-		Collection<BinaryAxiom<ObjectPropertyExpression>> ass = dlliteonto.getSubObjectPropertyAxioms();
+		Collection<BinaryAxiom<ObjectPropertyExpression>> ass = dlliteonto.tbox().getSubObjectPropertyAxioms();
 		Iterator<BinaryAxiom<ObjectPropertyExpression>> assit = ass.iterator();
 		assertEquals(2, ass.size());
 		
@@ -132,7 +132,7 @@ public class TranslatorTest extends TestCase {
 		
 		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 		
-		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
+		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.tbox().getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
 		assertEquals(2, ass.size());
 		

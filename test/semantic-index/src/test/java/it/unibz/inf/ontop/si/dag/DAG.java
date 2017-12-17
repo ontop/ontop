@@ -20,17 +20,7 @@ package it.unibz.inf.ontop.si.dag;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyRangeExpression;
-import it.unibz.inf.ontop.spec.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.spec.ontology.DataSomeValuesFrom;
-import it.unibz.inf.ontop.spec.ontology.Description;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.BinaryAxiom;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRange;
 
@@ -77,7 +67,7 @@ public class DAG {
 	 * @param ontology
 	 *            ontology that contain TBox assertions for the DAG
 	 */
-	public DAG(Ontology ontology) {
+	public DAG(OntologyTBox ontology) {
 
 		//int rolenodes = (ontology.objectProperties().all().size() + ontology.dataProperties().all().size()) * 2;
 

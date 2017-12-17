@@ -160,9 +160,9 @@ public class OntopOntologyMaterializerTest extends TestCase {
 			// read onto
 			Ontology onto =  OWLAPITranslatorUtility.translateImportsClosure(
 					configuration.loadProvidedInputOntology());
-			System.out.println(onto.getSubClassAxioms());
-			System.out.println(onto.getSubObjectPropertyAxioms());
-			System.out.println(onto.getSubDataPropertyAxioms());
+			System.out.println(onto.tbox().getSubClassAxioms());
+			System.out.println(onto.tbox().getSubObjectPropertyAxioms());
+			System.out.println(onto.tbox().getSubDataPropertyAxioms());
 
 		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
 		MaterializationParams materializationParams = MaterializationParams.defaultBuilder()

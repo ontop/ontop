@@ -109,10 +109,10 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			ClassExpression previous = first;
 			while (it.hasNext()) {
 				ClassExpression current = getSubclassExpression(it.next());
-				dl_onto.addSubClassOfAxiom(previous, current);
+				dl_onto.tbox().addSubClassOfAxiom(previous, current);
 				previous = current;
 			}
-			dl_onto.addSubClassOfAxiom(previous, first);
+			dl_onto.tbox().addSubClassOfAxiom(previous, first);
 		} 
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
@@ -140,7 +140,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 				ClassExpression c = getSubclassExpression(ce);
 				disjointProperties[i++] = c;
 			}
-			dl_onto.addDisjointClassesAxiom(disjointProperties);		
+			dl_onto.tbox().addDisjointClassesAxiom(disjointProperties);
 		}
 		catch (TranslationException e) {
 			log.warn(NOT_SUPPORTED_EXT, ax, e.getMessage());
@@ -189,7 +189,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			ObjectPropertyExpression ope1 = helper.getPropertyExpression(ax.getSubProperty());
 			ObjectPropertyExpression ope2 = helper.getPropertyExpression(ax.getSuperProperty());
 
-			dl_onto.addSubPropertyOfAxiom(ope1, ope2);	
+			dl_onto.tbox().addSubPropertyOfAxiom(ope1, ope2);
 		}		
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -214,10 +214,10 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			ObjectPropertyExpression previous = first;
 			while (it.hasNext()) {
 				ObjectPropertyExpression current = helper.getPropertyExpression(it.next());
-				dl_onto.addSubPropertyOfAxiom(previous, current);
+				dl_onto.tbox().addSubPropertyOfAxiom(previous, current);
 				previous = current;
 			}
-			dl_onto.addSubPropertyOfAxiom(previous, first);
+			dl_onto.tbox().addSubPropertyOfAxiom(previous, first);
 		} 
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -243,7 +243,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 				ObjectPropertyExpression ope = helper.getPropertyExpression(prop);
 				opes[i++] = ope;
 			}
-			dl_onto.addDisjointObjectPropertiesAxiom(opes);		
+			dl_onto.tbox().addDisjointObjectPropertiesAxiom(opes);
 		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -266,8 +266,8 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			ObjectPropertyExpression ope1 = helper.getPropertyExpression(ax.getFirstProperty());
 			ObjectPropertyExpression ope2 = helper.getPropertyExpression(ax.getSecondProperty());
 
-			dl_onto.addSubPropertyOfAxiom(ope1, ope2.getInverse());
-			dl_onto.addSubPropertyOfAxiom(ope2, ope1.getInverse());		
+			dl_onto.tbox().addSubPropertyOfAxiom(ope1, ope2.getInverse());
+			dl_onto.tbox().addSubPropertyOfAxiom(ope2, ope1.getInverse());
 		} 
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -332,7 +332,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	public void visit(OWLReflexiveObjectPropertyAxiom ax) {
 		try {
 			ObjectPropertyExpression ope = helper.getPropertyExpression(ax.getProperty());
-			dl_onto.addReflexiveObjectPropertyAxiom(ope);
+			dl_onto.tbox().addReflexiveObjectPropertyAxiom(ope);
 		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -351,7 +351,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	public void visit(OWLIrreflexiveObjectPropertyAxiom ax) {
 		try {
 			ObjectPropertyExpression ope = helper.getPropertyExpression(ax.getProperty());
-			dl_onto.addIrreflexiveObjectPropertyAxiom(ope);
+			dl_onto.tbox().addIrreflexiveObjectPropertyAxiom(ope);
 		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -372,7 +372,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	public void visit(OWLSymmetricObjectPropertyAxiom ax) {
 		try {
 			ObjectPropertyExpression ope = helper.getPropertyExpression(ax.getProperty());
-			dl_onto.addSubPropertyOfAxiom(ope, ope.getInverse());
+			dl_onto.tbox().addSubPropertyOfAxiom(ope, ope.getInverse());
 		} 
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -392,7 +392,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	public void visit(OWLAsymmetricObjectPropertyAxiom ax) {
 		try {
 			ObjectPropertyExpression ope = helper.getPropertyExpression(ax.getProperty());
-			dl_onto.addDisjointObjectPropertiesAxiom(ope, ope.getInverse());
+			dl_onto.tbox().addDisjointObjectPropertiesAxiom(ope, ope.getInverse());
 		} 
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -440,7 +440,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			DataPropertyExpression dpe1 = helper.getPropertyExpression(ax.getSubProperty());
 			DataPropertyExpression dpe2 = helper.getPropertyExpression(ax.getSuperProperty());
 
-			dl_onto.addSubPropertyOfAxiom(dpe1, dpe2);	
+			dl_onto.tbox().addSubPropertyOfAxiom(dpe1, dpe2);
 		} 
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -466,10 +466,10 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			DataPropertyExpression previous = first;
 			while (it.hasNext()) {
 				DataPropertyExpression current = helper.getPropertyExpression(it.next());
-				dl_onto.addSubPropertyOfAxiom(previous, current);
+				dl_onto.tbox().addSubPropertyOfAxiom(previous, current);
 				previous = current;
 			}
-			dl_onto.addSubPropertyOfAxiom(previous, first);
+			dl_onto.tbox().addSubPropertyOfAxiom(previous, first);
 		} 
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -495,7 +495,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 				DataPropertyExpression dpe = helper.getPropertyExpression(prop);
 				dpes[i++] = dpe;
 			}
-			dl_onto.addDisjointDataPropertiesAxiom(dpes);		
+			dl_onto.tbox().addDisjointDataPropertiesAxiom(dpes);
 		}
 		catch (InconsistentOntologyException e) {
 			log.warn(INCONSISTENT_ONTOLOGY, ax);
@@ -544,11 +544,11 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 			OWL2Datatype owlDatatype = getCanonicalDatatype(ax.getRange());
 			if (owlDatatype == null) {
 				// range is empty (rule [DT1.1])
-				dl_onto.addSubPropertyOfAxiom(dpe, DataPropertyExpressionImpl.owlBottomDataProperty);
+				dl_onto.tbox().addSubPropertyOfAxiom(dpe, DataPropertyExpressionImpl.owlBottomDataProperty);
 			}
 			else {
 				Datatype datatype = dl_onto.getDatatype(owlDatatype.getIRI().toString());
-				dl_onto.addDataPropertyRangeAxiom(dpe.getRange(), datatype);		
+				dl_onto.tbox().addDataPropertyRangeAxiom(dpe.getRange(), datatype);
 			}		
 		} 
 		catch (TranslationException e) {
@@ -848,7 +848,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		for (OWLClassExpression superClass : owlCE2.asConjunctSet()) {
 			if (superClass instanceof OWLClass) {				
 				ClassExpression ce2 = helper.getOClass((OWLClass)superClass);
-				dl_onto.addSubClassOfAxiom(ce1, ce2);
+				dl_onto.tbox().addSubClassOfAxiom(ce1, ce2);
 			} 
 			else if (superClass instanceof OWLObjectSomeValuesFrom) {
 				OWLObjectSomeValuesFrom someexp = (OWLObjectSomeValuesFrom) superClass;
@@ -862,13 +862,13 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 				//		!((DataSomeValuesFrom)ce2).getDatatype().equals(DatatypeImpl.rdfsLiteral))
 				//	System.err.println("CI WITH QDD: " + ce1 + " <= " + ce2);
 
-				dl_onto.addSubClassOfAxiom(ce1, ce2);
+				dl_onto.tbox().addSubClassOfAxiom(ce1, ce2);
 			} 
 			else if (superClass instanceof OWLObjectComplementOf) {
 				OWLObjectComplementOf superC = (OWLObjectComplementOf)superClass;
 				// [R5]
 				ClassExpression ce2 = getSubclassExpression(superC.getOperand());
-				dl_onto.addDisjointClassesAxiom(ce1, ce2);
+				dl_onto.tbox().addDisjointClassesAxiom(ce1, ce2);
 			}
 			else if (minCardinalityClassExpressions && superClass instanceof OWLObjectMinCardinality) {
 				OWLObjectMinCardinality someexp = (OWLObjectMinCardinality) superClass;
@@ -883,7 +883,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 					throw new TranslationException();
 				
 				ClassExpression ce2 = getDataSomeValuesFrom(someexp.getProperty(), someexp.getFiller());
-				dl_onto.addSubClassOfAxiom(ce1, ce2);
+				dl_onto.tbox().addSubClassOfAxiom(ce1, ce2);
 			} 
 			else
 				throw new TranslationException("unsupported operation in " + superClass);			
@@ -893,13 +893,13 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	private void addSubClassOfObjectSomeValuesFromAxiom(ClassExpression ce1, OWLObjectPropertyExpression owlOPE, OWLClassExpression owlCE) throws TranslationException, InconsistentOntologyException {
 		// rule [C0]
 		if (owlOPE.isOWLBottomObjectProperty() || owlCE.isOWLNothing()) {
-			dl_onto.addSubClassOfAxiom(ce1, ClassImpl.owlNothing);
+			dl_onto.tbox().addSubClassOfAxiom(ce1, ClassImpl.owlNothing);
 		}
 		else {
 			if (owlCE.isOWLThing()) {
 				if (!owlOPE.isOWLTopObjectProperty()) { // this check is not really needed
 					ObjectPropertyExpression ope = helper.getPropertyExpression(owlOPE);
-					dl_onto.addSubClassOfAxiom(ce1, ope.getDomain());		
+					dl_onto.tbox().addSubClassOfAxiom(ce1, ope.getDomain());
 				}
 			}
 			else {
@@ -912,7 +912,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 				if (existsSA == null) {
 					// no replacement found for this exists R.A, creating a new one						
 					ObjectPropertyExpression R = helper.getPropertyExpression(owlOPE);
-					ObjectPropertyExpression SA = dl_onto.createAuxiliaryObjectProperty();
+					ObjectPropertyExpression SA = dl_onto.tbox().createAuxiliaryObjectProperty();
 					if (R.isInverse())
 						SA = SA.getInverse();
 
@@ -922,7 +922,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 
 					if (owlCE instanceof OWLClass) {
 						ClassExpression A = getSubclassExpression(owlCE);
-						dl_onto.addSubClassOfAxiom(SA.getRange(), A);
+						dl_onto.tbox().addSubClassOfAxiom(SA.getRange(), A);
 					}
 					else if (nestedQualifiedExistentials) {
 						addSubClassAxioms(SA.getRange(), owlCE);
@@ -930,9 +930,9 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 					else
 						throw new TranslationException("Complex expression in the superclass filler"); 
 					
-					dl_onto.addSubPropertyOfAxiom(SA, R);
+					dl_onto.tbox().addSubPropertyOfAxiom(SA, R);
 				}
-				dl_onto.addSubClassOfAxiom(ce1, existsSA);			
+				dl_onto.tbox().addSubClassOfAxiom(ce1, existsSA);
 			}
 		}
 	}
@@ -964,7 +964,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		// TEMPORARY FIX
 		if (functionalityAxioms) {
 			ObjectPropertyExpression ope = helper.getPropertyExpression(ax.getProperty());
-			dl_onto.addFunctionalObjectPropertyAxiom(ope);
+			dl_onto.tbox().addFunctionalObjectPropertyAxiom(ope);
 		}
 		else
 			log.warn(NOT_SUPPORTED, ax);
@@ -975,7 +975,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		// TEMPORARY FIX
 		if (functionalityAxioms) {
 			ObjectPropertyExpression ope = helper.getPropertyExpression(ax.getProperty());
-			dl_onto.addFunctionalObjectPropertyAxiom(ope.getInverse());
+			dl_onto.tbox().addFunctionalObjectPropertyAxiom(ope.getInverse());
 		}
 		else
 			log.warn(NOT_SUPPORTED, ax);
@@ -996,7 +996,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		// TEMPORARY FIX
 		if (functionalityAxioms) {
 			DataPropertyExpression dpe = helper.getPropertyExpression(ax.getProperty());
-			dl_onto.addFunctionalDataPropertyAxiom(dpe);		
+			dl_onto.tbox().addFunctionalDataPropertyAxiom(dpe);
 		}
 		else
 			log.warn(NOT_SUPPORTED, ax);
@@ -1048,10 +1048,9 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 
 	@Override
 	public void visit(OWLSubAnnotationPropertyOfAxiom ax) {
-
 		AnnotationProperty ap1 = helper.getPropertyExpression(ax.getSubProperty());
 		AnnotationProperty ap2 = helper.getPropertyExpression(ax.getSuperProperty());
-		dl_onto.addSubPropertyOfAxiom(ap1, ap2);
+		// NO-OP: AnnotationAxioms have no effect
 	}
 
 	@Override

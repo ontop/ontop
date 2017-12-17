@@ -48,7 +48,7 @@ public class OWL2QLTranslatorTest {
 		
 		manager.addAxiom(onto, factory.getOWLEquivalentClassesAxiom(class1, class2, class3));
 		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(3, axs.size());
@@ -82,8 +82,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class3));
 		
 		manager.addAxiom(onto, factory.getOWLEquivalentObjectPropertiesAxiom(class1, class2, class3));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ObjectPropertyExpression>> axs = dlliteonto.getSubObjectPropertyAxioms();
 		assertEquals(3, axs.size());
@@ -115,8 +115,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
 		
 		manager.addAxiom(onto, factory.getOWLInverseObjectPropertiesAxiom(class1, class2));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ObjectPropertyExpression>> axs = dlliteonto.getSubObjectPropertyAxioms();
 		assertEquals(2, axs.size());
@@ -151,8 +151,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class3));
 		
 		manager.addAxiom(onto, factory.getOWLEquivalentDataPropertiesAxiom(class1, class2, class3));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<DataPropertyExpression>> axs = dlliteonto.getSubDataPropertyAxioms();
 		assertEquals(3, axs.size());
@@ -184,8 +184,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
 		
 		manager.addAxiom(onto, factory.getOWLObjectPropertyDomainAxiom(class1, class2));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(1, axs.size());
@@ -212,8 +212,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
 		
 		manager.addAxiom(onto, factory.getOWLObjectPropertyRangeAxiom(class1, class2));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(1, axs.size());
@@ -240,8 +240,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class2));
 		
 		manager.addAxiom(onto, factory.getOWLDataPropertyDomainAxiom(class1, class2));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(1, axs.size());
@@ -265,8 +265,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
 		
 		manager.addAxiom(onto, factory.getOWLSymmetricObjectPropertyAxiom(class1));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ObjectPropertyExpression>> axs = dlliteonto.getSubObjectPropertyAxioms();
 		assertEquals(1, axs.size());
@@ -291,8 +291,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
 		
 		manager.addAxiom(onto, factory.getOWLAsymmetricObjectPropertyAxiom(class1));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<NaryAxiom<ObjectPropertyExpression>> axs = dlliteonto.getDisjointObjectPropertiesAxioms();
 		assertEquals(1, axs.size());
@@ -327,8 +327,8 @@ public class OWL2QLTranslatorTest {
 		OWLClassExpression expr = factory.getOWLObjectIntersectionOf(class2, 
 				factory.getOWLObjectIntersectionOf(class3, class4));
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(class1, expr));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(3, axs.size());
@@ -364,9 +364,9 @@ public class OWL2QLTranslatorTest {
 		OWLClassExpression expr = factory.getOWLObjectIntersectionOf(class2, 
 				factory.getOWLObjectIntersectionOf(factory.getOWLObjectComplementOf(class3), class4));
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(class1, expr));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
-		
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
+
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(2, axs.size());
 		Set<String> classNames = new HashSet<String>();
@@ -469,8 +469,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(owlNothing, class1));
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(class2, owlThing));
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(class3, owlNothing));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(0, axs.size());
@@ -505,8 +505,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLSubDataPropertyOfAxiom(owlBottom, dpe1));
 		manager.addAxiom(onto, factory.getOWLSubDataPropertyOfAxiom(dpe2, owlTop));
 		manager.addAxiom(onto, factory.getOWLSubDataPropertyOfAxiom(dpe3, owlBottom));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<DataPropertyExpression>> axs = dlliteonto.getSubDataPropertyAxioms();
 		assertEquals(0, axs.size());
@@ -541,8 +541,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLSubObjectPropertyOfAxiom(owlBottom, ope1));
 		manager.addAxiom(onto, factory.getOWLSubObjectPropertyOfAxiom(ope2, owlTop));
 		manager.addAxiom(onto, factory.getOWLSubObjectPropertyOfAxiom(ope3, owlBottom));
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ObjectPropertyExpression>> axs = dlliteonto.getSubObjectPropertyAxioms();
 		assertEquals(0, axs.size());
@@ -582,8 +582,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLDisjointDataPropertiesAxiom(dpe2, owlTop, owlBottom)); // empty
 		//manager.addAxiom(onto, factory.getOWLDisjointDataPropertiesAxiom(dpe3, owlBottom, owlTop, owlTop)); // inconsistent
 		manager.addAxiom(onto, factory.getOWLDisjointDataPropertiesAxiom(dpe4, owlBottom, dpe5)); // normal
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<DataPropertyExpression>> axs = dlliteonto.getSubDataPropertyAxioms();
 		assertEquals(0, axs.size());
@@ -630,8 +630,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLDisjointObjectPropertiesAxiom(dpe2, owlTop, owlBottom)); // empty
 		//manager.addAxiom(onto, factory.getOWLDisjointDataPropertiesAxiom(dpe3, owlBottom, owlTop, owlTop)); // inconsistent
 		manager.addAxiom(onto, factory.getOWLDisjointObjectPropertiesAxiom(dpe4, owlBottom, dpe5)); // normal
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ObjectPropertyExpression>> axs = dlliteonto.getSubObjectPropertyAxioms();
 		assertEquals(0, axs.size());
@@ -679,8 +679,8 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLDisjointClassesAxiom(dpe2, owlTop, owlBottom)); // empty
 		//manager.addAxiom(onto, factory.getOWLDisjointDataPropertiesAxiom(dpe3, owlBottom, owlTop, owlTop)); // inconsistent
 		manager.addAxiom(onto, factory.getOWLDisjointClassesAxiom(dpe4, owlBottom, dpe5)); // normal
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(0, axs.size());
@@ -720,8 +720,8 @@ public class OWL2QLTranslatorTest {
 		
 		manager.addAxiom(onto, factory.getOWLDataPropertyRangeAxiom(owlBottom, integer)); // nothing
 		manager.addAxiom(onto, factory.getOWLDataPropertyRangeAxiom(dpe1, literal)); // empty
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<DataRangeExpression>> axs = dlliteonto.getSubDataRangeAxioms();
 		assertEquals(0, axs.size());
@@ -750,9 +750,9 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce1, 
 							factory.getOWLDataSomeValuesFrom(owlTop, literal))); 
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(
-							factory.getOWLDataSomeValuesFrom(owlBottom, literal), ce2)); 
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+							factory.getOWLDataSomeValuesFrom(owlBottom, literal), ce2));
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(0, axs.size());
@@ -775,9 +775,8 @@ public class OWL2QLTranslatorTest {
 		
 		manager.addAxiom(onto, factory.getOWLReflexiveObjectPropertyAxiom(owlTop)); // nothing
 		manager.addAxiom(onto, factory.getOWLIrreflexiveObjectPropertyAxiom(owlBottom)); // nothing
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
-		
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<ObjectPropertyExpression> axs = dlliteonto.getReflexiveObjectPropertyAxioms();
 		assertEquals(0, axs.size());
@@ -834,9 +833,9 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce1, 
 							factory.getOWLObjectSomeValuesFrom(owlTop, thing))); 
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(
-							factory.getOWLObjectSomeValuesFrom(owlBottom, thing), ce2)); 
-		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+							factory.getOWLObjectSomeValuesFrom(owlBottom, thing), ce2));
+
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 		
 		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(0, axs.size());
@@ -866,13 +865,13 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce1, 
 							factory.getOWLObjectSomeValuesFrom(factory.getOWLObjectInverseOf(ope1), ce2))); 
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce3, 
-				factory.getOWLObjectSomeValuesFrom(factory.getOWLObjectInverseOf(ope1), ce2))); 
-		
+				factory.getOWLObjectSomeValuesFrom(factory.getOWLObjectInverseOf(ope1), ce2)));
+
 		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 
 		ObjectPropertyExpression ope = null;
 		
-		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
+		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.tbox().getSubClassAxioms();
 		//System.out.println(axs);
 		assertEquals(3, axs.size()); // surrogates for existential restrictions are re-used
 		// first pass - find ope
@@ -901,7 +900,7 @@ public class OWL2QLTranslatorTest {
 			}
 		}
 		
-		Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.getSubObjectPropertyAxioms();
+		Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.tbox().getSubObjectPropertyAxioms();
 		assertEquals(1, axs1.size());
 		
 		BinaryAxiom<ObjectPropertyExpression> ax1 = axs1.iterator().next();
@@ -938,7 +937,7 @@ public class OWL2QLTranslatorTest {
 		
 		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
 
-		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
+		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.tbox().getSubClassAxioms();
 		assertEquals(4, axs.size()); // surrogates for existential restrictions are re-used
 		Iterator<BinaryAxiom<ClassExpression>> it = axs.iterator();
 
@@ -972,7 +971,7 @@ public class OWL2QLTranslatorTest {
 //        ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)ax.getSub()).getProperty(); // aux
 //        ObjectPropertyExpression opep = ((ObjectSomeValuesFrom) ax.getSub()).getProperty(); // aux1^-
 
-        Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.getSubObjectPropertyAxioms();
+        Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.tbox().getSubObjectPropertyAxioms();
 		assertEquals(2, axs1.size());
 
         axs1.iterator().forEachRemaining(ax -> {
@@ -997,7 +996,7 @@ public class OWL2QLTranslatorTest {
 //		assertEquals(ax1.getSub(), ope.getInverse());
 //		assertEquals(ax1.getSuper(), voc.getObjectProperty("http://example/R").getInverse());
 //
-		Collection<NaryAxiom<ClassExpression>> axs2 = dlliteonto.getDisjointClassesAxioms();
+		Collection<NaryAxiom<ClassExpression>> axs2 = dlliteonto.tbox().getDisjointClassesAxioms();
 		assertEquals(axs2.size(), 1);
 	}	
 	
@@ -1029,7 +1028,7 @@ public class OWL2QLTranslatorTest {
 
 		ObjectPropertyExpression ope = null;
 		
-		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
+		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.tbox().getSubClassAxioms();
 		//System.out.println(axs);
 		assertEquals(3, axs.size()); // surrogates for existential restrictions are re-used
 		// first pass - find ope
@@ -1058,7 +1057,7 @@ public class OWL2QLTranslatorTest {
 			}
 		}
 		
-		Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.getSubObjectPropertyAxioms();
+		Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.tbox().getSubObjectPropertyAxioms();
 		assertEquals(1, axs1.size());
 		
 		BinaryAxiom<ObjectPropertyExpression> ax1 = axs1.iterator().next();
