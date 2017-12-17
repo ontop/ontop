@@ -43,6 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -79,9 +81,9 @@ public class R2rmlCheckerTest {
 	private OntopOWLReasoner reasonerOBDA;
 	private OntopOWLReasoner reasonerR2rml;
 
-	@Before
+    @Before
 	public void setUp() throws Exception {
-		onto = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(owlFile);
+		onto = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(new URL(owlFileName).getPath());
 
 		loadOBDA();
 		loadR2rml();
