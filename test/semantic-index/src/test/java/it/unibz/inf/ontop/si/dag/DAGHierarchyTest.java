@@ -22,15 +22,10 @@ package it.unibz.inf.ontop.si.dag;
 
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
-import it.unibz.inf.ontop.si.dag.TestTBoxReasonerImpl_OnNamedDAG;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import junit.framework.TestCase;
 
 import java.util.Set;
@@ -65,9 +60,9 @@ public class DAGHierarchyTest extends TestCase {
 		Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile1);
 
 		// generate DAG
-		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
 		// generate named DAG
-		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
+		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
 		EquivalencesDAG<ClassExpression> classes = namedReasoner.classes().dag();
 		
@@ -147,9 +142,9 @@ public class DAGHierarchyTest extends TestCase {
 		Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile1);
 
 		// generate DAG
-		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
 		// generate named DAG
-		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
+		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
 		EquivalencesDAG<ClassExpression> classes = namedReasoner.classes().dag();
 		
@@ -231,9 +226,9 @@ public class DAGHierarchyTest extends TestCase {
 		Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile2);
 		
 		// generate DAG
-		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
 		// generate named DAG
-		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
+		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
 		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.objectProperties().dag();
 		
@@ -311,9 +306,9 @@ public class DAGHierarchyTest extends TestCase {
 		Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile2);
 
 		// generate DAG
-		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
 		// generate named DAG
-		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
+		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 		
 		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.objectProperties().dag();
 		

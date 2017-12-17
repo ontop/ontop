@@ -5,13 +5,13 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class LinearInclusionDependencyTools {
 
-    public static LinearInclusionDependencies getABoxDependencies(TBoxReasoner reasoner, boolean full) {
+    public static LinearInclusionDependencies getABoxDependencies(ClassifiedTBox reasoner, boolean full) {
         LinearInclusionDependencies dependencies = new LinearInclusionDependencies();
 
         for (Equivalences<ObjectPropertyExpression> propNode : reasoner.objectProperties().dag()) {

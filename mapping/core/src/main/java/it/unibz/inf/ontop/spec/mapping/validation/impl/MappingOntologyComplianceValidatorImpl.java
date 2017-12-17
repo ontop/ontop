@@ -62,7 +62,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      *
      */
     @Override
-    public void validate(MappingWithProvenance mapping, TBoxReasoner saturatedTBox)
+    public void validate(MappingWithProvenance mapping, ClassifiedTBox saturatedTBox)
             throws MappingOntologyMismatchException {
 
         ImmutableMultimap<String, Datatype> datatypeMap = computeDataTypeMap(saturatedTBox);
@@ -73,7 +73,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     }
 
     private void validateAssertion(IntermediateQuery mappingAssertion, PPMappingAssertionProvenance provenance,
-                                   TBoxReasoner saturatedTBox,
+                                   ClassifiedTBox saturatedTBox,
                                    ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
@@ -180,7 +180,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private void checkTripleObject(String predicateIRI, Optional<TermType> optionalTripleObjectType,
                                    PPMappingAssertionProvenance provenance,
-                                   TBoxReasoner saturatedTBox,
+                                   ClassifiedTBox saturatedTBox,
                                    ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
@@ -209,7 +209,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     }
 
     private void checkObjectOrAnnotationProperty(String predicateIRI, PPMappingAssertionProvenance provenance,
-                                                 TBoxReasoner saturatedTBox)
+                                                 ClassifiedTBox saturatedTBox)
             throws MappingOntologyMismatchException {
         /*
          * Cannot be a data property (should be either an object or an annotation property)
@@ -227,7 +227,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
     private void checkDataOrAnnotationProperty(TermType tripleObjectType, String predicateIRI,
                                                PPMappingAssertionProvenance provenance,
-                                               TBoxReasoner saturatedTBox,
+                                               ClassifiedTBox saturatedTBox,
                                                ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
         /*
@@ -274,7 +274,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     }
 
     private void checkClass(String predicateIRI, PPMappingAssertionProvenance provenance,
-                            TBoxReasoner saturatedTBox) throws MappingOntologyMismatchException {
+                            ClassifiedTBox saturatedTBox) throws MappingOntologyMismatchException {
         /*
          * Cannot be an object property
          */
@@ -316,7 +316,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      * it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair#getDataTypeFromOntology
      * from Ontop v 1.18.1
      */
-    private ImmutableMultimap<String, Datatype> computeDataTypeMap(TBoxReasoner reasoner) {
+    private ImmutableMultimap<String, Datatype> computeDataTypeMap(ClassifiedTBox reasoner) {
         // TODO: switch to guava > 2.1, and replace by Streams.stream(iterable)
         return StreamSupport.stream(reasoner.dataRanges().dag().spliterator(), false)
                 .flatMap(n -> getPartialPredicateToDatatypeMap(n, reasoner).entrySet().stream())
@@ -327,7 +327,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
 
     private ImmutableMap<Predicate, Datatype> getPartialPredicateToDatatypeMap(Equivalences<DataRangeExpression> nodeSet,
-                                                                               TBoxReasoner reasoner) {
+                                                                               ClassifiedTBox reasoner) {
         DataRangeExpression node = nodeSet.getRepresentative();
 
         return ImmutableMap.<Predicate, Datatype>builder()
@@ -336,7 +336,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                 .build();
     }
 
-    private ImmutableMap<Predicate, Datatype> getDescendentNodesPartialMap(TBoxReasoner reasoner, DataRangeExpression node,
+    private ImmutableMap<Predicate, Datatype> getDescendentNodesPartialMap(ClassifiedTBox reasoner, DataRangeExpression node,
                                                                            Equivalences<DataRangeExpression> nodeSet) {
         if (node instanceof Datatype) {
             return reasoner.dataRanges().dag().getSub(nodeSet).stream()

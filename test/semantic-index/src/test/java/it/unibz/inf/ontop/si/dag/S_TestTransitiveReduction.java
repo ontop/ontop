@@ -22,14 +22,10 @@ package it.unibz.inf.ontop.si.dag;
 
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import junit.framework.TestCase;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -103,7 +99,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	
 	public void testR() throws Exception{
 		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive.owl");
-		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
 		
 		ClassExpression A = onto.classes().get("http://www.kro.com/ontologies/A");
 		ClassExpression B = onto.classes().get("http://www.kro.com/ontologies/B");
@@ -121,7 +117,7 @@ public class S_TestTransitiveReduction extends TestCase {
 
 	public void testR2() throws Exception{
 		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive2.owl");
-		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
 		
 		ClassExpression A = onto.classes().get("http://www.kro.com/ontologies/A");
 		ClassExpression B = onto.classes().get("http://www.kro.com/ontologies/B");
@@ -146,8 +142,8 @@ public class S_TestTransitiveReduction extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasonerImpl dag2 = (TBoxReasonerImpl)TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
-			TestTBoxReasonerImpl_OnGraph reasonerd1 = new TestTBoxReasonerImpl_OnGraph(dag2);
+			ClassifiedTBoxImpl dag2 = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+			TestClassifiedTBoxImpl_OnGraph reasonerd1 = new TestClassifiedTBoxImpl_OnGraph(dag2);
 
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", dag2.getObjectPropertyGraph());
@@ -161,7 +157,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	}
 
 
-	private boolean testRedundantEdges(TestTBoxReasonerImpl_OnGraph reasonerd1, TBoxReasonerImpl d2){
+	private boolean testRedundantEdges(TestClassifiedTBoxImpl_OnGraph reasonerd1, ClassifiedTBoxImpl d2){
 		//number of edges in the graph
 		int  numberEdgesD1= reasonerd1.edgeSetSize();
 		//number of edges in the dag

@@ -21,10 +21,10 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -131,7 +131,7 @@ public class DAGPerformanceTest extends TestCase {
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		TBoxReasoner reasoner= TBoxReasonerImpl.create(o);
+		ClassifiedTBox reasoner= ClassifiedTBoxImpl.create(o);
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -223,7 +223,7 @@ public class DAGPerformanceTest extends TestCase {
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		TBoxReasoner  reasoner = TBoxReasonerImpl.create(o);
+		ClassifiedTBox reasoner = ClassifiedTBoxImpl.create(o);
 		reasoner.getClass();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
@@ -319,7 +319,7 @@ public class DAGPerformanceTest extends TestCase {
 		long start = System.nanoTime();
 		log.debug("Creating a DAG out of it");
 		//DAGImpl impliedDAG = DAGBuilder.getDAG(o);
-		TBoxReasoner  reasoner= TBoxReasonerImpl.create(o);
+		ClassifiedTBox reasoner= ClassifiedTBoxImpl.create(o);
 		reasoner.getClass();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 

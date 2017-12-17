@@ -23,9 +23,9 @@ package it.unibz.inf.ontop.si.dag;
 
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
@@ -34,13 +34,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -155,7 +152,7 @@ public class DAGTest extends TestCase {
 	private void test_dag_index_nodes(String testname) throws Exception {
 
 		onto = OWLAPITranslatorUtility.loadOntologyFromFile(owlloc + testname + ".owl");
-		TBoxReasoner reasoner = TBoxReasonerImpl.create(onto);
+		ClassifiedTBox reasoner = ClassifiedTBoxImpl.create(onto);
 		List<List<Description>> exp_idx = get_results(testname);
 
 		List<Description> classes= new LinkedList<Description>();

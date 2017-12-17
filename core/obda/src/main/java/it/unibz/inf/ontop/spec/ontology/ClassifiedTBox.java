@@ -21,10 +21,10 @@ package it.unibz.inf.ontop.spec.ontology;
  */
 
 /**
- *  This is the interface for the class TBoxReasoner where we are able
+ *  This is the interface for the class ClassifiedTBox where we are able
  *  to retrieve all the connection built in our DAG
  */
-public interface TBoxReasoner {
+public interface ClassifiedTBox {
 	
 	/**
 	 * object properties
@@ -32,7 +32,7 @@ public interface TBoxReasoner {
 	 * @return object properties with their dag
 	 */
 
-	ClassifiedOntologyVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties();
+	ClassifiedTBoxVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties();
 	
 	/**
 	 * data properties
@@ -40,7 +40,7 @@ public interface TBoxReasoner {
 	 * @return data properties with their dag
 	 */
 
-	ClassifiedOntologyVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties();
+	ClassifiedTBoxVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties();
 
 	/**
 	 * classes
@@ -48,7 +48,7 @@ public interface TBoxReasoner {
 	 * @return classes with their dag
 	 */
 
-	ClassifiedOntologyVocabularyCategory<ClassExpression, OClass> classes();
+	ClassifiedTBoxVocabularyCategory<ClassExpression, OClass> classes();
 	
 	/**
 	 * datatypes and data property ranges
@@ -56,7 +56,7 @@ public interface TBoxReasoner {
 	 * @return datatypes and data property ranges with their dag
 	 */
 
-	ClassifiedOntologyVocabularyCategory<DataRangeExpression, Datatype> dataRanges();
+	ClassifiedTBoxVocabularyCategory<DataRangeExpression, Datatype> dataRanges();
 
 
     /**
@@ -65,5 +65,5 @@ public interface TBoxReasoner {
      * @return annotation properties (without dag)
      */
 
-    ClassifiedOntologyVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties();
+    ClassifiedTBoxVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties();
 }

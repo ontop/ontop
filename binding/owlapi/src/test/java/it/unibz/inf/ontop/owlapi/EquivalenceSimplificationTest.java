@@ -21,14 +21,11 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
 import it.unibz.inf.ontop.spec.ontology.impl.EquivalencesDAGImpl;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import junit.framework.TestCase;
 
 public class EquivalenceSimplificationTest extends TestCase {
@@ -43,7 +40,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 */
 
 		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_401.owl");
-		TBoxReasoner simple = TBoxReasonerImpl.create(ontology);
+		ClassifiedTBox simple = ClassifiedTBoxImpl.create(ontology);
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.classes().dag();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.objectProperties().dag();
@@ -83,7 +80,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 */
 
 		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_402.owl");
-		TBoxReasoner simple = TBoxReasonerImpl.create(ontology);
+		ClassifiedTBox simple = ClassifiedTBoxImpl.create(ontology);
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.classes().dag();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.objectProperties().dag();
@@ -127,7 +124,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 */
 
 		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_403.owl");
-		TBoxReasoner simple = TBoxReasonerImpl.create(ontology);
+		ClassifiedTBox simple = ClassifiedTBoxImpl.create(ontology);
 		
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.classes().dag();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.objectProperties().dag();
@@ -160,7 +157,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		 */
 
 		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(path + "test_404.owl");
-		TBoxReasoner simple = TBoxReasonerImpl.create(ontology);
+		ClassifiedTBox simple = ClassifiedTBoxImpl.create(ontology);
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = (EquivalencesDAGImpl<ClassExpression>)simple.classes().dag();
 		EquivalencesDAGImpl<ObjectPropertyExpression> propDAG = (EquivalencesDAGImpl<ObjectPropertyExpression>)simple.objectProperties().dag();

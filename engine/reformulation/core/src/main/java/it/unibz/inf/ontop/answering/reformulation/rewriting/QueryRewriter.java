@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 public interface QueryRewriter {
 
@@ -36,5 +36,5 @@ public interface QueryRewriter {
 	 * @param ontology
 	 * @param sigma
 	 */
-	void setTBox(TBoxReasoner ontology, LinearInclusionDependencies sigma);
+	void setTBox(ClassifiedTBox ontology, LinearInclusionDependencies sigma);
 }

@@ -21,19 +21,15 @@ package it.unibz.inf.ontop.owlapi.utils;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.File;
-import java.util.HashSet;
 import java.util.Iterator;
 
 public class OWLAPIABoxIteratorTest extends TestCase {

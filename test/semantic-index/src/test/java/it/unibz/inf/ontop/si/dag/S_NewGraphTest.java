@@ -24,7 +24,7 @@ package it.unibz.inf.ontop.si.dag;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class S_NewGraphTest  extends TestCase{
 		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile(roleowlfile);
 
 		log.info("Generating graph");
-		TBoxReasonerImpl r = (TBoxReasonerImpl)TBoxReasonerImpl.create(o);
+		ClassifiedTBoxImpl r = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.create(o);
 		
 		log.info("See information");
 		log.debug("properties {}", r.getObjectPropertyGraph());
@@ -60,7 +60,7 @@ public class S_NewGraphTest  extends TestCase{
 		//System.out.println(r.getDAG());
 		
 //		log.info("See relations");
-//		TBoxReasonerImpl tbox= new TBoxReasonerImpl(dag);
+//		ClassifiedTBoxImpl tbox= new ClassifiedTBoxImpl(dag);
 //		for (Description d: dag.vertexSet()){
 //		System.out.println("parents "+d+" "+tbox.getDirectParents(d));
 //		System.out.println("children "+d+" "+tbox.getDirectChildren(d));
@@ -80,7 +80,7 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(SemanticIndexBuilder.getNamedDAG(r.objectProperties().dag()));
 		
 //		log.info("See relations named DAG");
-//		TBoxReasonerImpl tbox2= new TBoxReasonerImpl(dag);
+//		ClassifiedTBoxImpl tbox2= new ClassifiedTBoxImpl(dag);
 //		for (Description d2: dag.vertexSet()){
 //		System.out.println("parents "+d2+" "+tbox2.getDirectParents(d2));
 //		System.out.println("children "+d2+" "+tbox2.getDirectChildren(d2));

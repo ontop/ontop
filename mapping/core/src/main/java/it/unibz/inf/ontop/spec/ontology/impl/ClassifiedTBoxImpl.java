@@ -24,9 +24,9 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -35,7 +35,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import com.google.common.collect.ImmutableSet;
 
 /**
- * TBoxReasonerImpl
+ * ClassifiedTBoxImpl
  *
  *    a DAG-based TBox reasoner
  *
@@ -43,26 +43,26 @@ import com.google.common.collect.ImmutableSet;
  *
  */
 
-public class TBoxReasonerImpl implements TBoxReasoner {
+public class ClassifiedTBoxImpl implements ClassifiedTBox {
 
-	private final ClassifiedOntologyVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
-    private final ClassifiedOntologyVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
-    private final ClassifiedOntologyVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
-    private final ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG;
-    private final ClassifiedOntologyVocabularyCategoryImpl<AnnotationProperty, AnnotationProperty> annotationProperties;
+	private final ClassifiedTBoxVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
+    private final ClassifiedTBoxVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
+    private final ClassifiedTBoxVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
+    private final ClassifiedTBoxVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG;
+    private final ClassifiedTBoxVocabularyCategoryImpl<AnnotationProperty, AnnotationProperty> annotationProperties;
 
-    public static final class ClassifiedOntologyVocabularyCategoryImpl<T, V> implements ClassifiedOntologyVocabularyCategory<T,V> {
+    public static final class ClassifiedTBoxVocabularyCategoryImpl<T, V> implements ClassifiedTBoxVocabularyCategory<T,V> {
         private final ImmutableMap<String, V> iriIndex;
         private final EquivalencesDAG<T> dag;
 
-        public ClassifiedOntologyVocabularyCategoryImpl(ImmutableMap<String, V> iriIndex, EquivalencesDAG<T> dag) {
+        public ClassifiedTBoxVocabularyCategoryImpl(ImmutableMap<String, V> iriIndex, EquivalencesDAG<T> dag) {
             this.iriIndex = iriIndex;
             this.dag = dag;
         }
 
         @Override
-        public Collection<V> all() {
-            return iriIndex.values();
+        public Iterator<V> iterator() {
+            return iriIndex.values().iterator();
         }
 
         @Override
@@ -90,7 +90,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * @param onto: ontology
 	 */
 
-	public static TBoxReasoner create(Ontology onto) {
+	public static ClassifiedTBox create(Ontology onto) {
 
 	    OntologyImpl impl = (OntologyImpl)onto;
 
@@ -115,12 +115,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		chooseClassRepresentatives(classDAG, objectPropertyDAG, dataPropertyDAG);
 		chooseDataRangeRepresentatives(dataRangeDAG, dataPropertyDAG);
 
-		TBoxReasonerImpl r = new TBoxReasonerImpl(
-		        new ClassifiedOntologyVocabularyCategoryImpl<>(impl.getClassesRawMap(), classDAG),
-                new ClassifiedOntologyVocabularyCategoryImpl<>(OntologyImpl.OWL2QLDatatypes, dataRangeDAG),
-                new ClassifiedOntologyVocabularyCategoryImpl<>(impl.getObjectPropertiesRawMap(), objectPropertyDAG),
-                new ClassifiedOntologyVocabularyCategoryImpl<>(impl.getDataPropertiesRawMap(), dataPropertyDAG),
-                new ClassifiedOntologyVocabularyCategoryImpl<>(impl.getAnnotationPropertiesRawMap(), null));
+		ClassifiedTBoxImpl r = new ClassifiedTBoxImpl(
+		        new ClassifiedTBoxVocabularyCategoryImpl<>(impl.getClassesRawMap(), classDAG),
+                new ClassifiedTBoxVocabularyCategoryImpl<>(OntologyImpl.OWL2QLDatatypes, dataRangeDAG),
+                new ClassifiedTBoxVocabularyCategoryImpl<>(impl.getObjectPropertiesRawMap(), objectPropertyDAG),
+                new ClassifiedTBoxVocabularyCategoryImpl<>(impl.getDataPropertiesRawMap(), dataPropertyDAG),
+                new ClassifiedTBoxVocabularyCategoryImpl<>(impl.getAnnotationPropertiesRawMap(), null));
 //		if (equivalenceReduced) {
 //			r = getEquivalenceSimplifiedReasoner(r);
 //		}
@@ -134,11 +134,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * @param objectPropertyDAG
 	 * @param objectPropertyDAG
 	 */
-	private TBoxReasonerImpl(ClassifiedOntologyVocabularyCategoryImpl<ClassExpression, OClass> classDAG,
-                             ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG,
-                             ClassifiedOntologyVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG,
-                             ClassifiedOntologyVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG,
-                             ClassifiedOntologyVocabularyCategoryImpl<AnnotationProperty, AnnotationProperty> annotationProperties) {
+	private ClassifiedTBoxImpl(ClassifiedTBoxVocabularyCategoryImpl<ClassExpression, OClass> classDAG,
+							   ClassifiedTBoxVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG,
+							   ClassifiedTBoxVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG,
+							   ClassifiedTBoxVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG,
+							   ClassifiedTBoxVocabularyCategoryImpl<AnnotationProperty, AnnotationProperty> annotationProperties) {
 		this.objectPropertyDAG = objectPropertyDAG;
 		this.dataPropertyDAG = dataPropertyDAG;
 		this.classDAG = classDAG;
@@ -153,12 +153,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 
     @Override
-    public ClassifiedOntologyVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties() {
+    public ClassifiedTBoxVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties() {
         return objectPropertyDAG;
     }
 
     @Override
-    public ClassifiedOntologyVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties() {
+    public ClassifiedTBoxVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties() {
         return dataPropertyDAG;
     }
 
@@ -170,7 +170,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 
 	@Override
-	public ClassifiedOntologyVocabularyCategory<ClassExpression, OClass> classes() {
+	public ClassifiedTBoxVocabularyCategory<ClassExpression, OClass> classes() {
 		return classDAG;
 	}
 
@@ -182,12 +182,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 
 	@Override
-	public ClassifiedOntologyVocabularyCategory<DataRangeExpression, Datatype> dataRanges() {
+	public ClassifiedTBoxVocabularyCategory<DataRangeExpression, Datatype> dataRanges() {
 		return dataRangeDAG;
 	}
 
     @Override
-    public ClassifiedOntologyVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties() {
+    public ClassifiedTBoxVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties() {
         return annotationProperties;
     }
 
@@ -432,7 +432,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 
 	/**
-	 * constructs a TBoxReasoner that has a reduced number of classes and properties in each equivalent class
+	 * constructs a ClassifiedTBox that has a reduced number of classes and properties in each equivalent class
 	 *
 	 *   - each object property equivalence class contains one property (representative)
 	 *     except when the representative property is equivalent to its inverse, in which
@@ -443,7 +443,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 *   - each class equivalence class contains the representative and all domains / ranges
 	 *     of the representatives of property equivalence classes
 	 *
-	 *  in other words, the constructed TBoxReasoner is the restriction to the vocabulary of the representatives
+	 *  in other words, the constructed ClassifiedTBox is the restriction to the vocabulary of the representatives
 	 *     all other symbols are mapped to the nodes via *Equivalences hash-maps
 	 *
 	 * @param reasoner
@@ -451,7 +451,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 */
 
 
-	private static TBoxReasonerImpl getEquivalenceSimplifiedReasoner(TBoxReasoner reasoner) {
+	private static ClassifiedTBoxImpl getEquivalenceSimplifiedReasoner(ClassifiedTBox reasoner) {
 
 		// OBJECT PROPERTIES
 		//
@@ -533,12 +533,12 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		//
 		// TODO: a proper implementation is in order here
 
-        TBoxReasonerImpl impl = (TBoxReasonerImpl)reasoner;
-		return new TBoxReasonerImpl(
-		        new ClassifiedOntologyVocabularyCategoryImpl<>(impl.classDAG.iriIndex, classDAG),
+        ClassifiedTBoxImpl impl = (ClassifiedTBoxImpl)reasoner;
+		return new ClassifiedTBoxImpl(
+		        new ClassifiedTBoxVocabularyCategoryImpl<>(impl.classDAG.iriIndex, classDAG),
                 impl.dataRangeDAG,
-                new ClassifiedOntologyVocabularyCategoryImpl<>(impl.objectPropertyDAG.iriIndex, objectPropertyDAG),
-                new ClassifiedOntologyVocabularyCategoryImpl<>(impl.dataPropertyDAG.iriIndex, dataPropertyDAG),
+                new ClassifiedTBoxVocabularyCategoryImpl<>(impl.objectPropertyDAG.iriIndex, objectPropertyDAG),
+                new ClassifiedTBoxVocabularyCategoryImpl<>(impl.dataPropertyDAG.iriIndex, dataPropertyDAG),
                 impl.annotationProperties);
 	}
 

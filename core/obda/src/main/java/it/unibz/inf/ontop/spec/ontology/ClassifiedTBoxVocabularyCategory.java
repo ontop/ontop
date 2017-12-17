@@ -1,16 +1,6 @@
 package it.unibz.inf.ontop.spec.ontology;
 
-import java.util.Collection;
-
-public interface ClassifiedOntologyVocabularyCategory<T, V> {
-
-    /**
-     * entity names
-     *
-     * @return collection of entity names
-     */
-
-    Collection<V> all();
+public interface ClassifiedTBoxVocabularyCategory<T, V> extends Iterable<V> {
 
     /**
      * check whether the entity has been declared

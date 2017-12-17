@@ -20,8 +20,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +61,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
      */
     protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
                                                   OBDASpecInput specInput,
-                                                  Optional<TBoxReasoner> optionalSaturatedTBox,
+                                                  Optional<ClassifiedTBox> optionalSaturatedTBox,
                                                   ExecutorRegistry executorRegistry)
             throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, UnknownDatatypeException {
 

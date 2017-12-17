@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.impl;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 
@@ -12,12 +12,12 @@ public class OBDASpecificationImpl implements OBDASpecification {
 
     private final Mapping mapping;
     private final DBMetadata dbMetadata;
-    private final TBoxReasoner saturatedTBox;
+    private final ClassifiedTBox saturatedTBox;
 
     @Inject
     private OBDASpecificationImpl(@Assisted Mapping saturatedMapping,
                                   @Assisted DBMetadata dbMetadata,
-                                  @Assisted TBoxReasoner saturatedTBox) {
+                                  @Assisted ClassifiedTBox saturatedTBox) {
         this.mapping = saturatedMapping;
         this.dbMetadata = dbMetadata;
         this.saturatedTBox = saturatedTBox;
@@ -34,7 +34,7 @@ public class OBDASpecificationImpl implements OBDASpecification {
     }
 
     @Override
-    public TBoxReasoner getSaturatedTBox() {
+    public ClassifiedTBox getSaturatedTBox() {
         return saturatedTBox;
     }
 }

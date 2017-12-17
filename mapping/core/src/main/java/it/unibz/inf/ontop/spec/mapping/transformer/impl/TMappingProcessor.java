@@ -35,7 +35,7 @@ import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
@@ -365,7 +364,7 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
+	public static List<CQIE> getTMappings(List<CQIE> originalMappings, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
 
 		final boolean printouts = false;
 		

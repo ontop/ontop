@@ -24,11 +24,11 @@ package it.unibz.inf.ontop.si.dag;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,14 +102,14 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasonerImpl reasoner = (TBoxReasonerImpl)TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
 			//transform in a named graph
-			TestTBoxReasonerImpl_OnNamedDAG namedDag2 = new TestTBoxReasonerImpl_OnNamedDAG(reasoner);
+			TestClassifiedTBoxImpl_OnNamedDAG namedDag2 = new TestClassifiedTBoxImpl_OnNamedDAG(reasoner);
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", reasoner.getClassGraph());
 			log.info("First graph {}", reasoner.getObjectPropertyGraph());
 			log.info("Second dag {}", namedDag2);
-			TestTBoxReasonerImpl_Named dag2 = new TestTBoxReasonerImpl_Named(reasoner);
+			TestClassifiedTBoxImpl_Named dag2 = new TestClassifiedTBoxImpl_Named(reasoner);
 
 			assertTrue(testDescendants(dag2.classes().dag(), namedDag2.classes().dag()));
 			assertTrue(testDescendants(dag2.objectProperties().dag(), namedDag2.objectProperties().dag()));
@@ -506,7 +506,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 */			
-	private boolean checkforNamedVertexesOnly(TestTBoxReasonerImpl_OnNamedDAG dag, TBoxReasoner reasoner){
+	private boolean checkforNamedVertexesOnly(TestClassifiedTBoxImpl_OnNamedDAG dag, ClassifiedTBox reasoner){
 		for (Equivalences<ObjectPropertyExpression> node: dag.objectProperties().dag()) {
 			ObjectPropertyExpression vertex = node.getRepresentative();
 			if (!reasoner.objectProperties().dag().getVertex(vertex).isIndexed())

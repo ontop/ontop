@@ -23,8 +23,8 @@ package it.unibz.inf.ontop.si.dag;
 
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,6 +48,6 @@ public class DAGLoopTest {
 	@Test
 	public void testLoop() throws Exception {
 		// generate DAG
-		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
 	}
 }

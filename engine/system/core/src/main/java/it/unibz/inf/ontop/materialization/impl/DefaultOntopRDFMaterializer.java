@@ -105,27 +105,26 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		return new DefaultMaterializedGraphResultSet(selectedVocabulary, params, queryEngine, inputQueryFactory);
 	}
 
-	private static ImmutableSet<Predicate> extractVocabulary(@Nonnull TBoxReasoner vocabulary) {
+	private static ImmutableSet<Predicate> extractVocabulary(@Nonnull ClassifiedTBox vocabulary) {
         Set<Predicate> predicates = new HashSet<>();
 
-        //add all class/data/object predicates to selectedVocabulary
-            //from ontology
-            for (OClass cl : vocabulary.classes().all()) {
+        	// collect all class/data/object predicates to selectedVocabulary
+            for (OClass cl : vocabulary.classes()) {
                 Predicate p = cl.getPredicate();
                 if (!isBuiltin(p))
                     predicates.add(p);
             }
-            for (ObjectPropertyExpression role : vocabulary.objectProperties().all()) {
+            for (ObjectPropertyExpression role : vocabulary.objectProperties()) {
                 Predicate p = role.getPredicate();
                 if (!isBuiltin(p))
                     predicates.add(p);
             }
-            for (DataPropertyExpression role : vocabulary.dataProperties().all()) {
+            for (DataPropertyExpression role : vocabulary.dataProperties()) {
                 Predicate p = role.getPredicate();
                 if (!isBuiltin(p))
                     predicates.add(p);
             }
-			for (AnnotationProperty role : vocabulary.annotationProperties().all()) {
+			for (AnnotationProperty role : vocabulary.annotationProperties()) {
 				Predicate p = role.getPredicate();
 				if (!isBuiltin(p))
 					predicates.add(p);

@@ -25,10 +25,10 @@ import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.Description;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,8 +100,8 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasonerImpl reasoner = (TBoxReasonerImpl)TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
-			TestTBoxReasonerImpl_OnGraph graphReasoner = new TestTBoxReasonerImpl_OnGraph(reasoner);
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) ClassifiedTBoxImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+			TestClassifiedTBoxImpl_OnGraph graphReasoner = new TestClassifiedTBoxImpl_OnGraph(reasoner);
 
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", reasoner.getClassGraph());
@@ -207,7 +207,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 	}
 
 
-	private boolean checkVertexReduction(TestTBoxReasonerImpl_OnGraph reasonerd1, TBoxReasonerImpl d2){
+	private boolean checkVertexReduction(TestClassifiedTBoxImpl_OnGraph reasonerd1, ClassifiedTBoxImpl d2){
 
 		//number of vertexes in the graph
 		int numberVertexesD1= reasonerd1.vertexSetSize();
@@ -242,7 +242,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 	}
 
-	private boolean checkEdgeReduction(TestTBoxReasonerImpl_OnGraph reasonerd1, TBoxReasonerImpl d2){
+	private boolean checkEdgeReduction(TestClassifiedTBoxImpl_OnGraph reasonerd1, ClassifiedTBoxImpl d2){
 		//number of edges in the graph
 		int numberEdgesD1= reasonerd1.edgeSetSize();
 		//number of edges in the dag

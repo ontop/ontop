@@ -21,14 +21,10 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,12 +76,12 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasoner reasoner = TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+			ClassifiedTBox reasoner = ClassifiedTBoxImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
 			//		DAGImpl dag2= InputOWL.createDAG(fileOutput);
 
 			//transform in a named graph
-			TestTBoxReasonerImpl_OnNamedDAG dag2= new TestTBoxReasonerImpl_OnNamedDAG(reasoner);
-			TestTBoxReasonerImpl_Named dag1 = new TestTBoxReasonerImpl_Named(reasoner);
+			TestClassifiedTBoxImpl_OnNamedDAG dag2= new TestClassifiedTBoxImpl_OnNamedDAG(reasoner);
+			TestClassifiedTBoxImpl_Named dag1 = new TestClassifiedTBoxImpl_Named(reasoner);
 			log.debug("Input number {}", i+1 );
 			log.info("First dag {}", dag1);
 			log.info("Second dag {}", dag2);
@@ -128,7 +124,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 	}
 	
 
-	private boolean checkforNamedVertexesOnly(TestTBoxReasonerImpl_OnNamedDAG dag, TBoxReasoner reasoner){
+	private boolean checkforNamedVertexesOnly(TestClassifiedTBoxImpl_OnNamedDAG dag, ClassifiedTBox reasoner){
 		for (Equivalences<ObjectPropertyExpression> node: dag.objectProperties().dag()) {
 			ObjectPropertyExpression vertex = node.getRepresentative();
 			if (!reasoner.objectProperties().dag().getVertex(vertex).isIndexed())

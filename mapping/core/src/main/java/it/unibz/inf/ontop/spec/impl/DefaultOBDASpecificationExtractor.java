@@ -1,16 +1,13 @@
 package it.unibz.inf.ontop.spec.impl;
 
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor.MappingAndDBMetadata;
@@ -46,7 +43,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
             throws OBDASpecificationException {
 
         if (optionalOntology.isPresent()) {
-            TBoxReasoner saturatedTBox = TBoxReasonerImpl.create(optionalOntology.get());
+            ClassifiedTBox saturatedTBox = ClassifiedTBoxImpl.create(optionalOntology.get());
 
             MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata,
                     Optional.of(saturatedTBox), executorRegistry);
@@ -70,7 +67,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                     mappingAndDBMetadata.getMapping(),
                     mappingAndDBMetadata.getDBMetadata(),
                     ontology.abox(), // EMPTY ABOX
-                    TBoxReasonerImpl.create(ontology));
+                    ClassifiedTBoxImpl.create(ontology));
         }
     }
 
@@ -80,7 +77,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                                      ExecutorRegistry executorRegistry) throws OBDASpecificationException {
 
         if (optionalOntology.isPresent()) {
-            TBoxReasoner optionalSaturatedTBox = TBoxReasonerImpl.create(optionalOntology.get());
+            ClassifiedTBox optionalSaturatedTBox = ClassifiedTBoxImpl.create(optionalOntology.get());
 
             MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
                     Optional.of(optionalSaturatedTBox), executorRegistry);
@@ -104,7 +101,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                     mappingAndDBMetadata.getMapping(),
                     mappingAndDBMetadata.getDBMetadata(),
                     ontology.abox(), // EMPTY ABOX
-                    TBoxReasonerImpl.create(ontology));
+                    ClassifiedTBoxImpl.create(ontology));
         }
     }
 }

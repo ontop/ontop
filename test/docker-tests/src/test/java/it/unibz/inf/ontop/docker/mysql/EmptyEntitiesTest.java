@@ -29,8 +29,8 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -267,7 +267,7 @@ public class EmptyEntitiesTest {
 	 */
 	// @Test
 	public void testEmptiesWithInverses() throws Exception {
-		TBoxReasoner tboxreasoner = TBoxReasonerImpl.create(onto);
+		ClassifiedTBox tboxreasoner = ClassifiedTBoxImpl.create(onto);
 		System.out.println();
 		System.out.println(tboxreasoner.objectProperties().dag());
 

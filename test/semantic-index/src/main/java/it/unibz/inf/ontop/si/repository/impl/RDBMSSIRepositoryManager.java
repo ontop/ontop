@@ -228,13 +228,13 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	
 	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
 	
-	private final TBoxReasoner reasonerDag;
+	private final ClassifiedTBox reasonerDag;
 
 	private SemanticIndexCache cacheSI;
 	
 	private SemanticIndexViewsManager views = new SemanticIndexViewsManager();
 	
-	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag) {
+	public RDBMSSIRepositoryManager(ClassifiedTBox reasonerDag) {
 		this.reasonerDag = reasonerDag;
 	}
 

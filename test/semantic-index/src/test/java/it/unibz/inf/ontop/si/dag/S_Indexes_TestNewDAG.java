@@ -21,15 +21,12 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRange;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import junit.framework.TestCase;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
@@ -101,7 +98,7 @@ public void testIndexes() throws Exception{
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasoner dag = TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
 
 		//add input named graph
 		SemanticIndexBuilder engine= new SemanticIndexBuilder(dag);
@@ -113,7 +110,7 @@ public void testIndexes() throws Exception{
 	}
 }
 
-	private boolean testIndexes(SemanticIndexBuilder engine, TBoxReasoner reasoner){
+	private boolean testIndexes(SemanticIndexBuilder engine, ClassifiedTBox reasoner){
 		boolean result = true;
 		
 		//create semantic index

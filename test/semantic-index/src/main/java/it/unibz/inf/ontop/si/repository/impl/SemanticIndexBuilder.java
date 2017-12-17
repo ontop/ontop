@@ -1,12 +1,7 @@
 package it.unibz.inf.ontop.si.repository.impl;
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
@@ -163,7 +158,7 @@ public class SemanticIndexBuilder  {
 	 * @param reasoner used to know ancestors and descendants of the dag
 	 */
 	
-	public SemanticIndexBuilder(TBoxReasoner reasoner)  {
+	public SemanticIndexBuilder(ClassifiedTBox reasoner)  {
 		classRanges = createSemanticIndex(reasoner.classes().dag());
 		opRanges = createSemanticIndex(reasoner.objectProperties().dag());
 		dpRanges = createSemanticIndex(reasoner.dataProperties().dag());

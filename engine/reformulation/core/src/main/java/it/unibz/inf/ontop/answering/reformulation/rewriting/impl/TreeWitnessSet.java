@@ -24,10 +24,10 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Edge;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
 
@@ -61,7 +61,7 @@ public class TreeWitnessSet {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
 	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
 	
-	private TreeWitnessSet(QueryConnectedComponent cc, TBoxReasoner reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
+	private TreeWitnessSet(QueryConnectedComponent cc, ClassifiedTBox reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
 		this.cc = cc;
 		this.cache = new QueryConnectedComponentCache(reasoner);
 		this.allTWgenerators = allTWgenerators;
@@ -75,7 +75,7 @@ public class TreeWitnessSet {
 		return hasConflicts;
 	}
 	
-	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TBoxReasoner reasoner, Collection<TreeWitnessGenerator> generators) {
+	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, ClassifiedTBox reasoner, Collection<TreeWitnessGenerator> generators) {
 		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, generators);
 		
 		if (!cc.isDegenerate())
@@ -366,9 +366,9 @@ public class TreeWitnessSet {
 		private final Map<TermOrderedPair, Intersection<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
 		private final Map<Term, Intersection<ClassExpression>> conceptsCache = new HashMap<>();
 
-		private final TBoxReasoner reasoner;
+		private final ClassifiedTBox reasoner;
 
-		private QueryConnectedComponentCache(TBoxReasoner reasoner) {
+		private QueryConnectedComponentCache(ClassifiedTBox reasoner) {
 			this.reasoner = reasoner;
 		}
 		

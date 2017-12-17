@@ -24,7 +24,7 @@ package it.unibz.inf.ontop.si.dag;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
@@ -32,7 +32,6 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -45,60 +44,60 @@ import java.util.Set;
  */
 
 @Deprecated
-public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
+public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 
-	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
-	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
-	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
-	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG;
-	private final TBoxReasoner reasoner;
+	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
+	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
+	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
+	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG;
+	private final ClassifiedTBox reasoner;
 
 	/**
 	 * Constructor using a DAG or a named DAG
 	 * @param reasoner DAG to be used for reasoning
 	 */
-	public TestTBoxReasonerImpl_OnNamedDAG(TBoxReasoner reasoner) {
+	public TestClassifiedTBoxImpl_OnNamedDAG(ClassifiedTBox reasoner) {
 
 		this.objectPropertyDAG =
-				new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
+				new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
 				SemanticIndexBuilder.getNamedDAG(reasoner.objectProperties().dag()), reasoner.objectProperties().dag()));
 		this.dataPropertyDAG =
-				new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
+				new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
 				SemanticIndexBuilder.getNamedDAG(reasoner.dataProperties().dag()), reasoner.dataProperties().dag()));
 		this.classDAG =
-				new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
+				new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
 				SemanticIndexBuilder.getNamedDAG(reasoner.classes().dag()), reasoner.classes().dag()));
 		this.dataRangeDAG =
-				new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
+				new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
 					SemanticIndexBuilder.getNamedDAG(reasoner.dataRanges().dag()), reasoner.dataRanges().dag()));
 		this.reasoner = reasoner;
 	}
 
 	
 	@Override
-	public ClassifiedOntologyVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties() {
+	public ClassifiedTBoxVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties() {
 		return objectPropertyDAG;
 	}
 	
 	@Override
-	public ClassifiedOntologyVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties() {
+	public ClassifiedTBoxVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties() {
 		return dataPropertyDAG;
 	}
 
 	@Override
-	public ClassifiedOntologyVocabularyCategory<ClassExpression, OClass> classes() {
+	public ClassifiedTBoxVocabularyCategory<ClassExpression, OClass> classes() {
 	    return classDAG;
 	}
 
 	@Override
-	public ClassifiedOntologyVocabularyCategory<DataRangeExpression, Datatype> dataRanges() {
+	public ClassifiedTBoxVocabularyCategory<DataRangeExpression, Datatype> dataRanges() {
 		return dataRangeDAG;
 	}
 
 	// DUMMY
 
 	@Override
-	public ClassifiedOntologyVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties() {
+	public ClassifiedTBoxVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties() {
 		return null;
 	}
 

@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 
 import javax.annotation.Nonnull;
@@ -24,14 +24,14 @@ public interface MappingExtractor {
 
     MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
                                  @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<TBoxReasoner> saturatedTBox,
+                                 @Nonnull Optional<ClassifiedTBox> saturatedTBox,
                                  @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException;
 
     MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping,
                                  @Nonnull OBDASpecInput specInput,
                                  @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<TBoxReasoner> saturatedTBox,
+                                 @Nonnull Optional<ClassifiedTBox> saturatedTBox,
                                  @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException;
 }

@@ -205,7 +205,7 @@ public class QueryConnectedComponent {
 	 * @return list of connected components
 	 */
 	
-	public static List<QueryConnectedComponent> getConnectedComponents(TBoxReasoner reasoner, CQIE cqie) {
+	public static List<QueryConnectedComponent> getConnectedComponents(ClassifiedTBox reasoner, CQIE cqie) {
 
 		Set<Term> headTerms = new HashSet<Term>(cqie.getHead().getTerms());
 
@@ -485,7 +485,7 @@ public class QueryConnectedComponent {
 		}
 	}
 
-	private static Function getCanonicalForm(TBoxReasoner reasoner, Function atom) {
+	private static Function getCanonicalForm(ClassifiedTBox reasoner, Function atom) {
 		Predicate p = atom.getFunctionSymbol();
 
 		// the contains tests are inefficient, but tests fails without them

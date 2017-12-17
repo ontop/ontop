@@ -33,7 +33,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +79,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
 		this.inputQueryFactory = inputQueryFactory;
-		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
+		ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = LinearInclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
 		this.rewriter = queryRewriter;

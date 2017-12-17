@@ -22,8 +22,7 @@ package it.unibz.inf.ontop.si.dag;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.impl.EquivalencesDAGImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 
 import java.util.*;
 
@@ -41,43 +40,43 @@ import com.google.common.collect.ImmutableSet;
  * WARNING: THIS CLASS IS FOR TESTING ONLY
  */
 @Deprecated
-public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
+public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 
-	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
-	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
-	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
-	private final TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG;
-	private final TBoxReasonerImpl reasoner;
+	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
+	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
+	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
+	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG;
+	private final ClassifiedTBoxImpl reasoner;
 
-	public TestTBoxReasonerImpl_OnGraph(TBoxReasonerImpl reasoner) {	
-		this.objectPropertyDAG = new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(),
+	public TestClassifiedTBoxImpl_OnGraph(ClassifiedTBoxImpl reasoner) {
+		this.objectPropertyDAG = new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(),
 				new EquivalencesDAGImplOnGraph<>(reasoner.getObjectPropertyGraph()));
-		this.dataPropertyDAG = new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(),
+		this.dataPropertyDAG = new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(),
 				new EquivalencesDAGImplOnGraph<>(reasoner.getDataPropertyGraph()));
-		this.classDAG = new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(),
+		this.classDAG = new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(),
 				new EquivalencesDAGImplOnGraph<>(reasoner.getClassGraph()));
-		this.dataRangeDAG = new TBoxReasonerImpl.ClassifiedOntologyVocabularyCategoryImpl<>(ImmutableMap.of(),
+		this.dataRangeDAG = new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(),
 				new EquivalencesDAGImplOnGraph<>(reasoner.getDataRangeGraph()));
 		this.reasoner = reasoner;
 	}
 
     @Override
-    public ClassifiedOntologyVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties() {
+    public ClassifiedTBoxVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties() {
         return objectPropertyDAG;
     }
 
     @Override
-    public ClassifiedOntologyVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties() {
+    public ClassifiedTBoxVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties() {
         return dataPropertyDAG;
     }
 
     @Override
-    public ClassifiedOntologyVocabularyCategory<ClassExpression, OClass> classes() {
+    public ClassifiedTBoxVocabularyCategory<ClassExpression, OClass> classes() {
 	    return classDAG;
     }
 
     @Override
-    public ClassifiedOntologyVocabularyCategory<DataRangeExpression, Datatype> dataRanges() {
+    public ClassifiedTBoxVocabularyCategory<DataRangeExpression, Datatype> dataRanges() {
         return dataRangeDAG;
     }
 
@@ -85,7 +84,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
     // DUMMY
 
     @Override
-    public ClassifiedOntologyVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties() {
+    public ClassifiedTBoxVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties() {
         return null;
     }
 

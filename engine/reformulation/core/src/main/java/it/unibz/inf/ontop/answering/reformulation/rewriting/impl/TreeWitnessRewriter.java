@@ -27,16 +27,11 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
-import it.unibz.inf.ontop.spec.ontology.DataSomeValuesFrom;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Edge;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.TreeWitnessSet.CompatibleTreeWitnessSetIterator;
@@ -62,14 +57,14 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
-	private TBoxReasoner reasoner;
+	private ClassifiedTBox reasoner;
 	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
 	private LinearInclusionDependencies sigma;
 	
 	private Collection<TreeWitnessGenerator> generators;
 	
 	@Override
-	public void setTBox(TBoxReasoner reasoner, LinearInclusionDependencies sigma) {
+	public void setTBox(ClassifiedTBox reasoner, LinearInclusionDependencies sigma) {
 		double startime = System.currentTimeMillis();
 
 		this.reasoner = reasoner;

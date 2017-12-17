@@ -23,13 +23,10 @@ package it.unibz.inf.ontop.si.dag;
 
 import it.unibz.inf.ontop.si.repository.impl.Interval;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import junit.framework.TestCase;
 
 import java.util.List;
@@ -61,7 +58,7 @@ public class 	DAGEquivalenceTest extends TestCase {
 		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceClasses);
 
 		// generate DAG
-		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
 		
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		List<Interval> nodeInterval = engine.getRange((OClass)dag.classes().dag()
@@ -117,7 +114,7 @@ public class 	DAGEquivalenceTest extends TestCase {
 		String testURI = "http://it.unibz.inf/obda/ontologies/Ontology1314774461138.owl#";
 		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceRoles);
 		// generate DAG
-		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 
@@ -174,7 +171,7 @@ public class 	DAGEquivalenceTest extends TestCase {
 		String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
 		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceRolesInverse);
 		// generate DAG
-		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		

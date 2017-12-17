@@ -20,12 +20,8 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,12 +41,12 @@ public class TreeWitnessGenerator {
 	private Set<ClassExpression> subconcepts;
 	private ObjectSomeValuesFrom existsRinv;
 
-	private final TBoxReasoner reasoner;
+	private final ClassifiedTBox reasoner;
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);	
 //	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
 	
-	public TreeWitnessGenerator(TBoxReasoner reasoner, ObjectPropertyExpression property/*, OClass filler*/) {
+	public TreeWitnessGenerator(ClassifiedTBox reasoner, ObjectPropertyExpression property/*, OClass filler*/) {
 		this.reasoner = reasoner;
 		this.property = property;
 //		this.filler = filler;
@@ -58,7 +54,7 @@ public class TreeWitnessGenerator {
 
 	// tree witness generators of the ontology (i.e., positive occurrences of \exists R.B)
 
-	public static Collection<TreeWitnessGenerator> getTreeWitnessGenerators(TBoxReasoner reasoner) {
+	public static Collection<TreeWitnessGenerator> getTreeWitnessGenerators(ClassifiedTBox reasoner) {
 		
 		Map<ClassExpression, TreeWitnessGenerator> gens = new HashMap<ClassExpression, TreeWitnessGenerator>();				
 
@@ -92,7 +88,7 @@ public class TreeWitnessGenerator {
 	}
 	
 	
-	public static Set<ClassExpression> getMaximalBasicConcepts(Collection<TreeWitnessGenerator> gens, TBoxReasoner reasoner) {
+	public static Set<ClassExpression> getMaximalBasicConcepts(Collection<TreeWitnessGenerator> gens, ClassifiedTBox reasoner) {
 		Set<ClassExpression> concepts = new HashSet<ClassExpression>();
 		for (TreeWitnessGenerator twg : gens) 
 			concepts.addAll(twg.concepts);

@@ -13,12 +13,12 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyABox;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.si.repository.impl.RDBMSSIRepositoryManager;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -49,11 +49,11 @@ class SILoadingTools {
         final Optional<Set<OWLOntology>> abox;
         final OntologyABox ontologyABox;
         final String jdbcUrl;
-        final TBoxReasoner reasoner;
+        final ClassifiedTBox reasoner;
         final Connection localConnection;
 
         private RepositoryInit(SIRepositoryManager dataRepository, Optional<Set<OWLOntology>> abox, String jdbcUrl,
-                               TBoxReasoner reasoner, OntologyABox ontologyABox, Connection localConnection) {
+                               ClassifiedTBox reasoner, OntologyABox ontologyABox, Connection localConnection) {
             this.dataRepository = dataRepository;
             this.abox = abox;
             this.jdbcUrl = jdbcUrl;
@@ -77,7 +77,7 @@ class SILoadingTools {
     private static RepositoryInit createRepository(Ontology ontology, Optional<Set<OWLOntology>> ontologyClosure)
             throws SemanticIndexException {
 
-        TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(ontology);
+        ClassifiedTBox reformulationReasoner = ClassifiedTBoxImpl.create(ontology);
 
         SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner);
 
