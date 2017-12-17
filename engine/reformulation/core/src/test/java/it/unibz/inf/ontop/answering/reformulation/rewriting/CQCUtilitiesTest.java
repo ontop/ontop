@@ -472,7 +472,7 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
             Ontology onto = dfac.createOntology();
-			OntologyTBox sigma = dfac.createOntology().tbox();
+			OntologyTBox sigma = onto.tbox();
 			OClass left = sigma.classes().create("A");
 			ObjectPropertyExpression pright = sigma.objectProperties().create("R").getInverse();
 						
