@@ -196,7 +196,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         leftAtomJoin.setTerm(0, TERM_FACTORY.getVariable("anon-" +bnode +leftAtom.getTerm(0)));
 
         //given a data property ex hasProperty (x, y)
-        //classify statement pattern for same as classify owl:sameAs( anon-x, y)
+        //create statement pattern for same as create owl:sameAs( anon-x, y)
         //it will be the right atom of the join
         Predicate predicate = TERM_FACTORY.getOWLSameAsPredicate();
         Term sTerm = leftAtom.getTerm(0);
@@ -221,7 +221,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         leftAtomJoin2.updateTerms(leftAtom.getTerms());
         leftAtomJoin2.setTerm(1, TERM_FACTORY.getVariable("anon-"+bnode +leftAtom.getTerm(1)));
 
-        //classify statement pattern for same as classify owl:sameAs(anon-y, y)
+        //create statement pattern for same as create owl:sameAs(anon-y, y)
         //it will be the right atom of the join
 
         Predicate predicate = TERM_FACTORY.getOWLSameAsPredicate();
