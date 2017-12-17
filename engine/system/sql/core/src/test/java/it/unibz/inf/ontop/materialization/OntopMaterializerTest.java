@@ -159,7 +159,7 @@ public class OntopMaterializerTest {
 
 	private static SQLPPMapping createMapping() throws DuplicateMappingException {
 
-    	// TODO: we should not have to classify an high-level configuration just for constructing these objects...
+    	// TODO: we should not have to create an high-level configuration just for constructing these objects...
 		OntopStandaloneSQLConfiguration configuration = createAndInitConfiguration()
 				.build();
 		Injector injector = configuration.getInjector();
@@ -218,7 +218,7 @@ public class OntopMaterializerTest {
 //            String username = "sa";
 //            String password = "";
 //
-//            OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.classify("http://www.obda.org/testdb3"));
+//            OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb3"));
 //            source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //            source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //            source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -244,7 +244,7 @@ public class OntopMaterializerTest {
 //
 //            dataSources.add(source);
 //
-//            OBDADataSource source2 = MAPPING_FACTORY.getDataSource(URI.classify("http://www.obda.org/testdb2"));
+//            OBDADataSource source2 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb2"));
 //            source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //            source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //            source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -285,12 +285,12 @@ public class OntopMaterializerTest {
 //		body.add(TERM_FACTORY.getFunction(hasschool, objectTerm, TERM_FACTORY.getVariable("schooluri")));
 //		body.add(TERM_FACTORY.getFunction(school, TERM_FACTORY.getVariable("schooluri")));
 //
-//            OBDAMappingAxiom map1 = nativeQLFactory.classify(MAPPING_FACTORY.getSQLQuery(sql), body);
+//            OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 //
 //            mappingIndex.put(source.getSourceID(), ImmutableList.of(map1));
 //            mappingIndex.put(source2.getSourceID(), ImmutableList.of(map1));
 //
-//            PrefixManager prefixManager = nativeQLFactory.classify(new HashMap<String, String>());
+//            PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
 //            OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager,
 //					new MutableOntologyVocabularyImpl());
 //
@@ -322,7 +322,7 @@ public class OntopMaterializerTest {
 //		String username = "sa";
 //		String password = "";
 //
-//		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.classify("http://www.obda.org/testdb4"));
+//		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb4"));
 //		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -348,7 +348,7 @@ public class OntopMaterializerTest {
 //
 //        dataSources.add(source);
 //
-//		OBDADataSource source2 = MAPPING_FACTORY.getDataSource(URI.classify("http://www.obda.org/testdb5"));
+//		OBDADataSource source2 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb5"));
 //		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -357,7 +357,7 @@ public class OntopMaterializerTest {
 //		source2.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 //        dataSources.add(source2);
 //
-//		OBDADataSource source3 = MAPPING_FACTORY.getDataSource(URI.classify("http://www.obda.org/testdb6"));
+//		OBDADataSource source3 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb6"));
 //		source3.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //		source3.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //		source3.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -398,9 +398,9 @@ public class OntopMaterializerTest {
 //		body.add(TERM_FACTORY.getFunction(hasschool, objectTerm, TERM_FACTORY.getVariable("schooluri")));
 //		body.add(TERM_FACTORY.getFunction(school, TERM_FACTORY.getVariable("schooluri")));
 //
-//		OBDAMappingAxiom map1 = nativeQLFactory.classify(MAPPING_FACTORY.getSQLQuery(sql), body);
+//		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 //
-//        PrefixManager prefixManager = nativeQLFactory.classify(new HashMap<String, String>());
+//        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
 //        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager, new MutableOntologyVocabularyImpl());
 //
 //		QuestMaterializer materializer = new QuestMaterializer(model, false);
@@ -428,7 +428,7 @@ public class OntopMaterializerTest {
 //		String username = "sa";
 //		String password = "";
 //
-//		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.classify("http://www.obda.org/testdb7"));
+//		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb7"));
 //		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -454,7 +454,7 @@ public class OntopMaterializerTest {
 //
 //        dataSources.add(source);
 //
-//		OBDADataSource source2 = MAPPING_FACTORY.getDataSource(URI.classify("http://www.obda.org/testdb8"));
+//		OBDADataSource source2 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb8"));
 //		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -463,7 +463,7 @@ public class OntopMaterializerTest {
 //		source2.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 //        dataSources.add(source2);
 //
-//		OBDADataSource source3 = MAPPING_FACTORY.getDataSource(URI.classify("http://www.obda.org/testdb9"));
+//		OBDADataSource source3 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb9"));
 //		source3.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //		source3.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //		source3.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -472,7 +472,7 @@ public class OntopMaterializerTest {
 //		source3.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 //        dataSources.add(source3);
 //
-//        PrefixManager prefixManager = nativeQLFactory.classify(new HashMap<String, String>());
+//        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
 //        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager, new MutableOntologyVocabularyImpl());
 //		QuestMaterializer materializer = new QuestMaterializer(model, false);
 //
@@ -499,7 +499,7 @@ public class OntopMaterializerTest {
 //		String username = "sa";
 //		String password = "";
 //
-//		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.classify("http://www.obda.org/testdb11"));
+//		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb11"));
 //		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -525,7 +525,7 @@ public class OntopMaterializerTest {
 //
 //		dataSources.add(source);
 //
-//		OBDADataSource source2 = MAPPING_FACTORY.getDataSource(URI.classify("http://www.obda.org/testdb12"));
+//		OBDADataSource source2 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb12"));
 //		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -534,7 +534,7 @@ public class OntopMaterializerTest {
 //		source2.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 //        dataSources.add(source2);
 //
-//		OBDADataSource source3 = MAPPING_FACTORY.getDataSource(URI.classify("http://www.obda.org/testdb13"));
+//		OBDADataSource source3 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb13"));
 //		source3.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //		source3.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //		source3.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -575,11 +575,11 @@ public class OntopMaterializerTest {
 //		body.add(TERM_FACTORY.getFunction(hasschool, objectTerm, TERM_FACTORY.getVariable("schooluri")));
 //		body.add(TERM_FACTORY.getFunction(school, TERM_FACTORY.getVariable("schooluri")));
 //
-//		OBDAMappingAxiom map1 = nativeQLFactory.classify(MAPPING_FACTORY.getSQLQuery(sql), body);
+//		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 //
 //        mappingIndex.put(source2.getSourceID(), ImmutableList.of(map1));
 //
-//        PrefixManager prefixManager = nativeQLFactory.classify(new HashMap<String, String>());
+//        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
 //        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager,
 //				new MutableOntologyVocabularyImpl());
 //
@@ -608,7 +608,7 @@ public class OntopMaterializerTest {
 //        final Set<OBDADataSource> dataSources = new HashSet<>();
 //        final Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>();
 //
-//		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.classify("http://www.obda.org/testdb100"));
+//		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb100"));
 //		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -677,17 +677,17 @@ public class OntopMaterializerTest {
 ////		body.add(TERM_FACTORY.getFunctionalTerm(school, TERM_FACTORY.getVariable("schooluri")));
 //
 //
-//		OBDAMappingAxiom map1 = nativeQLFactory.classify(MAPPING_FACTORY.getSQLQuery(sql1), Arrays.asList(TERM_FACTORY.getFunction(person, objectTerm)));
-//		OBDAMappingAxiom map2 = nativeQLFactory.classify(MAPPING_FACTORY.getSQLQuery(sql2), Arrays.asList(TERM_FACTORY.getFunction(fn, objectTerm, firstNameVariable)));
-//		OBDAMappingAxiom map3 = nativeQLFactory.classify(MAPPING_FACTORY.getSQLQuery(sql3), Arrays.asList(TERM_FACTORY.getFunction(ln, objectTerm, lastNameVariable)));
-//		OBDAMappingAxiom map4 = nativeQLFactory.classify(MAPPING_FACTORY.getSQLQuery(sql4), Arrays.asList(TERM_FACTORY.getFunction(age, objectTerm, ageVariable)));
-//		OBDAMappingAxiom map5 = nativeQLFactory.classify(MAPPING_FACTORY.getSQLQuery(sql5), Arrays.asList(TERM_FACTORY.getFunction(hasschool, objectTerm, schoolUriVariable)));
-//		OBDAMappingAxiom map6 = nativeQLFactory.classify(MAPPING_FACTORY.getSQLQuery(sql6), Arrays.asList(TERM_FACTORY.getFunction(school, schoolUriVariable)));
+//		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql1), Arrays.asList(TERM_FACTORY.getFunction(person, objectTerm)));
+//		OBDAMappingAxiom map2 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql2), Arrays.asList(TERM_FACTORY.getFunction(fn, objectTerm, firstNameVariable)));
+//		OBDAMappingAxiom map3 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql3), Arrays.asList(TERM_FACTORY.getFunction(ln, objectTerm, lastNameVariable)));
+//		OBDAMappingAxiom map4 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql4), Arrays.asList(TERM_FACTORY.getFunction(age, objectTerm, ageVariable)));
+//		OBDAMappingAxiom map5 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql5), Arrays.asList(TERM_FACTORY.getFunction(hasschool, objectTerm, schoolUriVariable)));
+//		OBDAMappingAxiom map6 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql6), Arrays.asList(TERM_FACTORY.getFunction(school, schoolUriVariable)));
 //
 //        dataSources.add(source);
 //        mappingIndex.put(source.getSourceID(), ImmutableList.of(map1, map2, map3, map4, map5, map6));
 //
-//        PrefixManager prefixManager = nativeQLFactory.classify(new HashMap<String, String>());
+//        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
 //        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager, new MutableOntologyVocabularyImpl());
 //
 //		QuestMaterializer materializer = new QuestMaterializer(model, false);

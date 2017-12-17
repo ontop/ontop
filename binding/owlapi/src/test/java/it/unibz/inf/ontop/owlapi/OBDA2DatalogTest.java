@@ -60,7 +60,7 @@ public class OBDA2DatalogTest extends TestCase {
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/mappinganalyzer/classify-tables.sql");
+		FileReader reader = new FileReader("src/test/resources/test/mappinganalyzer/create-tables.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();

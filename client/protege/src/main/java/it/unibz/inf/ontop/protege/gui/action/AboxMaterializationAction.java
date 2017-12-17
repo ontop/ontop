@@ -51,7 +51,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 /***
- * Action to classify individuals into the currently open OWL Ontology using the
+ * Action to create individuals into the currently open OWL Ontology using the
  * existing mappings from the current data source
  *
  * @author Mariano Rodriguez Muro
@@ -295,7 +295,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 			}
 			catch (Exception e) {
 				Container container = getWorkspace().getRootPane().getParent();
-				JOptionPane.showMessageDialog(container, "Cannot classify individuals! See the log information for the details.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(container, "Cannot create individuals! See the log information for the details.", "Error", JOptionPane.ERROR_MESSAGE);
 				log.error(e.getMessage(), e);
 			}
 		}

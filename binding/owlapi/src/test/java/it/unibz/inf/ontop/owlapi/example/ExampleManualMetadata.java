@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 
 /**
- * This class shows how to classify an instance of quest giving the metadata manually
+ * This class shows how to create an instance of quest giving the metadata manually
  * 
  * @author mrezk, Christian 
  *

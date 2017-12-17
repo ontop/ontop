@@ -45,7 +45,7 @@ public class TestRDF4JBindings {
     static String r2rmlfile = "src/test/resources/userconstraints/uc.ttl";
 
     static String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
-    static String uc_create = "src/test/resources/userconstraints/classify.sql";
+    static String uc_create = "src/test/resources/userconstraints/create.sql";
 
     private Connection sqlConnection;
     private RepositoryConnection conn;

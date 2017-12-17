@@ -213,7 +213,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
          */
         catch(Exception e)
         {   e.printStackTrace();
-            throw new RepositoryConfigException("Could not classify RDF4J Repository! Reason: " + e.getMessage());
+            throw new RepositoryConfigException("Could not create RDF4J Repository! Reason: " + e.getMessage());
         }
         return repository;
     }

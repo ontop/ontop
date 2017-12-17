@@ -27,7 +27,7 @@ public class DatatypeInferenceTest {
     private static final String DB_USER = "sa";
     private static final String DB_PASSWORD = "";
     private static final String DIR = "/datatype-inference/";
-    private static final String CREATE_SCRIPT = DIR + "classify-db.sql";
+    private static final String CREATE_SCRIPT = DIR + "create-db.sql";
     private static final String DROP_SCRIPT = DIR + "drop-db.sql";
     private static final String DEFAULT_OWL_FILE = DIR + "marriage.ttl";
     private static TestConnectionManager TEST_MANAGER;

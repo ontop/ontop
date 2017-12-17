@@ -40,7 +40,7 @@ public class H2ASKTest {
 		java.sql.Statement s = sqlConnection.createStatement();
 
 		try {
-			String text = new Scanner( new File("src/test/resources/stockexchange/stockexchange-classify-h2.sql") ).useDelimiter("\\A").next();
+			String text = new Scanner( new File("src/test/resources/stockexchange/stockexchange-create-h2.sql") ).useDelimiter("\\A").next();
 			s.execute(text);
 			//Server.startWebServer(sqlConnection);
 

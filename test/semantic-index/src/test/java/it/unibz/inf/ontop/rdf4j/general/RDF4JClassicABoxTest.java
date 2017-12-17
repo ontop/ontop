@@ -53,7 +53,7 @@ public class RDF4JClassicABoxTest {
 	@BeforeClass
 	public static void setupInMemory() throws Exception
 	{
-		// classify a sesame in-memory repository
+		// create a sesame in-memory repository
 		String owlfile = "src/test/resources/onto2.owl";
 
 		Properties p = new Properties();
@@ -100,7 +100,7 @@ public class RDF4JClassicABoxTest {
 	{
 
 
-		// classify some resources and literals to make statements out of
+		// create some resources and literals to make statements out of
 		IRI alice = valueFactory.createIRI(baseURI+"Alice");
 		IRI bob = valueFactory.createIRI(baseURI+"Bob");
 		IRI age = valueFactory.createIRI(baseURI + "age");

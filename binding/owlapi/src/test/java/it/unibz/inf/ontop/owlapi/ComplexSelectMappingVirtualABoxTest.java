@@ -80,7 +80,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/complexmapping-classify-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/complexmapping-create-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();

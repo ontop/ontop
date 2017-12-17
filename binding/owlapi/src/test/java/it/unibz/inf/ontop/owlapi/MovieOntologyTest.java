@@ -27,7 +27,7 @@ public class MovieOntologyTest extends TestCase {
 
 		// String driver = "org.h2.Driver";
 		conn = DriverManager.getConnection("jdbc:h2:mem:questjunitdb", "sa",  "");
-		executeUpdate("src/test/resources/test/treewitness/imdb-schema-classify-h2.sql");
+		executeUpdate("src/test/resources/test/treewitness/imdb-schema-create-h2.sql");
 	}
 
 	
