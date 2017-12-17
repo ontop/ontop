@@ -400,7 +400,7 @@ public class OWL2QLTranslatorTest {
     @Test
 	public void test_R6() {
 		OntologyFactory factory = OntologyFactoryImpl.getInstance(); 
-		Ontology voc = factory.createOntology();
+		OntologyTBox voc = factory.createOntology().tbox();
 		
 		ObjectPropertyExpression top = voc.objectProperties().create("http://www.w3.org/2002/07/owl#topObjectProperty");
 		ObjectPropertyExpression topInv = top.getInverse();
@@ -867,11 +867,11 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce3, 
 				factory.getOWLObjectSomeValuesFrom(factory.getOWLObjectInverseOf(ope1), ce2)));
 
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 
 		ObjectPropertyExpression ope = null;
 		
-		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.tbox().getSubClassAxioms();
+		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		//System.out.println(axs);
 		assertEquals(3, axs.size()); // surrogates for existential restrictions are re-used
 		// first pass - find ope
@@ -900,7 +900,7 @@ public class OWL2QLTranslatorTest {
 			}
 		}
 		
-		Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.tbox().getSubObjectPropertyAxioms();
+		Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.getSubObjectPropertyAxioms();
 		assertEquals(1, axs1.size());
 		
 		BinaryAxiom<ObjectPropertyExpression> ax1 = axs1.iterator().next();
@@ -935,9 +935,9 @@ public class OWL2QLTranslatorTest {
 											factory.getOWLObjectSomeValuesFrom(ope2, ce2), 
 											factory.getOWLObjectComplementOf(ce3), ce4)))); 
 		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 
-		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.tbox().getSubClassAxioms();
+		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		assertEquals(4, axs.size()); // surrogates for existential restrictions are re-used
 		Iterator<BinaryAxiom<ClassExpression>> it = axs.iterator();
 
@@ -971,7 +971,7 @@ public class OWL2QLTranslatorTest {
 //        ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)ax.getSub()).getProperty(); // aux
 //        ObjectPropertyExpression opep = ((ObjectSomeValuesFrom) ax.getSub()).getProperty(); // aux1^-
 
-        Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.tbox().getSubObjectPropertyAxioms();
+        Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.getSubObjectPropertyAxioms();
 		assertEquals(2, axs1.size());
 
         axs1.iterator().forEachRemaining(ax -> {
@@ -996,7 +996,7 @@ public class OWL2QLTranslatorTest {
 //		assertEquals(ax1.getSub(), ope.getInverse());
 //		assertEquals(ax1.getSuper(), voc.getObjectProperty("http://example/R").getInverse());
 //
-		Collection<NaryAxiom<ClassExpression>> axs2 = dlliteonto.tbox().getDisjointClassesAxioms();
+		Collection<NaryAxiom<ClassExpression>> axs2 = dlliteonto.getDisjointClassesAxioms();
 		assertEquals(axs2.size(), 1);
 	}	
 	
@@ -1024,11 +1024,11 @@ public class OWL2QLTranslatorTest {
 		manager.addAxiom(onto, factory.getOWLSubClassOfAxiom(ce3, 
 				factory.getOWLObjectMinCardinality(1, factory.getOWLObjectInverseOf(ope1), ce2))); 
 		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+		OntologyTBox dlliteonto = OWLAPITranslatorUtility.translate(onto).tbox();
 
 		ObjectPropertyExpression ope = null;
 		
-		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.tbox().getSubClassAxioms();
+		Collection<BinaryAxiom<ClassExpression>> axs = dlliteonto.getSubClassAxioms();
 		//System.out.println(axs);
 		assertEquals(3, axs.size()); // surrogates for existential restrictions are re-used
 		// first pass - find ope
@@ -1057,7 +1057,7 @@ public class OWL2QLTranslatorTest {
 			}
 		}
 		
-		Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.tbox().getSubObjectPropertyAxioms();
+		Collection<BinaryAxiom<ObjectPropertyExpression>> axs1 = dlliteonto.getSubObjectPropertyAxioms();
 		assertEquals(1, axs1.size());
 		
 		BinaryAxiom<ObjectPropertyExpression> ax1 = axs1.iterator().next();

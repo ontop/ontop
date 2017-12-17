@@ -22,11 +22,6 @@ package it.unibz.inf.ontop.spec.ontology;
 
 public interface Ontology  {
 
-	OntologyVocabularyCategory<OClass> classes();
-
-    OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties();
-
-    OntologyVocabularyCategory<DataPropertyExpression> dataProperties();
 
     OntologyTBox tbox();
 

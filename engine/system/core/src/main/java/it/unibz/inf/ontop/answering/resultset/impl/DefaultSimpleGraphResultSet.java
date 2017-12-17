@@ -120,17 +120,17 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 try {
                     Assertion assertion;
                     if (predicateName.equals(IriConstants.RDF_TYPE)) {
-                        OClass oc = onto.classes().create(objectConstant.getValue());
+                        OClass oc = onto.tbox().classes().create(objectConstant.getValue());
                         assertion = onto.abox().createClassAssertion(oc, subjectConstant);
                     }
                     else {
                         if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) {
-                            ObjectPropertyExpression ope = onto.objectProperties().create(predicateName);
+                            ObjectPropertyExpression ope = onto.tbox().objectProperties().create(predicateName);
                             assertion = onto.abox().createObjectPropertyAssertion(ope,
                                     subjectConstant, (ObjectConstant) objectConstant);
                         }
                         else {
-                            DataPropertyExpression dpe = onto.dataProperties().create(predicateName);
+                            DataPropertyExpression dpe = onto.tbox().dataProperties().create(predicateName);
                             assertion = onto.abox().createDataPropertyAssertion(dpe,
                                     subjectConstant, (ValueConstant) objectConstant);
                         }

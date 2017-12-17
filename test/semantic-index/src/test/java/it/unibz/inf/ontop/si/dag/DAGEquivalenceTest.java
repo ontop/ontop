@@ -55,10 +55,11 @@ public class 	DAGEquivalenceTest extends TestCase {
 
 	public void testIndexClasses() throws Exception {
 		String testURI = "http://it.unibz.inf/obda/ontologies/test.owl#";
-		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceClasses);
+		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceClasses);
+		OntologyTBox onto = o.tbox();
 
 		// generate DAG
-		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(o);
 		
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		List<Interval> nodeInterval = engine.getRange((OClass)dag.classes().dag()
@@ -112,9 +113,10 @@ public class 	DAGEquivalenceTest extends TestCase {
 
 	public void testIntervalsRoles() throws Exception {
 		String testURI = "http://it.unibz.inf/obda/ontologies/Ontology1314774461138.owl#";
-		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceRoles);
+		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceRoles);
+        OntologyTBox onto = o.tbox();
 		// generate DAG
-		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(o);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 
@@ -169,9 +171,10 @@ public class 	DAGEquivalenceTest extends TestCase {
 
 	public void testIntervalsRolesWithInverse() throws Exception {
 		String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
-		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceRolesInverse);
+		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile(testEquivalenceRolesInverse);
+        OntologyTBox onto = o.tbox();
 		// generate DAG
-		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(o);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		

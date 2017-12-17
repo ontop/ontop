@@ -38,12 +38,12 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 	
 	protected void setUp() throws Exception {
 		ontology = OntologyFactoryImpl.getInstance().createOntology();
-		ontology.objectProperties().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#P");
-		ontology.objectProperties().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#R");
-		ontology.dataProperties().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#age");
-		ontology.classes().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Man");
-		ontology.classes().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Person");
-		ontology.classes().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Woman");
+		ontology.tbox().objectProperties().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#P");
+		ontology.tbox().objectProperties().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#R");
+		ontology.tbox().dataProperties().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#age");
+		ontology.tbox().classes().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Man");
+		ontology.tbox().classes().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Person");
+		ontology.tbox().classes().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Woman");
 		super.setUp();
 	}
 

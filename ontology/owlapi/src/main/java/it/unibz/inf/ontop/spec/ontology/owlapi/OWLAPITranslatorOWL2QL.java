@@ -1082,33 +1082,34 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	
 	private Ontology createOntology(Collection<OWLOntology> owls) {
 		Ontology o = OntologyFactoryImpl.getInstance().createOntology();
+		OntologyTBox tbox = o.tbox();
 		
 		// add all definitions for classes and properties		
 		for (OWLOntology owl : owls) {
 			for (OWLClass entity : owl.getClassesInSignature())  {
 				String uri = entity.getIRI().toString();
-				o.classes().create(uri);
+				tbox.classes().create(uri);
 			}
 
 			for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) {
 				String uri = prop.getIRI().toString();
-				if (o.dataProperties().contains(uri))  {
+				if (tbox.dataProperties().contains(uri))  {
 					punnedPredicates.add(uri); 
 					log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
 				}
 				else {
-					o.objectProperties().create(uri);
+					tbox.objectProperties().create(uri);
 				}
 			}
 			
 			for (OWLDataProperty prop : owl.getDataPropertiesInSignature())  {
 				String uri = prop.getIRI().toString();
-				if (o.objectProperties().contains(uri)) {
+				if (tbox.objectProperties().contains(uri)) {
 					punnedPredicates.add(uri);
 					log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
 				}
 				else {
-					o.dataProperties().create(uri);
+					tbox.dataProperties().create(uri);
 				}
 			}
 

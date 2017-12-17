@@ -124,9 +124,9 @@ public class DirectMappingEngine {
 					? extractPPMapping(inputPPMapping.get())
 					: extractPPMapping();
 
-			Ontology newVocabulary = vocabularyExtractor.extractVocabulary(
+			OntologyTBox newVocabulary = vocabularyExtractor.extractVocabulary(
 					newPPMapping.getTripleMaps().stream()
-							.flatMap(ax -> ax.getTargetAtoms().stream()));
+							.flatMap(ax -> ax.getTargetAtoms().stream())).tbox();
 
 			OWLOntology newOntology = inputOntology.isPresent()
 					? updateOntology(inputOntology.get(), newVocabulary)
@@ -163,14 +163,14 @@ public class DirectMappingEngine {
 	 * @return a new ontology storing all classes and properties used in the mappings
 	 *
 	 */
-	private OWLOntology updateOntology(OWLOntology ontology, Ontology vocabulary) {
+	private OWLOntology updateOntology(OWLOntology ontology, OntologyTBox vocabulary) {
 		OWLOntologyManager manager = ontology.getOWLOntologyManager();
 		Set<OWLDeclarationAxiom> declarationAxioms = extractDeclarationAxioms(ontology, vocabulary);
 		manager.addAxioms(ontology, declarationAxioms);
 		return ontology;		
 	}
 
-	public static Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntology ontology, Ontology vocabulary) {
+	public static Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntology ontology, OntologyTBox vocabulary) {
         OWLOntologyManager manager = ontology.getOWLOntologyManager();
 
         OWLDataFactory dataFactory = manager.getOWLDataFactory();

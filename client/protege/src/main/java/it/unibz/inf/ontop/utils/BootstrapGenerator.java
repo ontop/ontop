@@ -54,15 +54,15 @@ public class BootstrapGenerator {
         bootstrapMappingAndOntologyProtege(baseUri);
     }
 
-    private void bootstrapMappingAndOntologyProtege(String baseUri) throws DuplicateMappingException, MappingIOException,
-            InvalidMappingException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
+    private void bootstrapMappingAndOntologyProtege(String baseUri) throws DuplicateMappingException,
+            SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
 
 
         List<SQLPPTriplesMap> sqlppTriplesMaps = bootstrapMapping(activeOBDAModel.generatePPMapping(), baseUri);
 
-        Ontology newVocabulary = vocabularyExtractor.extractVocabulary(
+        OntologyTBox newVocabulary = vocabularyExtractor.extractVocabulary(
                 sqlppTriplesMaps.stream()
-                        .flatMap(ax -> ax.getTargetAtoms().stream()));
+                        .flatMap(ax -> ax.getTargetAtoms().stream())).tbox();
 
         updateProtegeOntology(owlManager.getActiveOntology(), newVocabulary);
     }
@@ -115,7 +115,7 @@ public class BootstrapGenerator {
         }
     }
 
-    private void updateProtegeOntology(OWLOntology ontology, Ontology vocabulary)
+    private void updateProtegeOntology(OWLOntology ontology, OntologyTBox vocabulary)
             throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException {
 
         Set<OWLDeclarationAxiom> declarationAxioms = DirectMappingEngine.extractDeclarationAxioms(ontology, vocabulary);

@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
+import it.unibz.inf.ontop.spec.ontology.OntologyTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.rdf4j.rio.helpers.SemanticIndexRDFHandler;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
@@ -105,12 +106,12 @@ public class GraphLoading {
 
         Ontology vb = ONTOLOGY_FACTORY.createOntology();
         for (IRI graphURI : graphURIs) {
-            collectOntologyVocabulary(graphURI, vb);
+            collectOntologyVocabulary(graphURI, vb.tbox());
         }
         return vb;
     }
 
-    private static void collectOntologyVocabulary(IRI graphURI, Ontology vb) throws IOException {
+    private static void collectOntologyVocabulary(IRI graphURI, OntologyTBox vb) throws IOException {
         RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphURI.toString()).get();
         RDFParser rdfParser = Rio.createParser(rdfFormat, ValueFactoryImpl.getInstance());
         ParserConfig config = rdfParser.getParserConfig();
@@ -129,16 +130,13 @@ public class GraphLoading {
                 URI pred = st.getPredicate();
                 Value obj = st.getObject();
                 if (obj instanceof Literal) {
-                    String dataProperty = pred.stringValue();
-                    vb.dataProperties().create(dataProperty);
+                    vb.dataProperties().create(pred.stringValue());
                 }
                 else if (pred.stringValue().equals(IriConstants.RDF_TYPE)) {
-                    String className = obj.stringValue();
-                    vb.classes().create(className);
+                    vb.classes().create(obj.stringValue());
                 }
                 else {
-                    String objectProperty = pred.stringValue();
-                    vb.objectProperties().create(objectProperty);
+                    vb.objectProperties().create(pred.stringValue());
                 }
             }
         });

@@ -57,10 +57,11 @@ public class DAGHierarchyTest extends TestCase {
 	public void testDescendantClasses() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-class-hierarchy.owl#";
 
-		Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile1);
+		Ontology o =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile1);
+        OntologyTBox onto = o.tbox();
 
 		// generate DAG
-		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(o);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
@@ -107,7 +108,7 @@ public class DAGHierarchyTest extends TestCase {
 
 		assertEquals(descendants.size(), 1);
 
-		assertTrue(descendants.contains(new Equivalences<ClassExpression>(ImmutableSet.of(C, D)))); // getDescendants is reflexive
+		assertTrue(descendants.contains(new Equivalences<>(ImmutableSet.of(C, D)))); // getDescendants is reflexive
 
 		/**
 		 * The initial node is Node E.
@@ -129,7 +130,7 @@ public class DAGHierarchyTest extends TestCase {
 		assertTrue(descendants.contains(classes.getVertex(C)));
 		assertTrue(descendants.contains(classes.getVertex(D)));
 		
-		assertTrue(descendants.contains(new Equivalences<ClassExpression>(ImmutableSet.of(E, F)))); // getDescendants is reflexive
+		assertTrue(descendants.contains(new Equivalences<>(ImmutableSet.of(E, F)))); // getDescendants is reflexive
 	}
 
 	/**
@@ -139,10 +140,11 @@ public class DAGHierarchyTest extends TestCase {
 	public void testAncestorClasses() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-class-hierarchy.owl#";
 
-		Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile1);
+		Ontology o =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile1);
+		OntologyTBox onto = o.tbox();
 
 		// generate DAG
-		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(o);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
@@ -193,7 +195,7 @@ public class DAGHierarchyTest extends TestCase {
 		ancestors = classes.getSuper(initialNode);
 		assertEquals(sizeOf(ancestors), 4); // ancestors is now reflexive
 
-		assertTrue(ancestors.contains(new Equivalences<ClassExpression>(ImmutableSet.of(C, D)))); // ancestor is reflexive now
+		assertTrue(ancestors.contains(new Equivalences<>(ImmutableSet.of(C, D)))); // ancestor is reflexive now
 		assertTrue(ancestors.contains(classes.getVertex(E)));
 		assertTrue(ancestors.contains(classes.getVertex(F)));
 
@@ -213,7 +215,7 @@ public class DAGHierarchyTest extends TestCase {
 
 		assertEquals(ancestors.size(), 1);
 
-		assertTrue(ancestors.contains(new Equivalences<ClassExpression>(ImmutableSet.of(E, F))));// ancestor is reflexive now
+		assertTrue(ancestors.contains(new Equivalences<>(ImmutableSet.of(E, F))));// ancestor is reflexive now
 	}
 
 	/**
@@ -223,10 +225,11 @@ public class DAGHierarchyTest extends TestCase {
 	public void testDescendantRoles() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-role-hierarchy.owl#";
 
-		Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile2);
-		
-		// generate DAG
-		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
+		Ontology o =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile2);
+        OntologyTBox onto = o.tbox();
+
+        // generate DAG
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(o);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
@@ -272,7 +275,7 @@ public class DAGHierarchyTest extends TestCase {
 
 		assertEquals(descendants.size(), 1);
 
-		assertTrue(descendants.contains(new Equivalences<ObjectPropertyExpression>(ImmutableSet.of(R, S)))); // getDescendants is reflexive
+		assertTrue(descendants.contains(new Equivalences<>(ImmutableSet.of(R, S)))); // getDescendants is reflexive
 
 		/**
 		 * The initial node is Node T.
@@ -293,7 +296,7 @@ public class DAGHierarchyTest extends TestCase {
 		assertTrue(descendants.contains(properties.getVertex(Q)));
 		assertTrue(descendants.contains(properties.getVertex(R)));
 		assertTrue(descendants.contains(properties.getVertex(S)));
-		assertTrue(descendants.contains(new Equivalences<ObjectPropertyExpression>(ImmutableSet.of(T, U))));// getDescendants is reflexive
+		assertTrue(descendants.contains(new Equivalences<>(ImmutableSet.of(T, U))));// getDescendants is reflexive
 	}
 
 	/**
@@ -303,10 +306,11 @@ public class DAGHierarchyTest extends TestCase {
 	public void testAncestorRoles() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-role-hierarchy.owl#";
 
-		Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile2);
+		Ontology o =  OWLAPITranslatorUtility.loadOntologyFromFile(inputFile2);
+        OntologyTBox onto = o.tbox();
 
 		// generate DAG
-		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(o);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 		
@@ -355,7 +359,7 @@ public class DAGHierarchyTest extends TestCase {
 		ancestors = properties.getSuper(initialNode);
 		assertEquals(sizeOf(ancestors),4); // ancestor is reflexive now
 
-		assertTrue(ancestors.contains(new Equivalences<ObjectPropertyExpression>(ImmutableSet.of(R, S)))); // ancestor is reflexive now
+		assertTrue(ancestors.contains(new Equivalences<>(ImmutableSet.of(R, S)))); // ancestor is reflexive now
 		
 		assertTrue(ancestors.contains(properties.getVertex(T)));
 		assertTrue(ancestors.contains(properties.getVertex(U)));
@@ -375,6 +379,6 @@ public class DAGHierarchyTest extends TestCase {
 		ancestors = properties.getSuper(initialNode);
 		assertEquals(ancestors.size(), 1);
 
-		assertTrue(ancestors.contains(new Equivalences<ObjectPropertyExpression>(ImmutableSet.of(T, U))));		// ancestor is reflexive now
+		assertTrue(ancestors.contains(new Equivalences<>(ImmutableSet.of(T, U))));		// ancestor is reflexive now
 	}
 }

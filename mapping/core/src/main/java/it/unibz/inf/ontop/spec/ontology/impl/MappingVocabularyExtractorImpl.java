@@ -31,13 +31,13 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
                 .forEach(f -> {
                     String name = f.getFunctionSymbol().getName();
                     if (f.getArity() == 1)
-                        ontology.classes().create(name);
+                        ontology.tbox().classes().create(name);
                     else {
                         Predicate.COL_TYPE secondArgType = f.getFunctionSymbol().getType(1);
                         if ((secondArgType != null) && secondArgType.equals(Predicate.COL_TYPE.OBJECT))
-                            ontology.objectProperties().create(name);
+                            ontology.tbox().objectProperties().create(name);
                         else
-                            ontology.dataProperties().create(name);
+                            ontology.tbox().dataProperties().create(name);
                     }
                 });
         return ontology;

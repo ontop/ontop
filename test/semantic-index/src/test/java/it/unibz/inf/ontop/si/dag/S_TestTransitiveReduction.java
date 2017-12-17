@@ -98,8 +98,9 @@ public class S_TestTransitiveReduction extends TestCase {
 	
 	
 	public void testR() throws Exception{
-		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive.owl");
-		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
+		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive.owl");
+		OntologyTBox onto = o.tbox();
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(o);
 		
 		ClassExpression A = onto.classes().get("http://www.kro.com/ontologies/A");
 		ClassExpression B = onto.classes().get("http://www.kro.com/ontologies/B");
@@ -116,8 +117,9 @@ public class S_TestTransitiveReduction extends TestCase {
 	}
 
 	public void testR2() throws Exception{
-		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive2.owl");
-		ClassifiedTBox dag = ClassifiedTBoxImpl.create(onto);
+		Ontology o = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive2.owl");
+		OntologyTBox onto = o.tbox();
+		ClassifiedTBox dag = ClassifiedTBoxImpl.create(o);
 		
 		ClassExpression A = onto.classes().get("http://www.kro.com/ontologies/A");
 		ClassExpression B = onto.classes().get("http://www.kro.com/ontologies/B");

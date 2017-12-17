@@ -95,20 +95,20 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 	    OntologyImpl impl = (OntologyImpl)onto;
 
 		final DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> objectPropertyGraph =
-				getObjectPropertyGraph(onto);
+				getObjectPropertyGraph(onto.tbox());
 		final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG =
 				EquivalencesDAGImpl.getEquivalencesDAG(objectPropertyGraph);
 
 		final DefaultDirectedGraph<DataPropertyExpression, DefaultEdge> dataPropertyGraph =
-				getDataPropertyGraph(onto);
+				getDataPropertyGraph(onto.tbox());
 		final EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG =
 				EquivalencesDAGImpl.getEquivalencesDAG(dataPropertyGraph);
 
 		final EquivalencesDAGImpl<ClassExpression> classDAG =
-				EquivalencesDAGImpl.getEquivalencesDAG(getClassGraph(onto, objectPropertyGraph, dataPropertyGraph));
+				EquivalencesDAGImpl.getEquivalencesDAG(getClassGraph(onto.tbox(), objectPropertyGraph, dataPropertyGraph));
 
 		final EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG =
-				EquivalencesDAGImpl.getEquivalencesDAG(getDataRangeGraph(onto, dataPropertyGraph));
+				EquivalencesDAGImpl.getEquivalencesDAG(getDataRangeGraph(onto.tbox(), dataPropertyGraph));
 
 		chooseObjectPropertyRepresentatives(objectPropertyDAG);
 		chooseDataPropertyRepresentatives(dataPropertyDAG);
@@ -555,7 +555,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 	 * @return the graph of the property inclusions
 	 */
 
-	private static DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> getObjectPropertyGraph(Ontology ontology) {
+	private static DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> getObjectPropertyGraph(OntologyTBox ontology) {
 
 		DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 
@@ -566,13 +566,13 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 			}
 		}
 
-		for (ObjectPropertyExpression role : ontology.tbox().getAuxiliaryObjectProperties()) {
+		for (ObjectPropertyExpression role : ontology.getAuxiliaryObjectProperties()) {
 			graph.addVertex(role);
 			graph.addVertex(role.getInverse());
 		}
 
 		// property inclusions
-		for (BinaryAxiom<ObjectPropertyExpression> roleIncl : ontology.tbox().getSubObjectPropertyAxioms()) {
+		for (BinaryAxiom<ObjectPropertyExpression> roleIncl : ontology.getSubObjectPropertyAxioms()) {
 			// adds the direct edge and the inverse (e.g., R ISA S and R- ISA S-)
 			graph.addEdge(roleIncl.getSub(), roleIncl.getSuper());
 			graph.addEdge(roleIncl.getSub().getInverse(), roleIncl.getSuper().getInverse());
@@ -591,7 +591,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 	 * @return the graph of the property inclusions
 	 */
 
-	private static DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> getDataPropertyGraph(Ontology ontology) {
+	private static DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> getDataPropertyGraph(OntologyTBox ontology) {
 
 		DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 
@@ -599,7 +599,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 			if (!role.isBottom() && !role.isTop())
 				graph.addVertex(role);
 
-		for (BinaryAxiom<DataPropertyExpression> roleIncl : ontology.tbox().getSubDataPropertyAxioms())
+		for (BinaryAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms())
 			graph.addEdge(roleIncl.getSub(), roleIncl.getSuper());
 
 		return graph;
@@ -619,7 +619,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 	 * @return the graph of the concept inclusions
 	 */
 
-	private static DefaultDirectedGraph<ClassExpression,DefaultEdge> getClassGraph (Ontology ontology,
+	private static DefaultDirectedGraph<ClassExpression,DefaultEdge> getClassGraph (OntologyTBox ontology,
 																					DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> objectPropertyGraph,
 																					DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> dataPropertyGraph) {
 
@@ -654,13 +654,13 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 
 
 		// class inclusions from the ontology
-		for (BinaryAxiom<ClassExpression> clsIncl : ontology.tbox().getSubClassAxioms())
+		for (BinaryAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms())
 			graph.addEdge(clsIncl.getSub(), clsIncl.getSuper());
 
 		return graph;
 	}
 
-	private static DefaultDirectedGraph<DataRangeExpression,DefaultEdge> getDataRangeGraph (Ontology ontology,
+	private static DefaultDirectedGraph<DataRangeExpression,DefaultEdge> getDataRangeGraph (OntologyTBox ontology,
 																							DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> dataPropertyGraph) {
 
 		DefaultDirectedGraph<DataRangeExpression,DefaultEdge> dataRangeGraph
@@ -678,7 +678,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		}
 
 		// data range inclusions from the ontology
-		for (BinaryAxiom<DataRangeExpression> clsIncl : ontology.tbox().getSubDataRangeAxioms()) {
+		for (BinaryAxiom<DataRangeExpression> clsIncl : ontology.getSubDataRangeAxioms()) {
 			dataRangeGraph.addVertex(clsIncl.getSuper()); // Datatype is not among the vertices from the start
 			dataRangeGraph.addEdge(clsIncl.getSub(), clsIncl.getSuper());
 		}

@@ -47,7 +47,7 @@ public class DAGTest extends TestCase {
 	public final static Logger log = LoggerFactory.getLogger(DAGTest.class);
 
 	public static final String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
-	private Ontology onto;
+	private OntologyTBox onto;
 
 	private static final String owl_exists = "::__exists__::";
 	private static final String owl_inverse_exists = "::__inverse__exists__::";
@@ -151,27 +151,28 @@ public class DAGTest extends TestCase {
 
 	private void test_dag_index_nodes(String testname) throws Exception {
 
-		onto = OWLAPITranslatorUtility.loadOntologyFromFile(owlloc + testname + ".owl");
-		ClassifiedTBox reasoner = ClassifiedTBoxImpl.create(onto);
+		Ontology ontology = OWLAPITranslatorUtility.loadOntologyFromFile(owlloc + testname + ".owl");
+		onto = ontology.tbox();
+		ClassifiedTBox reasoner = ClassifiedTBoxImpl.create(ontology);
 		List<List<Description>> exp_idx = get_results(testname);
 
-		List<Description> classes= new LinkedList<Description>();
-		for(Equivalences<ClassExpression> node : reasoner.classes().dag()) {
-			for(ClassExpression c: node)
+		List<Description> classes= new LinkedList<>();
+		for (Equivalences<ClassExpression> node : reasoner.classes().dag()) {
+			for (ClassExpression c : node)
 				classes.add(c);
 		}
-		for(Equivalences<DataRangeExpression> node : reasoner.dataRanges().dag()) {
-			for(DataRangeExpression c: node)
+		for (Equivalences<DataRangeExpression> node : reasoner.dataRanges().dag()) {
+			for (DataRangeExpression c : node)
 				classes.add(c);
 		}
 		
 		List<Description> roles= new LinkedList<Description>();
 		for (Equivalences<ObjectPropertyExpression> node : reasoner.objectProperties().dag()) {
-			for (ObjectPropertyExpression r: node)
+			for (ObjectPropertyExpression r : node)
 				roles.add(r);
 		}
 		for (Equivalences<DataPropertyExpression> node : reasoner.dataProperties().dag()) {
-			for (DataPropertyExpression r: node) {
+			for (DataPropertyExpression r : node) {
 				roles.add(r);
 				roles.add(r); // ROMAN: hacky way of double-counting data properties (which have no inverses)
 			}

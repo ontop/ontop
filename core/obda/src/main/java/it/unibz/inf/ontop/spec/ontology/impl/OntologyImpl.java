@@ -271,15 +271,6 @@ public class OntologyImpl implements Ontology {
 
 
     @Override
-    public OntologyVocabularyCategory<OClass> classes() { return classes; }
-
-    @Override
-    public OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() { return objectProperties; }
-
-    @Override
-    public OntologyVocabularyCategory<DataPropertyExpression> dataProperties() { return dataProperties; }
-
-    @Override
     public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
 
  	@Override

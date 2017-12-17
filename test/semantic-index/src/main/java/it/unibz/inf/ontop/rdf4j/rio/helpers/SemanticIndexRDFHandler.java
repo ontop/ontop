@@ -121,55 +121,49 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 		Value object = st.getObject();
 
 		// Create the assertion
-		final Assertion assertion;
 		try {
 			if (predicateName.equals(IriConstants.RDF_TYPE)) {
-                OClass oc = ontology.classes().create(object.stringValue());
-				assertion = ontology.abox().createClassAssertion(oc, c);
+                OClass oc = ontology.tbox().classes().create(object.stringValue());
+				return ontology.abox().createClassAssertion(oc, c);
 			} 
-			else {
-				if (object instanceof IRI) {
-                    ObjectPropertyExpression ope  = ontology.objectProperties().create(predicateName);
-					ObjectConstant c2 = TERM_FACTORY.getConstantURI(object.stringValue());
-					assertion = ontology.abox().createObjectPropertyAssertion(ope, c, c2);
-				} 
-				else if (object instanceof BNode) {
-                    ObjectPropertyExpression ope  = ontology.objectProperties().create(predicateName);
-					ObjectConstant c2 = TERM_FACTORY.getConstantBNode(object.stringValue());
-					assertion = ontology.abox().createObjectPropertyAssertion(ope, c, c2);
-				} 
-				else if (object instanceof Literal) {
-                    DataPropertyExpression dpe  = ontology.dataProperties().create(predicateName);
-					Literal l = (Literal) object;
-					Optional<String> lang = l.getLanguage();
-					ValueConstant c2;
-					if (!lang.isPresent()) {
-						IRI datatype = l.getDatatype();
-						Predicate.COL_TYPE type;
-						if (datatype == null) {
-							type = Predicate.COL_TYPE.LITERAL;
-						} 
-						else {
-							type = TYPE_FACTORY.getDatatype(datatype);
-							if (type == null)
-								type = Predicate.COL_TYPE.UNSUPPORTED;
-						}
-						c2 = TERM_FACTORY.getConstantLiteral(l.getLabel(), type);
-					} 
-					else {
-						c2 = TERM_FACTORY.getConstantLiteral(l.getLabel(), lang.get());
-					}
-					assertion = ontology.abox().createDataPropertyAssertion(dpe, c, c2);
-				} 
-				else {
-					throw new RuntimeException("Unsupported object found in triple: " + st + " (Required URI, BNode or Literal)");
-				}
-			} 
+			else if (object instanceof IRI) {
+                ObjectPropertyExpression ope  = ontology.tbox().objectProperties().create(predicateName);
+                ObjectConstant c2 = TERM_FACTORY.getConstantURI(object.stringValue());
+                return ontology.abox().createObjectPropertyAssertion(ope, c, c2);
+            }
+            else if (object instanceof BNode) {
+                ObjectPropertyExpression ope  = ontology.tbox().objectProperties().create(predicateName);
+                ObjectConstant c2 = TERM_FACTORY.getConstantBNode(object.stringValue());
+                return ontology.abox().createObjectPropertyAssertion(ope, c, c2);
+            }
+            else if (object instanceof Literal) {
+                DataPropertyExpression dpe  = ontology.tbox().dataProperties().create(predicateName);
+                Literal l = (Literal) object;
+                Optional<String> lang = l.getLanguage();
+                final ValueConstant c2;
+                if (!lang.isPresent()) {
+                    IRI datatype = l.getDatatype();
+                    Predicate.COL_TYPE type;
+                    if (datatype == null) {
+                        type = Predicate.COL_TYPE.LITERAL;
+                    }
+                    else {
+                        type = TYPE_FACTORY.getDatatype(datatype);
+                        if (type == null)
+                            type = Predicate.COL_TYPE.UNSUPPORTED;
+                    }
+                    c2 = TERM_FACTORY.getConstantLiteral(l.getLabel(), type);
+                }
+                else {
+                    c2 = TERM_FACTORY.getConstantLiteral(l.getLabel(), lang.get());
+                }
+                return ontology.abox().createDataPropertyAssertion(dpe, c, c2);
+            }
+            throw new RuntimeException("Unsupported object found in triple: " + st + " (Required URI, BNode or Literal)");
 		}
 		catch (InconsistentOntologyException e) {
 			throw new RuntimeException("InconsistentOntologyException: " + st);
 		}
-		return assertion;
 	}
 
 	public int getCount() {

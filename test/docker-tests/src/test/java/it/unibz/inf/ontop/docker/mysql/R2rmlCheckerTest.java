@@ -29,10 +29,7 @@ import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import org.junit.After;
 import org.junit.Before;
@@ -63,7 +60,7 @@ public class R2rmlCheckerTest {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology owlOntology;
-	private Ontology onto;
+	private OntologyTBox onto;
 
 	final String owlFile = "/mysql/npd/npd-v2-ql_a.owl";
 	final String obdaFile = "/mysql/npd/npd-v2-ql_a.obda";
@@ -93,28 +90,26 @@ public class R2rmlCheckerTest {
 		owlOntology = manager
 				.loadOntologyFromOntologyDocument(owlFileName);
 
-		onto = OWLAPITranslatorUtility.translate(owlOntology);
+		onto = OWLAPITranslatorUtility.translate(owlOntology).tbox();
 
 		loadOBDA();
 		loadR2rml();
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		try {
-
-			if(reasonerOBDA!=null){
-			reasonerOBDA.dispose();
+			if (reasonerOBDA!=null) {
+				reasonerOBDA.dispose();
 			}
-			if(reasonerR2rml!=null){
-			reasonerR2rml.dispose();
+			if (reasonerR2rml!=null) {
+				reasonerR2rml.dispose();
 			}
-
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			log.debug(e.getMessage());
 			assertTrue(false);
 		}
-
 	}
 
 	//TODO:  extract the two OBDA specifications to compare the mapping objects

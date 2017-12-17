@@ -71,7 +71,8 @@ public class EmptyEntitiesTest {
 	private Set<Description> emptyProperties = new HashSet<Description>();
 
 	private OntopOWLReasoner reasoner;
-	private Ontology onto;
+	private OntologyTBox onto;
+	private Ontology ontology;
 
 	@Before
 	public void setUp() throws Exception {
@@ -96,7 +97,8 @@ public class EmptyEntitiesTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		onto = OWLAPITranslatorUtility.translate(config.loadProvidedInputOntology());
+		ontology = OWLAPITranslatorUtility.translate(config.loadProvidedInputOntology());
+		onto = ontology.tbox();
 	}
 
 	@After
@@ -267,7 +269,7 @@ public class EmptyEntitiesTest {
 	 */
 	// @Test
 	public void testEmptiesWithInverses() throws Exception {
-		ClassifiedTBox tboxreasoner = ClassifiedTBoxImpl.create(onto);
+		ClassifiedTBox tboxreasoner = ClassifiedTBoxImpl.create(ontology);
 		System.out.println();
 		System.out.println(tboxreasoner.objectProperties().dag());
 
@@ -302,5 +304,4 @@ public class EmptyEntitiesTest {
 			log.info(r + " Empty role/s: " + emptyRoles);
 		}
 	}
-
 }
