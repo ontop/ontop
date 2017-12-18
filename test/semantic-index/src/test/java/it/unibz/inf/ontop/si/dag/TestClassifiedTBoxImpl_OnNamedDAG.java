@@ -46,10 +46,11 @@ import java.util.Set;
 @Deprecated
 public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 
-	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
-	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
-	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
-	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG;
+	private final EquivalencesDAGImpl<ClassExpression> classDAG;
+	private final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG;
+	private final EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG;
+	private final EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG;
+
 	private final ClassifiedTBox reasoner;
 
 	/**
@@ -58,50 +59,54 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 	 */
 	public TestClassifiedTBoxImpl_OnNamedDAG(ClassifiedTBox reasoner) {
 
-		this.objectPropertyDAG =
-				new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
-				SemanticIndexBuilder.getNamedDAG(reasoner.objectProperties().dag()), reasoner.objectProperties().dag()));
-		this.dataPropertyDAG =
-				new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
-				SemanticIndexBuilder.getNamedDAG(reasoner.dataProperties().dag()), reasoner.dataProperties().dag()));
-		this.classDAG =
-				new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
-				SemanticIndexBuilder.getNamedDAG(reasoner.classes().dag()), reasoner.classes().dag()));
-		this.dataRangeDAG =
-				new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(), new EquivalencesDAGImpl<>(
-					SemanticIndexBuilder.getNamedDAG(reasoner.dataRanges().dag()), reasoner.dataRanges().dag()));
+		this.objectPropertyDAG = new EquivalencesDAGImpl<>(
+				SemanticIndexBuilder.getNamedDAG(reasoner.objectPropertiesDAG()), reasoner.objectPropertiesDAG());
+		this.dataPropertyDAG = new EquivalencesDAGImpl<>(
+				SemanticIndexBuilder.getNamedDAG(reasoner.dataPropertiesDAG()), reasoner.dataPropertiesDAG());
+		this.classDAG = new EquivalencesDAGImpl<>(
+				SemanticIndexBuilder.getNamedDAG(reasoner.classesDAG()), reasoner.classesDAG());
+		this.dataRangeDAG = new EquivalencesDAGImpl<>(
+					SemanticIndexBuilder.getNamedDAG(reasoner.dataRangesDAG()), reasoner.dataRangesDAG());
 		this.reasoner = reasoner;
 	}
 
-	
-	@Override
-	public ClassifiedTBoxVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties() {
-		return objectPropertyDAG;
-	}
-	
-	@Override
-	public ClassifiedTBoxVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties() {
-		return dataPropertyDAG;
-	}
 
-	@Override
-	public ClassifiedTBoxVocabularyCategory<ClassExpression, OClass> classes() {
-	    return classDAG;
-	}
+    @Override
+    public OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() { return reasoner.objectProperties(); }
 
-	@Override
-	public ClassifiedTBoxVocabularyCategory<DataRangeExpression, Datatype> dataRanges() {
-		return dataRangeDAG;
-	}
+    @Override
+    public OntologyVocabularyCategory<DataPropertyExpression> dataProperties() { return reasoner.dataProperties(); }
 
-	// DUMMY
+    @Override
+    public OntologyVocabularyCategory<OClass> classes() {
+        return reasoner.classes();
+    }
 
-	@Override
-	public ClassifiedTBoxVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties() {
-		return null;
-	}
+    @Override
+    public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return reasoner.annotationProperties(); }
 
-	/**
+    @Override
+    public EquivalencesDAG<ClassExpression> classesDAG() {
+        return classDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<ObjectPropertyExpression> objectPropertiesDAG() {
+        return objectPropertyDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<DataPropertyExpression> dataPropertiesDAG() {
+        return dataPropertyDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<DataRangeExpression> dataRangesDAG() {
+        return dataRangeDAG;
+    }
+
+
+    /**
 	 * Reconstruction of the Named DAG (as EquivalencesDAG) from a NamedDAG
 	 *
 	 * @param <T> Property or BasicClassDescription

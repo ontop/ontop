@@ -45,44 +45,15 @@ import com.google.common.collect.ImmutableSet;
 
 public class ClassifiedTBoxImpl implements ClassifiedTBox {
 
-	private final ClassifiedTBoxVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
-    private final ClassifiedTBoxVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
-    private final ClassifiedTBoxVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
-    private final ClassifiedTBoxVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG;
-    private final ClassifiedTBoxVocabularyCategoryImpl<AnnotationProperty, AnnotationProperty> annotationProperties;
+	private final OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties;
+    private final OntologyVocabularyCategory<DataPropertyExpression> dataProperties;
+    private final OntologyVocabularyCategory<OClass> classes;
+    private final OntologyVocabularyCategory<AnnotationProperty> annotationProperties;
 
-    public static final class ClassifiedTBoxVocabularyCategoryImpl<T, V> implements ClassifiedTBoxVocabularyCategory<T,V> {
-        private final ImmutableMap<String, V> iriIndex;
-        private final EquivalencesDAG<T> dag;
-
-        public ClassifiedTBoxVocabularyCategoryImpl(ImmutableMap<String, V> iriIndex, EquivalencesDAG<T> dag) {
-            this.iriIndex = iriIndex;
-            this.dag = dag;
-        }
-
-        @Override
-        public Iterator<V> iterator() {
-            return iriIndex.values().iterator();
-        }
-
-        @Override
-        public boolean contains(String iri) {
-            return iriIndex.containsKey(iri);
-        }
-
-        @Override
-        public V get(String iri) {
-            V oc = iriIndex.get(iri);
-            if (oc == null)
-                throw new RuntimeException("NOT FOUND: " + iri);
-            return oc;
-        }
-
-        @Override
-        public EquivalencesDAG<T> dag() {
-            return dag;
-        }
-    }
+    private final EquivalencesDAGImpl<ClassExpression> classDAG;
+    private final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG;
+    private final EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG;
+    private final EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG;
 
 
     /**
@@ -116,11 +87,14 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		chooseDataRangeRepresentatives(dataRangeDAG, dataPropertyDAG);
 
 		ClassifiedTBoxImpl r = new ClassifiedTBoxImpl(
-		        new ClassifiedTBoxVocabularyCategoryImpl<>(impl.getClassesRawMap(), classDAG),
-                new ClassifiedTBoxVocabularyCategoryImpl<>(OntologyImpl.OWL2QLDatatypes, dataRangeDAG),
-                new ClassifiedTBoxVocabularyCategoryImpl<>(impl.getObjectPropertiesRawMap(), objectPropertyDAG),
-                new ClassifiedTBoxVocabularyCategoryImpl<>(impl.getDataPropertiesRawMap(), dataPropertyDAG),
-                new ClassifiedTBoxVocabularyCategoryImpl<>(impl.getAnnotationPropertiesRawMap(), null));
+                impl.classes(),
+                impl.objectProperties(),
+                impl.dataProperties(),
+                impl.annotationProperties(),
+                classDAG,
+                objectPropertyDAG,
+                dataPropertyDAG,
+                dataRangeDAG);
 //		if (equivalenceReduced) {
 //			r = getEquivalenceSimplifiedReasoner(r);
 //		}
@@ -134,16 +108,22 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 	 * @param objectPropertyDAG
 	 * @param objectPropertyDAG
 	 */
-	private ClassifiedTBoxImpl(ClassifiedTBoxVocabularyCategoryImpl<ClassExpression, OClass> classDAG,
-							   ClassifiedTBoxVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG,
-							   ClassifiedTBoxVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG,
-							   ClassifiedTBoxVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG,
-							   ClassifiedTBoxVocabularyCategoryImpl<AnnotationProperty, AnnotationProperty> annotationProperties) {
+	private ClassifiedTBoxImpl(OntologyVocabularyCategory<OClass> classes,
+							   OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties,
+							   OntologyVocabularyCategory<DataPropertyExpression> dataProperties,
+							   OntologyVocabularyCategory<AnnotationProperty> annotationProperties,
+                               EquivalencesDAGImpl<ClassExpression> classDAG,
+                               EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG,
+                               EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG,
+							   EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG) {
+        this.classes = classes;
+		this.objectProperties = objectProperties;
+		this.dataProperties = dataProperties;
+		this.annotationProperties = annotationProperties;
+		this.classDAG = classDAG;
 		this.objectPropertyDAG = objectPropertyDAG;
 		this.dataPropertyDAG = dataPropertyDAG;
-		this.classDAG = classDAG;
-		this.dataRangeDAG = dataRangeDAG;
-		this.annotationProperties = annotationProperties;
+        this.dataRangeDAG = dataRangeDAG;
 	}
 
 	@Override
@@ -153,63 +133,28 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 
 
     @Override
-    public ClassifiedTBoxVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties() {
-        return objectPropertyDAG;
-    }
+    public OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() { return objectProperties; }
 
     @Override
-    public ClassifiedTBoxVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties() {
-        return dataPropertyDAG;
-    }
-
-    /**
-	 * Return the DAG of classes
-	 *
-	 * @return DAG
-	 */
-
-
-	@Override
-	public ClassifiedTBoxVocabularyCategory<ClassExpression, OClass> classes() {
-		return classDAG;
-	}
-
-	/**
-	 * Return the DAG of datatypes and data property ranges
-	 *
-	 * @return DAG
-	 */
-
-
-	@Override
-	public ClassifiedTBoxVocabularyCategory<DataRangeExpression, Datatype> dataRanges() {
-		return dataRangeDAG;
-	}
+    public EquivalencesDAG<ObjectPropertyExpression> objectPropertiesDAG() { return objectPropertyDAG; }
 
     @Override
-    public ClassifiedTBoxVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties() {
-        return annotationProperties;
-    }
+    public OntologyVocabularyCategory<DataPropertyExpression> dataProperties() { return dataProperties; }
 
-	/**
-	 * Return the DAG of object properties
-	 *
-	 * @return DAG
-	 */
+    @Override
+    public EquivalencesDAG<DataPropertyExpression> dataPropertiesDAG() { return dataPropertyDAG; }
 
-	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
-		return objectPropertyDAG.dag();
-	}
+    @Override
+	public OntologyVocabularyCategory<OClass> classes() { return classes; }
 
-	/**
-	 * Return the DAG of data properties
-	 *
-	 * @return DAG
-	 */
+    @Override
+    public EquivalencesDAG<ClassExpression> classesDAG() { return classDAG; }
 
-	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
-		return dataPropertyDAG.dag();
-	}
+    @Override
+    public EquivalencesDAG<DataRangeExpression> dataRangesDAG() { return dataRangeDAG; }
+
+    @Override
+    public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
 
 
 	// INTERNAL DETAILS
@@ -218,36 +163,26 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 
 
 	@Deprecated // test only
-	public DefaultDirectedGraph<ClassExpression,DefaultEdge> getClassGraph() {
-		return ((EquivalencesDAGImpl<ClassExpression>)classDAG.dag()).getGraph();
-	}
+	public DefaultDirectedGraph<ClassExpression,DefaultEdge> getClassGraph() { return classDAG.getGraph(); }
+
 	@Deprecated // test only
-	public DefaultDirectedGraph<DataRangeExpression,DefaultEdge> getDataRangeGraph() {
-		return ((EquivalencesDAGImpl<DataRangeExpression>)dataRangeDAG.dag()).getGraph();
+	public DefaultDirectedGraph<DataRangeExpression,DefaultEdge> getDataRangeGraph() { return dataRangeDAG.getGraph(); }
+
+	@Deprecated // test only
+	public DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> getObjectPropertyGraph() { return objectPropertyDAG.getGraph();
 	}
 
 	@Deprecated // test only
-	public DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> getObjectPropertyGraph() {
-		return ((EquivalencesDAGImpl<ObjectPropertyExpression>)objectPropertyDAG.dag()).getGraph();
-	}
-	@Deprecated // test only
-	public DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> getDataPropertyGraph() {
-		return  ((EquivalencesDAGImpl<DataPropertyExpression>)dataPropertyDAG.dag()).getGraph();
-	}
-
+	public DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> getDataPropertyGraph() { return dataPropertyDAG.getGraph(); }
 
 	@Deprecated // test only
 	public int edgeSetSize() {
-		return ((EquivalencesDAGImpl<ObjectPropertyExpression>)objectPropertyDAG.dag()).edgeSetSize()
-                + ((EquivalencesDAGImpl<DataPropertyExpression>)dataPropertyDAG.dag()).edgeSetSize()
-                + ((EquivalencesDAGImpl<ClassExpression>)classDAG.dag()).edgeSetSize();
+		return objectPropertyDAG.edgeSetSize() + dataPropertyDAG.edgeSetSize() + classDAG.edgeSetSize();
 	}
 
 	@Deprecated // test only
 	public int vertexSetSize() {
-		return ((EquivalencesDAGImpl<ObjectPropertyExpression>)objectPropertyDAG.dag()).vertexSetSize()
-                + ((EquivalencesDAGImpl<DataPropertyExpression>)dataPropertyDAG.dag()).vertexSetSize()
-                +  ((EquivalencesDAGImpl<ClassExpression>)classDAG.dag()).vertexSetSize();
+		return objectPropertyDAG.vertexSetSize() + dataPropertyDAG.vertexSetSize() + classDAG.vertexSetSize();
 	}
 
 
@@ -459,7 +394,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 				= new SimpleDirectedGraph<>(DefaultEdge.class);
 
 		// classify vertices for properties
-		for(Equivalences<ObjectPropertyExpression> node : reasoner.objectProperties().dag()) {
+		for(Equivalences<ObjectPropertyExpression> node : reasoner.objectPropertiesDAG()) {
 			ObjectPropertyExpression rep = node.getRepresentative();
 			ObjectPropertyExpression repInv = rep.getInverse();
 
@@ -474,7 +409,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		}
 
 		EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG = EquivalencesDAGImpl.reduce(
-				(EquivalencesDAGImpl<ObjectPropertyExpression>)reasoner.objectProperties().dag(), objectProperties);
+				(EquivalencesDAGImpl<ObjectPropertyExpression>)reasoner.objectPropertiesDAG(), objectProperties);
 
 		// DATA PROPERTIES
 		//
@@ -482,7 +417,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 				= new SimpleDirectedGraph<>(DefaultEdge.class);
 
 		// classify vertices for properties
-		for(Equivalences<DataPropertyExpression> node : reasoner.dataProperties().dag()) {
+		for(Equivalences<DataPropertyExpression> node : reasoner.dataPropertiesDAG()) {
 			DataPropertyExpression rep = node.getRepresentative();
 
 			Equivalences<DataPropertyExpression> reducedNode = new Equivalences<>(ImmutableSet.of(rep), rep, node.isIndexed());
@@ -490,14 +425,14 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		}
 
 		EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG = EquivalencesDAGImpl.reduce(
-				(EquivalencesDAGImpl<DataPropertyExpression>)reasoner.dataProperties().dag(), dataProperties);
+				(EquivalencesDAGImpl<DataPropertyExpression>)reasoner.dataPropertiesDAG(), dataProperties);
 
 		// CLASSES
 		//
 		SimpleDirectedGraph<Equivalences<ClassExpression>, DefaultEdge> classes = new SimpleDirectedGraph<>(DefaultEdge.class);
 
 		// classify vertices for classes
-		for(Equivalences<ClassExpression> node : reasoner.classes().dag()) {
+		for(Equivalences<ClassExpression> node : reasoner.classesDAG()) {
 			ClassExpression rep = node.getRepresentative();
 
 			ImmutableSet.Builder<ClassExpression> reduced = new ImmutableSet.Builder<>();
@@ -527,19 +462,15 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		}
 
 		EquivalencesDAGImpl<ClassExpression> classDAG = EquivalencesDAGImpl.reduce(
-				(EquivalencesDAGImpl<ClassExpression>)reasoner.classes().dag(), classes);
+				(EquivalencesDAGImpl<ClassExpression>)reasoner.classesDAG(), classes);
 
 		// DATA RANGES
 		//
 		// TODO: a proper implementation is in order here
 
         ClassifiedTBoxImpl impl = (ClassifiedTBoxImpl)reasoner;
-		return new ClassifiedTBoxImpl(
-		        new ClassifiedTBoxVocabularyCategoryImpl<>(impl.classDAG.iriIndex, classDAG),
-                impl.dataRangeDAG,
-                new ClassifiedTBoxVocabularyCategoryImpl<>(impl.objectPropertyDAG.iriIndex, objectPropertyDAG),
-                new ClassifiedTBoxVocabularyCategoryImpl<>(impl.dataPropertyDAG.iriIndex, dataPropertyDAG),
-                impl.annotationProperties);
+		return new ClassifiedTBoxImpl(impl.classes, impl.objectProperties, impl.dataProperties, impl.annotationProperties,
+		        classDAG, objectPropertyDAG, dataPropertyDAG, impl.dataRangeDAG);
 	}
 
 

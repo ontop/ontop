@@ -318,7 +318,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      */
     private ImmutableMultimap<String, Datatype> computeDataTypeMap(ClassifiedTBox reasoner) {
         // TODO: switch to guava > 2.1, and replace by Streams.stream(iterable)
-        return StreamSupport.stream(reasoner.dataRanges().dag().spliterator(), false)
+        return StreamSupport.stream(reasoner.dataRangesDAG().spliterator(), false)
                 .flatMap(n -> getPartialPredicateToDatatypeMap(n, reasoner).entrySet().stream())
                 .collect(ImmutableCollectors.toMultimap(
                         e -> e.getKey().getName(),
@@ -339,7 +339,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     private ImmutableMap<Predicate, Datatype> getDescendentNodesPartialMap(ClassifiedTBox reasoner, DataRangeExpression node,
                                                                            Equivalences<DataRangeExpression> nodeSet) {
         if (node instanceof Datatype) {
-            return reasoner.dataRanges().dag().getSub(nodeSet).stream()
+            return reasoner.dataRangesDAG().getSub(nodeSet).stream()
                     .map(Equivalences::getRepresentative)
                     .filter(d -> d != node)
                     .map(this::getPredicate)

@@ -456,7 +456,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		if (ope0.isInverse()) 
 			throw new RuntimeException("INVERSE PROPERTIES ARE NOT SUPPORTED IN ABOX:" + ax);
 		
-		ObjectPropertyExpression ope = reasonerDag.objectProperties().dag().getCanonicalForm(ope0);
+		ObjectPropertyExpression ope = reasonerDag.objectPropertiesDAG().getCanonicalForm(ope0);
 				
 		ObjectConstant o1, o2;
 		if (ope.isInverse()) {
@@ -501,7 +501,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 
 		// replace the property by its canonical representative
 		DataPropertyExpression dpe0 = ax.getProperty();
-		DataPropertyExpression dpe = reasonerDag.dataProperties().dag().getCanonicalForm(dpe0);
+		DataPropertyExpression dpe = reasonerDag.dataPropertiesDAG().getCanonicalForm(dpe0);
 		int idx = cacheSI.getEntry(dpe).getIndex();
 		
 		ObjectConstant subject = ax.getSubject();
@@ -586,7 +586,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		
 		// replace concept by the canonical representative (which must be a concept name)
 		OClass concept0 = ax.getConcept();
-		OClass concept = (OClass)reasonerDag.classes().dag().getCanonicalForm(concept0);
+		OClass concept = (OClass)reasonerDag.classesDAG().getCanonicalForm(concept0);
 		int conceptIndex = cacheSI.getEntry(concept).getIndex();	
 
 		ObjectConstant c1 = ax.getIndividual();
@@ -668,7 +668,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	private void setIndex(String iri, int type, int idx) {
 		if (type == CLASS_TYPE) {
 			OClass c = reasonerDag.classes().get(iri);
-			if (reasonerDag.classes().dag().getVertex(c) == null)
+			if (reasonerDag.classesDAG().getVertex(c) == null)
 				throw new RuntimeException("UNKNOWN CLASS: " + iri);
 			
 			if (cacheSI.getEntry(c) != null)
@@ -690,7 +690,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 				ObjectPropertyExpression ope = reasonerDag.objectProperties().get(iri);
 				if (cacheSI.getEntry(ope) != null)  {
 					DataPropertyExpression dpe = reasonerDag.dataProperties().get(iri);
-					if (reasonerDag.dataProperties().dag().getVertex(dpe) != null) {
+					if (reasonerDag.dataPropertiesDAG().getVertex(dpe) != null) {
 						if (cacheSI.getEntry(dpe) != null)
 							throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
 						
@@ -704,7 +704,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			}
 			else {
 				DataPropertyExpression dpe = reasonerDag.dataProperties().get(iri);
-				if (reasonerDag.dataProperties().dag().getVertex(dpe) != null) {
+				if (reasonerDag.dataPropertiesDAG().getVertex(dpe) != null) {
 					if (cacheSI.getEntry(dpe) != null)
 						throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
 					
@@ -839,7 +839,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		 */
 
 
-		for (Equivalences<ObjectPropertyExpression> set: reasonerDag.objectProperties().dag()) {
+		for (Equivalences<ObjectPropertyExpression> set : reasonerDag.objectPropertiesDAG()) {
 
 			ObjectPropertyExpression ope = set.getRepresentative();
 			// only named roles are mapped
@@ -881,7 +881,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 			}
 		}
 
-		for (Equivalences<DataPropertyExpression> set: reasonerDag.dataProperties().dag()) {
+		for (Equivalences<DataPropertyExpression> set : reasonerDag.dataPropertiesDAG()) {
 
 			DataPropertyExpression dpe = set.getRepresentative();
 			
@@ -925,8 +925,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		 * Creating mappings for each concept
 		 */
 
-		EquivalencesDAG<ClassExpression> classes = reasonerDag.classes().dag();
-		for (Equivalences<ClassExpression> set : classes) {
+		for (Equivalences<ClassExpression> set : reasonerDag.classesDAG()) {
 			
 			ClassExpression node = set.getRepresentative();
 			

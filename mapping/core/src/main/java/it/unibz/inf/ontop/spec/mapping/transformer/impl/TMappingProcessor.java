@@ -430,14 +430,14 @@ public class TMappingProcessor {
 		 * the TMappings specification.
 		 */
 
-		getObjectTMappings(mappingIndex, originalMappingIndex, reasoner.objectProperties().dag(), excludeFromTMappings);
-		getDataTMappings(mappingIndex, originalMappingIndex, reasoner.dataProperties().dag(), excludeFromTMappings);
+		getObjectTMappings(mappingIndex, originalMappingIndex, reasoner.objectPropertiesDAG(), excludeFromTMappings);
+		getDataTMappings(mappingIndex, originalMappingIndex, reasoner.dataPropertiesDAG(), excludeFromTMappings);
 
 		/*
 		 * Property t-mappings are done, we now continue with class t-mappings.
 		 */
 
-		for (Equivalences<ClassExpression> classSet : reasoner.classes().dag()) {
+		for (Equivalences<ClassExpression> classSet : reasoner.classesDAG()) {
 
 			if (!(classSet.getRepresentative() instanceof OClass))
 				continue;
@@ -452,7 +452,7 @@ public class TMappingProcessor {
 			Predicate currentPredicate = representative.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
-			for (Equivalences<ClassExpression> descendants : reasoner.classes().dag().getSub(classSet)) {
+			for (Equivalences<ClassExpression> descendants : reasoner.classesDAG().getSub(classSet)) {
 				for (ClassExpression childDescription : descendants) {
 
                     /* adding the mappings of the children as own mappings, the new

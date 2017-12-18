@@ -234,14 +234,7 @@ public class OntologyImpl implements Ontology {
         public ImmutableSet<ObjectPropertyExpression> getAuxiliaryObjectProperties() { return auxObjectProperties; }
 
 
-
-        public ImmutableMap<String, OClass> getClassesRawMap() { return ImmutableMap.copyOf(classes.map); }
-
-        public ImmutableMap<String, ObjectPropertyExpression> getObjectPropertiesRawMap() { return ImmutableMap.copyOf(objectProperties.map); }
-
-        public ImmutableMap<String, DataPropertyExpression> getDataPropertiesRawMap() { return ImmutableMap.copyOf(dataProperties.map); }
-
-        public ImmutableMap<String, AnnotationProperty> getAnnotationPropertiesRawMap() { return ImmutableMap.copyOf(annotationProperties.map); }
+        OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
     }
 
     @Override

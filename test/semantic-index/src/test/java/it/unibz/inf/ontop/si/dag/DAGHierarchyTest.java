@@ -61,7 +61,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
-		EquivalencesDAG<ClassExpression> classes = namedReasoner.classes().dag();
+		EquivalencesDAG<ClassExpression> classes = namedReasoner.classesDAG();
 		
 		ClassExpression A = dag.classes().get(ontoURI + "A");
 		ClassExpression B = dag.classes().get(ontoURI + "B");
@@ -140,7 +140,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
-		EquivalencesDAG<ClassExpression> classes = namedReasoner.classes().dag();
+		EquivalencesDAG<ClassExpression> classes = namedReasoner.classesDAG();
 		
 		ClassExpression A = dag.classes().get(ontoURI + "A");
 		ClassExpression B = dag.classes().get(ontoURI + "B");
@@ -221,7 +221,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
-		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.objectProperties().dag();
+		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.objectPropertiesDAG();
 		
 		ObjectPropertyExpression P = dag.objectProperties().get(ontoURI + "P");
 		ObjectPropertyExpression S = dag.objectProperties().get(ontoURI + "S");
@@ -298,7 +298,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 		
-		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.objectProperties().dag();
+		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.objectPropertiesDAG();
 		
 		ObjectPropertyExpression P = dag.objectProperties().get(ontoURI + "P");
 		ObjectPropertyExpression S = dag.objectProperties().get(ontoURI + "S");

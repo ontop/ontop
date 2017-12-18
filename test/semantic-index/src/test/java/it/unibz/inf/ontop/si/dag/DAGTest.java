@@ -153,21 +153,21 @@ public class DAGTest extends TestCase {
 		List<List<Description>> exp_idx = get_results(reasoner, testname);
 
 		List<Description> classes = new LinkedList<>();
-		for (Equivalences<ClassExpression> node : reasoner.classes().dag()) {
+		for (Equivalences<ClassExpression> node : reasoner.classesDAG()) {
 			for (ClassExpression c : node)
 				classes.add(c);
 		}
-		for (Equivalences<DataRangeExpression> node : reasoner.dataRanges().dag()) {
+		for (Equivalences<DataRangeExpression> node : reasoner.dataRangesDAG()) {
 			for (DataRangeExpression c : node)
 				classes.add(c);
 		}
 		
 		List<Description> roles = new LinkedList<Description>();
-		for (Equivalences<ObjectPropertyExpression> node : reasoner.objectProperties().dag()) {
+		for (Equivalences<ObjectPropertyExpression> node : reasoner.objectPropertiesDAG()) {
 			for (ObjectPropertyExpression r : node)
 				roles.add(r);
 		}
-		for (Equivalences<DataPropertyExpression> node : reasoner.dataProperties().dag()) {
+		for (Equivalences<DataPropertyExpression> node : reasoner.dataPropertiesDAG()) {
 			for (DataPropertyExpression r : node) {
 				roles.add(r);
 				roles.add(r); // ROMAN: hacky way of double-counting data properties (which have no inverses)

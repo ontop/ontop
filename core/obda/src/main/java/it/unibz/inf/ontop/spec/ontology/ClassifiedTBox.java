@@ -29,26 +29,32 @@ public interface ClassifiedTBox {
 	/**
 	 * object properties
 	 * 
-	 * @return object properties with their dag
+	 * @return object properties
 	 */
 
-	ClassifiedTBoxVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties();
+	OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties();
+
+	EquivalencesDAG<ObjectPropertyExpression> objectPropertiesDAG();
 	
 	/**
 	 * data properties
 	 * 
-	 * @return data properties with their dag
+	 * @return data properties
 	 */
 
-	ClassifiedTBoxVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties();
+	OntologyVocabularyCategory<DataPropertyExpression> dataProperties();
+
+	EquivalencesDAG<DataPropertyExpression> dataPropertiesDAG();
 
 	/**
 	 * classes
 	 * 
-	 * @return classes with their dag
+	 * @return classes
 	 */
 
-	ClassifiedTBoxVocabularyCategory<ClassExpression, OClass> classes();
+	OntologyVocabularyCategory<OClass> classes();
+
+    EquivalencesDAG<ClassExpression> classesDAG();
 	
 	/**
 	 * datatypes and data property ranges
@@ -56,14 +62,14 @@ public interface ClassifiedTBox {
 	 * @return datatypes and data property ranges with their dag
 	 */
 
-	ClassifiedTBoxVocabularyCategory<DataRangeExpression, Datatype> dataRanges();
+    EquivalencesDAG<DataRangeExpression> dataRangesDAG();
 
 
     /**
      * annotation properties
      *
-     * @return annotation properties (without dag)
+     * @return annotation properties
      */
 
-    ClassifiedTBoxVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties();
+    OntologyVocabularyCategory<AnnotationProperty> annotationProperties();
 }

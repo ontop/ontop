@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.si.dag;
  * #L%
  */
 
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 
@@ -42,51 +41,55 @@ import com.google.common.collect.ImmutableSet;
 @Deprecated
 public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 
-	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<ObjectPropertyExpression, ObjectPropertyExpression> objectPropertyDAG;
-	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<DataPropertyExpression, DataPropertyExpression> dataPropertyDAG;
-	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<ClassExpression, OClass> classDAG;
-	private final ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<DataRangeExpression, Datatype> dataRangeDAG;
+    private final EquivalencesDAGImplOnGraph<ClassExpression> classDAG;
+    private final EquivalencesDAGImplOnGraph<ObjectPropertyExpression> objectPropertyDAG;
+    private final EquivalencesDAGImplOnGraph<DataPropertyExpression> dataPropertyDAG;
+    private final EquivalencesDAGImplOnGraph<DataRangeExpression> dataRangeDAG;
+
 	private final ClassifiedTBoxImpl reasoner;
 
 	public TestClassifiedTBoxImpl_OnGraph(ClassifiedTBoxImpl reasoner) {
-		this.objectPropertyDAG = new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(),
-				new EquivalencesDAGImplOnGraph<>(reasoner.getObjectPropertyGraph()));
-		this.dataPropertyDAG = new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(),
-				new EquivalencesDAGImplOnGraph<>(reasoner.getDataPropertyGraph()));
-		this.classDAG = new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(),
-				new EquivalencesDAGImplOnGraph<>(reasoner.getClassGraph()));
-		this.dataRangeDAG = new ClassifiedTBoxImpl.ClassifiedTBoxVocabularyCategoryImpl<>(ImmutableMap.of(),
-				new EquivalencesDAGImplOnGraph<>(reasoner.getDataRangeGraph()));
+		this.objectPropertyDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getObjectPropertyGraph());
+		this.dataPropertyDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getDataPropertyGraph());
+		this.classDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getClassGraph());
+		this.dataRangeDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getDataRangeGraph());
 		this.reasoner = reasoner;
 	}
 
     @Override
-    public ClassifiedTBoxVocabularyCategory<ObjectPropertyExpression, ObjectPropertyExpression> objectProperties() {
+    public OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() { return reasoner.objectProperties(); }
+
+    @Override
+    public OntologyVocabularyCategory<DataPropertyExpression> dataProperties() { return reasoner.dataProperties(); }
+
+    @Override
+    public OntologyVocabularyCategory<OClass> classes() {
+	    return reasoner.classes();
+    }
+
+    @Override
+    public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return reasoner.annotationProperties(); }
+
+    @Override
+    public EquivalencesDAG<ClassExpression> classesDAG() {
+        return classDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<ObjectPropertyExpression> objectPropertiesDAG() {
         return objectPropertyDAG;
     }
 
     @Override
-    public ClassifiedTBoxVocabularyCategory<DataPropertyExpression, DataPropertyExpression> dataProperties() {
+    public EquivalencesDAG<DataPropertyExpression> dataPropertiesDAG() {
         return dataPropertyDAG;
     }
 
     @Override
-    public ClassifiedTBoxVocabularyCategory<ClassExpression, OClass> classes() {
-	    return classDAG;
-    }
-
-    @Override
-    public ClassifiedTBoxVocabularyCategory<DataRangeExpression, Datatype> dataRanges() {
+    public EquivalencesDAG<DataRangeExpression> dataRangesDAG() {
         return dataRangeDAG;
     }
 
-
-    // DUMMY
-
-    @Override
-    public ClassifiedTBoxVocabularyCategory<AnnotationProperty, AnnotationProperty> annotationProperties() {
-        return null;
-    }
 
 	/**
 	 * Reconstruction of the DAG from the ontology graph
@@ -302,24 +305,16 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 	
 
 	public int vertexSetSize() {
-		return ((EquivalencesDAGImplOnGraph<ObjectPropertyExpression>)objectPropertyDAG.dag()).graph.vertexSet().size()
-                + ((EquivalencesDAGImplOnGraph<DataPropertyExpression>)dataPropertyDAG.dag()).graph.vertexSet().size()
-                + ((EquivalencesDAGImplOnGraph<ClassExpression>)classDAG.dag()).graph.vertexSet().size();
+		return objectPropertyDAG.graph.vertexSet().size() + dataPropertyDAG.graph.vertexSet().size() + classDAG.graph.vertexSet().size();
 	}
 
 	public int edgeSetSize() {
-		return ((EquivalencesDAGImplOnGraph<ObjectPropertyExpression>)objectPropertyDAG.dag()).graph.edgeSet().size()
-                + ((EquivalencesDAGImplOnGraph<DataPropertyExpression>)dataPropertyDAG.dag()).graph.edgeSet().size()
-                + ((EquivalencesDAGImplOnGraph<ClassExpression>)classDAG.dag()).graph.edgeSet().size();
+		return objectPropertyDAG.graph.edgeSet().size() + dataPropertyDAG.graph.edgeSet().size() + classDAG.graph.edgeSet().size();
 	}
 
-	public DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> getObjectPropertyGraph() {
-		return ((EquivalencesDAGImplOnGraph<ObjectPropertyExpression>)objectPropertyDAG.dag()).graph;
-	}
-	public DefaultDirectedGraph<DataPropertyExpression, DefaultEdge> getDataPropertyGraph() {
-		return ((EquivalencesDAGImplOnGraph<DataPropertyExpression>)dataPropertyDAG.dag()).graph;
-	}
-	public DefaultDirectedGraph<ClassExpression, DefaultEdge> getClassGraph() {
-		return ((EquivalencesDAGImplOnGraph<ClassExpression>)classDAG.dag()).graph;
-	}
+	public DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> getObjectPropertyGraph() { return objectPropertyDAG.graph; }
+
+	public DefaultDirectedGraph<DataPropertyExpression, DefaultEdge> getDataPropertyGraph() { return dataPropertyDAG.graph; }
+
+	public DefaultDirectedGraph<ClassExpression, DefaultEdge> getClassGraph() { return classDAG.graph; }
 }
