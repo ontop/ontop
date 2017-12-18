@@ -472,7 +472,7 @@ public class CQCUtilitiesTest {
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
             OntologyBuilder builder = OntologyBuilderImpl.builder();
             OClass left = builder.declareClass("A");
-            ObjectPropertyExpression pright = builder.declareObjectProperty("R");
+            ObjectPropertyExpression pright = builder.declareObjectProperty("R").getInverse();
 
 			ObjectSomeValuesFrom right = pright.getDomain();
 			builder.addSubClassOfAxiom(left, right);
@@ -530,7 +530,7 @@ public class CQCUtilitiesTest {
 
             OntologyBuilder builder = OntologyBuilderImpl.builder();
             OClass right = builder.declareClass("A");
-            ObjectPropertyExpression pleft = builder.declareObjectProperty("R");
+            ObjectPropertyExpression pleft = builder.declareObjectProperty("R").getInverse();
 
 			ObjectSomeValuesFrom left = pleft.getDomain();
 			builder.addSubClassOfAxiom(left, right);
