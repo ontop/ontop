@@ -13,10 +13,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.OntologyABox;
-import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.si.repository.impl.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
@@ -48,18 +45,18 @@ class SILoadingTools {
     static class RepositoryInit {
         final SIRepositoryManager dataRepository;
         final Optional<Set<OWLOntology>> abox;
-        final OntologyBuilder ontologyABox;
+        final OntologyTBox ontologyTBox; // provides the vocabulary for OWLAPIIterator
         final String jdbcUrl;
         final ClassifiedTBox reasoner;
         final Connection localConnection;
 
         private RepositoryInit(SIRepositoryManager dataRepository, Optional<Set<OWLOntology>> abox, String jdbcUrl,
-                               ClassifiedTBox reasoner, OntologyBuilder ontologyABox, Connection localConnection) {
+                               ClassifiedTBox reasoner, OntologyTBox ontologyTBox, Connection localConnection) {
             this.dataRepository = dataRepository;
             this.abox = abox;
             this.jdbcUrl = jdbcUrl;
             this.reasoner = reasoner;
-            this.ontologyABox = ontologyABox;
+            this.ontologyTBox = ontologyTBox;
             this.localConnection = localConnection;
         }
     }
@@ -67,18 +64,18 @@ class SILoadingTools {
     static RepositoryInit createRepository(OWLOntology owlOntology) throws SemanticIndexException {
 
         Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
-        OntologyBuilder ontology = OWLAPITranslatorOWL2QL.translateB(ontologyClosure);
+        Ontology ontology = OWLAPITranslatorOWL2QL.translate(ontologyClosure);
         return createRepository(ontology, Optional.of(ontologyClosure));
     }
 
-    static RepositoryInit createRepository(OntologyBuilder builder) throws SemanticIndexException {
-        return createRepository(builder, Optional.empty());
+    static RepositoryInit createRepository(Ontology ontology) throws SemanticIndexException {
+        return createRepository(ontology, Optional.empty());
     }
 
-    private static RepositoryInit createRepository(OntologyBuilder builder, Optional<Set<OWLOntology>> ontologyClosure)
+    private static RepositoryInit createRepository(Ontology ontology, Optional<Set<OWLOntology>> ontologyClosure)
             throws SemanticIndexException {
 
-        ClassifiedTBox reformulationReasoner = ClassifiedTBoxImpl.classify(builder.build().tbox());
+        ClassifiedTBox reformulationReasoner = ClassifiedTBoxImpl.classify(ontology.tbox());
 
         SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner);
 
@@ -94,7 +91,7 @@ class SILoadingTools {
 
             // Creating the ABox repository
             dataRepository.createDBSchemaAndInsertMetadata(localConnection);
-            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner, builder, localConnection);
+            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner, ontology.tbox(), localConnection);
         }
         catch (SQLException e) {
             throw new SemanticIndexException(e.getMessage());

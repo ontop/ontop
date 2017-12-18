@@ -63,6 +63,25 @@ public class OntologyBuilderImpl implements OntologyBuilder {
         return new OntologyBuilderImpl();
     }
 
+    public static ABoxAssertionSupplier assertionSupplier() {
+        return new ABoxAssertionSupplier() {
+            @Override
+            public ClassAssertion createClassAssertion(String c, ObjectConstant o) throws InconsistentOntologyException {
+                return OntologyBuilderImpl.createClassAssertion(new ClassImpl(c), o);
+            }
+
+            @Override
+            public ObjectPropertyAssertion createObjectPropertyAssertion(String op, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
+                return OntologyBuilderImpl.createObjectPropertyAssertion(new ObjectPropertyExpressionImpl(op), o1, o2);
+            }
+
+            @Override
+            public DataPropertyAssertion createDataPropertyAssertion(String dp, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException {
+                return OntologyBuilderImpl.createDataPropertyAssertion(new DataPropertyExpressionImpl(dp), o, v);
+            }
+        };
+    }
+
 
 
 
@@ -400,8 +419,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      *     - inconsistency if the class is bot
      */
 
-    @Override
-    public ClassAssertion createClassAssertion(OClass ce, ObjectConstant object) throws InconsistentOntologyException {
+    public static ClassAssertion createClassAssertion(OClass ce, ObjectConstant object) throws InconsistentOntologyException {
         if (ce.isTop())
             return null;
         if (ce.isBottom())
@@ -422,8 +440,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      *     - swap the arguments to eliminate inverses
      */
 
-    @Override
-    public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
+    public static ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
         if (ope.isTop())
             return null;
         if (ope.isBottom())
@@ -446,8 +463,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      *     - inconsistency if the property is bot
      */
 
-    @Override
-    public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o1, ValueConstant o2) throws InconsistentOntologyException {
+    public static DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o1, ValueConstant o2) throws InconsistentOntologyException {
         if (dpe.isTop())
             return null;
         if (dpe.isBottom())
@@ -462,8 +478,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      * AnnotationSubject := IRI | AnonymousIndividual
      *
      */
-    @Override
-    public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c) {
+    public static AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c) {
         return new AnnotationAssertionImpl(ap,o,c);
     }
 

@@ -99,7 +99,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
             throws OntopResultConversionException, OntopConnectionException {
 
         List<Assertion> tripleAssertions = new ArrayList<>();
-        OntologyBuilder builder = OntologyBuilderImpl.builder();
+        ABoxAssertionSupplier builder = OntologyBuilderImpl.assertionSupplier();
 
         for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
             int size = peList.getElements().size();
@@ -120,18 +120,15 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 try {
                     Assertion assertion;
                     if (predicateName.equals(IriConstants.RDF_TYPE)) {
-                        OClass oc = builder.declareClass(objectConstant.getValue());
-                        assertion = builder.createClassAssertion(oc, subjectConstant);
+                        assertion = builder.createClassAssertion(objectConstant.getValue(), subjectConstant);
                     }
                     else {
                         if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) {
-                            ObjectPropertyExpression ope = builder.declareObjectProperty(predicateName);
-                            assertion = builder.createObjectPropertyAssertion(ope,
+                            assertion = builder.createObjectPropertyAssertion(predicateName,
                                     subjectConstant, (ObjectConstant) objectConstant);
                         }
                         else {
-                            DataPropertyExpression dpe = builder.declareDataProperty(predicateName);
-                            assertion = builder.createDataPropertyAssertion(dpe,
+                            assertion = builder.createDataPropertyAssertion(predicateName,
                                     subjectConstant, (ValueConstant) objectConstant);
                         }
                     }
@@ -175,16 +172,16 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
     private Constant getConstant(ProjectionElem node, TupleResultSet resSet)
             throws OntopResultConversionException, OntopConnectionException {
-        Constant constant = null;
         String node_name = node.getSourceName();
-        ValueExpr ve = null;
 
+        ValueExpr ve = null;
         if (extMap != null) {
             ve = extMap.get(node_name);
             if (ve != null && ve instanceof Var)
                 throw new OntopResultConversionException("Invalid query. Found unbound variable: " + ve);
         }
 
+        final Constant constant;
 //		if (node_name.charAt(0) == '-') {
         if (ve instanceof org.eclipse.rdf4j.query.algebra.ValueConstant) {
             org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;

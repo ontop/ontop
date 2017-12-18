@@ -1026,44 +1026,44 @@ public class OWLAPITranslatorOWL2QL {
     }
 
 
-    // METHODS FOR TRANSLATING ASSERTIONS (USED BY OTHER CLASSES)
+    // METHODS FOR TRANSLATING ASSERTIONS (used in OWLAPIABoxIterator)
 
-    public static ClassAssertion translate(OWLClassAssertionAxiom ax, OntologyBuilder builder) throws TranslationException, InconsistentOntologyException {
+    public static ClassAssertion translate(OWLClassAssertionAxiom ax, OntologyVocabularyCategory<OClass> classes) throws TranslationException, InconsistentOntologyException {
         OWLClassExpression classExpression = ax.getClassExpression();
         if (!(classExpression instanceof OWLClass))
             throw new OWLAPITranslatorOWL2QL.TranslationException("complex class expressions are not supported");
 
-        OClass concept = getOClass((OWLClass) classExpression, builder.classes());
+        OClass concept = getOClass((OWLClass) classExpression, classes);
         URIConstant c = getIndividual(ax.getIndividual());
 
-        return builder.createClassAssertion(concept, c);
+        return OntologyBuilderImpl.createClassAssertion(concept, c);
     }
 
-    public static ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax, OntologyBuilder builder) throws TranslationException, InconsistentOntologyException {
+    public static ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax, OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties) throws TranslationException, InconsistentOntologyException {
         URIConstant c1 = getIndividual(ax.getSubject());
         URIConstant c2 = getIndividual(ax.getObject());
-        ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty(), builder.objectProperties());
 
-        return builder.createObjectPropertyAssertion(ope, c1, c2);
+        ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty(), objectProperties);
+        return OntologyBuilderImpl.createObjectPropertyAssertion(ope, c1, c2);
     }
 
-    public static DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax, OntologyBuilder builder) throws TranslationException, InconsistentOntologyException {
+    public static DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax, OntologyVocabularyCategory<DataPropertyExpression> dataProperties) throws TranslationException, InconsistentOntologyException {
         URIConstant c1 = getIndividual(ax.getSubject());
         ValueConstant c2 = getValueOfLiteral(ax.getObject());
-        DataPropertyExpression dpe = getPropertyExpression(ax.getProperty(), builder.dataProperties());
 
-        return builder.createDataPropertyAssertion(dpe, c1, c2);
+        DataPropertyExpression dpe = getPropertyExpression(ax.getProperty(), dataProperties);
+        return OntologyBuilderImpl.createDataPropertyAssertion(dpe, c1, c2);
     }
 
-    public static AnnotationAssertion translate(OWLAnnotationAssertionAxiom ax, OntologyBuilder builder) throws TranslationException, InconsistentOntologyException {
+
+    public static AnnotationAssertion translate(OWLAnnotationAssertionAxiom ax, OntologyVocabularyCategory<AnnotationProperty> annotationProperties) throws TranslationException, InconsistentOntologyException {
 
         URIConstant c1 = getIndividual(ax.getSubject());
         Constant c2 = getValue(ax.getValue());
-        AnnotationProperty ap = getPropertyExpression(ax.getProperty(), builder.annotationProperties());
+        AnnotationProperty ap = getPropertyExpression(ax.getProperty(), annotationProperties);
 
-        return builder.createAnnotationAssertion(ap, c1, c2);
+        return OntologyBuilderImpl.createAnnotationAssertion(ap, c1, c2);
     }
-
 
     // PRIVATE METHODS FOR TRANSLATING COMPONENTS OF ASSERTIONS
 

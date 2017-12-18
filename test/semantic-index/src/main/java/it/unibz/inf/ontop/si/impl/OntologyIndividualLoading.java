@@ -33,7 +33,7 @@ public class OntologyIndividualLoading {
             Loads the data
              */
             OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(init.abox
-                    .orElseThrow(() -> new IllegalStateException("An ontology closure was expected")), init.ontologyABox);
+                    .orElseThrow(() -> new IllegalStateException("An ontology closure was expected")), init.ontologyTBox);
 
             int count = init.dataRepository.insertData(init.localConnection, aBoxIter, 5000, 500);
             LOG.debug("Inserted {} triples from the ontology.", count);

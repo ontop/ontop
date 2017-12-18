@@ -50,7 +50,7 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
 	private final SIRepositoryManager repositoryManager;
 	private final Connection connection;
-	private final OntologyBuilder builder;
+	private final ABoxAssertionSupplier builder;
 
     private static final int MAX_BUFFER_SIZE = 5000;
 
@@ -59,7 +59,7 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
 	public SemanticIndexRDFHandler(SIRepositoryManager repositoryManager, Connection connection) {
 		this.repositoryManager = repositoryManager;
-		this.builder = OntologyBuilderImpl.builder();
+		this.builder = OntologyBuilderImpl.assertionSupplier();
 		this.connection = connection;
 		this.buffer = new ArrayList<>(MAX_BUFFER_SIZE);
 		this.count = 0;
@@ -103,7 +103,7 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 	 * predicate is not type and the object is URI or BNode. Its a data property
 	 * if the predicate is not rdf:type and the object is a Literal.
 	 */
-	private static Assertion constructAssertion(Statement st, OntologyBuilder builder) {
+	private static Assertion constructAssertion(Statement st, ABoxAssertionSupplier builder) {
 
 		Resource subject = st.getSubject();
 		final ObjectConstant c;
@@ -123,21 +123,17 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 		// Create the assertion
 		try {
 			if (predicateName.equals(IriConstants.RDF_TYPE)) {
-                OClass oc = builder.declareClass(object.stringValue());
-				return builder.createClassAssertion(oc, c);
+				return builder.createClassAssertion(object.stringValue(), c);
 			} 
 			else if (object instanceof IRI) {
-                ObjectPropertyExpression ope  = builder.declareObjectProperty(predicateName);
                 ObjectConstant c2 = TERM_FACTORY.getConstantURI(object.stringValue());
-                return builder.createObjectPropertyAssertion(ope, c, c2);
+                return builder.createObjectPropertyAssertion(predicateName, c, c2);
             }
             else if (object instanceof BNode) {
-                ObjectPropertyExpression ope  = builder.declareObjectProperty(predicateName);
                 ObjectConstant c2 = TERM_FACTORY.getConstantBNode(object.stringValue());
-                return builder.createObjectPropertyAssertion(ope, c, c2);
+                return builder.createObjectPropertyAssertion(predicateName, c, c2);
             }
             else if (object instanceof Literal) {
-                DataPropertyExpression dpe  = builder.declareDataProperty(predicateName);
                 Literal l = (Literal) object;
                 Optional<String> lang = l.getLanguage();
                 final ValueConstant c2;
@@ -157,7 +153,7 @@ public class SemanticIndexRDFHandler extends AbstractRDFHandler {
                 else {
                     c2 = TERM_FACTORY.getConstantLiteral(l.getLabel(), lang.get());
                 }
-                return builder.createDataPropertyAssertion(dpe, c, c2);
+                return builder.createDataPropertyAssertion(predicateName, c, c2);
             }
             throw new RuntimeException("Unsupported object found in triple: " + st + " (Required URI, BNode or Literal)");
 		}

@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.owlapi.utils;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
+import it.unibz.inf.ontop.spec.ontology.OntologyTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -30,20 +31,22 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Iterator;
 
 public class OWLAPIABoxIteratorTest extends TestCase {
 
-	private OntologyBuilder builder;
+	private OntologyTBox tbox;
 	
 	protected void setUp() {
-		builder = OntologyBuilderImpl.builder();
+		OntologyBuilder builder = OntologyBuilderImpl.builder();
 		builder.declareObjectProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#P");
 		builder.declareObjectProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#R");
 		builder.declareDataProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#age");
 		builder.declareClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Man");
 		builder.declareClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Person");
 		builder.declareClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Woman");
+		tbox = builder.build().tbox();
 	}
 
 	public void testAssertionIterator() throws Exception {
@@ -53,12 +56,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(owl), builder);
-		int count = 0;
-		while (aboxit.hasNext()) {
-			count += 1;
-			aboxit.next();
-		}
+        int count = count(ImmutableList.of(owl));
 		assertTrue("Count: " + count, count == 9);
 	}
 
@@ -69,28 +67,15 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(owl), builder);
-		int count = 0;
-		while (aboxit.hasNext()) {
-			count += 1;
-			aboxit.next();
-		}
+        int count = count(ImmutableList.of(owl));
 		assertTrue("Count: " + count, count == 9);
 	}
 	
 	public void testAssertionEmptyIterable() throws Exception {
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(), builder);
-		int count = 0;
-		while (aboxit.hasNext()) {
-			count += 1;
-			aboxit.next();
-		}
+        int count = count(ImmutableList.of());
 		assertTrue("Count: " + count, count == 0);
 	}
-
-
-
 
 	
 	public void testAssertionOntology() throws Exception {
@@ -100,12 +85,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(owl), builder);
-		int count = 0;
-		while (aboxit.hasNext()) {
-			count += 1;
-			aboxit.next();
-		}
+        int count = count(ImmutableList.of(owl));
 		assertTrue("Count: " + count, count == 9);
 	}
 	
@@ -114,12 +94,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = manager.createOntology();
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(owl), builder);
-		int count = 0;
-		while (aboxit.hasNext()) {
-			count += 1;
-			aboxit.next();
-		}
+        int count = count(ImmutableList.of(owl));
 		assertTrue("Count: " + count, count == 0);
 	}
 	
@@ -134,23 +109,27 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		manager.loadOntologyFromOntologyDocument((new File(owlfile2)));
 		manager.loadOntologyFromOntologyDocument((new File(owlfile3)));
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(manager.getOntologies(), builder);
-		int count = 0;
-		while (aboxit.hasNext()) {
-			count += 1;
-			aboxit.next();
-		}
+        int count = count(manager.getOntologies());
 		assertTrue("Count: " + count, count == 9);
 	}
 	
-	public void testAssertionEmptyOntologySet() throws Exception {
+	public void testAssertionEmptyOntologySet() {
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(), builder);
-		int count = 0;
-		while (aboxit.hasNext()) {
-			count += 1;
-			aboxit.next();
-		}
+		int count = count(ImmutableList.of());
 		assertTrue("Count: " + count, count == 0);
 	}
+
+
+
+
+	private int count(Collection<OWLOntology> ontologies) {
+
+        Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ontologies, tbox);
+        int count = 0;
+        while (aboxit.hasNext()) {
+            count += 1;
+            aboxit.next();
+        }
+        return count;
+    }
 }

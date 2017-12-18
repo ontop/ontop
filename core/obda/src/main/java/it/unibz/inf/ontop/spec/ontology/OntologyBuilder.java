@@ -34,54 +34,6 @@ public interface OntologyBuilder {
 
 
 
-    /**
-     * Creates a class assertion
-     *    (implements rule [C4])
-     *
-     * @param ce
-     * @param o
-     * @return null if ce is the top class ([C4])
-     * @throws InconsistentOntologyException if ce is the bottom class ([C4])
-     */
-
-    ClassAssertion createClassAssertion(OClass ce, ObjectConstant o) throws InconsistentOntologyException;
-
-
-    /**
-     * Creates an object property assertion
-     * (ensures that the property is not inverse by swapping arguments if necessary)
-     *    (implements rule [O4])
-     *
-     * @param ope
-     * @param o1
-     * @param o2
-     * @return null if ope is the top property ([O4])
-     * @throws InconsistentOntologyException if ope is the bottom property ([O4])
-     */
-
-    ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException;
-
-    /**
-     * Creates a data property assertion
-     *    (implements rule [D4])
-     *
-     * @param dpe
-     * @param o
-     * @param v
-     * @return null if dpe is the top property ([D4])
-     * @throws InconsistentOntologyException if dpe is the bottom property ([D4])
-     */
-
-    DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException;
-
-    /**
-     * Creates an annotation property assertion
-     *
-     */
-
-    AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c);
-
-
 
     // SUBCLASS/PROPERTY
 
@@ -122,11 +74,49 @@ public interface OntologyBuilder {
 
     // ASSERTIONS
 
+    /**
+     * inserts a class assertion
+     *    (does nothing if ce is the top class, cf. rule [C4])
+     *
+     * @param ce
+     * @param o
+     * @throws InconsistentOntologyException if ce is the bottom class ([C4])
+     */
+
     void addClassAssertion(OClass ce, ObjectConstant o) throws InconsistentOntologyException;
 
-    void addObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o) throws InconsistentOntologyException;
+    /**
+     * inserts an object property assertion
+     * (ensures that the property is not inverse by swapping arguments if necessary)
+     *    (does nothing if ope is the top property, cf. rule [O4])
+     *
+     * @param ope
+     * @param o1
+     * @param o2
+     * @throws InconsistentOntologyException if ope is the bottom property ([O4])
+     */
+
+    void addObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException;
+
+    /**
+     * inserts a data property assertion
+     *    (does nothing if dpe is the top property, cf. rule [O4])
+     *
+     * @param dpe
+     * @param o
+     * @param v
+     * @throws InconsistentOntologyException if dpe is the bottom property ([D4])
+     */
 
     void addDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException;
+
+    /**
+     * inserts an annotation property assertion
+     *
+     * @param ap
+     * @param o
+     * @param c
+     */
 
     void addAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c);
 

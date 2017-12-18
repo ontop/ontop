@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.si.impl;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.rdf4j.rio.helpers.SemanticIndexRDFHandler;
@@ -34,7 +35,7 @@ public class GraphLoading {
 
     public static OntopSemanticIndexLoader loadRDFGraph(Dataset dataset, Properties properties) throws SemanticIndexException {
         try {
-            OntologyBuilder implicitTbox = loadTBoxFromDataset(dataset);
+            Ontology implicitTbox = loadTBoxFromDataset(dataset);
             RepositoryInit init = createRepository(implicitTbox);
 
             /*
@@ -95,7 +96,7 @@ public class GraphLoading {
         }
     }
 
-    private static OntologyBuilder loadTBoxFromDataset(Dataset dataset) throws IOException {
+    private static Ontology loadTBoxFromDataset(Dataset dataset) throws IOException {
         // Merge default and named graphs to filter duplicates
         Set<IRI> graphURIs = new HashSet<>();
         graphURIs.addAll(dataset.getDefaultGraphs());
@@ -105,7 +106,7 @@ public class GraphLoading {
         for (IRI graphURI : graphURIs) {
             collectOntologyVocabulary(graphURI, vb);
         }
-        return vb;
+        return vb.build();
     }
 
     private static void collectOntologyVocabulary(IRI graphURI, OntologyBuilder vb) throws IOException {
