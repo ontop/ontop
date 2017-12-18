@@ -20,14 +20,4 @@ public interface OntologyVocabularyCategory<T> extends Iterable<T> {
      */
 
     boolean contains(String uri);
-
-
-    /**
-     * declare an entity
-     *
-     * @param uri
-     * @return entity object
-     */
-
-    T create(String uri);
 }

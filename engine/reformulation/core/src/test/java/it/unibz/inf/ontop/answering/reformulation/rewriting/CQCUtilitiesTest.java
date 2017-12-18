@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
@@ -45,7 +45,6 @@ import static org.junit.Assert.assertTrue;
 public class CQCUtilitiesTest {
 
 	CQIE initialquery1 = null;
-	private final static OntologyFactory dfac = OntologyFactoryImpl.getInstance();
 
 	Term x = TERM_FACTORY.getVariable("x");
 	Term y = TERM_FACTORY.getVariable("y");
@@ -416,17 +415,18 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
+            OntologyBuilder builder = OntologyBuilderImpl.builder();
+            OClass left = builder.declareClass("A");
+            OClass right = builder.declareClass("C");
+            builder.addSubClassOfAxiom(left, right);
 
-			OntologyTBox sigma = dfac.createOntology().tbox();
-			OClass left = sigma.classes().create("A");
-			OClass right = sigma.classes().create("C");
-			sigma.addSubClassOfAxiom(left, right);
+			OntologyTBox sigma = builder.build().tbox();
 
-			Function head1 = getFunction("q", Collections.<Term>singletonList(TERM_FACTORY.getVariable("x")));
+			Function head1 = getFunction("q", Collections.singletonList(TERM_FACTORY.getVariable("x")));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
-			Function head2 = getFunction("q", Collections.<Term>singletonList(TERM_FACTORY.getVariable("y")));
+			Function head2 = getFunction("q", Collections.singletonList(TERM_FACTORY.getVariable("y")));
 			Function body2 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("C"), TERM_FACTORY.getVariable("y"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
@@ -442,12 +442,13 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
-			OntologyTBox sigma = dfac.createOntology().tbox();
-	        OClass left = sigma.classes().create("A");
-			ObjectPropertyExpression pright = sigma.objectProperties().create("R");
-			
+            OntologyBuilder builder = OntologyBuilderImpl.builder();
+            OClass left = builder.declareClass("A");
+            ObjectPropertyExpression pright = builder.declareObjectProperty("R");
+
 			ObjectSomeValuesFrom right = pright.getDomain();
-			sigma.addSubClassOfAxiom(left, right);
+			builder.addSubClassOfAxiom(left, right);
+			OntologyTBox sigma = builder.build().tbox();
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
@@ -469,12 +470,13 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
-			OntologyTBox sigma = dfac.createOntology().tbox();
-			OClass left = sigma.classes().create("A");
-			ObjectPropertyExpression pright = sigma.objectProperties().create("R").getInverse();
-						
+            OntologyBuilder builder = OntologyBuilderImpl.builder();
+            OClass left = builder.declareClass("A");
+            ObjectPropertyExpression pright = builder.declareObjectProperty("R");
+
 			ObjectSomeValuesFrom right = pright.getDomain();
-			sigma.addSubClassOfAxiom(left, right);
+			builder.addSubClassOfAxiom(left, right);
+            OntologyTBox sigma = builder.build().tbox();
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
@@ -496,14 +498,16 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
-			OntologyTBox sigma = dfac.createOntology().tbox();
-			ObjectPropertyExpression pleft = sigma.objectProperties().create("R");
-			OClass right = sigma.classes().create("A");
-			
-			ObjectSomeValuesFrom left = pleft.getDomain();
-			sigma.addSubClassOfAxiom(left, right);
+            OntologyBuilder builder = OntologyBuilderImpl.builder();
+            OClass right = builder.declareClass("A");
+            ObjectPropertyExpression pleft = builder.declareObjectProperty("R");
 
-			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
+			ObjectSomeValuesFrom left = pleft.getDomain();
+			builder.addSubClassOfAxiom(left, right);
+            OntologyTBox sigma = builder.build().tbox();
+
+
+            Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"),
 					TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y"));
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
@@ -524,12 +528,13 @@ public class CQCUtilitiesTest {
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 
-			OntologyTBox sigma = dfac.createOntology().tbox();
-			OClass right = sigma.classes().create("A");
-			ObjectPropertyExpression pleft = sigma.objectProperties().create("R").getInverse();
-	        
+            OntologyBuilder builder = OntologyBuilderImpl.builder();
+            OClass right = builder.declareClass("A");
+            ObjectPropertyExpression pleft = builder.declareObjectProperty("R");
+
 			ObjectSomeValuesFrom left = pleft.getDomain();
-			sigma.addSubClassOfAxiom(left, right);
+			builder.addSubClassOfAxiom(left, right);
+            OntologyTBox sigma = builder.build().tbox();
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("y"));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"),
@@ -572,13 +577,13 @@ public class CQCUtilitiesTest {
 
         // q(x) :- , q(x) :- R(x,y), A(x)
 
-		OntologyTBox sigma = dfac.createOntology().tbox();
-        OClass left = sigma.classes().create("A");
-        ObjectPropertyExpression pleft = sigma.objectProperties().create("R");
-        
-        ObjectSomeValuesFrom right = pleft.getDomain();
-        sigma.addSubClassOfAxiom(left, right);
+        OntologyBuilder builder = OntologyBuilderImpl.builder();
+        OClass left = builder.declareClass("A");
+        ObjectPropertyExpression pleft = builder.declareObjectProperty("R");
 
+        ObjectSomeValuesFrom right = pleft.getDomain();
+        builder.addSubClassOfAxiom(left, right);
+        OntologyTBox sigma = builder.build().tbox();
 
         // Query 1 q(x) :- R(x,y), A(x)
         Function head = getFunction("q", x);

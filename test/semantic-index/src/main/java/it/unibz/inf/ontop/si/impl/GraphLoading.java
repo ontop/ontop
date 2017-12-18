@@ -4,10 +4,8 @@ package it.unibz.inf.ontop.si.impl;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
-import it.unibz.inf.ontop.spec.ontology.OntologyTBox;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.rdf4j.rio.helpers.SemanticIndexRDFHandler;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
@@ -32,12 +30,11 @@ import static it.unibz.inf.ontop.si.impl.SILoadingTools.*;
 
 public class GraphLoading {
 
-    private static final OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(GraphLoading.class);
 
     public static OntopSemanticIndexLoader loadRDFGraph(Dataset dataset, Properties properties) throws SemanticIndexException {
         try {
-            Ontology implicitTbox =  loadTBoxFromDataset(dataset);
+            OntologyBuilder implicitTbox = loadTBoxFromDataset(dataset);
             RepositoryInit init = createRepository(implicitTbox);
 
             /*
@@ -98,20 +95,20 @@ public class GraphLoading {
         }
     }
 
-    private static Ontology loadTBoxFromDataset(Dataset dataset) throws IOException {
+    private static OntologyBuilder loadTBoxFromDataset(Dataset dataset) throws IOException {
         // Merge default and named graphs to filter duplicates
         Set<IRI> graphURIs = new HashSet<>();
         graphURIs.addAll(dataset.getDefaultGraphs());
         graphURIs.addAll(dataset.getNamedGraphs());
 
-        Ontology vb = ONTOLOGY_FACTORY.createOntology();
+        OntologyBuilder vb = OntologyBuilderImpl.builder();
         for (IRI graphURI : graphURIs) {
-            collectOntologyVocabulary(graphURI, vb.tbox());
+            collectOntologyVocabulary(graphURI, vb);
         }
         return vb;
     }
 
-    private static void collectOntologyVocabulary(IRI graphURI, OntologyTBox vb) throws IOException {
+    private static void collectOntologyVocabulary(IRI graphURI, OntologyBuilder vb) throws IOException {
         RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphURI.toString()).get();
         RDFParser rdfParser = Rio.createParser(rdfFormat, ValueFactoryImpl.getInstance());
         ParserConfig config = rdfParser.getParserConfig();
@@ -129,14 +126,14 @@ public class GraphLoading {
             public void handleStatement(Statement st) throws RDFHandlerException {
                 URI pred = st.getPredicate();
                 Value obj = st.getObject();
-                if (obj instanceof Literal) {
-                    vb.dataProperties().create(pred.stringValue());
+                if (pred.stringValue().equals(IriConstants.RDF_TYPE)) {
+                    vb.declareClass(obj.stringValue());
                 }
-                else if (pred.stringValue().equals(IriConstants.RDF_TYPE)) {
-                    vb.classes().create(obj.stringValue());
+                else if (obj instanceof Literal) {
+                    vb.declareDataProperty(pred.stringValue());
                 }
                 else {
-                    vb.objectProperties().create(pred.stringValue());
+                    vb.declareObjectProperty(pred.stringValue());
                 }
             }
         });

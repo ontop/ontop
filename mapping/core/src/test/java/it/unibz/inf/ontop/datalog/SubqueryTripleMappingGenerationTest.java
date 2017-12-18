@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
@@ -45,7 +45,7 @@ public class SubqueryTripleMappingGenerationTest {
 
     private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
 
-    public static BasicDBMetadata METADATA = DBMetadataTestingTools.createDummyMetadata();
+    public static final BasicDBMetadata METADATA;
 
     private static final AtomPredicate P1_PREDICATE;
     private static final AtomPredicate P2_PREDICATE;
@@ -93,7 +93,7 @@ public class SubqueryTripleMappingGenerationTest {
                 EXECUTOR_REGISTRY,
                 EMPTY_MAPPING_METADATA
         );
-        ClassifiedTBox tBoxReasoner = ClassifiedTBoxImpl.classify(OntologyFactoryImpl.getInstance().createOntology().tbox());
+        ClassifiedTBox tBoxReasoner = ClassifiedTBoxImpl.classify(OntologyBuilderImpl.builder().build().tbox());
         Mapping saturatedMapping = MAPPING_SATURATOR.saturate(mapping, METADATA, tBoxReasoner);
         String debug = saturatedMapping.getPredicates().stream()
                 .map(p -> saturatedMapping.getDefinition(p).get().toString())

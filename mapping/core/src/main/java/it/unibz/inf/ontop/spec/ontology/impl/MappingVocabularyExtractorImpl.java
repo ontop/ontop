@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.ontology.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -7,7 +8,7 @@ import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
+import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
 import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
 
 import java.util.stream.Stream;
@@ -15,7 +16,6 @@ import java.util.stream.Stream;
 
 public class MappingVocabularyExtractorImpl implements MappingVocabularyExtractor {
 
-    private static OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
     private final Mapping2DatalogConverter mapping2DatalogConverter;
 
     @Inject
@@ -26,21 +26,21 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
 
     @Override
     public Ontology extractVocabulary(Stream<? extends Function> targetAtoms) {
-        Ontology ontology = ONTOLOGY_FACTORY.createOntology();
+        OntologyBuilder ontologyBuilder = OntologyBuilderImpl.builder();
         targetAtoms
                 .forEach(f -> {
                     String name = f.getFunctionSymbol().getName();
                     if (f.getArity() == 1)
-                        ontology.tbox().classes().create(name);
+                        ontologyBuilder.declareClass(name);
                     else {
                         Predicate.COL_TYPE secondArgType = f.getFunctionSymbol().getType(1);
                         if ((secondArgType != null) && secondArgType.equals(Predicate.COL_TYPE.OBJECT))
-                            ontology.tbox().objectProperties().create(name);
+                            ontologyBuilder.declareObjectProperty(name);
                         else
-                            ontology.tbox().dataProperties().create(name);
+                            ontologyBuilder.declareDataProperty(name);
                     }
                 });
-        return ontology;
+        return ontologyBuilder.build();
     }
 
     @Override

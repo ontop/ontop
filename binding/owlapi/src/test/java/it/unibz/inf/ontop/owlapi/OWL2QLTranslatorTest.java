@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.UnmodifiableIterator;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -400,23 +400,22 @@ public class OWL2QLTranslatorTest {
 
     @Test
 	public void test_R6() {
-		OntologyFactory factory = OntologyFactoryImpl.getInstance(); 
-		OntologyTBox voc = factory.createOntology().tbox();
+		OntologyBuilder builder = OntologyBuilderImpl.builder();
 		
-		ObjectPropertyExpression top = voc.objectProperties().create("http://www.w3.org/2002/07/owl#topObjectProperty");
+		ObjectPropertyExpression top = builder.declareObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
 		ObjectPropertyExpression topInv = top.getInverse();
 		ObjectPropertyExpression topInvInv = topInv.getInverse();
 		assertTrue(topInv == topInvInv);
 
-		ObjectPropertyExpression top2 = voc.objectProperties().create("http://www.w3.org/2002/07/owl#topObjectProperty");
+		ObjectPropertyExpression top2 = builder.declareObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
 		assertEquals(top2, topInv);
 		
-		ObjectPropertyExpression bot = voc.objectProperties().create("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+		ObjectPropertyExpression bot = builder.declareObjectProperty("http://www.w3.org/2002/07/owl#bottomObjectProperty");
 		ObjectPropertyExpression botInv = bot.getInverse();
 		ObjectPropertyExpression botInvInv = botInv.getInverse();
 		assertTrue(botInv == botInvInv);
 		
-		ObjectPropertyExpression bot2 = voc.objectProperties().create("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+		ObjectPropertyExpression bot2 = builder.declareObjectProperty("http://www.w3.org/2002/07/owl#bottomObjectProperty");
 		assertEquals(bot2, botInv);		
 		
 		assertFalse(bot.equals(top));

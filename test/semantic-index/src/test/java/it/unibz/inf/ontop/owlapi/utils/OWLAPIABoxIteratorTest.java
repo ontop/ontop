@@ -22,8 +22,8 @@ package it.unibz.inf.ontop.owlapi.utils;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -34,17 +34,16 @@ import java.util.Iterator;
 
 public class OWLAPIABoxIteratorTest extends TestCase {
 
-	private Ontology ontology;
+	private OntologyBuilder builder;
 	
-	protected void setUp() throws Exception {
-		ontology = OntologyFactoryImpl.getInstance().createOntology();
-		ontology.tbox().objectProperties().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#P");
-		ontology.tbox().objectProperties().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#R");
-		ontology.tbox().dataProperties().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#age");
-		ontology.tbox().classes().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Man");
-		ontology.tbox().classes().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Person");
-		ontology.tbox().classes().create("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Woman");
-		super.setUp();
+	protected void setUp() {
+		builder = OntologyBuilderImpl.builder();
+		builder.declareObjectProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#P");
+		builder.declareObjectProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#R");
+		builder.declareDataProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#age");
+		builder.declareClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Man");
+		builder.declareClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Person");
+		builder.declareClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Woman");
 	}
 
 	public void testAssertionIterator() throws Exception {
@@ -54,7 +53,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(owl), ontology.abox());
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(owl), builder);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -70,7 +69,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(owl), ontology.abox());
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(owl), builder);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -81,7 +80,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 	
 	public void testAssertionEmptyIterable() throws Exception {
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(), ontology.abox());
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(), builder);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -101,7 +100,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(owl), ontology.abox());
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(owl), builder);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -115,7 +114,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = manager.createOntology();
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(owl), ontology.abox());
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(owl), builder);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -135,7 +134,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		manager.loadOntologyFromOntologyDocument((new File(owlfile2)));
 		manager.loadOntologyFromOntologyDocument((new File(owlfile3)));
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(manager.getOntologies(), ontology.abox());
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(manager.getOntologies(), builder);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -146,7 +145,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 	
 	public void testAssertionEmptyOntologySet() throws Exception {
 
-		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(), ontology.abox());
+		Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ImmutableList.of(), builder);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;

@@ -30,7 +30,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -99,7 +99,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
             throws OntopResultConversionException, OntopConnectionException {
 
         List<Assertion> tripleAssertions = new ArrayList<>();
-        Ontology onto = OntologyFactoryImpl.getInstance().createOntology();
+        OntologyBuilder builder = OntologyBuilderImpl.builder();
 
         for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
             int size = peList.getElements().size();
@@ -120,18 +120,18 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 try {
                     Assertion assertion;
                     if (predicateName.equals(IriConstants.RDF_TYPE)) {
-                        OClass oc = onto.tbox().classes().create(objectConstant.getValue());
-                        assertion = onto.abox().createClassAssertion(oc, subjectConstant);
+                        OClass oc = builder.declareClass(objectConstant.getValue());
+                        assertion = builder.createClassAssertion(oc, subjectConstant);
                     }
                     else {
                         if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) {
-                            ObjectPropertyExpression ope = onto.tbox().objectProperties().create(predicateName);
-                            assertion = onto.abox().createObjectPropertyAssertion(ope,
+                            ObjectPropertyExpression ope = builder.declareObjectProperty(predicateName);
+                            assertion = builder.createObjectPropertyAssertion(ope,
                                     subjectConstant, (ObjectConstant) objectConstant);
                         }
                         else {
-                            DataPropertyExpression dpe = onto.tbox().dataProperties().create(predicateName);
-                            assertion = onto.abox().createDataPropertyAssertion(dpe,
+                            DataPropertyExpression dpe = builder.declareDataProperty(predicateName);
+                            assertion = builder.createDataPropertyAssertion(dpe,
                                     subjectConstant, (ValueConstant) objectConstant);
                         }
                     }

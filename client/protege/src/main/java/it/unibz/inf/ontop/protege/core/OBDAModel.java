@@ -15,8 +15,6 @@ import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
@@ -58,7 +56,6 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
  */
 public class OBDAModel {
 
-    private final static OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
     private Map<String, SQLPPTriplesMap> triplesMapMap;

@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyABox;
+import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.si.repository.impl.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
@@ -47,13 +48,13 @@ class SILoadingTools {
     static class RepositoryInit {
         final SIRepositoryManager dataRepository;
         final Optional<Set<OWLOntology>> abox;
-        final OntologyABox ontologyABox;
+        final OntologyBuilder ontologyABox;
         final String jdbcUrl;
         final ClassifiedTBox reasoner;
         final Connection localConnection;
 
         private RepositoryInit(SIRepositoryManager dataRepository, Optional<Set<OWLOntology>> abox, String jdbcUrl,
-                               ClassifiedTBox reasoner, OntologyABox ontologyABox, Connection localConnection) {
+                               ClassifiedTBox reasoner, OntologyBuilder ontologyABox, Connection localConnection) {
             this.dataRepository = dataRepository;
             this.abox = abox;
             this.jdbcUrl = jdbcUrl;
@@ -66,18 +67,18 @@ class SILoadingTools {
     static RepositoryInit createRepository(OWLOntology owlOntology) throws SemanticIndexException {
 
         Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
-        Ontology ontology = OWLAPITranslatorOWL2QL.translate(ontologyClosure);
+        OntologyBuilder ontology = OWLAPITranslatorOWL2QL.translateB(ontologyClosure);
         return createRepository(ontology, Optional.of(ontologyClosure));
     }
 
-    static RepositoryInit createRepository(Ontology ontology) throws SemanticIndexException {
-        return createRepository(ontology, Optional.empty());
+    static RepositoryInit createRepository(OntologyBuilder builder) throws SemanticIndexException {
+        return createRepository(builder, Optional.empty());
     }
 
-    private static RepositoryInit createRepository(Ontology ontology, Optional<Set<OWLOntology>> ontologyClosure)
+    private static RepositoryInit createRepository(OntologyBuilder builder, Optional<Set<OWLOntology>> ontologyClosure)
             throws SemanticIndexException {
 
-        ClassifiedTBox reformulationReasoner = ClassifiedTBoxImpl.classify(ontology.tbox());
+        ClassifiedTBox reformulationReasoner = ClassifiedTBoxImpl.classify(builder.build().tbox());
 
         SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner);
 
@@ -93,7 +94,7 @@ class SILoadingTools {
 
             // Creating the ABox repository
             dataRepository.createDBSchemaAndInsertMetadata(localConnection);
-            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner, ontology.abox(), localConnection);
+            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner, builder, localConnection);
         }
         catch (SQLException e) {
             throw new SemanticIndexException(e.getMessage());
@@ -126,7 +127,8 @@ class SILoadingTools {
                 OWLOntology tbox = newManager.copyOntology(optionalOntology.get(), OntologyCopy.SHALLOW);
                 newManager.removeAxioms(tbox, tbox.getABoxAxioms(Imports.EXCLUDED));
                 optionalTBox = Optional.of(tbox);
-            } catch (OWLOntologyCreationException e) {
+            }
+            catch (OWLOntologyCreationException e) {
                 throw new SemanticIndexException(e.getMessage());
             }
         }
@@ -166,8 +168,8 @@ class SILoadingTools {
         try {
             return new SQLPPMappingImpl(mappingAxioms,
                     specificationFactory.createMetadata(prefixManager, uriTemplateMatcher));
-
-        } catch (DuplicateMappingException e) {
+        }
+        catch (DuplicateMappingException e) {
             throw new IllegalStateException(e.getMessage());
         }
     }

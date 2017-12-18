@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping;
 
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
-import it.unibz.inf.ontop.spec.ontology.OntologyTBox;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
@@ -15,21 +13,26 @@ public class TMappingExclusionConfigTest {
 
     @Test
     public void testParseFile() throws Exception {
-        OntologyFactory factory = OntologyFactoryImpl.getInstance();
         TMappingExclusionConfig conf = TMappingExclusionConfig.parseFile("src/test/resources/tmappingExclusionConf/good.conf");
-        OntologyTBox voc = factory.createOntology().tbox();
+        OntologyBuilder builder = OntologyBuilderImpl.builder();
+        OClass A = builder.declareClass("http://www.example.org/A");
+        OClass B = builder.declareClass("http://wwww.example.org/B");
+        OClass Pc = builder.declareClass("http://wwww.example.org/P");
+        ObjectPropertyExpression P = builder.declareObjectProperty("http://www.example.org/P");
+        ObjectPropertyExpression Q = builder.declareObjectProperty("http://www.example.org/Q");
+        ObjectPropertyExpression Ac = builder.declareObjectProperty("http://www.example.org/A");
         // in the config
-        assertTrue(conf.contains(voc.classes().create("http://www.example.org/A")));
+        assertTrue(conf.contains(A));
         // not in the config
-        assertFalse(conf.contains(voc.classes().create("http://wwww.example.org/B")));
+        assertFalse(conf.contains(B));
         // wrong type
-        assertFalse(conf.contains(voc.classes().create("http://wwww.example.org/B")));
+        assertFalse(conf.contains(Pc));
         // in the config
-        assertTrue(conf.contains(voc.objectProperties().create("http://www.example.org/P")));
+        assertTrue(conf.contains(P));
         // not in the config
-        assertFalse(conf.contains(voc.objectProperties().create("http://wwww.example.org/Q")));
+        assertFalse(conf.contains(Q));
         // wrong type
-        assertFalse(conf.contains(voc.objectProperties().create("http://wwww.example.org/P")));
+        assertFalse(conf.contains(Ac));
     }
 
     // File not found

@@ -26,8 +26,6 @@ import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Edge;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
 
@@ -59,8 +57,7 @@ public class TreeWitnessSet {
 	private Map<TreeWitness.TermCover, TreeWitness> twsCache;
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
-	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
-	
+
 	private TreeWitnessSet(QueryConnectedComponent cc, ClassifiedTBox reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
 		this.cc = cc;
 		this.cache = new QueryConnectedComponentCache(reasoner);
