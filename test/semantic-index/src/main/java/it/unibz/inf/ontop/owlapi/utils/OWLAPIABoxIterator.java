@@ -46,12 +46,13 @@ public class OWLAPIABoxIterator implements Iterator<Assertion> {
 	private Iterator<OWLAxiom> owlaxiomIterator = null;
 	private Assertion next = null;
 
-	private final OntologyTBox tbox;
+	private final ClassifiedTBox tbox;
     /**
      * @param ontologies used only for data (ABox)
+     * @param tbox provided the vocabulary for created ABox assertions
      */
 
-	public OWLAPIABoxIterator(Collection<OWLOntology> ontologies, OntologyTBox tbox) {
+	public OWLAPIABoxIterator(Collection<OWLOntology> ontologies, ClassifiedTBox tbox) {
 	    this.tbox = tbox;
 		ontologiesIterator = ontologies.iterator();
 		if (ontologiesIterator.hasNext()) 

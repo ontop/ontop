@@ -63,13 +63,13 @@ public class EmptyEntitiesTest {
 	final String propertyFile =
 			"/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.properties";
 	
-	private List<String> emptyConcepts = new ArrayList<String>();
-	private List<String> emptyRoles = new ArrayList<String>();
-	private Set<ClassExpression> emptyBasicConcepts = new HashSet<ClassExpression>();
-	private Set<Description> emptyProperties = new HashSet<Description>();
+	private List<String> emptyConcepts = new ArrayList<>();
+	private List<String> emptyRoles = new ArrayList<>();
+	private Set<ClassExpression> emptyBasicConcepts = new HashSet<>();
+	private Set<Description> emptyProperties = new HashSet<>();
 
 	private OntopOWLReasoner reasoner;
-	private OntologyTBox onto;
+	private ClassifiedTBox onto;
 
 	@Before
 	public void setUp() throws Exception {
@@ -93,7 +93,8 @@ public class EmptyEntitiesTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		onto = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(config.loadProvidedInputOntology())).tbox();
+		onto = ClassifiedTBoxImpl.classify(
+				OWLAPITranslatorOWL2QL.translate(ImmutableList.of(config.loadProvidedInputOntology())).tbox());
 	}
 
 	@After
@@ -261,12 +262,11 @@ public class EmptyEntitiesTest {
 	 */
 	// @Test
 	public void testEmptiesWithInverses() throws Exception {
-		ClassifiedTBox tboxreasoner = ClassifiedTBoxImpl.classify(onto);
 		System.out.println();
-		System.out.println(tboxreasoner.objectPropertiesDAG());
+		System.out.println(onto.objectPropertiesDAG());
 
 		int c = 0; // number of empty concepts
-		for (Equivalences<ClassExpression> concept : tboxreasoner.classesDAG()) {
+		for (Equivalences<ClassExpression> concept : onto.classesDAG()) {
 			ClassExpression representative = concept.getRepresentative();
 			if ((!(representative instanceof Datatype)) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
 				emptyBasicConcepts.addAll(concept.getMembers());
@@ -277,7 +277,7 @@ public class EmptyEntitiesTest {
 
 		{
 			int r = 0; // number of empty roles
-			for (Equivalences<ObjectPropertyExpression> properties : tboxreasoner.objectPropertiesDAG()) {
+			for (Equivalences<ObjectPropertyExpression> properties : onto.objectPropertiesDAG()) {
 				if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
 					emptyProperties.addAll(properties.getMembers());
 					r += properties.size();
@@ -287,7 +287,7 @@ public class EmptyEntitiesTest {
 		}
 		{
 			int r = 0; // number of empty roles
-			for (Equivalences<DataPropertyExpression> properties : tboxreasoner.dataPropertiesDAG()) {
+			for (Equivalences<DataPropertyExpression> properties : onto.dataPropertiesDAG()) {
 				if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
 					emptyProperties.addAll(properties.getMembers());
 					r += properties.size();

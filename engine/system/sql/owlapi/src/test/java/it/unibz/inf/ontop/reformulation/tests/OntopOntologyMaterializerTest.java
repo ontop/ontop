@@ -156,16 +156,16 @@ public class OntopOntologyMaterializerTest extends TestCase {
 				.build();
 
 		// read onto
-		OWLOntology ontology = configuration.loadProvidedInputOntology();
-		Ontology onto =  OWLAPITranslatorOWL2QL.translate(
-				ontology.getOWLOntologyManager().getImportsClosure(ontology));
-		System.out.println(onto.tbox().getSubClassAxioms());
-		System.out.println(onto.tbox().getSubObjectPropertyAxioms());
-		System.out.println(onto.tbox().getSubDataPropertyAxioms());
+		// OWLOntology ontology = configuration.loadProvidedInputOntology();
+		// Ontology onto = OWLAPITranslatorOWL2QL.translate(
+		//		ontology.getOWLOntologyManager().getImportsClosure(ontology));
+		// System.out.println(onto.tbox().getSubClassAxioms());
+		// System.out.println(onto.tbox().getSubObjectPropertyAxioms());
+		// System.out.println(onto.tbox().getSubDataPropertyAxioms());
 
 		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
 		MaterializationParams materializationParams = MaterializationParams.defaultBuilder().build();
-		try(MaterializedGraphResultSet resultSet = materializer.materialize(configuration, materializationParams)) {
+		try (MaterializedGraphResultSet resultSet = materializer.materialize(configuration, materializationParams)) {
 
 			int classAss = 0, propAss = 0, objAss = 0;
 			while (resultSet.hasNext()) {

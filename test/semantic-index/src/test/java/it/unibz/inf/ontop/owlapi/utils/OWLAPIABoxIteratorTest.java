@@ -22,8 +22,10 @@ package it.unibz.inf.ontop.owlapi.utils;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
 import it.unibz.inf.ontop.spec.ontology.OntologyTBox;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -36,7 +38,7 @@ import java.util.Iterator;
 
 public class OWLAPIABoxIteratorTest extends TestCase {
 
-	private OntologyTBox tbox;
+	private ClassifiedTBox tbox;
 	
 	protected void setUp() {
 		OntologyBuilder builder = OntologyBuilderImpl.builder();
@@ -46,7 +48,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		builder.declareClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Man");
 		builder.declareClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Person");
 		builder.declareClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Woman");
-		tbox = builder.build().tbox();
+		tbox = ClassifiedTBoxImpl.classify(builder.build().tbox());
 	}
 
 	public void testAssertionIterator() throws Exception {

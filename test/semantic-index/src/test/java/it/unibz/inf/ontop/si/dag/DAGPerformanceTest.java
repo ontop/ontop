@@ -129,7 +129,7 @@ public class DAGPerformanceTest extends TestCase {
 		OntologyTBox tbox = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(ont)).tbox();
 
 		long start = System.nanoTime();
-		ClassifiedTBox reasoner= ClassifiedTBoxImpl.classify(tbox);
+		ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(tbox);
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();

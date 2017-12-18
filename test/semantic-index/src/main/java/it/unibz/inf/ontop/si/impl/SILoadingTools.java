@@ -45,18 +45,16 @@ class SILoadingTools {
     static class RepositoryInit {
         final SIRepositoryManager dataRepository;
         final Optional<Set<OWLOntology>> abox;
-        final OntologyTBox ontologyTBox; // provides the vocabulary for OWLAPIIterator
         final String jdbcUrl;
         final ClassifiedTBox reasoner;
         final Connection localConnection;
 
         private RepositoryInit(SIRepositoryManager dataRepository, Optional<Set<OWLOntology>> abox, String jdbcUrl,
-                               ClassifiedTBox reasoner, OntologyTBox ontologyTBox, Connection localConnection) {
+                               ClassifiedTBox reasoner, Connection localConnection) {
             this.dataRepository = dataRepository;
             this.abox = abox;
             this.jdbcUrl = jdbcUrl;
             this.reasoner = reasoner;
-            this.ontologyTBox = ontologyTBox;
             this.localConnection = localConnection;
         }
     }
@@ -91,7 +89,7 @@ class SILoadingTools {
 
             // Creating the ABox repository
             dataRepository.createDBSchemaAndInsertMetadata(localConnection);
-            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner, ontology.tbox(), localConnection);
+            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner, localConnection);
         }
         catch (SQLException e) {
             throw new SemanticIndexException(e.getMessage());

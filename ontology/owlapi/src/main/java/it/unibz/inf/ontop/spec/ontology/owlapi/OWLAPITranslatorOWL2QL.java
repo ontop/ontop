@@ -81,26 +81,6 @@ public class OWLAPITranslatorOWL2QL {
         return onto;
     }
 
-    public static OntologyBuilder translateB(Collection<OWLOntology> ontologies)   {
-        log.debug("Load ontologies called. Translating {} ontologies.", ontologies.size());
-
-        OntologyBuilder builder = OntologyBuilderImpl.builder();
-
-        for (OWLOntology owl : ontologies) {
-            extractOntoloyVocabulary(owl, builder);
-        }
-
-        for (OWLOntology owl : ontologies) {
-            OWLAxiomVisitorImpl visitor = new OWLAxiomVisitorImpl(owl, builder);
-            for (OWLAxiom axiom : owl.getAxioms())  {
-                axiom.accept(visitor);
-            }
-        }
-
-        log.debug("Ontology loaded: {}", builder.build());
-        return builder;
-    }
-
     /**
      * USE FOR TESTS ONLY
      *
@@ -112,7 +92,7 @@ public class OWLAPITranslatorOWL2QL {
     public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
         OWLOntologyManager man = OWLManager.createOWLOntologyManager();
         OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-        Ontology onto = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(owl));
+        Ontology onto = translate(ImmutableList.of(owl));
         return ClassifiedTBoxImpl.classify(onto.tbox());
     }
 
