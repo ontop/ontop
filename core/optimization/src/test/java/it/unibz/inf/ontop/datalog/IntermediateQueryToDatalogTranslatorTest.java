@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.IntermediateQueryToDatalogTranslator;
+import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
@@ -27,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 
 public class IntermediateQueryToDatalogTranslatorTest {
 
+
     private static Variable X = DATA_FACTORY.getVariable("x");
     private static AtomPredicate ANS1_IQ_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
     private static DistinctVariableOnlyDataAtom ANS1_X_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -39,19 +38,23 @@ public class IntermediateQueryToDatalogTranslatorTest {
             P2_IQ_PREDICATE, ImmutableList.of(X));
 
     private static Predicate ANS1_DATALOG_PREDICATE;
-    private static Predicate ANSSQ1_DATALOG_PREDICATE;
+    private static Predicate SUBQUERY1_DATALOG_PREDICATE;
     private static Predicate P1_DATALOG_PREDICATE;
     private static Predicate P2_DATALOG_PREDICATE;
 
     static {
         ANS1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("ans1");
-        ANSSQ1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("ansSQ1");
+        SUBQUERY1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate(DATALOG_FACTORY.getSubqueryPredicatePrefix()+"1");
         P1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("p1");
         P2_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("p2");
     }
 
     @Test
     public void testUnionNodeChild() {
+
+        IntermediateQuery2DatalogTranslator translator = OntopOptimizationConfiguration.defaultBuilder().enableTestMode().build()
+                .getInjector()
+                .getInstance(IntermediateQuery2DatalogTranslator.class);
 
         Exception thrownException = null;
         /**
@@ -80,7 +83,7 @@ public class IntermediateQueryToDatalogTranslatorTest {
 
         DatalogProgram dp = null;
         try {
-            dp = IntermediateQueryToDatalogTranslator.translate(inputQuery);
+            dp = translator.translate(inputQuery);
         } catch (ClassCastException e) {
             thrownException = e;
         }
@@ -91,9 +94,8 @@ public class IntermediateQueryToDatalogTranslatorTest {
         /**
          Expected Datalog program
          */
-
         Function ans1Atom = DATA_FACTORY.getFunction(ANS1_DATALOG_PREDICATE, X);
-        Function ansSQ1Atom = DATA_FACTORY.getFunction(ANSSQ1_DATALOG_PREDICATE, X);
+        Function ansSQ1Atom = DATA_FACTORY.getFunction(SUBQUERY1_DATALOG_PREDICATE, X);
         Function p1Atom = DATA_FACTORY.getFunction(P1_DATALOG_PREDICATE, X);
         Function p2Atom = DATA_FACTORY.getFunction(P2_DATALOG_PREDICATE, X);
 

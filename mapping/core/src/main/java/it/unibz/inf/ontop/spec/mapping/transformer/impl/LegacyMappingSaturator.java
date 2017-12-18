@@ -76,43 +76,42 @@ public class LegacyMappingSaturator implements MappingSaturator {
      *
      * TODO: clean it
      */
-    private static List<CQIE> generateTripleMappings(ImmutableSet<CQIE> saturatedRules) {
-        List<CQIE> newmappings = new LinkedList<CQIE>();
+    private static ImmutableList<CQIE> generateTripleMappings(ImmutableSet<CQIE> saturatedRules) {
+        return saturatedRules.stream()
+                .filter(r -> !r.getHead().getFunctionSymbol().getName().startsWith(DATALOG_FACTORY.getSubqueryPredicatePrefix()))
+                .map(r -> generateTripleMapping(r))
+                .collect(ImmutableCollectors.toList());
+    }
 
-        for (CQIE mapping : saturatedRules) {
-            Function newhead;
-            Function currenthead = mapping.getHead();
-            if (currenthead.getArity() == 1) {
-				/*
-				 * head is Class(x) Forming head as triple(x,uri(rdf:type),
+    private static CQIE generateTripleMapping(CQIE rule) {
+        Function newhead;
+        Function currenthead = rule.getHead();
+        if (currenthead.getArity() == 1) {
+                /*
+                 * head is Class(x) Forming head as triple(x,uri(rdf:type),
 				 * uri(Class))
 				 */
-                Function rdfTypeConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(IriConstants.RDF_TYPE));
+            Function rdfTypeConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(IriConstants.RDF_TYPE));
 
-                String classname = currenthead.getFunctionSymbol().getName();
-                Term classConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(classname));
+            String classname = currenthead.getFunctionSymbol().getName();
+            Term classConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(classname));
 
-                newhead = ATOM_FACTORY.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
-            }
-            else if (currenthead.getArity() == 2) {
+            newhead = ATOM_FACTORY.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
+        } else if (currenthead.getArity() == 2) {
 				/*
 				 * head is Property(x,y) Forming head as triple(x,uri(Property),
 				 * y)
 				 */
-                String propname = currenthead.getFunctionSymbol().getName();
-                Function propConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(propname));
+            String propname = currenthead.getFunctionSymbol().getName();
+            Function propConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(propname));
 
-                newhead = ATOM_FACTORY.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
-            }
-            else {
+            newhead = ATOM_FACTORY.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
+        } else {
 				/*
 				 * head is triple(x,uri(Property),y)
 				 */
-                newhead = (Function) currenthead.clone();
-            }
-            CQIE newmapping = DATALOG_FACTORY.getCQIE(newhead, mapping.getBody());
-            newmappings.add(newmapping);
+            newhead = (Function) currenthead.clone();
         }
-        return newmappings;
+        return DATALOG_FACTORY.getCQIE(newhead, rule.getBody());
     }
 }

@@ -2,60 +2,36 @@ package it.unibz.inf.ontop.temporal.mapping;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.SQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
-import it.unibz.inf.ontop.iq.mapping.TargetAtom;
-import it.unibz.inf.ontop.iq.mapping.impl.TargetAtomImpl;
-import it.unibz.inf.ontop.model.IriConstants;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-
-import java.util.*;
-
+import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
-
-import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.temporal.mapping.impl.SQLPPTemporalTriplesMapImpl;
+import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
-import static it.unibz.inf.ontop.model.term.impl.PredicateImpl.QUEST_QUADRUPLE_PRED;
+import java.util.*;
 
-import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.castIntoGroundTerm;
-import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
-import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertIntoImmutableTerm;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class TemporalSQLPPMapping2DatalogConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(it.unibz.inf.ontop.datalog.SQLPPMapping2DatalogConverter.class);
 
-    /**
-     * returns a Datalog representation of the mappings
-     */
-    public static ImmutableList<CQIE> constructDatalogProgram(Collection<SQLPPTriplesMap> triplesMaps,
-                                                              DBMetadata metadata) throws InvalidMappingSourceQueriesException {
-        return ImmutableList.copyOf(convert(triplesMaps, metadata).keySet());
-    }
-
     public static ImmutableMap<CQIE, PPMappingAssertionProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
-                                                                           DBMetadata metadata0) throws InvalidMappingSourceQueriesException {
+                                                                           RDBMetadata metadata) throws InvalidMappingSourceQueriesException {
         Map<CQIE, PPMappingAssertionProvenance> mutableMap = new HashMap<>();
-
-        RDBMetadata metadata = (RDBMetadata)metadata0;
 
         List<String> errorMessages = new ArrayList<>();
 
@@ -65,11 +41,11 @@ public class TemporalSQLPPMapping2DatalogConverter {
             try {
                 OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
 
-                SelectQueryParser sqp = new SelectQueryParser(metadata);
                 List<Function> body;
                 ImmutableMap<QualifiedAttributeID, Variable> lookupTable;
 
                 try {
+                    SelectQueryParser sqp = new SelectQueryParser(metadata);
                     RAExpression re = sqp.parse(sourceQuery.toString());
                     lookupTable = re.getAttributes();
 
@@ -78,29 +54,20 @@ public class TemporalSQLPPMapping2DatalogConverter {
                     body.addAll(re.getFilterAtoms());
                 }
                 catch (UnsupportedSelectQueryException e) {
-                    // WRAP UP
-                    //ImmutableSet<QuotedID> variableNames = mappingAxiom.getTargetQuery().stream()
-                    //        .map(f -> collectVariableNames(idfac, f))
-                    //        .reduce((s1, s2) -> ImmutableSet.<QuotedID>builder().addAll(s1).addAll(s2).build())
-                    //        .get();
-                    ImmutableList<QuotedID> variableNames =
-                            new SelectQueryAttributeExtractor(metadata).extract(sourceQuery.toString());
+                    ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata)
+                            .extract(sourceQuery.toString());
+                    ParserViewDefinition view = metadata.createParserView(sourceQuery.toString(), attributes);
 
-                    ParserViewDefinition view = metadata.createParserView(sourceQuery.toString());
-                    // TODO: clean up
-                    boolean needsCreating = view.getAttributes().isEmpty();
-                    ImmutableMap.Builder<QualifiedAttributeID, Variable> builder = ImmutableMap.builder();
-                    List<Term> arguments = new ArrayList<>(variableNames.size());
-                    variableNames.forEach(id -> {
-                        QualifiedAttributeID qId = new QualifiedAttributeID(null, id);
-                        if (needsCreating)
-                            view.addAttribute(qId);
-                        Variable var = TERM_FACTORY.getVariable(id.getName());
-                        builder.put(qId, var);
-                        arguments.add(var);
-                    });
+                    // this is required to preserve the order of the variables
+                    ImmutableList<Map.Entry<QualifiedAttributeID,Variable>> list = view.getAttributes().stream()
+                            .map(att -> new AbstractMap.SimpleEntry<>(
+                                    new QualifiedAttributeID(null, att.getID()), // strip off the ParserViewDefinitionName
+                                    TERM_FACTORY.getVariable(att.getID().getName())))
+                            .collect(ImmutableCollectors.toList());
 
-                    lookupTable = builder.build();
+                    lookupTable = list.stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                    List<Term> arguments = list.stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
 
                     body = new ArrayList<>(1);
                     body.add(TERM_FACTORY.getFunction(Relation2Predicate.createPredicateFromRelation(view), arguments));
@@ -112,12 +79,11 @@ public class TemporalSQLPPMapping2DatalogConverter {
                         Function head = renameVariables(atom, lookupTable, idfac);
                         CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
 
-                        if (mutableMap.containsKey(rule)) {
-                            LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + mutableMap.get(rule));
-                        } else {
-                            mutableMap.put(rule, provenance);
-                        }
-                    } catch (TemporalSQLPPMapping2DatalogConverter.UnboundVariableException e) {
+                        PPMappingAssertionProvenance previous = mutableMap.put(rule, provenance);
+                        if (previous != null)
+                            LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + previous);
+                    }
+                    catch (AttributeNotFoundException e) {
                         errorMessages.add("Error: " + e.getMessage()
                                 + " \nProblem location: source query of the mapping assertion \n["
                                 + provenance.getProvenanceInfo() + "]");
@@ -137,60 +103,52 @@ public class TemporalSQLPPMapping2DatalogConverter {
         return ImmutableMap.copyOf(mutableMap);
     }
 
-
     /**
      * Returns a new function by renaming variables occurring in the {@code function}
      *  according to the {@code attributes} lookup table
      */
     private static Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Variable> attributes,
-                                            QuotedIDFactory idfac) throws TemporalSQLPPMapping2DatalogConverter.UnboundVariableException {
+                                            QuotedIDFactory idfac) throws AttributeNotFoundException {
         List<Term> terms = function.getTerms();
         List<Term> newTerms = new ArrayList<>(terms.size());
-        for (Term t : terms)
-            newTerms.add(renameTermVariables(t, attributes, idfac));
+        for (Term term : terms) {
+            Term newTerm;
+            if (term instanceof Variable) {
+                Variable var = (Variable) term;
+                QuotedID attribute = idfac.createAttributeID(var.getName());
+                newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
+
+                if (newTerm == null) {
+                    QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, var.getName());
+                    newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
+
+                    if (newTerm == null)
+                        throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
+                                + " (variable " + var.getName() + ") required by the target atom.");
+                }
+            }
+            else if (term instanceof Function)
+                newTerm = renameVariables((Function) term, attributes, idfac);
+            else if (term instanceof Constant)
+                newTerm = term.clone();
+            else
+                throw new RuntimeException("Unknown term type: " + term);
+
+            newTerms.add(newTerm);
+        }
 
         return TERM_FACTORY.getFunction(function.getFunctionSymbol(), newTerms);
     }
 
-    /**
-     * Returns a new term by renaming variables occurring in the {@code term}
-     *  according to the {@code attributes} lookup table
-     */
-    private static Term renameTermVariables(Term term, ImmutableMap<QualifiedAttributeID, Variable> attributes,
-                                            QuotedIDFactory idfac) throws TemporalSQLPPMapping2DatalogConverter.UnboundVariableException {
-
-        if (term instanceof Variable) {
-            Variable var = (Variable) term;
-            String varName = var.getName();
-            // TODO: remove this code
-            // chop off the qualifying table name
-            if (varName.contains("."))
-                varName = varName.substring(varName.indexOf(".") + 1);
-            QuotedID attribute = idfac.createAttributeID(varName);
-            Variable newVar = attributes.get(new QualifiedAttributeID(null, attribute));
-
-            if (newVar == null) {
-                QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, varName);
-                newVar = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
-
-                if (newVar == null)
-                    throw new TemporalSQLPPMapping2DatalogConverter.UnboundVariableException("The source query does not provide the attribute " + attribute
-                            + " (variable " + var.getName() + ") required by the target atom.");
-            }
-
-            return newVar;
-        }
-        else if (term instanceof Function)
-            return renameVariables((Function) term, attributes, idfac);
-
-        else if (term instanceof Constant)
-            return term.clone();
-
-        throw new RuntimeException("Unknown term type: " + term);
-    }
 
     private static class UnboundVariableException extends Exception {
         UnboundVariableException(String message) {
+            super(message);
+        }
+    }
+
+    private static class AttributeNotFoundException extends Exception {
+        AttributeNotFoundException(String message) {
             super(message);
         }
     }

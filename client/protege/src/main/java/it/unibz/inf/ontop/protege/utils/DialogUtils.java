@@ -31,7 +31,7 @@ import java.net.URI;
 public class DialogUtils {
 
 	public static void showQuickErrorDialog(Component parent, Exception e) {
-		showQuickErrorDialog(parent, e, "An Error Has Ocurred");
+		showQuickErrorDialog(parent, e, "An Error Has Occurred");
 	}
 
 	public static void open(URI uri, Component component) {

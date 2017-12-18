@@ -3,9 +3,7 @@ package it.unibz.inf.ontop.temporal.model.impl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.temporal.model.*;
-import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -118,5 +116,10 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     @Override
     public ComparisonExpression createComparisonExpression(AtomPredicate predicate, VariableOrGroundTerm term1, VariableOrGroundTerm term2) {
         return new ComparisonExpressionImpl(predicate, term1, term2);
+    }
+
+    @Override
+    public FilterExpression createFilterExpression(DatalogMTLExpression datalogMTLExpression, ComparisonExpression comparisonExpression) {
+        return new FilterExpressionImpl(datalogMTLExpression, comparisonExpression);
     }
 }

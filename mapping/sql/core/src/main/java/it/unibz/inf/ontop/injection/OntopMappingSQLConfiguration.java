@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public interface OntopMappingSQLConfiguration extends OntopSQLCoreConfiguration, OntopMappingConfiguration {
+public interface OntopMappingSQLConfiguration extends OntopSQLCredentialConfiguration, OntopMappingConfiguration {
 
     @Override
     OntopMappingSQLSettings getSettings();
@@ -37,7 +37,7 @@ public interface OntopMappingSQLConfiguration extends OntopSQLCoreConfiguration,
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingSQLBuilderFragment<B>,
-            OntopSQLCoreConfiguration.Builder<B>, OntopMappingConfiguration.Builder<B> {
+            OntopSQLCredentialConfiguration.Builder<B>, OntopMappingConfiguration.Builder<B> {
 
         @Override
         OntopMappingSQLConfiguration build();

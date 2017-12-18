@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.parser;
 
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 
@@ -25,8 +26,8 @@ public class DataSource2PropertiesConvertor {
         Properties p = new Properties();
         p.put(OntopSQLCoreSettings.JDBC_NAME, id);
         p.put(OntopSQLCoreSettings.JDBC_URL, url);
-        p.put(OntopSQLCoreSettings.JDBC_USER, username);
-        p.put(OntopSQLCoreSettings.JDBC_PASSWORD, password);
+        p.put(OntopSQLCredentialSettings.JDBC_USER, username);
+        p.put(OntopSQLCredentialSettings.JDBC_PASSWORD, password);
         p.put(OntopSQLCoreSettings.JDBC_DRIVER, driver);
 
         return p;

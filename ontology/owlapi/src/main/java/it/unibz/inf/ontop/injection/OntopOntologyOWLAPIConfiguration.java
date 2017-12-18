@@ -5,7 +5,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.Optional;
 
-public interface OntopOntologyOWLAPIConfiguration extends OntopOBDAConfiguration {
+public interface OntopOntologyOWLAPIConfiguration extends OntopModelConfiguration {
 
     Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException;
 

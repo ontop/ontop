@@ -2,4 +2,4 @@
 
 :x :p 1, "2", 3, 4 .
 :y :p 1, _:b2, 3, 4 .
-:z :p 2.5e0, "not a double" , 3.5, 4 .
+:z :p 2.5E0, "not a double" , 3.5, 4 .

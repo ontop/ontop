@@ -4,7 +4,6 @@ package it.unibz.inf.ontop.temporal.model.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.TemporalAtomicExpression;
 
@@ -50,7 +49,7 @@ public class TemporalAtomicExpressionImpl implements TemporalAtomicExpression {
     }
 
     @Override
-    public List<? extends Term> getTerms() {
-        return terms;
+    public ImmutableList<? extends Term> getTerms() {
+        return ImmutableList.copyOf(terms);
     }
 }

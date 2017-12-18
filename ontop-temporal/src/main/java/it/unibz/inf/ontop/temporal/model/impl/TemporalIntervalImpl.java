@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
 import it.unibz.inf.ontop.temporal.model.TemporalInterval;
-import it.unibz.inf.ontop.temporal.model.TemporalRange;
 
-import java.time.Duration;
 import java.time.Instant;
 
 public class TemporalIntervalImpl implements TemporalInterval {

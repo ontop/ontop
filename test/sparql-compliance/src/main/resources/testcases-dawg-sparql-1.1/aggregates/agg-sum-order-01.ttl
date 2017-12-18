@@ -17,7 +17,7 @@
 
 :book-a2-01 :price "100"^^xsd:integer .
 
-#:book-a3-01 :price 0.5 .
-#:book-a13-01 :price "0.6"^^xsd:decimal .
+:book-a3-01 :price 0.5 .
+:book-a13-01 :price "0.6"^^xsd:decimal .
 :book-a3-01 :price "2"^^xsd:integer .
 :book-a3-01 :price "4"^^xsd:integer .

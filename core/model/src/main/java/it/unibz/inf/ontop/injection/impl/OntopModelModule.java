@@ -31,10 +31,10 @@ public class OntopModelModule extends OntopAbstractModule {
         bind(TypeFactory.class).toInstance(TYPE_FACTORY);
         bind(TermFactory.class).toInstance(TERM_FACTORY);
 
-        bindFromPreferences(IntermediateQueryValidator.class);
-        bindFromPreferences(TermNullabilityEvaluator.class);
-        bindFromPreferences(FilterNullableVariableQueryTransformer.class);
-        bindFromPreferences(VariableDefinitionExtractor.class);
+        bindFromSettings(IntermediateQueryValidator.class);
+        bindFromSettings(TermNullabilityEvaluator.class);
+        bindFromSettings(FilterNullableVariableQueryTransformer.class);
+        bindFromSettings(VariableDefinitionExtractor.class);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
                 IntermediateQueryBuilder.class,

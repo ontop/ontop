@@ -17,7 +17,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.mapping.TargetAtom;
+import it.unibz.inf.ontop.datalog.TargetAtom;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
@@ -51,7 +51,7 @@ public class DatalogRule2QueryConverter {
 
             optionalGroupAtom = extractOptionalGroupAtom(otherAtoms);
 
-            /**
+            /*
              * May throw a NotSupportedConversionException
              */
             checkNonDataOrCompositeAtomSupport(otherAtoms, booleanAtoms, optionalGroupAtom);
@@ -137,6 +137,7 @@ public class DatalogRule2QueryConverter {
                                                 IntermediateQueryFactory modelFactory) {
         IntermediateQueryBuilder queryBuilder = modelFactory.createIQBuilder(dbMetadata, executorRegistry);
         queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.addChild(rootNode, modelFactory.createTrueNode());
         return queryBuilder.build();
     }
 
@@ -152,7 +153,7 @@ public class DatalogRule2QueryConverter {
                                                       IntermediateQueryFactory iqFactory,
                                                       ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
-        /**
+        /*
          * TODO: explain
          */
         Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(iqFactory, dataAndCompositeAtoms, booleanAtoms);
@@ -163,7 +164,7 @@ public class DatalogRule2QueryConverter {
         try {
             queryBuilder.init(projectionAtom, rootNode);
 
-            /**
+            /*
              * Intermediate node: ConstructionNode root or GROUP node
              */
             QueryNode intermediateNode;
@@ -177,7 +178,7 @@ public class DatalogRule2QueryConverter {
             }
 
 
-            /**
+            /*
              * Bottom node: intermediate node or JOIN or FILTER
              */
             QueryNode bottomNode;
@@ -189,7 +190,7 @@ public class DatalogRule2QueryConverter {
                 bottomNode = rootNode;
             }
 
-            /**
+            /*
              * TODO: explain
              */
             queryBuilder = convertDataOrCompositeAtoms(dataAndCompositeAtoms, queryBuilder, bottomNode, NO_POSITION,
@@ -212,16 +213,16 @@ public class DatalogRule2QueryConverter {
         int dataAndCompositeAtomCount = dataAndCompositeAtoms.length();
         Optional<JoinOrFilterNode> optionalRootNode;
 
-        /**
+        /*
          * Filter as a root node
          */
         if (optionalFilter.isPresent() && (dataAndCompositeAtomCount == 1)) {
-            optionalRootNode = Optional.of((JoinOrFilterNode) iqFactory.createFilterNode(optionalFilter.get()));
+            optionalRootNode = Optional.of(iqFactory.createFilterNode(optionalFilter.get()));
         }
         else if (dataAndCompositeAtomCount > 1) {
-            optionalRootNode = Optional.of((JoinOrFilterNode) iqFactory.createInnerJoinNode(optionalFilter));
+            optionalRootNode = Optional.of(iqFactory.createInnerJoinNode(optionalFilter));
         }
-        /**
+        /*
          * No need to create a special root node (will be the unique data atom)
          */
         else {
@@ -246,11 +247,11 @@ public class DatalogRule2QueryConverter {
                                                                         Optional<ArgumentPosition> optionalPosition,
                                                                         Collection<Predicate> tablePredicates)
             throws IntermediateQueryBuilderException, DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
-        /**
+        /*
          * For each atom
          */
         for (Function atom : atoms) {
-            /**
+            /*
              * If the atom is composite, extracts sub atoms
              */
             if (atom.isAlgebraFunction()) {
@@ -270,12 +271,12 @@ public class DatalogRule2QueryConverter {
                     throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Unsupported predicate: " + atomPredicate);
                 }
             }
-            /**
+            /*
              * Data atom: creates a DataNode and adds it to the tree
              */
             else if (atom.isDataFunction()) {
 
-                /**
+                /*
                  * Creates the node
                  */
                 TargetAtom targetAtom = DatalogConversionTools.convertFromDatalogDataAtom(atom);
@@ -304,7 +305,7 @@ public class DatalogRule2QueryConverter {
         final List<Function> leftAtoms = decomposition._1();
         final List<Function> rightAtoms = decomposition._2();
 
-        /**
+        /*
          * TODO: explain why we just care about the right
          */
         AtomClassification rightSubAtomClassification = new AtomClassification(rightAtoms);
@@ -315,12 +316,12 @@ public class DatalogRule2QueryConverter {
         LeftJoinNode ljNode = queryBuilder.getFactory().createLeftJoinNode(optionalFilterCondition);
         queryBuilder.addChild(parentNodeOfTheLJ, ljNode, optionalPosition);
 
-        /**
+        /*
          * Adds the left part
          */
         queryBuilder = convertJoinAtom(queryBuilder, ljNode, leftAtoms, LEFT_POSITION, tablePredicates);
 
-        /**
+        /*
          * Adds the right part
          */
         return convertDataOrCompositeAtoms(rightSubAtomClassification.dataAndCompositeAtoms, queryBuilder, ljNode,
@@ -349,7 +350,7 @@ public class DatalogRule2QueryConverter {
         if (classification.dataAndCompositeAtoms.isEmpty()) {
             throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Empty join found");
         }
-        /**
+        /*
          * May happen because this method can also be called after the LJ conversion
          */
         else if (classification.dataAndCompositeAtoms.length() == 1) {
@@ -360,7 +361,7 @@ public class DatalogRule2QueryConverter {
                 return convertDataOrCompositeAtoms(classification.dataAndCompositeAtoms, queryBuilder, filterNode,
                         NO_POSITION, tablePredicates);
             }
-            /**
+            /*
              * Otherwise, no need for intermediate query node.
              */
             else {
@@ -368,14 +369,14 @@ public class DatalogRule2QueryConverter {
                         parentNodeOfTheJoinNode, optionalPosition, tablePredicates);
             }
         }
-        /**
+        /*
          * Normal case
          */
         else {
             InnerJoinNode joinNode = queryBuilder.getFactory().createInnerJoinNode(optionalFilterCondition);
             queryBuilder.addChild(parentNodeOfTheJoinNode, joinNode, optionalPosition);
 
-            /**
+            /*
              * Indirect recursive call for composite atoms
              */
             return convertDataOrCompositeAtoms(classification.dataAndCompositeAtoms, queryBuilder, joinNode, NO_POSITION,

@@ -1,6 +1,10 @@
 package it.unibz.inf.ontop.iq.executor.substitution;
 
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.executor.substitution.LocalPropagationTools.SubstitutionApplicationResults;
+import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -13,7 +17,9 @@ import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.NodeTracker;
 import it.unibz.inf.ontop.iq.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
+import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 
+import javax.inject.Inject;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.executor.substitution.AscendingPropagationTools.propagateSubstitutionUp;
@@ -25,6 +31,13 @@ import static it.unibz.inf.ontop.iq.executor.substitution.LocalPropagationTools.
  */
 public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
         implements SubstitutionPropagationExecutor<N> {
+
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private SubstitutionPropagationExecutorImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
 
     @Override
     public NodeCentricOptimizationResults<N> apply(SubstitutionPropagationProposal<N> proposal,
@@ -50,9 +63,10 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
                                                                         QueryTreeComponent treeComponent)
             throws QueryNodeSubstitutionException, EmptyQueryException {
         N originalFocusNode = proposal.getFocusNode();
-        ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate = proposal.getSubstitution();
+        ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate = normalizeInputSubstitution(
+                originalFocusNode, query, proposal.getSubstitution());
 
-        /**
+        /*
          * First to the focus node
          */
         SubstitutionApplicationResults<N> localApplicationResults = applySubstitutionToFocusNode(originalFocusNode,
@@ -63,7 +77,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
                         "A SubstitutionPropagationProposal must provide a substitution " +
                                 "that is directly applicable to the focus node (the focus node should not reject it)"));
 
-        /**
+        /*
          * Then propagates up
          *
          * NB: this can remove the focus node (or its replacing child) but not altered it and its sub-tree.
@@ -71,9 +85,9 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
          */
         NodeCentricOptimizationResults<QueryNode> ascendingPropagationResults = propagateSubstitutionUp(
                 newFocusOrReplacingChildNode,
-                substitutionToPropagate, query, treeComponent, Optional.empty());
+                substitutionToPropagate, query, treeComponent, iqFactory, Optional.empty());
 
-        /**
+        /*
          * If some ancestors are removed, does not go further
          */
         if (!ascendingPropagationResults.getOptionalNewNode().isPresent()) {
@@ -91,7 +105,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
             throw new IllegalStateException("The original focus node was not expected to changed");
         }
 
-        /**
+        /*
          * Finally, propagates down and returns the results
          *
          * NB: localApplicationResults should still be valid after propagating the substitution up
@@ -99,6 +113,36 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
         return propagateDown(query, treeComponent, localApplicationResults);
 
 
+    }
+
+    /**
+     * Normalizes the input substitution so as to avoid projected variables to be renamed into variables
+     * that are NOT PROJECTED by the closest ExplicitVariableProjectionNode.
+     *
+     * Such an ancestor BLOCKS ascending substitutions and may thus be forced to incorporate some bindings
+     * of the substitution (if it is a ConstructionNode) or to insert a construction node out of a fragment
+     * of the substitution (if it is a UnionNode).
+     *
+     * Without this normalization, blocking the substitution could cause the insertion of illegal bindings
+     * (projected variable to non-projected variable) into a construction node, producing an invalid IQ.
+     *
+     * An alternative solution to normalization would have been to let the ancestors push down a renaming
+     * substitution, but this complicates the substitution propagation mechanisms.
+     *
+     */
+    private ImmutableSubstitution<? extends ImmutableTerm> normalizeInputSubstitution(
+            N originalFocusNode, IntermediateQuery query, ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        if (query.getRootNode() == originalFocusNode)
+            return substitution;
+
+        ImmutableSet<Variable> priorityVariables = query.getAncestors(originalFocusNode).stream()
+                .filter(a -> a instanceof ExplicitVariableProjectionNode)
+                .map(a -> (ExplicitVariableProjectionNode) a)
+                .findFirst()
+                .map(ExplicitVariableProjectionNode::getVariables)
+                .orElseGet(() -> query.getProjectionAtom().getVariables());
+
+        return ImmutableSubstitutionTools.prioritizeRenaming(substitution, priorityVariables);
     }
 
     /**
@@ -118,7 +162,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
             Optional<ImmutableSubstitution<? extends ImmutableTerm>> newSubstitution = localApplicationResults.getOptionalSubstitution();
             Optional<NodeTracker> optionalTracker = localApplicationResults.getOptionalTracker();
 
-            /**
+            /*
              * Applies the substitution to the replacing child (recursive)
              */
             if (newSubstitution.isPresent()) {
@@ -131,7 +175,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
                     return new SubstitutionApplicationResults<>(query, optionalNewReplacingChild.get(),
                             replacingChildResults.getOptionalSubstitution(), true, optionalTracker);
                 }
-                /**
+                /*
                  * No replacing child after applying the substitution (--> is empty)
                  */
                 else {
@@ -140,7 +184,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
             }
         }
 
-        /**
+        /*
          * By default, no recursion
          */
         return localApplicationResults;
@@ -153,7 +197,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
 
         if (localApplicationResults.getNewNodeOrReplacingChild().isPresent()) {
 
-            /**
+            /*
              * Still a substitution to propagate down
              */
             if (localApplicationResults.getOptionalSubstitution().isPresent()) {
@@ -164,13 +208,13 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
                 if (optionalNewFocusNode.isPresent()) {
                     return propagateSubstitutionDown(optionalNewFocusNode.get(), newSubstitution, query, treeComponent);
                 }
-                /**
+                /*
                  * When the focus has already been replaced by its child
                  */
                 else  {
                     QueryNode replacingNode = localApplicationResults.getOptionalReplacingChild().get();
 
-                    /**
+                    /*
                      * The results have to be converted
                      */
                     NodeCentricOptimizationResults<QueryNode> descendingResults = propagateSubstitutionDown(
@@ -185,7 +229,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
                     }
                 }
             }
-            /**
+            /*
              * No propagation down
              */
             else {
@@ -195,7 +239,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
                                 localApplicationResults.getOptionalReplacingChild()));
             }
         }
-        /**
+        /*
          *  The focus node has removed by the local application
          *
          */

@@ -10,7 +10,7 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
 public class TermTypeInferenceRules {
 
     public static final TermTypeInferenceRule PREDEFINED_OBJECT_RULE = new PredefinedTermTypeInferenceRule(OBJECT);
-    public static final TermTypeInferenceRule PREDEFINED_LITERAL_RULE = new PredefinedTermTypeInferenceRule(LITERAL);
+    public static final TermTypeInferenceRule PREDEFINED_LITERAL_RULE = new PredefinedTermTypeInferenceRule(STRING);
     public static final TermTypeInferenceRule PREDEFINED_BOOLEAN_RULE = new PredefinedTermTypeInferenceRule(BOOLEAN);
     public static final TermTypeInferenceRule PREDEFINED_INTEGER_RULE = new PredefinedTermTypeInferenceRule(INTEGER);
     public static final TermTypeInferenceRule PREDEFINED_DECIMAL_RULE = new PredefinedTermTypeInferenceRule(DECIMAL);

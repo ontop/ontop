@@ -2,7 +2,7 @@
     <parent>
         <artifactId>ontop-system</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.0-beta-2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-translation-core</artifactId>
+            <artifactId>ontop-reformulation-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

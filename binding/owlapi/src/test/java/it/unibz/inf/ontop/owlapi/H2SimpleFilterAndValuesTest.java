@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -160,7 +158,7 @@ public class H2SimpleFilterAndValuesTest {
 				"   FILTER ( ?x = :Row ) .\n" +
 				"}";
 		String val = runQueryReturnLiteral(query);
-		assertEquals("\"2013-03-18\"", val);
+		assertEquals("\"2013-03-18\"^^xsd:date", val);
 	}
 
 	@Test
@@ -171,7 +169,7 @@ public class H2SimpleFilterAndValuesTest {
 				"   VALUES ?x { :Row } .\n" +
 				"}";
 		String val = runQueryReturnLiteral(query);
-		assertEquals("\"2013-03-18\"", val);
+		assertEquals("\"2013-03-18\"^^xsd:date", val);
 	}
 
 	@Test
@@ -182,7 +180,7 @@ public class H2SimpleFilterAndValuesTest {
 				"   FILTER ( ?x = :hasDate ) .\n" +
 				"}";
 		String val = runQueryReturnLiteral(query);
-		assertEquals("\"2013-03-18\"", val);
+		assertEquals("\"2013-03-18\"^^xsd:date", val);
 	}
 
 	@Test
@@ -193,7 +191,7 @@ public class H2SimpleFilterAndValuesTest {
 				"   VALUES ?x { :hasDate } .\n" +
 				"}";
 		String val = runQueryReturnLiteral(query);
-		assertEquals("\"2013-03-18\"", val);
+		assertEquals("\"2013-03-18\"^^xsd:date", val);
 	}
 
 

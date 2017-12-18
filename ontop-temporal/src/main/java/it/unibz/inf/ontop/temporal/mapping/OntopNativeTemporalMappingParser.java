@@ -2,48 +2,38 @@ package it.unibz.inf.ontop.temporal.mapping;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.IriConstants;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.spec.mapping.QuadrupleElements;
-import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
+import it.unibz.inf.ontop.spec.mapping.QuadrupleElements;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
+import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException;
+import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.temporal.mapping.impl.SQLPPTemporalTriplesMapImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.exception.InvalidMappingTemporalExceptionwithIndicator.*;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.castIntoGroundTerm;
-import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
-import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertIntoImmutableTerm;
 import static it.unibz.inf.ontop.model.term.impl.PredicateImpl.QUEST_QUADRUPLE_PRED;
 
 

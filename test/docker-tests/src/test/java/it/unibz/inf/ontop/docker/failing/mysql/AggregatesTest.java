@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.docker.failing.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import org.junit.Ignore;
+import org.junit.Test;
 
 @Ignore("Not supported yet")
 public class AggregatesTest extends AbstractVirtualModeTest {
@@ -108,28 +109,33 @@ public class AggregatesTest extends AbstractVirtualModeTest {
 //		conn.commit();
 //	}
 
+	@Test
 	public void testAggrCount() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
 		countResults(query, 1);
 	}
 
 
+	@Test
 	public void testAggrCount2() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?broker (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :isExecutedBy ?broker. ?x :amountOfTransaction ?value } GROUP BY ?broker";
 		countResults(query, 1);
 	}
-	
+
+	@Test
 	public void testAggrCount3() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value } GROUP BY ?x";
 		countResults(query, 4);
 	}
 
+	@Test
 	public void testAggrCount4() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x (COUNT(?y) AS ?count) WHERE { ?x :belongsToCompany ?y } GROUP BY ?x";
 		//String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x ?y WHERE { ?x :belongsToCompany ?y } ";
 		countResults(query, 10);
 	}
-	
+
+	@Test
 	public void testAggrCount5() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (COUNT(?x) AS ?count) WHERE {?x a :Transaction. }";
 		countResults(query,1);
@@ -152,22 +158,26 @@ public class AggregatesTest extends AbstractVirtualModeTest {
 	}
 	
 */
-	
+
+	@Test
 	public void testAggrAVG() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?broker (AVG(?value) AS ?vavg) WHERE {?x :isExecutedBy ?broker. ?x :amountOfTransaction ?value } GROUP BY ?broker";
 		countResults(query,1);
 	}
-	
+
+	@Test
 	public void testAggrSUM() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (SUM(?value) AS ?sum) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
 		countResults(query,1);
 	}
-	
+
+	@Test
 	public void testAggrMIN() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (MIN(?value) AS ?min) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
 		countResults(query,1);
 	}
-	
+
+	@Test
 	public void testAggrMAX() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (MAX(?value) AS ?max) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
 		countResults(query,1);

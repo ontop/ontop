@@ -27,6 +27,8 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 
 public interface SQLPPTriplesMap extends PreProcessedTriplesMap {
 
+	ImmutableList<ImmutableFunctionalTerm> getTargetAtoms();
+
 	OBDASQLQuery getSourceQuery();
 
 	String getId();

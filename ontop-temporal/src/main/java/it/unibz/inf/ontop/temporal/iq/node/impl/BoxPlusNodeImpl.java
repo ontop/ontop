@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.temporal.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.IntermediateQuery;

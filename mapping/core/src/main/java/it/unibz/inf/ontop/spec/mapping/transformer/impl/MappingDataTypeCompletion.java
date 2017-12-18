@@ -23,11 +23,12 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
+import it.unibz.inf.ontop.exception.UnknownDatatypeException;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 public class MappingDataTypeCompletion {
 
     private final DBMetadata metadata;
+    private final boolean defaultDatatypeInferred;
 
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeCompletion.class);
 
@@ -53,11 +55,13 @@ public class MappingDataTypeCompletion {
      *
      * @param metadata The database metadata.
      */
-    public MappingDataTypeCompletion(DBMetadata metadata) {
+    public MappingDataTypeCompletion(DBMetadata metadata,
+                                     boolean defaultDatatypeInferred) {
         this.metadata = metadata;
+        this.defaultDatatypeInferred = defaultDatatypeInferred;
     }
 
-    public void insertDataTyping(CQIE rule) {
+    public void insertDataTyping(CQIE rule) throws UnknownDatatypeException {
         Function atom = rule.getHead();
         Predicate predicate = atom.getFunctionSymbol();
         if (predicate.getArity() == 2) { // we check both for data and object property
@@ -76,7 +80,7 @@ public class MappingDataTypeCompletion {
      * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
      */
     private void insertVariableDataTyping(Term term, Function atom, int position,
-                                          Map<String, List<IndexedPosition>> termOccurenceIndex) {
+                                          Map<String, List<IndexedPosition>> termOccurenceIndex) throws UnknownDatatypeException {
         Predicate predicate = atom.getFunctionSymbol();
 
         if (term instanceof Function) {
@@ -99,7 +103,7 @@ public class MappingDataTypeCompletion {
             Term newTerm;
             Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
             newTerm = TERM_FACTORY.getTypedTerm(variable, type);
-            log.warn("Datatype "+type+" for the value " + variable + " of the property " + predicate + " has been " +
+            log.info("Datatype "+type+" for the value " + variable + " of the property " + predicate + " has been " +
                     "inferred " +
                     "from the database");
             atom.setTerm(position, newTerm);
@@ -111,15 +115,16 @@ public class MappingDataTypeCompletion {
         }
     }
 
-    /**
-     * Infers inductively the datatypes of (evaluated) operations, from their operands.
-     * After execution, only the outermost operation is assigned a type.
-     */
-    private void insertOperationDatatyping(Term term, Function atom, int position) {
+   /*
+   * Following r2rml standard we do not infer the datatype for operation but we return the default value string
+    */
+    private void insertOperationDatatyping(Term term, Function atom, int position) throws UnknownDatatypeException {
 
         if (term instanceof Function) {
             Function castTerm = (Function) term;
+
             if (castTerm.isOperation()) {
+
                 Optional<TermType> inferredType = TermTypeInferenceTools.inferType(castTerm);
                 if(inferredType.isPresent()){
                     // delete explicit datatypes of the operands
@@ -131,8 +136,22 @@ public class MappingDataTypeCompletion {
                                     term,
                                     inferredType.get().getColType()
                             ));
-                }else {
-                    throw new IllegalStateException("A type should be inferred for operation " + castTerm);
+                }
+                else
+                    {
+
+
+                    if (defaultDatatypeInferred) {
+
+                        atom.setTerm(position, TERM_FACTORY.getTypedTerm(term, Predicate.COL_TYPE.STRING));
+                    } else {
+                        throw new UnknownDatatypeException("Impossible to determine the expected datatype for the operation " + castTerm + "\n" +
+                                "Possible solutions: \n" +
+                                "- Add an explicit datatype in the mapping \n" +
+                                "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +
+                                " and we will infer the default datatype (xsd:string)"
+                        );
+                    }
                 }
             }
         }
@@ -160,7 +179,7 @@ public class MappingDataTypeCompletion {
      * @param variable
      * @return
      */
-    private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) {
+    private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) throws UnknownDatatypeException {
 
 
         List<IndexedPosition> list = termOccurenceIndex.get(variable.getName());
@@ -174,14 +193,33 @@ public class MappingDataTypeCompletion {
         RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom
                 .getFunctionSymbol());
         RelationDefinition td = metadata.getRelation(tableId);
+        
+        
         Attribute attribute = td.getAttribute(ip.pos);
+        Optional<Predicate.COL_TYPE>  colType;
+        //we want to assign the default value or throw an exception when the type of the attribute is missing (case of view)
+        if (attribute.getType() == 0){
 
-        return metadata.getColType(attribute)
-                // Default datatype : XSD_STRING
-                .orElse(Predicate.COL_TYPE.STRING);
+            colType = Optional.empty();
+        }
+        else{
+            colType = metadata.getColType(attribute);
+        }
+
+        if(defaultDatatypeInferred)
+            return colType.orElse(Predicate.COL_TYPE.STRING) ;
+        else {
+            return colType.orElseThrow(() -> new UnknownDatatypeException("Impossible to determine the expected datatype for the column "+ variable+"\n" +
+                    "Possible solutions: \n" +
+                    "- Add an explicit datatype in the mapping \n" +
+                    "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +
+                    " and we will infer the default datatype (xsd:string)"));
+
+        }
+
     }
 
-    private static class IndexedPosition {
+	private static class IndexedPosition {
         final Function atom;
         final int pos;
 
@@ -204,7 +242,7 @@ public class MappingDataTypeCompletion {
                         aux = new LinkedList<>();
                     aux.add(new IndexedPosition(a, i));
                     termOccurenceIndex.put(var.getName(), aux);
-                    i++; // increase the position index for the next variable
+                    
                 } else if (t instanceof FunctionalTermImpl) {
                     // NO-OP
                 } else if (t instanceof ValueConstant) {
@@ -212,6 +250,11 @@ public class MappingDataTypeCompletion {
                 } else if (t instanceof URIConstant) {
                     // NO-OP
                 }
+                // fabad (4 Oct 2017) Quick fix if there are constants in arguments.
+                // Increase i in all cases. If there are terms that are not variables
+                // and i is not incremented then indexedPosition.pos contains a wrong
+                // index that may points to terms that are not variables.
+                i++; // increase the position index for the next variable
             }
         }
         return termOccurenceIndex;

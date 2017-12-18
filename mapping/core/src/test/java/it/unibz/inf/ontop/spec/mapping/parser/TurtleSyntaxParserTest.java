@@ -23,12 +23,11 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
-
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
 import junit.framework.TestCase;
 import org.junit.Test;
@@ -157,7 +156,7 @@ public class TurtleSyntaxParserTest {
 	@Test
 	public void test_4_2_1() {
 		final boolean result = parse(":Person-{id} :firstName \"John\"^^rdfs:Literal .");
-		TestCase.assertTrue(result);
+		TestCase.assertFalse(result);
 	}
 
 	@Test
@@ -293,6 +292,23 @@ public class TurtleSyntaxParserTest {
 	public void test10() {
 		final boolean result = parse(":Person-{id} a :Person ; :age 25 ; :hasDegree true ; :averageGrade 28.3 .");
 		TestCase.assertTrue(result);
+	}
+
+
+	//Test for fully identified column
+	@Test
+	public void test_11_1(){
+		final boolean result = parse(":Person-{person.id} a  :Person ;  :age 25 .");
+		TestCase.assertFalse(result);
+
+	}
+
+	//Test for language tag from db
+	@Test
+	public void test_12_1(){
+		final boolean result = parse(":Person-{id} a :Person ; :firstName {name}@{lang} . ");
+		TestCase.assertTrue(result);
+
 	}
 
 	private boolean compareCQIE(String input, int countBody) {

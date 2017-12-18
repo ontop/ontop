@@ -48,8 +48,8 @@ function _complete_ontop_command_query() {
   PREV_WORD=${COMP_WORDS[COMP_CWORD-1]}
   COMMANDS=$1
 
-  FLAG_OPTS="--disable-reasoning"
-  ARG_OPTS="-m --password -o -p -q --mapping -t -u --driver-class --ontology --username -d --query --output -l --url"
+  FLAG_OPTS="--disable-reasoning --enable-annotations"
+  ARG_OPTS="-m -o -p -q --mapping -t --properties --query --ontology --output"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -57,16 +57,6 @@ function _complete_ontop_command_query() {
     ARG_VALUES=
     ARG_GENERATED_VALUES=
     case ${PREV_WORD} in
-      -d|--driver-class)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
-        echo ${COMPREPLY[@]}
-        return 0
-        ;;
-      -p|--password)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
-        echo ${COMPREPLY[@]}
-        return 0
-        ;;
       -m|--mapping)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
@@ -74,11 +64,6 @@ function _complete_ontop_command_query() {
         ;;
       -t|--ontology)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
-        echo ${COMPREPLY[@]}
-        return 0
-        ;;
-      -u|--username)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
         ;;
@@ -92,8 +77,8 @@ function _complete_ontop_command_query() {
         echo ${COMPREPLY[@]}
         return 0
         ;;
-      -l|--url)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+      -p|--properties)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
         ;;
@@ -113,8 +98,8 @@ function _complete_ontop_command_materialize() {
   PREV_WORD=${COMP_WORDS[COMP_CWORD-1]}
   COMMANDS=$1
 
-  FLAG_OPTS="--disable-reasoning --separate-files"
-  ARG_OPTS="-m --password -o -p --mapping -t -u --driver-class --ontology --username -d -f --format --output -l --url"
+  FLAG_OPTS="--disable-reasoning --enable-annotations --no-streaming --separate-files"
+  ARG_OPTS="-m -o -p --mapping -t --properties -f --format --ontology --output"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -122,16 +107,6 @@ function _complete_ontop_command_materialize() {
     ARG_VALUES=
     ARG_GENERATED_VALUES=
     case ${PREV_WORD} in
-      -d|--driver-class)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
-        echo ${COMPREPLY[@]}
-        return 0
-        ;;
-      -p|--password)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
-        echo ${COMPREPLY[@]}
-        return 0
-        ;;
       -m|--mapping)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
@@ -139,11 +114,6 @@ function _complete_ontop_command_materialize() {
         ;;
       -t|--ontology)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
-        echo ${COMPREPLY[@]}
-        return 0
-        ;;
-      -u|--username)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
         ;;
@@ -157,8 +127,8 @@ function _complete_ontop_command_materialize() {
         echo ${COMPREPLY[@]}
         return 0
         ;;
-      -l|--url)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+      -p|--properties)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
         ;;
@@ -179,7 +149,7 @@ function _complete_ontop_command_bootstrap() {
   COMMANDS=$1
 
   FLAG_OPTS=""
-  ARG_OPTS="-m --password -p --mapping --base-iri -t -u --driver-class --ontology --username -b -d -l --url"
+  ARG_OPTS="-m -p -b --mapping --base-iri -t --properties --ontology"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -187,16 +157,6 @@ function _complete_ontop_command_bootstrap() {
     ARG_VALUES=
     ARG_GENERATED_VALUES=
     case ${PREV_WORD} in
-      -d|--driver-class)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
-        echo ${COMPREPLY[@]}
-        return 0
-        ;;
-      -p|--password)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
-        echo ${COMPREPLY[@]}
-        return 0
-        ;;
       -m|--mapping)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
@@ -207,18 +167,13 @@ function _complete_ontop_command_bootstrap() {
         echo ${COMPREPLY[@]}
         return 0
         ;;
-      -u|--username)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
-        echo ${COMPREPLY[@]}
-        return 0
-        ;;
       -b|--base-iri)
         COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
         ;;
-      -l|--url)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+      -p|--properties)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
         ;;
@@ -238,8 +193,8 @@ function _complete_ontop_command_validate() {
   PREV_WORD=${COMP_WORDS[COMP_CWORD-1]}
   COMMANDS=$1
 
-  FLAG_OPTS="--disable-reasoning"
-  ARG_OPTS="-m --password -o -p --mapping -t -u --driver-class --ontology --username -d --output -l --url"
+  FLAG_OPTS="--disable-reasoning --enable-annotations"
+  ARG_OPTS="-m -o -p --mapping -t --properties --ontology --output"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -247,16 +202,6 @@ function _complete_ontop_command_validate() {
     ARG_VALUES=
     ARG_GENERATED_VALUES=
     case ${PREV_WORD} in
-      -d|--driver-class)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
-        echo ${COMPREPLY[@]}
-        return 0
-        ;;
-      -p|--password)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
-        echo ${COMPREPLY[@]}
-        return 0
-        ;;
       -m|--mapping)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
@@ -267,18 +212,13 @@ function _complete_ontop_command_validate() {
         echo ${COMPREPLY[@]}
         return 0
         ;;
-      -u|--username)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
-        echo ${COMPREPLY[@]}
-        return 0
-        ;;
       -o|--output)
         COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
         ;;
-      -l|--url)
-        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+      -p|--properties)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
         ;;

@@ -7,6 +7,10 @@ target
 *.releaseBackup
 release.properties
 
+# gradle generated files
+.gradle
+build
+
 # Eclipse generated files
 .classpath
 .projecttmp.*
@@ -36,3 +40,4 @@ plugin-runtime
 ontop-optique-test
 tmp
 *.log
+

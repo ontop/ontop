@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.temporal.mapping;
 
 import it.unibz.inf.ontop.spec.mapping.pp.PPTriplesMapProvenance;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 
 import java.util.stream.Collectors;
 

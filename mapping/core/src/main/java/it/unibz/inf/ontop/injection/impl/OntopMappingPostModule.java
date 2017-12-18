@@ -17,8 +17,8 @@ public class OntopMappingPostModule extends OntopAbstractModule {
 
     @Override
     public void configure() {
-        bindFromPreferences(MappingExtractor.class);
-        bindFromPreferences(MappingTransformer.class);
-        bindFromPreferences(OBDASpecificationExtractor.class);
+        bindFromSettings(MappingExtractor.class);
+        bindFromSettings(MappingTransformer.class);
+        bindFromSettings(OBDASpecificationExtractor.class);
     }
 }

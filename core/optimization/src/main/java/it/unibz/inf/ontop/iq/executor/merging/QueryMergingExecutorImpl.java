@@ -241,10 +241,10 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
             renamedSubQuery = queryRenamer.transform(subQuery);
         }
 
-        /**
+        /*
          * Starting node: the root of the sub-query
          */
-        ConstructionNode rootNode = renamedSubQuery.getRootConstructionNode();
+        QueryNode rootNode = renamedSubQuery.getRootNode();
         Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalTau = Optional.of(extractSubstitution(
                 renamingSubstitution.applyToDistinctVariableOnlyDataAtom(renamedSubQuery.getProjectionAtom()),
                 intensionalDataNode.getProjectionAtom()))

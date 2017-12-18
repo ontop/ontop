@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
-import it.unibz.inf.ontop.temporal.model.NAryDatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.TemporalJoinExpression;
 
 import java.util.Arrays;

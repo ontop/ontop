@@ -15,6 +15,7 @@ import java.io.FileReader;
  *
  *
  */
+
 public class AnnotationTest extends AbstractVirtualModeTest {
 
     Logger log = LoggerFactory.getLogger(this.getClass());

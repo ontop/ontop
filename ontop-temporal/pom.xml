@@ -3,7 +3,7 @@
     <parent>
         <artifactId>ontop</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.0-beta-2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -13,9 +13,9 @@
     <name>ontop-temporal</name>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>${parent.groupId}</groupId>
             <artifactId>ontop-model</artifactId>
-            <version>${project.version}</version>
+            <version>${parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -39,9 +39,9 @@
         </dependency>
 -->
         <dependency>
-            <groupId>it.unibz.inf.ontop</groupId>
+            <groupId>${parent.groupId}</groupId>
             <artifactId>ontop-mapping-sql-core</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -58,9 +58,9 @@
             <artifactId>rdf4j-queryparser-sparql</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.unibz.inf.ontop</groupId>
+            <groupId>${parent.groupId}</groupId>
             <artifactId>ontop-system-sql-owlapi</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
 
         <!-- JDBC Drivers -->

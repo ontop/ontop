@@ -1,14 +1,16 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.inject.Module;
-import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.exception.OntologyException;
+import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
+import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllSettings;
+import it.unibz.inf.ontop.injection.OntopTemporalSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import org.apache.commons.rdf.api.Graph;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import javax.annotation.Nonnull;
@@ -37,7 +39,7 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl extends OntopSQLOWLAPIConfi
     }
 
     @Override
-    public OBDASpecification loadSpecification() throws OBDASpecificationException {
+    public OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
         return temporalConfiguration.loadSpecification(this::getOntology);
     }
 

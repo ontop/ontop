@@ -26,16 +26,15 @@ import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.spec.mapping.converter.OldSyntaxMappingConverter;
-import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.spec.mapping.validation.SQLPPMappingValidator;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.utils.querymanager.*;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.converter.OldSyntaxMappingConverter;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
+import it.unibz.inf.ontop.spec.mapping.validation.SQLPPMappingValidator;
+import it.unibz.inf.ontop.utils.querymanager.*;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.ui.util.UIUtil;
@@ -279,11 +278,7 @@ public class OBDAModelManager implements Disposable {
 					}
 				}
 
-				if (idx + 1 >= changes.size()) {
-					continue;
-				}
-
-				if (change instanceof RemoveAxiom && changes.get(idx + 1) instanceof AddAxiom) {
+				 if (idx + 1 < changes.size() && change instanceof RemoveAxiom && changes.get(idx + 1) instanceof AddAxiom) {
 
 					// Found the pattern of a renaming refactoring
 					RemoveAxiom remove = (RemoveAxiom) change;
@@ -302,6 +297,11 @@ public class OBDAModelManager implements Disposable {
 					// Found the pattern of a deletion
 					OWLDeclarationAxiom declaration = (OWLDeclarationAxiom) change.getAxiom();
 					OWLEntity removedEntity = declaration.getEntity();
+
+					if(removedEntity.getIRI().toQuotedString().equals("<http://www.unibz.it/inf/obdaplugin#RandomClass6677841155>")){
+						//Hack this has been done just to trigger a change int the ontology
+						continue;
+					 }
 					removals.add(removedEntity);
 				}
 			}
@@ -496,7 +496,7 @@ public class OBDAModelManager implements Disposable {
 
 			configurationManager.clearImplicitDBConstraintFile();
 			DisposableProperties settings = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
-			configurationManager.resetProperties(settings);
+			configurationManager.resetProperties(settings.clone());
 
 
 			ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
@@ -621,7 +621,7 @@ public class OBDAModelManager implements Disposable {
 				}
 
 
-				Properties properties = configurationManager.snapshotProperties();
+				Properties properties = configurationManager.snapshotUserProperties();
 				if (!properties.isEmpty()) {
 					String propertyFilePath = owlName + PROPERTY_EXT;
 					File propertyFile = new File(URI.create(propertyFilePath));
@@ -791,7 +791,7 @@ public class OBDAModelManager implements Disposable {
 		}
 
 		@Override
-		public void mappingUpdated(URI srcuri) {
+		public void mappingUpdated() {
 			triggerOntologyChanged();
 
 		}

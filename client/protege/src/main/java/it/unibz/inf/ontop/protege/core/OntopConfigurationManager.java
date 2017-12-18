@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.protege.core;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import javax.annotation.Nonnull;
@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Properties;
 
 import static it.unibz.inf.ontop.injection.OntopSQLCoreSettings.*;
+import static it.unibz.inf.ontop.injection.OntopSQLCredentialSettings.*;
 
 /**
  * TODO: find a better name
@@ -23,24 +24,34 @@ public class OntopConfigurationManager {
 
     private final OBDAModel obdaModel;
     private final DisposableProperties settings;
+    private final DisposableProperties userSettings;
 
     // Nullable
     @Nullable
     private File implicitDBConstraintFile;
 
-    OntopConfigurationManager(@Nonnull OBDAModel obdaModel, @Nonnull DisposableProperties settings) {
+    OntopConfigurationManager(@Nonnull OBDAModel obdaModel, @Nonnull DisposableProperties internalSettings) {
         this.obdaModel = obdaModel;
-        this.settings = settings;
+        this.settings = internalSettings;
         this.implicitDBConstraintFile = null;
+        this.userSettings = new DisposableProperties();
     }
 
     Properties snapshotProperties() {
         Properties properties = settings.clone();
+        properties.putAll(userSettings.clone());
+        properties.putAll(DataSource2PropertiesConvertor.convert(obdaModel.getDatasource()));
+        return properties;
+    }
+
+    Properties snapshotUserProperties() {
+        Properties properties = userSettings.clone();
         properties.putAll(DataSource2PropertiesConvertor.convert(obdaModel.getDatasource()));
         return properties;
     }
 
     public OntopSQLOWLAPIConfiguration buildOntopSQLOWLAPIConfiguration(OWLOntology currentOntology) {
+
         OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .properties(snapshotProperties())
                 .ppMapping(obdaModel.generatePPMapping());
@@ -65,13 +76,14 @@ public class OntopConfigurationManager {
      * Loads the properties in the global settings and in data source.
      */
     public void loadPropertyFile(File propertyFile) throws IOException {
-        settings.load(new FileReader(propertyFile));
-        loadDataSource(obdaModel, settings);
+        userSettings.load(new FileReader(propertyFile));
+        loadDataSource(obdaModel, userSettings);
     }
 
     void resetProperties(DisposableProperties settings){
         this.settings.clear();
         this.settings.putAll(settings);
+        this.userSettings.clear();
 
         OBDADataSource dataSource = obdaModel.getDatasource();
         dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, "");
@@ -85,8 +97,8 @@ public class OntopConfigurationManager {
      * Loads the properties in the global settings and in data source.
      */
     public void loadProperties(Properties properties) throws IOException {
-        settings.putAll(properties);
-        loadDataSource(obdaModel, settings);
+        userSettings.putAll(properties);
+        loadDataSource(obdaModel, userSettings);
     }
 
     private static void loadDataSource(OBDAModel obdaModel, DisposableProperties properties) {

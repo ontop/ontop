@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.injection.OntopSystemSettings;
 
 import java.util.Properties;
 
-public class OntopSystemSettingsImpl extends OntopTranslationSettingsImpl implements OntopSystemSettings {
+public class OntopSystemSettingsImpl extends OntopReformulationSettingsImpl implements OntopSystemSettings {
 
     private static final String DEFAULT_FILE = "system-default.properties";
 

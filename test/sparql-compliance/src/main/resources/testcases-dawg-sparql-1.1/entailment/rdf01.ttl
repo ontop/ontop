@@ -3,7 +3,7 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 
 _:ont a owl:Ontology .
-ex:p a owl:DatatypeProperty .
+ex:b a owl:ObjectProperty .
 
 ex:a ex:b ex:c .
 

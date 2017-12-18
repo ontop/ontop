@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.temporal.model.impl.DatalogMTLFactoryImpl;
@@ -80,8 +79,8 @@ public class ExampleSiemensProgram {
         DatalogMTLExpression bodyPIO = f.createTemporalJoinExpression(temporalPIO, CLTRS);
 
         DatalogMTLRule CLTRSrule = f.createRule(CLTRS, bodyCLTRS);
-        DatalogMTLRule LRSrule = f.createRule(lrs, f.createTemporalJoinExpression(rs, comparisonLs));
-        DatalogMTLRule HRSrule = f.createRule(hrs, f.createTemporalJoinExpression(rs, comparisonHs));
+        DatalogMTLRule LRSrule = f.createRule(lrs, f.createFilterExpression(rs, comparisonLs));
+        DatalogMTLRule HRSrule = f.createRule(hrs, f.createFilterExpression(rs, comparisonHs));
         DatalogMTLRule PIOrule = f.createRule(pio, bodyPIO);
 
 

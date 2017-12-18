@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
+import it.unibz.inf.ontop.answering.connection.pool.impl.ConnectionGenerator;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
@@ -50,7 +52,8 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	OWLEditorKit kit = null;
 //	OWLModelManager mmgr = null;
 	DisposableOBDAPreferences obdaPref = null;
-	DisposableProperties refplatPref = null;
+	DisposableProperties reasonerPref = null;
+
 	
 	@Override
 	protected void setup(EditorKit editorKit) {
@@ -59,6 +62,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	
 	@Override
 	public void initialise() throws Exception {
+
 
         /***
          * Preferences for the OBDA plugin (gui, etc)
@@ -69,8 +73,8 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
         /***
          * Preferences for Quest
          */
-        refplatPref = new DisposableProperties();
-        getEditorKit().put(DisposableProperties.class.getName(),refplatPref);
+        reasonerPref = new DisposableProperties();
+        getEditorKit().put(DisposableProperties.class.getName(), reasonerPref);
         loadPreferences();
 		
 		/***
@@ -117,7 +121,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			}
 		}
 		
-		keys = refplatPref.getReformulationPlatformPreferencesKeys();
+		keys = reasonerPref.getReformulationPlatformPreferencesKeys();
 		it = keys.iterator();
 		boolean isCalssic = false;
 		while(it.hasNext()){
@@ -125,16 +129,23 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			String value = pref.getString(key, null);
 			if(value != null){			// here we ensure that if the abox mode is classic the the data location can only be in memory
 				if (key.equals(ABOX_MODE) && value.equals(CLASSIC)) {
-//					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
-					refplatPref.put(key, value);
+//					reasonerPref.put(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+					reasonerPref.put(key, value);
 					isCalssic = true;
 				}else{
-					refplatPref.put(key, value);
+					reasonerPref.put(key, value);
 				}
 			}
 		}
-		// Publish the new refplatPref
-		getEditorKit().put(DisposableProperties.class.getName(),refplatPref);
+
+		/***
+		 * Preferences for JDBC Connection
+		 */
+
+		reasonerPref.put(JDBCConnectionPool.class.getCanonicalName(), ConnectionGenerator.class.getCanonicalName());
+
+		// Publish the new reasonerPref
+		getEditorKit().put(DisposableProperties.class.getName(), reasonerPref);
 	}
 	
 	private void storePreferences(){
@@ -149,11 +160,11 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			pref.putString(key.toString(), value.toString());
 		}
 		
-		keys = refplatPref.keySet();
+		keys = reasonerPref.keySet();
 		it = keys.iterator();
 		while(it.hasNext()){
 			Object key = it.next();
-			Object value = refplatPref.get(key);
+			Object value = reasonerPref.get(key);
 			pref.putString(key.toString(), value.toString());
 		}
 	}

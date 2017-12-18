@@ -1,30 +1,31 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
+import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
-import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
+import static it.unibz.inf.ontop.model.term.TermConstants.FALSE;
+import static it.unibz.inf.ontop.model.term.TermConstants.TRUE;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.*;
@@ -464,6 +465,44 @@ public class ExpressionEvaluatorTest {
         assertTrue(result.isEffectiveFalse());
     }
 
+    @Test
+    public void testIfElseNull1() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(
+                IS_NOT_NULL,
+                DATA_FACTORY.getImmutableExpression(
+                    IF_ELSE_NULL,
+                    DATA_FACTORY.getImmutableExpression(EQ, TRUE, TRUE), Y));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertTrue(optionalExpression.isPresent());
+        assertEquals(DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, Y), optionalExpression.get());
+    }
+
+    @Test
+    public void testIfElseNull2() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(
+                IS_NOT_NULL,
+                DATA_FACTORY.getImmutableExpression(
+                        IF_ELSE_NULL,
+                        DATA_FACTORY.getImmutableExpression(EQ, X, TRUE), Y));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
+        assertTrue(optionalExpression.isPresent());
+        assertEquals(initialExpression, optionalExpression.get());
+    }
+
+    @Test
+    public void testIfElseNull3() {
+        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(
+                IS_NOT_NULL,
+                DATA_FACTORY.getImmutableExpression(
+                        IF_ELSE_NULL,
+                        DATA_FACTORY.getImmutableExpression(EQ, TRUE, FALSE), Y));
+        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        assertFalse(result.getOptionalExpression().isPresent());
+        assertTrue(result.isEffectiveFalse());
+    }
+
     private ImmutableFunctionalTerm generateURI1(ImmutableTerm argument) {
         return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }
@@ -474,19 +513,19 @@ public class ExpressionEvaluatorTest {
 
     private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, Constant argument2) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(Predicate.COL_TYPE.LITERAL_LANG),
+                TYPE_FACTORY.getTypePredicate(Predicate.COL_TYPE.LANG_STRING),
                 argument1, argument2);
     }
     private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, VariableOrGroundTerm argument2) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(Predicate.COL_TYPE.LITERAL_LANG),
+                TYPE_FACTORY.getTypePredicate(Predicate.COL_TYPE.LANG_STRING),
                 argument1, argument2);
     }
 
 
     private ImmutableFunctionalTerm generateLiteral(Constant argument1) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(Predicate.COL_TYPE.LITERAL),
+                TYPE_FACTORY.getTypePredicate(Predicate.COL_TYPE.STRING),
                 argument1);
     }
 

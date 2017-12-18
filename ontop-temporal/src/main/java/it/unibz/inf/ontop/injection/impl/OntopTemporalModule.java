@@ -41,19 +41,19 @@ public class OntopTemporalModule extends OntopAbstractModule{
     protected void configure() {
         bind(OntopMappingSQLAllSettings.class).toInstance(settings);
 
-        bindFromPreferences(SQLPPMappingFactory.class);
-        bindFromPreferences(SQLMappingParser.class);
-        bindFromPreferences(SQLPPMappingConverter.class);
-        bindFromPreferences(PreProcessedImplicitRelationalDBConstraintExtractor.class);
-        bindFromPreferences(MappingExtractor.class);
-        bindFromPreferences(TemporalMappingExtractor.class);
-        bindFromPreferences(TemporalMappingParser.class);
-        bindFromPreferences(TemporalPPMappingConverter.class);
-        bindFromPreferences(TemporalDatalog2QueryMappingConverter.class);
-        bindFromPreferences(TemporalDatalogProgram2QueryConverter.class);
-        bindFromPreferences(TemporalMappingTransformer.class);
-        bindFromPreferences(TemporalMappingSaturator.class);
-        //bindFromPreferences(TemporalMapping.class);
+        bindFromSettings(SQLPPMappingFactory.class);
+        bindFromSettings(SQLMappingParser.class);
+        bindFromSettings(SQLPPMappingConverter.class);
+        bindFromSettings(PreProcessedImplicitRelationalDBConstraintExtractor.class);
+        bindFromSettings(MappingExtractor.class);
+        bindFromSettings(TemporalMappingExtractor.class);
+        bindFromSettings(TemporalMappingParser.class);
+        bindFromSettings(TemporalPPMappingConverter.class);
+        bindFromSettings(TemporalDatalog2QueryMappingConverter.class);
+        bindFromSettings(TemporalDatalogProgram2QueryConverter.class);
+        bindFromSettings(TemporalMappingTransformer.class);
+        bindFromSettings(TemporalMappingSaturator.class);
+        //bindFromSettings(TemporalMapping.class);
 
         Module specFactoryModule = buildFactory(ImmutableList.of(
                 PrefixManager.class,

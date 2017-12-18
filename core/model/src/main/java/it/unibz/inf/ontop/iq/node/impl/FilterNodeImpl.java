@@ -6,7 +6,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.SubstitutionResultsImpl;
+import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -72,25 +72,25 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             IntermediateQuery query) {
         EvaluationResult evaluationResult = transformBooleanExpression(substitution, getFilterCondition());
 
-        /**
+        /*
          * The condition cannot be satisfied --> the sub-tree is empty.
          */
         if (evaluationResult.isEffectiveFalse()) {
-            return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.DECLARE_AS_EMPTY);
+            return DefaultSubstitutionResults.declareAsEmpty();
         }
         else {
-            /**
+            /*
              * Propagates the substitution and ...
              */
             return evaluationResult.getOptionalExpression()
-                    /**
+                    /*
                      * Still a condition: returns a filter node with the new condition
                      */
-                    .map(exp -> new SubstitutionResultsImpl<>(changeFilterCondition(exp), substitution))
-                    /**
+                    .map(exp -> DefaultSubstitutionResults.newNode(changeFilterCondition(exp), substitution))
+                    /*
                      * No condition: the filter node is not needed anymore
                      */
-                    .orElseGet(() -> new SubstitutionResultsImpl<>(substitution, Optional.empty()));
+                    .orElseGet(() -> DefaultSubstitutionResults.replaceByUniqueChild(substitution));
         }
     }
 

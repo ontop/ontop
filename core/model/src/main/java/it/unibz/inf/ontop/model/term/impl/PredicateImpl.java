@@ -108,6 +108,7 @@ public class PredicateImpl implements Predicate {
 	}
 
 	@Override
+	@Deprecated
 	public boolean isDataProperty() {
 		return (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.LITERAL); 
 	}

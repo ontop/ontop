@@ -51,7 +51,7 @@ public class IntervalQueryParser {
     }
 
     public static boolean temporalMappingIntervalValidator(String input){
-        Pattern intervalRegexPattern = Pattern.compile("(?i)[\\[\\(]\\s*\\{[\\w.-]+\\}(\\^{2}[\\w.-]+:(date|datetime|time))?\\s*,\\s*\\{[\\w.-]+\\}(\\^{2}[\\w.-]+:(date|datetime|time))?\\s*[\\)\\]]");
+        Pattern intervalRegexPattern = Pattern.compile("(?i)[\\[\\(]\\s*\\{[\\w.-]+\\}(\\^{2}[\\w.-]+:(dateTimeStamp|dateTime|time))?\\s*,\\s*\\{[\\w.-]+\\}(\\^{2}[\\w.-]+:(dateTimeStamp|dateTime|time))?\\s*[\\)\\]]");
         Matcher m = intervalRegexPattern.matcher(input);
         return m.matches();
     }

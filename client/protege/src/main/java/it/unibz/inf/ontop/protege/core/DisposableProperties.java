@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
-import it.unibz.inf.ontop.answering.connection.pool.impl.ConnectionGenerator;
 import org.protege.editor.core.Disposable;
 
 import java.util.ArrayList;
@@ -43,8 +41,6 @@ public class DisposableProperties extends Properties implements Disposable {
 	}
 
 	public DisposableProperties(Properties properties) {
-		// TODO: put it a default configuration file
-		put(JDBCConnectionPool.class.getCanonicalName(), ConnectionGenerator.class.getCanonicalName());
 		putAll(properties);
 	}
 

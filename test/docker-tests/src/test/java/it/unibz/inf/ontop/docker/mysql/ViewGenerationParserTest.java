@@ -14,12 +14,13 @@ public class ViewGenerationParserTest extends AbstractVirtualModeTest {
         super(owlFile, obdaFile, propertiesFile);
     }
 
+    @Test
     public void testComplexFunction() throws Exception {
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :Category}";
         countResults(query, 8);
     }
-
+    @Test
     public void testComplexFunction2() throws Exception {
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :Customer}";
