@@ -24,8 +24,8 @@ package it.unibz.inf.ontop.si.dag;
 import it.unibz.inf.ontop.si.repository.impl.Interval;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public class DAGEquivalenceTest extends TestCase {
 
 	public void testIndexClasses() throws Exception {
 		String testURI = "http://it.unibz.inf/obda/ontologies/test.owl#";
-		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(testEquivalenceClasses);
+		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(testEquivalenceClasses);
 
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		List<Interval> nodeInterval = engine.getRange((OClass)dag.classes().dag()
@@ -108,7 +108,7 @@ public class DAGEquivalenceTest extends TestCase {
 
 	public void testIntervalsRoles() throws Exception {
 		String testURI = "http://it.unibz.inf/obda/ontologies/Ontology1314774461138.owl#";
-		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(testEquivalenceRoles);
+		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(testEquivalenceRoles);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 
@@ -163,7 +163,7 @@ public class DAGEquivalenceTest extends TestCase {
 
 	public void testIntervalsRolesWithInverse() throws Exception {
 		String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
-		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(testEquivalenceRolesInverse);
+		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(testEquivalenceRolesInverse);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		

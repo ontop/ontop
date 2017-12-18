@@ -24,7 +24,7 @@ package it.unibz.inf.ontop.si.dag;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.OntologyTBox;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -126,7 +126,7 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		OntologyTBox tbox = OWLAPITranslatorUtility.translate(ImmutableList.of(ont)).tbox();
+		OntologyTBox tbox = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(ont)).tbox();
 
 		long start = System.nanoTime();
 		ClassifiedTBox reasoner= ClassifiedTBoxImpl.classify(tbox);
@@ -214,7 +214,7 @@ public class DAGPerformanceTest extends TestCase {
     		
     	}
 		log.debug("Translating into quest API");
-		OntologyTBox tbox = OWLAPITranslatorUtility.translate(ImmutableList.of(ont)).tbox();
+		OntologyTBox tbox = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(ont)).tbox();
 
 		log.debug("Creating a DAG out of it");
 
@@ -306,7 +306,7 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		OntologyTBox tbox = OWLAPITranslatorUtility.translate(ImmutableList.of(ont)).tbox();
+		OntologyTBox tbox = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(ont)).tbox();
 
 		log.debug("Creating a DAG out of it");
 

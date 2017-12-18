@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
@@ -90,21 +90,17 @@ public class EmptyEntitiesTest {
 				.build();
         reasoner = factory.createReasoner(config);
 
-
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		onto = OWLAPITranslatorUtility.translate(ImmutableList.of(config.loadProvidedInputOntology())).tbox();
+		onto = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(config.loadProvidedInputOntology())).tbox();
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		
 //			dropTables();
 			reasoner.dispose();
 //			connection.close();
-		
-
 	}
 
 //	private void dropTables() throws SQLException, IOException {

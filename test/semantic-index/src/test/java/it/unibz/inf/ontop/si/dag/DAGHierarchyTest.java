@@ -23,9 +23,9 @@ package it.unibz.inf.ontop.si.dag;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 
 import java.util.Set;
@@ -57,7 +57,7 @@ public class DAGHierarchyTest extends TestCase {
 	public void testDescendantClasses() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-class-hierarchy.owl#";
 
-		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(inputFile1);
+		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(inputFile1);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
@@ -136,7 +136,7 @@ public class DAGHierarchyTest extends TestCase {
 	public void testAncestorClasses() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-class-hierarchy.owl#";
 
-		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(inputFile1);
+		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(inputFile1);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
@@ -217,7 +217,7 @@ public class DAGHierarchyTest extends TestCase {
 	public void testDescendantRoles() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-role-hierarchy.owl#";
 
-		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(inputFile2);
+		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(inputFile2);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
@@ -294,7 +294,7 @@ public class DAGHierarchyTest extends TestCase {
 	public void testAncestorRoles() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-role-hierarchy.owl#";
 
-		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(inputFile2);
+		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(inputFile2);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 		

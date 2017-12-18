@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -46,7 +46,7 @@ public class TranslatorTest extends TestCase {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(prop));
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(ImmutableList.of(onto));
+		Ontology dlliteonto = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(onto));
 		
 		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.tbox().getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
@@ -71,7 +71,7 @@ public class TranslatorTest extends TestCase {
 		
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(ImmutableList.of(onto));
+		Ontology dlliteonto = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(onto));
 		
 		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.tbox().getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
@@ -94,7 +94,7 @@ public class TranslatorTest extends TestCase {
 		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(ImmutableList.of(onto));
+		Ontology dlliteonto = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(onto));
 		
 		Collection<BinaryAxiom<ObjectPropertyExpression>> ass = dlliteonto.tbox().getSubObjectPropertyAxioms();
 		Iterator<BinaryAxiom<ObjectPropertyExpression>> assit = ass.iterator();
@@ -131,7 +131,7 @@ public class TranslatorTest extends TestCase {
 		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(ImmutableList.of(onto));
+		Ontology dlliteonto = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(onto));
 		
 		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.tbox().getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();

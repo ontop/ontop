@@ -25,10 +25,10 @@ import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +93,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 	public void testNamedAndEquivalences() throws Exception {
 		//for each file in the input
 		for (String fileInput : input){
-			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(fileInput);
 			//transform in a named graph
 			TestClassifiedTBoxImpl_OnNamedDAG namedDag2 = new TestClassifiedTBoxImpl_OnNamedDAG(reasoner);
 			log.debug("Input {}", fileInput);

@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.injection.OntopMappingOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.OntopMappingOntologyOptions;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -79,7 +79,7 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
     Optional<Ontology> loadOntology() throws OntologyException {
         try {
             return loadInputOntology()
-                    .map(o -> OWLAPITranslatorUtility.translate(
+                    .map(o -> OWLAPITranslatorOWL2QL.translate(
                             o.getOWLOntologyManager().getImportsClosure(o)));
         }
         catch (OWLOntologyCreationException e) {

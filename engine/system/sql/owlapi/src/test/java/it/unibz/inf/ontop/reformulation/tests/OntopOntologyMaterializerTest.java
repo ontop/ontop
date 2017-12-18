@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
@@ -157,7 +157,7 @@ public class OntopOntologyMaterializerTest extends TestCase {
 
 		// read onto
 		OWLOntology ontology = configuration.loadProvidedInputOntology();
-		Ontology onto =  OWLAPITranslatorUtility.translate(
+		Ontology onto =  OWLAPITranslatorOWL2QL.translate(
 				ontology.getOWLOntologyManager().getImportsClosure(ontology));
 		System.out.println(onto.tbox().getSubClassAxioms());
 		System.out.println(onto.tbox().getSubObjectPropertyAxioms());

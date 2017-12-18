@@ -34,7 +34,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -234,7 +234,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
 
-        Ontology mergeOntology = OWLAPITranslatorUtility.translate(
+        Ontology mergeOntology = OWLAPITranslatorOWL2QL.translate(
 				ontology.getOWLOntologyManager().getImportsClosure(ontology));
         return mergeOntology.tbox();
 //		log.debug("Ontology loaded: {}", mergeOntology);

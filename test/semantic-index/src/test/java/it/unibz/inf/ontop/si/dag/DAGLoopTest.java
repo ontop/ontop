@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.junit.Test;
 
 /* 
@@ -37,6 +37,6 @@ public class DAGLoopTest {
 	@Test
 	public void testLoop() throws Exception {
 		// generate DAG
-		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify("src/test/resources/test/dag/final_project_original.owl");
+		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify("src/test/resources/test/dag/final_project_original.owl");
 	}
 }

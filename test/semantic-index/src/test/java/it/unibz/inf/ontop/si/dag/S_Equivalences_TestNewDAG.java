@@ -26,9 +26,9 @@ import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.Description;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,16 +89,12 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		input.add("src/test/resources/test/newDag/inverseEquivalents7.owl");
 		/** B->A=ET- ->ER- C->ES- = D->A*/
 		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
-
-
-		
-
 	}
 
-	public void testEquivalences() throws Exception{
+	public void testEquivalences() throws Exception {
 		for (String fileInput: input) {
 
-			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(fileInput);
 			TestClassifiedTBoxImpl_OnGraph graphReasoner = new TestClassifiedTBoxImpl_OnGraph(reasoner);
 
 			log.debug("Input {}", fileInput);

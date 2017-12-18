@@ -25,8 +25,7 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,7 +149,7 @@ public class DAGTest extends TestCase {
 
 	private void test_dag_index_nodes(String testname) throws Exception {
 
-		ClassifiedTBox reasoner = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(owlloc + testname + ".owl");
+		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(owlloc + testname + ".owl");
 		List<List<Description>> exp_idx = get_results(reasoner, testname);
 
 		List<Description> classes = new LinkedList<>();

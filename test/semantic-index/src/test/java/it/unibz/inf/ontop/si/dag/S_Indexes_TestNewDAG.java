@@ -22,11 +22,10 @@ package it.unibz.inf.ontop.si.dag;
 
 
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRange;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
@@ -39,7 +38,7 @@ import java.util.Map.Entry;
 
 public class S_Indexes_TestNewDAG extends TestCase {
 	
-	ArrayList<String> input= new ArrayList<String>();
+	ArrayList<String> input= new ArrayList<>();
 
 	Logger log = LoggerFactory.getLogger(S_HierarchyTestNewDAG.class);
 
@@ -47,9 +46,8 @@ public class S_Indexes_TestNewDAG extends TestCase {
 		super(name);
 	}
 	
-public void setUp(){
-		
-	
+	public void setUp() {
+
 		/** C -> B  -> A  C->A*/
 		input.add("src/test/resources/test/newDag/transitive.owl");
 		/** C -> B  -> A  C->D ->A C->A */
@@ -91,22 +89,22 @@ public void setUp(){
 		/** B->A=ET- ->ER- C->ES- = D->A*/
 		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
 
-}
-
-public void testIndexes() throws Exception{
-	//for each file in the input
-	for (String fileInput : input) {
-		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(fileInput);
-
-		//add input named graph
-		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
-		
-		log.debug("Input {}", fileInput);
-		log.info("named graph {}", engine);
-		
-		assertTrue(testIndexes(engine, dag));
 	}
-}
+
+	public void testIndexes() throws Exception {
+		//for each file in the input
+		for (String fileInput : input) {
+			ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(fileInput);
+
+			//add input named graph
+			SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
+		
+			log.debug("Input {}", fileInput);
+			log.info("named graph {}", engine);
+		
+			assertTrue(testIndexes(engine, dag));
+		}
+	}
 
 	private boolean testIndexes(SemanticIndexBuilder engine, ClassifiedTBox reasoner){
 		boolean result = true;

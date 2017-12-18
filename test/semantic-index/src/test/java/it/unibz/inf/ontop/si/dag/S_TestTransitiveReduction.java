@@ -24,11 +24,12 @@ package it.unibz.inf.ontop.si.dag;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,8 +94,8 @@ public class S_TestTransitiveReduction extends TestCase {
 	}
 	
 	
-	public void testR() throws Exception{
-		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive.owl");
+	public void testR() throws OWLOntologyCreationException {
+		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive.owl");
 
 		ClassExpression A = dag.classes().get("http://www.kro.com/ontologies/A");
 		ClassExpression B = dag.classes().get("http://www.kro.com/ontologies/B");
@@ -110,8 +111,8 @@ public class S_TestTransitiveReduction extends TestCase {
 		assertEquals(ImmutableSet.of(vA), classes.getDirectSuper(vB));
 	}
 
-	public void testR2() throws Exception{
-		ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive2.owl");
+	public void testR2() throws Exception {
+		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive2.owl");
 
 		ClassExpression A = dag.classes().get("http://www.kro.com/ontologies/A");
 		ClassExpression B = dag.classes().get("http://www.kro.com/ontologies/B");
@@ -133,7 +134,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	
 	public void testSimplification() throws Exception{
 		for (String fileInput: input) {
-			ClassifiedTBox dag2 = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBox dag2 = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(fileInput);
 			TestClassifiedTBoxImpl_OnGraph reasonerd1 = new TestClassifiedTBoxImpl_OnGraph((ClassifiedTBoxImpl)dag2);
 
 			log.debug("Input number {}", fileInput);

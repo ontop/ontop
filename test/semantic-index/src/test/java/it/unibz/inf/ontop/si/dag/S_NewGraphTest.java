@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public class S_NewGraphTest  extends TestCase{
 
 		// Loading the OWL file
 		log.info("Translating");
-		ClassifiedTBoxImpl r = (ClassifiedTBoxImpl) OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(roleowlfile);
+		ClassifiedTBoxImpl r = (ClassifiedTBoxImpl) OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(roleowlfile);
 
 		log.info("See information");
 		log.debug("properties {}", r.getObjectPropertyGraph());

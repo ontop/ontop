@@ -20,28 +20,19 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -105,7 +96,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		connection.commit();
 
 		// Loading the OWL file
-		onto = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(owlfile);
+		onto = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(owlfile);
 
 		// Creating a new instance of the reasoner
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
@@ -162,7 +153,6 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		log.info("Empty concept/s: " + emptyConcepts);
 		assertEquals(1, emptyConcepts.size());
 		assertEquals(1, empties.getEConceptsSize());
-
 	}
 
 	/**
@@ -179,6 +169,5 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		log.info("Empty role/s: " + emptyRoles);
 		assertEquals(2, emptyRoles.size());
 		assertEquals(2, empties.getERolesSize());
-
 	}
 }

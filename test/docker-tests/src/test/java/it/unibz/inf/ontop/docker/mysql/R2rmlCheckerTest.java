@@ -30,20 +30,15 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -83,7 +78,7 @@ public class R2rmlCheckerTest {
 
     @Before
 	public void setUp() throws Exception {
-		onto = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(new URL(owlFileName).getPath());
+		onto = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(new URL(owlFileName).getPath());
 
 		loadOBDA();
 		loadR2rml();

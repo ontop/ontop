@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyABox;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.si.repository.impl.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.si.SemanticIndexException;
@@ -66,7 +66,7 @@ class SILoadingTools {
     static RepositoryInit createRepository(OWLOntology owlOntology) throws SemanticIndexException {
 
         Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
-        Ontology ontology = OWLAPITranslatorUtility.translate(ontologyClosure);
+        Ontology ontology = OWLAPITranslatorOWL2QL.translate(ontologyClosure);
         return createRepository(ontology, Optional.of(ontologyClosure));
     }
 

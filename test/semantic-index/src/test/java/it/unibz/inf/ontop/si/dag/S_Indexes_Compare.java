@@ -22,10 +22,10 @@ package it.unibz.inf.ontop.si.dag;
 
 
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRange;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
@@ -52,7 +52,7 @@ public class S_Indexes_Compare extends TestCase {
 
 	public void testIndexes() throws Exception {
 		for (String fileInput: input) {
-			ClassifiedTBox dag = OWLAPITranslatorUtility.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(fileInput);
 
 			SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 
