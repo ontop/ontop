@@ -51,4 +51,6 @@ public interface DatalogMTLFactory {
     StaticJoinExpression createStaticJoinExpression(List<StaticExpression> expressions);
 
     ComparisonExpression createComparisonExpression(AtomPredicate predicate, VariableOrGroundTerm term1, VariableOrGroundTerm term2);
+
+    FilterExpression createFilterExpression(DatalogMTLExpression datalogMTLExpression, ComparisonExpression comparisonExpression);
 }

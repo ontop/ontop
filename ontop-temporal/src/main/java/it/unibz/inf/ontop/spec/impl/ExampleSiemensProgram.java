@@ -79,8 +79,8 @@ public class ExampleSiemensProgram {
         DatalogMTLExpression bodyPIO = f.createTemporalJoinExpression(temporalPIO, CLTRS);
 
         DatalogMTLRule CLTRSrule = f.createRule(CLTRS, bodyCLTRS);
-        DatalogMTLRule LRSrule = f.createRule(lrs, f.createTemporalJoinExpression(rs, comparisonLs));
-        DatalogMTLRule HRSrule = f.createRule(hrs, f.createTemporalJoinExpression(rs, comparisonHs));
+        DatalogMTLRule LRSrule = f.createRule(lrs, f.createFilterExpression(rs, comparisonLs));
+        DatalogMTLRule HRSrule = f.createRule(hrs, f.createFilterExpression(rs, comparisonHs));
         DatalogMTLRule PIOrule = f.createRule(pio, bodyPIO);
 
 

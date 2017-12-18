@@ -12,10 +12,8 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonGroundFunctionalTerm;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.QuadrupleDefinition;
 import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
@@ -29,6 +27,9 @@ import it.unibz.inf.ontop.temporal.model.impl.TemporalAtomicExpressionImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.temporal.datalog.impl.DatalogMTLConversionTools;
 import java.util.*;
+import java.util.logging.Filter;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 @Singleton
 public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
@@ -110,11 +111,14 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                 DatalogMTLExpression currentExpression = teStack.pop();
                 QueryNode newNode;
 
+                //TODO: Coalesce Node is missing, implement it.
                 if(currentExpression instanceof AtomicExpression) {
 
-                    if (currentExpression instanceof StaticAtomicExpression)
+                    if (currentExpression instanceof ComparisonExpression){
+                        continue;
+                    } else if (currentExpression instanceof StaticAtomicExpression)
                         newNode = mapping.getDefinition(((StaticAtomicExpression) currentExpression).getPredicate()).get().getRootNode();
-                    else
+                    else //TemporalAtomicExpression
                         newNode = temporalMapping.getDefinitions().get(((TemporalAtomicExpression) currentExpression).getPredicate()).getQuadruple().getIntermediateQuery().getRootNode();
 
                     QueryNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
@@ -122,15 +126,27 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                     qnStack.push(coalesceNode);
 
                 }else if(currentExpression instanceof TemporalJoinExpression){
-
                     QueryNode qn1 = qnStack.pop();
                     QueryNode qn2 = qnStack.pop();
-                    QueryNode newJoinNode = TIQFactory.createTemporalJoinNode();
-                    TIQBuilder.addChild(newJoinNode, qn1);
-                    TIQBuilder.addChild(newJoinNode, qn2);
-                    qnStack.push(newJoinNode);
+                    newNode = TIQFactory.createTemporalJoinNode();
+                    TIQBuilder.addChild(newNode, qn1);
+                    TIQBuilder.addChild(newNode, qn2);
+                    qnStack.push(newNode);
 
-                }else if (currentExpression instanceof UnaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange){
+                }else if(currentExpression instanceof StaticJoinExpression){
+                    QueryNode qn1 = qnStack.pop();
+                    QueryNode qn2 = qnStack.pop();
+                    newNode = TIQFactory.createInnerJoinNode();
+                    TIQBuilder.addChild(newNode, qn1);
+                    TIQBuilder.addChild(newNode, qn2);
+                    qnStack.push(newNode);
+
+                }else if (currentExpression instanceof FilterExpression){
+                    newNode = TIQFactory.createFilterNode(comparisonExpToFilterCondition(((FilterExpression) currentExpression).getComparisonExpression()));
+                    QueryNode qn1 = qnStack.pop();
+                    TIQBuilder.addChild(newNode, qn1);
+
+                }else if(currentExpression instanceof UnaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange){
 
                     if(currentExpression instanceof BoxMinusExpression)
                          newNode = TIQFactory.createBoxMinusNode(((BoxMinusExpression) currentExpression).getRange());
@@ -148,7 +164,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                     qnStack.push(newNode);
 
                     //TODO: fill here
-                }else if (currentExpression instanceof BinaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange) {
+                }else if(currentExpression instanceof BinaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange) {
 
                     if (currentExpression instanceof SinceExpression){
 
@@ -163,6 +179,21 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
             //TODO:????
         }
 
+    }
+
+    private ImmutableExpression comparisonExpToFilterCondition(ComparisonExpression comparisonExpression){
+        String operator = comparisonExpression.getPredicate().getName();
+        ExpressionOperation expressionOperation = null;
+        if(operator == ExpressionOperation.LT.getName())
+            expressionOperation = ExpressionOperation.LT;
+        else if(operator == ExpressionOperation.GT.getName())
+            expressionOperation = ExpressionOperation.GT;
+        else if(operator == ExpressionOperation.EQ.getName())
+            expressionOperation = ExpressionOperation.EQ;
+        else if(operator == ExpressionOperation.NEQ.getName())
+            expressionOperation = ExpressionOperation.NEQ;
+
+        return TERM_FACTORY.getImmutableExpression(expressionOperation,comparisonExpression.getLeftOperand(), comparisonExpression.getRightOperand());
     }
 
     private ImmutableMap<Variable, Term> retrieveMapForVariablesOccuringInTheHead(DatalogMTLRule rule, Mapping mapping, TemporalMapping temporalMapping){

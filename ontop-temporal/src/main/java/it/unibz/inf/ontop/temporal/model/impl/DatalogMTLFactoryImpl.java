@@ -117,4 +117,9 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     public ComparisonExpression createComparisonExpression(AtomPredicate predicate, VariableOrGroundTerm term1, VariableOrGroundTerm term2) {
         return new ComparisonExpressionImpl(predicate, term1, term2);
     }
+
+    @Override
+    public FilterExpression createFilterExpression(DatalogMTLExpression datalogMTLExpression, ComparisonExpression comparisonExpression) {
+        return new FilterExpressionImpl(datalogMTLExpression, comparisonExpression);
+    }
 }

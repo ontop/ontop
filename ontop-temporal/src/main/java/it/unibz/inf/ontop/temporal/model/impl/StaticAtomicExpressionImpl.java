@@ -39,8 +39,8 @@ public class StaticAtomicExpressionImpl implements StaticAtomicExpression {
     }
 
     @Override
-    public List<? extends Term> getTerms() {
-        return terms;
+    public ImmutableList<? extends Term> getTerms() {
+        return ImmutableList.copyOf(terms);
     }
 
     @Override
