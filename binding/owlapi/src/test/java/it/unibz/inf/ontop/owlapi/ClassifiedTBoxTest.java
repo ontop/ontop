@@ -12,13 +12,12 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-public class ClassifiedTBoxTest{
+public class ClassifiedTBoxTest {
 
-    private final static Logger log = LoggerFactory.getLogger(ClassifiedTBoxTest.class);
 
     @Test
     public void test_wrong_property() throws Exception {
-        ClassifiedTBox ontology = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify("src/test/resources/ontology/venice.owl");
+//        ClassifiedTBox ontology = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify("src/test/resources/ontology/venice.owl");
 
     }
 
